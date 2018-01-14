@@ -1,0 +1,14 @@
+FCToernooi\Tournament\Role:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      type: integer
+    competitionseason:
+      type: Voetbal\Competitionseason
+    user:
+      type: FCToernooi\User
+    role:
+      type: integer

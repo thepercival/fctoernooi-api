@@ -1,0 +1,27 @@
+FCToernooi\User:
+  type: entity
+  repositoryClass: FCToernooi\User\Repository
+  table: users
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    name:
+      type: string
+      length : !php/const:FCToernooi\User::MAX_LENGTH_NAME
+      unique: true
+      nullable: false
+    password:
+      type: string
+      length : !php/const:FCToernooi\User::MAX_LENGTH_HASH
+      nullable: false
+    emailaddress:
+      type: string
+      length : !php/const:FCToernooi\User::MAX_LENGTH_EMAIL
+      nullable: false
+#  oneToMany:
+#    tournamentroles:
+#      targetEntity: FCToernooi\Tournament\Role
+#      mappedBy: user
