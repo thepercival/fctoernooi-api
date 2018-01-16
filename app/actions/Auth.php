@@ -115,7 +115,7 @@ final class Auth
 		catch( \Exception $e ){
 			$sErrorMessage = $e->getMessage();
 		}
-		return $response->withStatus(404, $sErrorMessage );
+		return $response->withStatus(404)->write( $sErrorMessage );
 	}
 
 	/*
