@@ -55,7 +55,7 @@ class Service
         }
         $user = new User($emailaddress, password_hash( $password, PASSWORD_DEFAULT) );
 		$savedUser = $this->repos->save($user);
-		// $this->sendRegisterEmail( $emailaddress );
+		$this->sendRegisterEmail( $emailaddress );
 		return $savedUser;
 	}
 
@@ -80,15 +80,15 @@ class Service
         $fromEmail = "noreply@fctoernooi.nl";
         $headers  = "MIME-Version: 1.0" . "\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-        $headers .= "From: ".$from." <".$fromEmail.">" . "\r\n";
+        $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
         $headers .= "X-Mailer: PHP/" . phpversion();
-        $params = "-r ".$from;
+        $params = "-r ".$fromEmail;
 
-        //if ( !mail( $emailAddress, $subject, $body, $headers, $params) ) {
+        if ( !mail( $emailAddress, $subject, $body, $headers, $params) ) {
             // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
-          //  error_log('Mailer Error: emailerror' );
+            error_log('Mailer Error!' );
             // $app->halt(500);
-        // }
+        }
     }
 
 
