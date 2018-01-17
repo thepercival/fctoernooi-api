@@ -8,19 +8,20 @@ FCToernooi\User:
       generator:
         strategy: AUTO
   fields:
-    name:
+    emailaddress:
       type: string
-      length : !php/const:FCToernooi\User::MAX_LENGTH_NAME
-      unique: true
+      length : !php/const:FCToernooi\User::MAX_LENGTH_EMAIL
       nullable: false
     password:
       type: string
       length : !php/const:FCToernooi\User::MAX_LENGTH_HASH
       nullable: false
-    emailaddress:
+    name:
       type: string
-      length : !php/const:FCToernooi\User::MAX_LENGTH_EMAIL
-      nullable: false
+      length : !php/const:FCToernooi\User::MAX_LENGTH_NAME
+      unique: true
+      nullable: true
+
 #  oneToMany:
 #    tournamentroles:
 #      targetEntity: FCToernooi\Tournament\Role

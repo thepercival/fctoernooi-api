@@ -47,31 +47,44 @@ final class Auth
 	{
 		$sErrorMessage = null;
 		try{
-			$userName = new User\Name( $request->getParam('name') );
-			$userPassword = new User\Password( $request->getParam('password') );
-			$userEmailaddress = new User\Emailaddress( $request->getParam('emailaddress') );
+		    $arrRegisterData = $request->getParsedBody();
+            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen emailadres ingevoerd");
+            }
+            if( array_key_exists("password", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen wachtwoord ingevoerd");
+            }
+            $emailAddress = $arrRegisterData["emailaddress"];
+            $password = $arrRegisterData["password"];
 
-			$user = $this->authService->register( $userName, $request->getParam('password'), $userEmailaddress );
-			if ($user === null or !($user instanceof User))
+			$user = $this->authService->register( $emailAddress, $password );
+			if ($user === null or !($user instanceof User)) {
 				throw new \Exception( "de nieuwe gebruiker kan niet worden geretourneerd");
+            }
 
-			// ser$jsonContent = $serializer->serialize($person, 'json');
-			/*return $response
-				->withHeader('Content-Type', 'application/json;charset=utf-8')
-				->write($this->serializer->serialize( $users, 'json'));
-			;*/
-			// return $response->withJSON($user);
-			return $response->withJSON($this->serializer->serialize( $user, 'json'));
+            $data = [
+                "token" => $this->getToken( $user),
+                "user" => [
+                    "id" => $user->getId(),
+                    "emailaddress" => $user->getEmailaddress()
+                ]
+            ];
+
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $data, 'json'));
+            ;
 		}
 		catch( \Exception $e ){
 			$sErrorMessage = $e->getMessage();
 		}
-		return $response->withStatus(404, rawurlencode( $sErrorMessage ) );
+        return $response->withStatus(400)->write( $sErrorMessage );
 	}
 
 	public function login($request, $response, $args)
 	{
-		$emailaddress = $request->getParam('emailaddress');
+        $emailaddress = $request->getParam('emailaddress');
 		$password = $request->getParam('password');
 
 		$sErrorMessage = null;
@@ -91,20 +104,11 @@ final class Auth
 				throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
 			}*/
 
-			$now = new \DateTime();
-			$future = new \DateTime("now +24 hours");
 
-			$payload = [
-				"iat" => $now->getTimeStamp(),
-				"exp" => $future->getTimeStamp(),
-				"sub" => $user->getId(),
-			];
-
-			$token = JWT::encode($payload, $this->settings['auth']['jwtsecret'] );
-
-			$data["status"] = "ok";
-			$data["token"] = $token;
-			$data["userid"] = $user->getId();
+            $data = [
+                "token" => $this->getToken( $user),
+                "userid" => $user->getId()
+            ];
 
 			return $response
 				->withStatus(201)
@@ -115,8 +119,22 @@ final class Auth
 		catch( \Exception $e ){
 			$sErrorMessage = $e->getMessage();
 		}
-		return $response->withStatus(404)->write( $sErrorMessage );
+		return $response->withStatus(400)->write( $sErrorMessage );
 	}
+
+	protected function getToken( User $user)
+    {
+        $now = new \DateTime();
+        $future = new \DateTime("now +2 months");
+
+        $payload = [
+            "iat" => $now->getTimeStamp(),
+            "exp" => $future->getTimeStamp(),
+            "sub" => $user->getId(),
+        ];
+
+        return JWT::encode($payload, $this->settings['auth']['jwtsecret'] );
+    }
 
 	/*
 		public function edit( $request, $response, $args)

@@ -6,5 +6,7 @@ FCToernooi\User:
   properties:
     id:
       type: integer
+    emailaddress:
+      type: string
     name:
       type: string
