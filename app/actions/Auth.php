@@ -93,10 +93,7 @@ final class Auth
 				array( 'emailaddress' => $emailaddress )
 			);
 
-            // throw new \Exception( password_hash("cdk", PASSWORD_DEFAULT), E_ERROR );
-
-
-            if (!$user or !password_verify( $password, $user->getPassword() ) ) {
+            if (!$user or !password_verify( $user->getSalt() . $password, $user->getPassword() ) ) {
 				throw new \Exception( "ongeldige emailadres en wachtwoord combinatie");
 			}
 
@@ -121,6 +118,68 @@ final class Auth
 		}
 		return $response->withStatus(400)->write( $sErrorMessage );
 	}
+
+    public function passwordreset($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try{
+            $arrRegisterData = $request->getParsedBody();
+            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen emailadres ingevoerd");
+            }
+            $emailAddress = $arrRegisterData["emailaddress"];
+
+            $retVal = $this->authService->sendPasswordCode( $emailAddress );
+
+            $data = [ "retval" => $retVal ];
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $data, 'json'));
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(400)->write( $sErrorMessage );
+    }
+
+    public function passwordchange($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try{
+            $arrRegisterData = $request->getParsedBody();
+            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen emailadres ingevoerd");
+            }
+            if( array_key_exists("password", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen wachtwoord ingevoerd");
+            }
+            if( array_key_exists("code", $arrRegisterData ) === false ) {
+                throw new \Exception( "geen code ingevoerd");
+            }
+            $emailAddress = $arrRegisterData["emailaddress"];
+            $password = $arrRegisterData["password"];
+            $code = (string) $arrRegisterData["code"];
+
+            $user = $this->authService->changePassword( $emailAddress, $password, $code );
+
+            $data = [
+                "token" => $this->getToken( $user),
+                "userid" => $user->getId()
+            ];
+
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $data, 'json'));
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(400)->write( $sErrorMessage );
+    }
 
 	protected function getToken( User $user)
     {

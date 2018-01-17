@@ -7,9 +7,9 @@ $app->any('/voetbal/{resourceType}[/{id}]', \Voetbal\Action\Slim\Handler::class 
 $app->group('/auth', function () use ($app) {
 	$app->post('/register', 'App\Action\Auth:register');
 	$app->post('/login', 'App\Action\Auth:login');
-    /*$app->post('/auth/activate', 'App\Action\Auth:activate');
-	$app->put('/auth/passwordreset', 'App\Action\Auth:passwordreset');
-	$app->put('/auth/passwordchange', 'App\Action\Auth:passwordchange');*/
+    /*$app->post('/auth/activate', 'App\Action\Auth:activate');*/
+	$app->post('/passwordreset', 'App\Action\Auth:passwordreset');
+	$app->post('/passwordchange', 'App\Action\Auth:passwordchange');
 });
 
 $app->group('/users', function () use ($app) {

@@ -13,7 +13,6 @@ use Voetbal\Association;
 use Voetbal\Competition;
 use Voetbal\Season;
 use Voetbal\Competitionseason;
-use Voetbal\Field;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Role\Repository as TournamentRoleRepository;
@@ -74,14 +73,12 @@ class Service
         $competitionseason = $p_tournament->getCompetitionseason();
         $tournament = null;
         try {
-            // association, check als bestaat op basis van naam, zoniet, aak aan
+            $associationName = static::getAssociationNameFromUserId( $user->getId() );
             $associationRepos = $this->voetbalService->getRepository(Association::class);
-            $association = $associationRepos->findOneBy(
-                array( 'name' => $user->getName() )
-            );
+            $association = $associationRepos->findOneBy( array( 'name' => $associationName ) );
             if( $association === null ){
                 $assService = $this->voetbalService->getService( Association::class );
-                $association = $assService->create( $user->getName() );
+                $association = $assService->create( $associationName );
             }
 
             // check competition, check als naam niet bestaat
@@ -177,5 +174,13 @@ class Service
     {
         $competitionRepos = $this->voetbalService->getRepository(Competition::class);
         return $competitionRepos->remove( $tournament->getCompetitionseason()->getCompetition() );
+    }
+
+    public static function getAssociationNameFromUserId( $userId ) {
+        $userId = (string) $userId;
+        while( strlen($userId) < Association::MIN_LENGTH_NAME ) {
+            $userId = "0" . $userId;
+        }
+        return $userId;
     }
 }

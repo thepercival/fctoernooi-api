@@ -222,10 +222,5 @@ final class Tournament
                 if(!$mail->send()) {
                     throw new \Exception("de activatie email kan niet worden verzonden");
                 }
-            }
-
-            protected function forgetEmailForgetPassword()
-            {
-
             }*/
 }

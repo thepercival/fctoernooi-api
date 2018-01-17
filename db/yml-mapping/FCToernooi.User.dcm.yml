@@ -12,6 +12,10 @@ FCToernooi\User:
       type: string
       length : !php/const:FCToernooi\User::MAX_LENGTH_EMAIL
       nullable: false
+    salt:
+      type: string
+      length : 30
+      nullable: false
     password:
       type: string
       length : !php/const:FCToernooi\User::MAX_LENGTH_HASH
@@ -21,6 +25,11 @@ FCToernooi\User:
       length : !php/const:FCToernooi\User::MAX_LENGTH_NAME
       unique: true
       nullable: true
+    forgetpassword:
+      type: string
+      length : 17
+      nullable: true
+
 
 #  oneToMany:
 #    tournamentroles:

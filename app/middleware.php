@@ -14,7 +14,7 @@ $app->add(
         "rules" => [
             new JwtAuthentication\RequestPathRule([
                 "path" => "/",
-                "passthrough" => ["/auth/register", "/auth/login"]
+                "passthrough" => ["/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange"]
             ]),
             new JwtAuthentication\RequestMethodRule([
                 "path" => "/tournaments",

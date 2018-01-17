@@ -28,7 +28,17 @@ class User
     /**
      * @var string
      */
+    private $salt;
+
+    /**
+     * @var string
+     */
     private $name;
+
+    /**
+     * @var string
+     */
+    private $forgetpassword;
 
 	const MIN_LENGTH_EMAIL = 6;
     const MAX_LENGTH_EMAIL = 100;
@@ -38,10 +48,9 @@ class User
     const MAX_LENGTH_NAME = 15;
     const MAX_LENGTH_HASH = 256;
 
-	public function __construct( $emailaddress, $password )
+	public function __construct( $emailaddress )
 	{
         $this->setEmailaddress( $emailaddress );
-        $this->setPassword( $password );
 	}
 
 	/**
@@ -108,6 +117,22 @@ class User
     /**
      * @return string
      */
+    public function getSalt()
+    {
+        return $this->salt;
+    }
+
+    /**
+     * @param string $salt
+     */
+    public function setSalt( $salt )
+    {
+        $this->salt = $salt;
+    }
+
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
@@ -126,6 +151,62 @@ class User
             throw new \InvalidArgumentException( "de naam mag alleen cijfers en letters bevatten", E_ERROR );
         }
         $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getForgetpassword()
+    {
+        return $this->forgetpassword;
+    }
+
+    /**
+     * @param string $forgetpassword
+     */
+    public function setForgetpassword( $forgetpassword )
+    {
+        $this->forgetpassword = $forgetpassword;
+    }
+
+    /**
+     * return string
+     */
+    public function resetForgetpassword()
+    {
+        $forgetpassword = rand ( 100000, 999999 );
+        $tomorrow = date("Y-m-d", strtotime('tomorrow'));
+        $tomorrow = new \DateTimeImmutable($tomorrow);
+        $tomorrow = $tomorrow->modify("+1 days");
+        $this->setForgetpassword( $forgetpassword . ":" . $tomorrow->format("Y-m-d") );
+    }
+
+    /**
+     * first 6 characters
+     *
+     * @return string
+     */
+    public function getForgetpasswordToken() {
+        $forgetpassword = $this->getForgetpassword();
+        if( strlen( $forgetpassword ) === 0 ) {
+            return null;
+        }
+        $arrForgetPassword = explode(":", $forgetpassword);
+        return $arrForgetPassword[0];
+    }
+
+    /**
+     * last 10 characters
+     *
+     * @return \DateTimeImmutable
+     */
+    public function getForgetpasswordDeadline() {
+        $forgetpassword = $this->getForgetpassword();
+        if( strlen( $forgetpassword ) === 0 ) {
+            return null;
+        }
+        $arrForgetPassword = explode(":", $forgetpassword);
+        return new \DateTimeImmutable( $arrForgetPassword[1] );
     }
 
     /**
