@@ -3,6 +3,5 @@
 !/logs/README.md
 .env
 *.log
-/cache/proxies/*
 .idea
 /cache/*
