@@ -68,12 +68,16 @@ class ScheduledGames extends ToernooiPdfPage
         $nX = $nFirstBorder + $nMargin;
         $nWidth = $this->getWidth() - ($this->getPageMargin() + $nX);
         $this->drawCell( $roundsName, $nX, $nY, $nWidth, $nRowHeight );
-        // var_dump($nY);die();
+
         $nY -= $nRowHeight;
 
-        if( $game->getRound()->getConfig()->getEnableTime() === true ) {
-            $dateTime = $game->getStartDateTime()->toString("d M H:i");
-            $this->drawCell( $dateTime, $nX, $nY, $nWidth, $nRowHeight );
+        if( $structService->canCalculateStartDateTime($game->getRound()) === true ) {
+            $dateTime = $game->getStartDateTime()->format("d M H:i");
+            $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
+            if( $game->getRound()->getConfig()->getHasExtension() === true ) {
+                $duration .= ' (' . $game->getRound()->getConfig()->getMinutesPerGameExt() . ' min.)';
+            }
+            $this->drawCell( $dateTime . ' -> ' . $duration, $nX, $nY, $nWidth, $nRowHeight );
             $nY -= $nRowHeight;
         }
 

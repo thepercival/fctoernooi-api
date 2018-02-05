@@ -40,9 +40,6 @@ class Service
         if ( strlen( $password ) < User::MIN_LENGTH_PASSWORD or strlen( $password ) > User::MAX_LENGTH_PASSWORD ){
             throw new \InvalidArgumentException( "het wachtwoord moet minimaal ".User::MIN_LENGTH_PASSWORD." karakters bevatten en mag maximaal ".User::MAX_LENGTH_PASSWORD." karakters bevatten", E_ERROR );
         }
-		if ( $emailaddress !== "coendunnink@gmail.com" ){
-			throw new \Exception("alleen het emailadres coendunnink@gmail.com kan geregistreerd worden op het moment, expirimentele fase");
-		}
 		$userTmp = $this->repos->findOneBy( array('emailaddress' => $emailaddress ) );
 		if ( $userTmp ) {
 			throw new \Exception("het emailadres is al in gebruik",E_ERROR);
