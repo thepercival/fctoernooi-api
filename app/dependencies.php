@@ -105,5 +105,10 @@ $container['App\Action\Tournament'] = function ($c) {
         $em
     );
     $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-    return new App\Action\Tournament($tournamentService,$tournamentRepos,$userRepository,$c->get('serializer'),$c->get('jwt'));
+    return new App\Action\Tournament(
+        $tournamentService,
+        $tournamentRepos,
+        $userRepository,
+        $voetbalService->getService(Voetbal\Structure::class),
+        $c->get('serializer'),$c->get('jwt'));
 };

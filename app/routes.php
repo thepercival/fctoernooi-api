@@ -23,6 +23,7 @@ $app->group('/tournaments', function () use ($app) {
     $app->get('/{id}', 'App\Action\Tournament:fetchOne');
     $app->put('/{id}', 'App\Action\Tournament:edit');
     $app->delete('/{id}', 'App\Action\Tournament:remove');
+    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
 });
 
 $app->group('/tournamentroles', function () use ($app) {

@@ -74,14 +74,15 @@ class Service
         $competitionseason = $p_tournament->getCompetitionseason();
         $tournament = null;
         try {
+            $userId = $user->getId();
             // association, check als bestaat op basis van naam, zoniet, aak aan
             $associationRepos = $this->voetbalService->getRepository(Association::class);
             $association = $associationRepos->findOneBy(
-                array( 'name' => $user->getName() )
+                array( 'name' => $userId )
             );
             if( $association === null ){
                 $assService = $this->voetbalService->getService( Association::class );
-                $association = $assService->create( $user->getName() );
+                $association = $assService->create( $userId );
             }
 
             // check competition, check als naam niet bestaat

@@ -15,6 +15,7 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Role as TournamentRole;
+use Voetbal\Structure\Service as StructureService;
 
 final class Tournament
 {
@@ -34,6 +35,11 @@ final class Tournament
     private $userRepository;
 
     /**
+     * @var StructureService
+     */
+    private $structureService;
+
+    /**
      * @var Serializer
      */
     protected $serializer;
@@ -42,11 +48,17 @@ final class Tournament
      */
     protected $jwt;
 
-    public function __construct(TournamentService $service, TournamentRepository $repos, UserRepository $userRepository, Serializer $serializer, \StdClass $jwt )
+    public function __construct(
+        TournamentService $service,
+        TournamentRepository $repos,
+        UserRepository $userRepository,
+        StructureService $structureService,
+        Serializer $serializer, \StdClass $jwt )
     {
         $this->service = $service;
         $this->repos = $repos;
         $this->userRepository = $userRepository;
+        $this->structureService = $structureService;
         $this->serializer = $serializer;
         $this->jwt = $jwt;
     }
@@ -191,6 +203,33 @@ final class Tournament
             $sErrorMessage = $e->getMessage();
         }
         return $response->withStatus(400, $sErrorMessage )->write( $sErrorMessage );
+    }
+
+    public function fetchPdf($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try {
+            $tournament = $this->repos->find((int)$args['id']);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+            // verplaatsen naar ?
+            $pdf = new \FCToernooi\Pdf\Document\ScheduledGames( $tournament, $this->structureService );
+            $vtData = $pdf->render();
+
+            return $response
+                ->withHeader('Cache-Control', 'must-revalidate')
+                ->withHeader('Pragma', 'public')
+                ->withHeader('Content-Disposition', 'inline; filename="wedstrijdbrieven.pdf";')
+                ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
+                ->withHeader('Content-Length', strlen( $vtData ))
+                ->write($vtData);
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(422)->write( $sErrorMessage);
     }
 
     /*
