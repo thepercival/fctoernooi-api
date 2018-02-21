@@ -79,7 +79,7 @@ class Service
             $association = $associationRepos->findOneBy( array( 'name' => $associationName ) );
             if( $association === null ){
                 $assService = $this->voetbalService->getService( Association::class );
-                $association = $assService->create( $associationName );
+                $association = $assService->create( new Association($associationName) );
             }
 
             // check competition, check als naam niet bestaat
