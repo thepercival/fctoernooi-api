@@ -9,7 +9,7 @@
 namespace FCToernooi;
 
 use \Doctrine\Common\Collections\ArrayCollection;
-use Voetbal\Competitionseason;
+use Voetbal\Competition;
 
 class Tournament
 {
@@ -19,9 +19,9 @@ class Tournament
     private $id;
 
     /**
-     * @var Competitionseason
+     * @var Competition
      */
-    private $competitionseason;
+    private $competition;
 
     /**
      * @var ArrayCollection
@@ -31,9 +31,9 @@ class Tournament
     const MINNROFCOMPETITORS = 2;
     const MAXNROFCOMPETITORS = 32;
 
-    public function __construct( Competitionseason $competitionseason )
+    public function __construct( Competition $competition )
     {
-        $this->competitionseason = $competitionseason;
+        $this->competition = $competition;
         $this->roles = new ArrayCollection();
     }
 
@@ -56,19 +56,19 @@ class Tournament
     }
 
     /**
-     * @return Competitionseason
+     * @return Competition
      */
-    public function getCompetitionseason()
+    public function getCompetition()
     {
-        return $this->competitionseason;
+        return $this->competition;
     }
 
     /**
-     * @param Competitionseason $competitionseason
+     * @param Competition $competition
      */
-    public function setCompetitionseason( Competitionseason $competitionseason )
+    public function setCompetition( Competition $competition )
     {
-        $this->competitionseason = $competitionseason;
+        $this->competition = $competition;
     }
 
     /**

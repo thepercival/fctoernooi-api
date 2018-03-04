@@ -58,7 +58,7 @@ class ScheduledGames extends ToernooiPdfPage
         $arrLineColors = array( "b" => "black" );
         $nX = $this->drawCell( "FCToernooi", $this->getPageMargin(), $nY, $nFirstBorder - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, $arrLineColors );
         $nX += $nMargin;
-        $name = $this->getParent()->getTournament()->getCompetitionseason()->getCompetition()->getName();
+        $name = $this->getParent()->getTournament()->getCompetition()->getLeague()->getName();
         $this->drawCell( $name, $nX, $nY, $this->getWidth() - ($this->getPageMargin() + $nX), $nRowHeight, ToernooiPdfPage::ALIGNLEFT, $arrLineColors );
         $nY -= 2 * $nRowHeight;
 

@@ -16,17 +16,17 @@ FCToernooi\Tournament:
           mappedBy: tournament
           cascade: [ persist, remove ]
     manyToOne:
-        competitionseason:
-            targetEntity: Voetbal\Competitionseason
+        competition:
+            targetEntity: Voetbal\Competition
             joinColumn:
-              name: competitionseasonid
+              name: competitionid
               referencedColumnName: id
               nullable: false
               onDelete: CASCADE
             cascade: [ persist, remove ]
     uniqueConstraints:
         main_u_idx:
-            columns: [ competitionseasonid ]
+            columns: [ competitionid ]
 
 
 

@@ -233,7 +233,7 @@ class ScheduledGames extends \Zend_Pdf
 
     protected function fillContent()
     {
-        $games = $this->getScheduledGames( $this->tournament->getCompetitionseason()->getFirstRound() );
+        $games = $this->getScheduledGames( $this->tournament->getCompetition()->getFirstRound() );
         if( count( $games ) === 0 ) {
             $page = $this->createSchedulePage( null, null );
             $page->setFillColor( new \Zend_Pdf_Color_Html( 'black' ) );
@@ -275,7 +275,7 @@ class ScheduledGames extends \Zend_Pdf
 //        }
 //
 //        $oPage = $this->createNewPage( $nWidth, $nHeight );
-//        $nY = $oPage->drawHeader( $this->m_oPool->getCompetitionSeason(), $this->m_oPool );
+//        $nY = $oPage->drawHeader( $this->m_oPool->getCompetition(), $this->m_oPool );
 //        $nY -= $this->getPoolUserMarginVertical();
 //        $nX = $this->getPageMargin();
 //        foreach( $oPoolUsers as $oPoolUser )
@@ -301,7 +301,7 @@ class ScheduledGames extends \Zend_Pdf
 //        if ( $this->getNow() > $oEndDateTime ) // pool ended
 //            return;
 //
-//        $oPoule = $this->m_oPool->getCompetitionSeason()->getRounds()->first()->getPoules()->first();
+//        $oPoule = $this->m_oPool->getCompetition()->getRounds()->first()->getPoules()->first();
 //        $oGameNrRange = Voetbal_Game_Factory::getNumberRange( $oPoule, Voetbal_Factory::STATE_SCHEDULED, Agenda_Factory::createDateTime(), $oEndDateTime );
 //        if ( $oGameNrRange->Start === null )
 //            return;
@@ -309,7 +309,7 @@ class ScheduledGames extends \Zend_Pdf
 //        $this->putGameNumberXMargin( $nWidth );
 //        $oPage = $this->createSchedulePage( $nWidth, $nHeight );
 //
-//        $nY = $oPage->drawHeader( $this->m_oPool->getCompetitionSeason(), $this->m_oPool );
+//        $nY = $oPage->drawHeader( $this->m_oPool->getCompetition(), $this->m_oPool );
 //
 //        $nY -= $this->getGameNumberYMargin();
 //        $nX = $this->getPageMargin();

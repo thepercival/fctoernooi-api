@@ -6,8 +6,8 @@ FCToernooi\Tournament\Role:
   properties:
     id:
       type: integer
-    competitionseason:
-      type: Voetbal\Competitionseason
+    competition:
+      type: Voetbal\Competition
     user:
       type: FCToernooi\User
     role:

@@ -10,9 +10,9 @@ namespace FCToernooi\Tournament;
 
 use FCToernooi\User as User;
 use Voetbal\Association;
-use Voetbal\Competition;
+use Voetbal\League;
 use Voetbal\Season;
-use Voetbal\Competitionseason;
+use Voetbal\Competition;
 use Voetbal\Field;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -71,7 +71,7 @@ class Service
     public function createFromJSON( Tournament $p_tournament, User $user )
     {
         $this->em->getConnection()->beginTransaction();
-        $competitionseason = $p_tournament->getCompetitionseason();
+        $competition = $p_tournament->getCompetition();
         $tournament = null;
         try {
             $associationName = static::getAssociationNameFromUserId( $user->getId() );
@@ -82,14 +82,14 @@ class Service
                 $association = $assService->create( new Association($associationName) );
             }
 
-            // check competition, check als naam niet bestaat
-            $competitionRepos = $this->voetbalService->getRepository(Competition::class);
-            $competition = $competitionRepos->findOneBy( array('name' => $competitionseason->getCompetition()->getName() ) );
-            if ( $competition !== null ){
+            // check league, check als naam niet bestaat
+            $leagueRepos = $this->voetbalService->getRepository(League::class);
+            $league = $leagueRepos->findOneBy( array('name' => $competition->getLeague()->getName() ) );
+            if ( $league !== null ){
                 throw new \Exception("de competitienaam bestaat al", E_ERROR );
             }
-            // $compService = $this->voetbalService->getService( Competition::class );
-            // $competition = $compService->create( $name );
+            // $compService = $this->voetbalService->getService( League::class );
+            // $league = $compService->create( $name );
 
             // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
             $year = date("Y");
@@ -104,10 +104,10 @@ class Service
             }
 
             // DO POST SERIALIZING!!
-            $competitionseason->setAssociation( $association );
-            $competitionseason->setSeason( $season );
-            $csRepos = $this->voetbalService->getRepository(Competitionseason::class);
-            $csRepos->saveFromJSON($competitionseason);
+            $competition->setAssociation( $association );
+            $competition->setSeason( $season );
+            $csRepos = $this->voetbalService->getRepository(Competition::class);
+            $csRepos->saveFromJSON($competition);
 
             $tournament = $this->repos->save($p_tournament);
 
@@ -123,10 +123,10 @@ class Service
 //            }
 //
 //            $structureService = $this->voetbalService->getService(\Voetbal\Structure::class);
-//            $firstRound = $structureService->create( $competitionseason, $round );
+//            $firstRound = $structureService->create( $competition, $round );
 //
 //            $planningService = $this->voetbalService->getService(\Voetbal\Planning::class);
-//            $planningService->create( $firstRound, $competitionseason->getStartDateTime() );
+//            $planningService->create( $firstRound, $competition->getStartDateTime() );
 
             $this->em->getConnection()->commit();
         } catch (\Exception $e) {
@@ -145,25 +145,25 @@ class Service
      */
     public function editFromJSON( Tournament $tournament, User $user )
     {
-        $csRepos = $this->voetbalService->getRepository(Competitionseason::class);
+        $csRepos = $this->voetbalService->getRepository(Competition::class);
 
-        $csRepos->editFromJSON($tournament->getCompetitionseason());
+        $csRepos->editFromJSON($tournament->getCompetition());
 
-//        $competitionseason = $tournament->getCompetitionseason();
-//        $csRepos->onPostSerialize( $competitionseason );
-//        $competitionseason = $csRepos->merge( $competitionseason );
-//        $csRepos->save( $competitionseason );
-//        $tournament->setCompetitionseason( $competitionseason );
+//        $competition = $tournament->getCompetition();
+//        $csRepos->onPostSerialize( $competition );
+//        $competition = $csRepos->merge( $competition );
+//        $csRepos->save( $competition );
+//        $tournament->setCompetition( $competition );
 
-//        $competition = $tournament->getCompetitionseason()->getCompetition();
-//        $competition->setName($name);
+//        $league = $tournament->getCompetition()->getLeague();
+//        $league->setName($name);
+//        $leagueRepos = $this->voetbalService->getRepository(League::class);
+//        $leagueRepos->save($league);
+//
+//        $competition = $tournament->getCompetition();
+//        $competition->setStartDateTime($startDateTime);
 //        $competitionRepos = $this->voetbalService->getRepository(Competition::class);
 //        $competitionRepos->save($competition);
-//
-//        $competitionseason = $tournament->getCompetitionseason();
-//        $competitionseason->setStartDateTime($startDateTime);
-//        $competitionseasonRepos = $this->voetbalService->getRepository(Competitionseason::class);
-//        $competitionseasonRepos->save($competitionseason);
 
         return $tournament;
     }
@@ -173,8 +173,8 @@ class Service
      */
     public function remove( Tournament $tournament )
     {
-        $competitionRepos = $this->voetbalService->getRepository(Competition::class);
-        return $competitionRepos->remove( $tournament->getCompetitionseason()->getCompetition() );
+        $leagueRepos = $this->voetbalService->getRepository(League::class);
+        return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
 
     public static function getAssociationNameFromUserId( $userId ) {

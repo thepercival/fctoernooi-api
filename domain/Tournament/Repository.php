@@ -12,7 +12,7 @@ use FCToernooi\Tournament;
 
 /**
  * Class Repository
- * @package Voetbal\Competitionseason
+ * @package Voetbal\Competition
  */
 class Repository extends \Voetbal\Repository
 {
@@ -27,7 +27,7 @@ class Repository extends \Voetbal\Repository
     )
     {
         $query = $this->createQueryBuilder('t')
-            ->join("t.competitionseason","cs");
+            ->join("t.competition","cs");
 
         if( $startDateTime !== null ) {
             $query = $query

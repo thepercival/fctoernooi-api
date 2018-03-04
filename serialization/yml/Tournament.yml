@@ -6,7 +6,7 @@ FCToernooi\Tournament:
   properties:
     id:
       type: integer
-    competitionseason:
-      type: Voetbal\Competitionseason
+    competition:
+      type: Voetbal\Competition
     roles:
       type: ArrayCollection<FCToernooi\Tournament\Role>

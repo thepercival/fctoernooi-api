@@ -10,7 +10,7 @@ namespace FCToernooi\Tournament\Role;
 
 /**
  * Class Repository
- * @package Voetbal\Competitionseason
+ * @package Voetbal\Competition
  */
 class Repository extends \Voetbal\Repository
 {
