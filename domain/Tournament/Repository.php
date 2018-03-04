@@ -16,11 +16,6 @@ use FCToernooi\Tournament;
  */
 class Repository extends \Voetbal\Repository
 {
-    public function merge( Tournament $tournament )
-    {
-        return $this->_em->merge( $tournament );
-    }
-
     public function findByPeriod(
         \DateTimeImmutable $startDateTime = null,
         \DateTimeImmutable $endDateTime = null
