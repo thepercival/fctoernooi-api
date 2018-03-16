@@ -81,14 +81,13 @@ class Service
             $association = $associationRepos->findOneBy( array( 'name' => $associationName ) );
             if( $association === null ){
                 $assService = $this->voetbalService->getService( Association::class );
-                $association = $assService->create( new Association($associationName) );
+                $association = $assService->create( $associationName );
             }
 
             // create league
             $leagueSer = $competitionSer->getLeague();
-            $leagueSer->setAssociation($association);
             $leagueService = $this->voetbalService->getService( League::class );
-            $league = $leagueService->create( $leagueSer );
+            $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
 
             // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
             $year = date("Y");
@@ -100,23 +99,21 @@ class Service
                 $season = $seasonService->create( $year, $period );
             }
 
-            $competitionSer->setLeague( $league );
-            $competitionSer->setSeason( $season );
             $fieldsSer = $competitionSer->getFields();
             $competitionSer->setFields([]);
             $refereesSer = $competitionSer->getReferees();
             $competitionSer->setReferees([]);
             $competitionService = $this->voetbalService->getService(Competition::class);
-            $competition = $competitionService->create($competitionSer);
+            $competition = $competitionService->create($league, $season, $competitionSer->getStartDateTime() );
 
             $fieldService = $this->voetbalService->getService( Field::class );
-            foreach( $fieldsSer as $field ) {
-                $fieldService->create( $field, $competition );
+            foreach( $fieldsSer as $fieldSet ) {
+                $fieldService->create( $fieldSet->getNumber(), $fieldSet->getName(), $competition );
             }
 
             $refereeService = $this->voetbalService->getService( Referee::class );
-            foreach( $refereesSer as $referee ) {
-                $refereeService->create( $referee, $competition );
+            foreach( $refereesSer as $referesSer ) {
+                $refereeService->create( $referesSer->getInitials(), $referesSer->getName(), $competition );
             }
 
             $tournamentSer->setCompetition($competition);
