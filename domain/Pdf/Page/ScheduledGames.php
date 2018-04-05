@@ -103,7 +103,7 @@ class ScheduledGames extends ToernooiPdfPage
         $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight , ToernooiPdfPage::ALIGNRIGHT);
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight );
         $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight );
-        $scoreConfig = $game->getRound()->getInputScoreConfig();
+        $scoreConfig = $game->getRound()->getConfig()->getInputScore();
         if( $scoreConfig !== null ) {
             $this->drawCell( $scoreConfig->getName(), $nX2, $nY, $nWidthResult - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
         }

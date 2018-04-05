@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "e07a3972e5b0e5f06697b1b393fae677",
+    "content-hash": "331a8bf99f17a60956289868f1f810b7",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -36,6 +36,60 @@
             "description": "Promoting the interoperability of container objects (DIC, SL, etc.)",
             "homepage": "https://github.com/container-interop/container-interop",
             "time": "2017-02-14T19:40:03+00:00"
+        },
+        {
+            "name": "crell/api-problem",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Crell/ApiProblem.git",
+                "reference": "3ced9684ae764669255b4c10ca3614a0a1c3d7cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Crell/ApiProblem/zipball/3ced9684ae764669255b4c10ca3614a0a1c3d7cc",
+                "reference": "3ced9684ae764669255b4c10ca3614a0a1c3d7cc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5 || ^7.0"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "phpunit/phpunit": "4.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Crell\\ApiProblem\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Larry Garfield",
+                    "email": "larry@garfieldtech.com",
+                    "homepage": "http://www.garfieldtech.com/"
+                }
+            ],
+            "description": "PHP wrapper for the api-problem IETF specification",
+            "homepage": "https://github.com/Crell/ApiProblem",
+            "keywords": [
+                "api-problem",
+                "http",
+                "json",
+                "rest",
+                "xml"
+            ],
+            "time": "2017-11-06T17:40:56+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -111,12 +165,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/cache.git",
-                "reference": "e3fcea0d1af20ec7e236e37efaca378071adbae0"
+                "reference": "73ba4514e504092e815d0c70519b655e989a1756"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/cache/zipball/e3fcea0d1af20ec7e236e37efaca378071adbae0",
-                "reference": "e3fcea0d1af20ec7e236e37efaca378071adbae0",
+                "url": "https://api.github.com/repos/doctrine/cache/zipball/73ba4514e504092e815d0c70519b655e989a1756",
+                "reference": "73ba4514e504092e815d0c70519b655e989a1756",
                 "shasum": ""
             },
             "require": {
@@ -127,11 +181,10 @@
             },
             "require-dev": {
                 "alcaeus/mongo-php-adapter": "^1.1",
-                "doctrine/coding-standard": "^1.0",
+                "doctrine/coding-standard": "^4.0",
                 "mongodb/mongodb": "^1.1",
-                "phpunit/phpunit": "^6.3",
-                "predis/predis": "~1.0",
-                "squizlabs/php_codesniffer": "^3.0"
+                "phpunit/phpunit": "^7.0",
+                "predis/predis": "~1.0"
             },
             "suggest": {
                 "alcaeus/mongo-php-adapter": "Required to use legacy MongoDB driver"
@@ -179,7 +232,7 @@
                 "cache",
                 "caching"
             ],
-            "time": "2017-12-18T07:23:23+00:00"
+            "time": "2018-03-18T15:47:07+00:00"
         },
         {
             "name": "doctrine/collections",
@@ -187,21 +240,21 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/collections.git",
-                "reference": "6a205be3bec4cb49e6a5adcb799a3c79a47aad38"
+                "reference": "ab845b9f5614e9f355dfba7c47a0915d9bc0afff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/collections/zipball/6a205be3bec4cb49e6a5adcb799a3c79a47aad38",
-                "reference": "6a205be3bec4cb49e6a5adcb799a3c79a47aad38",
+                "url": "https://api.github.com/repos/doctrine/collections/zipball/ab845b9f5614e9f355dfba7c47a0915d9bc0afff",
+                "reference": "ab845b9f5614e9f355dfba7c47a0915d9bc0afff",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1"
             },
             "require-dev": {
-                "doctrine/coding-standard": "~2.1.0",
-                "phpunit/phpunit": "^6.3",
-                "squizlabs/php_codesniffer": "^3.0"
+                "doctrine/coding-standard": "^4.0",
+                "phpstan/phpstan-shim": "^0.9.2",
+                "phpunit/phpunit": "^7.0"
             },
             "type": "library",
             "extra": {
@@ -247,7 +300,7 @@
                 "collections",
                 "iterator"
             ],
-            "time": "2018-01-29T06:33:36+00:00"
+            "time": "2018-03-28T09:45:45+00:00"
         },
         {
             "name": "doctrine/common",
@@ -334,12 +387,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "63efa539343a8e6d296b259ca322de981b213498"
+                "reference": "1853a6dd3bb36b7886a069fec4791dff02a83dca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/63efa539343a8e6d296b259ca322de981b213498",
-                "reference": "63efa539343a8e6d296b259ca322de981b213498",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/1853a6dd3bb36b7886a069fec4791dff02a83dca",
+                "reference": "1853a6dd3bb36b7886a069fec4791dff02a83dca",
                 "shasum": ""
             },
             "require": {
@@ -348,11 +401,11 @@
                 "php": "^7.1"
             },
             "require-dev": {
-                "doctrine/coding-standard": "~2.0.0",
-                "phpunit/phpunit": "^6.3",
+                "doctrine/coding-standard": "^3.0",
+                "phpunit/phpunit": "^7.0",
                 "phpunit/phpunit-mock-objects": "!=3.2.4,!=3.2.5",
                 "symfony/console": "^2.0.5||^3.0",
-                "symfony/phpunit-bridge": "^3.3"
+                "symfony/phpunit-bridge": "^3.4.5|^4.0.5"
             },
             "suggest": {
                 "symfony/console": "For helpful console commands such as SQL execution and import of files."
@@ -401,7 +454,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2018-02-07T16:04:47+00:00"
+            "time": "2018-03-27T20:07:42+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -409,12 +462,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/inflector.git",
-                "reference": "87e0271f5a45ae369ff6f5b9297d564edf05755c"
+                "reference": "dfe20066f5636a55f5143671949812a12881e11e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/inflector/zipball/87e0271f5a45ae369ff6f5b9297d564edf05755c",
-                "reference": "87e0271f5a45ae369ff6f5b9297d564edf05755c",
+                "url": "https://api.github.com/repos/doctrine/inflector/zipball/dfe20066f5636a55f5143671949812a12881e11e",
+                "reference": "dfe20066f5636a55f5143671949812a12881e11e",
                 "shasum": ""
             },
             "require": {
@@ -422,7 +475,7 @@
             },
             "require-dev": {
                 "doctrine/coding-standard": "^3.0",
-                "phpunit/phpunit": "^6.2"
+                "phpunit/phpunit": "^7.0"
             },
             "type": "library",
             "extra": {
@@ -469,7 +522,7 @@
                 "singularize",
                 "string"
             ],
-            "time": "2018-02-08T06:24:48+00:00"
+            "time": "2018-03-28T04:40:29+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -477,22 +530,24 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/instantiator.git",
-                "reference": "dcbbb92ee8534a4244559f3b0e5702dd30b43f47"
+                "reference": "870a62d7b0d63d4e0ffa8f2ce3ab7c8a53d1846d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/instantiator/zipball/dcbbb92ee8534a4244559f3b0e5702dd30b43f47",
-                "reference": "dcbbb92ee8534a4244559f3b0e5702dd30b43f47",
+                "url": "https://api.github.com/repos/doctrine/instantiator/zipball/870a62d7b0d63d4e0ffa8f2ce3ab7c8a53d1846d",
+                "reference": "870a62d7b0d63d4e0ffa8f2ce3ab7c8a53d1846d",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1"
             },
             "require-dev": {
-                "doctrine/coding-standard": "~2.1.0",
+                "doctrine/coding-standard": "^4.0",
                 "ext-pdo": "*",
                 "ext-phar": "*",
-                "phpunit/phpunit": "^6.5.5"
+                "phpbench/phpbench": "^0.13",
+                "phpstan/phpstan-shim": "^0.9.2",
+                "phpunit/phpunit": "^7.0"
             },
             "type": "library",
             "extra": {
@@ -522,7 +577,7 @@
                 "constructor",
                 "instantiate"
             ],
-            "time": "2018-01-29T06:31:30+00:00"
+            "time": "2018-03-05T09:41:42+00:00"
         },
         {
             "name": "doctrine/lexer",
@@ -584,12 +639,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/doctrine2.git",
-                "reference": "f4eb8ca85ff90870e788291d697afdbe30d07e3e"
+                "reference": "4f6d47b88a84896dadaadd18212df6bb504f2e97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/f4eb8ca85ff90870e788291d697afdbe30d07e3e",
-                "reference": "f4eb8ca85ff90870e788291d697afdbe30d07e3e",
+                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/4f6d47b88a84896dadaadd18212df6bb504f2e97",
+                "reference": "4f6d47b88a84896dadaadd18212df6bb504f2e97",
                 "shasum": ""
             },
             "require": {
@@ -658,7 +713,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2018-01-04T21:12:52+00:00"
+            "time": "2018-02-27T08:06:30+00:00"
         },
         {
             "name": "firebase/php-jwt",
@@ -705,6 +760,110 @@
             "description": "A simple library to encode and decode JSON Web Tokens (JWT) in PHP. Should conform to the current spec.",
             "homepage": "https://github.com/firebase/php-jwt",
             "time": "2017-06-27T22:17:23+00:00"
+        },
+        {
+            "name": "gofabian/negotiation-middleware",
+            "version": "v0.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gofabian/negotiation-middleware.git",
+                "reference": "23d80fa1b00bbadded515df837c5a84517374b50"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gofabian/negotiation-middleware/zipball/23d80fa1b00bbadded515df837c5a84517374b50",
+                "reference": "23d80fa1b00bbadded515df837c5a84517374b50",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "psr/http-message": "^1.0",
+                "willdurand/negotiation": "^2.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8",
+                "satooshi/php-coveralls": "0.6.1"
+            },
+            "suggest": {
+                "slim/slim": "The negotiation middleware is compatible to Slim 3.x"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gofabian\\Negotiation\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabian Iffländer",
+                    "homepage": "http://gofabian.de/"
+                }
+            ],
+            "description": "PHP negotiation middleware for accept headers of PSR-7 requests. Uses the negotiation library willdurand/negotiation.",
+            "homepage": "https://github.com/gofabian/negotiation-middleware",
+            "keywords": [
+                "middleware",
+                "negotiation",
+                "psr-7",
+                "slim"
+            ],
+            "time": "2017-02-22T18:45:01+00:00"
+        },
+        {
+            "name": "http-interop/http-factory",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/http-interop/http-factory.git",
+                "reference": "c2587cc0a6f74987fefb5b8074acfd32c69a4b0f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/http-interop/http-factory/zipball/c2587cc0a6f74987fefb5b8074acfd32c69a4b0f",
+                "reference": "c2587cc0a6f74987fefb5b8074acfd32c69a4b0f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "psr/http-message": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Interop\\Http\\Factory\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP message factories",
+            "keywords": [
+                "factory",
+                "http",
+                "message",
+                "psr",
+                "psr-17",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "time": "2017-03-24T14:48:51+00:00"
         },
         {
             "name": "jms/metadata",
@@ -798,12 +957,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "9890aa3cd89a38c1a014b58aa263e823cf5930a1"
+                "reference": "75a73c9ed1c81c1e159a6d62cc3f7e6830635ee4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/9890aa3cd89a38c1a014b58aa263e823cf5930a1",
-                "reference": "9890aa3cd89a38c1a014b58aa263e823cf5930a1",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/75a73c9ed1c81c1e159a6d62cc3f7e6830635ee4",
+                "reference": "75a73c9ed1c81c1e159a6d62cc3f7e6830635ee4",
                 "shasum": ""
             },
             "require": {
@@ -874,7 +1033,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2018-02-18T10:37:31+00:00"
+            "time": "2018-03-23T08:45:22+00:00"
         },
         {
             "name": "league/period",
@@ -1063,26 +1222,81 @@
             "time": "2017-06-19T01:22:40+00:00"
         },
         {
-            "name": "nesbot/carbon",
-            "version": "dev-master",
+            "name": "neomerx/cors-psr7",
+            "version": "v1.0.12",
             "source": {
                 "type": "git",
-                "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "40afac6703a8b770a82579b5a34d2bb511e2486f"
+                "url": "https://github.com/neomerx/cors-psr7.git",
+                "reference": "24944f39483d1a89f66ae9d58cca9f82b8815b35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/40afac6703a8b770a82579b5a34d2bb511e2486f",
-                "reference": "40afac6703a8b770a82579b5a34d2bb511e2486f",
+                "url": "https://api.github.com/repos/neomerx/cors-psr7/zipball/24944f39483d1a89f66ae9d58cca9f82b8815b35",
+                "reference": "24944f39483d1a89f66ae9d58cca9f82b8815b35",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
+                "php": ">=5.6.0",
+                "psr/http-message": "^1.0",
+                "psr/log": "^1.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^0.9.9",
+                "phpunit/phpunit": "^5.7",
+                "scrutinizer/ocular": "^1.1",
+                "squizlabs/php_codesniffer": "^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Neomerx\\Cors\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "neomerx",
+                    "email": "info@neomerx.com"
+                }
+            ],
+            "description": "Framework agnostic (PSR-7) CORS implementation (www.w3.org/TR/cors/)",
+            "homepage": "https://github.com/neomerx/cors-psr7",
+            "keywords": [
+                "Cross Origin Resource Sharing",
+                "Cross-Origin Resource Sharing",
+                "cors",
+                "neomerx",
+                "psr-7",
+                "psr7",
+                "w3.org",
+                "www.w3.org"
+            ],
+            "time": "2017-09-03T22:31:57+00:00"
+        },
+        {
+            "name": "nesbot/carbon",
+            "version": "1.25.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/briannesbitt/Carbon.git",
+                "reference": "cbcf13da0b531767e39eb86e9687f5deba9857b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/cbcf13da0b531767e39eb86e9687f5deba9857b4",
+                "reference": "cbcf13da0b531767e39eb86e9687f5deba9857b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.9",
                 "symfony/translation": "~2.6 || ~3.0 || ~4.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "~2",
-                "phpunit/phpunit": "~4.0 || ~5.0"
+                "phpunit/phpunit": "^4.8.35 || ^5.7"
             },
             "type": "library",
             "extra": {
@@ -1113,7 +1327,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2018-02-20T08:48:55+00:00"
+            "time": "2018-03-19T15:50:49+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -1534,6 +1748,112 @@
             "time": "2016-08-06T14:39:51+00:00"
         },
         {
+            "name": "psr/http-server-handler",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-server-handler.git",
+                "reference": "ede6c504a77ebc87e7256d13df5877cbf9127104"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-server-handler/zipball/ede6c504a77ebc87e7256d13df5877cbf9127104",
+                "reference": "ede6c504a77ebc87e7256d13df5877cbf9127104",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
+                "psr/http-message": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Server\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP server-side request handler",
+            "keywords": [
+                "handler",
+                "http",
+                "http-interop",
+                "psr",
+                "psr-15",
+                "psr-7",
+                "request",
+                "response",
+                "server"
+            ],
+            "time": "2018-01-26T14:27:09+00:00"
+        },
+        {
+            "name": "psr/http-server-middleware",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-server-middleware.git",
+                "reference": "e01237126449cadfb66b60a5a818de9e9dde6bf3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-server-middleware/zipball/e01237126449cadfb66b60a5a818de9e9dde6bf3",
+                "reference": "e01237126449cadfb66b60a5a818de9e9dde6bf3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
+                "psr/http-message": "^1.0",
+                "psr/http-server-handler": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Server\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP server-side middleware",
+            "keywords": [
+                "http",
+                "http-interop",
+                "middleware",
+                "psr",
+                "psr-15",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "time": "2018-01-22T22:18:49+00:00"
+        },
+        {
             "name": "psr/log",
             "version": "dev-master",
             "source": {
@@ -1706,12 +2026,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "4de97e8d0ff6d4822f0b4d1486b63edf9028eac8"
+                "reference": "851ba3618b9ecce197c225526c05504c6e83ca16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/4de97e8d0ff6d4822f0b4d1486b63edf9028eac8",
-                "reference": "4de97e8d0ff6d4822f0b4d1486b63edf9028eac8",
+                "url": "https://api.github.com/repos/symfony/console/zipball/851ba3618b9ecce197c225526c05504c6e83ca16",
+                "reference": "851ba3618b9ecce197c225526c05504c6e83ca16",
                 "shasum": ""
             },
             "require": {
@@ -1766,7 +2086,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2018-02-09T15:48:09+00:00"
+            "time": "2018-03-20T14:41:21+00:00"
         },
         {
             "name": "symfony/inflector",
@@ -2013,33 +2333,33 @@
         },
         {
             "name": "symfony/translation",
-            "version": "3.4.x-dev",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "b3cc1f9b04bb36e24b015c8200c0935ee64f7442"
+                "reference": "6664b21dc874109ab6c6d30af4116360d84d573f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/b3cc1f9b04bb36e24b015c8200c0935ee64f7442",
-                "reference": "b3cc1f9b04bb36e24b015c8200c0935ee64f7442",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/6664b21dc874109ab6c6d30af4116360d84d573f",
+                "reference": "6664b21dc874109ab6c6d30af4116360d84d573f",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.5.9|>=7.0.8",
+                "php": "^7.1.3",
                 "symfony/polyfill-mbstring": "~1.0"
             },
             "conflict": {
-                "symfony/config": "<2.8",
+                "symfony/config": "<3.4",
                 "symfony/dependency-injection": "<3.4",
                 "symfony/yaml": "<3.4"
             },
             "require-dev": {
                 "psr/log": "~1.0",
-                "symfony/config": "~2.8|~3.0|~4.0",
+                "symfony/config": "~3.4|~4.0",
                 "symfony/dependency-injection": "~3.4|~4.0",
                 "symfony/finder": "~2.8|~3.0|~4.0",
-                "symfony/intl": "^2.8.18|^3.2.5|~4.0",
+                "symfony/intl": "~3.4|~4.0",
                 "symfony/yaml": "~3.4|~4.0"
             },
             "suggest": {
@@ -2050,7 +2370,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.4-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -2077,7 +2397,7 @@
             ],
             "description": "Symfony Translation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-02-14T10:03:57+00:00"
+            "time": "2018-02-22T11:40:25+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -2143,12 +2463,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "4684595cb7e53cae1571ff2e1c547be26a1392b2"
+                "reference": "fbf44377bd255c295b08c776f922e049193b3258"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/4684595cb7e53cae1571ff2e1c547be26a1392b2",
-                "reference": "4684595cb7e53cae1571ff2e1c547be26a1392b2",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/fbf44377bd255c295b08c776f922e049193b3258",
+                "reference": "fbf44377bd255c295b08c776f922e049193b3258",
                 "shasum": ""
             },
             "require": {
@@ -2181,44 +2501,42 @@
                     "email": "coendunnink@gmail.com"
                 }
             ],
-            "description": "library  for football seasons, leagues, leagues and more too come",
+            "description": "library  for football competitions and more",
             "homepage": "https://github.com/thepercival/voetbal",
             "keywords": [
                 "Voetbal",
                 "football"
             ],
-            "time": "2018-02-21T06:55:11+00:00"
+            "time": "2018-03-28T09:22:23+00:00"
         },
         {
-            "name": "tuupola/slim-jwt-auth",
-            "version": "2.x-dev",
+            "name": "tuupola/base62",
+            "version": "0.9.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/tuupola/slim-jwt-auth.git",
-                "reference": "756edeb8b61845a47f74386ff6b738b1dcb54e7f"
+                "url": "https://github.com/tuupola/base62.git",
+                "reference": "204d97d3d06e0a40313483ddbe8125ffd0ccea08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/slim-jwt-auth/zipball/756edeb8b61845a47f74386ff6b738b1dcb54e7f",
-                "reference": "756edeb8b61845a47f74386ff6b738b1dcb54e7f",
+                "url": "https://api.github.com/repos/tuupola/base62/zipball/204d97d3d06e0a40313483ddbe8125ffd0ccea08",
+                "reference": "204d97d3d06e0a40313483ddbe8125ffd0ccea08",
                 "shasum": ""
             },
             "require": {
-                "firebase/php-jwt": "^3.0 || ^4.0 || ^5.0",
-                "php": "^5.5 || ^7.0",
-                "psr/http-message": "^1.0",
-                "psr/log": "^1.0"
+                "php": "^5.5 || ^7.0"
             },
             "require-dev": {
                 "overtrue/phplint": "^0.2.4",
-                "phpunit/phpunit": "^4.6",
-                "squizlabs/php_codesniffer": "^2.3",
-                "zendframework/zend-diactoros": "^1.3"
+                "paragonie/random_compat": "^2.0",
+                "phpbench/phpbench": "^0.13.0",
+                "phpunit/phpunit": "^4.8",
+                "squizlabs/php_codesniffer": "^2.5"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Slim\\Middleware\\": "src"
+                    "Tuupola\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2233,16 +2551,297 @@
                     "role": "Developer"
                 }
             ],
-            "description": "PSR-7 JWT Authentication Middleware",
+            "description": "Base62 encoder and decoder for arbitrary data",
+            "homepage": "https://github.com/tuupola/base62",
+            "keywords": [
+                "base62"
+            ],
+            "time": "2017-10-09T10:27:39+00:00"
+        },
+        {
+            "name": "tuupola/callable-handler",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/callable-handler.git",
+                "reference": "5141efa1e974687a3fa53338811a988198f50662"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/callable-handler/zipball/5141efa1e974687a3fa53338811a988198f50662",
+                "reference": "5141efa1e974687a3fa53338811a988198f50662",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0",
+                "psr/http-server-middleware": "^1.0"
+            },
+            "require-dev": {
+                "codedungeon/phpunit-result-printer": "^0.4.4",
+                "overtrue/phplint": "^1.0",
+                "phpunit/phpunit": "^6.5",
+                "squizlabs/php_codesniffer": "^3.2",
+                "tuupola/http-factory": "^0.3.0",
+                "zendframework/zend-diactoros": "^1.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\Middleware\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "https://appelsiini.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Compatibility layer for PSR-7 double pass and PSR-15 middlewares.",
+            "homepage": "https://github.com/tuupola/callable-handler",
+            "keywords": [
+                "middleware",
+                "psr-15",
+                "psr-7"
+            ],
+            "time": "2018-01-23T04:07:25+00:00"
+        },
+        {
+            "name": "tuupola/cors-middleware",
+            "version": "0.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/cors-middleware.git",
+                "reference": "b0e2b7acacf22acae6ba029ee424fd6c073bb443"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/cors-middleware/zipball/b0e2b7acacf22acae6ba029ee424fd6c073bb443",
+                "reference": "b0e2b7acacf22acae6ba029ee424fd6c073bb443",
+                "shasum": ""
+            },
+            "require": {
+                "neomerx/cors-psr7": "^1.0",
+                "php": "^7.1",
+                "psr/http-server-middleware": "^1.0",
+                "tuupola/callable-handler": "^0.3.0",
+                "tuupola/http-factory": "^0.3.0"
+            },
+            "require-dev": {
+                "codedungeon/phpunit-result-printer": "^0.4.4",
+                "equip/dispatch": "dev-approved-psr15 as 1.0.x-dev",
+                "overtrue/phplint": "^1.0",
+                "phpunit/phpunit": "^6.5",
+                "squizlabs/php_codesniffer": "^3.2",
+                "zendframework/zend-diactoros": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\Middleware\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "http://www.appelsiini.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PSR-7 and PSR-15 CORS middleware",
+            "homepage": "https://github.com/tuupola/cors-middleware",
+            "keywords": [
+                "cors",
+                "middleware",
+                "psr-15",
+                "psr-7"
+            ],
+            "time": "2018-01-25T02:29:07+00:00"
+        },
+        {
+            "name": "tuupola/http-factory",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/http-factory.git",
+                "reference": "57b2e19ff3f4af0bbee4e31fd282689be351f1ad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/http-factory/zipball/57b2e19ff3f4af0bbee4e31fd282689be351f1ad",
+                "reference": "57b2e19ff3f4af0bbee4e31fd282689be351f1ad",
+                "shasum": ""
+            },
+            "require": {
+                "http-interop/http-factory": "^0.3.0"
+            },
+            "require-dev": {
+                "http-interop/http-factory-tests": "^0.3.0",
+                "overtrue/phplint": "^0.2.1",
+                "phpunit/phpunit": "^5.7",
+                "squizlabs/php_codesniffer": "^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\Http\\Factory\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "http://www.appelsiini.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Lightweight autodiscovering PSR-17 HTTP factories",
+            "homepage": "https://github.com/tuupola/http-factory",
+            "keywords": [
+                "http",
+                "psr-17",
+                "psr-7"
+            ],
+            "time": "2017-07-15T22:03:15+00:00"
+        },
+        {
+            "name": "tuupola/slim-basic-auth",
+            "version": "3.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/slim-basic-auth.git",
+                "reference": "473fb1c670d01b0bbba83727149bcd526f271140"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/slim-basic-auth/zipball/473fb1c670d01b0bbba83727149bcd526f271140",
+                "reference": "473fb1c670d01b0bbba83727149bcd526f271140",
+                "shasum": ""
+            },
+            "require": {
+                "http-interop/http-factory": "^0.3.0",
+                "php": "^7.1",
+                "psr/http-message": "^1.0",
+                "psr/http-server-middleware": "^1.0",
+                "tuupola/callable-handler": "^0.3.0",
+                "tuupola/http-factory": "^0.3.0"
+            },
+            "require-dev": {
+                "codedungeon/phpunit-result-printer": "^0.6.0",
+                "equip/dispatch": "^2.0",
+                "overtrue/phplint": "^0.2.4",
+                "phpstan/phpstan": "^0.9.2",
+                "phpunit/phpunit": "^7.0",
+                "squizlabs/php_codesniffer": "^3.2",
+                "zendframework/zend-diactoros": "^1.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\Middleware\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "https://appelsiini.net/"
+                }
+            ],
+            "description": "PSR-7 and PSR-15 HTTP Basic Authentication Middleware",
+            "homepage": "https://appelsiini.net/projects/slim-basic-auth",
+            "keywords": [
+                "auth",
+                "middleware",
+                "psr-15",
+                "psr-7"
+            ],
+            "time": "2018-03-02T06:36:29+00:00"
+        },
+        {
+            "name": "tuupola/slim-jwt-auth",
+            "version": "3.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tuupola/slim-jwt-auth.git",
+                "reference": "43b8c7eb0076b5bd28cab72685368a205ea74237"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tuupola/slim-jwt-auth/zipball/43b8c7eb0076b5bd28cab72685368a205ea74237",
+                "reference": "43b8c7eb0076b5bd28cab72685368a205ea74237",
+                "shasum": ""
+            },
+            "require": {
+                "firebase/php-jwt": "^3.0 || ^4.0 || ^5.0",
+                "php": "^7.1",
+                "psr/http-message": "^1.0",
+                "psr/http-server-middleware": "^1.0",
+                "psr/log": "^1.0",
+                "tuupola/callable-handler": "^0.3.0",
+                "tuupola/http-factory": "^0.3.0"
+            },
+            "require-dev": {
+                "codedungeon/phpunit-result-printer": "^0.5.4",
+                "equip/dispatch": "^2.0",
+                "overtrue/phplint": "^0.2.4",
+                "phpstan/phpstan": "^0.9.1",
+                "phpunit/phpunit": "^6.5",
+                "squizlabs/php_codesniffer": "^2.3",
+                "zendframework/zend-diactoros": "^1.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-3.x": "3.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Tuupola\\Middleware\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mika Tuupola",
+                    "email": "tuupola@appelsiini.net",
+                    "homepage": "http://www.appelsiini.net/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PSR-7 and PSR-15 JWT Authentication Middleware",
             "homepage": "https://github.com/tuupola/slim-jwt-auth",
             "keywords": [
                 "auth",
                 "json",
                 "jwt",
                 "middleware",
+                "psr-15",
                 "psr-7"
             ],
-            "time": "2017-12-26T03:27:53+00:00"
+            "time": "2018-03-12T00:38:36+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -2250,12 +2849,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/vlucas/phpdotenv.git",
-                "reference": "ec37c495d56b68f103acafa95fec5ed39b14d7db"
+                "reference": "fe2a5c22c94949983be10263417f47f8551d5946"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/ec37c495d56b68f103acafa95fec5ed39b14d7db",
-                "reference": "ec37c495d56b68f103acafa95fec5ed39b14d7db",
+                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/fe2a5c22c94949983be10263417f47f8551d5946",
+                "reference": "fe2a5c22c94949983be10263417f47f8551d5946",
                 "shasum": ""
             },
             "require": {
@@ -2277,7 +2876,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3-Clause-Attribution"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
@@ -2292,7 +2891,59 @@
                 "env",
                 "environment"
             ],
-            "time": "2017-11-24T14:28:50+00:00"
+            "time": "2018-03-19T21:27:48+00:00"
+        },
+        {
+            "name": "willdurand/negotiation",
+            "version": "2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/willdurand/Negotiation.git",
+                "reference": "cf78c9ac47e8e1e141bf609c71e9e2c3a7780dcf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/willdurand/Negotiation/zipball/cf78c9ac47e8e1e141bf609c71e9e2c3a7780dcf",
+                "reference": "cf78c9ac47e8e1e141bf609c71e9e2c3a7780dcf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Negotiation\\": "src/Negotiation"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "William Durand",
+                    "email": "will+git@drnd.me"
+                }
+            ],
+            "description": "Content Negotiation tools for PHP provided as a standalone library.",
+            "homepage": "http://williamdurand.fr/Negotiation/",
+            "keywords": [
+                "accept",
+                "content",
+                "format",
+                "header",
+                "negotiation"
+            ],
+            "time": "2017-08-04T15:54:30+00:00"
         },
         {
             "name": "zf1/zend-cache",
@@ -3008,28 +3659,28 @@
         },
         {
             "name": "phpunit/php-timer",
-            "version": "dev-master",
+            "version": "1.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-timer.git",
-                "reference": "8b8454ea6958c3dee38453d3bd571e023108c91f"
+                "reference": "9513098641797ce5f459dbc1de5a54c29b0ec1fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/8b8454ea6958c3dee38453d3bd571e023108c91f",
-                "reference": "8b8454ea6958c3dee38453d3bd571e023108c91f",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/9513098641797ce5f459dbc1de5a54c29b0ec1fb",
+                "reference": "9513098641797ce5f459dbc1de5a54c29b0ec1fb",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^5.3.3 || ^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.0"
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0-dev"
+                    "dev-master": "1.0-dev"
                 }
             },
             "autoload": {
@@ -3044,7 +3695,7 @@
             "authors": [
                 {
                     "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
+                    "email": "sb@sebastian-bergmann.de",
                     "role": "lead"
                 }
             ],
@@ -3053,33 +3704,33 @@
             "keywords": [
                 "timer"
             ],
-            "time": "2018-02-01T13:07:23+00:00"
+            "time": "2018-01-06T05:27:16+00:00"
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "dev-master",
+            "version": "2.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "21ad88bbba7c3d93530d93994e0a33cd45f02ace"
+                "reference": "13eb9aba9626b1a3811c6a492acc9669d24bb85a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/21ad88bbba7c3d93530d93994e0a33cd45f02ace",
-                "reference": "21ad88bbba7c3d93530d93994e0a33cd45f02ace",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/13eb9aba9626b1a3811c6a492acc9669d24bb85a",
+                "reference": "13eb9aba9626b1a3811c6a492acc9669d24bb85a",
                 "shasum": ""
             },
             "require": {
                 "ext-tokenizer": "*",
-                "php": "^7.1"
+                "php": "^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.0"
+                "phpunit/phpunit": "^6.2.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.0-dev"
+                    "dev-master": "2.0-dev"
                 }
             },
             "autoload": {
@@ -3102,7 +3753,91 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2018-02-01T13:16:43+00:00"
+            "time": "2017-11-27T08:47:38+00:00"
+        },
+        {
+            "name": "phpunit/phpunit",
+            "version": "6.5.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpunit.git",
+                "reference": "ea739aae4742aa4eae1e98d4d06acdbf01692415"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ea739aae4742aa4eae1e98d4d06acdbf01692415",
+                "reference": "ea739aae4742aa4eae1e98d4d06acdbf01692415",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-mbstring": "*",
+                "ext-xml": "*",
+                "myclabs/deep-copy": "^1.6.1",
+                "phar-io/manifest": "^1.0.1",
+                "phar-io/version": "^1.0",
+                "php": "^7.0",
+                "phpspec/prophecy": "^1.7",
+                "phpunit/php-code-coverage": "^5.3",
+                "phpunit/php-file-iterator": "^1.4.3",
+                "phpunit/php-text-template": "^1.2.1",
+                "phpunit/php-timer": "^1.0.9",
+                "phpunit/phpunit-mock-objects": "^5.0.5",
+                "sebastian/comparator": "^2.1",
+                "sebastian/diff": "^2.0",
+                "sebastian/environment": "^3.1",
+                "sebastian/exporter": "^3.1",
+                "sebastian/global-state": "^2.0",
+                "sebastian/object-enumerator": "^3.0.3",
+                "sebastian/resource-operations": "^1.0",
+                "sebastian/version": "^2.0.1"
+            },
+            "conflict": {
+                "phpdocumentor/reflection-docblock": "3.0.2",
+                "phpunit/dbunit": "<3.0"
+            },
+            "require-dev": {
+                "ext-pdo": "*"
+            },
+            "suggest": {
+                "ext-xdebug": "*",
+                "phpunit/php-invoker": "^1.1"
+            },
+            "bin": [
+                "phpunit"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "6.5.x-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "The PHP Unit Testing framework.",
+            "homepage": "https://phpunit.de/",
+            "keywords": [
+                "phpunit",
+                "testing",
+                "xunit"
+            ],
+            "time": "2018-03-15T16:51:04+00:00"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -3274,29 +4009,28 @@
         },
         {
             "name": "sebastian/diff",
-            "version": "dev-master",
+            "version": "2.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/diff.git",
-                "reference": "ebf0c4e8996ad83136861660593aa6b3b1bb24cf"
+                "reference": "abcc70409ddfb310a8cb41ef0c2e857425438cf4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/ebf0c4e8996ad83136861660593aa6b3b1bb24cf",
-                "reference": "ebf0c4e8996ad83136861660593aa6b3b1bb24cf",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/abcc70409ddfb310a8cb41ef0c2e857425438cf4",
+                "reference": "abcc70409ddfb310a8cb41ef0c2e857425438cf4",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1"
+                "php": "^7.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^7.0",
-                "symfony/process": "^2 || ^3.3 || ^4"
+                "phpunit/phpunit": "^6.2"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.0-dev"
+                    "dev-master": "2.0-dev"
                 }
             },
             "autoload": {
@@ -3321,12 +4055,9 @@
             "description": "Diff implementation",
             "homepage": "https://github.com/sebastianbergmann/diff",
             "keywords": [
-                "diff",
-                "udiff",
-                "unidiff",
-                "unified diff"
+                "diff"
             ],
-            "time": "2018-02-02T07:14:03+00:00"
+            "time": "2017-12-14T11:32:19+00:00"
         },
         {
             "name": "sebastian/environment",
@@ -3334,16 +4065,15 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "eb71ad57e2b937a06c91a60efc647f28187626e9"
+                "reference": "cd35e43a53ec1c10424a5dec250c30e952e09ced"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/eb71ad57e2b937a06c91a60efc647f28187626e9",
-                "reference": "eb71ad57e2b937a06c91a60efc647f28187626e9",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/cd35e43a53ec1c10424a5dec250c30e952e09ced",
+                "reference": "cd35e43a53ec1c10424a5dec250c30e952e09ced",
                 "shasum": ""
             },
             "require": {
-                "ext-posix": "*",
                 "php": "^7.0"
             },
             "require-dev": {
@@ -3377,7 +4107,7 @@
                 "environment",
                 "hhvm"
             ],
-            "time": "2018-02-09T07:31:46+00:00"
+            "time": "2018-03-21T07:21:42+00:00"
         },
         {
             "name": "sebastian/exporter",

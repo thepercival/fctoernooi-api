@@ -8,6 +8,7 @@
 
 namespace FCToernooi\Tournament;
 
+use Doctrine\DBAL\Connection;
 use FCToernooi\User as User;
 use Voetbal\Association;
 use Voetbal\Field;
@@ -20,7 +21,6 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Role\Repository as TournamentRoleRepository;
 use FCToernooi\Tournament\Role\Service as TournamentRoleService;
 use League\Period\Period;
-use Doctrine\ORM\EntityManager as EntityManager;
 
 class Service
 {
@@ -39,28 +39,29 @@ class Service
     protected $tournamentRoleRepos;
 
     /**
-     * @var EntityManager
+     * @var Connection
      */
-    protected $em;
+    protected $conn;
 
 
     /**
      * Service constructor.
      * @param \Voetbal\Service $voetbalService
+     * @param Repository $tournamentRepos
      * @param TournamentRoleRepository $tournamentRoleRepos
-     * @param EntityManager $em
+     * @param \FCToernooi\Tournament\Connection $conn
      */
     public function __construct(
         \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
         TournamentRoleRepository $tournamentRoleRepos,
-        EntityManager $em
+        Connection $conn
     )
     {
         $this->voetbalService = $voetbalService;
         $this->repos = $tournamentRepos;
         $this->tournamentRoleRepos = $tournamentRoleRepos;
-        $this->em = $em;
+        $this->conn = $conn;
     }
 
     /**
@@ -71,12 +72,12 @@ class Service
      */
     public function create( Tournament $tournamentSer, User $user )
     {
-        $this->em->getConnection()->beginTransaction();
+        $this->conn->beginTransaction();
         $competitionSer = $tournamentSer->getCompetition();
         $tournament = null;
         try {
             // create association
-            $associationName = static::getAssociationNameFromUserId( $user->getId() );
+            $associationName = $this->getAssociationNameFromUserId( $user->getId() );
             $associationRepos = $this->voetbalService->getRepository(Association::class);
             $association = $associationRepos->findOneBy( array( 'name' => $associationName ) );
             if( $association === null ){
@@ -122,10 +123,10 @@ class Service
             $tournamentRoleService = new TournamentRoleService( $this->tournamentRoleRepos );
             $tournamentRoles = $tournamentRoleService->set( $tournament, $user, Role::ALL );
 
-            $this->em->getConnection()->commit();
+            $this->conn->commit();
         } catch (\Exception $e) {
             // Rollback the failed transaction attempt
-            $this->em->getConnection()->rollback();
+            $this->conn->rollback();
             throw $e;
         }
         return $tournament;
@@ -159,7 +160,7 @@ class Service
         return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
 
-    public static function getAssociationNameFromUserId( $userId ) {
+    public function getAssociationNameFromUserId( $userId ) {
         $userId = (string) $userId;
         while( strlen($userId) < Association::MIN_LENGTH_NAME ) {
             $userId = "0" . $userId;

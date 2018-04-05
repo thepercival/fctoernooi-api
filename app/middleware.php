@@ -1,42 +1,83 @@
 <?php
-// Application middleware
-use \Slim\Middleware\JwtAuthentication;
 
-$settings = $app->getContainer()->get('settings');
+use FCToernooi\Token;
+// use Crell\ApiProblem\ApiProblem;
+use Gofabian\Negotiation\NegotiationMiddleware;
+// use Micheh\Cache\CacheUtil;
+use Tuupola\Middleware\JwtAuthentication;
+use Tuupola\Middleware\CorsMiddleware;
+use App\Response\Unauthorized;
+use App\Middleware\Authentication;
 
-$app->add(
-    // $app->getContainer()->get('jwtauth')
-    new JwtAuthentication([
-        "secure" => true,
-        "relaxed" => ["localhost"],
-        "secret" => $app->getContainer()->get('settings')['auth']['jwtsecret'],
-        // "algorithm" => $app->getContainer()->get('settings')['auth']['jwtalgorithm'], default
+$container = $app->getContainer();
+$container["token"] = function ($container) {
+    return new Token;
+};
+
+$container["JwtAuthentication"] = function ($container) {
+    return new JwtAuthentication([
+        "secret" => $container->get('settings')['auth']['jwtsecret'],
+        "logger" => $container["logger"],
+        "attribute" => false,
+        "relaxed" => ["127.0.0.1", "localhost"],
         "rules" => [
-            new JwtAuthentication\RequestPathRule([
+            new Tuupola\Middleware\JwtAuthentication\RequestPathRule([
                 "path" => "/",
-                "passthrough" => ["/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange"]
+                "ignore" => ["/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange"]
             ]),
             new JwtAuthentication\RequestMethodRule([
                 "path" => "/tournaments",
-                "passthrough" => ["GET"]
+                "ignore" => ["GET"]
             ]),
-            new JwtAuthentication\RequestMethodRule([
-                "passthrough" => ["OPTIONS"]
+            new Tuupola\Middleware\JwtAuthentication\RequestMethodRule([
+                "ignore" => ["OPTIONS"]
             ])
         ],
-        "callback" => function ($request, $response, $arguments) use ($container) {
-            $container["jwt"] = $arguments["decoded"];
+        "error" => function ($response, $arguments) {
+            return new Unauthorized($arguments["message"], 401);
+        },
+        "before" => function ($request, $arguments) use ($container) {
+            $container["token"]->populate($arguments["decoded"]);
         }
-    ])
-);
+    ]);
+};
 
-$app->add( function ($request, $response, $next) use ( $app ) {
+$container["CorsMiddleware"] = function ($container) {
+    return new CorsMiddleware([
+        "logger" => $container["logger"],
+        "origin" => [ $container->get('settings')['www']['url'] ],
+        "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        "headers.allow" => ["Authorization", "If-Match", "If-Unmodified-Since","content-type"],
+        "headers.expose" => ["Authorization", "Etag"],
+        "credentials" => true,
+        "cache" => 300,
+        "error" => function ($request, $response, $arguments) {
+            return new Unauthorized($arguments["message"], 401);
+        }
+    ]);
+};
+$container["NegotiationMiddleware"] = function ($container) {
+    return new NegotiationMiddleware([
+        "accept" => ["application/json"]
+    ]);
+};
 
-	$response = $next($request, $response);
+$container["MyAuthentication"] = function ($container) {
+    return new Authentication(
+        $container->get('token'),
+        new FCToernooi\User\Repository($container->get('em'),$container->get('em')->getClassMetaData(FCToernooi\User::class)),
+        new FCToernooi\Tournament\Repository($container->get('em'),$container->get('em')->getClassMetaData(FCToernooi\Tournament::class)),
+        $container->get('toernooi'),
+        $container->get('voetbal')
+    );
+};
 
-	return $response
-		->withHeader('Access-Control-Allow-Origin', $app->getContainer()->get('settings')['www']['url'] )
-		->withHeader('Access-Control-Allow-Credentials', 'true')
-		->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Origin, Content-Type, Accept, Authorization')
-		->withHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-});
+$app->add("MyAuthentication"); // needs executed after jwtauth for userid
+$app->add("JwtAuthentication");
+$app->add("CorsMiddleware");
+$app->add("NegotiationMiddleware");
+
+$container["cache"] = function ($container) {
+    return new CacheUtil;
+};
+

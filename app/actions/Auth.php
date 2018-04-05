@@ -15,6 +15,7 @@ use \Firebase\JWT\JWT;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Auth\Service as AuthService;
 use \Slim\Middleware\JwtAuthentication;
+use Tuupola\Base62;
 
 final class Auth
 {
@@ -84,6 +85,9 @@ final class Auth
 
 	public function login($request, $response, $args)
 	{
+//	    var_dump($request->getParams());
+//	    var_dump($args);
+//	    die();
         $emailaddress = $request->getParam('emailaddress');
 		$password = $request->getParam('password');
 
@@ -183,12 +187,15 @@ final class Auth
 
 	protected function getToken( User $user)
     {
+        $jti = (new Base62)->encode(random_bytes(16));
+
         $now = new \DateTime();
         $future = new \DateTime("now +2 months");
 
         $payload = [
             "iat" => $now->getTimeStamp(),
             "exp" => $future->getTimeStamp(),
+            "jti" => $jti,
             "sub" => $user->getId(),
         ];
 

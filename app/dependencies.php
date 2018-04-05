@@ -72,9 +72,20 @@ $container['serializer'] = function( $c ) {
 
 // voetbalService
 $container['voetbal'] = function( $c ) {
-    $voetbalService = new Voetbal\Service($c->get('em'));
+    return new Voetbal\Service($c->get('em'));
+};
 
-    return $voetbalService;
+// toernooiService
+$container['toernooi'] = function( $c ) {
+    $em = $c->get('em');
+    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+    $tournamentRoleRepos = new FCToernooi\Tournament\Role\Repository($em,$em->getClassMetaData(FCToernooi\Tournament\Role::class));
+    return new FCToernooi\Tournament\Service(
+        $c->get('voetbal'),
+        $tournamentRepos,
+        $tournamentRoleRepos,
+        $em->getConnection()
+    );
 };
 
 // JWT
@@ -95,20 +106,13 @@ $container['App\Action\User'] = function ($c) {
 };
 $container['App\Action\Tournament'] = function ($c) {
     $em = $c->get('em');
-    $voetbalService = $c->get('voetbal');
     $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-    $tournamentRoleRepos = new FCToernooi\Tournament\Role\Repository($em,$em->getClassMetaData(FCToernooi\Tournament\Role::class));
-    $tournamentService = new FCToernooi\Tournament\Service(
-        $voetbalService,
-        $tournamentRepos,
-        $tournamentRoleRepos,
-        $em
-    );
     $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
     return new App\Action\Tournament(
-        $tournamentService,
+        $c->get('toernooi'),
         $tournamentRepos,
         $userRepository,
-        $voetbalService->getService(Voetbal\Structure::class),
-        $c->get('serializer'),$c->get('jwt'));
+        $c->get('voetbal')->getService(Voetbal\Structure::class),
+        $c->get('serializer'),
+        $c->get('token'));
 };
