@@ -62,16 +62,20 @@ class ScheduledGames extends ToernooiPdfPage
         $this->drawCell( $name, $nX, $nY, $this->getWidth() - ($this->getPageMargin() + $nX), $nRowHeight, ToernooiPdfPage::ALIGNLEFT, $arrLineColors );
         $nY -= 2 * $nRowHeight;
 
-        $structService = $this->getParent()->getStructureService();
-        $roundsByNumber = $structService->getRoundsByNumber( $game->getRound() );
-        $roundsName = $structService->getRoundsName( $game->getRound()->getNumber(), $roundsByNumber );
+        $roundNumber = $game->getRound()->getNumber();
+        $planningService = $this->getParent()->getPlanningService();
+        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $roundsByNumber = $this->getParent()->getRoundsByRumber( $roundNumber );
+        $roundsName = $nameService->getRoundsName( $roundNumber, $roundsByNumber );
         $nX = $nFirstBorder + $nMargin;
         $nWidth = $this->getWidth() - ($this->getPageMargin() + $nX);
         $this->drawCell( $roundsName, $nX, $nY, $nWidth, $nRowHeight );
+        $nYImgStart = $nY;
 
         $nY -= $nRowHeight;
 
-        if( $structService->canCalculateStartDateTime($game->getRound()) === true ) {
+        $competition = $game->getRound()->getCompetition();
+        if( $planningService->canCalculateStartDateTime($competition, $roundNumber) === true ) {
             $dateTime = $game->getStartDateTime()->format("d M H:i");
             $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
             if( $game->getRound()->getConfig()->getHasExtension() === true ) {
@@ -81,9 +85,13 @@ class ScheduledGames extends ToernooiPdfPage
             $nY -= $nRowHeight;
         }
 
-        $sGame = $structService->getPouleName($game->getPoule(), true) . ' -> speelronde ' . $game->getRoundNumber();
+        $sGame = $nameService->getPouleName($game->getPoule(), true) . ' -> speelronde ' . $game->getRoundNumber();
         $this->drawCell( $sGame, $nX, $nY, $nWidth, $nRowHeight );
         $nY -= 2 * $nRowHeight; // extra lege regel
+
+        $img = \Zend_Pdf_Resource_ImageFactory::factory( __DIR__ . '/../logo.jpg');
+        $imgHeight = $nYImgStart - $nY;
+        $this->drawImage( $img, $nFirstBorder - $imgHeight, $nY, $nFirstBorder, $nY + $imgHeight );
 
         $nY -= $nRowHeight * 2;
 

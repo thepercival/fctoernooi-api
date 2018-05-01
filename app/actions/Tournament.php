@@ -8,7 +8,6 @@
 
 namespace App\Action;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
@@ -16,6 +15,7 @@ use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Role as TournamentRole;
 use Voetbal\Structure\Service as StructureService;
+use Voetbal\Planning\Service as PlanningService;
 use FCToernooi\Token;
 
 final class Tournament
@@ -41,6 +41,11 @@ final class Tournament
     private $structureService;
 
     /**
+     * @var PlanningService
+     */
+    private $planningService;
+
+    /**
      * @var Serializer
      */
     protected $serializer;
@@ -54,6 +59,7 @@ final class Tournament
         TournamentRepository $repos,
         UserRepository $userRepository,
         StructureService $structureService,
+        PlanningService $planningService,
         Serializer $serializer,
         Token $token
     )
@@ -62,6 +68,7 @@ final class Tournament
         $this->repos = $repos;
         $this->userRepository = $userRepository;
         $this->structureService = $structureService;
+        $this->planningService = $planningService;
         $this->serializer = $serializer;
         $this->token = $token;
     }
@@ -226,7 +233,7 @@ final class Tournament
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             // verplaatsen naar ?
-            $pdf = new \FCToernooi\Pdf\Document\ScheduledGames( $tournament, $this->structureService );
+            $pdf = new \FCToernooi\Pdf\Document\ScheduledGames( $tournament, $this->structureService, $this->planningService );
             $vtData = $pdf->render();
 
             return $response

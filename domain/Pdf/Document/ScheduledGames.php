@@ -10,6 +10,7 @@ namespace FCToernooi\Pdf\Document;
 
 use \FCToernooi\Tournament;
 use Voetbal\Structure\Service as StructureService;
+use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 
 class ScheduledGames extends \Zend_Pdf
@@ -18,6 +19,18 @@ class ScheduledGames extends \Zend_Pdf
      * @var Tournament
      */
     protected $tournament;
+    /**
+     * @var StructureService
+     */
+    protected $structureService;
+    /**
+     * @var PlanningService
+     */
+    protected $planningService;
+    /**
+     * @var array
+     */
+    protected $allRoundByNumber;
 //    protected $m_nPageHeight;					// int
 //    protected $m_nPageWidth;					// int
 //    protected $m_nPoolUserHeight;				// int
@@ -37,11 +50,17 @@ class ScheduledGames extends \Zend_Pdf
      * @throws Nothing
      * @return An instance of the class
      */
-    public function __construct( Tournament $tournament, StructureService $structureService )
+    public function __construct(
+        Tournament $tournament,
+        StructureService $structureService,
+        PlanningService $planningService
+    )
     {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structureService = $structureService;
+        $this->planningService = $planningService;
+        $this->allRoundByNumber = $this->structureService->getAllRoundsByNumber( $tournament->getCompetition() );
 
 //        $this->m_nPoolUserRowHeight = 20;
 //        $this->m_nPoolUserWidth = 600;
@@ -54,10 +73,27 @@ class ScheduledGames extends \Zend_Pdf
 //        $this->m_oNow = Agenda_Factory::createDateTime();
     }
 
+    /**
+     * @return StructureService
+     */
     public function getStructureService()
     {
         return $this->structureService;
     }
+
+    /**
+     * @return PlanningService
+     */
+    public function getPlanningService()
+    {
+        return $this->planningService;
+    }
+
+    public function getRoundsByRumber( int $roundNr )
+    {
+        return $this->allRoundByNumber[$roundNr];
+    }
+
 //    public function getFontHeightPoolUsers()
 //    {
 //        return 14;
