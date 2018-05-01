@@ -10,7 +10,7 @@ namespace FCToernooi\Tests\Auth;
 
 use \FCToernooi\User as User;
 
-class UserTest extends \PHPUnit_Framework_TestCase
+class UserTest extends \PHPUnit\Framework\TestCase
 {
 	public function testCreateNameMin()
 	{

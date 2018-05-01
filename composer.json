@@ -51,7 +51,7 @@
 	"scripts": {
 		"start": "php -S localhost:2999 -t public public/index.php",
 		"test": [
-			"phpunit -c tests/config.xml"
+			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/"
 		]
 	}
 }
