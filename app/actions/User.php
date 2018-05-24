@@ -58,6 +58,6 @@ final class User
 				->write($this->serializer->serialize( $user, 'json'));
 			;
 		}
-		return $response->withStatus(404, 'geen gebruiker met het opgegeven id gevonden');
+		return $response->withStatus(404)->write('geen gebruiker met het opgegeven id gevonden');
 	}
 }

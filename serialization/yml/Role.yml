@@ -1,4 +1,4 @@
-FCToernooi\Tournament\Role:
+FCToernooi\Role:
   exclusion_policy: ALL
   exclude: false
   access_type: public_method
@@ -10,5 +10,5 @@ FCToernooi\Tournament\Role:
       type: Voetbal\Competition
     user:
       type: FCToernooi\User
-    role:
+    value:
       type: integer

@@ -26,8 +26,16 @@ $app->group('/tournaments', function () use ($app) {
     $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
 });
 
-$app->group('/tournamentroles', function () use ($app) {
-    $app->get('', 'App\Action\Tournament\Role\User:fetch');
-    $app->get('/{id}', 'App\Action\Tournament\Role:fetchOne');
+$app->group('/roles', function () use ($app) {
+    $app->get('', 'App\Action\Role\User:fetch');
+    $app->get('/{id}', 'App\Action\Role:fetchOne');
+});
+
+$app->group('/sponsors', function () use ($app) {
+    $app->post('', 'App\Action\Sponsor:add');
+    $app->get('', 'App\Action\Sponsor:fetch');
+    $app->get('/{id}', 'App\Action\Sponsor:fetchOne');
+    $app->put('/{id}', 'App\Action\Sponsor:edit');
+    $app->delete('/{id}', 'App\Action\Sponsor:remove');
 });
 

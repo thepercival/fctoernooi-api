@@ -2,15 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: coen
- * Date: 1-10-17
- * Time: 12:10
+ * Date: 22-5-18
+ * Time: 12:14
  */
 
-namespace FCToernooi\Tournament\Role;
+namespace FCToernooi\Sponsor;
 
 /**
  * Class Repository
- * @package Voetbal\Competition
+ * @package FCToernooi\Sponsor
  */
 class Repository extends \Voetbal\Repository
 {

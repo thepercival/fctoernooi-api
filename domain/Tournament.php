@@ -28,6 +28,11 @@ class Tournament
      */
     private $roles;
 
+    /**
+     * @var ArrayCollection
+     */
+    private $sponsors;
+
     const MINNROFCOMPETITORS = 2;
     const MAXNROFCOMPETITORS = 32;
 
@@ -35,6 +40,7 @@ class Tournament
     {
         $this->competition = $competition;
         $this->roles = new ArrayCollection();
+        $this->sponsors = new ArrayCollection();
     }
 
     /**
@@ -87,9 +93,25 @@ class Tournament
         $this->roles = $roles;
     }
 
-    public function hasRole( User $user, $role ) {
-        return ( count(array_filter( $this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $role ) {
-            return ( $roleIt->getUser() === $user && $roleIt->getRole() === $role );
+    public function hasRole( User $user, $roleValue ) {
+        return ( count(array_filter( $this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $roleValue ) {
+            return ( $roleIt->getUser() === $user && $roleIt->getValue() === $roleValue );
         }, ARRAY_FILTER_USE_BOTH)) === 1);
+    }
+
+    /**
+     * @return Sponsor[] | ArrayCollection
+     */
+    public function getSponsors()
+    {
+        return $this->sponsors;
+    }
+
+    /**
+     * @param ArrayCollection $sponsors
+     */
+    public function setSponsors( ArrayCollection $sponsors)
+    {
+        $this->sponsors = $sponsors;
     }
 }

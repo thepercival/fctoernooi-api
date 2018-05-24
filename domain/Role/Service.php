@@ -6,28 +6,27 @@
  * Time: 12:14
  */
 
-namespace FCToernooi\Tournament\Role;
+namespace FCToernooi\Role;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use FCToernooi\Tournament\Role\Repository as TournamentRoleRepository;
+use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Role;
-use FCToernooi\User as User;
-
+use FCToernooi\Role;
+use FCToernooi\User;
 
 class Service
 {
     /**
-     * @var TournamentRoleRepository
+     * @var RoleRepository
      */
     protected $repos;
 
     /**
      * Service constructor.
      *
-     * @param TournamentRoleRepository $repos
+     * @param RoleRepository $repos
      */
-    public function __construct( TournamentRoleRepository $repos )
+    public function __construct( RoleRepository $repos )
     {
         $this->repos = $repos;
     }
@@ -39,7 +38,7 @@ class Service
      * @return ArrayCollection
      * @throws \Exception
      */
-    public function set( Tournament $tournament, User $user, $roles )
+    public function set( Tournament $tournament, User $user, $roleValues )
     {
         // get roles
         $rolesRet = new ArrayCollection();
@@ -50,14 +49,14 @@ class Service
             $this->flushRoles( $tournament, $user );
 
             // save roles
-            for($role = 1 ; $role < Role::ALL ; $role *= 2 ){
-                if ( ( $role & $roles ) !== $role ){
+            for($roleValue = 1 ; $roleValue < Role::ALL ; $roleValue *= 2 ){
+                if ( ( $roleValue & $roleValues ) !== $roleValue ){
                     continue;
                 }
-                $tournamentRole = new Role( $tournament, $user );
-                $tournamentRole->setRole( $role );
-                $this->repos->save($tournamentRole);
-                $rolesRet->add($tournamentRole);
+                $role = new Role( $tournament, $user );
+                $role->setValue( $roleValue );
+                $this->repos->save($role);
+                $rolesRet->add($role);
             }
 
         }

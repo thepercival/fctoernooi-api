@@ -219,7 +219,7 @@ final class Auth
 			catch( \Exception $e ){
 				$sErrorMessage = $e->getMessage();
 			}
-			return $response->withStatus(404, rawurlencode( $sErrorMessage ) );
+			return $response->withStatus(404)->write(rawurlencode( $sErrorMessage ) );
 		}
 
 		public function remove( $request, $response, $args)
@@ -232,7 +232,7 @@ final class Auth
 			catch( \Exception $e ){
 				$sErrorMessage = $e->getMessage();
 			}
-			return $response->withStatus(404, 'de gebruiker is niet verwijdered : ' . $sErrorMessage );
+			return $response->withStatus(404)->write('de gebruiker is niet verwijdered : ' . $sErrorMessage );
 		}
 
 		protected function sentEmailActivation( $user )

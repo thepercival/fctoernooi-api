@@ -7,10 +7,7 @@
  */
 
 
-namespace FCToernooi\Tournament;
-
-use FCToernooi\Tournament;
-use FCToernooi\User;
+namespace FCToernooi;
 
 // use \Doctrine\Common\Collections\ArrayCollection;
 
@@ -34,7 +31,7 @@ class Role
     /**
      * @var int
      */
-    private $role;
+    private $value;
 
     const ADMIN = 1;
     const STRUCTUREADMIN = 2;
@@ -94,19 +91,19 @@ class Role
     /**
      * @return int
      */
-    public function getRole()
+    public function getValue()
     {
-        return $this->role;
+        return $this->value;
     }
 
     /**
-     * @param int $role
+     * @param int $value
      */
-    public function setRole( $role )
+    public function setValue( int $value )
     {
-        if ( !is_int( $role ) or ( ( $role & static::ALL ) !== $role ) ){
+        if ( ( $value & static::ALL ) !== $value ){
             throw new \InvalidArgumentException( "de rol heeft een onjuiste waarde", E_ERROR );
         }
-        $this->role = $role;
+        $this->value = $value;
     }
 }

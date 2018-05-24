@@ -1,6 +1,6 @@
-FCToernooi\Tournament\Role:
+FCToernooi\Role:
     type: entity
-    repositoryClass: FCToernooi\Tournament\Role\Repository
+    repositoryClass: FCToernooi\Role\Repository
     table: tournamentroles
     id:
         id:
@@ -11,10 +11,11 @@ FCToernooi\Tournament\Role:
             generator:
                 strategy: AUTO
     fields:
-        role:
+        value:
             type: integer
             nullable: false
             unique: false
+            column: role
     manyToOne:
         tournament:
             targetEntity: FCToernooi\Tournament
@@ -26,7 +27,7 @@ FCToernooi\Tournament\Role:
               onDelete: CASCADE
         user:
             targetEntity: FCToernooi\User
-#            inversedBy: tournamentroles
+#            inversedBy: roles
             joinColumn:
               name: userid
               referencedColumnName: id

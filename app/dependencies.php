@@ -79,11 +79,11 @@ $container['voetbal'] = function( $c ) {
 $container['toernooi'] = function( $c ) {
     $em = $c->get('em');
     $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-    $tournamentRoleRepos = new FCToernooi\Tournament\Role\Repository($em,$em->getClassMetaData(FCToernooi\Tournament\Role::class));
+    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
     return new FCToernooi\Tournament\Service(
         $c->get('voetbal'),
         $tournamentRepos,
-        $tournamentRoleRepos,
+        $roleRepos,
         $em->getConnection()
     );
 };
@@ -114,6 +114,21 @@ $container['App\Action\Tournament'] = function ($c) {
         $userRepository,
         $c->get('voetbal')->getService(Voetbal\Structure::class),
         $c->get('voetbal')->getService(Voetbal\Planning::class),
+        $c->get('serializer'),
+        $c->get('token'));
+};
+
+$container['App\Action\Sponsor'] = function ($c) {
+    $em = $c->get('em');
+    $repos = new FCToernooi\Sponsor\Repository($em,$em->getClassMetaData(FCToernooi\Sponsor::class));
+    $service = new FCToernooi\Sponsor\Service( $repos, $em->getConnection() );
+    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+    $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
+    return new App\Action\Sponsor(
+        $service,
+        $repos,
+        $tournamentRepos,
+        $userRepository,
         $c->get('serializer'),
         $c->get('token'));
 };

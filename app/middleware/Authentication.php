@@ -17,7 +17,7 @@ use FCToernooi\Token;
 use FCToernooi\User;
 use App\Response\Forbidden as ForbiddenResponse;
 use Voetbal\Service as VoetbalService;
-use FCToernooi\Tournament\Role as TournamentRole;
+use FCToernooi\Role;
 
 class Authentication
 {
@@ -62,7 +62,8 @@ class Authentication
         if ($this->token->isPopulated() !== true) {
             return $next($request, $response);
         }
-        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments") {
+        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
+        || substr($request->getUri()->getPath(), 0, 9) === "/sponsors" ) {
             return $next($request, $response);
         }
 
@@ -122,9 +123,10 @@ class Authentication
         if ($association === null) {
             return false;
         }
-        if ($association->getName() !== $this->tournamentService->getAssociationNameFromUserId($user->getId())) {
+        if( $this->tournamentService->mayUserChangeTeam( $user, $association ) === false ) {
             return false;
         }
+        
         return true;
     }
 
@@ -145,7 +147,7 @@ class Authentication
         if ($tournament === null) {
             return false;
         }
-        if (!$tournament->hasRole($user, TournamentRole::ADMIN)) {
+        if (!$tournament->hasRole($user, Role::ADMIN)) {
             return false;
         }
         return true;

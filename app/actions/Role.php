@@ -6,18 +6,18 @@
  * Time: 12:29
  */
 
-namespace App\Action\Tournament;
+namespace App\Action;
 
 use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
-use FCToernooi\Tournament\Role\Repository as TournamentRoleRepository;
+use FCToernooi\Role\Repository as RoleRepository;
 
 final class Role
 {
     /**
-     * @var TournamentRoleRepository
+     * @var RoleRepository
      */
-    private $tournamentRoleRepository;
+    private $roleRepository;
     /**
      * @var Serializer
      */
@@ -27,9 +27,9 @@ final class Role
      */
     protected $settings;
 
-    public function __construct(TournamentRoleRepository $tournamentRoleRepository, Serializer $serializer, $settings )
+    public function __construct(RoleRepository $roleRepository, Serializer $serializer, $settings )
     {
-        $this->tournamentRoleRepository = $tournamentRoleRepository;
+        $this->roleRepository = $roleRepository;
         // $this->authService = new Auth\Service($userRepository);
         $this->serializer = $serializer;
         $this->settings = $settings;
@@ -37,7 +37,7 @@ final class Role
 
     public function fetch($request, $response, $args)
     {
-        $users = $this->tournamentRoleRepository->findAll();
+        $users = $this->roleRepository->findAll();
         return $response
             ->withHeader('Content-Type', 'application/json;charset=utf-8')
             ->write($this->serializer->serialize( $users, 'json'));
@@ -46,13 +46,13 @@ final class Role
 
     public function fetchOne($request, $response, $args)
     {
-        $tournamentRole = $this->tournamentRoleRepository->find($args['id']);
-        if ($tournamentRole) {
+        $role = $this->roleRepository->find($args['id']);
+        if ($role) {
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournamentRole, 'json'));
+                ->write($this->serializer->serialize( $role, 'json'));
             ;
         }
-        return $response->withStatus(404, 'geen toernooirol met het opgegeven id gevonden');
+        return $response->withStatus(404)->write('geen toernooirol met het opgegeven id gevonden');
     }
 }

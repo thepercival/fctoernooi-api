@@ -13,7 +13,7 @@ use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Tournament\Role as TournamentRole;
+use FCToernooi\Role;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
 use FCToernooi\Token;
@@ -53,6 +53,8 @@ final class Tournament
      * @var Token
      */
     protected $token;
+
+    use AuthTrait;
 
     public function __construct(
         TournamentService $service,
@@ -130,14 +132,7 @@ final class Tournament
             /** @var \FCToernooi\Tournament $tournament */
             $tournament = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
 
-            $user = null;
-            if( $this->token->isPopulated() ){
-                $user = $this->userRepository->find( $this->token->getUserId() );
-            }
-            if ( $user === null ){
-                return $response->withStatus(404, "gebruiker kan niet gevonden worden" );
-            }
-
+            $user = $this->checkAuth( $this->token, $this->userRepository );
             $tournament = $this->service->create( $tournament, $user );
 
             return $response
@@ -161,19 +156,10 @@ final class Tournament
 
             $tournament = $this->repos->find( $tournamentSer->getId() );
             if ( $tournament === null ){
-                return $response->withStatus(404, "het te wijzigen toernooi kon niet gevonden worden" );
+                return $response->withStatus(404)->write("het te wijzigen toernooi kon niet gevonden worden" );
             }
 
-            $user = null;
-            if( $this->token->isPopulated() ){
-                $user = $this->userRepository->find( $this->token->getUserId() );
-            }
-            if ( $user === null ){
-                return $response->withStatus(404, "gebruiker kan niet gevonden worden" );
-            }
-            if( !$tournament->hasRole( $user, TournamentRole::ADMIN ) ) {
-                return $response->withStatus(404, "je hebt geen rechten om het toernooi aan te passen" );
-            }
+            $user = $this->checkAuth( $this->token, $this->userRepository, $tournament );
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
@@ -200,19 +186,10 @@ final class Tournament
             $tournament = $this->repos->find( $args['id'] );
 
             if ( $tournament === null ){
-                return $response->withStatus(404, "het te verwijderen toernooi kon niet gevonden worden" );
+                return $response->withStatus(404)->write("het te verwijderen toernooi kon niet gevonden worden" );
             }
 
-            $user = null;
-            if( $this->token->isPopulated() ){
-                $user = $this->userRepository->find( $this->token->getUserId() );
-            }
-            if ( $user === null ){
-                return $response->withStatus(404, "de ingelogde gebruikers kon niet gevonden worden" );
-            }
-            if( !$tournament->hasRole( $user, TournamentRole::ADMIN ) ) {
-                return $response->withStatus(404, "je hebt geen rechten om het toernooi te verwijderen" );
-            }
+            $user = $this->checkAuth( $this->token, $this->userRepository, $tournament );
 
             $this->service->remove( $tournament );
 

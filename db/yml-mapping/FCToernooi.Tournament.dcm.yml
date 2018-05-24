@@ -12,7 +12,11 @@ FCToernooi\Tournament:
                 strategy: AUTO
     oneToMany:
         roles:
-          targetEntity: FCToernooi\Tournament\Role
+          targetEntity: FCToernooi\Role
+          mappedBy: tournament
+          cascade: [ persist, remove ]
+        sponsors:
+          targetEntity: FCToernooi\Sponsor
           mappedBy: tournament
           cascade: [ persist, remove ]
     manyToOne:

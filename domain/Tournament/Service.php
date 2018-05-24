@@ -9,7 +9,7 @@
 namespace FCToernooi\Tournament;
 
 use Doctrine\DBAL\Connection;
-use FCToernooi\User as User;
+use FCToernooi\User;
 use Voetbal\Association;
 use Voetbal\Field;
 use Voetbal\Referee;
@@ -18,8 +18,9 @@ use Voetbal\Season;
 use Voetbal\Competition;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Tournament\Role\Repository as TournamentRoleRepository;
-use FCToernooi\Tournament\Role\Service as TournamentRoleService;
+use FCToernooi\Role\Repository as RoleRepository;
+use FCToernooi\Role\Service as RoleService;
+use FCToernooi\Role;
 use League\Period\Period;
 
 class Service
@@ -34,9 +35,9 @@ class Service
      */
     protected $repos;
     /**
-     * @var TournamentRoleRepository
+     * @var RoleRepository
      */
-    protected $tournamentRoleRepos;
+    protected $roleRepos;
 
     /**
      * @var Connection
@@ -48,19 +49,19 @@ class Service
      * Service constructor.
      * @param \Voetbal\Service $voetbalService
      * @param Repository $tournamentRepos
-     * @param TournamentRoleRepository $tournamentRoleRepos
+     * @param RoleRepository $roleRepos
      * @param \FCToernooi\Tournament\Connection $conn
      */
     public function __construct(
         \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
-        TournamentRoleRepository $tournamentRoleRepos,
+        RoleRepository $roleRepos,
         Connection $conn
     )
     {
         $this->voetbalService = $voetbalService;
         $this->repos = $tournamentRepos;
-        $this->tournamentRoleRepos = $tournamentRoleRepos;
+        $this->roleRepos = $roleRepos;
         $this->conn = $conn;
     }
 
@@ -120,8 +121,8 @@ class Service
             $tournamentSer->setCompetition($competition);
             $tournament = $this->repos->save($tournamentSer);
 
-            $tournamentRoleService = new TournamentRoleService( $this->tournamentRoleRepos );
-            $tournamentRoles = $tournamentRoleService->set( $tournament, $user, Role::ALL );
+            $roleService = new RoleService( $this->roleRepos );
+            $roles = $roleService->set( $tournament, $user, Role::ALL );
 
             $this->conn->commit();
         } catch (\Exception $e) {
@@ -166,5 +167,17 @@ class Service
             $userId = "0" . $userId;
         }
         return $userId;
+    }
+
+    public function mayUserChangeTeam( User $user, Association  $association )
+    {
+        $roleValues = Role::ADMIN + Role::STRUCTUREADMIN;
+        $tournaments = $this->repos->findByPermissions($user, $roleValues);
+        foreach ($tournaments as $tournament) {
+            if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {
+                return true;
+            }
+        }
+        return false;
     }
 }

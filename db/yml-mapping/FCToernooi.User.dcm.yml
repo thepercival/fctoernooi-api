@@ -32,6 +32,6 @@ FCToernooi\User:
 
 
 #  oneToMany:
-#    tournamentroles:
-#      targetEntity: FCToernooi\Tournament\Role
+#    roles:
+#      targetEntity: FCToernooi\Role
 #      mappedBy: user

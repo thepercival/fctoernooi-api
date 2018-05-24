@@ -210,11 +210,11 @@ class User
     }
 
     /**
-     * @return TournamentRole[] | ArrayCollection
+     * @return Role[] | ArrayCollection
      */
-//    public function getTournamentRoles()
+//    public function getRoles()
 //    {
-//        return $this->tournamentRoles;
+//        return $this->roles;
 //    }
 
     /**
@@ -223,8 +223,8 @@ class User
 //    public function getTournaments()
 //    {
 //        $tournaments = new ArrayCollection();
-//        foreach($this->tournamentRoles as $tournamentRoles) {
-//            $tournaments->add($tournamentRoles->getTournament());
+//        foreach($this->roles as $roles) {
+//            $tournaments->add($roles->getTournament());
 //        }
 //
 //        return $tournaments;

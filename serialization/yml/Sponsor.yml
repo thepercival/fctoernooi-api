@@ -1,0 +1,14 @@
+FCToernooi\Sponsor:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      type: integer
+    tournament:
+      type: FCToernooi\Tournament
+    name:
+      type: string
+    url:
+      type: string
