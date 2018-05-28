@@ -113,7 +113,7 @@ class Sponsor
                     E_ERROR);
             }
             if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                throw new \InvalidArgumentException("de url " . $url . " is niet valide", E_ERROR);
+                throw new \InvalidArgumentException("de url " . $url . " is niet valide (begin met https://)", E_ERROR);
             }
         }
         $this->url = $url;
