@@ -76,7 +76,8 @@ class ScheduledGames extends ToernooiPdfPage
 
         $competition = $game->getRound()->getCompetition();
         if( $planningService->canCalculateStartDateTime($competition, $roundNumber) === true ) {
-            $dateTime = $game->getStartDateTime()->format("d M H:i");
+            $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
+            $dateTime = $localDateTime->format("d M H:i");
             $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
             if( $game->getRound()->getConfig()->getHasExtension() === true ) {
                 $duration .= ' (' . $game->getRound()->getConfig()->getMinutesPerGameExt() . ' min.)';
