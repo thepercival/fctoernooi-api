@@ -19,7 +19,6 @@ $container["JwtAuthentication"] = function ($container) {
         "secret" => $container->get('settings')['auth']['jwtsecret'],
         "logger" => $container["logger"],
         "attribute" => false,
-        "relaxed" => ["127.0.0.1", "localhost"],
         "rules" => [
             new Tuupola\Middleware\JwtAuthentication\RequestPathRule([
                 "path" => "/",
