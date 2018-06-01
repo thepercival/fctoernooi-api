@@ -44,7 +44,7 @@ $container["JwtAuthentication"] = function ($container) {
 $container["CorsMiddleware"] = function ($container) {
     return new CorsMiddleware([
         "logger" => $container["logger"],
-        "origin" => [ $container->get('settings')['www']['url'] ],
+        "origin" => $container->get('settings')['www']['urls'],
         "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
         "headers.allow" => ["Authorization", "If-Match", "If-Unmodified-Since","content-type"],
         "headers.expose" => ["Authorization", "Etag"],
