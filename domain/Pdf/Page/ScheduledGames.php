@@ -138,7 +138,7 @@ class ScheduledGames extends ToernooiPdfPage
         // 2x font thuis - uit
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
-        $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( $game->getHomePoulePlace()->getTeam()->getName(), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
         $this->drawCell( $game->getAwayPoulePlace()->getTeam()->getName(), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
@@ -147,7 +147,7 @@ class ScheduledGames extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
-        $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
         $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
