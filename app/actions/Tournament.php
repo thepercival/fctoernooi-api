@@ -16,7 +16,11 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
+use FCToernooi\Tournament as TournamentBase;
+use FCToernooi\User;
 use FCToernooi\Token;
+use FCToernooi\Tournament\Shell;
+use JMS\Serializer\SerializationContext;
 
 final class Tournament
 {
@@ -76,6 +80,32 @@ final class Tournament
     }
 
     /**
+     * @param $request
+     * @param $response
+     * @param $args
+     * @return mixed
+     */
+    public function fetch($request, $response, $args)
+    {
+        $user = null;
+        if ( $this->token->isPopulated() ) {
+            $user = $this->userRepository->find($this->token->getUserId());
+        }
+        return $this->fetchHelper($request, $response, $args, $user);
+    }
+
+    /**
+     * @param $request
+     * @param $response
+     * @param $args
+     * @return mixed
+     */
+    public function fetchPublic($request, $response, $args)
+    {
+        return $this->fetchHelper($request, $response, $args);
+    }
+
+    /**
      * startdatetime, enddatetime, id, userid
      *
      * @param $request
@@ -83,7 +113,7 @@ final class Tournament
      * @param $args
      * @return mixed
      */
-    public function fetch($request, $response, $args)
+    public function fetchHelper($request, $response, $args, User $user = null)
     {
         $sErrorMessage = null;
         try {
@@ -92,12 +122,14 @@ final class Tournament
             $endDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('endDateTime') );
             if ( $endDateTime === false ){ $endDateTime = null; }
 
-            $tournaments = $this->repos->findByPeriod(
-                $startDateTime, $endDateTime
-            );
+            $tournaments = $this->repos->findByPeriod($startDateTime, $endDateTime);
+            $shells = [];
+            foreach( $tournaments as $tournament ) {
+                $shells[] = new Shell($tournament, $user);
+            }
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournaments, 'json'));
+                ->write($this->serializer->serialize( $shells, 'json'));
             ;
         }
         catch( \Exception $e ){
@@ -106,17 +138,28 @@ final class Tournament
         return $response->withStatus(422)->write( $sErrorMessage);
     }
 
+    public function fetchOnePublic($request, $response, $args)
+    {
+        return $this->fetchOneHelper($request, $response, $args);
+    }
+
     public function fetchOne($request, $response, $args)
+    {
+        return $this->fetchOneHelper($request, $response, $args);
+    }
+
+    protected function fetchOneHelper($request, $response, $args)
     {
         $sErrorMessage = null;
         try {
+            /** @var \FCToernooi\Tournament $tournament */
             $tournament = $this->repos->find($args['id']);
             if (!$tournament) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json'));
+                ->write($this->serializer->serialize( $tournament, 'json', $this->getSerializationContext($tournament)));
             ;
         }
         catch( \Exception $e ){
@@ -124,6 +167,78 @@ final class Tournament
         }
         return $response->withStatus(422)->write( $sErrorMessage);
     }
+
+    protected function getSerializationContext( TournamentBase $tournament, User $user = null ) {
+        $serGroups = ['Default'];
+
+        if ( $user === null && $this->token->isPopulated() ) {
+            $user = $this->userRepository->find($this->token->getUserId());
+        }
+        if ($user !== null && $tournament->hasRole($user, Role::ADMIN)) {
+            $serGroups[] = 'privacy';
+        }
+        if ($user !== null && $tournament->hasRole($user, Role::ALL)) {
+            $serGroups[] = 'roles';
+        }
+        return SerializationContext::create()->setGroups($serGroups);
+    }
+
+    public function getUserRefereeId($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try {
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $this->repos->find($args['id']);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+            $user = $this->checkAuth( $this->token, $this->userRepository );
+
+            $refereeId = 0;
+            if (strlen( $user->getEmailaddress() ) > 0 ) {
+                $referee = $this->service->getReferee( $tournament, $user->getEmailaddress() );
+                if( $referee !== null ) {
+                    $refereeId = $referee->getId();
+                }
+            }
+
+            return $response
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $refereeId, 'json'));
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(422)->write( $sErrorMessage);
+
+    }
+
+    public function syncRefereeRoles($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try {
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $this->repos->find($args['id']);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+            $this->checkAuth( $this->token, $this->userRepository );
+
+            $roles = $this->service->syncRefereeRoles( $tournament );
+
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $roles, 'json' ));
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(422 )->write( $sErrorMessage );
+    }
+
 
     public function add( $request, $response, $args)
     {
@@ -134,11 +249,11 @@ final class Tournament
 
             $user = $this->checkAuth( $this->token, $this->userRepository );
             $tournament = $this->service->create( $tournament, $user );
-
+            $serializationContext = $this->getSerializationContext($tournament, $user);
             return $response
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json'));
+                ->write($this->serializer->serialize( $tournament, 'json', $serializationContext));
             ;
         }
         catch( \Exception $e ){
@@ -165,11 +280,12 @@ final class Tournament
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
 
             $tournament = $this->service->changeBasics( $tournament, $dateTime, $name );
+            $serializationContext = $this->getSerializationContext($tournament, $user);
 
             return $response
                 ->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json'));
+                ->write($this->serializer->serialize( $tournament, 'json', $serializationContext ));
             ;
         }
         catch( \Exception $e ){

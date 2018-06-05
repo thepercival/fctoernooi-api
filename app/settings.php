@@ -20,7 +20,7 @@ return [
             'yml_dir' => [
                 "Voetbal" =>__DIR__.'/../vendor/thepercival/voetbal/serialization/yml',
                 "FCToernooi" => __DIR__.'/../serialization/yml'
-            ]
+            ],
         ],
         // Monolog settings
         'logger' => [
@@ -52,7 +52,7 @@ return [
                 )
             ],
             'serializer' => array(
-	            'enabled' => true,
+	            'enabled' => true
             ),
         ],
         'auth' => [

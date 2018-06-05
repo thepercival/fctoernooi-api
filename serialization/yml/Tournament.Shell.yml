@@ -1,0 +1,24 @@
+FCToernooi\Tournament\Shell:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    tournamentId:
+      type: integer
+      read_only: true
+      serialized_name: tournamentId
+    name: # league
+      type: string
+      read_only: true
+    sport: # league
+      type: string
+      read_only: true
+    startDateTime: # competition
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+      serialized_name: startDateTime
+      read_only: true
+    hasEditPermissions:
+      type: boolean
+      serialized_name: hasEditPermissions
+      read_only: true

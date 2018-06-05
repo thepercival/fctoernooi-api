@@ -96,8 +96,6 @@ class Authentication
     protected function authorized(User $user, string $resourceType, string $method, array $queryParams, int $id = null)
     {
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
-
-
         if ($resourceType === 'teams') {
             return $this->teamActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'games' || $resourceType === 'pouleplaces') {

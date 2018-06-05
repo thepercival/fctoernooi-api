@@ -10,7 +10,7 @@ FCToernooi\User:
   fields:
     emailaddress:
       type: string
-      length : !php/const:FCToernooi\User::MAX_LENGTH_EMAIL
+      length : !php/const:Voetbal\Referee::MAX_LENGTH_EMAIL
       nullable: false
     salt:
       type: string

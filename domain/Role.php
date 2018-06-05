@@ -37,7 +37,8 @@ class Role
     const STRUCTUREADMIN = 2;
     const PLANNER = 4;
     const GAMERESULTADMIN = 8;
-    const ALL = 15;
+    const REFEREE = 16;
+    const ALL = 31;
 
     public function __construct( Tournament $tournament, User $user )
     {

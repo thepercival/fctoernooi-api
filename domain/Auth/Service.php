@@ -8,8 +8,10 @@
 
 namespace FCToernooi\Auth;
 
+use Doctrine\DBAL\Connection;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
+use FCToernooi\Tournament\Service as TournamentService;
 
 class Service
 {
@@ -17,15 +19,25 @@ class Service
 	 * @var UserRepository
 	 */
 	protected $repos;
+    /**
+     * @var TournamentService
+     */
+    protected $tournamentService;
+    /**
+     * @var Connection
+     */
+    protected $conn;
 
 	/**
 	 * Service constructor.
 	 *
 	 * @param UserRepository $userRepository
 	 */
-	public function __construct( UserRepository $userRepository )
+	public function __construct( UserRepository $userRepository, TournamentService $tournamentService, Connection $conn )
 	{
 		$this->repos = $userRepository;
+		$this->tournamentService = $tournamentService;
+		$this->conn = $conn;
 	}
 
 	/**
@@ -50,23 +62,41 @@ class Service
                 throw new \Exception("de gebruikersnaam is al in gebruik",E_ERROR);
             }
         }
+
         $user = new User($emailaddress);
-		$user->setSalt( bin2hex(random_bytes(15) ) );
-		$user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
-		$savedUser = $this->repos->save($user);
-		$this->sendRegisterEmail( $emailaddress );
+        $user->setSalt( bin2hex(random_bytes(15) ) );
+        $user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
+
+        $this->conn->beginTransaction();
+        $savedUser = null;
+        try {
+            $savedUser = $this->repos->save($user);
+            $roles = $this->tournamentService->syncRefereeRoles( null, $user );
+            $this->sendRegisterEmail( $emailaddress, $roles );
+            $this->conn->commit();
+        } catch (\Exception $e) {
+            $this->conn->rollback();
+            throw $e;
+        }
 		return $savedUser;
 	}
 
-	protected function sendRegisterEmail( $emailAddress )
+	protected function sendRegisterEmail( $emailAddress, array $roles )
     {
         $subject = 'welkom bij FCToernooi';
         $body = '
         <p>Hallo,</p>
         <p>            
         Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi.
-        </p>
-        <p>
+        </p>';
+        if( count( $roles ) > 0 ) {
+            $body .= '<p>Je staat geregistreerd als scheidsrechter voor de volgende toernooien:<ul>';
+            foreach( $roles as $role ) {
+                $body .= '<li><a href="https://www.fctoernooi.nl/toernooi/view/'.$role->getTournament()->getId().'">'.$role->getTournament()->getCompetition()->getLeague()->getName().'</a></li>';
+            }
+            $body .= '</ul></p>';
+        }
+        $body .= '<p>
         Mocht je vragen/opmerkingen/klachten/suggesties/etc hebben ga dan naar <a href="https://github.com/thepercival/fctoernooi/issues">https://github.com/thepercival/fctoernooi/issues</a>
         </p>        
         <p>

@@ -58,7 +58,6 @@ class Service
                 $this->repos->save($role);
                 $rolesRet->add($role);
             }
-
         }
         catch( \Exception $e ){
             throw new \Exception(urlencode($e->getMessage()), E_ERROR );

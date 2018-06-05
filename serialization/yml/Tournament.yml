@@ -10,5 +10,6 @@ FCToernooi\Tournament:
       type: Voetbal\Competition
     roles:
       type: ArrayCollection<FCToernooi\Role>
+      groups: [roles]
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>

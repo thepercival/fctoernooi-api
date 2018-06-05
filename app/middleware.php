@@ -20,15 +20,14 @@ $container["JwtAuthentication"] = function ($container) {
         "logger" => $container["logger"],
         "attribute" => false,
         "rules" => [
-            new Tuupola\Middleware\JwtAuthentication\RequestPathRule([
+            new JwtAuthentication\RequestPathRule([
                 "path" => "/",
-                "ignore" => ["/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange"]
+                "ignore" => [
+                    "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
+                    "/tournamentspublic", "/voetbal/structures"
+                ]
             ]),
             new JwtAuthentication\RequestMethodRule([
-                "path" => "/tournaments",
-                "ignore" => ["GET"]
-            ]),
-            new Tuupola\Middleware\JwtAuthentication\RequestMethodRule([
                 "ignore" => ["OPTIONS"]
             ])
         ],

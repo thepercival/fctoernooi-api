@@ -8,11 +8,22 @@
 
 namespace FCToernooi\User;
 
+use FCToernooi\User;
+use FCToernooi\Tournament;
+
 /**
  * Class Repository
  * @package FCToernooi\User
  */
 class Repository extends \Voetbal\Repository
 {
+    public function findRefereeUsersByTournament( Tournament $tournament )
+    {
 
+    }
+
+    public function findRefereeUsersByUser( User $user )
+    {
+
+    }
 }

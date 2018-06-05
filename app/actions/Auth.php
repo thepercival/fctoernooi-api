@@ -26,7 +26,7 @@ final class Auth
     /**
      * @var AuthService
      */
-	private $authService;
+	private $service;
     /**
      * @var Serializer
      */
@@ -36,10 +36,10 @@ final class Auth
      */
 	protected $settings;
 
-	public function __construct(UserRepository $userRepository, Serializer $serializer, $settings )
+	public function __construct(AuthService $service, UserRepository $userRepository, Serializer $serializer, $settings )
 	{
 		$this->userRepository = $userRepository;
-		$this->authService = new AuthService($userRepository);
+		$this->service = $service;
 		$this->serializer = $serializer;
 		$this->settings = $settings;
 	}
@@ -58,7 +58,7 @@ final class Auth
             $emailAddress = $arrRegisterData["emailaddress"];
             $password = $arrRegisterData["password"];
 
-			$user = $this->authService->register( $emailAddress, $password );
+			$user = $this->service->register( $emailAddress, $password );
 			if ($user === null or !($user instanceof User)) {
 				throw new \Exception( "de nieuwe gebruiker kan niet worden geretourneerd");
             }
@@ -133,7 +133,7 @@ final class Auth
             }
             $emailAddress = $arrRegisterData["emailaddress"];
 
-            $retVal = $this->authService->sendPasswordCode( $emailAddress );
+            $retVal = $this->service->sendPasswordCode( $emailAddress );
 
             $data = [ "retval" => $retVal ];
             return $response
@@ -166,7 +166,7 @@ final class Auth
             $password = $arrRegisterData["password"];
             $code = (string) $arrRegisterData["code"];
 
-            $user = $this->authService->changePassword( $emailAddress, $password, $code );
+            $user = $this->service->changePassword( $emailAddress, $password, $code );
 
             $data = [
                 "token" => $this->getToken( $user),

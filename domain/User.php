@@ -8,6 +8,8 @@
 
 namespace FCToernooi;
 
+use Voetbal\Referee;
+
 class User
 {
 	/**
@@ -40,8 +42,8 @@ class User
      */
     private $forgetpassword;
 
-	const MIN_LENGTH_EMAIL = 6;
-    const MAX_LENGTH_EMAIL = 100;
+	const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
+    const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
     const MIN_LENGTH_PASSWORD = 3;
     const MAX_LENGTH_PASSWORD = 50;
     const MIN_LENGTH_NAME = 3;

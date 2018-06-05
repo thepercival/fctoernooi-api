@@ -12,6 +12,8 @@ use FCToernooi\Tournament;
 use FCToernooi\User;
 use FCToernooi\Role;
 use Doctrine\ORM\Query\Expr;
+use Voetbal\Referee;
+use Voetbal\Competition;
 
 /**
  * Class Repository
@@ -60,6 +62,28 @@ class Repository extends \Voetbal\Repository
 
         $qb = $qb->setParameter('user', $user);
         $qb = $qb->setParameter('rolevalues', $roleValues);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByEmailaddress( $emailladdress )
+    {
+        if( strlen( $emailladdress ) === 0 ) {
+            return [];
+        }
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb = $qb
+            ->select('t')
+            ->from( Tournament::class, 't')
+            ->join( Competition::class, 'c', Expr\Join::WITH, 'c.id = t.competition')
+            ->join( Referee::class, 'ref', Expr\Join::WITH, 'c.id = ref.competition')
+        ;
+
+        $qb = $qb
+            ->distinct()
+            ->where('ref.emailaddress = :emailaddress');
+
+        $qb = $qb->setParameter('emailaddress', $emailladdress);
 
         return $qb->getQuery()->getResult();
     }

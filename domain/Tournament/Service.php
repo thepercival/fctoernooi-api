@@ -19,6 +19,7 @@ use Voetbal\Competition;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role\Repository as RoleRepository;
+use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Role;
 use League\Period\Period;
@@ -38,7 +39,10 @@ class Service
      * @var RoleRepository
      */
     protected $roleRepos;
-
+    /**
+     * @var UserRepository
+     */
+    protected $userRepos;
     /**
      * @var Connection
      */
@@ -50,18 +54,21 @@ class Service
      * @param \Voetbal\Service $voetbalService
      * @param Repository $tournamentRepos
      * @param RoleRepository $roleRepos
-     * @param \FCToernooi\Tournament\Connection $conn
+     * @param UserRepository $userRepos
+     * @param Connection $conn
      */
     public function __construct(
         \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
         RoleRepository $roleRepos,
+        UserRepository $userRepos,
         Connection $conn
     )
     {
         $this->voetbalService = $voetbalService;
         $this->repos = $tournamentRepos;
         $this->roleRepos = $roleRepos;
+        $this->userRepos = $userRepos;
         $this->conn = $conn;
     }
 
@@ -126,7 +133,6 @@ class Service
 
             $this->conn->commit();
         } catch (\Exception $e) {
-            // Rollback the failed transaction attempt
             $this->conn->rollback();
             throw $e;
         }
@@ -179,5 +185,77 @@ class Service
             }
         }
         return false;
+    }
+
+    public function syncRefereeRoles( Tournament $tournament = null, User $user = null ): array
+    {
+        if( $tournament === null && $user === null ) {
+            throw new \Exception("toernooi en gebruiker kunnen niet allebei leeg zijn om scheidsrechter-rollen te synchroniseren", E_ERROR );
+        }
+
+        $this->conn->beginTransaction();
+
+        $rolesRet = [];
+        try {
+            // remove referee roles
+            {
+                $params = ['value' => Role::REFEREE];
+                if( $user !== null ) {
+                    $params['user'] = $user;
+                } else if( $tournament !== null ) {
+                    $params['tournament'] = $tournament;
+                }
+                $refereeRoles = $this->roleRepos->findBy( $params );
+                foreach( $refereeRoles as $refereeRole ) {
+                    $this->roleRepos->remove( $refereeRole );
+                }
+            }
+
+            // add referee roles
+            if( $user !== null ) {
+                $tournaments = $this->repos->findByEmailaddress( $user->getEmailaddress() );
+                foreach( $tournaments as $tournament ) {
+                    $refereeRole = new Role( $tournament, $user);
+                    $refereeRole->setValue(Role::REFEREE);
+                    $this->roleRepos->save( $refereeRole );
+                    $rolesRet[] = $refereeRole;
+                }
+
+            } else if( $tournament !== null ) {
+                $referees = $tournament->getCompetition()->getReferees();
+                foreach( $referees as $referee ) {
+                    if( strlen( $referee->getEmailaddress() ) === 0 ) {
+                        continue;
+                    }
+                    $user = $this->userRepos->findOneBy( ['emailaddress' => $referee->getEmailaddress()] );
+                    if( $user === null ) {
+                        continue;
+                    }
+                    $refereeRole = new Role( $tournament, $user);
+                    $refereeRole->setValue(Role::REFEREE);
+                    $this->roleRepos->save( $refereeRole );
+                }
+                $rolesRet = $tournament->getRoles()->toArray();
+            }
+
+            $this->conn->commit();
+
+        } catch (\Exception $e) {
+            // Rollback the failed transaction attempt
+            $this->conn->rollback();
+            throw $e;
+        }
+        return $rolesRet;
+    }
+
+    public function getReferee( Tournament $tournament, string $emailaddress )
+    {
+        $referees = $tournament->getCompetition()->getReferees();
+        foreach( $referees as $referee ) {
+            if( $referee->getEmailaddress() === $emailaddress ) {
+                return $referee;
+            }
+        }
+        return null;
     }
 }

@@ -2,7 +2,7 @@
 // DIC configuration
 
 use \JMS\Serializer\SerializerBuilder;
-// use \Slim\Middleware\JwtAuthentication;
+use JMS\Serializer\SerializationContext;
 
 $container = $app->getContainer();
 
@@ -48,18 +48,13 @@ $container['serializer'] = function( $c ) {
 
     $serializerBuilder = SerializerBuilder::create()
         ->setDebug($settings['displayErrorDetails'])
-        /*->setCacheDir($settings['serializer']['cache_dir'])*/;
-
-    $serializerBuilder
-//        ->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
-//            $dispatcher->addListener('serializer.pre_serialize',
-//                function(JMS\Serializer\EventDispatcher\PostSerializeEvent $event) {
-//                    // do something
-//
-//                }
-//            );
-//            // $dispatcher->addSubscriber(new MyEventSubscriber());
-//        })
+        ->setSerializationContextFactory(function () {
+            return SerializationContext::create()
+                ->setGroups(array('Default'));
+        });
+        if( $settings["environment"] === "production") {
+            $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
+        }
     ;
 
     foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
@@ -80,10 +75,12 @@ $container['toernooi'] = function( $c ) {
     $em = $c->get('em');
     $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
     $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
+    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
     return new FCToernooi\Tournament\Service(
         $c->get('voetbal'),
         $tournamentRepos,
         $roleRepos,
+        $userRepos,
         $em->getConnection()
     );
 };
@@ -96,8 +93,9 @@ $container["jwt"] = function ( $c ) {
 // actions
 $container['App\Action\Auth'] = function ($c) {
 	$em = $c->get('em');
-    $repos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-	return new App\Action\Auth($repos,$c->get('serializer'),$c->get('settings'));
+    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
+    $service = new FCToernooi\Auth\Service( $userRepos, $c->get('toernooi'), $em->getConnection() );
+	return new App\Action\Auth($service, $userRepos,$c->get('serializer'),$c->get('settings'));
 };
 $container['App\Action\User'] = function ($c) {
 	$em = $c->get('em');

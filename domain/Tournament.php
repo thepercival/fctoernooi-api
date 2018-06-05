@@ -95,8 +95,8 @@ class Tournament
 
     public function hasRole( User $user, $roleValue ) {
         return ( count(array_filter( $this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $roleValue ) {
-            return ( $roleIt->getUser() === $user && $roleIt->getValue() === $roleValue );
-        }, ARRAY_FILTER_USE_BOTH)) === 1);
+            return ( $roleIt->getUser() === $user && (( $roleIt->getValue() & $roleValue ) === $roleIt->getValue() ) );
+        }, ARRAY_FILTER_USE_BOTH)) > 0);
     }
 
     /**
