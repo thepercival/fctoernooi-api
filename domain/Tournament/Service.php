@@ -177,7 +177,7 @@ class Service
 
     public function mayUserChangeTeam( User $user, Association  $association )
     {
-        $roleValues = Role::ADMIN + Role::STRUCTUREADMIN;
+        $roleValues = Role::STRUCTUREADMIN;
         $tournaments = $this->repos->findByPermissions($user, $roleValues);
         foreach ($tournaments as $tournament) {
             if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {

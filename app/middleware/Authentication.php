@@ -97,9 +97,11 @@ class Authentication
     {
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
         if ($resourceType === 'teams') {
-            return $this->teamActionAuthorized($user, $method, $queryParams, $id);
-        } elseif ($resourceType === 'games' || $resourceType === 'pouleplaces') {
-            return $this->putActionAuthorized($user, $method, $queryParams, $id);
+            return $this->teamActionAuthorized($user, $method, $queryParams);
+        } elseif ($resourceType === 'pouleplaces') {
+            return $this->pouleplaceActionAuthorized($user, $method, $queryParams, $id);
+        } elseif ($resourceType === 'games') {
+            return $this->gameActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
             || $resourceType === 'structures' || $resourceType === 'roundconfigs'
         ) {
@@ -128,12 +130,41 @@ class Authentication
         return true;
     }
 
-    protected function putActionAuthorized(User $user, string $method, array $queryParams)
+    protected function pouleplaceActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
     {
         if ($method !== 'PUT') {
             return false;
         }
         return $this->otherActionAuthorized($user, $method, $queryParams);
+    }
+
+    protected function gameActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
+    {
+        if ($method !== 'PUT') {
+            return false;
+        }
+        if (array_key_exists("competitionid", $queryParams) !== true) {
+            return false;
+        }
+        $tournament = $this->tournamentRepos->findOneBy(["competition" => $queryParams["competitionid"]]);
+        if ($tournament === null) {
+            return false;
+        }
+        if ($tournament->hasRole($user, Role::GAMERESULTADMIN)) {
+            return true;
+        }
+        if (!$tournament->hasRole($user, Role::REFEREE)) {
+            return false;
+        }
+        $gameRepos = $this->voetbalService->getRepository(\Voetbal\Game::class);
+        $game = $gameRepos->find($id);
+        if ($game === null || $game->getReferee() === null ) {
+            return false;
+        }
+        if( $game->getReferee()->getEmailaddress() === $user->getEmailaddress() ) {
+            return true;
+        }
+        return false;
     }
 
     protected function otherActionAuthorized(User $user, string $method, array $queryParams)
