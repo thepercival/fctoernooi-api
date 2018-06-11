@@ -20,6 +20,7 @@ use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\Token;
 use FCToernooi\Tournament\Shell;
+use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 
 final class Tournament
@@ -279,7 +280,11 @@ final class Tournament
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
 
-            $tournament = $this->service->changeBasics( $tournament, $dateTime, $name );
+            $break = null;
+            if( $tournamentSer->getBreakStartDateTime() !== null ) {
+                $break = new BreakX( $tournamentSer->getBreakStartDateTime(), $tournamentSer->getBreakDuration() );
+            }
+            $tournament = $this->service->changeBasics( $tournament, $dateTime, $name, $break );
             $serializationContext = $this->getSerializationContext($tournament, $user);
 
             return $response

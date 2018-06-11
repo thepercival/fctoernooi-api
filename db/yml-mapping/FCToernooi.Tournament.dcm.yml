@@ -1,36 +1,46 @@
 FCToernooi\Tournament:
-    type: entity
-    repositoryClass: FCToernooi\Tournament\Repository
-    table: tournaments
+  type: entity
+  repositoryClass: FCToernooi\Tournament\Repository
+  table: tournaments
+  id:
     id:
-        id:
-            type: integer
-            nullable: false
-            id: true
-            column: id
-            generator:
-                strategy: AUTO
-    oneToMany:
-        roles:
-          targetEntity: FCToernooi\Role
-          mappedBy: tournament
-          cascade: [ persist, remove ]
-        sponsors:
-          targetEntity: FCToernooi\Sponsor
-          mappedBy: tournament
-          cascade: [ persist, remove ]
-    manyToOne:
-        competition:
-            targetEntity: Voetbal\Competition
-            joinColumn:
-              name: competitionid
-              referencedColumnName: id
-              nullable: false
-              onDelete: CASCADE
-            cascade: [ persist, remove ]
-    uniqueConstraints:
-        main_u_idx:
-            columns: [ competitionid ]
+      type: integer
+      nullable: false
+      id: true
+      column: id
+      generator:
+        strategy: AUTO
+  fields:
+    breakStartDateTime:
+      type: datetime_immutable
+      unique: false
+      nullable: true
+    breakDuration:
+      type: smallint
+      default:  0
+      nullable: false
+      unique: false
+  oneToMany:
+    roles:
+      targetEntity: FCToernooi\Role
+      mappedBy: tournament
+      cascade: [ persist, remove ]
+    sponsors:
+      targetEntity: FCToernooi\Sponsor
+      mappedBy: tournament
+      cascade: [ persist, remove ]
+  manyToOne:
+    competition:
+      targetEntity: Voetbal\Competition
+      joinColumn:
+        name: competitionid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE
+      cascade: [ persist, remove ]
+  uniqueConstraints:
+    main_u_idx:
+      columns: [ competitionid ]
 
 
 

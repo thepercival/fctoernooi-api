@@ -23,6 +23,7 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Role;
 use League\Period\Period;
+use FCToernooi\Tournament\BreakX;
 
 class Service
 {
@@ -145,7 +146,7 @@ class Service
      * @param $name
      * @return Tournament
      */
-    public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, $name )
+    public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, string $name, BreakX $break = null)
     {
         $competitionService = $this->voetbalService->getService(Competition::class);
         $competition = $tournament->getCompetition();
@@ -154,6 +155,9 @@ class Service
         $leagueService = $this->voetbalService->getService(League::class);
         $league = $tournament->getCompetition()->getLeague();
         $leagueService->changeBasics( $league, $name, null );
+
+        $tournament->setBreak( $break );
+        $this->repos->save( $tournament );
 
         return $tournament;
     }

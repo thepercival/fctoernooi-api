@@ -10,6 +10,7 @@ namespace FCToernooi;
 
 use \Doctrine\Common\Collections\ArrayCollection;
 use Voetbal\Competition;
+use FCToernooi\Tournament\BreakX;
 
 class Tournament
 {
@@ -22,6 +23,16 @@ class Tournament
      * @var Competition
      */
     private $competition;
+
+    /**
+     * @var \DateTimeImmutable
+     */
+    private $breakStartDateTime;
+
+    /**
+     * @var int
+     */
+    private $breakDuration;
 
     /**
      * @var ArrayCollection
@@ -75,6 +86,49 @@ class Tournament
     public function setCompetition( Competition $competition )
     {
         $this->competition = $competition;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getBreakStartDateTime()
+    {
+        return $this->breakStartDateTime;
+    }
+
+    /**
+     * @param \DateTimeImmutable $datetime
+     */
+    public function setBreakStartDateTime( \DateTimeImmutable $datetime = null )
+    {
+        $this->breakStartDateTime = $datetime;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBreakDuration()
+    {
+        return $this->breakDuration;
+    }
+
+    /**
+     * @param int $breakDuration
+     */
+    public function setBreakDuration( int $breakDuration )
+    {
+        $this->breakDuration = $breakDuration;
+    }
+
+    /**
+     * @param BreakX $break
+     */
+    public function setBreak( BreakX $break = null )
+    {
+        $breakStartDateTime = $break !== null ? $break->getStartDateTime() : null;
+        $breakDuration = $break !== null ? $break->getDuration() : 0;
+        $this->setBreakStartDateTime( $breakStartDateTime );
+        $this->setBreakDuration( $breakDuration );
     }
 
     /**
