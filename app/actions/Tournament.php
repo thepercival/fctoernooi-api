@@ -330,7 +330,8 @@ final class Tournament
             if (!$tournament) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
-            // verplaatsen naar ?
+
+            // $user = $this->checkAuth( $this->token, $this->userRepository, $tournament );
             $pdf = new \FCToernooi\Pdf\Document\ScheduledGames( $tournament, $this->structureService, $this->planningService );
             $vtData = $pdf->render();
 

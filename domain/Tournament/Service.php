@@ -127,6 +127,7 @@ class Service
             }
 
             $tournamentSer->setCompetition($competition);
+            $tournamentSer->setBreakDuration( 0 );
             $tournament = $this->repos->save($tournamentSer);
 
             $roleService = new RoleService( $this->roleRepos );

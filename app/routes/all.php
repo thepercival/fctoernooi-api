@@ -25,12 +25,12 @@ $app->group('/tournaments', function () use ($app) {
     $app->delete('/{id}', 'App\Action\Tournament:remove');
     $app->post('/syncrefereeroles/{id}', 'App\Action\Tournament:syncRefereeRoles');
     $app->get('/userrefereeid/{id}', 'App\Action\Tournament:getUserRefereeId');
-    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
 });
 
 $app->group('/tournamentspublic', function () use ($app) {
     $app->get('', 'App\Action\Tournament:fetchPublic');
     $app->get('/{id}', 'App\Action\Tournament:fetchOnePublic');
+    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
 });
 
 $app->group('/roles', function () use ($app) {

@@ -52,6 +52,7 @@ class Tournament
         $this->competition = $competition;
         $this->roles = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
+        $this->breakDuration = 0;
     }
 
     /**
