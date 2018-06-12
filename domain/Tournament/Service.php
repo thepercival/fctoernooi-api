@@ -100,7 +100,7 @@ class Service
             $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
 
             // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
-            $year = date("Y");
+            $year = $competitionSer->getStartDateTime()->format("Y");
             $seasonRepos = $this->voetbalService->getRepository( Season::class );
             $season = $seasonRepos->findOneBy( array('name' => $year ) );
             if( $season === null ){
