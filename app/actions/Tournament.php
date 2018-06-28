@@ -118,15 +118,42 @@ final class Tournament
     {
         $sErrorMessage = null;
         try {
-            $startDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('startDateTime') );
+            $name = null;
+            if( strlen( $request->getParam('name') ) > 0 ) {
+                $name = $request->getParam('name');
+            }
+
+            $startDateTime = null;
+            if( strlen( $request->getParam('minDate') ) > 0 ) {
+                $startDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('minDate') );
+            }
             if ( $startDateTime === false ){ $startDateTime = null; }
-            $endDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('endDateTime') );
+
+            $endDateTime = null;
+            if( strlen( $request->getParam('maxDate') ) > 0 ) {
+                $endDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('maxDate') );
+            }
             if ( $endDateTime === false ){ $endDateTime = null; }
 
-            $tournaments = $this->repos->findByPeriod($startDateTime, $endDateTime);
+            $withRoles = null;
+            if( strlen( $request->getParam('withRoles') ) > 0 ) {
+                $withRoles = $request->getParam('withRoles') === 'true';
+            }
+
             $shells = [];
-            foreach( $tournaments as $tournament ) {
-                $shells[] = new Shell($tournament, $user);
+            {
+                if( $user !== null && $withRoles === true ) {
+
+                    $tournamentsByRole = $this->repos->findByPermissions($user, Role::ADMIN);
+                    foreach( $tournamentsByRole as $tournament ) {
+                        $shells[] = new Shell($tournament, $user);
+                    }
+                } else {
+                    $tournamentsByDates = $this->repos->findByFilter($name, $startDateTime, $endDateTime);
+                    foreach( $tournamentsByDates as $tournament ) {
+                        $shells[] = new Shell($tournament, $user);
+                    }
+                }
             }
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')

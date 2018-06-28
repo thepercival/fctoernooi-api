@@ -21,28 +21,35 @@ use Voetbal\Competition;
  */
 class Repository extends \Voetbal\Repository
 {
-    public function findByPeriod(
-        \DateTimeImmutable $startDateTime = null,
-        \DateTimeImmutable $endDateTime = null
-    )
+    public function findByFilter(string $name = null, \DateTimeImmutable $startDateTime = null, \DateTimeImmutable $endDateTime = null )
     {
         $query = $this->createQueryBuilder('t')
-            ->join("t.competition","cs");
+            ->join("t.competition","c")
+            ->join("c.league","l");
 
         if( $startDateTime !== null ) {
-            $query = $query
-                ->where('cs.startDateTime >= :date')
-                ->setParameter('date', $startDateTime);
+            $query = $query->where('c.startDateTime >= :startDateTime');
+            $query = $query->setParameter('startDateTime', $startDateTime);
         }
-
-            // ->andWhere('s.begindatum is null or lidm.einddatum >= :date');
 
         if( $endDateTime !== null ) {
-            $query = $query
-                ->where('cs.startDateTime <= :date')
-                ->setParameter('date', $endDateTime);
+            if( $startDateTime !== null ) {
+                $query = $query->andWhere('c.startDateTime <= :endDateTime');
+            } else {
+                $query = $query->where('c.startDateTime <= :endDateTime');
+            }
+            $query = $query->setParameter('endDateTime', $endDateTime);
         }
 
+        if( $name !== null ) {
+            if( $startDateTime !== null || $endDateTime !== null ) {
+                $query = $query->andWhere("l.name like :name");
+            } else {
+                $query = $query->where('l.name like :name');
+            }
+
+            $query = $query->setParameter('name', '%'.$name.'%');
+        }
         return $query->getQuery()->getResult();
     }
 
@@ -50,16 +57,13 @@ class Repository extends \Voetbal\Repository
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb
+            ->distinct()
             ->select('t')
             ->from( Tournament::class, 't')
             ->join( Role::class, 'r', Expr\Join::WITH, 't.id = r.tournament')
         ;
 
-        $qb = $qb
-            ->distinct()
-            ->where('r.user = :user')
-            ->andWhere('BIT_AND(r.value, :rolevalues) = r.value');
-
+        $qb = $qb->where('r.user = :user')->andWhere('BIT_AND(r.value, :rolevalues) = r.value');
         $qb = $qb->setParameter('user', $user);
         $qb = $qb->setParameter('rolevalues', $roleValues);
 
