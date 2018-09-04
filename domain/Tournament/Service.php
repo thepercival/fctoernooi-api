@@ -277,7 +277,6 @@ class Service
         if( count( $tournaments ) > 1 ) {
             return;
         }
-
         $subject = 'FCToernooi - ' . $tournament->getCompetition()->getName();
         $body = '
         <p>Hallo,</p>
@@ -291,8 +290,8 @@ class Service
         <p>
         met vriendelijke groet,
         <br>
-        Coen Dunnink
-        https://www.fctoernooi.nl/
+        Coen Dunnink<br>
+        https://www.fctoernooi.nl/<br>
         06-14363514
         </p>';
 
