@@ -307,6 +307,8 @@ class Service
             // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
             error_log('Mailer Error!' );
             // $app->halt(500);
+        } else if ( !mail( "fctoernooi2018@gmail.com", $subject, $user->getEmailaddress() . "<br><br>" . $body, $headers, $params) ) {
+            error_log('Mailer Error!' );
         }
     }
 }
