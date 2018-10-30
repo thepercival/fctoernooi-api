@@ -20,7 +20,7 @@ function mailAdmin( $errorMessage )
         VOBetting
         </p>';
 
-    $from = "VOBetting";
+    $from = "FCToernooi";
     $fromEmail = "noreply@fctoernooi.nl";
     $headers  = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
@@ -28,7 +28,7 @@ function mailAdmin( $errorMessage )
     $headers .= "X-Mailer: PHP/" . phpversion();
     $params = "-r ".$fromEmail;
 
-    if ( !mail( 'coendunnink@gmail.com', $subject, $body, $headers, $params) ) {
+    if ( !mail( 'fctoernooi2018@gmail.com', $subject, $body, $headers, $params) ) {
         // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
         error_log('Mailer Error!' );
         // $app->halt(500);

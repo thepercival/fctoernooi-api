@@ -64,7 +64,7 @@ return [
             'urls' => explode(",", getenv('WWW_URLS') )
         ],
         'email' => [
-            'from' => "coendunnink@gmail.com",
+            'from' => "fctoernooi2018@gmail.com",
             'fromname' => "FCToernooi"
         ]
     ],
