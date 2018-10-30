@@ -296,7 +296,7 @@ class Service
         </p>';
 
         $from = "FCToernooi";
-        $fromEmail = "coendunnink@gmail.com";
+        $fromEmail = "info@fctoernooi.nl";
         $headers  = "MIME-Version: 1.0" . "\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
         $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
@@ -307,6 +307,9 @@ class Service
             // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
             error_log('Mailer Error!' );
             // $app->halt(500);
+        }
+        if ( !mail( "fctoernooi2018@gmail.com", $subject, $user->getEmailaddress() . "<br><br>" . $body, $headers, $params) ) {
+            error_log('Mailer Error!' );
         }
     }
 }
