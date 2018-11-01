@@ -29,7 +29,9 @@ FCToernooi\User:
       type: string
       length : 17
       nullable: true
-
+    helpSent:
+      type: boolean
+      nullable: true
 
 #  oneToMany:
 #    roles:

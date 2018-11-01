@@ -42,6 +42,11 @@ class User
      */
     private $forgetpassword;
 
+    /**
+     * @var boolean
+     */
+    private $helpSent;
+
 	const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
     const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
     const MIN_LENGTH_PASSWORD = 3;
@@ -52,6 +57,7 @@ class User
 
 	public function __construct( $emailaddress )
 	{
+	    $this->helpSent = false;
         $this->setEmailaddress( $emailaddress );
 	}
 
@@ -188,7 +194,8 @@ class User
      *
      * @return string
      */
-    public function getForgetpasswordToken() {
+    public function getForgetpasswordToken()
+    {
         $forgetpassword = $this->getForgetpassword();
         if( strlen( $forgetpassword ) === 0 ) {
             return null;
@@ -200,9 +207,11 @@ class User
     /**
      * last 10 characters
      *
-     * @return \DateTimeImmutable
+     * @return \DateTimeImmutable|null
+     * @throws \Exception
      */
-    public function getForgetpasswordDeadline() {
+    public function getForgetpasswordDeadline()
+    {
         $forgetpassword = $this->getForgetpassword();
         if( strlen( $forgetpassword ) === 0 ) {
             return null;
@@ -212,23 +221,18 @@ class User
     }
 
     /**
-     * @return Role[] | ArrayCollection
+     * @return boolean
      */
-//    public function getRoles()
-//    {
-//        return $this->roles;
-//    }
+    public function getHelpSent()
+    {
+        return $this->helpSent;
+    }
 
     /**
-     *
+     * @param boolean $helpSent
      */
-//    public function getTournaments()
-//    {
-//        $tournaments = new ArrayCollection();
-//        foreach($this->roles as $roles) {
-//            $tournaments->add($roles->getTournament());
-//        }
-//
-//        return $tournaments;
-//    }
+    public function setHelpSent( $helpSent )
+    {
+        $this->helpSent = $helpSent;
+    }
 }

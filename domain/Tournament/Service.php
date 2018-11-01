@@ -134,13 +134,6 @@ class Service
             $roles = $roleService->set( $tournament, $user, Role::ALL );
 
             $this->conn->commit();
-
-            try {
-                $this->mailFirstTimeWelcome( $user, $tournament );
-            }
-            catch (\Exception $e) {
-
-            }
         } catch (\Exception $e) {
             $this->conn->rollback();
             throw $e;
@@ -271,45 +264,5 @@ class Service
         return null;
     }
 
-    protected function mailFirstTimeWelcome( User $user, Tournament $tournament )
-    {
-        $tournaments = $this->repos->findByPermissions( $user, Role::ADMIN );
-        if( count( $tournaments ) > 1 ) {
-            return;
-        }
-        $subject = 'FCToernooi - ' . $tournament->getCompetition()->getName();
-        $body = '
-        <p>Hallo,</p>
-        <p>            
-        Als beheerder van <a href="https://www.fctoernooi.nl/">https://www.fctoernooi.nl/</a> zag ik dat je een toernooi hebt aangemaakt op onze website. 
-        Mocht je vragen hebben of feedback willen geven, dan horen we dat graag. Beantwoord dan deze email.
-        </p>
-        <p>            
-        Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://docs.google.com/document/d/1SYeUJa5yvHZzvacMyJ_Xy4MpHWTWRgAh1LYkEA2CFnM/edit?usp=sharing">hier</a> vinden.
-        </p>
-        <p>
-        met vriendelijke groet,
-        <br>
-        Coen Dunnink<br>
-        https://www.fctoernooi.nl/<br>
-        06-14363514
-        </p>';
 
-        $from = "FCToernooi";
-        $fromEmail = "info@fctoernooi.nl";
-        $headers  = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-        $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
-        $headers .= "X-Mailer: PHP/" . phpversion();
-        $params = "-r ".$fromEmail;
-
-        if ( !mail( $user->getEmailaddress(), $subject, $body, $headers, $params) ) {
-            // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
-            error_log('Mailer Error!' );
-            // $app->halt(500);
-        }
-        if ( !mail( "fctoernooi2018@gmail.com", $subject, $user->getEmailaddress() . "<br><br>" . $body, $headers, $params) ) {
-            error_log('Mailer Error!' );
-        }
-    }
 }
