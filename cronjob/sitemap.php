@@ -17,7 +17,7 @@ $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
 $url = "https://www.fctoernooi.nl/";
-$distPath = realpath( "../../" ) . "/fctoernooi/dist/";
+$distPath = realpath( __DIR__ . "/../../" ) . "/fctoernooi/dist/";
 
 $tournamentRepos = $voetbal->getRepository( \FCToernooi\Tournament::class );
 
