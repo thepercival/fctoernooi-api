@@ -74,12 +74,11 @@ function mailHelp( User $user, Tournament $tournament )
         met vriendelijke groet,
         <br>
         Coen Dunnink<br>
-        https://www.fctoernooi.nl/<br>
         06-14363514
         </p>';
 
     $from = "FCToernooi";
-    $fromEmail = "fctoernooi2018@gmail.com";
+    $fromEmail = "norepl@fctoernooi.nl";
     $headers  = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
     $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
