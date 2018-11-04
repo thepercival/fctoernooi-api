@@ -32,6 +32,9 @@ try {
         $content .= $url. "toernooi/view/" . $tournament->getId() . PHP_EOL;
     }
     file_put_contents( $distPath . "sitemap.txt", $content );
+    chmod ( $distPath . "sitemap.txt", 744 );
+    chown ( $distPath . "sitemap.txt", "coen" );
+    chgrp ( $distPath . "sitemap.txt", "coen" );
 }
 catch( \Exception $e ) {
     if( $settings->get('environment') === 'production') {
