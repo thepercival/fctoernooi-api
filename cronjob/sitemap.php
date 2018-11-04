@@ -25,7 +25,6 @@ try {
     $content = $url . PHP_EOL;
     $content .= $url . "user/register/" . PHP_EOL;
     $content .= $url . "user/login/" . PHP_EOL;
-    $content .= $url . "user/forgetpassword/" . PHP_EOL;
 
     $tournaments = $tournamentRepos->findAll();
     foreach( $tournaments as $tournament ) {
