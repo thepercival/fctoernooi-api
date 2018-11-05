@@ -11,7 +11,7 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
 
-class ScheduledGames extends ToernooiPdfPage
+class Structure extends ToernooiPdfPage
 {
 //    protected $m_sOuterBorder = "black";
 //    protected $m_sInnerBorder = "#A8A8A8";
@@ -139,9 +139,9 @@ class ScheduledGames extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $game->getHomePoulePlace()->getTeam()->getName(), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( $this->getName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $game->getAwayPoulePlace()->getTeam()->getName(), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $this->getName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
@@ -168,5 +168,14 @@ class ScheduledGames extends ToernooiPdfPage
             }
         }
 
+    }
+
+    protected function getName( $poulePlace )
+    {
+        $nameService = $this->getParent()->getStructureService()->getNameService();
+        if( $poulePlace->getTeam() !== null ) {
+            return $poulePlace->getTeam()->getName();
+        }
+        return $nameService->getPoulePlaceName( $poulePlace->getName() );
     }
 }

@@ -22,6 +22,7 @@ use FCToernooi\Token;
 use FCToernooi\Tournament\Shell;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
+use FCToernooi\Pdf\TournamentConfig;
 
 final class Tournament
 {
@@ -358,8 +359,26 @@ final class Tournament
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            // $user = $this->checkAuth( $this->token, $this->userRepository, $tournament );
-            $pdf = new \FCToernooi\Pdf\Document\ScheduledGames( $tournament, $this->structureService, $this->planningService );
+            $tournament = $this->repos->find((int)$args['id']);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $pdfConfig = new TournamentConfig(
+                (boolean) $request->getParam("gamenotes"),
+                (boolean) $request->getParam("structure"),
+                (boolean) $request->getParam("rules"),
+                (boolean) $request->getParam("gamesperfield"),
+                (boolean) $request->getParam("planning"),
+                (boolean) $request->getParam("poules")
+            );
+            if( $pdfConfig->allOptionsOff() ) {
+                throw new \Exception("kies minimaal 1 printoptie", E_ERROR);
+            }
+
+            $pdf = new \FCToernooi\Pdf\Document( $tournament,
+                $this->structureService, $this->planningService,
+                $pdfConfig );
             $vtData = $pdf->render();
 
             return $response
