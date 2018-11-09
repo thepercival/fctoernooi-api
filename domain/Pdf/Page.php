@@ -80,6 +80,60 @@ abstract class Page extends \Zend_Pdf_Page
         $this->m_nPadding = $nPadding;
     }
 
+    public function drawHeader( $subTitle = null, $nY = null )
+    {
+        if( $nY === null ) {
+            $nY = $this->getHeight() - $this->getPageMargin();
+        }
+        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
+        $title = "FCToernooi";
+
+        $displayWidth = $this->getDisplayWidth();
+        $margin = $displayWidth / 25;
+        $nRowHeight = 20;
+        $imgSize = $nRowHeight;
+        $widthLeft = $imgSize + $this->getTextWidth( $title );
+        $xLeft = $this->getPageMargin();
+        $xCenter = $xLeft + $widthLeft + $margin;
+        $widthRight = strlen( $subTitle ) > 0 ? $this->getTextWidth( $subTitle ) : 0;
+        $xRight = strlen( $subTitle ) > 0 ? $this->getWidth() - ( $this->getPageMargin() + $widthRight ) : 0;
+        $widthCenter = $displayWidth - ( $widthLeft + $margin );
+        if( strlen( $subTitle ) > 0 ) {
+            $widthCenter -= ( $margin + $widthRight );
+        }
+
+        $img = \Zend_Pdf_Resource_ImageFactory::factory( __DIR__ . '/logo.jpg');
+        $this->drawImage( $img, $xLeft, $nY - $imgSize, $xLeft + $imgSize, $nY );
+
+        $arrLineColors = array( "b" => "black" );
+        $this->drawCell( "FCToernooi", $xLeft + $imgSize, $nY, $widthLeft - $imgSize, $nRowHeight, Page::ALIGNLEFT, $arrLineColors );
+
+
+        $name = $this->getParent()->getTournament()->getCompetition()->getLeague()->getName();
+        $this->drawCell( $name, $xCenter, $nY, $widthCenter, $nRowHeight, Page::ALIGNLEFT, $arrLineColors );
+
+        if( strlen( $subTitle ) > 0 ) {
+            $this->drawCell( $subTitle, $xRight, $nY, $widthRight, $nRowHeight, Page::ALIGNRIGHT, $arrLineColors );
+        }
+
+        return $nY - ( 2 * $nRowHeight );
+    }
+
+    public function drawSubHeader( $subHeader, $nY )
+    {
+        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
+        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
+        $nX = $this->getPageMargin();
+        $displayWidth = $this->getDisplayWidth();
+        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, Page::ALIGNCENTER );
+        return $nY - ( 2 * $fontHeightSubHeader );
+    }
+
+    protected function getDisplayWidth()
+    {
+        return $this->getWidth() - ( 2 * $this->getPageMargin() );
+    }
+
     public function drawCell( $sText, $nXPos, $nYPos, $nWidth, $nHeight, $nAlign = Page::ALIGNLEFT, $vtLineColors = null )
     {
         $nStyle = \Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
@@ -304,9 +358,9 @@ abstract class Page extends \Zend_Pdf_Page
             $arrTopLineColors = array(); $arrMiddleLineColors = array(); $arrBottomLineColors = array();
             if ( is_string( $vtLineColor ) )
             {
-                $arrTopLineColors = array( "b" => $oFillColor, "t" => $sLineColor, "l" => $sLineColor, "r" => $sLineColor );
-                $arrMiddleLineColors = array( "b" => $oFillColor, "t" => $oFillColor, "l" => $sLineColor, "r" => $sLineColor );
-                $arrBottomLineColors = array( "b" => $sLineColor, "t" => $oFillColor, "l" => $sLineColor, "r" => $sLineColor );
+                $arrTopLineColors = array( "b" => $oFillColor, "t" => $vtLineColor, "l" => $vtLineColor, "r" => $vtLineColor );
+                $arrMiddleLineColors = array( "b" => $oFillColor, "t" => $oFillColor, "l" => $vtLineColor, "r" => $vtLineColor );
+                $arrBottomLineColors = array( "b" => $vtLineColor, "t" => $oFillColor, "l" => $vtLineColor, "r" => $vtLineColor );
             }
             else
             {

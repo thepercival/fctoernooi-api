@@ -9,173 +9,276 @@
 namespace FCToernooi\Pdf\Page;
 
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Game;
+use Voetbal\Round;
+use Voetbal\Poule;
+use Voetbal\PoulePlace;
+use Voetbal\Qualify\Service as QualifyService;
+use Voetbal\Structure\NameService;
 
 class Structure extends ToernooiPdfPage
 {
-//    protected $m_sOuterBorder = "black";
-//    protected $m_sInnerBorder = "#A8A8A8";
-//    protected $m_sOdd = "#F0F0F0";
-//    protected $m_sEven = "white";
-    //protected $m_bHeadersFirstTime = true;
-    protected $gameOne;
-    protected $gameTwo;
+    protected $maxPoulesPerLine;
+    protected $poulePlaceWidthStructure;
+    protected $pouleMarginStructure;
+    protected $rowHeight;
 
-    public function __construct( $param1, Game $gameA = null, Game $gameB = null )
+    public function __construct( $param1 )
     {
         parent::__construct( $param1 );
         $this->setLineWidth( 0.5 );
-        $this->gameOne = $gameA;
-        $this->gameTwo = $gameB;
+        $this->maxPoulesPerLine = 3;
+        $this->poulePlaceWidthStructure = 30;
+        $this->pouleMarginStructure = 10;
     }
 
     public function getPageMargin(){ return 20; }
     public function getHeaderHeight(){ return 0; }
 
+    protected function getRowHeight() {
+        if( $this->rowHeight === null ) {
+            $this->rowHeight = 18;
+        }
+        return $this->rowHeight;
+    }
+
     public function draw()
     {
-        $this->drawGame( $this->gameOne, $this->getHeight() );
+        $tournament = $this->getParent()->getTournament();
+        $firstRound = $this->getParent()->getStructureService()->getFirstRound( $tournament->getCompetition() );
+        $this->setQual( $firstRound );
+        $nY = $this->drawHeader( "indeling & structuur" );
+        $nY = $this->drawGrouping( $firstRound, $nY );
 
-        $this->setLineColor(new \Zend_Pdf_Color_Html( "black" ));
-        $this->setLineDashingPattern(array(10,10));
-        $this->drawLine(0, $this->getHeight() / 2, $this->getWidth(), $this->getHeight() / 2);
-        $this->setLineDashingPattern(\Zend_Pdf_Page::LINE_DASHING_SOLID);
-        if( $this->gameTwo !== null ) {
-            $this->drawGame($this->gameTwo, $this->getHeight() / 2);
-        }
+        $this->drawRoundStructure( $firstRound, $nY );
     }
 
-    public function drawGame( Game $game, $nOffSetY )
+    protected function setQual( Round $parentRound )
     {
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
-        $nY = $nOffSetY - $this->getPageMargin();
-
-        $nFirstBorder = $this->getWidth() / 6;
-        $nSecondBorder = $nFirstBorder + ( ( $this->getWidth() - ( $nFirstBorder + $this->getPageMargin() ) ) / 2 );
-        $nMargin = 15;
-        $nRowHeight = 20;
-
-        $arrLineColors = array( "b" => "black" );
-        $nX = $this->drawCell( "FCToernooi", $this->getPageMargin(), $nY, $nFirstBorder - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, $arrLineColors );
-        $nX += $nMargin;
-        $name = $this->getParent()->getTournament()->getCompetition()->getLeague()->getName();
-        $this->drawCell( $name, $nX, $nY, $this->getWidth() - ($this->getPageMargin() + $nX), $nRowHeight, ToernooiPdfPage::ALIGNLEFT, $arrLineColors );
-        $nY -= 2 * $nRowHeight;
-
-        $img = \Zend_Pdf_Resource_ImageFactory::factory( __DIR__ . '/../logo.jpg');
-        $imgWidthHeight = $nFirstBorder - $this->getPageMargin();
-        $this->drawImage( $img, $nFirstBorder - $imgWidthHeight, $nY - $imgWidthHeight, $nFirstBorder, $nY );
-
-        $roundNumber = $game->getRound()->getNumber();
-        $planningService = $this->getParent()->getPlanningService();
-        $nX = $nFirstBorder + $nMargin;
-        $bNeedsRanking = $game->getPoule()->needsRanking();
-        $nWidth = $this->getWidth() - ($this->getPageMargin() + $nX);
-        $nWidthResult = $nWidth / 2;
-        $nX2 = $nSecondBorder + ( $nMargin * 0.5 );
-
-        $nameService = $this->getParent()->getStructureService()->getNameService();
-        $roundsByNumber = $this->getParent()->getRoundsByRumber( $roundNumber );
-        $roundsName = $nameService->getRoundsName( $roundNumber, $roundsByNumber );
-        $this->drawCell( "ronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $this->drawCell( $roundsName, $nX2, $nY, $nWidthResult, $nRowHeight );
-        $nY -= $nRowHeight;
-
-        $sGame = $nameService->getPouleName($game->getPoule(), false);
-        $sGmeDescription = $bNeedsRanking ? "poule" : "wedstrijd";
-        $this->drawCell( $sGmeDescription, $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $this->drawCell( $sGame, $nX2, $nY, $nWidthResult, $nRowHeight );
-        $nY -= $nRowHeight;
-        if( $bNeedsRanking ) {
-            $this->drawCell( "speelronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getRoundNumber(), $nX2, $nY, $nWidthResult, $nRowHeight );
-            $nY -= $nRowHeight;
+        foreach ($parentRound->getChildRounds() as $childRound) {
+            $qualifyService = new QualifyService($childRound);
+            $qualifyService->setQualifyRules();
+            $this->setQual( $childRound );
         }
-
-        $competition = $game->getRound()->getCompetition();
-        if( $planningService->canCalculateStartDateTime($competition, $roundNumber) === true ) {
-            $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            $dateTime = $localDateTime->format("H:i") . "     " . $localDateTime->format("d M");
-            $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
-            if( $game->getRound()->getConfig()->getHasExtension() === true ) {
-                $duration .= ' (' . $game->getRound()->getConfig()->getMinutesPerGameExt() . ' min.)';
-            }
-
-            $this->drawCell( "tijdstip", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $dateTime, $nX2, $nY, $nWidthResult, $nRowHeight );
-            $nY -= $nRowHeight;
-
-            $this->drawCell( "duur", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $duration, $nX2, $nY, $nWidthResult, $nRowHeight );
-            $nY -= $nRowHeight;
-        }
-
-        if( $game->getField() !== null ) {
-            $this->drawCell( "veld", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getField()->getName(), $nX2, $nY, $nWidthResult, $nRowHeight );
-            $nY -= $nRowHeight;
-        }
-
-        if( $game->getReferee() !== null ) {
-            $this->drawCell( "scheidrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getReferee()->getInitials(), $nX2, $nY, $nWidthResult, $nRowHeight );
-            $nY -= $nRowHeight;
-        }
-
-        $nY -= $nRowHeight; // extra lege regel
-
-        $larger = 1.2;
-        $nY -= $nRowHeight * $larger;
-        $nWidth = $nFirstBorder - $this->getPageMargin();
-
-        // 2x font thuis - uit
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
-
-        $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $this->getName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $this->getName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
-        $nY -= 3 * $nRowHeight; // extra lege regel
-
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
-        $nX = $nFirstBorder + $nMargin;
-
-        $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
-        $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
-        $scoreConfig = $game->getRound()->getConfig()->getInputScore();
-        if( $scoreConfig !== null ) {
-            $this->drawCell( $scoreConfig->getName(), $nX2, $nY, $nWidthResult - $this->getPageMargin(), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        }
-
-        $nY -= 3 * $nRowHeight; // extra lege regel
-
-        if( $game->getRound()->getConfig()->getHasExtension() ) {
-            $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
-            $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-            $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
-            if( $scoreConfig !== null ) {
-                $this->drawCell( $scoreConfig->getName(), $nX2, $nY, $nWidthResult - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            }
-        }
-
     }
 
-    protected function getName( $poulePlace )
+    protected function getPouleName( Poule $poule )
     {
         $nameService = $this->getParent()->getStructureService()->getNameService();
-        if( $poulePlace->getTeam() !== null ) {
-            return $poulePlace->getTeam()->getName();
-        }
-        return $nameService->getPoulePlaceName( $poulePlace->getName() );
+        return $nameService->getPouleName( $poule, true );
     }
+
+    /*********************** GROUPING **************************/
+
+    public function drawGrouping( Round $round, $nY )
+    {
+        $nY = $this->drawSubHeader( "Indeling", $nY );
+        $nRowHeight = $this->getRowHeight();
+        $fontHeight = $nRowHeight - 4;
+        $pouleMargin = 20;
+        $poules = $round->getPoules()->toArray();
+        $nrOfPoules = $round->getPoules()->count();
+        $percNumberWidth = 0.1;
+        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nYPouleStart = $nY;
+        $maxNrOfPlacesPerPoule = null;
+        $nrOfLines = $this->getNrOfLines( $nrOfPoules );
+        for( $line = 1 ; $line <= $nrOfLines ; $line++ ) {
+            $nrOfPoulesForLine = $this->getNrOfPoulesForLine( $nrOfPoules, $line === $nrOfLines );
+            $pouleWidth = $this->getPouleWidth( $nrOfPoulesForLine, $pouleMargin );
+            $nX = $this->getXLineCentered( $nrOfPoulesForLine, $pouleWidth, $pouleMargin );
+            while( $nrOfPoulesForLine > 0 ) {
+                $poule = array_shift( $poules );
+
+                if( $maxNrOfPlacesPerPoule === null ) {
+                    $maxNrOfPlacesPerPoule = $poule->getPlaces()->count();
+                }
+                $numberWidth = $pouleWidth * $percNumberWidth;
+                $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
+                $this->drawCell( $this->getPouleName( $poule ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
+                $this->setFont( $this->getParent()->getFont(), $fontHeight );
+                $nY = $nYPouleStart - $nRowHeight;
+                foreach( $poule->getPlaces() as $poulePlace ) {
+                    $this->drawCell( $poulePlace->getNumber(), $nX, $nY, $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, "black" );
+                    $name = $poulePlace->getTeam() !== null ? $nameService->getPoulePlaceNameSimple( $poulePlace, true ) : null;
+                    $this->drawCell( $name, $nX + $numberWidth, $nY, $pouleWidth - $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, "black" );
+                    $nY -= $nRowHeight;
+                }
+                $nX += $pouleMargin + $pouleWidth;
+                $nrOfPoulesForLine--;
+            }
+            $nYPouleStart -= ( $maxNrOfPlacesPerPoule + 2 /* header + empty line */ ) * $nRowHeight;
+        }
+        return $nY - ( 2 * $nRowHeight );
+    }
+
+    protected function getNrOfLines( $nrOfPoules )
+    {
+        if( ( $nrOfPoules % 3 ) !== 0 ) {
+            $nrOfPoules += ( 3 - ( $nrOfPoules % 3 ) );
+        }
+        return ( $nrOfPoules / 3 );
+    }
+
+    protected function getNrOfPoulesForLine( $nrOfPoules, $lastLine )
+    {
+        if( $nrOfPoules === 4 ) {
+            return 2;
+        }
+        if( $nrOfPoules <= 3 ) {
+            return $nrOfPoules;
+        }
+        if( !$lastLine ) {
+            return 3;
+        }
+        return ( $nrOfPoules % 3 );
+    }
+
+    protected function getPouleWidth( $nrOfPoules, $margin )
+    {
+        if( $nrOfPoules === 1 ) {
+            $nrOfPoules++;
+        }
+        return ( $this->getDisplayWidth() - ( ( $nrOfPoules - 1 ) * $margin ) ) / $nrOfPoules;
+    }
+
+    /**
+     * maximaal 4 poules in de breedte
+     */
+    protected function getXLineCentered( $nrOfPoules, $pouleWidth, $margin )
+    {
+        if( $nrOfPoules > $this->maxPoulesPerLine  ) {
+            $nrOfPoules = $this->maxPoulesPerLine;
+        }
+        $width = ( $nrOfPoules * $pouleWidth ) + ( ( $nrOfPoules - 1 ) * $margin );
+        return $this->getPageMargin() + ( $this->getDisplayWidth() - $width ) / 2;
+    }
+
+    /********************** END GROUPING *********************/
+
+    /********************** BEGIN STRUCTURE *********************/
+
+    protected function drawRoundStructure( Round $round, $nY )
+    {
+        $nY = $this->drawSubHeader( "Structuur", $nY );
+        $this->drawRoundStructureHelper( $round, $nY, $this->getPageMargin(), $this->getDisplayWidth() );
+    }
+
+    protected function drawRoundStructureHelper( Round $round, $nY, $nX, $width )
+    {
+        $nRowHeight = $this->getRowHeight();
+        $fontHeight = $nRowHeight - 4;
+        $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
+        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $margin = 20;
+        $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
+        $roundName = $this->getRoundNameStructure( $round, $nameService);
+        $this->drawCell( $roundName, $nX, $nY, $width, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, $arrLineColors );
+        $nY -= $nRowHeight;
+        $nY -= $this->pouleMarginStructure;
+
+        if( $round->getPoules()->count() === 1 && $round->getPoules()->first()->getPlaces()->count() < 3 ) {
+            return;
+        }
+        $this->setFont( $this->getParent()->getFont(), $fontHeight );
+        $poules = $round->getPoules()->toArray();
+        while( count( $poules ) > 0 ) {
+            $poulesForLine = $this->getPoulesForLineStructure( $poules, $width );
+            $nXPoules = $this->getXLineCenteredStructure( $poulesForLine, $nX, $width );
+            $maxNrOfPoulePlaceRows = 0;
+            while( count( $poulesForLine ) > 0 ) {
+                $poule = array_shift($poulesForLine);
+                $pouleWidth = $this->getPouleWidthStructure( $poule );
+                $nXPlaces = $nXPoules;
+                $nXPoules = $this->drawCell($nameService->getPouleName($poule, false), $nXPoules, $nY, $pouleWidth, $nRowHeight,
+                    ToernooiPdfPage::ALIGNCENTER, "black");
+                $nYPlaces = $nY - $nRowHeight;
+                $poulePlaces = $poule->getPlaces()->toArray();
+                uasort( $poulePlaces, function($poulePlaceA, $poulePlaceB) {
+                    return ($poulePlaceA->getNumber() > $poulePlaceB->getNumber()) ? 1 : -1;
+                });
+                $nrOfPoulePlaceRows = count($poulePlaces) === 3 ? 1 : 2; // bij 3 places, naast elkaar
+                foreach( $poulePlaces as $poulePlace ) {
+                    $this->drawCell( $nameService->getPoulePlaceName( $poulePlace, false ), $nXPlaces, $nYPlaces, $this->poulePlaceWidthStructure, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
+                    if( $nrOfPoulePlaceRows === 1 ) {
+                        $nXPlaces += $this->poulePlaceWidthStructure;
+                    } else if( ( $poulePlace->getNumber() % 2 ) === 0 ) {
+                        $nYPlaces += $nRowHeight;
+                        $nXPlaces += $this->poulePlaceWidthStructure;
+                    } else {
+                        $nYPlaces -= $nRowHeight;
+                    }
+                }
+                if( $nrOfPoulePlaceRows > $maxNrOfPoulePlaceRows) {
+                    $maxNrOfPoulePlaceRows = $nrOfPoulePlaceRows;
+                }
+                $nXPoules += $this->pouleMarginStructure;
+            }
+            $nY -= ( ( 1 + $maxNrOfPoulePlaceRows )  * $nRowHeight ) + $this->pouleMarginStructure;
+        }
+
+        $nrOfChildren = $round->getChildRounds()->count();
+        $widthChild = ( $width / $nrOfChildren ) - ( $nrOfChildren > 1 ? ( $margin / 2 ) : 0 );
+        foreach( $round->getChildRounds() as $childRound ) {
+            $this->drawRoundStructureHelper( $childRound, $nY, $nX, $widthChild );
+            $nX += $widthChild + $margin;
+        }
+    }
+
+    /**
+     * add winnerslosers if roundnumber is 2 and has sibling
+     *
+     * @param Round $round
+     * @param NameService $nameService
+     * @return string
+     */
+    protected function getRoundNameStructure( Round $round, NameService $nameService ): string
+    {
+        $roundName = $nameService->getRoundName( $round );
+        if( $round->getNumber() === 2 and $round->getOpposingRound() !== null ) {
+            $roundName .= ' - ' . $nameService->getWinnersLosersDescription($round->getWinnersOrlosers()) . 's';
+        }
+        return $roundName;
+    }
+
+
+    protected function getPoulesForLineStructure( &$poules, $width )
+    {
+        $poulesForLine = [];
+        $widthPoules = 0;
+        while ( $poule = array_shift($poules) ) {
+            if( $widthPoules > 0 ) {
+                $widthPoules += $this->pouleMarginStructure;
+            }
+            $widthPoules += $this->getPouleWidthStructure( $poule );
+            if( $widthPoules > $width ) {
+                array_unshift($poules, $poule);
+                break;
+            }
+            $poulesForLine[] = $poule;
+        }
+        return $poulesForLine;
+    }
+
+    protected function getXLineCenteredStructure( $poulesForLine, $nX, $width )
+    {
+        $widthPoules = 0;
+        foreach( $poulesForLine as $poule ) {
+            $widthPoules += $this->getPouleWidthStructure($poule);
+        }
+        $widthPoules += ( count( $poulesForLine ) - 1 ) * $this->pouleMarginStructure;
+        return $nX + ( ( $width - $widthPoules ) / 2 );
+    }
+
+    protected function getPouleWidthStructure( $poule )
+    {
+        $nrOfPlaces = $poule->getPlaces()->count();
+        if( $nrOfPlaces === 3 ) {
+            $nrOfPlaceColumns = $nrOfPlaces;
+        } else {
+            $nrOfPlaceColumns = (($nrOfPlaces % 2) === 0 ? $nrOfPlaces : $nrOfPlaces + 1) / 2;
+        }
+        return $this->poulePlaceWidthStructure * $nrOfPlaceColumns;
+    }
+
+
 }

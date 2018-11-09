@@ -365,13 +365,14 @@ final class Tournament
             }
 
             $pdfConfig = new TournamentConfig(
-                (boolean) $request->getParam("gamenotes"),
-                (boolean) $request->getParam("structure"),
-                (boolean) $request->getParam("rules"),
-                (boolean) $request->getParam("gamesperfield"),
-                (boolean) $request->getParam("planning"),
-                (boolean) $request->getParam("poules")
+                filter_var($request->getParam("gamenotes"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("structure"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("rules"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("gamesperfield"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("planning"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("poules"), FILTER_VALIDATE_BOOLEAN)
             );
+
             if( $pdfConfig->allOptionsOff() ) {
                 throw new \Exception("kies minimaal 1 printoptie", E_ERROR);
             }

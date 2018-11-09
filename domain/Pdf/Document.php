@@ -13,6 +13,8 @@ use \FCToernooi\Pdf\TournamentConfig;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
+use Voetbal\Round;
+use FCToernooi\Pdf\Page\Poules as PagePoules;
 
 class Document extends \Zend_Pdf
 {
@@ -86,6 +88,10 @@ class Document extends \Zend_Pdf
         return 14;
     }
 
+    public function getFontHeightSubHeader() {
+        return 16;
+    }
+
     /**
      * @return Tournament
      */
@@ -126,30 +132,97 @@ class Document extends \Zend_Pdf
 
     protected function fillContent()
     {
-        if( $this->config->getGamenotes() ) {
-            $games = $this->getScheduledGames( $this->tournament->getCompetition()->getFirstRound() );
-            while( count( $games ) > 0 ) {
-                $page = $this->createPageGamenotes( array_shift( $games ), array_shift( $games ) );
-                $page->draw();
-            }
-        }
         if( $this->config->getStructure() ) {
-            // $page = $this->createPageStructure( array_shift( $games ), array_shift( $games ) );
-            // $page->draw();
+            $page = $this->createPageStructure();
+            $page->draw();
         }
         if( $this->config->getPoules() ) {
-
+            $this->drawPoules( $this->tournament->getCompetition()->getFirstRound());
         }
         if( $this->config->getPlanning() ) {
-
+            $page = $this->createPagePlanning();
+            $nY = $page->drawHeader( "wedstrijden" );
+            $page->draw( $this->tournament->getCompetition()->getFirstRound(), $nY );
         }
         if( $this->config->getRules() ) {
 
         }
+        if( $this->config->getGamenotes() ) {
+            $this->drawGamenotes();
+        }
         if( $this->config->getGamesperfield() ) {
-
+            $page = $this->createPageGamesPerField();
+            $nY = $page->drawHeader( "wedstrijden per veld" );
+            $page->draw( $this->tournament->getCompetition()->getFirstRound(), $nY );
         }
     }
+
+    protected function drawGamenotes()
+    {
+        $games = $this->getScheduledGames( $this->tournament->getCompetition()->getFirstRound() );
+        while( count( $games ) > 0 ) {
+            $page = $this->createPageGamenotes( array_shift( $games ), array_shift( $games ) );
+            $page->draw();
+        }
+    }
+
+    protected function drawPoules( Round $round, PagePoules $page = null, int $nY = null )
+    {
+        foreach( $round->getPoules() as $poule ) {
+            if (!$poule->needsRanking()) {
+                continue;
+            }
+            if ($poule->getState() === Game::STATE_PLAYED) {
+                continue;
+            }
+            $pageCreated = false;
+            if( $page === null ) {
+                $page = $this->createPagePoules();
+                $pageCreated = true;
+                $nY = $page->drawHeader( "draaitabel per poule" );
+            }
+
+            $pouleHeight = $page->getPouleHeight( $poule );
+            if( !$pageCreated and $nY - $pouleHeight < $page->getPageMargin() ) {
+                $page = $this->createPagePoules();
+                $nY = $page->drawHeader( "draaitabel per poule" );
+            }
+            $nY = $page->draw( $poule, $nY );
+        }
+
+        foreach( $round->getChildRounds() as $childRound ) {
+            $this->drawPoules( $childRound, $page, $nY );
+        }
+    }
+
+    protected function createPageStructure()
+    {
+        $page = new \FCToernooi\Pdf\Page\Structure( \Zend_Pdf_Page::SIZE_A4 );
+        $page->setFont( $this->getFont(), $this->getFontHeight() );
+        $page->putParent( $this );
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    protected function createPagePlanning()
+    {
+        $page = new \FCToernooi\Pdf\Page\Planning( \Zend_Pdf_Page::SIZE_A4 );
+        $page->setFont( $this->getFont(), $this->getFontHeight() );
+        $page->putParent( $this );
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    protected function createPageGamesPerField()
+    {
+        $page = new \FCToernooi\Pdf\Page\GamesPerField( \Zend_Pdf_Page::SIZE_A4 );
+        $page->setFont( $this->getFont(), $this->getFontHeight() );
+        $page->putParent( $this );
+        $this->pages[] = $page;
+        return $page;
+    }
+
+
 
     protected function createPageGamenotes( Game $gameA = null, Game $gameB = null)
     {
@@ -160,14 +233,17 @@ class Document extends \Zend_Pdf
         return $page;
     }
 
-    protected function createPageStructure( Game $gameA = null, Game $gameB = null)
+    protected function createPagePoules()
     {
-        $page = new \FCToernooi\Pdf\Page\Structure( \Zend_Pdf_Page::SIZE_A4, $gameA, $gameB );
+        $page = new \FCToernooi\Pdf\Page\Poules( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
         return $page;
     }
+
+
+
 
     /**
      * @param Tournament $tournament
@@ -181,4 +257,13 @@ class Document extends \Zend_Pdf
         }
         return $games;
     }
+
+    /*public function getName( PoulePlace $poulePlace )
+    {
+        $nameService = $this->getParent()->getStructureService()->getNameService();
+        if( $poulePlace->getTeam() !== null ) {
+            return $poulePlace->getTeam()->getName();
+        }
+        return $nameService->getPoulePlaceName( $poulePlace );
+    }*/
 }

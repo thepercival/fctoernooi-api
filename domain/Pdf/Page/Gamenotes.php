@@ -8,7 +8,7 @@
 
 namespace FCToernooi\Pdf\Page;
 
-use \FCToernooi\Pdf\Page as ToernooiPdfPage;
+use FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
 use Voetbal\PoulePlace;
 
@@ -35,37 +35,28 @@ class Gamenotes extends ToernooiPdfPage
 
     public function draw()
     {
-        $this->drawGame( $this->gameOne, $this->getHeight() );
+        $nY = $this->drawHeader( "wedstrijdbriefje" );
+        $this->drawGame( $this->gameOne, $nY );
 
         $this->setLineColor(new \Zend_Pdf_Color_Html( "black" ));
         $this->setLineDashingPattern(array(10,10));
-        $this->drawLine(0, $this->getHeight() / 2, $this->getWidth(), $this->getHeight() / 2);
+        $this->drawLine($this->getPageMargin(), $this->getHeight() / 2, $this->getWidth() - $this->getPageMargin(), $this->getHeight() / 2);
         $this->setLineDashingPattern(\Zend_Pdf_Page::LINE_DASHING_SOLID);
         if( $this->gameTwo !== null ) {
-            $this->drawGame($this->gameTwo, $this->getHeight() / 2);
+            $nY = $this->drawHeader( "wedstrijdbriefje", ( $this->getHeight() / 2 ) - $this->getPageMargin() );
+            $this->drawGame($this->gameTwo, $nY);
         }
     }
 
     public function drawGame( Game $game, $nOffSetY )
     {
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
-        $nY = $nOffSetY - $this->getPageMargin();
+        $nY = $nOffSetY;
 
         $nFirstBorder = $this->getWidth() / 6;
         $nSecondBorder = $nFirstBorder + ( ( $this->getWidth() - ( $nFirstBorder + $this->getPageMargin() ) ) / 2 );
         $nMargin = 15;
         $nRowHeight = 20;
-
-        $arrLineColors = array( "b" => "black" );
-        $nX = $this->drawCell( "FCToernooi", $this->getPageMargin(), $nY, $nFirstBorder - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, $arrLineColors );
-        $nX += $nMargin;
-        $name = $this->getParent()->getTournament()->getCompetition()->getLeague()->getName();
-        $this->drawCell( $name, $nX, $nY, $this->getWidth() - ($this->getPageMargin() + $nX), $nRowHeight, ToernooiPdfPage::ALIGNLEFT, $arrLineColors );
-        $nY -= 2 * $nRowHeight;
-
-        $img = \Zend_Pdf_Resource_ImageFactory::factory( __DIR__ . '/../logo.jpg');
-        $imgWidthHeight = $nFirstBorder - $this->getPageMargin();
-        $this->drawImage( $img, $nFirstBorder - $imgWidthHeight, $nY - $imgWidthHeight, $nFirstBorder, $nY );
 
         $roundNumber = $game->getRound()->getNumber();
         $planningService = $this->getParent()->getPlanningService();
@@ -140,21 +131,23 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $this->getName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( $nameService->getPoulePlaceName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $this->getName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $nameService->getPoulePlaceName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
+        $dots = '...............';
+        $dotsWidth = $this->getTextWidth( $dots );
         $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
+        $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
         $scoreConfig = $game->getRound()->getConfig()->getInputScore();
         if( $scoreConfig !== null ) {
-            $this->drawCell( $scoreConfig->getName(), $nX2, $nY, $nWidthResult - $this->getPageMargin(), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+            $this->drawCell( $scoreConfig->getName(), $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         }
 
         $nY -= 3 * $nRowHeight; // extra lege regel
@@ -169,14 +162,5 @@ class Gamenotes extends ToernooiPdfPage
             }
         }
 
-    }
-
-    protected function getName( PoulePlace $poulePlace )
-    {
-        $nameService = $this->getParent()->getStructureService()->getNameService();
-        if( $poulePlace->getTeam() !== null ) {
-            return $poulePlace->getTeam()->getName();
-        }
-        return $nameService->getPoulePlaceName( $poulePlace );
     }
 }
