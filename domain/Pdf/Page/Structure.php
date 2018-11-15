@@ -217,10 +217,12 @@ class Structure extends ToernooiPdfPage
         }
 
         $nrOfChildren = $round->getChildRounds()->count();
-        $widthChild = ( $width / $nrOfChildren ) - ( $nrOfChildren > 1 ? ( $margin / 2 ) : 0 );
-        foreach( $round->getChildRounds() as $childRound ) {
-            $this->drawRoundStructureHelper( $childRound, $nY, $nX, $widthChild );
-            $nX += $widthChild + $margin;
+        if( $nrOfChildren > 0 ) {
+            $widthChild = ( $width / $nrOfChildren ) - ( $nrOfChildren > 1 ? ( $margin / 2 ) : 0 );
+            foreach( $round->getChildRounds() as $childRound ) {
+                $this->drawRoundStructureHelper( $childRound, $nY, $nX, $widthChild );
+                $nX += $widthChild + $margin;
+            }
         }
     }
 
