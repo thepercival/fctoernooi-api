@@ -8,6 +8,9 @@ use Tuupola\Middleware\JwtAuthentication;
 use Tuupola\Middleware\CorsMiddleware;
 use App\Response\Unauthorized;
 use App\Middleware\Authentication;
+use \JMS\Serializer\SerializerBuilder;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\ContextFactory\CallableSerializationContextFactory;
 
 $container = $app->getContainer();
 $container["token"] = function ($container) {
@@ -45,7 +48,7 @@ $container["CorsMiddleware"] = function ($container) {
         "logger" => $container["logger"],
         "origin" => $container->get('settings')['www']['urls'],
         "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
-        "headers.allow" => ["Authorization", "If-Match", "If-Unmodified-Since","content-type"],
+        "headers.allow" => ["Authorization", "If-Match", "If-Unmodified-Since","Content-Type","X-Api-Version"],
         "headers.expose" => ["Authorization", "Etag"],
         "credentials" => true,
         "cache" => 300,
@@ -75,7 +78,26 @@ $app->add("JwtAuthentication");
 $app->add("CorsMiddleware");
 $app->add("NegotiationMiddleware");
 
+$app->add(function ( $request,  $response, callable $next) {
+    $apiVersion = $request->getHeaderLine('X-Api-Version');
+    if( strlen( $apiVersion ) === 0 ) {
+        $apiVersion = "1";
+    }
+    $this['serializer']->setSerializationContextFactory(
+        new CallableSerializationContextFactory(
+            function () use ($apiVersion) {
+                return SerializationContext::create()
+                    ->setGroups(array('Default'))
+                    ->setVersion($apiVersion);
+            }
+        )
+    );
+    return $next($request, $response);
+});
+
 $container["cache"] = function ($container) {
     return new CacheUtil;
 };
+
+
 

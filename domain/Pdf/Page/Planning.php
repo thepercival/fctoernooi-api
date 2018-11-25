@@ -10,10 +10,10 @@ namespace FCToernooi\Pdf\Page;
 
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
+use Voetbal\Structure\NameService;
 use Voetbal\Poule;
 use Voetbal\PoulePlace;
 use Voetbal\Qualify\Service as QualifyService;
-use Voetbal\Structure\NameService;
 
 class Planning extends ToernooiPdfPage
 {
@@ -29,10 +29,25 @@ class Planning extends ToernooiPdfPage
         /*$this->maxPoulesPerLine = 3;
         $this->poulePlaceWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
+/*
+        <colgroup>
+        <col *ngIf="aRoundNeedsRanking(roundsByNumber)">
+        <col *ngIf="!aRoundNeedsRanking(roundsByNumber)">
+        <col *ngIf="planningService.canCalculateStartDateTime(roundNumber)">
+        <col *ngIf="hasFields()">
+        <col class="width-25">
+        <col>
+        <col class="width-25">
+        <col *ngIf="hasReferees()" class="d-none d-sm-table-cell">
+      </colgroup>*/
     }
 
     public function getPageMargin(){ return 20; }
     public function getHeaderHeight(){ return 0; }
+
+    protected function showPouleName(){
+        // <span>{{nameService.getPouleName(game.getPoule(), false)}}</span>
+    }
 
     protected function getRowHeight() {
         if( $this->rowHeight === null ) {
@@ -43,10 +58,14 @@ class Planning extends ToernooiPdfPage
 
     public function draw( Round $round, $nY )
     {
-        $nY = $this->drawSubHeader( "deze pdf komt binnen een paar weken beschikbaar", $nY );
+        $structureService = $this->getParent()->getStructureService();
+        $allRoundsByNumber = $structureService->getAllRoundsByNumber( $this->getParent()->getTournament()->getCompetition() );
+        $roundsByNumber = $allRoundsByNumber[$round->getNumber()];
+        $roundsName = $structureService->getNameService()->getRoundsName( $round->getNumber(), $roundsByNumber );
+        $nY = $this->drawSubHeader( $roundsName, $nY );
         return;
 
-        $this->drawRound( $round, $nY );
+        // $this->drawRound( $round, $nY );
     }
 
 

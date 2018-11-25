@@ -14,7 +14,7 @@ use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 use Voetbal\Round;
-use FCToernooi\Pdf\Page\Poules as PagePoules;
+use FCToernooi\Pdf\Page\Inputform as PagePoules;
 
 class Document extends \Zend_Pdf
 {
@@ -136,8 +136,8 @@ class Document extends \Zend_Pdf
             $page = $this->createPageStructure();
             $page->draw();
         }
-        if( $this->config->getPoules() ) {
-            $this->drawPoules( $this->tournament->getCompetition()->getFirstRound());
+        if( $this->config->getInputform() ) {
+            $this->drawInputform( $this->tournament->getCompetition()->getFirstRound());
         }
         if( $this->config->getPlanning() ) {
             $page = $this->createPagePlanning();
@@ -166,7 +166,7 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function drawPoules( Round $round, PagePoules $page = null, int $nY = null )
+    protected function drawInputform( Round $round, PagePoules $page = null, int $nY = null )
     {
         foreach( $round->getPoules() as $poule ) {
             if (!$poule->needsRanking()) {
@@ -177,21 +177,21 @@ class Document extends \Zend_Pdf
             }
             $pageCreated = false;
             if( $page === null ) {
-                $page = $this->createPagePoules();
+                $page = $this->createPageInputform();
                 $pageCreated = true;
                 $nY = $page->drawHeader( "draaitabel per poule" );
             }
 
             $pouleHeight = $page->getPouleHeight( $poule );
             if( !$pageCreated and $nY - $pouleHeight < $page->getPageMargin() ) {
-                $page = $this->createPagePoules();
+                $page = $this->createPageInputform();
                 $nY = $page->drawHeader( "draaitabel per poule" );
             }
             $nY = $page->draw( $poule, $nY );
         }
 
         foreach( $round->getChildRounds() as $childRound ) {
-            $this->drawPoules( $childRound, $page, $nY );
+            $this->drawInputform( $childRound, $page, $nY );
         }
     }
 
@@ -233,9 +233,9 @@ class Document extends \Zend_Pdf
         return $page;
     }
 
-    protected function createPagePoules()
+    protected function createPageInputform()
     {
-        $page = new \FCToernooi\Pdf\Page\Poules( \Zend_Pdf_Page::SIZE_A4 );
+        $page = new \FCToernooi\Pdf\Page\Inputform( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;

@@ -25,6 +25,7 @@ FCToernooi\Role:
               referencedColumnName: id
               nullable: false
               onDelete: CASCADE
+            cascade: [ persist ]
         user:
             targetEntity: FCToernooi\User
 #            inversedBy: roles

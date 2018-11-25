@@ -8,6 +8,7 @@
 
 namespace App\Action;
 
+use Doctrine\ORM\EntityManager;
 use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
@@ -59,6 +60,10 @@ final class Tournament
      * @var Token
      */
     protected $token;
+    /**
+     * @var EntityManager
+     */
+    protected $em;
 
     use AuthTrait;
 
@@ -69,7 +74,8 @@ final class Tournament
         StructureService $structureService,
         PlanningService $planningService,
         Serializer $serializer,
-        Token $token
+        Token $token,
+        EntityManager $em
     )
     {
         $this->service = $service;
@@ -79,6 +85,7 @@ final class Tournament
         $this->planningService = $planningService;
         $this->serializer = $serializer;
         $this->token = $token;
+        $this->em = $em;
     }
 
     /**
@@ -271,13 +278,14 @@ final class Tournament
 
     public function add( $request, $response, $args)
     {
-        $sErrorMessage = null;
         try {
             /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
+            $tournamentSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
 
             $user = $this->checkAuth( $this->token, $this->userRepository );
-            $tournament = $this->service->create( $tournament, $user );
+            $tournament = $this->service->createFromSerialized( $tournamentSer, $user );
+            $this->em->persist($tournament);
+            $this->em->flush();
             $serializationContext = $this->getSerializationContext($tournament, $user);
             return $response
                 ->withStatus(201)
@@ -286,14 +294,12 @@ final class Tournament
             ;
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return $response->withStatus(422 )->write( urldecode($e->getMessage()) );
         }
-        return $response->withStatus(422 )->write( $sErrorMessage );
     }
 
     public function edit( $request, $response, $args)
     {
-        $sErrorMessage = null;
         try {
             /** @var \FCToernooi\Tournament $tournament */
             $tournamentSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
@@ -322,9 +328,8 @@ final class Tournament
             ;
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return $response->withStatus(422)->write( $e->getMessage() );
         }
-        return $response->withStatus(422)->write( $sErrorMessage );
     }
 
     public function remove( $request, $response, $args)
@@ -370,7 +375,7 @@ final class Tournament
                 filter_var($request->getParam("rules"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("gamesperfield"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("planning"), FILTER_VALIDATE_BOOLEAN),
-                filter_var($request->getParam("poules"), FILTER_VALIDATE_BOOLEAN)
+                filter_var($request->getParam("inputform"), FILTER_VALIDATE_BOOLEAN)
             );
 
             if( $pdfConfig->allOptionsOff() ) {

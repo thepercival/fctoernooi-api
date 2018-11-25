@@ -38,15 +38,15 @@ class Service
      * @return ArrayCollection
      * @throws \Exception
      */
-    public function set( Tournament $tournament, User $user, $roleValues )
+    public function create( Tournament $tournament, User $user, $roleValues )
     {
         // get roles
-        $rolesRet = new ArrayCollection();
+        // $rolesRet = new ArrayCollection();
 
-        try {
+        //try {
 
             // flush roles
-            $this->flushRoles( $tournament, $user );
+            // $this->flushRoles( $tournament, $user );
 
             // save roles
             for($roleValue = 1 ; $roleValue < Role::ALL ; $roleValue *= 2 ){
@@ -55,22 +55,22 @@ class Service
                 }
                 $role = new Role( $tournament, $user );
                 $role->setValue( $roleValue );
-                $this->repos->save($role);
-                $rolesRet->add($role);
+                // $this->repos->save($role);
+                // $rolesRet->add($role);
             }
-        }
-        catch( \Exception $e ){
-            throw new \Exception(urlencode($e->getMessage()), E_ERROR );
-        }
-
-        return $rolesRet;
+//        }
+//        catch( \Exception $e ){
+//            throw new \Exception(urlencode($e->getMessage()), E_ERROR );
+//        }
+//
+//        return $rolesRet;
     }
 
     /**
      * @param Tournament $tournament
      * @param User $user
      */
-    protected function flushRoles( Tournament $tournament, User $user )
+    protected function flushRolesDep( Tournament $tournament, User $user )
     {
         $roles = $this->repos->findBy(
             array(

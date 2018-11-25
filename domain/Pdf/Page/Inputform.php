@@ -15,7 +15,7 @@ use Voetbal\PoulePlace;
 use Voetbal\Qualify\Service as QualifyService;
 use Voetbal\Structure\NameService;
 
-class Poules extends ToernooiPdfPage
+class Inputform extends ToernooiPdfPage
 {
     /*protected $maxPoulesPerLine;
     protected $poulePlaceWidthStructure;
@@ -79,8 +79,6 @@ class Poules extends ToernooiPdfPage
 
     public function draw( Poule $poule, $nY )
     {
-        $nY = $this->drawSubHeader( "deze pdf komt binnen een paar weken beschikbaar", $nY );
-        return;
 
         foreach( $poule->getPlaces() as $poulePlace ) {
 

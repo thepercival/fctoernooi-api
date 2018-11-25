@@ -2,7 +2,6 @@
 // DIC configuration
 
 use \JMS\Serializer\SerializerBuilder;
-use JMS\Serializer\SerializationContext;
 
 $container = $app->getContainer();
 
@@ -39,29 +38,21 @@ $container['em'] = function ($c) {
 	);
 	$config->setMetadataDriverImpl( new CustomYamlDriver( $settings['meta']['entity_path'] ));
 
-	return Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+	$em = Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+    // $em->getConnection()->setAutoCommit(false);
+    return $em;
 };
 
 // symfony serializer
 $container['serializer'] = function( $c ) {
     $settings = $c->get('settings');
-
-    $serializerBuilder = SerializerBuilder::create()
-        ->setDebug($settings['displayErrorDetails'])
-        ->setSerializationContextFactory(function () {
-            return SerializationContext::create()
-                ->setGroups(array('Default'));
-        });
-        if( $settings["environment"] === "production") {
-            $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
-        }
-    ;
-
+    $serializerBuilder = SerializerBuilder::create()->setDebug($settings['displayErrorDetails']);
+    if( $settings["environment"] === "production") {
+        $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
+    }
     foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
         $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
     }
-
-
     return $serializerBuilder->build();
 };
 
@@ -80,8 +71,7 @@ $container['toernooi'] = function( $c ) {
         $c->get('voetbal'),
         $tournamentRepos,
         $roleRepos,
-        $userRepos,
-        $em->getConnection()
+        $userRepos
     );
 };
 
@@ -113,7 +103,8 @@ $container['App\Action\Tournament'] = function ($c) {
         $c->get('voetbal')->getService(Voetbal\Structure::class),
         $c->get('voetbal')->getService(Voetbal\Planning::class),
         $c->get('serializer'),
-        $c->get('token'));
+        $c->get('token'),
+        $em);
 };
 
 $container['App\Action\Sponsor'] = function ($c) {

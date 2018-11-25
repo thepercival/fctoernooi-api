@@ -44,10 +44,6 @@ class Service
      * @var UserRepository
      */
     protected $userRepos;
-    /**
-     * @var Connection
-     */
-    protected $conn;
 
 
     /**
@@ -62,15 +58,13 @@ class Service
         \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
         RoleRepository $roleRepos,
-        UserRepository $userRepos,
-        Connection $conn
+        UserRepository $userRepos
     )
     {
         $this->voetbalService = $voetbalService;
         $this->repos = $tournamentRepos;
         $this->roleRepos = $roleRepos;
         $this->userRepos = $userRepos;
-        $this->conn = $conn;
     }
 
     /**
@@ -79,28 +73,27 @@ class Service
      * @return null
      * @throws \Exception
      */
-    public function create( Tournament $tournamentSer, User $user )
+    public function createFromSerialized( Tournament $tournamentSer, User $user )
     {
-        $this->conn->beginTransaction();
         $competitionSer = $tournamentSer->getCompetition();
-        $tournament = null;
-        try {
-            // create association
-            $associationName = $this->getAssociationNameFromUserId( $user->getId() );
+
+        $getAssociation = function($name) use( $user ) {
             $associationRepos = $this->voetbalService->getRepository(Association::class);
-            $association = $associationRepos->findOneBy( array( 'name' => $associationName ) );
+            $association = $associationRepos->findOneBy( array( 'name' => $name ) );
             if( $association === null ){
                 $assService = $this->voetbalService->getService( Association::class );
-                $association = $assService->create( $associationName );
+                $association = $assService->create( $name );
             }
+            return $association;
+        };
+        $association = $getAssociation( $this->getAssociationNameFromUserId( $user->getId() ) );
 
-            // create league
-            $leagueSer = $competitionSer->getLeague();
-            $leagueService = $this->voetbalService->getService( League::class );
-            $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
+        $leagueSer = $competitionSer->getLeague();
+        $leagueService = $this->voetbalService->getService( League::class );
+        $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
 
-            // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
-            $year = $competitionSer->getStartDateTime()->format("Y");
+        // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
+        $getSeason = function($year) {
             $seasonRepos = $this->voetbalService->getRepository( Season::class );
             $season = $seasonRepos->findOneBy( array('name' => $year ) );
             if( $season === null ){
@@ -108,36 +101,31 @@ class Service
                 $period = new Period( new \DateTimeImmutable($year."-01-01"), new \DateTimeImmutable($year."-12-31") );
                 $season = $seasonService->create( $year, $period );
             }
+            return $season;
+        };
+        $season = $getSeason( $competitionSer->getStartDateTime()->format("Y") );
 
-            $fieldsSer = $competitionSer->getFields();
-            $competitionSer->setFields([]);
-            $refereesSer = $competitionSer->getReferees();
-            $competitionSer->setReferees([]);
-            $competitionService = $this->voetbalService->getService(Competition::class);
-            $competition = $competitionService->create($league, $season, $competitionSer->getStartDateTime() );
+        $competitionService = $this->voetbalService->getService(Competition::class);
+        $competition = $competitionService->create($league, $season, $competitionSer->getStartDateTime() );
 
+        $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
             $fieldService = $this->voetbalService->getService( Field::class );
             foreach( $fieldsSer as $fieldSet ) {
                 $fieldService->create( $fieldSet->getNumber(), $fieldSet->getName(), $competition );
             }
-
             $refereeService = $this->voetbalService->getService( Referee::class );
             foreach( $refereesSer as $referesSer ) {
                 $refereeService->create( $referesSer->getInitials(), $referesSer->getName(), $competition );
             }
+        };
+        $createFieldsAndReferees( $competitionSer->getFields(), $competitionSer->getReferees() );
 
-            $tournamentSer->setCompetition($competition);
-            $tournamentSer->setBreakDuration( 0 );
-            $tournament = $this->repos->save($tournamentSer);
+        $tournament = new Tournament( $competition );
+        $tournament->setBreakDuration( 0 );
 
-            $roleService = new RoleService( $this->roleRepos );
-            $roles = $roleService->set( $tournament, $user, Role::ALL );
+        $roleService = new RoleService( $this->roleRepos );
+        $roleService->create( $tournament, $user, Role::ALL );
 
-            $this->conn->commit();
-        } catch (\Exception $e) {
-            $this->conn->rollback();
-            throw $e;
-        }
         return $tournament;
     }
 
@@ -158,7 +146,6 @@ class Service
         $leagueService->changeBasics( $league, $name, null );
 
         $tournament->setBreak( $break );
-        $this->repos->save( $tournament );
 
         return $tournament;
     }
