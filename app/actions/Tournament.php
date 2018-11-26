@@ -284,8 +284,7 @@ final class Tournament
 
             $user = $this->checkAuth( $this->token, $this->userRepository );
             $tournament = $this->service->createFromSerialized( $tournamentSer, $user );
-            $this->em->persist($tournament);
-            $this->em->flush();
+            $this->repos->save($tournament);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             return $response
                 ->withStatus(201)
