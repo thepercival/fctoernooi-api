@@ -252,7 +252,6 @@ final class Tournament
 
     public function syncRefereeRoles($request, $response, $args)
     {
-        $sErrorMessage = null;
         try {
             /** @var \FCToernooi\Tournament $tournament */
             $tournament = $this->repos->find($args['id']);
@@ -270,9 +269,9 @@ final class Tournament
             ;
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return $response->withStatus(422 )->write( $e->getMessage() );
         }
-        return $response->withStatus(422 )->write( $sErrorMessage );
+
     }
 
 

@@ -8,7 +8,6 @@
 
 namespace FCToernooi\Tournament;
 
-use Doctrine\DBAL\Connection;
 use FCToernooi\User;
 use Voetbal\Association;
 use Voetbal\Field;
@@ -52,7 +51,6 @@ class Service
      * @param Repository $tournamentRepos
      * @param RoleRepository $roleRepos
      * @param UserRepository $userRepos
-     * @param Connection $conn
      */
     public function __construct(
         \Voetbal\Service $voetbalService,

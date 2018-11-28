@@ -92,7 +92,9 @@ $app->add(function ( $request,  $response, callable $next) {
             }
         )
     );
-    return $next($request, $response);
+    $response = $next($request, $response);
+    header_remove("X-Powered-By");
+    return $response;
 });
 
 $container["cache"] = function ($container) {
