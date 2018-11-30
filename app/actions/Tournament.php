@@ -271,7 +271,6 @@ final class Tournament
         catch( \Exception $e ){
             return $response->withStatus(422 )->write( $e->getMessage() );
         }
-
     }
 
 
