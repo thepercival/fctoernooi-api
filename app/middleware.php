@@ -10,7 +10,9 @@ use App\Response\Unauthorized;
 use App\Middleware\Authentication;
 use \JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\ContextFactory\CallableSerializationContextFactory;
+use JMS\Serializer\ContextFactory\CallableDeserializationContextFactory;
 
 $container = $app->getContainer();
 $container["token"] = function ($container) {
@@ -87,6 +89,15 @@ $app->add(function ( $request,  $response, callable $next) {
         new CallableSerializationContextFactory(
             function () use ($apiVersion) {
                 return SerializationContext::create()
+                    ->setGroups(array('Default'))
+                    ->setVersion($apiVersion);
+            }
+        )
+    );
+    $this['serializer']->setDeserializationContextFactory(
+        new CallableDeserializationContextFactory(
+            function () use ($apiVersion) {
+                return DeserializationContext::create()
                     ->setGroups(array('Default'))
                     ->setVersion($apiVersion);
             }
