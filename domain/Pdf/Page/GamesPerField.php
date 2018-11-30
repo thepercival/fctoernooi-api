@@ -56,7 +56,7 @@ class GamesPerField extends ToernooiPdfPage
         /*$nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         $margin = 20;
         $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
         $roundName = $this->getRoundNameStructure( $round, $nameService);

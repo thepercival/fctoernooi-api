@@ -10,7 +10,7 @@ namespace FCToernooi\Pdf\Page;
 
 use FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
-use Voetbal\PoulePlace;
+use Voetbal\Structure\NameService;
 
 class Gamenotes extends ToernooiPdfPage
 {
@@ -66,7 +66,7 @@ class Gamenotes extends ToernooiPdfPage
         $nWidthResult = $nWidth / 2;
         $nX2 = $nSecondBorder + ( $nMargin * 0.5 );
 
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         $roundsByNumber = $this->getParent()->getRoundsByRumber( $roundNumber );
         $roundsName = $nameService->getRoundsName( $roundNumber, $roundsByNumber );
         $this->drawCell( "ronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );

@@ -11,9 +11,6 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
 use Voetbal\Structure\NameService;
-use Voetbal\Poule;
-use Voetbal\PoulePlace;
-use Voetbal\Qualify\Service as QualifyService;
 
 class Planning extends ToernooiPdfPage
 {
@@ -58,10 +55,8 @@ class Planning extends ToernooiPdfPage
 
     public function draw( Round $round, $nY )
     {
-        $structureService = $this->getParent()->getStructureService();
-        $allRoundsByNumber = $structureService->getAllRoundsByNumber( $this->getParent()->getTournament()->getCompetition() );
-        $roundsByNumber = $allRoundsByNumber[$round->getNumber()];
-        $roundsName = $structureService->getNameService()->getRoundsName( $round->getNumber(), $roundsByNumber );
+        $nameService = new NameService();
+        $roundsName = $nameService->getRoundNumberName( $round->getNumber() );
         $nY = $this->drawSubHeader( $roundsName, $nY );
         return;
 
@@ -75,7 +70,7 @@ class Planning extends ToernooiPdfPage
         /*$nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         $margin = 20;
         $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
         $roundName = $this->getRoundNameStructure( $round, $nameService);

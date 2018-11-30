@@ -379,8 +379,9 @@ final class Tournament
                 throw new \Exception("kies minimaal 1 printoptie", E_ERROR);
             }
 
+            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
             $pdf = new \FCToernooi\Pdf\Document( $tournament,
-                $this->structureService, $this->planningService,
+                $structure, $this->planningService,
                 $pdfConfig );
             $vtData = $pdf->render();
 

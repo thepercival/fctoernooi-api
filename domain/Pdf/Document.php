@@ -10,7 +10,7 @@ namespace FCToernooi\Pdf;
 
 use \FCToernooi\Tournament;
 use \FCToernooi\Pdf\TournamentConfig;
-use Voetbal\Structure\Service as StructureService;
+use Voetbal\Structure;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 use Voetbal\Round;
@@ -23,9 +23,9 @@ class Document extends \Zend_Pdf
      */
     protected $tournament;
     /**
-     * @var StructureService
+     * @var Structure
      */
-    protected $structureService;
+    protected $structure;
     /**
      * @var PlanningService
      */
@@ -49,25 +49,24 @@ class Document extends \Zend_Pdf
      */
     public function __construct(
         Tournament $tournament,
-        StructureService $structureService,
+        Structure $structure,
         PlanningService $planningService,
         TournamentConfig $config
     )
     {
         parent::__construct();
         $this->tournament = $tournament;
-        $this->structureService = $structureService;
+        $this->structure = $structure;
         $this->planningService = $planningService;
         $this->config = $config;
-        $this->allRoundByNumber = $this->structureService->getAllRoundsByNumber( $tournament->getCompetition() );
     }
 
     /**
      * @return StructureService
      */
-    public function getStructureService()
+    public function getStructure()
     {
-        return $this->structureService;
+        return $this->structure;
     }
 
     /**
@@ -137,12 +136,12 @@ class Document extends \Zend_Pdf
             $page->draw();
         }
         if( $this->config->getInputform() ) {
-            $this->drawInputform( $this->tournament->getCompetition()->getFirstRound());
+            $this->drawInputform( $this->structure->getRootRound());
         }
         if( $this->config->getPlanning() ) {
             $page = $this->createPagePlanning();
             $nY = $page->drawHeader( "wedstrijden" );
-            $page->draw( $this->tournament->getCompetition()->getFirstRound(), $nY );
+            $page->draw( $this->structure->getRootRound(), $nY );
         }
         if( $this->config->getRules() ) {
 
@@ -153,13 +152,13 @@ class Document extends \Zend_Pdf
         if( $this->config->getGamesperfield() ) {
             $page = $this->createPageGamesPerField();
             $nY = $page->drawHeader( "wedstrijden per veld" );
-            $page->draw( $this->tournament->getCompetition()->getFirstRound(), $nY );
+            $page->draw( $this->structure->getRootRound(), $nY );
         }
     }
 
     protected function drawGamenotes()
     {
-        $games = $this->getScheduledGames( $this->tournament->getCompetition()->getFirstRound() );
+        $games = $this->getScheduledGames( $this->structure->getRootRound() );
         while( count( $games ) > 0 ) {
             $page = $this->createPageGamenotes( array_shift( $games ), array_shift( $games ) );
             $page->draw();
@@ -260,7 +259,7 @@ class Document extends \Zend_Pdf
 
     /*public function getName( PoulePlace $poulePlace )
     {
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         if( $poulePlace->getTeam() !== null ) {
             return $poulePlace->getTeam()->getName();
         }

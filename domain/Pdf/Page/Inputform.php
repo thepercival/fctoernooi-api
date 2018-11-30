@@ -9,11 +9,8 @@
 namespace FCToernooi\Pdf\Page;
 
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\PoulePlace;
-use Voetbal\Qualify\Service as QualifyService;
 use Voetbal\Structure\NameService;
+use Voetbal\Poule;
 
 class Inputform extends ToernooiPdfPage
 {
@@ -56,7 +53,7 @@ class Inputform extends ToernooiPdfPage
     /*public function draw()
     {
         $tournament = $this->getParent()->getTournament();
-        $firstRound = $this->getParent()->getStructureService()->getFirstRound( $tournament->getCompetition() );
+        $firstRound = $this->getParent()->getStructure()->getRootRound();
         $this->setQual( $firstRound );
         $nY = $this->drawHeader( "draaitabel per poule" );
         $nY = $this->draw( $firstRound, $nY );
@@ -73,7 +70,7 @@ class Inputform extends ToernooiPdfPage
 
     protected function getPouleName( Poule $poule )
     {
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         return $nameService->getPouleName( $poule, true );
     }
 
@@ -88,7 +85,7 @@ class Inputform extends ToernooiPdfPage
             $poules = $round->getPoules()->toArray();
             $nrOfPoules = $round->getPoules()->count();
             $percNumberWidth = 0.1;
-            $nameService = $this->getParent()->getStructureService()->getNameService();
+            $nameService = new NameService();
             $nYPouleStart = $nY;
             $maxNrOfPlacesPerPoule = null;
             $nrOfLines = $this->getNrOfLines( $nrOfPoules );

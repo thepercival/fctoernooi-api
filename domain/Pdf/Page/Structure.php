@@ -11,7 +11,6 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
 use Voetbal\Poule;
-use Voetbal\PoulePlace;
 use Voetbal\Qualify\Service as QualifyService;
 use Voetbal\Structure\NameService;
 
@@ -43,13 +42,12 @@ class Structure extends ToernooiPdfPage
 
     public function draw()
     {
-        $tournament = $this->getParent()->getTournament();
-        $firstRound = $this->getParent()->getStructureService()->getFirstRound( $tournament->getCompetition() );
-        $this->setQual( $firstRound );
+        $rooRound = $this->getParent()->getStructure()->getRootRound();
+        $this->setQual( $rooRound );
         $nY = $this->drawHeader( "indeling & structuur" );
-        $nY = $this->drawGrouping( $firstRound, $nY );
+        $nY = $this->drawGrouping( $rooRound, $nY );
 
-        $this->drawRoundStructure( $firstRound, $nY );
+        $this->drawRoundStructure( $rooRound, $nY );
     }
 
     protected function setQual( Round $parentRound )
@@ -63,7 +61,7 @@ class Structure extends ToernooiPdfPage
 
     protected function getPouleName( Poule $poule )
     {
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         return $nameService->getPouleName( $poule, true );
     }
 
@@ -78,7 +76,7 @@ class Structure extends ToernooiPdfPage
         $poules = $round->getPoules()->toArray();
         $nrOfPoules = $round->getPoules()->count();
         $percNumberWidth = 0.1;
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         $nYPouleStart = $nY;
         $maxNrOfPlacesPerPoule = null;
         $nrOfLines = $this->getNrOfLines( $nrOfPoules );
@@ -168,7 +166,7 @@ class Structure extends ToernooiPdfPage
         $nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-        $nameService = $this->getParent()->getStructureService()->getNameService();
+        $nameService = new NameService();
         $margin = 20;
         $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
         $roundName = $this->getRoundNameStructure( $round, $nameService);
