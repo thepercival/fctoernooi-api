@@ -9,12 +9,13 @@
 namespace FCToernooi\Pdf;
 
 use \FCToernooi\Tournament;
-use \FCToernooi\Pdf\TournamentConfig;
+use Voetbal\Qualify\Service as QualifyService;
 use Voetbal\Structure;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 use Voetbal\Round;
-use FCToernooi\Pdf\Page\Inputform as PagePoules;
+use Voetbal\Round\Number as RoundNumber;
+use FCToernooi\Pdf\Page\PoulePivotTables as PagePoules;
 
 class Document extends \Zend_Pdf
 {
@@ -59,6 +60,7 @@ class Document extends \Zend_Pdf
         $this->structure = $structure;
         $this->planningService = $planningService;
         $this->config = $config;
+        $this->setQualificationRules( $structure->getRootRound() );
     }
 
     /**
@@ -135,8 +137,9 @@ class Document extends \Zend_Pdf
             $page = $this->createPageStructure();
             $page->draw();
         }
-        if( $this->config->getInputform() ) {
-            $this->drawInputform( $this->structure->getRootRound());
+        if( $this->config->getPoulePivotTables() ) {
+            list( $page, $nY ) = $this->createPagePoulePivotTables();
+            $this->drawPoulePivotTables( $this->structure->getFirstRoundNumber(), $page, $nY );
         }
         if( $this->config->getPlanning() ) {
             $page = $this->createPagePlanning();
@@ -165,32 +168,22 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function drawInputform( Round $round, PagePoules $page = null, int $nY = null )
+    protected function drawPoulePivotTables( RoundNumber $roundNumber, PagePoules $page = null, int $nY = null )
     {
-        foreach( $round->getPoules() as $poule ) {
-            if (!$poule->needsRanking()) {
-                continue;
+        if( $roundNumber->needsRanking() ) {
+            $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
+            foreach ($roundNumber->getRounds() as $round) {
+                foreach ($round->getPoules() as $poule) {
+                    $pouleHeight = $page->getPouleHeight($poule);
+                    if ($nY - $pouleHeight < $page->getPageMargin() ) {
+                        list($page, $nY) = $this->createPagePoulePivotTables();
+                    }
+                    $nY = $page->draw($poule, $nY);
+                }
             }
-            if ($poule->getState() === Game::STATE_PLAYED) {
-                continue;
-            }
-            $pageCreated = false;
-            if( $page === null ) {
-                $page = $this->createPageInputform();
-                $pageCreated = true;
-                $nY = $page->drawHeader( "draaitabel per poule" );
-            }
-
-            $pouleHeight = $page->getPouleHeight( $poule );
-            if( !$pageCreated and $nY - $pouleHeight < $page->getPageMargin() ) {
-                $page = $this->createPageInputform();
-                $nY = $page->drawHeader( "draaitabel per poule" );
-            }
-            $nY = $page->draw( $poule, $nY );
         }
-
-        foreach( $round->getChildRounds() as $childRound ) {
-            $this->drawInputform( $childRound, $page, $nY );
+        if( $roundNumber->hasNext() ) {
+            $this->drawPoulePivotTables( $roundNumber->getNext(), $page, $nY );
         }
     }
 
@@ -232,13 +225,14 @@ class Document extends \Zend_Pdf
         return $page;
     }
 
-    protected function createPageInputform()
+    protected function createPagePoulePivotTables()
     {
-        $page = new \FCToernooi\Pdf\Page\Inputform( \Zend_Pdf_Page::SIZE_A4 );
+        $page = new \FCToernooi\Pdf\Page\PoulePivotTables( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
-        return $page;
+        $nY = $page->drawHeader( "invulformulier" );
+        return array( $page, $nY );
     }
 
 
@@ -265,4 +259,13 @@ class Document extends \Zend_Pdf
         }
         return $nameService->getPoulePlaceName( $poulePlace );
     }*/
+
+    protected function setQualificationRules( Round $parentRound )
+    {
+        foreach ($parentRound->getChildRounds() as $childRound) {
+            $qualifyService = new QualifyService($childRound);
+            $qualifyService->createRules();
+            $this->setQualificationRules( $childRound );
+        }
+    }
 }

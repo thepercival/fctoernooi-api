@@ -32,7 +32,7 @@ class TournamentConfig
     /**
      * @var bool
      */
-    private $inputform;
+    private $poulePivotTables;
 
     public function __construct(
         bool $gamenotes = true,
@@ -40,7 +40,7 @@ class TournamentConfig
         bool $rules = false,
         bool $gamesperfield = false,
         bool $planning = false,
-        bool $inputform = false
+        bool $poulePivotTables = false
     )
     {
         $this->gamenotes = $gamenotes;
@@ -48,7 +48,7 @@ class TournamentConfig
         $this->rules = $rules;
         $this->gamesperfield = $gamesperfield;
         $this->planning = $planning;
-        $this->inputform = $inputform;
+        $this->poulePivotTables = $poulePivotTables;
     }
 
     /**
@@ -94,9 +94,9 @@ class TournamentConfig
     /**
      * @return bool
      */
-    public function getInputform()
+    public function getPoulePivotTables()
     {
-        return $this->inputform;
+        return $this->poulePivotTables;
     }
 
     /**
@@ -105,6 +105,6 @@ class TournamentConfig
     public function allOptionsOff()
     {
         return (!$this->getStructure() && !$this->getPlanning() && !$this->getGamenotes() &&
-         !$this->getGamesperfield() && !$this->getRules() && !$this->getInputForm() );
+         !$this->getGamesperfield() && !$this->getRules() && !$this->getPoulePivotTables() );
     }
 }

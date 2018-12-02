@@ -11,9 +11,15 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Structure\NameService;
 use Voetbal\Poule;
+use Voetbal\Round\Number as RoundNumber;
+use FCToernooi\Pdf\Page;
 
-class Inputform extends ToernooiPdfPage
+class PoulePivotTables extends ToernooiPdfPage
 {
+    protected $nameColumnWidth;
+    protected $pointsColumnWidth;
+    protected $rankColumnWidth;
+    protected $versusColumnsWidth;
     /*protected $maxPoulesPerLine;
     protected $poulePlaceWidthStructure;
     protected $pouleMarginStructure;
@@ -23,6 +29,11 @@ class Inputform extends ToernooiPdfPage
     {
         parent::__construct( $param1 );
         $this->setLineWidth( 0.5 );
+        $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
+        $this->pointsColumnWidth = $this->getDisplayWidth() * 0.1;
+        $this->rankColumnWidth = $this->getDisplayWidth() * 0.1;
+        $this->versusColumnsWidth = $this->getDisplayWidth() * 0.55;
+
         /*$this->maxPoulesPerLine = 3;
         $this->poulePlaceWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
@@ -38,6 +49,17 @@ class Inputform extends ToernooiPdfPage
         return $this->rowHeight;
     }
 
+    public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
+    {
+        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
+        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
+        $nX = $this->getPageMargin();
+        $displayWidth = $this->getDisplayWidth();
+        $subHeader = (new NameService())->getRoundNumberName( $roundNumber);
+        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, Page::ALIGNCENTER );
+        return $nY - ( 2 * $fontHeightSubHeader );
+    }
+
     /**
      * t/m 3 teams 0g, t/m 8 teams 45g, hoger 90g
      *
@@ -45,7 +67,15 @@ class Inputform extends ToernooiPdfPage
      */
     public function getPouleHeight( Poule $poule )
     {
-        return 6;
+        $nrOfPlaces = $poule->getPlaces()->count();
+
+        $height = 0;
+        // header row
+
+        // places
+        $height += $this->getRowHeight() * $nrOfPlaces;
+
+        return $height;
     }
 
 
@@ -76,10 +106,25 @@ class Inputform extends ToernooiPdfPage
 
     public function draw( Poule $poule, $nY )
     {
+        // draw first row
+        // $this->drawTableHeader();
 
+        $nRowHeight = $this->getRowHeight();
+        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
+        $nrOfPlaces = $poule->getPlaces()->count();
+
+        $nX = $this->getPageMargin();
         foreach( $poule->getPlaces() as $poulePlace ) {
+            $this->drawCell( (new NameService())->getPoulePlaceName( $poulePlace ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            for( $nI = 0 ; $nI < $nrOfPlaces ; $nI++ ) {
+                // draw rectangles
+            }
 
-            /*$nRowHeight = $this->getRowHeight();
+            // draw pointsrectangle
+
+            // draw rankrectangle
+
+            /*
             $fontHeight = $nRowHeight - 4;
             $pouleMargin = 20;
             $poules = $round->getPoules()->toArray();
@@ -115,6 +160,7 @@ class Inputform extends ToernooiPdfPage
                 }
                 $nYPouleStart -= ( $maxNrOfPlacesPerPoule + 2 ) * $nRowHeight;
             }*/
+            $nY -= $nRowHeight;
         }
 
         return $nY; // - ( 2 * $nRowHeight );

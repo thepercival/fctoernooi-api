@@ -11,7 +11,6 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
 use Voetbal\Poule;
-use Voetbal\Qualify\Service as QualifyService;
 use Voetbal\Structure\NameService;
 
 class Structure extends ToernooiPdfPage
@@ -43,20 +42,10 @@ class Structure extends ToernooiPdfPage
     public function draw()
     {
         $rooRound = $this->getParent()->getStructure()->getRootRound();
-        $this->setQual( $rooRound );
         $nY = $this->drawHeader( "indeling & structuur" );
         $nY = $this->drawGrouping( $rooRound, $nY );
 
         $this->drawRoundStructure( $rooRound, $nY );
-    }
-
-    protected function setQual( Round $parentRound )
-    {
-        foreach ($parentRound->getChildRounds() as $childRound) {
-            $qualifyService = new QualifyService($childRound);
-            $qualifyService->setQualifyRules();
-            $this->setQual( $childRound );
-        }
     }
 
     protected function getPouleName( Poule $poule )
