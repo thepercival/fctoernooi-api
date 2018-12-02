@@ -231,7 +231,7 @@ class Document extends \Zend_Pdf
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
-        $nY = $page->drawHeader( "invulformulier" );
+        $nY = $page->drawHeader( "pouledraaitabel" );
         return array( $page, $nY );
     }
 
