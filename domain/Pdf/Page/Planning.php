@@ -10,10 +10,15 @@ namespace FCToernooi\Pdf\Page;
 
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
+use Voetbal\Game;
+use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Structure\NameService;
+use FCToernooi\Pdf\Page;
 
 class Planning extends ToernooiPdfPage
 {
+    use GamesTrait;
+
     /*protected $maxPoulesPerLine;
     protected $poulePlaceWidthStructure;
     protected $pouleMarginStructure;
@@ -42,8 +47,16 @@ class Planning extends ToernooiPdfPage
     public function getPageMargin(){ return 20; }
     public function getHeaderHeight(){ return 0; }
 
-    protected function showPouleName(){
-        // <span>{{nameService.getPouleName(game.getPoule(), false)}}</span>
+    public function getGames( RoundNumber $roundNumber ): array {
+        $games = [];
+        foreach( $roundNumber->getRounds() as $round ) {
+            foreach( $round->getPoules() as $poule ) {
+                foreach( $poule->getGames() as $game ) {
+                    $games[] = $game;
+                }
+            }
+        }
+        return $games;
     }
 
     protected function getRowHeight() {
@@ -53,37 +66,31 @@ class Planning extends ToernooiPdfPage
         return $this->rowHeight;
     }
 
-    public function draw( Round $round, $nY )
+    public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
     {
-        $nameService = new NameService();
-        $roundsName = $nameService->getRoundNumberName( $round->getNumber() );
-        $nY = $this->drawSubHeader( $roundsName, $nY );
-        return;
+        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
+        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
+        $nX = $this->getPageMargin();
+        $displayWidth = $this->getDisplayWidth();
+        $subHeader = (new NameService())->getRoundNumberName( $roundNumber);
+        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, Page::ALIGNCENTER );
+        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
+        return $nY - ( 2 * $fontHeightSubHeader );
+    }
+
+    public function drawGame( Game $game, $nY )
+    {
+//        $nameService = new NameService();
+//        $roundsName = $nameService->getRoundNumberName( $round->getNumber() );
+//        $nY = $this->drawSubHeader( $roundsName, $nY );
+        return $nY - $this->getRowHeight();
 
         // $this->drawRound( $round, $nY );
     }
 
-
-
-    protected function drawRoundStructureHelper( Round $round, $nY )
+    public function getGameHeight( Game $game )
     {
-        /*$nRowHeight = $this->getRowHeight();
-        $fontHeight = $nRowHeight - 4;
-        $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-        $nameService = new NameService();
-        $margin = 20;
-        $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
-        $roundName = $this->getRoundNameStructure( $round, $nameService);
-        $this->drawCell( $roundName, $nX, $nY, $width, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, $arrLineColors );
-        $nY -= $nRowHeight;
-        $nY -= $this->pouleMarginStructure;
-
-        $nrOfChildren = $round->getChildRounds()->count();
-        $widthChild = ( $width / $nrOfChildren ) - ( $nrOfChildren > 1 ? ( $margin / 2 ) : 0 );
-        foreach( $round->getChildRounds() as $childRound ) {
-            $this->drawRoundStructureHelper( $childRound, $nY, $nX, $widthChild );
-            $nX += $widthChild + $margin;
-        }*/
+        return $this->getRowHeight();
     }
 
     /**
@@ -93,14 +100,14 @@ class Planning extends ToernooiPdfPage
      * @param NameService $nameService
      * @return string
      */
-    protected function getRoundNameStructure( Round $round, NameService $nameService ): string
-    {
-        $roundName = $nameService->getRoundName( $round );
-        if( $round->getNumber() === 2 and $round->getOpposingRound() !== null ) {
-            $roundName .= ' - ' . $nameService->getWinnersLosersDescription($round->getWinnersOrlosers()) . 's';
-        }
-        return $roundName;
-    }
+//    protected function getRoundNameStructure( Round $round, NameService $nameService ): string
+//    {
+//        $roundName = $nameService->getRoundName( $round );
+//        if( $round->getNumber() === 2 and $round->getOpposingRound() !== null ) {
+//            $roundName .= ' - ' . $nameService->getWinnersLosersDescription($round->getWinnersOrlosers()) . 's';
+//        }
+//        return $roundName;
+//    }
 
 
 

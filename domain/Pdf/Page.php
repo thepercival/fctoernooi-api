@@ -134,7 +134,7 @@ abstract class Page extends \Zend_Pdf_Page
         return $this->getWidth() - ( 2 * $this->getPageMargin() );
     }
 
-    public function drawCell( $sText, $nXPos, $nYPos, $nWidth, $nHeight, $nAlign = Page::ALIGNLEFT, $vtLineColors = null )
+    public function drawCell( $sText, $nXPos, $nYPos, $nWidth, $nHeight, $nAlign = Page::ALIGNLEFT, $vtLineColors = null, $degrees = null )
     {
         $nStyle = \Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
 
@@ -176,9 +176,9 @@ abstract class Page extends \Zend_Pdf_Page
         }
 
         $nFontSize = $this->getFontSize();
-        $nTextHeight = $nYPos - ( ( ( $nHeight / 2 ) + ( $nFontSize / 2 ) ) - 1 );
+        $nTextY = $nYPos - ( ( ( $nHeight / 2 ) + ( $nFontSize / 2 ) ) - 1.5 );
 
-        $nRetVal = $this->drawString( $sText, $nXPos, $nTextHeight, $nWidth, $nAlign );
+        $nRetVal = $this->drawString( $sText, $nXPos, $nTextY, $nWidth, $nAlign, $degrees );
 
         return $nXPos + $nWidth;
     }
@@ -234,13 +234,17 @@ abstract class Page extends \Zend_Pdf_Page
             if( $nRotationDegree == 45 ) $nRotationAngle = M_PI / 4;
             if( $nRotationDegree == 90 ) $nRotationAngle = M_PI / 2;
 
-            $this->rotate( $nXPos, $nYPos, $nRotationAngle );
+            $nXMiddle = $nXPos;
+            if( $nMaxWidth !== null ) {
+                $nXMiddle += ( $nMaxWidth / 2);
+            }
+            $nYMiddle = $nYPos + ( $nFontSize / 2 );
+            $this->rotate( $nXMiddle, $nYMiddle, $nRotationAngle );
             // $nYTextBase -= $nFontSize - $nPadding; //Y richting is nu horizontaal (bij hoek 90 graden)
             //$nXTextBase -= round( ($nHeight )/2 ) - 2*$nPadding	 ; //MOET NOG ANDERS!!  //round( ($nWidth - $nTextWidth)/2 ) centreert hem nu verticaal
-
             $nRetVal = $this->drawString( $sText, $nXPos, $nYPos, $nMaxWidth, $nAlign );
 
-            $this->rotate( $nXPos, $nYPos, -$nRotationAngle );
+            $this->rotate( $nXMiddle, $nYMiddle, -$nRotationAngle );
 
             return $nRetVal;
         }
@@ -284,18 +288,20 @@ abstract class Page extends \Zend_Pdf_Page
 
     protected function uniord( $sChar )
     {
-        $sUCS2Char = mb_convert_encoding( $sChar, 'UCS-2LE', 'UTF-8');
-        $nCharCode1 = ord( substr( $sUCS2Char, 0, 1) );
-        $nCharCode2 = ord( substr( $sUCS2Char, 1, 1) );
+        // $sUCS2Char = mb_convert_encoding( $sChar, 'UCS-2LE', 'UTF-8');
+        $nCharCode1 = ord( substr( $sChar, 0, 1) );
+        $nCharCode2 = ord( substr( $sChar, 1, 1) );
         return $nCharCode2 * 256 + $nCharCode1;
     }
 
-    protected function getTextWidth( $sText )
+    protected function getTextWidth( string $sText = null, int $nFontSize = null )
     {
         $nCharPosition = 0;
         $font = $this->getFont();
         $nFontUnitsPerEM = $font->getUnitsPerEm();
-        $nFontSize = $this->getFontSize();
+        if( $nFontSize === null ){
+            $nFontSize = $this->getFontSize();
+        }
 
         // $unicodeString = 'aÄ…bcÄ�deÄ™Ã«Å‚';
         $chrArray = preg_split('//u',$sText, -1, PREG_SPLIT_NO_EMPTY);

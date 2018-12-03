@@ -30,9 +30,9 @@ class PoulePivotTables extends ToernooiPdfPage
         parent::__construct( $param1 );
         $this->setLineWidth( 0.5 );
         $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
-        $this->pointsColumnWidth = $this->getDisplayWidth() * 0.1;
-        $this->rankColumnWidth = $this->getDisplayWidth() * 0.1;
-        $this->versusColumnsWidth = $this->getDisplayWidth() * 0.55;
+        $this->versusColumnsWidth = $this->getDisplayWidth() * 0.60;
+        $this->pointsColumnWidth = $this->getDisplayWidth() * 0.08;
+        $this->rankColumnWidth = $this->getDisplayWidth() * 0.07;
 
         /*$this->maxPoulesPerLine = 3;
         $this->poulePlaceWidthStructure = 30;
@@ -72,14 +72,15 @@ class PoulePivotTables extends ToernooiPdfPage
 
         $height = 0;
         // header row
+        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+        $degrees = $this->getDegrees( $nrOfPlaces );
+        $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
 
         // places
         $height += $this->getRowHeight() * $nrOfPlaces;
 
         return $height;
     }
-
-
 
     /*public function draw()
     {
@@ -108,44 +109,38 @@ class PoulePivotTables extends ToernooiPdfPage
     public function drawPouleHeader( Poule $poule, $nY )
     {
         $nRowHeight = $this->getRowHeight();
+        $nrOfPlaces = $poule->getPlaces()->count();
+        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+        $degrees = $this->getDegrees( $nrOfPlaces );
+        $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
 
         $nX = $this->getPageMargin();
-        $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+        $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, Page::ALIGNCENTER, 'black' );
 
         // CDK  TODO
         // kijken als namen passen in $this->versusColumnsWidth
-        // zo niet kijk dan wat de minimale aantal graden zijn, zodat het wel past
+        // zo niet, kijk als 50 graden past, zo niet dan vertical
         // hierbij is 90 graden het max.
         // wanneer 90 graden en tekst te lang voor maximale hoogte, dan kijken als de tekst over meerdere regels kan worden uitgesplitst
         // zo nee, dan afkappen
-        $nrOfPlaces = $poule->getPlaces()->count();
-        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+
         $nVersus = 0;
         foreach( $poule->getPlaces() as $poulePlace ) {
-            $nX += $versusColumnWidth;
-            /*$nX = $this->getPageMargin();
-            $nX = $this->drawCell((new NameService())->getPoulePlaceName($poulePlace), $nX, $nY, $this->nameColumnWidth,
-                $nRowHeight, Page::ALIGNLEFT, 'black');
 
-            // draw versus
-            for ($nI = 0; $nI < $nrOfPlaces; $nI++) {
-                if ($nVersus === $nI) {
-                    $this->setFillColor(new \Zend_Pdf_Color_Html("lightgrey"));
-                }
-                $nX = $this->drawCell(null, $nX, $nY, $versusColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black');
-                if ($nVersus === $nI) {
-                    $this->setFillColor(new \Zend_Pdf_Color_Html("white"));
-                }
-            }*/
+            $nX = $this->drawCell((new NameService())->getPoulePlaceName($poulePlace, true), $nX, $nY, $versusColumnWidth,
+                $height, Page::ALIGNCENTER, 'black', $degrees);
+
+
+            // $nX += $versusColumnWidth;
             $nVersus++;
         }
         // draw pointsrectangle
-        $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $nRowHeight, Page::ALIGNRIGHT, 'black' );
+        $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $height, Page::ALIGNCENTER, 'black' );
 
         // draw rankrectangle
-        $this->drawCell( "plek", $nX, $nY, $this->rankColumnWidth, $nRowHeight, Page::ALIGNRIGHT, 'black' );
+        $this->drawCell( "plek", $nX, $nY, $this->rankColumnWidth, $height, Page::ALIGNCENTER, 'black' );
 
-        return $nY - $nRowHeight;
+        return $nY - $height;
     }
 
     public function draw( Poule $poule, $nY )
@@ -160,7 +155,7 @@ class PoulePivotTables extends ToernooiPdfPage
         $nVersus = 0;
         foreach( $poule->getPlaces() as $poulePlace ) {
             $nX = $this->getPageMargin();
-            $nX = $this->drawCell( (new NameService())->getPoulePlaceName( $poulePlace ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            $nX = $this->drawCell( (new NameService())->getPoulePlaceName( $poulePlace, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
 
             // draw versus
             for( $nI = 0 ; $nI < $nrOfPlaces ; $nI++ ) {
@@ -180,85 +175,44 @@ class PoulePivotTables extends ToernooiPdfPage
             // draw rankrectangle
             $this->drawCell( null, $nX, $nY, $this->rankColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
 
-            /*
-            $fontHeight = $nRowHeight - 4;
-            $pouleMargin = 20;
-            $poules = $round->getPoules()->toArray();
-            $nrOfPoules = $round->getPoules()->count();
-            $percNumberWidth = 0.1;
-            $nameService = new NameService();
-            $nYPouleStart = $nY;
-            $maxNrOfPlacesPerPoule = null;
-            $nrOfLines = $this->getNrOfLines( $nrOfPoules );
-            for( $line = 1 ; $line <= $nrOfLines ; $line++ ) {
-                $nrOfPoulesForLine = $this->getNrOfPoulesForLine( $nrOfPoules, $line === $nrOfLines );
-                $pouleWidth = $this->getPouleWidth( $nrOfPoulesForLine, $pouleMargin );
-                $nX = $this->getXLineCentered( $nrOfPoulesForLine, $pouleWidth, $pouleMargin );
-                while( $nrOfPoulesForLine > 0 ) {
-                    $poule = array_shift( $poules );
-
-                    if( $maxNrOfPlacesPerPoule === null ) {
-                        $maxNrOfPlacesPerPoule = $poule->getPlaces()->count();
-                    }
-                    $numberWidth = $pouleWidth * $percNumberWidth;
-                    $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-                    $this->drawCell( $this->getPouleName( $poule ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
-                    $this->setFont( $this->getParent()->getFont(), $fontHeight );
-                    $nY = $nYPouleStart - $nRowHeight;
-                    foreach( $poule->getPlaces() as $poulePlace ) {
-                        $this->drawCell( $poulePlace->getNumber(), $nX, $nY, $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, "black" );
-                        $name = $poulePlace->getTeam() !== null ? $nameService->getPoulePlaceNameSimple( $poulePlace, true ) : null;
-                        $this->drawCell( $name, $nX + $numberWidth, $nY, $pouleWidth - $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, "black" );
-                        $nY -= $nRowHeight;
-                    }
-                    $nX += $pouleMargin + $pouleWidth;
-                    $nrOfPoulesForLine--;
-                }
-                $nYPouleStart -= ( $maxNrOfPlacesPerPoule + 2 ) * $nRowHeight;
-            }*/
             $nY -= $nRowHeight;
         }
-
         return $nY - $nRowHeight;
     }
-/*
-    protected function getNrOfLines( $nrOfPoules )
-    {
-        if( ( $nrOfPoules % 3 ) !== 0 ) {
-            $nrOfPoules += ( 3 - ( $nrOfPoules % 3 ) );
-        }
-        return ( $nrOfPoules / 3 );
-    }
 
-    protected function getNrOfPoulesForLine( $nrOfPoules, $lastLine )
-    {
-        if( $nrOfPoules === 4 ) {
-            return 2;
+    protected function getPoulePlaceNamesWidth( Poule $poule ) {
+        $width = 0;
+        foreach( $poule->getPlaces() as $poulePlace ) {
+            $width += $this->getPoulePlaceWidth( $poulePlace );
         }
-        if( $nrOfPoules <= 3 ) {
-            return $nrOfPoules;
-        }
-        if( !$lastLine ) {
-            return 3;
-        }
-        return ( $nrOfPoules % 3 );
-    }
-
-    protected function getPouleWidth( $nrOfPoules, $margin )
-    {
-        if( $nrOfPoules === 1 ) {
-            $nrOfPoules++;
-        }
-        return ( $this->getDisplayWidth() - ( ( $nrOfPoules - 1 ) * $margin ) ) / $nrOfPoules;
+        return $width;
     }
 
 
-    protected function getXLineCentered( $nrOfPoules, $pouleWidth, $margin )
+    public function getPoulePlaceWidth( PoulePlace $poulePlace, int $nFontSize = null )
     {
-        if( $nrOfPoules > $this->maxPoulesPerLine  ) {
-            $nrOfPoules = $this->maxPoulesPerLine;
+        $key = $poulePlace->getId();
+        if( $this->getParent()->hasTextWidth($key) ) {
+            return $this->getParent()->getTextWidth();
         }
-        $width = ( $nrOfPoules * $pouleWidth ) + ( ( $nrOfPoules - 1 ) * $margin );
-        return $this->getPageMargin() + ( $this->getDisplayWidth() - $width ) / 2;
-    }*/
+        $width = $this->getTextWidth( (new NameService())->getPoulePlaceName($poulePlace, true));
+        return $this->getParent()->setTextWidth($width);
+    }
+
+    public function getDegrees( int $nrOfPlaces ): int {
+        if( $nrOfPlaces <= 3 ) {
+            return 0;
+        }
+        if( $nrOfPlaces >= 6 ) {
+            return 90;
+        }
+        return 45;
+    }
+
+    public function getVersusHeight( $versusColumnWidth, int $degrees ): int {
+        if( $degrees === 90 ) {
+            return $versusColumnWidth * 2;
+        }
+        return (tan(deg2rad($degrees)) * $versusColumnWidth );
+    }
 }

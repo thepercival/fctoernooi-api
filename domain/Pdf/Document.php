@@ -16,6 +16,7 @@ use Voetbal\Game;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
 use FCToernooi\Pdf\Page\PoulePivotTables as PagePoules;
+use FCToernooi\Pdf\Page\Planning as PagePlanning;
 
 class Document extends \Zend_Pdf
 {
@@ -39,8 +40,18 @@ class Document extends \Zend_Pdf
      * @var array
      */
     protected $allRoundByNumber;
-    protected $m_nHeaderHeight;					// int
-    protected $m_nPageMargin;					// int
+    /**
+     * @var int
+     */
+    protected $m_nHeaderHeight;
+    /**
+     * @var int
+     */
+    protected $m_nPageMargin;
+    /**
+     * @var array
+     */
+    protected $widthText = [];
 
     /**
      * Constructs the class
@@ -142,9 +153,8 @@ class Document extends \Zend_Pdf
             $this->drawPoulePivotTables( $this->structure->getFirstRoundNumber(), $page, $nY );
         }
         if( $this->config->getPlanning() ) {
-            $page = $this->createPagePlanning();
-            $nY = $page->drawHeader( "wedstrijden" );
-            $page->draw( $this->structure->getRootRound(), $nY );
+            list( $page, $nY ) = $this->createPagePlanning();
+            $this->drawPlanning( $this->structure->getFirstRoundNumber(), $page, $nY );
         }
         if( $this->config->getRules() ) {
 
@@ -156,6 +166,26 @@ class Document extends \Zend_Pdf
             $page = $this->createPageGamesPerField();
             $nY = $page->drawHeader( "wedstrijden per veld" );
             $page->draw( $this->structure->getRootRound(), $nY );
+        }
+    }
+
+    protected function drawPlanning( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    {
+        $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
+        $games = $page->getGames($roundNumber);
+        if( count($games) > 0 ) {
+            $nY = $page->drawGamesHeader($roundNumber, $nY);
+        }
+        foreach ($games as $game) {
+            $gameHeight = $page->getGameHeight($game);
+            if ($nY - $gameHeight < $page->getPageMargin() ) {
+                list($page, $nY) = $this->createPagePlanning();
+            }
+            $nY = $page->drawGame($game, $nY);
+        }
+
+        if( $roundNumber->hasNext() ) {
+            $this->drawPlanning( $roundNumber->getNext(), $page, $nY );
         }
     }
 
@@ -202,7 +232,8 @@ class Document extends \Zend_Pdf
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
-        return $page;
+        $nY = $page->drawHeader( "wedstrijden" );
+        return array( $page, $nY );
     }
 
     protected function createPageGamesPerField()
@@ -235,9 +266,6 @@ class Document extends \Zend_Pdf
         return array( $page, $nY );
     }
 
-
-
-
     /**
      * @param Tournament $tournament
      * @return array
@@ -267,5 +295,18 @@ class Document extends \Zend_Pdf
             $qualifyService->createRules();
             $this->setQualificationRules( $childRound );
         }
+    }
+
+    public function hasTextWidth( string $key ) {
+        return array_key_exists( $key, $this->widthText );
+    }
+
+    public function getTextWidth( string $key) {
+        return $this->widthText[$key];
+    }
+
+    public function setTextWidth( string $key, $value ) {
+        $this->widthText[$key] = $value;
+        return $value;
     }
 }

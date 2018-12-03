@@ -268,6 +268,4 @@ class Structure extends ToernooiPdfPage
         }
         return $this->poulePlaceWidthStructure * $nrOfPlaceColumns;
     }
-
-
 }
