@@ -78,21 +78,6 @@ class Planning extends ToernooiPdfPage
         return $nY - ( 2 * $fontHeightSubHeader );
     }
 
-    public function drawGame( Game $game, $nY )
-    {
-//        $nameService = new NameService();
-//        $roundsName = $nameService->getRoundNumberName( $round->getNumber() );
-//        $nY = $this->drawSubHeader( $roundsName, $nY );
-        return $nY - $this->getRowHeight();
-
-        // $this->drawRound( $round, $nY );
-    }
-
-    public function getGameHeight( Game $game )
-    {
-        return $this->getRowHeight();
-    }
-
     /**
      * add winnerslosers if roundnumber is 2 and has sibling
      *

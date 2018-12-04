@@ -176,6 +176,7 @@ class Document extends \Zend_Pdf
         if( count($games) > 0 ) {
             $nY = $page->drawGamesHeader($roundNumber, $nY);
         }
+        $games = $this->getPlanningService()->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH);
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {

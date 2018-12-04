@@ -12,6 +12,7 @@ use Voetbal\Game;
 use Voetbal\Competition;
 use Voetbal\Round\Number as RoundNumber;
 use FCToernooi\Pdf\Page;
+use Voetbal\Structure\NameService;
 
 trait GamesTrait
 {
@@ -21,20 +22,25 @@ trait GamesTrait
     {
         $this->columnWidths = [];
         $this->columnWidths["poule"] = 0.1;
-        $this->columnWidths["start"] = 0.1; // als niet op 1 dag dan langer
+        $this->columnWidths["start"] = 0.1;
         $this->columnWidths["field"] = 0.1;
         $this->columnWidths["home"] = 0.25;
         $this->columnWidths["score"] = 0.1;
         $this->columnWidths["away"] = 0.25;
         $this->columnWidths["referee"] = 0.1;
-        if( $competition->getFields()->count() > 0 ) {
+        if( $competition->getFields()->count() === 0 ) {
             $this->columnWidths["home"] += ( $this->columnWidths["field"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["field"] / 2 );
         }
-        if( $competition->getReferees()->count() > 0 ) {
+        if( $competition->getReferees()->count() === 0 ) {
             $this->columnWidths["home"] += ( $this->columnWidths["referee"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["referee"] / 2 );
         }
+    }
+
+    public function getGameHeight( Game $game )
+    {
+        return $this->getRowHeight();
     }
 
     protected function getGamesWidthHelper( string $key) {
@@ -42,6 +48,18 @@ trait GamesTrait
             $this->setGamesColumns( $this->getParent()->getTournament()->getCompetition() );
         }
         return $this->columnWidths[$key] * $this->getDisplayWidth();
+    }
+
+    protected function getGamesPouleWidth() {
+        return $this->getGamesWidthHelper( "poule" );
+    }
+
+    protected function getGamesStartWidth() {
+        return $this->getGamesWidthHelper( "start" );
+    }
+
+    protected function getGamesFieldWidth() {
+        return $this->getGamesWidthHelper( "field" );
     }
 
     protected function getGamesHomeWidth() {
@@ -56,51 +74,70 @@ trait GamesTrait
         return $this->getGamesWidthHelper( "away" );
     }
 
+    protected function getGamesRefereeWidth() {
+        return $this->getGamesWidthHelper( "referee" );
+    }
+
     public function drawGamesHeader( RoundNumber $roundNumber, $nY ) {
         $nX = $this->getPageMargin();
         $nRowHeight = $this->getRowHeight();
+        $gamePouleWidth = $this->getGamesPouleWidth();
+        $gameStartWidth = $this->getGamesStartWidth();
         $gameHomeWidth = $this->getGamesHomeWidth();
         $gameScoreWidth = $this->getGamesScoreWidth();
         $gameAwayWidth = $this->getGamesAwayWidth();
-//        if( $roundNumber->needsRanking() ) {
-//            // draw pouleheader <fa-icon [icon]="['fas', 'list-ul']"></fa-icon>
-//        } else {
-//            // draw vs
-//        }
-//
-//        if( planningService.canCalculateStartDateTime(roundNumber) ) {
-//            if( roundNumber onsameday) {
-//                draw start
-//            } else {
-//                {{planningService.calculateStartDateTime(roundNumber).toLocaleString("nl",{"month":"short","day":"2-digit"})}}
-//            }
-//        }
-//
-//        if( .tournament.getCompetition().getFields().length > 0; ) {
-//            draw veld
-//        }
+        $gameRefereeWidth = $this->getGamesRefereeWidth();
+        $gameFieldWidth = $this->getGamesFieldWidth();
 
-        $nX = $this->drawCell( "thuis", $nX, $nY, $gameHomeWidth, $nRowHeight, Page::ALIGNCENTER );
+        $text = null;
+        if( $roundNumber->needsRanking() ) {
+            $text = "p.";
+        } else {
+            $text = "vs";
+        }
+        $nX = $this->drawCell( $text, $nX, $nY, $gamePouleWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
-        $nX = $this->drawCell( "score", $nX, $nY, $gameScoreWidth, $nRowHeight, Page::ALIGNCENTER );
+        $planningService = $this->getParent()->getPlanningService();
+        $text = null;
+        if( $planningService->canCalculateStartDateTime($roundNumber) ) {
+            if( $planningService->gamesOnSameDay( $roundNumber ) ) {
+                $text = "start";
+            } else {
+                $startDate = $planningService->calculateStartDateTime($roundNumber);
+                $text = $startDate->format("d-m");
+            }
+        }
+        $nX = $this->drawCell( $text, $nX, $nY, $gameStartWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
-        $nX = $this->drawCell( "uit", $nX, $nY, $gameAwayWidth, $nRowHeight, Page::ALIGNCENTER );
+        if( $this->getParent()->getTournament()->getCompetition()->getFields()->count() > 0 ) {
+            $nX = $this->drawCell( "v.", $nX, $nY, $gameFieldWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+        }
 
-//        if( tournament.getCompetition().getReferees().length > 0 ) {
-//         // <i class="fi flaticon-referee"></i>
-//        }
+        $nX = $this->drawCell( "thuis", $nX, $nY, $gameHomeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+
+        $nX = $this->drawCell( "score", $nX, $nY, $gameScoreWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+
+        $nX = $this->drawCell( "uit", $nX, $nY, $gameAwayWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+
+        if( $this->getParent()->getTournament()->getCompetition()->getReferees()->count() > 0 ) {
+            $this->drawCell( "sch.", $nX, $nY, $gameRefereeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+        }
         return $nY - $nRowHeight;
     }
-
-
-
 
     /**
      * @return int
      */
     public function drawGame( Game $game, $nY )
     {
+        $nX = $this->getPageMargin();
+        $nRowHeight = $this->getRowHeight();
+        $roundNumber = $game->getRound()->getNumber();
 
+        $pouleName = (new NameService())->getPouleName($game->getPoule(), false);
+        $nX = $this->drawCell( $pouleName, $nX, $nY, $this->getGamesPouleWidth(), $nRowHeight, Page::ALIGNCENTER, "black" );
+
+        return $nY - $nRowHeight;
 
 //<tr *ngIf="tournament.hasBreak() && isBreakInBetween(game)" class="table-info">
 //            <td></td>
