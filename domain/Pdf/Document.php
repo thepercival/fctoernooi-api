@@ -181,6 +181,7 @@ class Document extends \Zend_Pdf
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {
                 list($page, $nY) = $this->createPagePlanning();
+                $nY = $page->drawGamesHeader($roundNumber, $nY);
             }
             $nY = $page->drawGame($game, $nY);
         }
