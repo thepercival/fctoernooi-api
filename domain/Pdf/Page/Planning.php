@@ -10,7 +10,7 @@ namespace FCToernooi\Pdf\Page;
 
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
-use Voetbal\Game;
+use Voetbal\Field;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Structure\NameService;
 use FCToernooi\Pdf\Page;
@@ -18,6 +18,11 @@ use FCToernooi\Pdf\Page;
 class Planning extends ToernooiPdfPage
 {
     use GamesTrait;
+
+    /**
+     * @var Field
+     */
+    protected $fieldFilter;
 
     /*protected $maxPoulesPerLine;
     protected $poulePlaceWidthStructure;
@@ -47,12 +52,20 @@ class Planning extends ToernooiPdfPage
     public function getPageMargin(){ return 20; }
     public function getHeaderHeight(){ return 0; }
 
+    public function getFieldFilter(){ return $this->fieldFilter; }
+    public function setFieldFilter( Field $field )
+    {
+        $this->fieldFilter = $field;
+    }
+
     public function getGames( RoundNumber $roundNumber ): array {
         $games = [];
         foreach( $roundNumber->getRounds() as $round ) {
             foreach( $round->getPoules() as $poule ) {
                 foreach( $poule->getGames() as $game ) {
-                    $games[] = $game;
+                    if( $this->fieldFilter === null || $this->fieldFilter === $game->getField() ) {
+                        $games[] = $game;
+                    }
                 }
             }
         }

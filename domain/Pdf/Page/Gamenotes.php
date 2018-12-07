@@ -86,10 +86,9 @@ class Gamenotes extends ToernooiPdfPage
             $nY -= $nRowHeight;
         }
 
-        $competition = $game->getRound()->getCompetition();
-        if( $planningService->canCalculateStartDateTime($competition, $roundNumber) === true ) {
+        if( $planningService->canCalculateStartDateTime($roundNumber) === true ) {
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            $dateTime = $localDateTime->format("H:i") . "     " . $localDateTime->format("d M");
+            $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("d M") );
             $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
             if( $game->getRound()->getConfig()->getHasExtension() === true ) {
                 $duration .= ' (' . $game->getRound()->getConfig()->getMinutesPerGameExt() . ' min.)';

@@ -37,7 +37,7 @@ trait GamesTrait
             $this->columnWidths["home"] += ( $this->columnWidths["start"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["start"] / 2 );
         }
-        if( $roundNumber->getCompetition()->getFields()->count() === 0 ) {
+        if( $roundNumber->getCompetition()->getFields()->count() === 0 || $this->fieldFilter !== null ) {
             $this->columnWidths["home"] += ( $this->columnWidths["field"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["field"] / 2 );
         }
@@ -117,7 +117,7 @@ trait GamesTrait
             $nX = $this->drawCell( $text, $nX, $nY, $gameStartWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         }
 
-        if( $roundNumber->getCompetition()->getFields()->count() > 0 ) {
+        if( $roundNumber->getCompetition()->getFields()->count() > 0 && $this->fieldFilter === null ) {
             $nX = $this->drawCell( "v.", $nX, $nY, $gameFieldWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         }
 
@@ -138,6 +138,10 @@ trait GamesTrait
      */
     public function drawGame( Game $game, $nY )
     {
+        if( $this->fieldFilter !== null && $this->fieldFilter !== $game->getField() ) {
+            return $nY;
+        }
+
         $nX = $this->getPageMargin();
         $nRowHeight = $this->getRowHeight();
         $roundNumber = $game->getRound()->getNumber();
@@ -150,18 +154,20 @@ trait GamesTrait
         $planningService = $this->getParent()->getPlanningService();
         if ($planningService->canCalculateStartDateTime($roundNumber)) {
             $text = "";
+            $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
             if (!$planningService->gamesOnSameDay($roundNumber)) {
-                $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
-                $dateElements = explode(" ", $df->format($game->getStartDateTime()));
-                $month = strtolower( substr( $dateElements[1], 0, 3 ) );
-                $text = $game->getStartDateTime()->format("d") . " " . $month . " ";
+//                $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
+//                $dateElements = explode(" ", $df->format($game->getStartDateTime()));
+//                $month = strtolower( substr( $dateElements[1], 0, 3 ) );
+//                $text = $game->getStartDateTime()->format("d") . " " . $month . " ";
+                $text = $localDateTime->format("d-m ");
             }
-            $text .= $game->getStartDateTime()->format("H:m");
+            $text .= $localDateTime->format("H:i");
             $nX = $this->drawCell($text, $nX, $nY, $this->getGamesStartWidth(), $nRowHeight, Page::ALIGNCENTER,
                 "black");
         }
 
-        if ($game->getField() !== null) {
+        if ($game->getField() !== null && $this->fieldFilter === null ) {
             $nX = $this->drawCell($game->getField()->getName(), $nX, $nY, $this->getGamesFieldWidth(), $nRowHeight,
                 Page::ALIGNCENTER, "black");
         }

@@ -153,7 +153,7 @@ class Document extends \Zend_Pdf
             $this->drawPoulePivotTables( $this->structure->getFirstRoundNumber(), $page, $nY );
         }
         if( $this->config->getPlanning() ) {
-            list( $page, $nY ) = $this->createPagePlanning();
+            list( $page, $nY ) = $this->createPagePlanning("wedstrijden");
             $this->drawPlanning( $this->structure->getFirstRoundNumber(), $page, $nY );
         }
         if( $this->config->getRules() ) {
@@ -163,9 +163,7 @@ class Document extends \Zend_Pdf
             $this->drawGamenotes();
         }
         if( $this->config->getGamesperfield() ) {
-            $page = $this->createPageGamesPerField();
-            $nY = $page->drawHeader( "wedstrijden per veld" );
-            $page->draw( $this->structure->getRootRound(), $nY );
+            $this->drawPlanningPerField( $this->structure->getFirstRoundNumber() );
         }
     }
 
@@ -188,6 +186,43 @@ class Document extends \Zend_Pdf
 
         if( $roundNumber->hasNext() ) {
             $this->drawPlanning( $roundNumber->getNext(), $page, $nY );
+        }
+    }
+
+    protected function drawPlanningPerField( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    {
+        $fields = $this->getTournament()->getCompetition()->getFields();
+        if( $fields->count() === 0 ) {
+            return;
+        }
+        foreach( $fields as $field ) {
+            list( $page, $nY ) = $this->createPagePlanning("veld " . $field->getName() );
+            $page->setFieldFilter( $field );
+            $this->drawPlanningPerFieldHelper( $roundNumber, $page , $nY );
+        }
+    }
+
+    protected function drawPlanningPerFieldHelper( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    {
+        $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
+        $games = $page->getGames($roundNumber);
+        if( count($games) > 0 ) {
+            $nY = $page->drawGamesHeader($roundNumber, $nY);
+        }
+        $games = $this->getPlanningService()->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH);
+        foreach ($games as $game) {
+            $gameHeight = $page->getGameHeight($game);
+            if ($nY - $gameHeight < $page->getPageMargin() ) {
+                $field = $page->getFieldFilter();
+                list($page, $nY) = $this->createPagePlanning("veld " . $field->getName());
+                $page->setFieldFilter( $field );
+                $nY = $page->drawGamesHeader($roundNumber, $nY);
+            }
+            $nY = $page->drawGame($game, $nY);
+        }
+
+        if( $roundNumber->hasNext() ) {
+            $this->drawPlanningPerFieldHelper( $roundNumber->getNext(), $page, $nY );
         }
     }
 
@@ -228,26 +263,15 @@ class Document extends \Zend_Pdf
         return $page;
     }
 
-    protected function createPagePlanning()
+    protected function createPagePlanning( string $title )
     {
         $page = new \FCToernooi\Pdf\Page\Planning( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
-        $nY = $page->drawHeader( "wedstrijden" );
+        $nY = $page->drawHeader( $title );
         return array( $page, $nY );
     }
-
-    protected function createPageGamesPerField()
-    {
-        $page = new \FCToernooi\Pdf\Page\GamesPerField( \Zend_Pdf_Page::SIZE_A4 );
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
-        $this->pages[] = $page;
-        return $page;
-    }
-
-
 
     protected function createPageGamenotes( Game $gameA = null, Game $gameB = null)
     {
