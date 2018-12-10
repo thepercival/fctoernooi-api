@@ -59,6 +59,7 @@ class Gamenotes extends ToernooiPdfPage
         $nRowHeight = 20;
 
         $roundNumber = $game->getRound()->getNumber();
+        $roundNumberConfig = $roundNumber->getConfig();
         $planningService = $this->getParent()->getPlanningService();
         $nX = $nFirstBorder + $nMargin;
         $bNeedsRanking = $game->getPoule()->needsRanking();
@@ -89,9 +90,9 @@ class Gamenotes extends ToernooiPdfPage
         if( $planningService->canCalculateStartDateTime($roundNumber) === true ) {
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
             $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("d M") );
-            $duration = $game->getRound()->getConfig()->getMinutesPerGame() . ' min.';
-            if( $game->getRound()->getConfig()->getHasExtension() === true ) {
-                $duration .= ' (' . $game->getRound()->getConfig()->getMinutesPerGameExt() . ' min.)';
+            $duration = $roundNumberConfig->getMinutesPerGame() . ' min.';
+            if( $roundNumberConfig->getHasExtension() === true ) {
+                $duration .= ' (' . $roundNumberConfig->getMinutesPerGameExt() . ' min.)';
             }
 
             $this->drawCell( "tijdstip", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
@@ -143,14 +144,14 @@ class Gamenotes extends ToernooiPdfPage
         $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
         $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
-        $scoreConfig = $game->getRound()->getConfig()->getInputScore();
+        $scoreConfig = $roundNumberConfig->getInputScore();
         if( $scoreConfig !== null ) {
             $this->drawCell( $scoreConfig->getName(), $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         }
 
         $nY -= 3 * $nRowHeight; // extra lege regel
 
-        if( $game->getRound()->getConfig()->getHasExtension() ) {
+        if( $roundNumberConfig->getHasExtension() ) {
             $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
             $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
