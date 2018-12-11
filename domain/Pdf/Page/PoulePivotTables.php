@@ -70,7 +70,6 @@ class PoulePivotTables extends ToernooiPdfPage
     {
         $nrOfPlaces = $poule->getPlaces()->count();
 
-        $height = 0;
         // header row
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
         $degrees = $this->getDegrees( $nrOfPlaces );
@@ -108,7 +107,6 @@ class PoulePivotTables extends ToernooiPdfPage
 
     public function drawPouleHeader( Poule $poule, $nY )
     {
-        $nRowHeight = $this->getRowHeight();
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
         $degrees = $this->getDegrees( $nrOfPlaces );
@@ -117,21 +115,10 @@ class PoulePivotTables extends ToernooiPdfPage
         $nX = $this->getPageMargin();
         $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, Page::ALIGNCENTER, 'black' );
 
-        // CDK  TODO
-        // kijken als namen passen in $this->versusColumnsWidth
-        // zo niet, kijk als 50 graden past, zo niet dan vertical
-        // hierbij is 90 graden het max.
-        // wanneer 90 graden en tekst te lang voor maximale hoogte, dan kijken als de tekst over meerdere regels kan worden uitgesplitst
-        // zo nee, dan afkappen
-
         $nVersus = 0;
         foreach( $poule->getPlaces() as $poulePlace ) {
-
             $nX = $this->drawCell((new NameService())->getPoulePlaceName($poulePlace, true), $nX, $nY, $versusColumnWidth,
                 $height, Page::ALIGNCENTER, 'black', $degrees);
-
-
-            // $nX += $versusColumnWidth;
             $nVersus++;
         }
         // draw pointsrectangle
@@ -210,6 +197,9 @@ class PoulePivotTables extends ToernooiPdfPage
     }
 
     public function getVersusHeight( $versusColumnWidth, int $degrees ): int {
+        if( $degrees === 0 ) {
+            return $this->getRowHeight();
+        }
         if( $degrees === 90 ) {
             return $versusColumnWidth * 2;
         }

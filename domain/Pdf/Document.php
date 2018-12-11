@@ -241,6 +241,9 @@ class Document extends \Zend_Pdf
             $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
             foreach ($roundNumber->getRounds() as $round) {
                 foreach ($round->getPoules() as $poule) {
+                    if( !$poule->needsRanking() ) {
+                        continue;
+                    }
                     $pouleHeight = $page->getPouleHeight($poule);
                     if ($nY - $pouleHeight < $page->getPageMargin() ) {
                         list($page, $nY) = $this->createPagePoulePivotTables();
