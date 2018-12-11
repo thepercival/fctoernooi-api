@@ -75,7 +75,7 @@ class Document extends \Zend_Pdf
     }
 
     /**
-     * @return StructureService
+     * @return Structure
      */
     public function getStructure()
     {
@@ -259,7 +259,7 @@ class Document extends \Zend_Pdf
 
     protected function createPageStructure()
     {
-        $page = new \FCToernooi\Pdf\Page\Structure( \Zend_Pdf_Page::SIZE_A4 );
+        $page = new Page\Structure( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
@@ -268,7 +268,7 @@ class Document extends \Zend_Pdf
 
     protected function createPagePlanning( string $title )
     {
-        $page = new \FCToernooi\Pdf\Page\Planning( \Zend_Pdf_Page::SIZE_A4 );
+        $page = new PagePlanning( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
@@ -278,7 +278,7 @@ class Document extends \Zend_Pdf
 
     protected function createPageGamenotes( Game $gameA = null, Game $gameB = null)
     {
-        $page = new \FCToernooi\Pdf\Page\Gamenotes( \Zend_Pdf_Page::SIZE_A4, $gameA, $gameB );
+        $page = new Page\Gamenotes( \Zend_Pdf_Page::SIZE_A4, $gameA, $gameB );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
@@ -287,7 +287,7 @@ class Document extends \Zend_Pdf
 
     protected function createPagePoulePivotTables()
     {
-        $page = new \FCToernooi\Pdf\Page\PoulePivotTables( \Zend_Pdf_Page::SIZE_A4 );
+        $page = new PagePoules( \Zend_Pdf_Page::SIZE_A4 );
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
