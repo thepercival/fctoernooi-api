@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "e218b16542cdb573486dd0aa8b246e40",
@@ -3207,12 +3207,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "1ea7373d6edef3e436b165d5a92c5f39d115f6a4"
+                "reference": "3a45c6285ed3e9ac41782ae86cbfac1b41a5851c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/1ea7373d6edef3e436b165d5a92c5f39d115f6a4",
-                "reference": "1ea7373d6edef3e436b165d5a92c5f39d115f6a4",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/3a45c6285ed3e9ac41782ae86cbfac1b41a5851c",
+                "reference": "3a45c6285ed3e9ac41782ae86cbfac1b41a5851c",
                 "shasum": ""
             },
             "require": {
@@ -3250,7 +3250,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2018-12-12T08:52:22+00:00"
+            "time": "2018-12-12T11:14:22+00:00"
         },
         {
             "name": "tuupola/base62",

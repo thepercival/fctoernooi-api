@@ -15,12 +15,12 @@ FCToernooi\Sponsor:
       type: string
       nullable: false
       unique: false
-      length : php/const:FCToernooi\Sponsor::MAX_LENGTH_NAME
+      length : !php/const FCToernooi\Sponsor::MAX_LENGTH_NAME
     url:
       type: string
       nullable: true
       unique: false
-      length : php/const:FCToernooi\Sponsor::MAX_LENGTH_URL
+      length : !php/const FCToernooi\Sponsor::MAX_LENGTH_URL
   manyToOne:
     tournament:
       targetEntity: FCToernooi\Tournament

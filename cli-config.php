@@ -1,6 +1,7 @@
 <?php
 
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Symfony\Component\Yaml\Yaml;
 
 require 'vendor/autoload.php';
 
@@ -11,7 +12,7 @@ class CustomYamlDriver extends Doctrine\ORM\Mapping\Driver\YamlDriver
 {
 	protected function loadMappingFile($file)
 	{
-		return Symfony\Component\Yaml\Yaml::parse(file_get_contents($file), Symfony\Component\Yaml\Yaml::PARSE_CONSTANT);
+		return Symfony\Component\Yaml\Yaml::parse(file_get_contents($file), Yaml::PARSE_CONSTANT);
 	}
 }
 
