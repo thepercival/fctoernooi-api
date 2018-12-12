@@ -45,15 +45,8 @@ $container['em'] = function ($c) {
 
 // symfony serializer
 $container['serializer'] = function( $c ) {
-    $settings = $c->get('settings');
-    $serializerBuilder = SerializerBuilder::create()->setDebug($settings['displayErrorDetails']);
-    if( $settings["environment"] === "production") {
-        $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
-    }
-    foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
-        $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
-    }
-    return $serializerBuilder->build();
+    // temporary, real one is set in middleware
+    return SerializerBuilder::create()->build();
 };
 
 // voetbalService

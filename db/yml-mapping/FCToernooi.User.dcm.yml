@@ -10,7 +10,7 @@ FCToernooi\User:
   fields:
     emailaddress:
       type: string
-      length : !php/const:Voetbal\Referee::MAX_LENGTH_EMAIL
+      length : php/const:Voetbal\Referee::MAX_LENGTH_EMAIL
       nullable: false
     salt:
       type: string
@@ -18,11 +18,11 @@ FCToernooi\User:
       nullable: false
     password:
       type: string
-      length : !php/const:FCToernooi\User::MAX_LENGTH_HASH
+      length : php/const:FCToernooi\User::MAX_LENGTH_HASH
       nullable: false
     name:
       type: string
-      length : !php/const:FCToernooi\User::MAX_LENGTH_NAME
+      length : php/const:FCToernooi\User::MAX_LENGTH_NAME
       unique: true
       nullable: true
     forgetpassword:

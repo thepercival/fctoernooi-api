@@ -10,10 +10,8 @@ FCToernooi\Tournament:
       type: Voetbal\Competition
     breakStartDateTime:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
-      serialized_name: breakStartDateTime
     breakDuration:
       type: integer
-      serialized_name: breakDuration
     roles:
       type: ArrayCollection<FCToernooi\Role>
       groups: [roles]

@@ -1,32 +1,32 @@
 FCToernooi\Sponsor:
-    type: entity
-    repositoryClass: FCToernooi\Sponsor\Repository
-    table: sponsors
+  type: entity
+  repositoryClass: FCToernooi\Sponsor\Repository
+  table: sponsors
+  id:
     id:
-        id:
-            type: integer
-            nullable: false
-            id: true
-            column: id
-            generator:
-                strategy: AUTO
-    fields:
-        name:
-            type: string
-            nullable: false
-            unique: false
-            length : !php/const:FCToernooi\Sponsor::MAX_LENGTH_NAME
-        url:
-            type: string
-            nullable: true
-            unique: false
-            length : !php/const:FCToernooi\Sponsor::MAX_LENGTH_URL
-    manyToOne:
-        tournament:
-            targetEntity: FCToernooi\Tournament
-            inversedBy: sponsors
-            joinColumn:
-              name: tournamentid
-              referencedColumnName: id
-              nullable: false
-              onDelete: CASCADE
+      type: integer
+      nullable: false
+      id: true
+      column: id
+      generator:
+        strategy: AUTO
+  fields:
+    name:
+      type: string
+      nullable: false
+      unique: false
+      length : php/const:FCToernooi\Sponsor::MAX_LENGTH_NAME
+    url:
+      type: string
+      nullable: true
+      unique: false
+      length : php/const:FCToernooi\Sponsor::MAX_LENGTH_URL
+  manyToOne:
+    tournament:
+      targetEntity: FCToernooi\Tournament
+      inversedBy: sponsors
+      joinColumn:
+        name: tournamentid
+        referencedColumnName: id
+        nullable: false
+        onDelete: CASCADE

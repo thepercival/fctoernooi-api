@@ -85,24 +85,31 @@ $app->add(function ( $request,  $response, callable $next) {
     if( strlen( $apiVersion ) === 0 ) {
         $apiVersion = "1";
     }
-    $this['serializer']->setSerializationContextFactory(
-        new CallableSerializationContextFactory(
-            function () use ($apiVersion) {
-                return SerializationContext::create()
-                    ->setGroups(array('Default'))
-                    ->setVersion($apiVersion);
-            }
-        )
-    );
-    $this['serializer']->setDeserializationContextFactory(
-        new CallableDeserializationContextFactory(
-            function () use ($apiVersion) {
-                return DeserializationContext::create()
-                    ->setGroups(array('Default'))
-                    ->setVersion($apiVersion);
-            }
-        )
-    );
+
+    $this['serializer'] = function() use ($apiVersion) {
+        $settings = $this['settings'];
+        $serializerBuilder = SerializerBuilder::create()->setDebug($settings['displayErrorDetails']);
+        if( $settings["environment"] === "production") {
+            $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
+        }
+        $serializerBuilder->setPropertyNamingStrategy(new \JMS\Serializer\Naming\SerializedNameAnnotationStrategy(new \JMS\Serializer\Naming\IdenticalPropertyNamingStrategy()));
+
+        $serializerBuilder->setSerializationContextFactory(function () use ($apiVersion) {
+            return SerializationContext::create()
+                ->setGroups(array('Default'))
+                ->setVersion($apiVersion);
+        });
+        $serializerBuilder->setDeserializationContextFactory(function () use ($apiVersion) {
+            return DeserializationContext::create()
+                ->setGroups(array('Default'))
+                ->setVersion($apiVersion);
+        });
+        foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
+            $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
+        }
+        return $serializerBuilder->build();
+    };
+
     $response = $next($request, $response);
     header_remove("X-Powered-By");
     return $response;
