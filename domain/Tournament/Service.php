@@ -199,6 +199,7 @@ class Service
                 $em->remove( $refereeRole );
             }
         }
+        $em->flush();
 
         // add referee roles
         if( $user !== null ) {
@@ -206,7 +207,7 @@ class Service
             foreach( $tournaments as $tournament ) {
                 $refereeRole = new Role( $tournament, $user);
                 $refereeRole->setValue(Role::REFEREE);
-                $em->save( $refereeRole );
+                $em->persist( $refereeRole );
                 $rolesRet[] = $refereeRole;
             }
 
@@ -222,7 +223,7 @@ class Service
                 }
                 $refereeRole = new Role( $tournament, $user);
                 $refereeRole->setValue(Role::REFEREE);
-                $em->save( $refereeRole );
+                $em->persist( $refereeRole );
             }
             $rolesRet = $tournament->getRoles()->toArray();
         }
