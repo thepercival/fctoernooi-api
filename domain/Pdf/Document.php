@@ -178,7 +178,7 @@ class Document extends \Zend_Pdf
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {
-                list($page, $nY) = $this->createPagePlanning();
+                list($page, $nY) = $this->createPagePlanning("wedstrijden");
                 $nY = $page->drawGamesHeader($roundNumber, $nY);
             }
             $nY = $page->drawGame($game, $nY);
@@ -222,6 +222,7 @@ class Document extends \Zend_Pdf
         }
 
         if( $roundNumber->hasNext() ) {
+            $nY -= 20;
             $this->drawPlanningPerFieldHelper( $roundNumber->getNext(), $page, $nY );
         }
     }

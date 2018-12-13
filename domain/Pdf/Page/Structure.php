@@ -157,7 +157,7 @@ class Structure extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
         $nameService = new NameService();
         $margin = 20;
-        $arrLineColors = $round->getNumber() > 1 ? array( "t" => "black" ) : null;
+        $arrLineColors = !$round->isRoot() ? array( "t" => "black" ) : null;
         $roundName = $this->getRoundNameStructure( $round, $nameService);
         $this->drawCell( $roundName, $nX, $nY, $width, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, $arrLineColors );
         $nY -= $nRowHeight;
