@@ -91,17 +91,17 @@ class Service
         $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
 
         // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
-        $getSeason = function($year) {
+        $getSeason = function( int $year) {
             $seasonRepos = $this->voetbalService->getRepository( Season::class );
             $season = $seasonRepos->findOneBy( array('name' => $year ) );
             if( $season === null ){
                 $seasonService = $this->voetbalService->getService( Season::class );
-                $period = new Period( new \DateTimeImmutable($year."-01-01"), new \DateTimeImmutable($year."-12-31") );
+                $period = new Period( new \DateTimeImmutable($year."-01-01"), new \DateTimeImmutable(($year+1)."-01-01") );
                 $season = $seasonService->create( $year, $period );
             }
             return $season;
         };
-        $season = $getSeason( $competitionSer->getStartDateTime()->format("Y") );
+        $season = $getSeason( (int) $competitionSer->getStartDateTime()->format("Y") );
 
         $competitionService = $this->voetbalService->getService(Competition::class);
         $competition = $competitionService->create($league, $season, $competitionSer->getStartDateTime() );
