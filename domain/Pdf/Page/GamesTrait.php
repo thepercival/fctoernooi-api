@@ -172,12 +172,12 @@ trait GamesTrait
                 Page::ALIGNCENTER, "black");
         }
 
-        $home = $nameService->getPoulePlaceName($game->getHomePoulePlace(), true);
+        $home = $nameService->getPoulePlaceFromName($game->getHomePoulePlace(), true);
         $nX = $this->drawCell($home, $nX, $nY, $this->getGamesHomeWidth(), $nRowHeight, Page::ALIGNRIGHT, "black");
 
         $nX = $this->drawCell($this->getScore($game), $nX, $nY, $this->getGamesScoreWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
 
-        $away = $nameService->getPoulePlaceName($game->getAwayPoulePlace(), true);
+        $away = $nameService->getPoulePlaceFromName($game->getAwayPoulePlace(), true);
         $nX = $this->drawCell($away, $nX, $nY, $this->getGamesAwayWidth(), $nRowHeight, Page::ALIGNLEFT, "black");
 
         if ($game->getReferee() !== null) {

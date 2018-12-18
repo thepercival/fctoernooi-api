@@ -130,9 +130,9 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $nameService->getPoulePlaceName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $nameService->getPoulePlaceName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );

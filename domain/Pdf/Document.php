@@ -185,6 +185,7 @@ class Document extends \Zend_Pdf
         }
 
         if( $roundNumber->hasNext() ) {
+            $nY -= 20;
             $this->drawPlanning( $roundNumber->getNext(), $page, $nY );
         }
     }
@@ -315,7 +316,7 @@ class Document extends \Zend_Pdf
         if( $poulePlace->getTeam() !== null ) {
             return $poulePlace->getTeam()->getName();
         }
-        return $nameService->getPoulePlaceName( $poulePlace );
+        return $nameService->getPoulePlaceFromName( $poulePlace );
     }*/
 
     protected function setQualificationRules( Round $parentRound )
