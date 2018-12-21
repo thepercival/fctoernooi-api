@@ -60,12 +60,12 @@ catch( \Exception $e ) {
 
 function mailHelp( User $user, Tournament $tournament )
 {
-    $subject = 'FCToernooi - ' . $tournament->getCompetition()->getName();
+    $subject = $tournament->getCompetition()->getLeague()->getName();
     $body = '
         <p>Hallo,</p>
         <p>            
         Als beheerder van <a href="https://www.fctoernooi.nl/">https://www.fctoernooi.nl/</a> zag ik dat je een toernooi hebt aangemaakt op onze website. 
-        Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.
+        Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.        
         </p>
         <p>            
         Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://docs.google.com/document/d/1SYeUJa5yvHZzvacMyJ_Xy4MpHWTWRgAh1LYkEA2CFnM/edit?usp=sharing">hier</a> vinden.
@@ -90,7 +90,8 @@ function mailHelp( User $user, Tournament $tournament )
         error_log('Mailer Error!' );
         // $app->halt(500);
     }
-    if ( !mail( "fctoernooi2018@gmail.com", $subject, $user->getEmailaddress() . "<br><br>" . $body, $headers, $params) ) {
+    $prepend = "email: " . $user->getEmailaddress() . "<br><br>link: https://www.fctoernooi.nl/toernooi/view/" . $tournament->getId() . "<br><br>";
+    if ( !mail( "fctoernooi2018@gmail.com", $subject, $prepend . $body, $headers, $params) ) {
         error_log('Mailer Error!' );
     }
 }
