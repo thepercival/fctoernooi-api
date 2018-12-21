@@ -37,7 +37,11 @@ $container["JwtAuthentication"] = function ($container) {
             ])
         ],
         "error" => function ($response, $arguments) {
-            return new Unauthorized($arguments["message"], 401);
+            $message = $arguments["message"];
+            if( $message === "Expired Token" ) {
+              $message = "token is niet meer geldig, log opnieuw in";
+            }
+            return new Unauthorized($message, 401);
         },
         "before" => function ($request, $arguments) use ($container) {
             $container["token"]->populate($arguments["decoded"]);
