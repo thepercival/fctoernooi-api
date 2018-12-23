@@ -80,6 +80,14 @@ class Gamenotes extends ToernooiPdfPage
         $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
         $this->drawCell( $sGame, $nX2, $nY, $nWidthResult, $nRowHeight );
         $nY -= $nRowHeight;
+
+        $this->drawCell( 'plekken', $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
+        $home = $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), false );
+        $away = $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), false );
+        $this->drawCell( $home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight );
+        $nY -= $nRowHeight;
+
         if( $bNeedsRanking ) {
             $this->drawCell( "speelronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
@@ -130,9 +138,9 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getHomePoulePlace() ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), true ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace() ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), true ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
