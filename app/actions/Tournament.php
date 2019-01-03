@@ -381,6 +381,7 @@ final class Tournament
             }
 
             $structure = $this->structureService->getStructure( $tournament->getCompetition() );
+            $structure->setQualifyRules();
             $pdf = new \FCToernooi\Pdf\Document( $tournament,
                 $structure, $this->planningService,
                 $pdfConfig );

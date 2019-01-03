@@ -50,7 +50,7 @@
 	"scripts": {
 		"start": "php -S localhost:2999 -t public public/index.php",
 		"test": [
-			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/"
+			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
 		]
 	}
 }

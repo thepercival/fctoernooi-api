@@ -71,7 +71,6 @@ class Document extends \Zend_Pdf
         $this->structure = $structure;
         $this->planningService = $planningService;
         $this->config = $config;
-        $this->setQualificationRules( $structure->getRootRound() );
     }
 
     /**
@@ -318,15 +317,6 @@ class Document extends \Zend_Pdf
         }
         return $nameService->getPoulePlaceFromName( $poulePlace );
     }*/
-
-    protected function setQualificationRules( Round $parentRound )
-    {
-        foreach ($parentRound->getChildRounds() as $childRound) {
-            $qualifyService = new QualifyService($childRound);
-            $qualifyService->createRules();
-            $this->setQualificationRules( $childRound );
-        }
-    }
 
     public function hasTextWidth( string $key ) {
         return array_key_exists( $key, $this->widthText );
