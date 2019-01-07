@@ -208,6 +208,6 @@ trait GamesTrait
         if ($finalScore === null) {
             return $score;
         }
-        return $finalScore->getHome() . $score + $finalScore->getAway();
+        return $finalScore->getHome() . $score . $finalScore->getAway();
     }
 }
