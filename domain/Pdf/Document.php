@@ -164,6 +164,10 @@ class Document extends \Zend_Pdf
         if( $this->config->getGamesperfield() ) {
             $this->drawPlanningPerField( $this->structure->getFirstRoundNumber() );
         }
+        if( $this->config->getQRCode() ) {
+            $page = $this->createPageQRCode();
+            $page->draw();
+        }
     }
 
     protected function drawPlanning( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
@@ -294,6 +298,15 @@ class Document extends \Zend_Pdf
         $this->pages[] = $page;
         $nY = $page->drawHeader( "pouledraaitabel" );
         return array( $page, $nY );
+    }
+
+    protected function createPageQRCode()
+    {
+        $page = new Page\QRCode( \Zend_Pdf_Page::SIZE_A4 );
+        $page->setFont( $this->getFont(), $this->getFontHeight() );
+        $page->putParent( $this );
+        $this->pages[] = $page;
+        return $page;
     }
 
     /**

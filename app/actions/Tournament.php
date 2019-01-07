@@ -373,7 +373,8 @@ final class Tournament
                 filter_var($request->getParam("rules"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("gamesperfield"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("planning"), FILTER_VALIDATE_BOOLEAN),
-                filter_var($request->getParam("poulepivottables"), FILTER_VALIDATE_BOOLEAN)
+                filter_var($request->getParam("poulepivottables"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("qrcode"), FILTER_VALIDATE_BOOLEAN)
             );
 
             if( $pdfConfig->allOptionsOff() ) {

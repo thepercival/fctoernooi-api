@@ -34,13 +34,19 @@ class TournamentConfig
      */
     private $poulePivotTables;
 
+    /**
+     * @var bool
+     */
+    private $qrcode;
+
     public function __construct(
         bool $gamenotes = true,
         bool $structure = false,
         bool $rules = false,
         bool $gamesperfield = false,
         bool $planning = false,
-        bool $poulePivotTables = false
+        bool $poulePivotTables = false,
+        bool $qrcode = false
     )
     {
         $this->gamenotes = $gamenotes;
@@ -49,6 +55,7 @@ class TournamentConfig
         $this->gamesperfield = $gamesperfield;
         $this->planning = $planning;
         $this->poulePivotTables = $poulePivotTables;
+        $this->qrcode = $qrcode;
     }
 
     /**
@@ -102,9 +109,18 @@ class TournamentConfig
     /**
      * @return bool
      */
+    public function getQRCode()
+    {
+        return $this->qrcode;
+    }
+
+    /**
+     * @return bool
+     */
     public function allOptionsOff()
     {
         return (!$this->getStructure() && !$this->getPlanning() && !$this->getGamenotes() &&
-         !$this->getGamesperfield() && !$this->getRules() && !$this->getPoulePivotTables() );
+         !$this->getGamesperfield() && !$this->getRules() && !$this->getPoulePivotTables()
+            && !$this->getQRCode() );
     }
 }
