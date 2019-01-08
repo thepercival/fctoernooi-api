@@ -38,7 +38,7 @@ $container["JwtAuthentication"] = function ($container) {
         ],
         "error" => function ($response, $arguments) {
             $message = $arguments["message"];
-            if( $message === "Expired Token" ) {
+            if( $message === "Expired token" ) {
               $message = "token is niet meer geldig, log opnieuw in";
             }
             return new Unauthorized($message, 401);
