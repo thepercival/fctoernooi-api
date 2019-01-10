@@ -99,7 +99,17 @@ $container['App\Action\Tournament'] = function ($c) {
         $c->get('token'),
         $em);
 };
-
+$container['App\Action\Tournament\Shell'] = function ($c) {
+    $em = $c->get('em');
+    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+    $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
+    return new App\Action\Tournament\Shell(
+        $tournamentRepos,
+        $userRepository,
+        $c->get('serializer'),
+        $c->get('token'),
+        $em);
+};
 $container['App\Action\Sponsor'] = function ($c) {
     $em = $c->get('em');
     $repos = new FCToernooi\Sponsor\Repository($em,$em->getClassMetaData(FCToernooi\Sponsor::class));

@@ -24,6 +24,7 @@ use FCToernooi\Tournament\Shell;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 use FCToernooi\Pdf\TournamentConfig;
+use App\Action\TournamentShell as TournamentShellAction;
 
 final class Tournament
 {
@@ -124,54 +125,12 @@ final class Tournament
      */
     public function fetchHelper($request, $response, $args, User $user = null)
     {
-        $sErrorMessage = null;
-        try {
-            $name = null;
-            if( strlen( $request->getParam('name') ) > 0 ) {
-                $name = $request->getParam('name');
-            }
-
-            $startDateTime = null;
-            if( strlen( $request->getParam('minDate') ) > 0 ) {
-                $startDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('minDate') );
-            }
-            if ( $startDateTime === false ){ $startDateTime = null; }
-
-            $endDateTime = null;
-            if( strlen( $request->getParam('maxDate') ) > 0 ) {
-                $endDateTime = \DateTimeImmutable::createFromFormat ( 'Y-m-d\TH:i:s.u\Z', $request->getParam('maxDate') );
-            }
-            if ( $endDateTime === false ){ $endDateTime = null; }
-
-            $withRoles = null;
-            if( strlen( $request->getParam('withRoles') ) > 0 ) {
-                $withRoles = $request->getParam('withRoles') === 'true';
-            }
-
-            $shells = [];
-            {
-                if( $user !== null && $withRoles === true ) {
-
-                    $tournamentsByRole = $this->repos->findByPermissions($user, Role::ADMIN);
-                    foreach( $tournamentsByRole as $tournament ) {
-                        $shells[] = new Shell($tournament, $user);
-                    }
-                } else {
-                    $tournamentsByDates = $this->repos->findByFilter($name, $startDateTime, $endDateTime);
-                    foreach( $tournamentsByDates as $tournament ) {
-                        $shells[] = new Shell($tournament, $user);
-                    }
-                }
-            }
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $shells, 'json'));
-            ;
-        }
-        catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
-        }
-        return $response->withStatus(422)->write( $sErrorMessage);
+        /*
+         * When this function is removed tournamentshellcontroller->fetchHelper
+         * should be made protected
+         */
+        $action = new TournamentShellAction();
+        return $action->fetchHelper($request, $response, $args, $user);
     }
 
     public function fetchOnePublic($request, $response, $args)

@@ -1,9 +1,7 @@
 <?php
 
 use FCToernooi\Token;
-// use Crell\ApiProblem\ApiProblem;
 use Gofabian\Negotiation\NegotiationMiddleware;
-// use Micheh\Cache\CacheUtil;
 use Tuupola\Middleware\JwtAuthentication;
 use Tuupola\Middleware\CorsMiddleware;
 use App\Response\Unauthorized;
@@ -11,8 +9,7 @@ use App\Middleware\Authentication;
 use \JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\ContextFactory\CallableSerializationContextFactory;
-use JMS\Serializer\ContextFactory\CallableDeserializationContextFactory;
+use FCToernooi\Auth\JWT\TournamentRule;
 
 $container = $app->getContainer();
 $container["token"] = function ($container) {
@@ -29,7 +26,8 @@ $container["JwtAuthentication"] = function ($container) {
                 "path" => "/",
                 "ignore" => [
                     "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                    "/tournamentspublic", "/voetbal/structures"
+                    "/tournamentshells", "/tournamentspublic" /* DEPRECATED */, "/tournaments/pdf",
+                    "/voetbal/structures"
                 ]
             ]),
             new JwtAuthentication\RequestMethodRule([

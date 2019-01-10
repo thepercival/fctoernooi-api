@@ -44,6 +44,15 @@ final class Auth
 		$this->settings = $settings;
 	}
 
+    public function validateToken( $request, $response, $args)
+    {
+        return $response
+            ->withStatus(200)
+            // ->withHeader('Content-Type', 'application/json;charset=utf-8')
+            ->write('token is ok');
+        ;
+    }
+
 	public function register( $request, $response, $args)
 	{
 		$sErrorMessage = null;
