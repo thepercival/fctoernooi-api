@@ -46,11 +46,7 @@ final class Auth
 
     public function validateToken( $request, $response, $args)
     {
-        return $response
-            ->withStatus(200)
-            // ->withHeader('Content-Type', 'application/json;charset=utf-8')
-            ->write('token is ok');
-        ;
+        return $response->withStatus(200);
     }
 
 	public function register( $request, $response, $args)
@@ -199,7 +195,7 @@ final class Auth
         $jti = (new Base62)->encode(random_bytes(16));
 
         $now = new \DateTime();
-        $future = new \DateTime("now +2 months");
+        $future = new \DateTime("now +3 months");
 
         $payload = [
             "iat" => $now->getTimeStamp(),

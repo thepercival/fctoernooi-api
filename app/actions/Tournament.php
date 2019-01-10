@@ -89,61 +89,21 @@ final class Tournament
         $this->em = $em;
     }
 
-    /**
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
-     */
-    public function fetch($request, $response, $args)
+    public function fetchOnePublic($request, $response, $args)
+    {
+        return $this->fetchOneHelper($request, $response, $args, null);
+    }
+
+    public function fetchOne($request, $response, $args)
     {
         $user = null;
         if ( $this->token->isPopulated() ) {
             $user = $this->userRepository->find($this->token->getUserId());
         }
-        return $this->fetchHelper($request, $response, $args, $user);
+        return $this->fetchOneHelper($request, $response, $args, $user);
     }
 
-    /**
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
-     */
-    public function fetchPublic($request, $response, $args)
-    {
-        return $this->fetchHelper($request, $response, $args);
-    }
-
-    /**
-     * startdatetime, enddatetime, id, userid
-     *
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
-     */
-    public function fetchHelper($request, $response, $args, User $user = null)
-    {
-        /*
-         * When this function is removed tournamentshellcontroller->fetchHelper
-         * should be made protected
-         */
-        $action = new TournamentShellAction();
-        return $action->fetchHelper($request, $response, $args, $user);
-    }
-
-    public function fetchOnePublic($request, $response, $args)
-    {
-        return $this->fetchOneHelper($request, $response, $args);
-    }
-
-    public function fetchOne($request, $response, $args)
-    {
-        return $this->fetchOneHelper($request, $response, $args);
-    }
-
-    protected function fetchOneHelper($request, $response, $args)
+    protected function fetchOneHelper($request, $response, $args, $user)
     {
         $sErrorMessage = null;
         try {
@@ -154,7 +114,7 @@ final class Tournament
             }
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json', $this->getSerializationContext($tournament)));
+                ->write($this->serializer->serialize( $tournament, 'json', $this->getSerializationContext($tournament, $user)));
             ;
         }
         catch( \Exception $e ){
@@ -340,17 +300,16 @@ final class Tournament
                 throw new \Exception("kies minimaal 1 printoptie", E_ERROR);
             }
 
+            $fileName = $this->getFileName($pdfConfig);
             $structure = $this->structureService->getStructure( $tournament->getCompetition() );
             $structure->setQualifyRules();
-            $pdf = new \FCToernooi\Pdf\Document( $tournament,
-                $structure, $this->planningService,
-                $pdfConfig );
+            $pdf = new \FCToernooi\Pdf\Document( $tournament, $structure, $this->planningService, $pdfConfig );
             $vtData = $pdf->render();
 
             return $response
                 ->withHeader('Cache-Control', 'must-revalidate')
                 ->withHeader('Pragma', 'public')
-                ->withHeader('Content-Disposition', 'inline; filename="wedstrijdbrieven.pdf";')
+                ->withHeader('Content-Disposition', 'inline; filename="'.$fileName.'.pdf";')
                 ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
                 ->withHeader('Content-Length', strlen( $vtData ))
                 ->write($vtData);
@@ -360,6 +319,25 @@ final class Tournament
             $sErrorMessage = $e->getMessage();
         }
         return $response->withStatus(422)->write( $sErrorMessage);
+    }
+
+    protected function getFileName(TournamentConfig $pdfConfig): string {
+        if( $pdfConfig->hasOnly(TournamentConfig::GAMENOTES) ) {
+            return "wedstrijdbrieven";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::STRUCTURE) ) {
+            return "structuur-en-indeling";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::RULES) ) {
+            return "reglementen";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::GAMESPERFIELD) ) {
+            return "wedstrijden-per-veld";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::PLANNING) ) {
+            return "wedstrijdschema";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::PIVOTTABLES) ) {
+            return "poule-draaitabellen";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::QRCODE) ) {
+            return "qrcode-en-link";
+        }
+        return "toernooi";
     }
 
     /*

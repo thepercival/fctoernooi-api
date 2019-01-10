@@ -4,40 +4,18 @@ namespace FCToernooi\Pdf;
 
 class TournamentConfig
 {
-    /**
-     * @var bool
-     */
-    private $gamenotes;
+    CONST GAMENOTES = 1;
+    CONST STRUCTURE = 2;
+    CONST RULES = 4;
+    CONST GAMESPERFIELD = 8;
+    CONST PLANNING = 16;
+    CONST PIVOTTABLES = 32;
+    CONST QRCODE = 64;
 
     /**
      * @var bool
      */
-    private $structure;
-
-    /**
-     * @var bool
-     */
-    private $rules;
-
-    /**
-     * @var bool
-     */
-    private $gamesperfield;
-
-    /**
-     * @var bool
-     */
-    private $planning;
-
-    /**
-     * @var bool
-     */
-    private $poulePivotTables;
-
-    /**
-     * @var bool
-     */
-    private $qrcode;
+    private $value;
 
     public function __construct(
         bool $gamenotes = true,
@@ -49,13 +27,13 @@ class TournamentConfig
         bool $qrcode = false
     )
     {
-        $this->gamenotes = $gamenotes;
-        $this->structure = $structure;
-        $this->rules = $rules;
-        $this->gamesperfield = $gamesperfield;
-        $this->planning = $planning;
-        $this->poulePivotTables = $poulePivotTables;
-        $this->qrcode = $qrcode;
+        $this->value = $gamenotes ? static::GAMENOTES : 0;
+        $this->value += $structure ? static::STRUCTURE : 0;
+        $this->value += $rules ? static::RULES : 0;
+        $this->value += $gamesperfield ? static::GAMESPERFIELD : 0;
+        $this->value += $planning ? static::PLANNING : 0;
+        $this->value += $poulePivotTables ? static::PIVOTTABLES : 0;
+        $this->value += $qrcode ? static::QRCODE : 0;
     }
 
     /**
@@ -63,7 +41,7 @@ class TournamentConfig
      */
     public function getGamenotes()
     {
-        return $this->gamenotes;
+        return ( $this->value & static::GAMENOTES ) === static::GAMENOTES;
     }
 
     /**
@@ -71,7 +49,7 @@ class TournamentConfig
      */
     public function getStructure()
     {
-        return $this->structure;
+        return ( $this->value & static::STRUCTURE ) === static::STRUCTURE;
     }
 
     /**
@@ -79,7 +57,7 @@ class TournamentConfig
      */
     public function getRules()
     {
-        return $this->rules;
+        return ( $this->value & static::RULES ) === static::RULES;
     }
 
     /**
@@ -87,7 +65,7 @@ class TournamentConfig
      */
     public function getGamesperfield()
     {
-        return $this->gamesperfield;
+        return ( $this->value & static::GAMESPERFIELD ) === static::GAMESPERFIELD;
     }
 
     /**
@@ -95,7 +73,7 @@ class TournamentConfig
      */
     public function getPlanning()
     {
-        return $this->planning;
+        return ( $this->value & static::PLANNING ) === static::PLANNING;
     }
 
     /**
@@ -103,7 +81,7 @@ class TournamentConfig
      */
     public function getPoulePivotTables()
     {
-        return $this->poulePivotTables;
+        return ( $this->value & static::PIVOTTABLES ) === static::PIVOTTABLES;
     }
 
     /**
@@ -111,7 +89,7 @@ class TournamentConfig
      */
     public function getQRCode()
     {
-        return $this->qrcode;
+        return ( $this->value & static::QRCODE ) === static::QRCODE;
     }
 
     /**
@@ -119,8 +97,14 @@ class TournamentConfig
      */
     public function allOptionsOff()
     {
-        return (!$this->getStructure() && !$this->getPlanning() && !$this->getGamenotes() &&
-         !$this->getGamesperfield() && !$this->getRules() && !$this->getPoulePivotTables()
-            && !$this->getQRCode() );
+        return $this->value === 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasOnly( int $option )
+    {
+        return $this->value === $option;
     }
 }
