@@ -26,6 +26,7 @@ $app->group('/tournaments', function () use ($app) {
     $app->post('/syncrefereeroles/{id}', 'App\Action\Tournament:syncRefereeRoles');
     $app->get('/userrefereeid/{id}', 'App\Action\Tournament:getUserRefereeId');
     $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
+    $app->post('/copy/{id}', 'App\Action\Tournament:copy');
 });
 
 $app->group('/tournamentspublic', function () use ($app) {

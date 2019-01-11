@@ -166,7 +166,6 @@ final class Tournament
             $sErrorMessage = $e->getMessage();
         }
         return $response->withStatus(422)->write( $sErrorMessage);
-
     }
 
     public function syncRefereeRoles($request, $response, $args)
@@ -270,6 +269,56 @@ final class Tournament
             $errorMessage = $e->getMessage();
         }
         return $response->withStatus(404)->write('het toernooi is niet verwijdered : ' . $errorMessage );
+    }
+
+    /**
+     * echt nieuwe aanmaken via service
+     * bestaande toernooi deserialising en dan weer opslaan
+     *
+     *
+     * @param $request
+     * @param $response
+     * @param $args
+     * @return mixed
+     */
+    public function copy($request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try {
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $this->repos->find($args['id']);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+            /** @var \FCToernooi\User $user */
+            $user = $this->checkAuth( $this->token, $this->userRepository );
+
+            // haal nieuwe datum op en zet deze
+            // evt planning nog doen, als deze niet meekomt, kan in frontend evt
+            // db transactie om geheel
+            // verplaatsen naar service?
+
+            /** @var \FCToernooi\Tournament $tournamentSer */
+            $tournamentSer = $this->serializer->serialize( $tournament, 'json');
+            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
+            /** @var \Voetbal\Structure $structureSer */
+            $structureSer = $this->serializer->serialize( $structure, 'json');
+
+            $newTournament = $this->service->createFromSerialized( $tournamentSer, $user);
+            $newStructure = $this->structureService->createFromSerialized( $structureSer, $newTournament->getCompetition() );
+            // newPlanning
+
+            return $response
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( $newTournament->getId(), 'json'))
+                ;
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(422)->write( $sErrorMessage);
+
     }
 
     public function fetchPdf($request, $response, $args)
