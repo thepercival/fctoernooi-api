@@ -20,11 +20,10 @@ use Voetbal\Planning\Service as PlanningService;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\Token;
-use FCToernooi\Tournament\Shell;
+use Voetbal\Structure;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 use FCToernooi\Pdf\TournamentConfig;
-use App\Action\TournamentShell as TournamentShellAction;
 
 final class Tournament
 {
@@ -293,19 +292,21 @@ final class Tournament
             /** @var \FCToernooi\User $user */
             $user = $this->checkAuth( $this->token, $this->userRepository );
 
-            // haal nieuwe datum op en zet deze
+            $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
+            $tournament->getCompetition()->setStartDateTime( $startDateTime );
             // evt planning nog doen, als deze niet meekomt, kan in frontend evt
             // db transactie om geheel
             // verplaatsen naar service?
 
             /** @var \FCToernooi\Tournament $tournamentSer */
-            $tournamentSer = $this->serializer->serialize( $tournament, 'json');
+            // $tournamentSer = $this->serializer->serialize( $tournament, 'json');
             $structure = $this->structureService->getStructure( $tournament->getCompetition() );
             /** @var \Voetbal\Structure $structureSer */
-            $structureSer = $this->serializer->serialize( $structure, 'json');
+            // $structureSer = $this->serializer->serialize( $structure, 'json');
 
-            $newTournament = $this->service->createFromSerialized( $tournamentSer, $user);
-            $newStructure = $this->structureService->createFromSerialized( $structureSer, $newTournament->getCompetition() );
+            $newTournament = $this->service->createFromSerialized( $tournament, $user);
+            $this->repos->save($newTournament);
+            $newStructure = $this->structureService->createFromSerialized( $this->structureService->stripIds($structure), $newTournament->getCompetition() );
             // newPlanning
 
             return $response
@@ -318,7 +319,6 @@ final class Tournament
             $sErrorMessage = $e->getMessage();
         }
         return $response->withStatus(422)->write( $sErrorMessage);
-
     }
 
     public function fetchPdf($request, $response, $args)
