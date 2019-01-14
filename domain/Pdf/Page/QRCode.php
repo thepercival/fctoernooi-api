@@ -39,7 +39,7 @@ class QRCode extends ToernooiPdfPage
     {
         $nY = $this->drawHeader( "qrcode" );
 
-        $url = "https://www.fctoernooi.nl/toernooi/view/" . $this->getParent()->getTournament()->getId();
+        $url = "https://www.fctoernooi.nl/" . $this->getParent()->getTournament()->getId();
 
         $nY = $this->drawSubHeader( $url, $nY );
 
