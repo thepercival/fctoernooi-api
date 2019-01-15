@@ -282,7 +282,7 @@ final class Tournament
      */
     public function copy($request, $response, $args)
     {
-        $sErrorMessage = null;
+        $this->em->getConnection()->beginTransaction();
         try {
             /** @var \FCToernooi\Tournament $tournament */
             $tournament = $this->repos->find($args['id']);
@@ -294,9 +294,6 @@ final class Tournament
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
             $tournament->getCompetition()->setStartDateTime( $startDateTime );
-            // evt planning nog doen, als deze niet meekomt, kan in frontend evt
-            // db transactie om geheel
-            // verplaatsen naar service?
 
             /** @var \FCToernooi\Tournament $tournamentSer */
             // $tournamentSer = $this->serializer->serialize( $tournament, 'json');
@@ -309,6 +306,9 @@ final class Tournament
             $newStructure = $this->structureService->createFromSerialized( $this->structureService->stripIds($structure), $newTournament->getCompetition() );
             // newPlanning
 
+            $this->planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
+
+            $this->em->getConnection()->commit();
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
                 ->write($this->serializer->serialize( $newTournament->getId(), 'json'))
@@ -316,9 +316,9 @@ final class Tournament
             ;
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            $this->em->getConnection()->rollBack();
+            return $response->withStatus(422)->write( $e->getMessage());
         }
-        return $response->withStatus(422)->write( $sErrorMessage);
     }
 
     public function fetchPdf($request, $response, $args)
