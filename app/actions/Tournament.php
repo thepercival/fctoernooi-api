@@ -24,6 +24,7 @@ use Voetbal\Structure;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 use FCToernooi\Pdf\TournamentConfig;
+use Voetbal\Round;
 
 final class Tournament
 {
@@ -293,20 +294,7 @@ final class Tournament
             $user = $this->checkAuth( $this->token, $this->userRepository );
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
-            $tournament->getCompetition()->setStartDateTime( $startDateTime );
-
-            /** @var \FCToernooi\Tournament $tournamentSer */
-            // $tournamentSer = $this->serializer->serialize( $tournament, 'json');
-            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
-            /** @var \Voetbal\Structure $structureSer */
-            // $structureSer = $this->serializer->serialize( $structure, 'json');
-
-            $newTournament = $this->service->createFromSerialized( $tournament, $user);
-            $this->repos->save($newTournament);
-            $newStructure = $this->structureService->createFromSerialized( $this->structureService->stripIds($structure), $newTournament->getCompetition() );
-            // newPlanning
-
-            $this->planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
+            $newTournament = $this->service->copy( $tournament, $user, $startDateTime);
 
             $this->em->getConnection()->commit();
             return $response
