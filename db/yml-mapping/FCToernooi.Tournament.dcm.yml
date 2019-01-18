@@ -37,7 +37,7 @@ FCToernooi\Tournament:
         referencedColumnName: id
         nullable: false
         onDelete: CASCADE
-      cascade: [ persist, remove ]
+      cascade: [ remove ]
   uniqueConstraints:
     main_u_idx:
       columns: [ competitionid ]

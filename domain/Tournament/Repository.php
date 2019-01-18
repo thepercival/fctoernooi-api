@@ -21,6 +21,16 @@ use Voetbal\Competition;
  */
 class Repository extends \Voetbal\Repository
 {
+    public function customPersist( Tournament $tournament, bool $flush )
+    {
+        $competitionRepos = $this->_em->getRepository(Competition::class);
+        $competitionRepos->customPersist($tournament->getCompetition());
+        $this->_em->persist($tournament);
+        if( $flush ) {
+            $this->_em->flush();
+        }
+    }
+
     public function findByFilter(string $name = null, \DateTimeImmutable $startDateTime = null, \DateTimeImmutable $endDateTime = null )
     {
         $query = $this->createQueryBuilder('t')

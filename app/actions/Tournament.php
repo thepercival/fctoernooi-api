@@ -16,11 +16,15 @@ use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role;
 use Voetbal\Structure\Service as StructureService;
+use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\Service as PlanningService;
+use Voetbal\Game\Repository as GameRepository;
+use Voetbal\Team\Service as TeamService;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\Token;
-use Voetbal\Structure;
+use Voetbal\Team;
+use Voetbal\Association;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 use FCToernooi\Pdf\TournamentConfig;
@@ -28,31 +32,6 @@ use Voetbal\Round;
 
 final class Tournament
 {
-    /**
-     * @var TournamentService
-     */
-    private $service;
-
-    /**
-     * @var TournamentRepos
-     */
-    private $repos;
-
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-
-    /**
-     * @var StructureService
-     */
-    private $structureService;
-
-    /**
-     * @var PlanningService
-     */
-    private $planningService;
-
     /**
      * @var Serializer
      */
@@ -65,6 +44,38 @@ final class Tournament
      * @var EntityManager
      */
     protected $em;
+    /**
+     * @var TournamentService
+     */
+    private $service;
+    /**
+     * @var TournamentRepos
+     */
+    private $repos;
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
+    /**
+     * @var StructureService
+     */
+    private $structureService;
+    /**
+     * @var StructureService
+     */
+    private $structureReposistory;
+    /**
+     * @var PlanningService
+     */
+    private $planningService;
+    /**
+     * @var GameRepository
+     */
+    private $gameRepository;
+    /**
+     * @var TeamService
+     */
+    private $teamService;
 
     use AuthTrait;
 
@@ -73,7 +84,10 @@ final class Tournament
         TournamentRepository $repos,
         UserRepository $userRepository,
         StructureService $structureService,
+        StructureRepository $structureRepository,
         PlanningService $planningService,
+        GameRepository $gameRepository,
+        TeamService $teamService,
         Serializer $serializer,
         Token $token,
         EntityManager $em
@@ -83,7 +97,10 @@ final class Tournament
         $this->repos = $repos;
         $this->userRepository = $userRepository;
         $this->structureService = $structureService;
+        $this->structureReposistory = $structureRepository;
         $this->planningService = $planningService;
+        $this->gameRepository = $gameRepository;
+        $this->teamService = $teamService;
         $this->serializer = $serializer;
         $this->token = $token;
         $this->em = $em;
@@ -92,15 +109,6 @@ final class Tournament
     public function fetchOnePublic($request, $response, $args)
     {
         return $this->fetchOneHelper($request, $response, $args, null);
-    }
-
-    public function fetchOne($request, $response, $args)
-    {
-        $user = null;
-        if ( $this->token->isPopulated() ) {
-            $user = $this->userRepository->find($this->token->getUserId());
-        }
-        return $this->fetchOneHelper($request, $response, $args, $user);
     }
 
     protected function fetchOneHelper($request, $response, $args, $user)
@@ -136,6 +144,15 @@ final class Tournament
             $serGroups[] = 'roles';
         }
         return SerializationContext::create()->setGroups($serGroups);
+    }
+
+    public function fetchOne($request, $response, $args)
+    {
+        $user = null;
+        if ( $this->token->isPopulated() ) {
+            $user = $this->userRepository->find($this->token->getUserId());
+        }
+        return $this->fetchOneHelper($request, $response, $args, $user);
     }
 
     public function getUserRefereeId($request, $response, $args)
@@ -200,7 +217,7 @@ final class Tournament
 
             $user = $this->checkAuth( $this->token, $this->userRepository );
             $tournament = $this->service->createFromSerialized( $tournamentSer, $user );
-            $this->repos->save($tournament);
+            $this->repos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             return $response
                 ->withStatus(201)
@@ -234,7 +251,7 @@ final class Tournament
                 $break = new BreakX( $tournamentSer->getBreakStartDateTime(), $tournamentSer->getBreakDuration() );
             }
             $tournament = $this->service->changeBasics( $tournament, $dateTime, $name, $break );
-            $this->repos->save($tournament);
+            $this->repos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
 
             return $response
@@ -295,6 +312,20 @@ final class Tournament
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
             $newTournament = $this->service->copy( $tournament, $user, $startDateTime);
+            $this->repos->customPersist($newTournament, true);
+
+            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
+            $newTeams = $this->teamService->createTeamsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
+            foreach( $newTeams as $newTeam ) {
+                $this->em->persist($newTeam);
+            }
+
+            $newStructure = $this->structureService->copy( $structure, $newTournament->getCompetition() );
+            $this->teamService->assignTeams( $newStructure, $newTeams );
+
+            $this->structureReposistory->customPersist($newStructure);
+
+            $games = $this->planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
 
             $this->em->getConnection()->commit();
             return $response

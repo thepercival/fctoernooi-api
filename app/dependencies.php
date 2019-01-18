@@ -2,6 +2,7 @@
 // DIC configuration
 
 use \JMS\Serializer\SerializerBuilder;
+use Voetbal\Structure\Repository as StructureRepository;
 
 $container = $app->getContainer();
 
@@ -94,7 +95,10 @@ $container['App\Action\Tournament'] = function ($c) {
         $tournamentRepos,
         $userRepository,
         $c->get('voetbal')->getService(Voetbal\Structure::class),
+        new StructureRepository($em),
         $c->get('voetbal')->getService(Voetbal\Planning::class),
+        $c->get('voetbal')->getRepository(Voetbal\Game::class),
+        $c->get('voetbal')->getService(Voetbal\Team::class),
         $c->get('serializer'),
         $c->get('token'),
         $em);

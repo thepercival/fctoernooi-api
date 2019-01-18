@@ -103,8 +103,8 @@ class Service
 
         $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
             $fieldService = $this->voetbalService->getService( Field::class );
-            foreach( $fieldsSer as $fieldSet ) {
-                $fieldService->create( $fieldSet->getNumber(), $fieldSet->getName(), $competition );
+            foreach( $fieldsSer as $fieldSer ) {
+                $fieldService->create( $fieldSer->getNumber(), $fieldSer->getName(), $competition );
             }
             $refereeService = $this->voetbalService->getService( Referee::class );
             foreach( $refereesSer as $referesSer ) {
@@ -247,67 +247,8 @@ class Service
      */
     public function copy(Tournament $tournament, User $user, \DateTimeImmutable $startDateTime)
     {
-        $tournament->getCompetition()->setStartDateTime( $startDateTime );
-
-        /** @var \FCToernooi\Tournament $tournamentSer */
-        // $tournamentSer = $this->serializer->serialize( $tournament, 'json');
-        $structureService = $this->voetbalService->getService( Structure::class );
-        $structure = $this->stripForCopy( $structureService->getStructure( $tournament->getCompetition() ) );
-        /** @var \Voetbal\Structure $structureSer */
-        // $structureSer = $this->serializer->serialize( $structure, 'json');
-
-        $newTournament = $this->createFromSerialized( $tournament, $user);
-        $this->repos->save($newTournament);
-
-        $this->saveTeamsFromStructure( $structure, $newTournament->getCompetition()->getLeague()->getAssociation() );
-
-        $newStructure = $structureService->createFromSerialized( $structure, $newTournament->getCompetition() );
-
-        // $planningService = $this->voetbalService->getService( Planning::class );
-        // $planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
-
+        $newTournament = $this->createFromSerialized( $tournament, $user );
+        $newTournament->getCompetition()->setStartDateTime( $startDateTime );
         return $newTournament;
     }
-
-    protected function stripForCopy( Structure $structure)
-    {
-        $this->stripRoundForCopy( $structure->getRootRound() );
-        return $structure;
-    }
-
-    protected function stripRoundForCopy( Round $round)
-    {
-        foreach( $round->getPoules() as $poule ) {
-            foreach( $poule->getPlaces() as $place ) {
-                if ( $place->getTeam() !== null ) {
-                    $place->getTeam()->setId(null);
-                }
-                if( !$round->getNumber()->isFirst() ) {
-                    $place->setTeam(null);
-                }
-                $place->setId(null);
-            }
-            $poule->setId(null);
-        }
-        foreach( $round->getChildRounds() as $childRound ) {
-            $this->stripRoundForCopy( $childRound );
-        }
-        $round->setId(null);
-    }
-
-    protected function saveTeamsFromStructure( Structure $structure, Association $association ) {
-        $teamRepos = $this->voetbalService->getRepository( Team::class );
-        $poulePlaces = $structure->getRootRound()->getPoulePlaces();
-        foreach( $poulePlaces as $poulePlace ) {
-            $team = $poulePlace->getTeam();
-            if( $team !== null ) {
-                $newTeam = new Team( $team->getName(), $association );
-                $newTeam->setAbbreviation($team->getAbbreviation());
-                $newTeam->setImageUrl($team->getImageUrl());
-                $newTeam->setInfo($team->getInfo());
-                $poulePlace->setTeam( $teamRepos->save($newTeam) );
-            }
-        }
-    }
-
 }
