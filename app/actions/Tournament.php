@@ -308,7 +308,7 @@ final class Tournament
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             /** @var \FCToernooi\User $user */
-            $user = $this->checkAuth( $this->token, $this->userRepository );
+            $user = $this->checkAuth( $this->token, $this->userRepository, $tournament );
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
             $newTournament = $this->service->copy( $tournament, $user, $startDateTime);
@@ -326,6 +326,10 @@ final class Tournament
             $this->structureReposistory->customPersist($newStructure);
 
             $games = $this->planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
+            foreach( $games as $game ) {
+                $this->em->persist($game);
+            }
+            $this->em->flush();
 
             $this->em->getConnection()->commit();
             return $response
@@ -373,6 +377,10 @@ final class Tournament
             $structure->setQualifyRules();
             $pdf = new \FCToernooi\Pdf\Document( $tournament, $structure, $this->planningService, $pdfConfig );
             $vtData = $pdf->render();
+
+            $tournament->setPrinted(true);
+            $this->em->persist($tournament);
+            $this->em->flush();
 
             return $response
                 ->withHeader('Cache-Control', 'must-revalidate')

@@ -20,6 +20,10 @@ FCToernooi\Tournament:
       default:  0
       nullable: false
       unique: false
+    printed:
+      type: boolean
+      nullable: true
+      unique: false
   oneToMany:
     roles:
       targetEntity: FCToernooi\Role

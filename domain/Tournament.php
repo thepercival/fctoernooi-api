@@ -44,6 +44,11 @@ class Tournament
      */
     private $sponsors;
 
+    /**
+     * @var bool
+     */
+    protected $printed;
+
     const MINNROFCOMPETITORS = 2;
     const MAXNROFCOMPETITORS = 32;
 
@@ -168,5 +173,21 @@ class Tournament
     public function setSponsors( ArrayCollection $sponsors)
     {
         $this->sponsors = $sponsors;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPrinted()
+    {
+        return $this->printed;
+    }
+
+    /**
+     * @param $printed
+     */
+    public function setPrinted($printed)
+    {
+        $this->printed = $printed;
     }
 }
