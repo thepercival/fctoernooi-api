@@ -28,7 +28,7 @@ try {
 
     $tournaments = $tournamentRepos->findAll();
     foreach( $tournaments as $tournament ) {
-        $content .= $url. "toernooi/view/" . $tournament->getId() . PHP_EOL;
+        $content .= $url. $tournament->getId() . PHP_EOL;
     }
     file_put_contents( $distPath . "sitemap.txt", $content );
     // chmod ( $distPath . "sitemap.txt", 744 );
