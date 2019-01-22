@@ -2095,16 +2095,16 @@
         },
         {
             "name": "jms/serializer",
-            "version": "2.0.2",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "cbfc555b327f1a1b3523855227ea345f66c72677"
+                "reference": "4964dcbc7316333cabbd078fa5274414a86738ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/cbfc555b327f1a1b3523855227ea345f66c72677",
-                "reference": "cbfc555b327f1a1b3523855227ea345f66c72677",
+                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/4964dcbc7316333cabbd078fa5274414a86738ce",
+                "reference": "4964dcbc7316333cabbd078fa5274414a86738ce",
                 "shasum": ""
             },
             "require": {
@@ -2144,7 +2144,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0-dev"
+                    "dev-master": "2.1-dev"
                 }
             },
             "autoload": {
@@ -2175,7 +2175,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2018-12-12 08:03:07"
+            "time": "2019-01-11 08:46:16"
         },
         {
             "name": "khanamiryan/qrcode-detector-decoder",
@@ -2229,16 +2229,16 @@
         },
         {
             "name": "league/period",
-            "version": "4.3.1",
+            "version": "4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/period.git",
-                "reference": "fdcab49bfa1ca1f6cba1564f7aeb9e5d4cc37d51"
+                "reference": "ac573c3a4ff47557b362d081dd051544ba4530f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/period/zipball/fdcab49bfa1ca1f6cba1564f7aeb9e5d4cc37d51",
-                "reference": "fdcab49bfa1ca1f6cba1564f7aeb9e5d4cc37d51",
+                "url": "https://api.github.com/repos/thephpleague/period/zipball/ac573c3a4ff47557b362d081dd051544ba4530f5",
+                "reference": "ac573c3a4ff47557b362d081dd051544ba4530f5",
                 "shasum": ""
             },
             "require": {
@@ -2250,12 +2250,13 @@
                 "phpstan/phpstan": "^0.10.1",
                 "phpstan/phpstan-phpunit": "^0.10.0",
                 "phpstan/phpstan-strict-rules": "^0.10.0",
-                "phpunit/phpunit": "^7.0"
+                "phpunit/phpunit": "^7.0",
+                "symfony/var-dumper": "^4.2"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.x-dev"
                 }
             },
             "autoload": {
@@ -2289,7 +2290,7 @@
                 "range",
                 "time"
             ],
-            "time": "2019-01-07 13:00:14"
+            "time": "2019-01-20 13:19:34"
         },
         {
             "name": "monolog/monolog",
@@ -2985,16 +2986,16 @@
         },
         {
             "name": "slim/slim",
-            "version": "3.11.0",
+            "version": "3.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/slimphp/Slim.git",
-                "reference": "d378e70431e78ee92ee32ddde61ecc72edf5dc0a"
+                "reference": "f4947cc900b6e51cbfda58b9f1247bca2f76f9f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/slimphp/Slim/zipball/d378e70431e78ee92ee32ddde61ecc72edf5dc0a",
-                "reference": "d378e70431e78ee92ee32ddde61ecc72edf5dc0a",
+                "url": "https://api.github.com/repos/slimphp/Slim/zipball/f4947cc900b6e51cbfda58b9f1247bca2f76f9f0",
+                "reference": "f4947cc900b6e51cbfda58b9f1247bca2f76f9f0",
                 "shasum": ""
             },
             "require": {
@@ -3052,7 +3053,7 @@
                 "micro",
                 "router"
             ],
-            "time": "2018-09-16 10:54:21"
+            "time": "2019-01-15 13:21:25"
         },
         {
             "name": "symfony/console",
@@ -3552,12 +3553,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "20db7ff618c6f108fa58327b36aebdcbbb5935ec"
+                "reference": "3db0a2af62289e9723db55501f51dd25f3536695"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/20db7ff618c6f108fa58327b36aebdcbbb5935ec",
-                "reference": "20db7ff618c6f108fa58327b36aebdcbbb5935ec",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/3db0a2af62289e9723db55501f51dd25f3536695",
+                "reference": "3db0a2af62289e9723db55501f51dd25f3536695",
                 "shasum": ""
             },
             "require": {
@@ -3595,7 +3596,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2018-12-20 22:12:16"
+            "time": "2019-01-22 15:55:55"
         },
         {
             "name": "tuupola/base62",
@@ -3761,16 +3762,16 @@
         },
         {
             "name": "tuupola/http-factory",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/http-factory.git",
-                "reference": "60f44b13e5363fbe6876b5b5edc03af5e4cb6294"
+                "reference": "1fd4eaafe3a6e0c26d288e3b3e17d777ea1991bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/http-factory/zipball/60f44b13e5363fbe6876b5b5edc03af5e4cb6294",
-                "reference": "60f44b13e5363fbe6876b5b5edc03af5e4cb6294",
+                "url": "https://api.github.com/repos/tuupola/http-factory/zipball/1fd4eaafe3a6e0c26d288e3b3e17d777ea1991bf",
+                "reference": "1fd4eaafe3a6e0c26d288e3b3e17d777ea1991bf",
                 "shasum": ""
             },
             "require": {
@@ -3814,7 +3815,7 @@
                 "psr-17",
                 "psr-7"
             ],
-            "time": "2018-12-22 06:14:23"
+            "time": "2019-01-11 15:13:01"
         },
         {
             "name": "tuupola/slim-basic-auth",
@@ -4861,16 +4862,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "7.5.1",
+            "version": "7.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c23d78776ad415d5506e0679723cb461d71f488f"
+                "reference": "7c89093bd00f7d5ddf0ab81dee04f801416b4944"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c23d78776ad415d5506e0679723cb461d71f488f",
-                "reference": "c23d78776ad415d5506e0679723cb461d71f488f",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7c89093bd00f7d5ddf0ab81dee04f801416b4944",
+                "reference": "7c89093bd00f7d5ddf0ab81dee04f801416b4944",
                 "shasum": ""
             },
             "require": {
@@ -4941,7 +4942,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-12-12 07:20:32"
+            "time": "2019-01-15 08:19:08"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
