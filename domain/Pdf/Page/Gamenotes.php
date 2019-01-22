@@ -83,8 +83,8 @@ class Gamenotes extends ToernooiPdfPage
 
         $this->drawCell( 'plekken', $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $home = $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), false );
-        $away = $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), false );
+        $home = $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), false, true );
+        $away = $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), false, true );
         $this->drawCell( $home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight );
         $nY -= $nRowHeight;
 
@@ -138,9 +138,9 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), true ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getHomePoulePlace(), true, true ), $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), true ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $this->drawCell( $nameService->getPoulePlaceFromName( $game->getAwayPoulePlace(), true, true ), $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );

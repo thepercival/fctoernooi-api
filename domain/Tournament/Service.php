@@ -107,8 +107,8 @@ class Service
                 $fieldService->create( $fieldSer->getNumber(), $fieldSer->getName(), $competition );
             }
             $refereeService = $this->voetbalService->getService( Referee::class );
-            foreach( $refereesSer as $referesSer ) {
-                $refereeService->create( $referesSer->getInitials(), $referesSer->getName(), $competition );
+            foreach( $refereesSer as $refereeSer ) {
+                $refereeService->create( $competition, $refereeSer->getInitials(), $refereeSer->getName(), $refereeSer->getEmailaddress(), $refereeSer->getInfo() );
             }
         };
         $createFieldsAndReferees( $competitionSer->getFields(), $competitionSer->getReferees() );
