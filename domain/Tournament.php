@@ -50,7 +50,7 @@ class Tournament
     protected $printed;
 
     const MINNROFCOMPETITORS = 2;
-    const MAXNROFCOMPETITORS = 32;
+    const MAXNROFCOMPETITORS = 40;
 
     public function __construct( Competition $competition )
     {
