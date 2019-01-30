@@ -78,7 +78,7 @@ function mailHelp( User $user, Tournament $tournament )
         </p>';
 
     $from = "FCToernooi";
-    $fromEmail = "norepl@fctoernooi.nl";
+    $fromEmail = "info@fctoernooi.nl";
     $headers  = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
     $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
