@@ -126,6 +126,11 @@ class Gamenotes extends ToernooiPdfPage
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
             $this->drawCell( $game->getReferee()->getInitials(), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
+        } else if( $game->getPoulePlaceReferee() !== null ) {
+            $this->drawCell( "scheidrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
+            $this->drawCell( $nameService->getPoulePlaceName( $game->getPoulePlaceReferee(), true, true), $nX2, $nY, $nWidthResult, $nRowHeight );
+            $nY -= $nRowHeight;
         }
 
         $nY -= $nRowHeight; // extra lege regel

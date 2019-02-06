@@ -17,6 +17,9 @@ use Voetbal\Structure\NameService;
 trait GamesTrait
 {
     protected $columnWidths;
+    protected $hasReferees;
+    protected $selfRefereesAssigned;
+    protected $refereesAssigned;
 
     protected function setGamesColumns( RoundNumber $roundNumber )
     {
@@ -24,10 +27,10 @@ trait GamesTrait
         $this->columnWidths["poule"] = 0.05;
         $this->columnWidths["start"] = 0.15;
         $this->columnWidths["field"] = 0.05;
-        $this->columnWidths["home"] = 0.28;
         $this->columnWidths["score"] = 0.11;
-        $this->columnWidths["away"] = 0.28;
-        $this->columnWidths["referee"] = 0.08;
+        $this->columnWidths["referee"] = $this->selfRefereesAssigned ? 0.22 : 0.08;
+        $this->columnWidths["home"] = $this->selfRefereesAssigned ? 0.21 : 0.28;
+        $this->columnWidths["away"] = $this->selfRefereesAssigned ? 0.21 : 0.28;
         $planningService = $this->getParent()->getPlanningService();
         if( !$planningService->canCalculateStartDateTime($roundNumber) ) {
             $this->columnWidths["home"] += ( $this->columnWidths["start"] / 2 );
@@ -41,10 +44,18 @@ trait GamesTrait
             $this->columnWidths["home"] += ( $this->columnWidths["field"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["field"] / 2 );
         }
-        if( $roundNumber->getCompetition()->getReferees()->count() === 0 ) {
+        if( $this->refereesAssigned === false ) {
             $this->columnWidths["home"] += ( $this->columnWidths["referee"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["referee"] / 2 );
         }
+    }
+
+    public function setSelfRefereesAssigned( bool $selfRefereesAssigned) {
+        $this->selfRefereesAssigned = $selfRefereesAssigned;
+    }
+
+    public function setRefereesAssigned( bool $refereesAssigned) {
+        $this->refereesAssigned = $refereesAssigned;
     }
 
     public function getGameHeight( Game $game )
@@ -181,8 +192,11 @@ trait GamesTrait
         $nX = $this->drawCell($away, $nX, $nY, $this->getGamesAwayWidth(), $nRowHeight, Page::ALIGNLEFT, "black");
 
         if ($game->getReferee() !== null) {
-            $this->drawCell($game->getReferee()->getInitials(), $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight,
-                Page::ALIGNCENTER, "black");
+            $this->drawCell($game->getReferee()->getInitials(),
+                $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
+        }  else if( $game->getPoulePlaceReferee() !== null ) {
+            $this->drawCell($nameService->getPoulePlaceName( $game->getPoulePlaceReferee(), true, true),
+                $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
         }
 
         return $nY - $nRowHeight;

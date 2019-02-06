@@ -52,6 +52,10 @@ class Document extends \Zend_Pdf
      * @var array
      */
     protected $widthText = [];
+    /**
+     * @var bool
+     */
+    protected $areSelfRefereesAssigned;
 
     /**
      * Constructs the class
@@ -273,7 +277,10 @@ class Document extends \Zend_Pdf
 
     protected function createPagePlanning( string $title )
     {
-        $page = new PagePlanning( \Zend_Pdf_Page::SIZE_A4 );
+        $selfRefereesAssigned = $this->areSelfRefereesAssigned();
+        $page = new PagePlanning( $selfRefereesAssigned ? \Zend_Pdf_Page::SIZE_A4_LANDSCAPE : \Zend_Pdf_Page::SIZE_A4 );
+        $page->setSelfRefereesAssigned($selfRefereesAssigned);
+        $page->setRefereesAssigned($this->areRefereesAssigned());
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
@@ -307,6 +314,32 @@ class Document extends \Zend_Pdf
         $page->putParent( $this );
         $this->pages[] = $page;
         return $page;
+    }
+
+    protected function areSelfRefereesAssigned(): bool {
+        if( $this->areSelfRefereesAssigned !== null ){
+            return $this->areSelfRefereesAssigned;
+        };
+        $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
+            if( $roundNumber->getConfig()->getSelfReferee() ) {
+                $games = $this->planningService->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH );
+                if( count( array_filter( $games, function( $game ) {
+                        return $game->getPoulePlaceReferee() !== null;
+                    } ) ) > 0 ) {
+                    return true;
+                }
+            }
+            if( $roundNumber->hasNext() === false ) {
+                return false;
+            }
+            return $hasSelfRefereeHelper( $roundNumber->getNext() );
+        };
+        $this->areSelfRefereesAssigned = $hasSelfRefereeHelper( $this->structure->getFirstRoundNumber() );
+        return $this->areSelfRefereesAssigned;
+    }
+
+    protected function areRefereesAssigned() {
+        return $this->tournament->getCompetition()->getReferees()->count() > 0 || $this->areSelfRefereesAssigned();
     }
 
     /**
