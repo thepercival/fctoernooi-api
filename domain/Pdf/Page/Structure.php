@@ -117,6 +117,9 @@ class Structure extends ToernooiPdfPage
         if( !$lastLine ) {
             return 3;
         }
+        if( ( $nrOfPoules % 3 ) === 0 ) {
+            return 3;
+        }
         return ( $nrOfPoules % 3 );
     }
 

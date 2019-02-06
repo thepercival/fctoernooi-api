@@ -83,8 +83,8 @@ class Gamenotes extends ToernooiPdfPage
 
         $this->drawCell( 'plekken', $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $home = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::HOME ), false, true );
-        $away = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::AWAY ), false, true );
+        $home = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::HOME ), false, !$roundNumberConfig->getTeamup() );
+        $away = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::AWAY ), false, !$roundNumberConfig->getTeamup() );
         $this->drawCell( $home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight );
         $nY -= $nRowHeight;
 
