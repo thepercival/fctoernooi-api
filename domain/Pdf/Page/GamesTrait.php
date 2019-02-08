@@ -138,8 +138,9 @@ trait GamesTrait
 
         $nX = $this->drawCell( "uit", $nX, $nY, $gameAwayWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
-        if( $roundNumber->getCompetition()->getReferees()->count() > 0 ) {
-            $this->drawCell( "sch.", $nX, $nY, $gameRefereeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+        if( $this->refereesAssigned || $this->selfRefereesAssigned ) {
+            $title = $this->selfRefereesAssigned ? 'scheidsrechter' : 'sch.';
+            $this->drawCell( $title, $nX, $nY, $gameRefereeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         }
         return $nY - $nRowHeight;
     }
