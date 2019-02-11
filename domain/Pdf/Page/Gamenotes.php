@@ -11,6 +11,8 @@ namespace FCToernooi\Pdf\Page;
 use FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
 use Voetbal\Structure\NameService;
+use Voetbal\Round\Config\Score as RoundConfigScore;
+use Voetbal\Round\Config\Score\Options as RoundConfigScoreOptions;
 
 class Gamenotes extends ToernooiPdfPage
 {
@@ -153,28 +155,80 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
+        $inputScoreConfig = $roundNumberConfig->getInputScore();
+        $calculateScoreConfig = $roundNumberConfig->getCalculateScore();
+
         $dots = '...............';
         $dotsWidth = $this->getTextWidth( $dots );
-        $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
-        $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
-        $scoreConfig = $roundNumberConfig->getInputScore();
-        if( $scoreConfig !== null ) {
-            $this->drawCell( $scoreConfig->getName(), $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        }
-
-        $nY -= 3 * $nRowHeight; // extra lege regel
-
-        if( $roundNumberConfig->getHasExtension() ) {
-            $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( '...............', $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
-            $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-            $this->drawCell( '...............', $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
-            if( $scoreConfig !== null ) {
-                $this->drawCell( $scoreConfig->getName(), $nX2, $nY, $nWidthResult - $this->getPageMargin(), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+        if( $inputScoreConfig !== null ) {
+            if( $inputScoreConfig !== $calculateScoreConfig ) {
+                $nYDelta = 0;
+                $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
+                for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
+                    $descr = $calculateScoreConfig->getNameSingle() . ' ' . $gameUnitNr;
+                    $this->drawCell( $descr, $this->getPageMargin(), $nY - $nYDelta, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+                    $this->drawCell( $dots, $nX, $nY - $nYDelta, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
+                    $this->drawCell( '-', $nSecondBorder, $nY - $nYDelta, $nMargin, $nRowHeight * $larger );
+                    $this->drawCell( $dots, $nX2, $nY - $nYDelta, $dotsWidth, $nRowHeight * $larger );
+                    $nYDelta += $nRowHeight * $larger;
+                }
+            } else {
+                $this->drawCell( 'uitslag', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+                $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
+                $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
+                $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
             }
         }
 
+
+        if( $inputScoreConfig !== null ) {
+            $descr = $this->getInputScoreConfigDescription( $inputScoreConfig );
+            if( $inputScoreConfig !== $calculateScoreConfig ) {
+                $nYDelta = 0;
+                $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
+                for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
+                    $this->drawCell($descr, $nX2 + $dotsWidth, $nY - $nYDelta,
+                        $nWidthResult - ($this->getPageMargin() + $dotsWidth), $nRowHeight * $larger,
+                        ToernooiPdfPage::ALIGNRIGHT);
+                    $nYDelta += $nRowHeight * $larger;
+                }
+                $nY -= $nYDelta;
+            } else {
+                $this->drawCell( $descr, $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+            }
+        }
+
+        $nY -= $nRowHeight; // extra lege regel
+
+        if( $roundNumberConfig->getHasExtension() ) {
+            $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
+            $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
+            $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
+            $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
+            if( $inputScoreConfig !== null ) {
+                $this->drawCell( $inputScoreConfig->getName(), $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight  * $larger, ToernooiPdfPage::ALIGNRIGHT );
+            }
+        }
+
+    }
+
+    protected function getInputScoreConfigDescription( RoundConfigScore $inputScoreConfig): string {
+        $direction = $this->getDirectionName($inputScoreConfig);
+        if( $inputScoreConfig->getMaximum() === 0 ) {
+            return $inputScoreConfig->getName();
+        }
+        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $inputScoreConfig->getName();
+    }
+
+    protected function getDirectionName(RoundConfigScore $scoreConfig ) {
+        return $scoreConfig->getDirection() === RoundConfigScoreOptions::UPWARDS ? 'naar' : 'vanaf';
+    }
+
+    protected function getNrOfScoreLines( int $scoreConfigMax ) : int {
+        $nrOfScoreLines = ($scoreConfigMax * 2) - 1;
+        if( $nrOfScoreLines > 5 ) {
+            $nrOfScoreLines = 5;
+        }
+        return $nrOfScoreLines;
     }
 }
