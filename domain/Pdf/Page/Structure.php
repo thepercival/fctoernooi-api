@@ -86,7 +86,7 @@ class Structure extends ToernooiPdfPage
                 $nY = $nYPouleStart - $nRowHeight;
                 foreach( $poule->getPlaces() as $poulePlace ) {
                     $this->drawCell( $poulePlace->getNumber(), $nX, $nY, $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, "black" );
-                    $name = $poulePlace->getTeam() !== null ? $nameService->getPoulePlaceName( $poulePlace, true ) : null;
+                    $name = $poulePlace->getCompetitor() !== null ? $nameService->getPoulePlaceName( $poulePlace, true ) : null;
                     $this->drawCell( $name, $nX + $numberWidth, $nY, $pouleWidth - $numberWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, "black" );
                     $nY -= $nRowHeight;
                 }

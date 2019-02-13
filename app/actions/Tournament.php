@@ -19,16 +19,13 @@ use Voetbal\Structure\Service as StructureService;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Team\Service as TeamService;
+use Voetbal\Competitor\Service as CompetitorService;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\Token;
-use Voetbal\Team;
-use Voetbal\Association;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
 use FCToernooi\Pdf\TournamentConfig;
-use Voetbal\Round;
 
 final class Tournament
 {
@@ -73,9 +70,9 @@ final class Tournament
      */
     private $gameRepository;
     /**
-     * @var TeamService
+     * @var CompetitorService
      */
-    private $teamService;
+    private $competitorService;
 
     use AuthTrait;
 
@@ -87,7 +84,7 @@ final class Tournament
         StructureRepository $structureRepository,
         PlanningService $planningService,
         GameRepository $gameRepository,
-        TeamService $teamService,
+        CompetitorService $competitorService,
         Serializer $serializer,
         Token $token,
         EntityManager $em
@@ -100,7 +97,7 @@ final class Tournament
         $this->structureReposistory = $structureRepository;
         $this->planningService = $planningService;
         $this->gameRepository = $gameRepository;
-        $this->teamService = $teamService;
+        $this->competitorService = $competitorService;
         $this->serializer = $serializer;
         $this->token = $token;
         $this->em = $em;
@@ -315,13 +312,13 @@ final class Tournament
             $this->repos->customPersist($newTournament, true);
 
             $structure = $this->structureService->getStructure( $tournament->getCompetition() );
-            $newTeams = $this->teamService->createTeamsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
-            foreach( $newTeams as $newTeam ) {
-                $this->em->persist($newTeam);
+            $newCompetitors = $this->competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
+            foreach( $newCompetitors as $newCompetitor ) {
+                $this->em->persist($newCompetitor);
             }
 
             $newStructure = $this->structureService->copy( $structure, $newTournament->getCompetition() );
-            $this->teamService->assignTeams( $newStructure, $newTeams );
+            $this->competitorService->assignCompetitors( $newStructure, $newCompetitors );
 
             $this->structureReposistory->customPersist($newStructure);
 

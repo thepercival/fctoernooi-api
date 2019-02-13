@@ -14,10 +14,6 @@ use Voetbal\Field;
 use Voetbal\Referee;
 use Voetbal\League;
 use Voetbal\Season;
-use Voetbal\Round;
-use Voetbal\Planning;
-use Voetbal\Team;
-use Voetbal\Structure;
 use Voetbal\Competition;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -26,7 +22,6 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Role;
 use League\Period\Period;
-use FCToernooi\Tournament\BreakX;
 
 class Service
 {
@@ -158,7 +153,7 @@ class Service
         return $assService->create( $userId . '-' . $dateTime->getTimestamp() );
     }
 
-    public function mayUserChangeTeam( User $user, Association  $association )
+    public function mayUserChangeCompetitor( User $user, Association  $association )
     {
         $roleValues = Role::STRUCTUREADMIN;
         $tournaments = $this->repos->findByPermissions($user, $roleValues);

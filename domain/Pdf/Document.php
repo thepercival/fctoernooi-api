@@ -355,15 +355,6 @@ class Document extends \Zend_Pdf
         return $games;
     }
 
-    /*public function getName( PoulePlace $poulePlace )
-    {
-        $nameService = new NameService();
-        if( $poulePlace->getTeam() !== null ) {
-            return $poulePlace->getTeam()->getName();
-        }
-        return $nameService->getPoulePlaceFromName( $poulePlace );
-    }*/
-
     public function hasTextWidth( string $key ) {
         return array_key_exists( $key, $this->widthText );
     }

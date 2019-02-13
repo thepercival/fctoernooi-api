@@ -97,8 +97,8 @@ class Authentication
     protected function authorized(User $user, string $resourceType, string $method, array $queryParams, int $id = null)
     {
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
-        if ($resourceType === 'teams') {
-            return $this->teamActionAuthorized($user, $method, $queryParams);
+        if ($resourceType === 'competitors') {
+            return $this->competitorActionAuthorized($user, $method, $queryParams);
         } elseif ($resourceType === 'pouleplaces') {
             return $this->pouleplaceActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'games') {
@@ -111,7 +111,7 @@ class Authentication
         return false;
     }
 
-    protected function teamActionAuthorized(User $user, string $method, array $queryParams)
+    protected function competitorActionAuthorized(User $user, string $method, array $queryParams)
     {
         if (array_key_exists("associationid", $queryParams) !== true) {
             return false;
@@ -124,7 +124,7 @@ class Authentication
         if ($association === null) {
             return false;
         }
-        if( $this->tournamentService->mayUserChangeTeam( $user, $association ) === false ) {
+        if( $this->tournamentService->mayUserChangeCompetitor( $user, $association ) === false ) {
             return false;
         }
         

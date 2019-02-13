@@ -14,19 +14,19 @@ require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
 use Monolog\Logger;
-use Voetbal\External\Team\Importer as TeamImporter;
+use Voetbal\External\Competitor\Importer as CompetitorImporter;
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 
-$logger = new Logger('cronjob-teams');
+$logger = new Logger('cronjob-competitors');
 $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'teams.log', $settings['logger']['level']));
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'competitors.log', $settings['logger']['level']));
 
 try {
-    $importer = new TeamImporter(
-        $voetbal->getService( \Voetbal\Team::class ),
+    $importer = new CompetitorImporter(
+        $voetbal->getService( \Voetbal\Competitor::class ),
         $voetbal,
         $em->getConnection(),
         $logger

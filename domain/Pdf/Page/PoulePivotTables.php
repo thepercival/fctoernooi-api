@@ -62,7 +62,7 @@ class PoulePivotTables extends ToernooiPdfPage
     }
 
     /**
-     * t/m 3 teams 0g, t/m 8 teams 45g, hoger 90g
+     * t/m 3 places 0g, t/m 8 places 45g, hoger 90g
      *
      * @param Poule $poule
      */
