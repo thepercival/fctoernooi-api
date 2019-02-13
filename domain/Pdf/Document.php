@@ -324,7 +324,7 @@ class Document extends \Zend_Pdf
             if( $roundNumber->getConfig()->getSelfReferee() ) {
                 $games = $this->planningService->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH );
                 if( count( array_filter( $games, function( $game ) {
-                        return $game->getPoulePlaceReferee() !== null;
+                        return $game->getRefereePoulePlace() !== null;
                     } ) ) > 0 ) {
                     return true;
                 }

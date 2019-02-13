@@ -195,8 +195,8 @@ trait GamesTrait
         if ($game->getReferee() !== null) {
             $this->drawCell($game->getReferee()->getInitials(),
                 $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
-        }  else if( $game->getPoulePlaceReferee() !== null ) {
-            $this->drawCell($nameService->getPoulePlaceName( $game->getPoulePlaceReferee(), true, true),
+        }  else if( $game->getRefereePoulePlace() !== null ) {
+            $this->drawCell($nameService->getPoulePlaceName( $game->getRefereePoulePlace(), true, true),
                 $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
         }
 
