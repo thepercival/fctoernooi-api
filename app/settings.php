@@ -26,7 +26,7 @@ return [
         'logger' => [
             'name' => 'cronjob',
             'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/cronjob.log',
-            'level' => \Monolog\Logger::DEBUG,
+            'level' => ( getenv('ENVIRONMENT') === "development" ? \Monolog\Logger::DEBUG : \Monolog\Logger::ERROR),
             'cronjobpath' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/cronjob_',
         ],
         // Doctrine settings
