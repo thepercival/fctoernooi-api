@@ -62,10 +62,6 @@ final class Tournament
      */
     private $structureReposistory;
     /**
-     * @var PlanningService
-     */
-    private $planningService;
-    /**
      * @var GameRepository
      */
     private $gameRepository;
@@ -82,7 +78,6 @@ final class Tournament
         UserRepository $userRepository,
         StructureService $structureService,
         StructureRepository $structureRepository,
-        PlanningService $planningService,
         GameRepository $gameRepository,
         CompetitorService $competitorService,
         Serializer $serializer,
@@ -95,7 +90,6 @@ final class Tournament
         $this->userRepository = $userRepository;
         $this->structureService = $structureService;
         $this->structureReposistory = $structureRepository;
-        $this->planningService = $planningService;
         $this->gameRepository = $gameRepository;
         $this->competitorService = $competitorService;
         $this->serializer = $serializer;
@@ -322,7 +316,8 @@ final class Tournament
 
             $this->structureReposistory->customPersist($newStructure);
 
-            $games = $this->planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
+            $planningService = new PlanningService($newTournament->getCompetition());
+            $games = $planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
             foreach( $games as $game ) {
                 $this->em->persist($game);
             }
@@ -372,7 +367,7 @@ final class Tournament
             $fileName = $this->getFileName($pdfConfig);
             $structure = $this->structureService->getStructure( $tournament->getCompetition() );
             $structure->setQualifyRules();
-            $pdf = new \FCToernooi\Pdf\Document( $tournament, $structure, $this->planningService, $pdfConfig );
+            $pdf = new \FCToernooi\Pdf\Document( $tournament, $structure, $pdfConfig );
             $vtData = $pdf->render();
 
             $tournament->setPrinted(true);

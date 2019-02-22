@@ -96,7 +96,6 @@ $container['App\Action\Tournament'] = function ($c) {
         $userRepository,
         $c->get('voetbal')->getService(Voetbal\Structure::class),
         new StructureRepository($em),
-        $c->get('voetbal')->getService(Voetbal\Planning::class),
         $c->get('voetbal')->getRepository(Voetbal\Game::class),
         $c->get('voetbal')->getService(Voetbal\Competitor::class),
         $c->get('serializer'),

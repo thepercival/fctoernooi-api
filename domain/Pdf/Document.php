@@ -57,23 +57,16 @@ class Document extends \Zend_Pdf
      */
     protected $areSelfRefereesAssigned;
 
-    /**
-     * Constructs the class
-     *
-     * @throws Nothing
-     * @return An instance of the class
-     */
     public function __construct(
         Tournament $tournament,
         Structure $structure,
-        PlanningService $planningService,
         TournamentConfig $config
     )
     {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->planningService = $planningService;
+        $this->planningService = new PlanningService($tournament->getCompetition());
         $this->config = $config;
     }
 
