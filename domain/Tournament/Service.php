@@ -94,7 +94,7 @@ class Service
         $season = $getSeason( (int) $competitionSer->getStartDateTime()->format("Y") );
 
         $competitionService = $this->voetbalService->getService(Competition::class);
-        $competition = $competitionService->create($league, $season, $competitionSer->getStartDateTime() );
+        $competition = $competitionService->create($league, $season, $competitionSer->getRuleSet(), $competitionSer->getStartDateTime() );
 
         $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
             $fieldService = $this->voetbalService->getService( Field::class );
@@ -179,7 +179,7 @@ class Service
             $params = ['value' => Role::REFEREE];
             if( $user !== null ) {
                 $params['user'] = $user;
-            } else if( $tournament !== null ) {
+            } else if( $tournament !== nulStartDateTimel ) {
                 $params['tournament'] = $tournament;
             }
             $refereeRoles = $this->roleRepos->findBy( $params );

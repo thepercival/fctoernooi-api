@@ -182,7 +182,7 @@ class Gamenotes extends ToernooiPdfPage
 
 
         if( $inputScoreConfig !== null ) {
-            $descr = $this->getInputScoreConfigDescription( $inputScoreConfig );
+            $descr = $this->getInputScoreConfigDescription( $inputScoreConfig, $roundNumberConfig->getEnableTime() );
             if( $inputScoreConfig !== $calculateScoreConfig ) {
                 $nYDelta = 0;
                 $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
@@ -212,9 +212,9 @@ class Gamenotes extends ToernooiPdfPage
 
     }
 
-    protected function getInputScoreConfigDescription( RoundConfigScore $inputScoreConfig): string {
+    protected function getInputScoreConfigDescription( RoundConfigScore $inputScoreConfig, $timeEnabled): string {
         $direction = $this->getDirectionName($inputScoreConfig);
-        if( $inputScoreConfig->getMaximum() === 0 ) {
+        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
             return $inputScoreConfig->getName();
         }
         return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $inputScoreConfig->getName();
