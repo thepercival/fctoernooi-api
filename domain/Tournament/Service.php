@@ -94,7 +94,11 @@ class Service
         $season = $getSeason( (int) $competitionSer->getStartDateTime()->format("Y") );
 
         $competitionService = $this->voetbalService->getService(Competition::class);
-        $competition = $competitionService->create($league, $season, $competitionSer->getRuleSet(), $competitionSer->getStartDateTime() );
+        $ruleSet = $competitionSer->getRuleSet();
+        if( $ruleSet === null ) {
+            $ruleSet = \Voetbal\Qualify\Rule::SOCCERWORLDCUP; // temperarily(for new js) @TODO
+        }
+        $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
         $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
             $fieldService = $this->voetbalService->getService( Field::class );
