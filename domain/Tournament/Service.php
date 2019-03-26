@@ -114,6 +114,8 @@ class Service
 
         $tournament = new Tournament( $competition );
         $tournament->setBreakDuration( 0 );
+        $public = is_bool( $tournamentSer->getPublic() ) ? $tournamentSer->getPublic() : true;
+        $tournament->setPublic( $public );
 
         $roleService = new RoleService( $this->roleRepos );
         $roleService->create( $tournament, $user, Role::ALL );

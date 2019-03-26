@@ -35,6 +35,11 @@ class Tournament
     private $breakDuration;
 
     /**
+     * @var bool
+     */
+    private $public;
+
+    /**
      * @var ArrayCollection
      */
     private $roles;
@@ -124,6 +129,22 @@ class Tournament
     public function setBreakDuration( int $breakDuration )
     {
         $this->breakDuration = $breakDuration;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPublic()
+    {
+        return $this->public;
+    }
+
+    /**
+     * @param bool $public
+     */
+    public function setPublic( bool $public )
+    {
+        $this->public = $public;
     }
 
     /**

@@ -12,6 +12,8 @@ FCToernooi\Tournament:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
     breakDuration:
       type: integer
+    public:
+      type: boolean
     roles:
       type: ArrayCollection<FCToernooi\Role>
       groups: [roles]

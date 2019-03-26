@@ -24,6 +24,10 @@ FCToernooi\Tournament:
       type: boolean
       nullable: true
       unique: false
+    public:
+      type: boolean
+      nullable: true
+      unique: false
   oneToMany:
     roles:
       targetEntity: FCToernooi\Role
