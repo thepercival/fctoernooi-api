@@ -12,3 +12,5 @@ FCToernooi\Sponsor:
       type: string
     url:
       type: string
+    logoUrl:
+      type: string

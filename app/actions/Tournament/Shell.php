@@ -58,7 +58,7 @@ final class Shell
 
     public function fetch($request, $response, $args)
     {
-        return $this->fetchHelper($request, $response, $args);
+        return $this->fetchHelper($request, $response, $args, true);
     }
 
     public function fetchWithRoles($request, $response, $args)
@@ -67,7 +67,7 @@ final class Shell
         if ( $this->token->isPopulated() ) {
             $user = $this->userRepository->find($this->token->getUserId());
         }
-        return $this->fetchHelper($request, $response, $args, $user);
+        return $this->fetchHelper($request, $response, $args, null, $user);
     }
 
     /**
@@ -77,7 +77,7 @@ final class Shell
      * @param User|null $user
      * @return mixed
      */
-    public function fetchHelper($request, $response, $args, User $user = null)
+    public function fetchHelper($request, $response, $args, bool $public = null, User $user = null)
     {
         $sErrorMessage = null;
         try {
@@ -87,17 +87,17 @@ final class Shell
             }
 
             $startDateTime = null;
-            if (strlen($request->getParam('minDate')) > 0) {
+            if (strlen($request->getParam('startDate')) > 0) {
                 $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z',
-                    $request->getParam('minDate'));
+                    $request->getParam('startDate'));
             }
             if ($startDateTime === false) {
                 $startDateTime = null;
             }
 
             $endDateTime = null;
-            if (strlen($request->getParam('maxDate')) > 0) {
-                $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('maxDate'));
+            if (strlen($request->getParam('endDate')) > 0) {
+                $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('endDate'));
             }
             if ($endDateTime === false) {
                 $endDateTime = null;

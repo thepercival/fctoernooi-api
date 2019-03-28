@@ -26,6 +26,11 @@ class Sponsor
     private $url;
 
     /**
+     * @var string
+     */
+    private $logoUrl;
+
+    /**
      * @var Tournament
      */
     private $tournament;
@@ -117,5 +122,30 @@ class Sponsor
             }
         }
         $this->url = $url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogoUrl()
+    {
+        return $this->logourl;
+    }
+
+    /**
+     * @param string $url
+     */
+    public function setLogoUrl( $url )
+    {
+        if ( strlen( $url ) > 0 ) {
+            if (strlen($url) > static::MAX_LENGTH_URL) {
+                throw new \InvalidArgumentException("de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",
+                    E_ERROR);
+            }
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                throw new \InvalidArgumentException("de url " . $url . " is niet valide (begin met https://)", E_ERROR);
+            }
+        }
+        $this->logoUrl = $url;
     }
 }

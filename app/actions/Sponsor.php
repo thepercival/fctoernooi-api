@@ -11,17 +11,13 @@ namespace App\Action;
 //use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Sponsor\Service as SponsorService;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Token;
+use FCToernooi\Sponsor as SponsorBase;
 
 final class Sponsor
 {
-    /**
-     * @var SponsorService
-     */
-    private $service;
     /**
      * @var SponsorRepos
      */
@@ -47,7 +43,6 @@ final class Sponsor
     use AuthTrait;
 
     public function __construct(
-        SponsorService $service,
         SponsorRepository $repos,
         TournamentRepository $tournamentRepos,
         UserRepository $userRepository,
@@ -55,7 +50,6 @@ final class Sponsor
         Token $token
     )
     {
-        $this->service = $service;
         $this->repos = $repos;
         $this->tournamentRepos = $tournamentRepos;
         $this->userRepos = $userRepository;
@@ -132,7 +126,10 @@ final class Sponsor
             /** @var \FCToernooi\Sponsor $sponsorSer */
             $sponsorSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Sponsor', 'json');
 
-            $sponsor = $this->service->create( $tournament, $sponsorSer->getName(), $sponsorSer->getUrl() );
+            $sponsor = new SponsorBase( $tournament, $sponsorSer->getName() );
+            $sponsor->setUrl( $sponsorSer->getUrl() );
+            $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
+            $this->repos->save($sponsor);
 
             return $response
                 ->withStatus(201)
@@ -167,7 +164,10 @@ final class Sponsor
                 return $response->withStatus(404)->write( "de te wijzigen sponsor kon niet gevonden worden" );
             }
 
-            $sponsor = $this->service->changeBasics( $sponsor, $sponsorSer->getName(), $sponsorSer->getUrl() );
+            $sponsor->setName( $sponsorSer->getName() );
+            $sponsor->setUrl( $sponsorSer->getUrl() );
+            $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
+            $this->repos->save($sponsor);
 
             return $response
                 ->withStatus(200)
@@ -199,7 +199,7 @@ final class Sponsor
             if ( $sponsor === null ){
                 return $response->withStatus(404)->write("de te verwijderen sponsor kon niet gevonden worden" );
             }
-            $this->service->remove( $sponsor );
+            $this->repos->remove( $sponsor );
 
             return $response->withStatus(200);
         }
@@ -207,5 +207,51 @@ final class Sponsor
             $errorMessage = $e->getMessage();
         }
         return $response->withStatus(404)->write('de sponsor is niet verwijdered : ' . $errorMessage );
+    }
+
+    public function upload( $request, $response, $args)
+    {
+        $sErrorMessage = null;
+        try {
+            $tournamentId = (int)$request->getParam("tournamentid");
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $this->tournamentRepos->find($tournamentId);
+            if (!$tournament) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+
+            $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
+
+            // var_dump( $request );
+
+            var_dump( $request->getBody()->getContents() ); die();
+
+            // verwerk de stream die binnenkomt!!
+
+            // sla op in database en schrijf weg naar
+
+//
+//            $sponsor = $this->repos->find( $sponsorSer->getId() );
+//            if ( $sponsor === null ){
+//                return $response->withStatus(404)->write( "de te wijzigen sponsor kon niet gevonden worden" );
+//            }
+//
+//            $sponsor->setName( $sponsorSer->getName() );
+//            $sponsor->setUrl( $sponsorSer->getUrl() );
+//            $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
+//            $this->repos->save($sponsor);
+
+            $logoUrl = 'https://fctoernooi.nl/test/123.jpg';
+
+            return $response
+                ->withStatus(200)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($logoUrl);
+            ;
+        }
+        catch( \Exception $e ){
+            $sErrorMessage = $e->getMessage();
+        }
+        return $response->withStatus(422)->write( $sErrorMessage );
     }
 }

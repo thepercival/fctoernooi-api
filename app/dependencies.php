@@ -116,11 +116,9 @@ $container['App\Action\Tournament\Shell'] = function ($c) {
 $container['App\Action\Sponsor'] = function ($c) {
     $em = $c->get('em');
     $repos = new FCToernooi\Sponsor\Repository($em,$em->getClassMetaData(FCToernooi\Sponsor::class));
-    $service = new FCToernooi\Sponsor\Service( $repos, $em->getConnection() );
     $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
     $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
     return new App\Action\Sponsor(
-        $service,
         $repos,
         $tournamentRepos,
         $userRepository,

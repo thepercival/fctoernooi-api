@@ -19,3 +19,6 @@ FCToernooi\Tournament\Shell:
     hasEditPermissions:
       type: boolean
       read_only: true
+    public:
+      type: boolean
+      read_only: true

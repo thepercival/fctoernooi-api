@@ -41,6 +41,11 @@ class Shell
      */
     private $hasEditPermissions;
 
+    /**
+     * @var bool
+     */
+    private $public;
+
     public function __construct( Tournament $tournament, User $user = null )
     {
         $this->tournamentId = $tournament->getId();
@@ -50,6 +55,7 @@ class Shell
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
         $this->hasEditPermissions = ( $user !== null && $tournament->hasRole( $user, Role::ADMIN ) );
+        $this->public = $tournament->getPublic();
     }
 
     /**
@@ -92,6 +98,14 @@ class Shell
     public function getHasEditPermissions()
     {
         return $this->hasEditPermissions;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getPublic()
+    {
+        return $this->public;
     }
 
 }

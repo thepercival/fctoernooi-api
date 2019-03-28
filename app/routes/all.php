@@ -49,5 +49,6 @@ $app->group('/sponsors', function () use ($app) {
     $app->get('/{id}', 'App\Action\Sponsor:fetchOne');
     $app->put('/{id}', 'App\Action\Sponsor:edit');
     $app->delete('/{id}', 'App\Action\Sponsor:remove');
-});
 
+    $app->put('/upload/{id}', 'App\Action\Sponsor:upload');
+});
