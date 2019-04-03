@@ -50,5 +50,5 @@ $app->group('/sponsors', function () use ($app) {
     $app->put('/{id}', 'App\Action\Sponsor:edit');
     $app->delete('/{id}', 'App\Action\Sponsor:remove');
 
-    $app->put('/upload/{id}', 'App\Action\Sponsor:upload');
+    $app->post('/upload/', 'App\Action\Sponsor:upload');
 });

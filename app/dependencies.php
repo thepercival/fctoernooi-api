@@ -123,5 +123,6 @@ $container['App\Action\Sponsor'] = function ($c) {
         $tournamentRepos,
         $userRepository,
         $c->get('serializer'),
-        $c->get('token'));
+        $c->get('token'),
+        $c->get('settings'));
 };

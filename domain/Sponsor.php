@@ -31,6 +31,11 @@ class Sponsor
     private $logoUrl;
 
     /**
+     * @var int
+     */
+    private $screenNr;
+
+    /**
      * @var Tournament
      */
     private $tournament;
@@ -129,7 +134,7 @@ class Sponsor
      */
     public function getLogoUrl()
     {
-        return $this->logourl;
+        return $this->logoUrl;
     }
 
     /**
@@ -147,5 +152,21 @@ class Sponsor
             }
         }
         $this->logoUrl = $url;
+    }
+
+    /**
+     * @return int
+     */
+    public function getScreenNr()
+    {
+        return $this->screenNr;
+    }
+
+    /**
+     * @param int $screenNr
+     */
+    public function setScreenNr( $screenNr )
+    {
+        $this->screenNr = $screenNr;
     }
 }

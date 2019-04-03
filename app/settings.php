@@ -61,11 +61,19 @@ return [
             'activationsecret' => getenv('ACTIVATION_SECRET'),
         ],
         'www' => [
-            'urls' => explode(",", getenv('WWW_URLS') )
+            'urls' => explode(",", getenv('WWW_URLS') ),
+            'apiurl' => getenv('API_URL'),
+            "apiurl-localpath" =>  realpath( __DIR__ . '/../public/' ) . '/',
         ],
         'email' => [
             'from' => "noreply@fctoernooi.nl",
             'fromname' => "FCToernooi"
-        ]
+        ],
+        'images' => [
+            'sponsors' => [
+                'pathpostfix' => 'images/sponsors/',
+                'backuppath' => '/var/www/backup/fctoernooi-sponsor-images/',
+            ]
+        ],
     ],
 ];
