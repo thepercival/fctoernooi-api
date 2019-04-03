@@ -47,6 +47,8 @@ final class Sponsor
 
     use AuthTrait;
 
+    const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+
     public function __construct(
         SponsorRepository $repos,
         TournamentRepository $tournamentRepos,
@@ -133,6 +135,8 @@ final class Sponsor
             /** @var \FCToernooi\Sponsor $sponsorSer */
             $sponsorSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Sponsor', 'json');
 
+            $this->repos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr() );
+
             $sponsor = new SponsorBase( $tournament, $sponsorSer->getName() );
             $sponsor->setUrl( $sponsorSer->getUrl() );
             $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
@@ -171,6 +175,8 @@ final class Sponsor
             if ( $sponsor === null ){
                 return $response->withStatus(404)->write( "de te wijzigen sponsor kon niet gevonden worden" );
             }
+
+            $this->repos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor );
 
             $sponsor->setName( $sponsorSer->getName() );
             $sponsor->setUrl( $sponsorSer->getUrl() );
@@ -292,7 +298,7 @@ final class Sponsor
         if( $height === $target_height ) {
             return $image_resource_id;
         }
-        $thressHold = 0.34;
+        $thressHold = Sponsor::LOGO_ASPECTRATIO_THRESHOLD;
         $aspectRatio = $width / $height;
 
         $target_width = $width - (( $height - $target_height ) * $aspectRatio );
