@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a006f7bf3d79aea2b9818a7b96f4b50",
+    "content-hash": "b4194c3487ffb33431457fa4214780d3",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1098,16 +1098,16 @@
         },
         {
             "name": "endroid/qr-code",
-            "version": "3.5.6",
+            "version": "3.5.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/endroid/qr-code.git",
-                "reference": "9cc1eaecb9bc670bba82f27b8dfccd4cbed2df2f"
+                "reference": "7823badf59402f31e8f9b33ce1e3161a1ba89866"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/endroid/qr-code/zipball/9cc1eaecb9bc670bba82f27b8dfccd4cbed2df2f",
-                "reference": "9cc1eaecb9bc670bba82f27b8dfccd4cbed2df2f",
+                "url": "https://api.github.com/repos/endroid/qr-code/zipball/7823badf59402f31e8f9b33ce1e3161a1ba89866",
+                "reference": "7823badf59402f31e8f9b33ce1e3161a1ba89866",
                 "shasum": ""
             },
             "require": {
@@ -1157,7 +1157,7 @@
                 "qr",
                 "qrcode"
             ],
-            "time": "2019-03-03T08:34:10+00:00"
+            "time": "2019-04-03T21:14:10+00:00"
         },
         {
             "name": "firebase/php-jwt",
@@ -3294,53 +3294,17 @@
             "time": "2019-01-15T13:21:25+00:00"
         },
         {
-            "name": "suin/php-image-resizer",
-            "version": "1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/suin/php-image-resizer.git",
-                "reference": "f9cc8dfde7f759f408af7ed243406cbe8aba7852"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/suin/php-image-resizer/zipball/f9cc8dfde7f759f408af7ed243406cbe8aba7852",
-                "reference": "f9cc8dfde7f759f408af7ed243406cbe8aba7852",
-                "shasum": ""
-            },
-            "require": {
-                "ext-gd": "*",
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Suin": "Source/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "suin",
-                    "email": "suinyeze@gmail.com",
-                    "homepage": "https://www.facebook.com/suinyeze",
-                    "role": "Developer, Renaming Specialist"
-                }
-            ],
-            "description": "A simple image resizing library for PHP.",
-            "time": "2012-07-30T23:21:07+00:00"
-        },
-        {
             "name": "symfony/console",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "9dc2299a016497f9ee620be94524e6c0af0280a9"
+                "reference": "24206aff3efe6962593297e57ef697ebb220e384"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/9dc2299a016497f9ee620be94524e6c0af0280a9",
-                "reference": "9dc2299a016497f9ee620be94524e6c0af0280a9",
+                "url": "https://api.github.com/repos/symfony/console/zipball/24206aff3efe6962593297e57ef697ebb220e384",
+                "reference": "24206aff3efe6962593297e57ef697ebb220e384",
                 "shasum": ""
             },
             "require": {
@@ -3399,7 +3363,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2019-02-23T15:17:42+00:00"
+            "time": "2019-04-01T07:32:59+00:00"
         },
         {
             "name": "symfony/contracts",
@@ -3471,7 +3435,7 @@
         },
         {
             "name": "symfony/inflector",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/inflector.git",
@@ -3529,7 +3493,7 @@
         },
         {
             "name": "symfony/options-resolver",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
@@ -3700,16 +3664,16 @@
         },
         {
             "name": "symfony/property-access",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/property-access.git",
-                "reference": "d5e10532c51db0b657b1e25b2bd70acbcd13bbf9"
+                "reference": "5440dd2b5373073beee051bd978b58a0f543b192"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/property-access/zipball/d5e10532c51db0b657b1e25b2bd70acbcd13bbf9",
-                "reference": "d5e10532c51db0b657b1e25b2bd70acbcd13bbf9",
+                "url": "https://api.github.com/repos/symfony/property-access/zipball/5440dd2b5373073beee051bd978b58a0f543b192",
+                "reference": "5440dd2b5373073beee051bd978b58a0f543b192",
                 "shasum": ""
             },
             "require": {
@@ -3763,20 +3727,20 @@
                 "property path",
                 "reflection"
             ],
-            "time": "2019-02-23T15:17:42+00:00"
+            "time": "2019-03-04T09:16:25+00:00"
         },
         {
             "name": "symfony/yaml",
-            "version": "v4.2.4",
+            "version": "v4.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "761fa560a937fd7686e5274ff89dcfa87a5047df"
+                "reference": "6712daf03ee25b53abb14e7e8e0ede1a770efdb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/761fa560a937fd7686e5274ff89dcfa87a5047df",
-                "reference": "761fa560a937fd7686e5274ff89dcfa87a5047df",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/6712daf03ee25b53abb14e7e8e0ede1a770efdb1",
+                "reference": "6712daf03ee25b53abb14e7e8e0ede1a770efdb1",
                 "shasum": ""
             },
             "require": {
@@ -3822,7 +3786,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2019-02-23T15:17:42+00:00"
+            "time": "2019-03-30T15:58:42+00:00"
         },
         {
             "name": "thepercival/voetbal",
@@ -5793,16 +5757,16 @@
         },
         {
             "name": "theseer/tokenizer",
-            "version": "1.1.0",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theseer/tokenizer.git",
-                "reference": "cb2f008f3f05af2893a87208fe6a6c4985483f8b"
+                "reference": "1c42705be2b6c1de5904f8afacef5895cab44bf8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/cb2f008f3f05af2893a87208fe6a6c4985483f8b",
-                "reference": "cb2f008f3f05af2893a87208fe6a6c4985483f8b",
+                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/1c42705be2b6c1de5904f8afacef5895cab44bf8",
+                "reference": "1c42705be2b6c1de5904f8afacef5895cab44bf8",
                 "shasum": ""
             },
             "require": {
@@ -5829,7 +5793,7 @@
                 }
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
-            "time": "2017-04-07T12:08:54+00:00"
+            "time": "2019-04-04T09:56:43+00:00"
         },
         {
             "name": "webmozart/assert",
