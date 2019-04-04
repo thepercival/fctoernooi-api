@@ -111,13 +111,12 @@ final class Shell
             $shells = [];
             {
                 if ($user !== null && $withRoles === true) {
-
                     $tournamentsByRole = $this->repos->findByPermissions($user, Role::ADMIN);
                     foreach ($tournamentsByRole as $tournament) {
                         $shells[] = new TournamentShell($tournament, $user);
                     }
                 } else {
-                    $tournamentsByDates = $this->repos->findByFilter($name, $startDateTime, $endDateTime);
+                    $tournamentsByDates = $this->repos->findByFilter($name, $startDateTime, $endDateTime, $public);
                     foreach ($tournamentsByDates as $tournament) {
                         $shells[] = new TournamentShell($tournament, $user);
                     }

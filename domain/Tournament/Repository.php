@@ -31,7 +31,11 @@ class Repository extends \Voetbal\Repository
         }
     }
 
-    public function findByFilter(string $name = null, \DateTimeImmutable $startDateTime = null, \DateTimeImmutable $endDateTime = null )
+    public function findByFilter(
+        string $name = null,
+        \DateTimeImmutable $startDateTime = null,
+        \DateTimeImmutable $endDateTime = null,
+        bool $public = null)
     {
         $query = $this->createQueryBuilder('t')
             ->join("t.competition","c")
@@ -57,9 +61,18 @@ class Repository extends \Voetbal\Repository
             } else {
                 $query = $query->where('l.name like :name');
             }
-
             $query = $query->setParameter('name', '%'.$name.'%');
         }
+
+        if( $public !== null ) {
+            if( $startDateTime !== null || $endDateTime !== null || $name !== null ) {
+                $query = $query->andWhere("t.public = :public");
+            } else {
+                $query = $query->where('t.public = :public');
+            }
+            $query = $query->setParameter('public', $public);
+        }
+
         return $query->getQuery()->getResult();
     }
 
