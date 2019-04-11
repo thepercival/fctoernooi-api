@@ -150,23 +150,23 @@ abstract class Page extends \Zend_Pdf_Page
             if ( array_key_exists( "b", $arrLineColors ) === true )
             {
                 $this->setLineColor ( $arrLineColors["b"] );
-                $this->drawLine( $nXPos + $nWidth, $nYPos - $nHeight, $nXPos, $nYPos - $nHeight, $nStyle ); // leftwards
+                $this->drawLine( $nXPos + $nWidth, $nYPos - $nHeight, $nXPos, $nYPos - $nHeight ); // leftwards
             }
             if ( array_key_exists( "t", $arrLineColors ) === true )
             {
                 $this->setLineColor ( $arrLineColors["t"] );
-                $this->drawLine( $nXPos, $nYPos, $nXPos + $nWidth, $nYPos, $nStyle );	// rightwards
+                $this->drawLine( $nXPos, $nYPos, $nXPos + $nWidth, $nYPos );	// rightwards
             }
 
             if ( array_key_exists( "l", $arrLineColors ) === true )
             {
                 $this->setLineColor ( $arrLineColors["l"] );
-                $this->drawLine( $nXPos, $nYPos - $nHeight, $nXPos, $nYPos, $nStyle );  // upwards
+                $this->drawLine( $nXPos, $nYPos - $nHeight, $nXPos, $nYPos );  // upwards
             }
             if ( array_key_exists( "r", $arrLineColors ) === true )
             {
                 $this->setLineColor ( $arrLineColors["r"] );
-                $this->drawLine( $nXPos + $nWidth, $nYPos, $nXPos + $nWidth, $nYPos - $nHeight, $nStyle ); // downwards
+                $this->drawLine( $nXPos + $nWidth, $nYPos, $nXPos + $nWidth, $nYPos - $nHeight ); // downwards
             }
         }
         else
@@ -198,6 +198,7 @@ abstract class Page extends \Zend_Pdf_Page
             }
             else
             {
+                $oColor = null;
                 if ( is_string( $vtLineColors ) )
                 {
                     $oColor = new \Zend_Pdf_Color_Html( $vtLineColors );
@@ -213,14 +214,15 @@ abstract class Page extends \Zend_Pdf_Page
     }
 
 
-
-    /**	 *
-     * Enter description here ...
-     *
-     * @param unknown_type $sText
-     * @param unknown_type $nXPos
-     * @param unknown_type $nYPos
-     * @param unknown_type $nMaxWidth
+    /**
+     * @param $sText
+     * @param $nXPos
+     * @param $nYPos
+     * @param null $nMaxWidth
+     * @param int $nAlign
+     * @param int $nRotationDegree
+     * @return float|int|null
+     * @throws \Zend_Pdf_Exception
      */
     public function drawString( $sText, $nXPos, $nYPos, $nMaxWidth = null, $nAlign = Page::ALIGNLEFT, $nRotationDegree = 0 )
     {

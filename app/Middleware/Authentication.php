@@ -106,7 +106,7 @@ class Authentication
         } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
             || $resourceType === 'structures' || $resourceType === 'roundconfigs'
         ) {
-            return $this->otherActionAuthorized($user, $method, $queryParams, $id);
+            return $this->otherActionAuthorized($user, $queryParams);
         }
         return false;
     }
@@ -127,7 +127,7 @@ class Authentication
         if( $this->tournamentService->mayUserChangeCompetitor( $user, $association ) === false ) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -136,7 +136,7 @@ class Authentication
         if ($method !== 'PUT') {
             return false;
         }
-        return $this->otherActionAuthorized($user, $method, $queryParams);
+        return $this->otherActionAuthorized($user, $queryParams);
     }
 
     protected function gameActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
@@ -168,7 +168,7 @@ class Authentication
         return false;
     }
 
-    protected function otherActionAuthorized(User $user, string $method, array $queryParams)
+    protected function otherActionAuthorized(User $user, array $queryParams): bool
     {
         if (array_key_exists("competitionid", $queryParams) !== true) {
             return false;

@@ -171,23 +171,14 @@ class Service
         return false;
     }
 
-    public function syncRefereeRoles( Tournament $tournament = null, User $user = null ): array
+    public function syncRefereeRolesForUser( User $user ): array
     {
-        if( $tournament === null && $user === null ) {
-            throw new \Exception("toernooi en gebruiker kunnen niet allebei leeg zijn om scheidsrechter-rollen te synchroniseren", E_ERROR );
-        }
-
         $rolesRet = [];
         $em = $this->roleRepos->getEM();
 
         // remove referee roles
         {
-            $params = ['value' => Role::REFEREE];
-            if( $user !== null ) {
-                $params['user'] = $user;
-            } else if( $tournament !== nulStartDateTimel ) {
-                $params['tournament'] = $tournament;
-            }
+            $params = ['value' => Role::REFEREE, 'user' => $user ];
             $refereeRoles = $this->roleRepos->findBy( $params );
             foreach( $refereeRoles as $refereeRole ) {
                 $em->remove( $refereeRole );
@@ -196,31 +187,48 @@ class Service
         $em->flush();
 
         // add referee roles
-        if( $user !== null ) {
-            $tournaments = $this->repos->findByEmailaddress( $user->getEmailaddress() );
-            foreach( $tournaments as $tournament ) {
-                $refereeRole = new Role( $tournament, $user);
-                $refereeRole->setValue(Role::REFEREE);
-                $em->persist( $refereeRole );
-                $rolesRet[] = $refereeRole;
-            }
-
-        } else if( $tournament !== null ) {
-            $referees = $tournament->getCompetition()->getReferees();
-            foreach( $referees as $referee ) {
-                if( strlen( $referee->getEmailaddress() ) === 0 ) {
-                    continue;
-                }
-                $user = $this->userRepos->findOneBy( ['emailaddress' => $referee->getEmailaddress()] );
-                if( $user === null ) {
-                    continue;
-                }
-                $refereeRole = new Role( $tournament, $user);
-                $refereeRole->setValue(Role::REFEREE);
-                $em->persist( $refereeRole );
-            }
-            $rolesRet = $tournament->getRoles()->toArray();
+        $tournaments = $this->repos->findByEmailaddress( $user->getEmailaddress() );
+        foreach( $tournaments as $tournament ) {
+            $refereeRole = new Role( $tournament, $user);
+            $refereeRole->setValue(Role::REFEREE);
+            $em->persist( $refereeRole );
+            $rolesRet[] = $refereeRole;
         }
+        $em->flush();
+        return $rolesRet;
+    }
+
+    public function syncRefereeRolesForTournament( Tournament $tournament ): array
+    {
+        $rolesRet = [];
+        $em = $this->roleRepos->getEM();
+
+        // remove referee roles
+        {
+            $params = ['value' => Role::REFEREE, 'tournament' => $tournament];
+            $refereeRoles = $this->roleRepos->findBy( $params );
+            foreach( $refereeRoles as $refereeRole ) {
+                $em->remove( $refereeRole );
+            }
+        }
+        $em->flush();
+
+        // add referee roles
+        $referees = $tournament->getCompetition()->getReferees();
+        foreach( $referees as $referee ) {
+            if( strlen( $referee->getEmailaddress() ) === 0 ) {
+                continue;
+            }
+            $user = $this->userRepos->findOneBy( ['emailaddress' => $referee->getEmailaddress()] );
+            if( $user === null ) {
+                continue;
+            }
+            $refereeRole = new Role( $tournament, $user);
+            $refereeRole->setValue(Role::REFEREE);
+            $em->persist( $refereeRole );
+        }
+        $rolesRet = $tournament->getRoles()->toArray();
+
         $em->flush();
         return $rolesRet;
     }

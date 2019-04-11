@@ -13,11 +13,11 @@ declare(strict_types=1);
  *
  */
 namespace App\Response;
-use Crell\ApiProblem\ApiProblem;
+/*use Crell\ApiProblem\ApiProblem;
 use Slim\Http\Headers;
 use Slim\Http\Response;
 use Slim\Http\Stream;
-class NotFoundR extends Response
+class NotFoundResponse extends Response
 {
     public function __construct($message, $status = 404)
     {
@@ -33,4 +33,4 @@ class NotFoundR extends Response
         $headers->set("Content-type", "application/problem+json");
         parent::__construct($status, $headers, $body);
     }
-}
+}*/

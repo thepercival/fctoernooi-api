@@ -12,6 +12,7 @@ use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Structure\NameService;
 use Voetbal\Poule;
 use Voetbal\Round\Number as RoundNumber;
+use Voetbal\PoulePlace;
 use FCToernooi\Pdf\Page;
 
 class PoulePivotTables extends ToernooiPdfPage

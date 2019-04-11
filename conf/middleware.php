@@ -82,14 +82,14 @@ $app->add("JwtAuthentication");
 $app->add("CorsMiddleware");
 $app->add("NegotiationMiddleware");
 
-$app->add(function ( $request,  $response, callable $next) {
+$app->add(function ( $request,  $response, callable $next) use ( $container ){
     $apiVersion = $request->getHeaderLine('X-Api-Version');
     if( strlen( $apiVersion ) === 0 ) {
         $apiVersion = "1";
     }
 
-    $this['serializer'] = function() use ($apiVersion) {
-        $settings = $this['settings'];
+    $container['serializer'] = function() use ($container, $apiVersion) {
+        $settings = $container['settings'];
         $serializerBuilder = SerializerBuilder::create()->setDebug($settings['displayErrorDetails']);
         if( $settings["environment"] === "production") {
             $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
@@ -117,9 +117,9 @@ $app->add(function ( $request,  $response, callable $next) {
     return $response;
 });
 
-$container["cache"] = function ($container) {
-    return new CacheUtil;
-};
+//$container["cache"] = function ($container) {
+//    return new CacheUtil;
+//};
 
 
 

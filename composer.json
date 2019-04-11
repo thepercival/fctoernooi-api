@@ -33,14 +33,13 @@
 		"endroid/qr-code": "^3.5"
     	},
 	"require-dev": {
-		"phpunit/phpunit": "^7.0"
+		"phpunit/phpunit": "^7.0",
+		"phpstan/phpstan": "^0.11.5"
 	},
 	"autoload": {
 		"psr-4": {
 			"FCToernooi\\": "domain/",
-			"App\\Action\\": "app/actions",
-			"App\\Middleware\\": "app/middleware",
-			"App\\Response\\": "app/response"
+			"App\\": "app/"
 		}
 	},
 	"autoload-dev": {

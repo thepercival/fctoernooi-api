@@ -19,7 +19,7 @@ use FCToernooi\Sponsor as SponsorBase;
 final class Sponsor
 {
     /**
-     * @var SponsorRepos
+     * @var SponsorRepository
      */
     private $repos;
     /**

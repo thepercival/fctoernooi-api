@@ -46,7 +46,7 @@ final class Tournament
      */
     private $service;
     /**
-     * @var TournamentRepos
+     * @var TournamentRepository
      */
     private $repos;
     /**

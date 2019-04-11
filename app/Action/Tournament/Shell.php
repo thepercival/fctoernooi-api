@@ -21,7 +21,7 @@ use FCToernooi\Tournament\Shell as TournamentShell;
 final class Shell
 {
     /**
-     * @var TournamentRepos
+     * @var TournamentRepository
      */
     private $repos;
 
