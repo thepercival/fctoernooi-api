@@ -65,14 +65,21 @@ $container['toernooi'] = function( $c ) {
 
 // JWT
 $container["jwt"] = function ( $c ) {
-    return new \StdClass;
+    return new \stdClass;
 };
 
 // actions
 $container['App\Action\Auth'] = function ($c) {
 	$em = $c->get('em');
     $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-    $service = new FCToernooi\Auth\Service( $userRepos, $c->get('toernooi'), $em->getConnection() );
+    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
+    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+    $service = new FCToernooi\Auth\Service(
+        $userRepos,
+        $roleRepos,
+        $tournamentRepos,
+        $em->getConnection()
+    );
 	return new App\Action\Auth($service, $userRepos,$c->get('serializer'),$c->get('settings'));
 };
 $container['App\Action\User'] = function ($c) {

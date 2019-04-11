@@ -11,32 +11,45 @@ namespace FCToernooi\Auth;
 use Doctrine\DBAL\Connection;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Tournament\Service as TournamentService;
+use FCToernooi\Role\Repository as RoleRepository;
+use FCToernooi\Role;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 
 class Service
 {
 	/**
 	 * @var UserRepository
 	 */
-	protected $repos;
+	protected $userRepos;
     /**
-     * @var TournamentService
+     * @var RoleRepository
      */
-    protected $tournamentService;
+    protected $roleRepos;
+    /**
+     * @var TournamentRepository
+     */
+    protected $tournamentRepos;
     /**
      * @var Connection
      */
     protected $conn;
 
-	/**
-	 * Service constructor.
-	 *
-	 * @param UserRepository $userRepository
-	 */
-	public function __construct( UserRepository $userRepository, TournamentService $tournamentService, Connection $conn )
+    /**
+     * Service constructor.
+     * @param UserRepository $userRepos
+     * @param RoleRepository $roleRepos
+     * @param TournamentRepository $tournamentRepos
+     * @param Connection $conn
+     */
+	public function __construct(
+	    UserRepository $userRepos,
+        RoleRepository $roleRepos,
+        TournamentRepository $tournamentRepos,
+        Connection $conn )
 	{
-		$this->repos = $userRepository;
-		$this->tournamentService = $tournamentService;
+		$this->userRepos = $userRepos;
+        $this->roleRepos = $roleRepos;
+        $this->tournamentRepos = $tournamentRepos;
 		$this->conn = $conn;
 	}
 
@@ -52,12 +65,12 @@ class Service
         if ( strlen( $password ) < User::MIN_LENGTH_PASSWORD or strlen( $password ) > User::MAX_LENGTH_PASSWORD ){
             throw new \InvalidArgumentException( "het wachtwoord moet minimaal ".User::MIN_LENGTH_PASSWORD." karakters bevatten en mag maximaal ".User::MAX_LENGTH_PASSWORD." karakters bevatten", E_ERROR );
         }
-		$userTmp = $this->repos->findOneBy( array('emailaddress' => $emailaddress ) );
+		$userTmp = $this->userRepos->findOneBy( array('emailaddress' => $emailaddress ) );
 		if ( $userTmp ) {
 			throw new \Exception("het emailadres is al in gebruik",E_ERROR);
 		}
 		if ( $name !== null ) {
-            $userTmp = $this->repos->findOneBy( array('name' => $name ) );
+            $userTmp = $this->userRepos->findOneBy( array('name' => $name ) );
             if ( $userTmp ) {
                 throw new \Exception("de gebruikersnaam is al in gebruik",E_ERROR);
             }
@@ -70,8 +83,8 @@ class Service
         $this->conn->beginTransaction();
         $savedUser = null;
         try {
-            $savedUser = $this->repos->save($user);
-            $roles = $this->tournamentService->syncRefereeRoles( null, $user );
+            $savedUser = $this->userRepos->save($user);
+            $roles = $this->syncRefereeRolesForUser( $user );
             $this->sendRegisterEmail( $emailaddress, $roles );
             $this->conn->commit();
         } catch (\Exception $e) {
@@ -80,6 +93,33 @@ class Service
         }
 		return $savedUser;
 	}
+
+    public function syncRefereeRolesForUser( User $user ): array
+    {
+        $rolesRet = [];
+        $em = $this->roleRepos->getEM();
+
+        // remove referee roles
+        {
+            $params = ['value' => Role::REFEREE, 'user' => $user ];
+            $refereeRoles = $this->roleRepos->findBy( $params );
+            foreach( $refereeRoles as $refereeRole ) {
+                $em->remove( $refereeRole );
+            }
+        }
+        $em->flush();
+
+        // add referee roles
+        $tournaments = $this->tournamentRepos->findByEmailaddress( $user->getEmailaddress() );
+        foreach( $tournaments as $tournament ) {
+            $refereeRole = new Role( $tournament, $user);
+            $refereeRole->setValue(Role::REFEREE);
+            $em->persist( $refereeRole );
+            $rolesRet[] = $refereeRole;
+        }
+        $em->flush();
+        return $rolesRet;
+    }
 
 	protected function sendRegisterEmail( $emailAddress, array $roles )
     {
@@ -121,12 +161,12 @@ class Service
     }
 
     public function sendPasswordCode( $emailAddress ) {
-        $user = $this->repos->findOneBy( array( 'emailaddress' => $emailAddress ) );
+        $user = $this->userRepos->findOneBy( array( 'emailaddress' => $emailAddress ) );
         if (!$user) {
             throw new \Exception( "kan geen code versturen");
         }
         $user->resetForgetpassword();
-        $this->repos->save( $user );
+        $this->userRepos->save( $user );
         $this->mailPasswordCode( $user );
         return true;
     }
@@ -165,7 +205,7 @@ class Service
 
     public function changePassword( $emailAddress, $password, $code )
     {
-        $user = $this->repos->findOneBy( array( 'emailaddress' => $emailAddress ) );
+        $user = $this->userRepos->findOneBy( array( 'emailaddress' => $emailAddress ) );
         if (!$user) {
             throw new \Exception( "het wachtwoord kan niet gewijzigd worden");
         }
@@ -181,6 +221,6 @@ class Service
         // set password
         $user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
         $user->setForgetpassword( null );
-        return $this->repos->save($user);
+        return $this->userRepos->save($user);
     }
 }

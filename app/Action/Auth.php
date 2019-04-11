@@ -20,13 +20,13 @@ use Tuupola\Base62;
 final class Auth
 {
     /**
-     * @var UserRepository
-     */
-    private $userRepository;
-    /**
      * @var AuthService
      */
 	private $service;
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
     /**
      * @var Serializer
      */
@@ -38,8 +38,8 @@ final class Auth
 
 	public function __construct(AuthService $service, UserRepository $userRepository, Serializer $serializer, $settings )
 	{
-		$this->userRepository = $userRepository;
-		$this->service = $service;
+        $this->service = $service;
+        $this->userRepository = $userRepository;
 		$this->serializer = $serializer;
 		$this->settings = $settings;
 	}

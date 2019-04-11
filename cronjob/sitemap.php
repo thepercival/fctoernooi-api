@@ -12,6 +12,8 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../app/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
+use Monolog\Logger;
+
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
@@ -20,6 +22,10 @@ $url = "https://www.fctoernooi.nl/";
 $distPath = realpath( __DIR__ . "/../../" ) . "/fctoernooi/dist/";
 
 $tournamentRepos = $voetbal->getRepository( \FCToernooi\Tournament::class );
+
+$logger = new Logger('cronjob-sitemap');
+$logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+$logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cronjobpath'] . 'sitemap.log', $settings['logger']['level']));
 
 try {
     $content = $url . PHP_EOL;

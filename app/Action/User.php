@@ -20,10 +20,6 @@ final class User
      */
 	private $userRepository;
     /**
-     * @var Auth\Service
-     */
-    private $authService;
-    /**
      * @var Serializer
      */
 	protected $serializer;
@@ -35,7 +31,6 @@ final class User
 	public function __construct(UserRepository $userRepository, Serializer $serializer, $settings )
 	{
 		$this->userRepository = $userRepository;
-		$this->authService = new Auth\Service($userRepository);
 		$this->serializer = $serializer;
 		$this->settings = $settings;
 	}

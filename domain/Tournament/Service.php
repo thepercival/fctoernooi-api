@@ -171,36 +171,8 @@ class Service
         return false;
     }
 
-    public function syncRefereeRolesForUser( User $user ): array
+    public function syncRefereeRoles( Tournament $tournament ): array
     {
-        $rolesRet = [];
-        $em = $this->roleRepos->getEM();
-
-        // remove referee roles
-        {
-            $params = ['value' => Role::REFEREE, 'user' => $user ];
-            $refereeRoles = $this->roleRepos->findBy( $params );
-            foreach( $refereeRoles as $refereeRole ) {
-                $em->remove( $refereeRole );
-            }
-        }
-        $em->flush();
-
-        // add referee roles
-        $tournaments = $this->repos->findByEmailaddress( $user->getEmailaddress() );
-        foreach( $tournaments as $tournament ) {
-            $refereeRole = new Role( $tournament, $user);
-            $refereeRole->setValue(Role::REFEREE);
-            $em->persist( $refereeRole );
-            $rolesRet[] = $refereeRole;
-        }
-        $em->flush();
-        return $rolesRet;
-    }
-
-    public function syncRefereeRolesForTournament( Tournament $tournament ): array
-    {
-        $rolesRet = [];
         $em = $this->roleRepos->getEM();
 
         // remove referee roles
