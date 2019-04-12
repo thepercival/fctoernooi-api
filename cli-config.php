@@ -5,7 +5,7 @@ use Symfony\Component\Yaml\Yaml;
 
 require 'vendor/autoload.php';
 
-$settings = include 'app/settings.php';
+$settings = include 'conf/settings.php';
 $settings = $settings['settings']['doctrine'];
 
 $config = \Doctrine\ORM\Tools\Setup::createConfiguration(
