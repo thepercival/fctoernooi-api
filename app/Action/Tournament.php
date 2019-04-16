@@ -9,7 +9,8 @@
 namespace App\Action;
 
 use Doctrine\ORM\EntityManager;
-use Slim\ServerRequestInterface;
+use Slim\Http\Request;
+use Slim\Http\Response;
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Service as TournamentService;
@@ -58,7 +59,7 @@ final class Tournament
      */
     private $structureService;
     /**
-     * @var StructureService
+     * @var StructureRepository
      */
     private $structureReposistory;
     /**
@@ -256,7 +257,13 @@ final class Tournament
         }
     }
 
-    public function remove( $request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return mixed
+     */
+    public function remove( Request $request, Response $response, array $args)
     {
         $errorMessage = null;
         try{
@@ -283,13 +290,12 @@ final class Tournament
      * echt nieuwe aanmaken via service
      * bestaande toernooi deserialising en dan weer opslaan
      *
-     *
-     * @param $request
-     * @param $response
-     * @param $args
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
      * @return mixed
      */
-    public function copy($request, $response, $args)
+    public function copy(Request $request, Response $response, array $args)
     {
         $this->em->getConnection()->beginTransaction();
         try {

@@ -8,7 +8,6 @@
 
 namespace App\Action;
 
-use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
 use FCToernooi\Role\Repository as RoleRepository;
 

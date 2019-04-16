@@ -14,6 +14,7 @@ use FCToernooi\Role;
 use Doctrine\ORM\Query\Expr;
 use Voetbal\Referee;
 use Voetbal\Competition;
+use Voetbal\Competition\Repository as CompetitionRepository;
 
 /**
  * Class Repository
@@ -23,7 +24,7 @@ class Repository extends \Voetbal\Repository
 {
     public function customPersist( Tournament $tournament, bool $flush )
     {
-        $competitionRepos = $this->_em->getRepository(Competition::class);
+        $competitionRepos = new CompetitionRepository($this->_em,$this->_em->getClassMetaData(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
         $this->_em->persist($tournament);
         if( $flush ) {

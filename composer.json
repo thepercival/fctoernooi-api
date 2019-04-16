@@ -44,13 +44,14 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"FCToernooi\\Tests\\": "tests/"
+			"FCToernooiTest\\": "tests/cases"
 		}
 	},
 	"scripts": {
 		"start": "php -S localhost:2999 -t public public/index.php",
 		"test": [
 			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
-		]
+		],
+        "stan": "vendor/bin/phpstan analyse --level=3 app domain tests"
 	}
 }

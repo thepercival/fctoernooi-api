@@ -6,7 +6,7 @@
  * Time: 21:24
  */
 
-namespace FCToernooi\Tests\Auth;
+namespace FCToernooiTest\Auth;
 
 use \FCToernooi\User as User;
 

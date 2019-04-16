@@ -215,9 +215,9 @@ abstract class Page extends \Zend_Pdf_Page
 
 
     /**
-     * @param $sText
-     * @param $nXPos
-     * @param $nYPos
+     * @param string|null $sText
+     * @param int $nXPos
+     * @param int $nYPos
      * @param null $nMaxWidth
      * @param int $nAlign
      * @param int $nRotationDegree

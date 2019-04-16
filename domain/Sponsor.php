@@ -43,7 +43,7 @@ class Sponsor
     const MIN_LENGTH_NAME = 2;
     const MAX_LENGTH_NAME = 30;
     const MAX_LENGTH_URL = 100;
-    
+
     public function __construct( Tournament $tournament, $name )
     {
         $this->tournament = $tournament;
@@ -77,7 +77,7 @@ class Sponsor
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -111,7 +111,7 @@ class Sponsor
     {
         return $this->url;
     }
-    
+
     /**
      * @param string $url
      */

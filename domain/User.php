@@ -72,7 +72,7 @@ class User
 	}
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -112,7 +112,7 @@ class User
 	}
 
 	/**
-	 * @param string
+	 * @param string $password
 	 */
 	public function setPassword( $password )
 	{
@@ -198,7 +198,7 @@ class User
     {
         $forgetpassword = $this->getForgetpassword();
         if( strlen( $forgetpassword ) === 0 ) {
-            return null;
+            return "";
         }
         $arrForgetPassword = explode(":", $forgetpassword);
         return $arrForgetPassword[0];

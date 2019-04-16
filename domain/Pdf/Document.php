@@ -336,10 +336,11 @@ class Document extends \Zend_Pdf
     }
 
     /**
-     * @param Tournament $tournament
+     * @param Round $round
+     * @param array $games
      * @return array
      */
-    protected function getScheduledGames( $round, $games = [] )
+    protected function getScheduledGames( Round $round, $games = [] ): array
     {
         $games = array_merge( $games, $round->getGamesWithState(Game::STATE_CREATED));
         foreach( $round->getChildRounds() as $childRound ) {

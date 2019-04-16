@@ -9,7 +9,6 @@
 namespace App\Action\Tournament;
 
 use Doctrine\ORM\EntityManager;
-use Slim\ServerRequestInterface;
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -70,13 +69,6 @@ final class Shell
         return $this->fetchHelper($request, $response, $args, null, $user);
     }
 
-    /**
-     * @param $request
-     * @param $response
-     * @param $args
-     * @param User|null $user
-     * @return mixed
-     */
     public function fetchHelper($request, $response, $args, bool $public = null, User $user = null)
     {
         $sErrorMessage = null;

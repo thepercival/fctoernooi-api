@@ -76,7 +76,7 @@ class Tournament
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -205,7 +205,7 @@ class Tournament
     }
 
     /**
-     * @param $printed
+     * @param bool $printed
      */
     public function setPrinted($printed)
     {

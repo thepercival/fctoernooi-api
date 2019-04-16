@@ -34,11 +34,11 @@ class Service
     /**
      * @param Tournament $tournament
      * @param User $user
-     * @param $roles
+     * @param int $roleValues
      * @return ArrayCollection
      * @throws \Exception
      */
-    public function create( Tournament $tournament, User $user, $roleValues )
+    public function create( Tournament $tournament, User $user, int $roleValues )
     {
         // get roles
         // $rolesRet = new ArrayCollection();

@@ -8,8 +8,8 @@
 
 namespace App\Middleware;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Slim\Http\Request;
+use Slim\Http\Response;
 use FCToernooi\User\Repository as UserRepos;
 use FCToernooi\Tournament\Repository as TournamentRepos;
 use FCToernooi\Tournament\Service as TournamentService;
@@ -56,7 +56,7 @@ class Authentication
         $this->voetbalService = $voetbalService;
     }
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function __invoke(Request $request, Response $response, callable $next)
     {
         // user is not known, no need to check authorization
         if ($this->token->isPopulated() !== true) {

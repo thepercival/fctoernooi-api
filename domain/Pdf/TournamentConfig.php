@@ -13,7 +13,7 @@ class TournamentConfig
     CONST QRCODE = 64;
 
     /**
-     * @var bool
+     * @var int
      */
     private $value;
 

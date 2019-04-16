@@ -67,10 +67,10 @@ class Service
     /**
      * @param Tournament $tournamentSer
      * @param User $user
-     * @return null
+     * @return Tournament
      * @throws \Exception
      */
-    public function createFromSerialized( Tournament $tournamentSer, User $user )
+    public function createFromSerialized( Tournament $tournamentSer, User $user ): Tournament
     {
         $competitionSer = $tournamentSer->getCompetition();
 
@@ -126,8 +126,10 @@ class Service
     /**
      * @param Tournament $tournament
      * @param \DateTimeImmutable $dateTime
-     * @param $name
+     * @param string $name
+     * @param BreakX|null $break
      * @return Tournament
+     * @throws \Exception
      */
     public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, string $name, BreakX $break = null)
     {
@@ -217,16 +219,15 @@ class Service
     }
 
     /**
-     * echt nieuwe aanmaken via service
-     * bestaande toernooi deserialising en dan weer opslaan
+     * echt nieuwe aanmaken via service, bestaande toernooi deserialising en dan weer opslaan
      *
-     *
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
+     * @param Tournament $tournament
+     * @param User $user
+     * @param \DateTimeImmutable $startDateTime
+     * @return Tournament
+     * @throws \Exception
      */
-    public function copy(Tournament $tournament, User $user, \DateTimeImmutable $startDateTime)
+    public function copy(Tournament $tournament, User $user, \DateTimeImmutable $startDateTime): Tournament
     {
         $newTournament = $this->createFromSerialized( $tournament, $user );
         $newTournament->getCompetition()->setStartDateTime( $startDateTime );

@@ -197,7 +197,7 @@ class PoulePivotTables extends ToernooiPdfPage
         return 45;
     }
 
-    public function getVersusHeight( $versusColumnWidth, int $degrees ): int {
+    public function getVersusHeight( $versusColumnWidth, int $degrees ): float {
         if( $degrees === 0 ) {
             return $this->getRowHeight();
         }

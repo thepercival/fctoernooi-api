@@ -66,14 +66,6 @@ final class Sponsor
         $this->settings = $settings;
     }
 
-    /**
-     * startdatetime, enddatetime, id, userid
-     *
-     * @param $request
-     * @param $response
-     * @param $args
-     * @return mixed
-     */
     public function fetch($request, $response, $args)
     {
         $sErrorMessage = null;

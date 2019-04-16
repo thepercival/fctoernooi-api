@@ -58,7 +58,7 @@ class Role
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
     public function setId( $id )
     {
@@ -74,7 +74,7 @@ class Role
     }
 
     /**
-     * @param User $user
+     * @return User
      */
     public function getUser()
     {
