@@ -243,6 +243,7 @@ final class Tournament
                 $break = new BreakX( $tournamentSer->getBreakStartDateTime(), $tournamentSer->getBreakDuration() );
             }
             $tournament = $this->service->changeBasics( $tournament, $dateTime, $name, $break );
+            $tournament->setPublic( $tournamentSer->getPublic() );
             $this->repos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
 
