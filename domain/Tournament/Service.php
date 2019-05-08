@@ -96,7 +96,7 @@ class Service
         $competitionService = $this->voetbalService->getService(Competition::class);
         $ruleSet = $competitionSer->getRuleSet();
         if( $ruleSet === null ) {
-            $ruleSet = \Voetbal\Qualify\Rule::SOCCERWORLDCUP; // temperarily(for new js) @TODO
+            $ruleSet = \Voetbal\Ranking::SOCCERWORLDCUP; // temperarily(for new js) @TODO
         }
         $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
