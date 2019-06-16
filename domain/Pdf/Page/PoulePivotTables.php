@@ -11,8 +11,12 @@ namespace FCToernooi\Pdf\Page;
 use \FCToernooi\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Structure\NameService;
 use Voetbal\Poule;
+use Voetbal\Place;
+use Voetbal\Game;
+use Voetbal\State;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\PoulePlace;
+use Voetbal\Ranking\Service as RankingService;
 use FCToernooi\Pdf\Page;
 
 class PoulePivotTables extends ToernooiPdfPage
@@ -136,36 +140,79 @@ class PoulePivotTables extends ToernooiPdfPage
         // draw first row
         $nY = $this->drawPouleHeader( $poule, $nY );
 
+        $pouleState = $poule->getState();
+        $rankingService = new RankingService($poule->getRound() );
+        $rankingItems = $rankingService->getItemsForPoule( $poule );
+
         $nRowHeight = $this->getRowHeight();
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
 
-        $nVersus = 0;
+        $nVersus = 1;
         foreach( $poule->getPlaces() as $poulePlace ) {
             $nX = $this->getPageMargin();
             $nX = $this->drawCell( (new NameService())->getPoulePlaceFromName( $poulePlace, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
-
+            $placeGames = $poule->getGames()->filter( function( $game ) use ($poulePlace) {
+                return $game->isParticipating( $poulePlace );
+            });
             // draw versus
-            for( $nI = 0 ; $nI < $nrOfPlaces ; $nI++ ) {
-                if( $nVersus === $nI ) {
+            for( $placeNr = 1 ; $placeNr <= $nrOfPlaces ; $placeNr++ ) {
+                if( $nVersus === $placeNr ) {
                     $this->setFillColor( new \Zend_Pdf_Color_Html( "lightgrey" ) );
                 }
-                $nX = $this->drawCell( null, $nX, $nY, $versusColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
-                if( $nVersus === $nI ) {
+                $score = '';
+                if( $pouleState !== State::Created ) {
+                    $score = $this->getScore( $poule->getPlace($placeNr), $placeGames );
+                }
+                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+                if( $nVersus === $placeNr ) {
                     $this->setFillColor( new \Zend_Pdf_Color_Html( "white" ) );
                 }
             }
             $nVersus++;
 
             // draw pointsrectangle
-            $nX = $this->drawCell( null, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            $points = null;
+            if( $pouleState !== State::Finished ) {
+                $points = '?';
+            }
+            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
 
             // draw rankrectangle
-            $this->drawCell( null, $nX, $nY, $this->rankColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            $rank = null;
+            if( $pouleState !== State::Finished ) {
+                $rank = '?';
+            }
+            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
 
             $nY -= $nRowHeight;
         }
         return $nY - $nRowHeight;
+    }
+
+    protected function getScore( Place $awayPlace, array $placeGames): string {
+        $foundGames = $placeGames->filter( function( $game ) use ($awayPlace) {
+            return $game->isParticipating( $awayPlace, Game::AWAY );
+        });
+        if( $foundGames->count() !== 1 ) {
+            return '';
+        }
+        return $this->getGameScore( $foundGames->first() );
+    }
+
+    protected function getGameScore(Game $game, bool $reverse): string {
+        $score = ' - ';
+        if ($game->getState() !== Game::STATE_PLAYED) {
+            return $score;
+        }
+        $finalScore = $game->getFinalScore();
+        if ($finalScore === null) {
+            return $score;
+        }
+        if( $reverse === true ) {
+            return $finalScore->getAway() . $score . $finalScore->getHome();
+        }
+        return $finalScore->getHome() . $score . $finalScore->getAway();
     }
 
     protected function getPoulePlaceNamesWidth( Poule $poule ) {
