@@ -25,9 +25,8 @@ $container['logger'] = function ($c) {
 $container['em'] = function ($c) {
     $settings = $c->get('settings')['doctrine'];
 
-
 	$config = Doctrine\ORM\Tools\Setup::createConfiguration(
-		$settings['meta']['auto_generate_proxies'],
+		$settings['meta']['dev_mode'],
 		$settings['meta']['proxy_dir'],
 		$settings['meta']['cache']
 	);

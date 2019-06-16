@@ -9,7 +9,7 @@ $settings = include 'conf/settings.php';
 $settings = $settings['settings']['doctrine'];
 
 $config = \Doctrine\ORM\Tools\Setup::createConfiguration(
-	$settings['meta']['auto_generate_proxies'],
+	$settings['meta']['dev_mode'],
 	$settings['meta']['proxy_dir'],
 	$settings['meta']['cache']
 );

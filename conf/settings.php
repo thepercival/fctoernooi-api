@@ -36,7 +36,7 @@ return [
                     __DIR__ . '/../vendor/thepercival/voetbal/db/yml-mapping',
                     __DIR__ . '/../db/yml-mapping'
                 ],
-                'auto_generate_proxies' => true,
+                'dev_mode' => ( getenv('ENVIRONMENT') === "development" ),
                 'proxy_dir' => __DIR__ . '/../cache/proxies',
                 'cache' => null,
             ],
