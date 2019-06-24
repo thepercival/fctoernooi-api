@@ -116,7 +116,8 @@ final class Shell
             }
             return $response
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize($shells, 'json'));;
+                ->write($this->serializer->serialize($shells, 'json'));
+
         } catch (\Exception $e) {
             $sErrorMessage = $e->getMessage();
         }
