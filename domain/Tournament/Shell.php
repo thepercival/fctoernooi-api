@@ -8,8 +8,7 @@
 
 namespace FCToernooi\Tournament;
 
-use \Doctrine\Common\Collections\ArrayCollection;
-use Voetbal\Competition;
+use Voetbal\Sport;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
 use FCToernooi\User;
@@ -22,9 +21,9 @@ class Shell
     private $tournamentId;
 
     /**
-     * @var string
+     * @var int
      */
-    private $sport;
+    private $sportCustomId;
 
     /**
      * @var string
@@ -51,7 +50,7 @@ class Shell
         $this->tournamentId = $tournament->getId();
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
-        $this->sport = $league->getSport();
+        $this->sportCustomId = $this->getSportCustomIdBySports( $competition->getSports() );
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
         $this->hasEditPermissions = ( $user !== null && $tournament->hasRole( $user, Role::ADMIN ) );
@@ -69,11 +68,36 @@ class Shell
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getSport()
+    public function getSportCustomId()
     {
-        return $this->sport;
+        return $this->sportCustomId;
+    }
+
+    /**
+     * @param int $sportCustomId
+     */
+//    protected function setSportCustomId( int $sportCustomId ) {
+//        $this->sportCustomId = $sportCustomId;
+//    }
+
+    /**
+     * @param array $sports
+     * @return int
+     */
+    protected function getSportCustomIdBySports( array $sports ): int {
+        if( count($sports) === 1 ) {
+            $sport = $sports[0];
+            if ($sport->getCustomId() === null) {
+                return 0;
+            }
+            return reset($sports)->getCustomId();
+        }
+        if( count($sports) > 1 ) {
+            return -1;
+        }
+        return 0;
     }
 
     /**
