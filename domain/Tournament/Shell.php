@@ -50,7 +50,7 @@ class Shell
         $this->tournamentId = $tournament->getId();
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
-        $this->sportCustomId = $this->getSportCustomIdBySports( $competition->getSports() );
+        $this->sportCustomId = $competition->getSportConfigs()->count() > 1 ? null : $competition->getSportConfigs()->first()->getSport()->getId();
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
         $this->hasEditPermissions = ( $user !== null && $tournament->hasRole( $user, Role::ADMIN ) );
