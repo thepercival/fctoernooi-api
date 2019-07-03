@@ -103,6 +103,8 @@ class Authentication
             return $this->pouleplaceActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'games') {
             return $this->gameActionAuthorized($user, $method, $queryParams, $id);
+        } elseif ($resourceType === 'sports') {
+            return true;
         } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
             || $resourceType === 'structures' || $resourceType === 'roundconfigs'
         ) {
