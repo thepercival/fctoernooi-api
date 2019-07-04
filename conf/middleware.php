@@ -27,7 +27,7 @@ $container["JwtAuthentication"] = function ($container) {
                 "ignore" => [
                     "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
                     "/tournamentshells", "/tournamentspublic", "/tournaments/pdf",
-                    "/voetbal/structures"
+                    "/voetbal/structures", "/voetbal/sports"
                 ]
             ]),
             new JwtAuthentication\RequestMethodRule([
