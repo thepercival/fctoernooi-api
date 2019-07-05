@@ -20,7 +20,9 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Service as RoleService;
+use Voetbal\Sport\Repository as SportRepository ;
 use FCToernooi\Role;
+use Voetbal\Sport\Config as SportConfig;
 use League\Period\Period;
 
 class Service
@@ -35,6 +37,10 @@ class Service
      */
     protected $repos;
     /**
+     * @var SportRepository
+     */
+    protected $sportRepos;
+    /**
      * @var RoleRepository
      */
     protected $roleRepos;
@@ -48,18 +54,21 @@ class Service
      * Service constructor.
      * @param \Voetbal\Service $voetbalService
      * @param Repository $tournamentRepos
+     * * @param SportRepository $sportRepos
      * @param RoleRepository $roleRepos
      * @param UserRepository $userRepos
      */
     public function __construct(
         \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
+        SportRepository $sportRepos,
         RoleRepository $roleRepos,
         UserRepository $userRepos
     )
     {
         $this->voetbalService = $voetbalService;
         $this->repos = $tournamentRepos;
+        $this->sportRepos = $sportRepos;
         $this->roleRepos = $roleRepos;
         $this->userRepos = $userRepos;
     }
@@ -98,7 +107,12 @@ class Service
         $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
         // add serialized fields and referees to source-competition
-        $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
+        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $competition ) {
+            foreach( $sportConfigsSer as $sportConfigSer ) {
+                $sport = $this->sportRepos->find( $sportConfigSer->getSport()->getId() );
+                $sportConfig = new SportConfig( $sport, $competition );
+                $sportConfig->setName( $sportConfigSer->getName() );
+            }
             foreach( $fieldsSer as $fieldSer ) {
                 $field = new Field( $competition, $fieldSer->getNumber() );
                 $field->setName( $fieldSer->getName() );
@@ -110,7 +124,7 @@ class Service
                 $referee->setInfo( $refereeSer->getInfo() );
             }
         };
-        $createFieldsAndReferees( $competitionSer->getFields(), $competitionSer->getReferees() );
+        $createFieldsAndReferees( $competitionSer->getSportConfigs(), $competitionSer->getFields(), $competitionSer->getReferees() );
 
         $tournament = new Tournament( $competition );
         $tournament->setBreakDuration( 0 );

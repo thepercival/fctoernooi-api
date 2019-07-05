@@ -52,11 +52,13 @@ $container['voetbal'] = function( $c ) {
 $container['toernooi'] = function( $c ) {
     $em = $c->get('em');
     $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
+    $sportRepos = new Voetbal\Sport\Repository($em,$em->getClassMetaData(Voetbal\Sport::class));
     $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
     $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
     return new FCToernooi\Tournament\Service(
         $c->get('voetbal'),
         $tournamentRepos,
+        $sportRepos,
         $roleRepos,
         $userRepos
     );
