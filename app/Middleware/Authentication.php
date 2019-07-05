@@ -99,8 +99,8 @@ class Authentication
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
         if ($resourceType === 'competitors') {
             return $this->competitorActionAuthorized($user, $method, $queryParams);
-        } elseif ($resourceType === 'pouleplaces') {
-            return $this->pouleplaceActionAuthorized($user, $method, $queryParams, $id);
+        } elseif ($resourceType === 'places') {
+            return $this->placeActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'games') {
             return $this->gameActionAuthorized($user, $method, $queryParams, $id);
         } elseif ($resourceType === 'sports') {
@@ -133,7 +133,7 @@ class Authentication
         return true;
     }
 
-    protected function pouleplaceActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
+    protected function placeActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
     {
         if ($method !== 'PUT') {
             return false;

@@ -6,21 +6,26 @@
  * Time: 15:03
  */
 
-namespace FCToernooi\Pdf\Page;
+namespace App\Pdf\Page;
 
-use FCToernooi\Pdf\Page as ToernooiPdfPage;
+use App\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
-use Voetbal\Structure\NameService;
-use Voetbal\Round\Config\Score as RoundConfigScore;
-use Voetbal\Round\Config\Score\Options as RoundConfigScoreOptions;
+use Voetbal\NameService;
+use Voetbal\Sport\ScoreConfig as SportScoreConfig;
+use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use FCToernooi\TranslationService;
 
 class Gamenotes extends ToernooiPdfPage
 {
-//    protected $m_sOuterBorder = "black";
-//    protected $m_sInnerBorder = "#A8A8A8";
-//    protected $m_sOdd = "#F0F0F0";
-//    protected $m_sEven = "white";
-    //protected $m_bHeadersFirstTime = true;
+    /**
+     * @var SportScoreConfigService
+     */
+    protected $sportScoreConfigService;
+    /**
+     * @var TranslationService
+     */
+    protected $translationService;
+
     protected $gameOne;
     protected $gameTwo;
 
@@ -30,6 +35,8 @@ class Gamenotes extends ToernooiPdfPage
         $this->setLineWidth( 0.5 );
         $this->gameOne = $gameA;
         $this->gameTwo = $gameB;
+        $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->translationService = new TranslationService();
     }
 
     public function getPageMargin(){ return 20; }
@@ -61,7 +68,7 @@ class Gamenotes extends ToernooiPdfPage
         $nRowHeight = 20;
 
         $roundNumber = $game->getRound()->getNumber();
-        $roundNumberConfig = $roundNumber->getConfig();
+        $planningConfig = $roundNumber->getPlanningConfig();
         $planningService = $this->getParent()->getPlanningService();
         $nX = $nFirstBorder + $nMargin;
         $bNeedsRanking = $game->getPoule()->needsRanking();
@@ -85,8 +92,8 @@ class Gamenotes extends ToernooiPdfPage
 
         $this->drawCell( 'plekken', $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $home = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::HOME ), false, !$roundNumberConfig->getTeamup() );
-        $away = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::AWAY ), false, !$roundNumberConfig->getTeamup() );
+        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), false, !$planningConfig->getTeamup() );
+        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), false, !$planningConfig->getTeamup() );
         $this->drawCell( $home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight );
         $nY -= $nRowHeight;
 
@@ -100,9 +107,9 @@ class Gamenotes extends ToernooiPdfPage
         if( $planningService->canCalculateStartDateTime($roundNumber) === true ) {
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
             $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("d M") );
-            $duration = $roundNumberConfig->getMinutesPerGame() . ' min.';
-            if( $roundNumberConfig->getHasExtension() === true ) {
-                $duration .= ' (' . $roundNumberConfig->getMinutesPerGameExt() . ' min.)';
+            $duration = $planningConfig->getMinutesPerGame() . ' min.';
+            if( $planningConfig->getHasExtension() === true ) {
+                $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
 
             $this->drawCell( "tijdstip", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
@@ -128,10 +135,10 @@ class Gamenotes extends ToernooiPdfPage
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
             $this->drawCell( $game->getReferee()->getInitials(), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
-        } else if( $game->getRefereePoulePlace() !== null ) {
+        } else if( $game->getRefereePlace() !== null ) {
             $this->drawCell( "scheidrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $nameService->getPoulePlaceName( $game->getRefereePoulePlace(), true, true), $nX2, $nY, $nWidthResult, $nRowHeight );
+            $this->drawCell( $nameService->getPlaceName( $game->getRefereePlace(), true, true), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
         }
 
@@ -145,18 +152,18 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $home = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::HOME ), true, true );
+        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
         $this->drawCell( $home, $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $away = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::AWAY ), true, true );
+        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), true, true );
         $this->drawCell( $away, $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
         $nY -= 3 * $nRowHeight; // extra lege regel
 
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
-        $inputScoreConfig = $roundNumberConfig->getInputScore();
-        $calculateScoreConfig = $roundNumberConfig->getCalculateScore();
+        $inputScoreConfig = $this->sportScoreConfigService->getInput( $roundNumber->getSportScoreConfig() );
+        $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $roundNumber->getSportScoreConfig() );
 
         $dots = '...............';
         $dotsWidth = $this->getTextWidth( $dots );
@@ -165,7 +172,7 @@ class Gamenotes extends ToernooiPdfPage
                 $nYDelta = 0;
                 $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
                 for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
-                    $descr = $calculateScoreConfig->getNameSingle() . ' ' . $gameUnitNr;
+                    $descr = $this->translationService->getScoreNameMultiple(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
                     $this->drawCell( $descr, $this->getPageMargin(), $nY - $nYDelta, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
                     $this->drawCell( $dots, $nX, $nY - $nYDelta, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
                     $this->drawCell( '-', $nSecondBorder, $nY - $nYDelta, $nMargin, $nRowHeight * $larger );
@@ -182,7 +189,7 @@ class Gamenotes extends ToernooiPdfPage
 
 
         if( $inputScoreConfig !== null ) {
-            $descr = $this->getInputScoreConfigDescription( $inputScoreConfig, $roundNumberConfig->getEnableTime() );
+            $descr = $this->getInputScoreConfigDescription( $inputScoreConfig, $planningConfig->getEnableTime() );
             if( $inputScoreConfig !== $calculateScoreConfig ) {
                 $nYDelta = 0;
                 $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
@@ -200,28 +207,29 @@ class Gamenotes extends ToernooiPdfPage
 
         $nY -= $nRowHeight; // extra lege regel
 
-        if( $roundNumberConfig->getHasExtension() ) {
+        if( $planningConfig->getHasExtension() ) {
             $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
             $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
             $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
             if( $inputScoreConfig !== null ) {
-                $this->drawCell( $inputScoreConfig->getName(), $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight  * $larger, ToernooiPdfPage::ALIGNRIGHT );
+                $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
+                $this->drawCell( $name, $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight  * $larger, ToernooiPdfPage::ALIGNRIGHT );
             }
         }
-
     }
 
-    protected function getInputScoreConfigDescription( RoundConfigScore $inputScoreConfig, $timeEnabled): string {
+    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string {
         $direction = $this->getDirectionName($inputScoreConfig);
+        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
         if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
-            return $inputScoreConfig->getName();
+            return $name;
         }
-        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $inputScoreConfig->getName();
+        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
     }
 
-    protected function getDirectionName(RoundConfigScore $scoreConfig ) {
-        return $scoreConfig->getDirection() === RoundConfigScoreOptions::UPWARDS ? 'naar' : 'vanaf';
+    protected function getDirectionName(SportScoreConfig $scoreConfig ) {
+        return $scoreConfig->getDirection() === SportScoreConfig::UPWARDS ? 'naar' : 'vanaf';
     }
 
     protected function getNrOfScoreLines( int $scoreConfigMax ) : int {

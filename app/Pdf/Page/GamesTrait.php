@@ -6,13 +6,13 @@
  * Time: 19:15
  */
 
-namespace FCToernooi\Pdf\Page;
+namespace App\Pdf\Page;
 
 use Voetbal\Game;
-use Voetbal\Competition;
 use Voetbal\Round\Number as RoundNumber;
-use FCToernooi\Pdf\Page;
-use Voetbal\Structure\NameService;
+use App\Pdf\Page;
+use Voetbal\State;
+use Voetbal\NameService;
 
 trait GamesTrait
 {
@@ -184,19 +184,19 @@ trait GamesTrait
                 Page::ALIGNCENTER, "black");
         }
 
-        $home = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::HOME ), true, true );
+        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
         $nX = $this->drawCell($home, $nX, $nY, $this->getGamesHomeWidth(), $nRowHeight, Page::ALIGNRIGHT, "black");
 
         $nX = $this->drawCell($this->getScore($game), $nX, $nY, $this->getGamesScoreWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
 
-        $away = $nameService->getPoulePlacesFromName( $game->getPoulePlaces( Game::AWAY ), true, true );
+        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), true, true );
         $nX = $this->drawCell($away, $nX, $nY, $this->getGamesAwayWidth(), $nRowHeight, Page::ALIGNLEFT, "black");
 
         if ($game->getReferee() !== null) {
             $this->drawCell($game->getReferee()->getInitials(),
                 $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
-        }  else if( $game->getRefereePoulePlace() !== null ) {
-            $this->drawCell($nameService->getPoulePlaceName( $game->getRefereePoulePlace(), true, true),
+        }  else if( $game->getRefereePlace() !== null ) {
+            $this->drawCell($nameService->getPlaceName( $game->getRefereePlace(), true, true),
                 $nX, $nY, $this->getGamesRefereeWidth(), $nRowHeight, Page::ALIGNCENTER, "black");
         }
 
@@ -216,10 +216,10 @@ trait GamesTrait
 
     protected function getScore(Game $game): string {
         $score = ' - ';
-        if ($game->getState() !== Game::STATE_PLAYED) {
+        if ($game->getState() !== State::Finished) {
             return $score;
         }
-        $finalScore = $game->getFinalScore();
+        $finalScore = $this->sportScoreConfigService->getFinal($game);
         if ($finalScore === null) {
             return $score;
         }

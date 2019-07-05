@@ -6,17 +6,22 @@
  * Time: 19:28
  */
 
-namespace FCToernooi\Pdf\Page;
+namespace App\Pdf\Page;
 
-use \FCToernooi\Pdf\Page as ToernooiPdfPage;
+use App\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
 use Voetbal\Field;
 use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Structure\NameService;
-use FCToernooi\Pdf\Page;
+use Voetbal\NameService;
+use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class Planning extends ToernooiPdfPage
 {
+    /**
+     * @var SportScoreConfigService
+     */
+    protected $sportScoreConfigService;
+
     use GamesTrait;
 
     /**
@@ -25,7 +30,7 @@ class Planning extends ToernooiPdfPage
     protected $fieldFilter;
 
     /*protected $maxPoulesPerLine;
-    protected $poulePlaceWidthStructure;
+    protected $placeWidthStructure;
     protected $pouleMarginStructure;
     */protected $rowHeight;
 
@@ -33,8 +38,9 @@ class Planning extends ToernooiPdfPage
     {
         parent::__construct( $param1 );
         $this->setLineWidth( 0.5 );
+        $this->sportScoreConfigService = new SportScoreConfigService();
         /*$this->maxPoulesPerLine = 3;
-        $this->poulePlaceWidthStructure = 30;
+        $this->placeWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
 /*
         <colgroup>
@@ -86,7 +92,7 @@ class Planning extends ToernooiPdfPage
         $nX = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
         $subHeader = (new NameService())->getRoundNumberName( $roundNumber);
-        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, Page::ALIGNCENTER );
+        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
         return $nY - ( 2 * $fontHeightSubHeader );
     }

@@ -26,7 +26,8 @@ use FCToernooi\User;
 use FCToernooi\Token;
 use FCToernooi\Tournament\BreakX;
 use JMS\Serializer\SerializationContext;
-use FCToernooi\Pdf\TournamentConfig;
+use App\Pdf\TournamentConfig;
+use App\Pdf\Document as PdfDocument;
 
 final class Tournament
 {
@@ -312,13 +313,14 @@ final class Tournament
             $newTournament = $this->service->copy( $tournament, $user, $startDateTime);
             $this->repos->customPersist($newTournament, true);
 
-            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
+            $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
             $newCompetitors = $this->competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
             foreach( $newCompetitors as $newCompetitor ) {
                 $this->em->persist($newCompetitor);
             }
 
             $newStructure = $this->structureService->copy( $structure, $newTournament->getCompetition() );
+
             $this->competitorService->assignCompetitors( $newStructure, $newCompetitors );
 
             $this->structureReposistory->customPersist($newStructure);
@@ -372,9 +374,9 @@ final class Tournament
             }
 
             $fileName = $this->getFileName($pdfConfig);
-            $structure = $this->structureService->getStructure( $tournament->getCompetition() );
-            $structure->setQualifyRules();
-            $pdf = new \FCToernooi\Pdf\Document( $tournament, $structure, $pdfConfig );
+            $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
+            throw new \Exception('not impl setQualifyRules yet, should be impl in getStructure', E_ERROR );
+            $pdf = new PdfDocument( $tournament, $structure, $pdfConfig );
             $vtData = $pdf->render();
 
             $tournament->setPrinted(true);

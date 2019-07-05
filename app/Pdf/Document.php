@@ -6,17 +6,17 @@
  * Time: 15:06
  */
 
-namespace FCToernooi\Pdf;
+namespace App\Pdf;
 
-use \FCToernooi\Tournament;
-use Voetbal\Qualify\Service as QualifyService;
+use FCToernooi\Tournament;
+use Voetbal\State;
 use Voetbal\Structure;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
-use FCToernooi\Pdf\Page\PoulePivotTables as PagePoules;
-use FCToernooi\Pdf\Page\Planning as PagePlanning;
+use App\Pdf\Page\PoulePivotTables as PagePoules;
+use App\Pdf\Page\Planning as PagePlanning;
 
 class Document extends \Zend_Pdf
 {
@@ -314,10 +314,10 @@ class Document extends \Zend_Pdf
             return $this->areSelfRefereesAssigned;
         };
         $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
-            if( $roundNumber->getConfig()->getSelfReferee() ) {
+            if( $roundNumber->getPlanningConfig()->getSelfReferee() ) {
                 $games = $this->planningService->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH );
                 if( count( array_filter( $games, function( $game ) {
-                        return $game->getRefereePoulePlace() !== null;
+                        return $game->getRefereePlace() !== null;
                     } ) ) > 0 ) {
                     return true;
                 }
@@ -342,8 +342,8 @@ class Document extends \Zend_Pdf
      */
     protected function getScheduledGames( Round $round, $games = [] ): array
     {
-        $games = array_merge( $games, $round->getGamesWithState(Game::STATE_CREATED));
-        foreach( $round->getChildRounds() as $childRound ) {
+        $games = array_merge( $games, $round->getGamesWithState(State::Created));
+        foreach( $round->getChildren() as $childRound ) {
             $games = $this->getScheduledGames( $childRound, $games);
         }
         return $games;

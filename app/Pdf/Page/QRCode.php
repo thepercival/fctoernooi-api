@@ -6,12 +6,11 @@
  * Time: 10:00
  */
 
-namespace FCToernooi\Pdf\Page;
+namespace App\Pdf\Page;
 
-use \FCToernooi\Pdf\Page as ToernooiPdfPage;
-use \FCToernooi\QRService;
-use Voetbal\Poule;
-use Voetbal\Structure\NameService;
+use App\Pdf\Page as ToernooiPdfPage;
+use FCToernooi\QRService;
+use Voetbal\NameService;
 
 class QRCode extends ToernooiPdfPage
 {

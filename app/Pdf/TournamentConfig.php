@@ -1,6 +1,6 @@
 <?php
 
-namespace FCToernooi\Pdf;
+namespace App\Pdf;
 
 class TournamentConfig
 {

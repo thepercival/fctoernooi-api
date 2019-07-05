@@ -77,8 +77,8 @@ class Service
         $association = $this->createAssociationFromUserIdAndDateTime( $user->getId() );
 
         $leagueSer = $competitionSer->getLeague();
-        $leagueService = $this->voetbalService->getService( League::class );
-        $league = $leagueService->create( $leagueSer->getName(), $leagueSer->getSport(), $association );
+        $league = new League( $association, $leagueSer->getName() );
+        $league->setSportDep( 'voetbal' ); // DEPRECATED
 
         // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
         $getSeason = function( int $year) {
@@ -95,19 +95,19 @@ class Service
 
         $competitionService = $this->voetbalService->getService(Competition::class);
         $ruleSet = $competitionSer->getRuleSet();
-        if( $ruleSet === null ) {
-            $ruleSet = \Voetbal\Ranking::SOCCERWORLDCUP; // temperarily(for new js) @TODO
-        }
         $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
+        // add serialized fields and referees to source-competition
         $createFieldsAndReferees = function($fieldsSer, $refereesSer) use( $competition ) {
-            $fieldService = $this->voetbalService->getService( Field::class );
             foreach( $fieldsSer as $fieldSer ) {
-                $fieldService->create( $fieldSer->getNumber(), $fieldSer->getName(), $competition );
+                $field = new Field( $competition, $fieldSer->getNumber() );
+                $field->setName( $fieldSer->getName() );
             }
-            $refereeService = $this->voetbalService->getService( Referee::class );
             foreach( $refereesSer as $refereeSer ) {
-                $refereeService->create( $competition, $refereeSer->getInitials(), $refereeSer->getName(), $refereeSer->getEmailaddress(), $refereeSer->getInfo() );
+                $referee = new Referee( $competition, $refereeSer->getInitials() );
+                $referee->setName( $refereeSer->getName() );
+                $referee->setEmailaddress( $refereeSer->getEmailaddress() );
+                $referee->setInfo( $refereeSer->getInfo() );
             }
         };
         $createFieldsAndReferees( $competitionSer->getFields(), $competitionSer->getReferees() );
@@ -155,10 +155,9 @@ class Service
         return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
 
-    protected function createAssociationFromUserIdAndDateTime( $userId ) {
+    protected function createAssociationFromUserIdAndDateTime( $userId ): Association {
         $dateTime = new \DateTimeImmutable();
-        $assService = $this->voetbalService->getService( Association::class );
-        return $assService->create( $userId . '-' . $dateTime->getTimestamp() );
+        return new Association($userId . '-' . $dateTime->getTimestamp());
     }
 
     public function mayUserChangeCompetitor( User $user, Association  $association )

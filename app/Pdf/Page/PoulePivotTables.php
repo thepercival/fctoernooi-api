@@ -6,27 +6,30 @@
  * Time: 15:03
  */
 
-namespace FCToernooi\Pdf\Page;
+namespace App\Pdf\Page;
 
-use \FCToernooi\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Structure\NameService;
+use App\Pdf\Page as ToernooiPdfPage;
+use Voetbal\NameService;
 use Voetbal\Poule;
 use Voetbal\Place;
 use Voetbal\Game;
 use Voetbal\State;
 use Voetbal\Round\Number as RoundNumber;
-use Voetbal\PoulePlace;
 use Voetbal\Ranking\Service as RankingService;
-use FCToernooi\Pdf\Page;
+use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class PoulePivotTables extends ToernooiPdfPage
 {
+    /**
+     * @var SportScoreConfigService
+     */
+    protected $sportScoreConfigService;
     protected $nameColumnWidth;
     protected $pointsColumnWidth;
     protected $rankColumnWidth;
     protected $versusColumnsWidth;
     /*protected $maxPoulesPerLine;
-    protected $poulePlaceWidthStructure;
+    protected $placeWidthStructure;
     protected $pouleMarginStructure;
     */protected $rowHeight;
 
@@ -38,9 +41,9 @@ class PoulePivotTables extends ToernooiPdfPage
         $this->versusColumnsWidth = $this->getDisplayWidth() * 0.60;
         $this->pointsColumnWidth = $this->getDisplayWidth() * 0.08;
         $this->rankColumnWidth = $this->getDisplayWidth() * 0.07;
-
+        $this->sportScoreConfigService = new SportScoreConfigService();
         /*$this->maxPoulesPerLine = 3;
-        $this->poulePlaceWidthStructure = 30;
+        $this->placeWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
     }
 
@@ -61,7 +64,7 @@ class PoulePivotTables extends ToernooiPdfPage
         $nX = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
         $subHeader = (new NameService())->getRoundNumberName( $roundNumber);
-        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, Page::ALIGNCENTER );
+        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
         return $nY - ( 2 * $fontHeightSubHeader );
     }
@@ -118,19 +121,19 @@ class PoulePivotTables extends ToernooiPdfPage
         $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
 
         $nX = $this->getPageMargin();
-        $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, Page::ALIGNCENTER, 'black' );
+        $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
 
         $nVersus = 0;
-        foreach( $poule->getPlaces() as $poulePlace ) {
-            $nX = $this->drawCell((new NameService())->getPoulePlaceFromName($poulePlace, true), $nX, $nY, $versusColumnWidth,
-                $height, Page::ALIGNCENTER, 'black', $degrees);
+        foreach( $poule->getPlaces() as $place ) {
+            $nX = $this->drawCell((new NameService())->getPlaceFromName($place, true), $nX, $nY, $versusColumnWidth,
+                $height, ToernooiPdfPage::ALIGNCENTER, 'black', $degrees);
             $nVersus++;
         }
         // draw pointsrectangle
-        $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $height, Page::ALIGNCENTER, 'black' );
+        $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
 
         // draw rankrectangle
-        $this->drawCell( "plek", $nX, $nY, $this->rankColumnWidth, $height, Page::ALIGNCENTER, 'black' );
+        $this->drawCell( "plek", $nX, $nY, $this->rankColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
 
         return $nY - $height;
     }
@@ -141,7 +144,8 @@ class PoulePivotTables extends ToernooiPdfPage
         $nY = $this->drawPouleHeader( $poule, $nY );
 
         $pouleState = $poule->getState();
-        $rankingService = new RankingService($poule->getRound() );
+        $competition = $this->getParent()->getTournament()->getCompetition();
+        $rankingService = new RankingService($poule->getRound(), $competition->getRuleSet() );
         $rankingItems = $rankingService->getItemsForPoule( $poule );
 
         $nRowHeight = $this->getRowHeight();
@@ -149,11 +153,11 @@ class PoulePivotTables extends ToernooiPdfPage
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
 
         $nVersus = 1;
-        foreach( $poule->getPlaces() as $poulePlace ) {
+        foreach( $poule->getPlaces() as $place ) {
             $nX = $this->getPageMargin();
-            $nX = $this->drawCell( (new NameService())->getPoulePlaceFromName( $poulePlace, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
-            $placeGames = $poule->getGames()->filter( function( $game ) use ($poulePlace) {
-                return $game->isParticipating( $poulePlace );
+            $nX = $this->drawCell( (new NameService())->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
+            $placeGames = $poule->getGames()->filter( function( $game ) use ($place) {
+                return $game->isParticipating( $place );
             });
             // draw versus
             for( $placeNr = 1 ; $placeNr <= $nrOfPlaces ; $placeNr++ ) {
@@ -164,7 +168,7 @@ class PoulePivotTables extends ToernooiPdfPage
                 if( $pouleState !== State::Created ) {
                     $score = $this->getScore( $poule->getPlace($placeNr), $placeGames );
                 }
-                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
                 if( $nVersus === $placeNr ) {
                     $this->setFillColor( new \Zend_Pdf_Color_Html( "white" ) );
                 }
@@ -176,14 +180,14 @@ class PoulePivotTables extends ToernooiPdfPage
             if( $pouleState !== State::Finished ) {
                 $points = '?';
             }
-            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
 
             // draw rankrectangle
             $rank = null;
             if( $pouleState !== State::Finished ) {
                 $rank = '?';
             }
-            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, Page::ALIGNLEFT, 'black' );
+            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
 
             $nY -= $nRowHeight;
         }
@@ -191,21 +195,21 @@ class PoulePivotTables extends ToernooiPdfPage
     }
 
     protected function getScore( Place $awayPlace, array $placeGames): string {
-        $foundGames = $placeGames->filter( function( $game ) use ($awayPlace) {
+        $foundGames = array_filter( $placeGames, function( $game ) use ($awayPlace) {
             return $game->isParticipating( $awayPlace, Game::AWAY );
         });
-        if( $foundGames->count() !== 1 ) {
+        if( count($foundGames) !== 1 ) {
             return '';
         }
-        return $this->getGameScore( $foundGames->first() );
+        return $this->getGameScore( reset($foundGames), false );
     }
 
     protected function getGameScore(Game $game, bool $reverse): string {
         $score = ' - ';
-        if ($game->getState() !== Game::STATE_PLAYED) {
+        if ($game->getState() !== State::Finished) {
             return $score;
         }
-        $finalScore = $game->getFinalScore();
+        $finalScore = $this->sportScoreConfigService->getFinal($game);
         if ($finalScore === null) {
             return $score;
         }
@@ -217,20 +221,20 @@ class PoulePivotTables extends ToernooiPdfPage
 
     protected function getPoulePlaceNamesWidth( Poule $poule ) {
         $width = 0;
-        foreach( $poule->getPlaces() as $poulePlace ) {
-            $width += $this->getPoulePlaceWidth( $poulePlace );
+        foreach( $poule->getPlaces() as $place ) {
+            $width += $this->getPlaceWidth( $place );
         }
         return $width;
     }
 
 
-    public function getPoulePlaceWidth( PoulePlace $poulePlace, int $nFontSize = null )
+    public function getPlaceWidth( Place $place, int $nFontSize = null )
     {
-        $key = $poulePlace->getId();
+        $key = $place->getId();
         if( $this->getParent()->hasTextWidth($key) ) {
             return $this->getParent()->getTextWidth();
         }
-        $width = $this->getTextWidth( (new NameService())->getPoulePlaceFromName($poulePlace, true));
+        $width = $this->getTextWidth( (new NameService())->getPlaceFromName($place, true));
         return $this->getParent()->setTextWidth($width);
     }
 
