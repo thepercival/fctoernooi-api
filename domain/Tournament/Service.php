@@ -103,15 +103,15 @@ class Service
         $season = $getSeason( (int) $competitionSer->getStartDateTime()->format("Y") );
 
         $competitionService = $this->voetbalService->getService(Competition::class);
+        $sportConfigService = $this->voetbalService->getService(SportConfig::class);
         $ruleSet = $competitionSer->getRuleSet();
         $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
         // add serialized fields and referees to source-competition
-        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $competition ) {
+        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $competition, $sportConfigService ) {
             foreach( $sportConfigsSer as $sportConfigSer ) {
-                $sport = $this->sportRepos->find( $sportConfigSer->getSport()->getId() );
-                $sportConfig = new SportConfig( $sport, $competition );
-                $sportConfig->setName( $sportConfigSer->getName() );
+                $sport = $this->sportRepos->find( $sportConfigSer->getSportIdSer() );
+                $sportConfigService->copy( $sportConfigSer, $competition, $sport );
             }
             foreach( $fieldsSer as $fieldSer ) {
                 $field = new Field( $competition, $fieldSer->getNumber() );

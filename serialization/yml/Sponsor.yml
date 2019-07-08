@@ -6,8 +6,6 @@ FCToernooi\Sponsor:
   properties:
     id:
       type: integer
-    tournament:
-      type: FCToernooi\Tournament
     name:
       type: string
     url:
