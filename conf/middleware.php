@@ -10,6 +10,11 @@ use \JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use FCToernooi\Auth\JWT\TournamentRule;
+use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
+use Voetbal\SerializationHandler\Qualify\Group as QualifyGroupSerializationHandler;
+use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
+// use Voetbal\SerializationHandler\Config as ConfigSerializationHandler;
+use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
 
 $container = $app->getContainer();
 $container["token"] = function ($container) {
@@ -109,6 +114,14 @@ $app->add(function ( $request,  $response, callable $next) use ( $container ){
         foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
             $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
         }
+        $serializerBuilder->configureHandlers(function(JMS\Serializer\Handler\HandlerRegistry $registry) {
+            $registry->registerSubscribingHandler(new StructureSerializationHandler());
+            $registry->registerSubscribingHandler(new RoundNumberSerializationHandler());
+            $registry->registerSubscribingHandler(new RoundSerializationHandler());
+//            $registry->registerSubscribingHandler(new QualifyGroupSerializationHandler());
+        });
+        $serializerBuilder->addDefaultHandlers();
+
         return $serializerBuilder->build();
     };
 

@@ -116,6 +116,8 @@ class Service
             foreach( $fieldsSer as $fieldSer ) {
                 $field = new Field( $competition, $fieldSer->getNumber() );
                 $field->setName( $fieldSer->getName() );
+                $sport = $this->sportRepos->find( $fieldSer->getSportIdSer() );
+                $field->setSport( $sport );
             }
             foreach( $refereesSer as $refereeSer ) {
                 $referee = new Referee( $competition, $refereeSer->getInitials() );
