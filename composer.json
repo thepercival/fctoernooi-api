@@ -1,14 +1,14 @@
 {
-	"name": "slim/slim-skeleton",
-	"description": "A Slim Framework skeleton application for rapid development",
+	"name": "thepercival/fctoernooi-api",
+	"description": "An api for tournament-apps",
 	"keywords": ["sport toernooi"],
-	"homepage": "http://github.com/slimphp/Slim-Skeleton",
+	"homepage": "http://github.com/thepercival/fctoernooi-api",
 	"license": "MIT",
 	"authors": [
         	{
-            		"name": "Josh Lockhart",
-            		"email": "info@joshlockhart.com",
-            		"homepage": "http://www.joshlockhart.com/"
+            		"name": "Coen Dunnink",
+            		"email": "fctoernooi2018@gmail.com",
+            		"homepage": "https://www.fctoernooi.nl/"
         	}
     	],
 	"require": {
