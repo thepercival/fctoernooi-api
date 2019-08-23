@@ -158,7 +158,7 @@ class PoulePivotTables extends ToernooiPdfPage
             $nX = $this->drawCell( (new NameService())->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
             $placeGames = $poule->getGames()->filter( function( $game ) use ($place) {
                 return $game->isParticipating( $place );
-            });
+            })->toArray();
             // draw versus
             for( $placeNr = 1 ; $placeNr <= $nrOfPlaces ; $placeNr++ ) {
                 if( $nVersus === $placeNr ) {

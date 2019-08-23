@@ -176,7 +176,7 @@ abstract class Page extends \Zend_Pdf_Page
         }
 
         $nFontSize = $this->getFontSize();
-        $nTextY = $nYPos - ( ( ( $nHeight / 2 ) + ( $nFontSize / 2 ) ) - 1.5 );
+        $nTextY = (int)($nYPos - ( ( ( $nHeight / 2 ) + ( $nFontSize / 2 ) ) - 1.5 ));
 
         $nRetVal = $this->drawString( $sText, $nXPos, $nTextY, $nWidth, $nAlign, $degrees );
 
@@ -218,7 +218,7 @@ abstract class Page extends \Zend_Pdf_Page
      * @param string|null $sText
      * @param int $nXPos
      * @param int $nYPos
-     * @param null $nMaxWidth
+     * @param int|null $nMaxWidth
      * @param int $nAlign
      * @param int $nRotationDegree
      * @return float|int|null

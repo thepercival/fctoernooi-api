@@ -132,7 +132,7 @@ class Tournament
     }
 
     /**
-     * @return bool
+     * @return ?bool
      */
     public function getPublic()
     {

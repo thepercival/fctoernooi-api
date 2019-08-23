@@ -116,9 +116,9 @@ final class Sponsor
         $sErrorMessage = null;
         try {
             $tournamentId = (int)$request->getParam("tournamentid");
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->tournamentRepos->find($tournamentId);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
@@ -152,9 +152,9 @@ final class Sponsor
         $sErrorMessage = null;
         try {
             $tournamentId = (int)$request->getParam("tournamentid");
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->tournamentRepos->find($tournamentId);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
@@ -193,15 +193,15 @@ final class Sponsor
         $errorMessage = null;
         try{
             $tournamentId = (int)$request->getParam("tournamentid");
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->tournamentRepos->find($tournamentId);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
             $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
 
-            /** @var \FCToernooi\Sponsor $sponsor */
+            /** @var \FCToernooi\Sponsor|null $sponsor */
             $sponsor = $this->repos->find( $args['id'] );
             if ( $sponsor === null ){
                 return $response->withStatus(404)->write("de te verwijderen sponsor kon niet gevonden worden" );
@@ -219,9 +219,9 @@ final class Sponsor
     public function upload( $request, $response, $args)
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->tournamentRepos->find((int)$request->getParam("tournamentid"));
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 

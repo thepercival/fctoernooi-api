@@ -12,6 +12,7 @@ use FCToernooi\Token;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
+use FCToernooi\User;
 
 trait AuthTrait
 {
@@ -19,10 +20,10 @@ trait AuthTrait
      * @param Token $token
      * @param UserRepository $userRepos
      * @param Tournament|null $tournament
-     * @return null|object
+     * @return User
      * @throws \Exception
      */
-    public function checkAuth( Token $token, UserRepository $userRepos, Tournament $tournament = null )
+    public function checkAuth( Token $token, UserRepository $userRepos, Tournament $tournament = null ): User
     {
         $user = null;
         if( $token->isPopulated() ){

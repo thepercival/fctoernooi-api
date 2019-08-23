@@ -108,9 +108,9 @@ final class Tournament
     {
         $sErrorMessage = null;
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->repos->find($args['id']);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             return $response
@@ -152,9 +152,9 @@ final class Tournament
     {
         $sErrorMessage = null;
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->repos->find($args['id']);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             $user = $this->checkAuth( $this->token, $this->userRepository );
@@ -181,9 +181,9 @@ final class Tournament
     public function syncRefereeRoles($request, $response, $args)
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->repos->find($args['id']);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             $this->checkAuth( $this->token, $this->userRepository );
@@ -269,7 +269,7 @@ final class Tournament
     {
         $errorMessage = null;
         try{
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->repos->find( $args['id'] );
 
             if ( $tournament === null ){
@@ -301,9 +301,9 @@ final class Tournament
     {
         $this->em->getConnection()->beginTransaction();
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->repos->find($args['id']);
-            if (!$tournament) {
+            if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             /** @var \FCToernooi\User $user */
