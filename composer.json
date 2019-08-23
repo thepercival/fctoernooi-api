@@ -34,7 +34,9 @@
     	},
 	"require-dev": {
 		"phpunit/phpunit": "^7.0",
-		"phpstan/phpstan": "^0.11.5"
+		"phpstan/phpstan": "^0.11.5",
+		"phpstan/phpstan-doctrine": "^0.11.5",
+		"phpstan/extension-installer": "^1.0"
 	},
 	"autoload": {
 		"psr-4": {
@@ -53,5 +55,12 @@
 			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
 		],
         "stan": "vendor/bin/phpstan analyse --level=2 app domain tests"
+	},
+	"extra": {
+		"phpstan": {
+			"includes": [
+				"extension.neon"
+			]
+		}
 	}
 }
