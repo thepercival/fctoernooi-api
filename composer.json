@@ -56,6 +56,9 @@
 		],
         "stan": "vendor/bin/phpstan analyse --level=2 app domain tests"
 	},
+	"config": {
+		"process-timeout":0
+	},
 	"extra": {
 		"phpstan": {
 			"includes": [

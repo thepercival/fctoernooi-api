@@ -16,6 +16,7 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role;
+use Voetbal\League;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
@@ -243,8 +244,9 @@ final class Tournament
             if( $tournamentSer->getBreakStartDateTime() !== null ) {
                 $break = new BreakX( $tournamentSer->getBreakStartDateTime(), $tournamentSer->getBreakDuration() );
             }
-            $tournament = $this->service->changeBasics( $tournament, $dateTime, $name, $break );
+            $tournament = $this->service->changeBasics( $tournament, $dateTime, $break );
             $tournament->setPublic( $tournamentSer->getPublic() );
+            $tournament->getCompetition()->getLeague()->setName($name);
             $this->repos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
 
