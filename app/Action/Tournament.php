@@ -365,6 +365,7 @@ final class Tournament
                 filter_var($request->getParam("gamenotes"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("structure"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("rules"), FILTER_VALIDATE_BOOLEAN),
+                filter_var($request->getParam("gamesperpoule"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("gamesperfield"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("planning"), FILTER_VALIDATE_BOOLEAN),
                 filter_var($request->getParam("poulepivottables"), FILTER_VALIDATE_BOOLEAN),
@@ -377,7 +378,6 @@ final class Tournament
 
             $fileName = $this->getFileName($pdfConfig);
             $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
-            throw new \Exception('not impl setQualifyRules yet, should be impl in getStructure', E_ERROR );
             $pdf = new PdfDocument( $tournament, $structure, $pdfConfig );
             $vtData = $pdf->render();
 
@@ -407,6 +407,8 @@ final class Tournament
             return "structuur-en-indeling";
         } elseif( $pdfConfig->hasOnly(TournamentConfig::RULES) ) {
             return "reglementen";
+        } elseif( $pdfConfig->hasOnly(TournamentConfig::GAMESPERPOULE) ) {
+            return "wedstrijden-per-poule";
         } elseif( $pdfConfig->hasOnly(TournamentConfig::GAMESPERFIELD) ) {
             return "wedstrijden-per-veld";
         } elseif( $pdfConfig->hasOnly(TournamentConfig::PLANNING) ) {

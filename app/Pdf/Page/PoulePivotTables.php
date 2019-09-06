@@ -180,14 +180,14 @@ class PoulePivotTables extends ToernooiPdfPage
             if( $pouleState !== State::Finished ) {
                 $points = '?';
             }
-            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
+            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
 
             // draw rankrectangle
             $rank = null;
             if( $pouleState !== State::Finished ) {
                 $rank = '?';
             }
-            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
+            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
 
             $nY -= $nRowHeight;
         }

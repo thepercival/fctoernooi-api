@@ -40,10 +40,6 @@ trait GamesTrait
             $this->columnWidths["home"] += ( $this->columnWidths["start"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["start"] / 2 );
         }
-        if( $roundNumber->getCompetition()->getFields()->count() === 0 || $this->fieldFilter !== null ) {
-            $this->columnWidths["home"] += ( $this->columnWidths["field"] / 2 );
-            $this->columnWidths["away"] += ( $this->columnWidths["field"] / 2 );
-        }
         if( $this->refereesAssigned === false ) {
             $this->columnWidths["home"] += ( $this->columnWidths["referee"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["referee"] / 2 );
@@ -128,9 +124,9 @@ trait GamesTrait
             $nX = $this->drawCell( $text, $nX, $nY, $gameStartWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         }
 
-        if( $roundNumber->getCompetition()->getFields()->count() > 0 && $this->fieldFilter === null ) {
+        // if( $this->fieldFilter === null ) {
             $nX = $this->drawCell( "v.", $nX, $nY, $gameFieldWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
-        }
+        // }
 
         $nX = $this->drawCell( "thuis", $nX, $nY, $gameHomeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
@@ -150,7 +146,7 @@ trait GamesTrait
      */
     public function drawGame( Game $game, $nY )
     {
-        if( $this->fieldFilter !== null && $this->fieldFilter !== $game->getField() ) {
+        if( $this->gameFilter !== null && !$this->getGameFilter()($game) ) {
             return $nY;
         }
 
@@ -179,10 +175,10 @@ trait GamesTrait
                 "black");
         }
 
-        if ($game->getField() !== null && $this->fieldFilter === null ) {
+        // if ( $this->fieldFilter === null ) {
             $nX = $this->drawCell($game->getField()->getName(), $nX, $nY, $this->getGamesFieldWidth(), $nRowHeight,
                 Page::ALIGNCENTER, "black");
-        }
+        // }
 
         $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
         $nX = $this->drawCell($home, $nX, $nY, $this->getGamesHomeWidth(), $nRowHeight, Page::ALIGNRIGHT, "black");
@@ -205,7 +201,7 @@ trait GamesTrait
 //<tr *ngIf="tournament.hasBreak() && isBreakInBetween(game)" class="table-info">
 //            <td></td>
 //            <td *ngIf="planningService.canCalculateStartDateTime(roundNumber)"></td>
-//            <td *ngIf="hasFields()"></td>
+//            <td></td>
 //            <td class="width-25 text-right">PAUZE</td>
 //            <td></td>
 //            <td class="width-25"></td>

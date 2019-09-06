@@ -7,10 +7,11 @@ class TournamentConfig
     CONST GAMENOTES = 1;
     CONST STRUCTURE = 2;
     CONST RULES = 4;
-    CONST GAMESPERFIELD = 8;
-    CONST PLANNING = 16;
-    CONST PIVOTTABLES = 32;
-    CONST QRCODE = 64;
+    CONST GAMESPERPOULE = 8;
+    CONST GAMESPERFIELD = 16;
+    CONST PLANNING = 32;
+    CONST PIVOTTABLES = 64;
+    CONST QRCODE = 128;
 
     /**
      * @var int
@@ -21,6 +22,7 @@ class TournamentConfig
         bool $gamenotes = true,
         bool $structure = false,
         bool $rules = false,
+        bool $gamesperpoule = false,
         bool $gamesperfield = false,
         bool $planning = false,
         bool $poulePivotTables = false,
@@ -30,6 +32,7 @@ class TournamentConfig
         $this->value = $gamenotes ? static::GAMENOTES : 0;
         $this->value += $structure ? static::STRUCTURE : 0;
         $this->value += $rules ? static::RULES : 0;
+        $this->value += $gamesperpoule ? static::GAMESPERPOULE : 0;
         $this->value += $gamesperfield ? static::GAMESPERFIELD : 0;
         $this->value += $planning ? static::PLANNING : 0;
         $this->value += $poulePivotTables ? static::PIVOTTABLES : 0;
@@ -58,6 +61,14 @@ class TournamentConfig
     public function getRules()
     {
         return ( $this->value & static::RULES ) === static::RULES;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getGamesperpoule()
+    {
+        return ( $this->value & static::GAMESPERPOULE ) === static::GAMESPERPOULE;
     }
 
     /**

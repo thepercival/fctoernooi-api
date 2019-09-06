@@ -158,6 +158,9 @@ class Document extends \Zend_Pdf
         if( $this->config->getGamenotes() ) {
             $this->drawGamenotes();
         }
+        if( $this->config->getGamesperpoule() ) {
+            $this->drawPlanningPerPoule( $this->structure->getFirstRoundNumber() );
+        }
         if( $this->config->getGamesperfield() ) {
             $this->drawPlanningPerField( $this->structure->getFirstRoundNumber() );
         }
@@ -190,20 +193,31 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function drawPlanningPerField( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanningPerPoule( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
     {
-        $fields = $this->getTournament()->getCompetition()->getFields();
-        if( $fields->count() === 0 ) {
-            return;
-        }
-        foreach( $fields as $field ) {
-            list( $page, $nY ) = $this->createPagePlanning("veld " . $field->getName() );
-            $page->setFieldFilter( $field );
-            $this->drawPlanningPerFieldHelper( $roundNumber, $page , $nY );
+        $poules = $roundNumber->getPoules();
+        foreach( $poules as $poule ) {
+            list( $page, $nY ) = $this->createPagePlanning("poule " . $poule->getNumber() );
+            $page->setGameFilter( function( Game $game ) use ($poule) {
+                return $game->getPoule() === $poule;
+            });
+            $this->drawPlanningPerHelper( $roundNumber, $page , $nY );
         }
     }
 
-    protected function drawPlanningPerFieldHelper( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanningPerField( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    {
+        $fields = $this->getTournament()->getCompetition()->getFields();
+        foreach( $fields as $field ) {
+            list( $page, $nY ) = $this->createPagePlanning("veld " . $field->getName() );
+            $page->setGameFilter( function( Game $game ) use ($field) {
+                return $game->getField() === $field;
+            });
+            $this->drawPlanningPerHelper( $roundNumber, $page , $nY );
+        }
+    }
+
+    protected function drawPlanningPerHelper( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
     {
         $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
         $games = $page->getGames($roundNumber);
@@ -214,9 +228,9 @@ class Document extends \Zend_Pdf
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {
-                $field = $page->getFieldFilter();
-                list($page, $nY) = $this->createPagePlanning("veld " . $field->getName());
-                $page->setFieldFilter( $field );
+                // $field = $page->getFieldFilter();
+                list($page, $nY) = $this->createPagePlanning($page->getTitle());
+                $page->setGameFilter( $page->getGameFilter() );
                 $nY = $page->drawGamesHeader($roundNumber, $nY);
             }
             $nY = $page->drawGame($game, $nY);
@@ -224,7 +238,7 @@ class Document extends \Zend_Pdf
 
         if( $roundNumber->hasNext() ) {
             $nY -= 20;
-            $this->drawPlanningPerFieldHelper( $roundNumber->getNext(), $page, $nY );
+            $this->drawPlanningPerHelper( $roundNumber->getNext(), $page, $nY );
         }
     }
 
@@ -277,6 +291,7 @@ class Document extends \Zend_Pdf
         $page->setFont( $this->getFont(), $this->getFontHeight() );
         $page->putParent( $this );
         $this->pages[] = $page;
+        $page->setTitle($title);
         $nY = $page->drawHeader( $title );
         return array( $page, $nY );
     }

@@ -25,10 +25,13 @@ class Planning extends ToernooiPdfPage
     use GamesTrait;
 
     /**
-     * @var Field
+     * @var mixed
      */
-    protected $fieldFilter;
-
+    protected $gameFilter;
+    /**
+     * @var string
+     */
+    protected $title;
     /*protected $maxPoulesPerLine;
     protected $placeWidthStructure;
     protected $pouleMarginStructure;
@@ -47,7 +50,7 @@ class Planning extends ToernooiPdfPage
         <col *ngIf="aRoundNeedsRanking(roundsByNumber)">
         <col *ngIf="!aRoundNeedsRanking(roundsByNumber)">
         <col *ngIf="planningService.canCalculateStartDateTime(roundNumber)">
-        <col *ngIf="hasFields()">
+        <col>
         <col class="width-25">
         <col>
         <col class="width-25">
@@ -55,13 +58,21 @@ class Planning extends ToernooiPdfPage
       </colgroup>*/
     }
 
+    public function getTitle(): ?string {
+        return $this->title;
+    }
+    public function setTitle( string $title ) {
+        $this->title = $title;
+    }
+
     public function getPageMargin(){ return 20; }
     public function getHeaderHeight(){ return 0; }
 
-    public function getFieldFilter(){ return $this->fieldFilter; }
-    public function setFieldFilter( Field $field )
-    {
-        $this->fieldFilter = $field;
+    public function getGameFilter() {
+        return $this->gameFilter;
+    }
+    public function setGameFilter( $gameFilter ) {
+        $this->gameFilter = $gameFilter;
     }
 
     public function getGames( RoundNumber $roundNumber ): array {
@@ -69,7 +80,7 @@ class Planning extends ToernooiPdfPage
         foreach( $roundNumber->getRounds() as $round ) {
             foreach( $round->getPoules() as $poule ) {
                 foreach( $poule->getGames() as $game ) {
-                    if( $this->fieldFilter === null || $this->fieldFilter === $game->getField() ) {
+                    if( $this->gameFilter === null || $this->getGameFilter()($game) ) {
                         $games[] = $game;
                     }
                 }

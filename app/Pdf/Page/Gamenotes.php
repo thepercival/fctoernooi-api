@@ -162,8 +162,8 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
-        $inputScoreConfig = $this->sportScoreConfigService->getInput( $roundNumber->getSportScoreConfig() );
-        $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $roundNumber->getSportScoreConfig() );
+        $inputScoreConfig = $this->sportScoreConfigService->getInput( $game->getSportScoreConfig() );
+        $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $game->getSportScoreConfig() );
 
         $dots = '...............';
         $dotsWidth = $this->getTextWidth( $dots );
