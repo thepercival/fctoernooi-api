@@ -37,7 +37,7 @@ class TranslationService {
 
     public function getScoreNameSingle(string $language, SportScoreConfig $sportScoreConfig): string {
         $customId = $sportScoreConfig->getSport()->getCustomId();
-        if ($sportScoreConfig->getParent() !== null) {
+        if ($sportScoreConfig->getPrevious() !== null) {
             return $this->getScoreSubSingleName($language, $customId);
         }
         switch ($customId) {
@@ -68,7 +68,7 @@ class TranslationService {
 
     public function getScoreNameMultiple(string $language, SportScoreConfig $sportScoreConfig): string {
         $customId = $sportScoreConfig->getSport()->getCustomId();
-        if ($sportScoreConfig->getParent() !== null) {
+        if ($sportScoreConfig->getPrevious() !== null) {
             return $this->getScoreSubSingleName($language, $customId);
         }
         switch ($customId) {

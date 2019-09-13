@@ -11,8 +11,12 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use FCToernooi\Auth\JWT\TournamentRule;
 use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
+// use Voetbal\SerializationSubscriberEvent\Round\Number as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Qualify\Group as QualifyGroupSerializationHandler;
+
+use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
+
 // use Voetbal\SerializationHandler\Config as ConfigSerializationHandler;
 use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
 
@@ -119,6 +123,15 @@ $app->add(function ( $request,  $response, callable $next) use ( $container ){
             $registry->registerSubscribingHandler(new RoundNumberSerializationHandler());
             $registry->registerSubscribingHandler(new RoundSerializationHandler());
 //            $registry->registerSubscribingHandler(new QualifyGroupSerializationHandler());
+        });
+        $serializerBuilder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
+            /*$dispatcher->addListener('serializer.pre_serialize',
+                function(JMS\Serializer\EventDispatcher\PreSerializeEvent $event) {
+                    // do something
+                }
+            );*/
+            //$dispatcher->addSubscriber(new RoundNumberEventSubscriber());
+            $dispatcher->addSubscriber(new RoundNumberEventSubscriber());
         });
         $serializerBuilder->addDefaultHandlers();
 
