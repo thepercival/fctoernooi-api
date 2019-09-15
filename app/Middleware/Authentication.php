@@ -107,6 +107,7 @@ class Authentication
             return true;
         } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
             || $resourceType === 'structures' || $resourceType === 'sportconfigs' || $resourceType === 'planningconfigs'
+            || $resourceType === 'sportscoreconfigs'
         ) {
             return $this->otherActionAuthorized($user, $queryParams);
         }
