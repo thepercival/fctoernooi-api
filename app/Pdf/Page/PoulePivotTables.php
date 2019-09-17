@@ -145,47 +145,56 @@ class PoulePivotTables extends ToernooiPdfPage
 
         $pouleState = $poule->getState();
         $competition = $this->getParent()->getTournament()->getCompetition();
-        $rankingService = new RankingService($poule->getRound(), $competition->getRuleSet() );
-        $rankingItems = $rankingService->getItemsForPoule( $poule );
+        $rankingItems = null;
+        if( $pouleState === State::Finished ) {
+            $rankingService = new RankingService($poule->getRound(), $competition->getRuleSet() );
+            $rankingItems = $rankingService->getItemsForPoule( $poule );
+        }
 
         $nRowHeight = $this->getRowHeight();
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
 
-        $nVersus = 1;
         foreach( $poule->getPlaces() as $place ) {
             $nX = $this->getPageMargin();
             $nX = $this->drawCell( (new NameService())->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
-            $placeGames = $poule->getGames()->filter( function( $game ) use ($place) {
+            $placeGames = $poule->getGames()->filter( function( Game $game ) use ($place) {
                 return $game->isParticipating( $place );
             })->toArray();
             // draw versus
             for( $placeNr = 1 ; $placeNr <= $nrOfPlaces ; $placeNr++ ) {
-                if( $nVersus === $placeNr ) {
+                if( $poule->getPlace($placeNr) === $place ) {
                     $this->setFillColor( new \Zend_Pdf_Color_Html( "lightgrey" ) );
                 }
                 $score = '';
                 if( $pouleState !== State::Created ) {
-                    $score = $this->getScore( $poule->getPlace($placeNr), $placeGames );
+                    $score = $this->getScore( $place, $poule->getPlace($placeNr), $placeGames );
                 }
-                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
-                if( $nVersus === $placeNr ) {
+                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, 'black' );
+                if( $poule->getPlace($placeNr) === $place ) {
                     $this->setFillColor( new \Zend_Pdf_Color_Html( "white" ) );
                 }
             }
-            $nVersus++;
+
+            $rankingItem = null;
+            if( $rankingItems !== null ) {
+                $arrFoundRankingItems = array_filter( $rankingItems, function( $rankingItem ) use ($place ) {
+                    return $rankingItem->getPlace() === $place;
+                });
+                $rankingItem = reset( $arrFoundRankingItems );
+            }
 
             // draw pointsrectangle
-            $points = null;
-            if( $pouleState !== State::Finished ) {
-                $points = '?';
+            $points = '?';
+            if( $rankingItem !== null ) {
+                $points = '' . $rankingItem->getUnranked()->getPoints();
             }
             $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
 
             // draw rankrectangle
-            $rank = null;
-            if( $pouleState !== State::Finished ) {
-                $rank = '?';
+            $rank = '?';
+            if( $rankingItem !== null ) {
+                $rank = '' . $rankingItem->getUniqueRank();
             }
             $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
 
@@ -194,14 +203,23 @@ class PoulePivotTables extends ToernooiPdfPage
         return $nY - $nRowHeight;
     }
 
-    protected function getScore( Place $awayPlace, array $placeGames): string {
-        $foundGames = array_filter( $placeGames, function( $game ) use ($awayPlace) {
-            return $game->isParticipating( $awayPlace, Game::AWAY );
+    protected function getScore( Place $homePlace, Place $awayPlace, array $placeGames): string {
+        $foundHomeGames = array_filter( $placeGames, function( $game ) use ($homePlace, $awayPlace) {
+            return $game->isParticipating( $awayPlace, Game::AWAY ) && $game->isParticipating( $homePlace, Game::HOME );
         });
-        if( count($foundGames) !== 1 ) {
+        if( count($foundHomeGames) > 1 ) {
             return '';
         }
-        return $this->getGameScore( reset($foundGames), false );
+        if( count($foundHomeGames) === 1 ) {
+            return $this->getGameScore( reset($foundHomeGames), false );
+        }
+        $foundAwayGames = array_filter( $placeGames, function( $game ) use ($homePlace, $awayPlace) {
+            return $game->isParticipating( $homePlace, Game::AWAY ) && $game->isParticipating( $awayPlace, Game::HOME );
+        });
+        if( count($foundAwayGames) !== 1 ) {
+            return '';
+        }
+        return $this->getGameScore( reset($foundAwayGames), true );
     }
 
     protected function getGameScore(Game $game, bool $reverse): string {

@@ -329,7 +329,7 @@ class Document extends \Zend_Pdf
             return $this->areSelfRefereesAssigned;
         };
         $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
-            if( $roundNumber->getPlanningConfig()->getSelfReferee() ) {
+            if( $roundNumber->getValidPlanningConfig()->getSelfReferee() ) {
                 $games = $this->planningService->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH );
                 if( count( array_filter( $games, function( $game ) {
                         return $game->getRefereePlace() !== null;

@@ -68,7 +68,7 @@ class Gamenotes extends ToernooiPdfPage
         $nRowHeight = 20;
 
         $roundNumber = $game->getRound()->getNumber();
-        $planningConfig = $roundNumber->getPlanningConfig();
+        $planningConfig = $roundNumber->getValidPlanningConfig();
         $planningService = $this->getParent()->getPlanningService();
         $nX = $nFirstBorder + $nMargin;
         $bNeedsRanking = $game->getPoule()->needsRanking();
@@ -105,8 +105,10 @@ class Gamenotes extends ToernooiPdfPage
         }
 
         if( $planningService->canCalculateStartDateTime($roundNumber) === true ) {
+            setlocale(LC_ALL, 'nl_NL.UTF-8'); //
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("d M") );
+            $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );
+            // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
             if( $planningConfig->getHasExtension() === true ) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
@@ -126,7 +128,11 @@ class Gamenotes extends ToernooiPdfPage
         if( $game->getField() !== null ) {
             $this->drawCell( "veld", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getField()->getName(), $nX2, $nY, $nWidthResult, $nRowHeight );
+            $fieldDescription = $game->getField()->getName();
+            if( $roundNumber->getCompetition()->hasMultipleSportConfigs() ) {
+                $fieldDescription .= " - " . $game->getField()->getSport()->getName();
+            }
+            $this->drawCell( $fieldDescription, $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
         }
 
@@ -162,6 +168,7 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
+        $n = $roundNumber->getNumber();
         $inputScoreConfig = $this->sportScoreConfigService->getInput( $game->getSportScoreConfig() );
         $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $game->getSportScoreConfig() );
 

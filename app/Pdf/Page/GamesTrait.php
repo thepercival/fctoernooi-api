@@ -128,11 +128,11 @@ trait GamesTrait
             $nX = $this->drawCell( "v.", $nX, $nY, $gameFieldWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         // }
 
-        $nX = $this->drawCell( "thuis", $nX, $nY, $gameHomeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+        $nX = $this->drawCell( "thuis", $nX, $nY, $gameHomeWidth, $nRowHeight, Page::ALIGNRIGHT, "black" );
 
         $nX = $this->drawCell( "score", $nX, $nY, $gameScoreWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
-        $nX = $this->drawCell( "uit", $nX, $nY, $gameAwayWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
+        $nX = $this->drawCell( "uit", $nX, $nY, $gameAwayWidth, $nRowHeight, Page::ALIGNLEFT, "black" );
 
         if( $this->refereesAssigned || $this->selfRefereesAssigned ) {
             $title = $this->selfRefereesAssigned ? 'scheidsrechter' : 'sch.';
