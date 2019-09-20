@@ -110,7 +110,7 @@ class Gamenotes extends ToernooiPdfPage
             $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );
             // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
-            if( $planningConfig->getHasExtension() === true ) {
+            if( $planningConfig->hasExtension() === true ) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
 
@@ -214,7 +214,7 @@ class Gamenotes extends ToernooiPdfPage
 
         $nY -= $nRowHeight; // extra lege regel
 
-        if( $planningConfig->getHasExtension() ) {
+        if( $planningConfig->hasExtension() ) {
             $this->drawCell( 'na verleng.', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( $dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
             $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );

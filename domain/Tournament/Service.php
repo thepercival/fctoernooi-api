@@ -120,7 +120,8 @@ class Service
                 $field->setSport( $sport );
             }
             foreach( $refereesSer as $refereeSer ) {
-                $referee = new Referee( $competition, $refereeSer->getInitials() );
+                $referee = new Referee( $competition, $refereeSer->getRank() );
+                $referee->setInitials( $refereeSer->getInitials() );
                 $referee->setName( $refereeSer->getName() );
                 $referee->setEmailaddress( $refereeSer->getEmailaddress() );
                 $referee->setInfo( $refereeSer->getInfo() );
