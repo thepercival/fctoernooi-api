@@ -19,3 +19,6 @@ FCToernooi\Tournament:
       groups: [roles]
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>
+    updated:
+      type: boolean
+      access_type: property

@@ -1,5 +1,6 @@
 <?php
 
+use App\Response\Forbidden as ForbiddenResponse;
 use FCToernooi\Token;
 use Gofabian\Negotiation\NegotiationMiddleware;
 use Tuupola\Middleware\JwtAuthentication;
@@ -92,7 +93,19 @@ $app->add("CorsMiddleware");
 $app->add("NegotiationMiddleware");
 
 $app->add(function ( $request,  $response, callable $next) use ( $container ){
-    $apiVersion = $request->getHeaderLine('X-Api-Version');
+    $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
+    if( ($request->getMethod() === "POST" && $request->getUri()->getPath() === "/validatetoken" )
+    || ($request->getMethod() === "GET" && $request->getUri()->getPath() === "/tournamentshells") ) {
+        if( $apiVersion !== "17" ) {
+            // return $response->withStatus(422)->write( "de app/website moet vernieuwd worden, ververs de pagina");
+            return new ForbiddenResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
+        }
+    }
+    return $next($request, $response);
+});
+
+$app->add(function ( $request,  $response, callable $next) use ( $container ){
+    $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
     if( strlen( $apiVersion ) === 0 ) {
         $apiVersion = "1";
     }

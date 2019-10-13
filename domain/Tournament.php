@@ -54,6 +54,11 @@ class Tournament
      */
     protected $printed;
 
+    /**
+     * @var bool
+     */
+    protected $updated; // DEP
+
     const MINNROFCOMPETITORS = 2;
     const MAXNROFCOMPETITORS = 40;
 

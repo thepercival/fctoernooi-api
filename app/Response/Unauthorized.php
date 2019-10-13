@@ -19,6 +19,7 @@ use Crell\ApiProblem\ApiProblem;
 use Slim\Http\Headers;
 use Slim\Http\Response;
 use Slim\Http\Stream;
+
 class Unauthorized extends Response
 {
     public function __construct($message, $status = 401)

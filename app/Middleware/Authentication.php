@@ -58,6 +58,8 @@ class Authentication
 
     public function __invoke(Request $request, Response $response, callable $next)
     {
+        $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
+
         // user is not known, no need to check authorization
         if ($this->token->isPopulated() !== true) {
             return $next($request, $response);

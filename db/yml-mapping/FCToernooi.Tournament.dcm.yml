@@ -28,6 +28,10 @@ FCToernooi\Tournament:
       type: boolean
       nullable: true
       unique: false
+    updated: #DEP AFTER ONE YEAR, REMOVE OLD
+      type: boolean
+      nullable: true
+      unique: false
   oneToMany:
     roles:
       targetEntity: FCToernooi\Role

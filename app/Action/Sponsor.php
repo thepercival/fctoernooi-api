@@ -233,6 +233,9 @@ final class Sponsor
             $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
 
             $uploadedFiles = $request->getUploadedFiles();
+            if( !array_key_exists("logostream", $uploadedFiles ) ) {
+                throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
+            }
             $logostream = $uploadedFiles["logostream"];
             $extension = null;
             if( $logostream->getClientMediaType() === "image/jpeg" ) {
