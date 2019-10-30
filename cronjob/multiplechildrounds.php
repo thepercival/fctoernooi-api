@@ -40,7 +40,7 @@ try {
         );
         foreach( $numbers as $number ) {
             $rounds = $roundRepos->findBy(
-                ["number" => $number, "qualifyOrder" => Round::QUALIFYORDER_RANK]
+                ["number" => $number, "qualifyOrderDep" => Round::QUALIFYORDER_RANK]
             );
             foreach( $rounds as $round ) {
                 addRounds( $round, $number );
