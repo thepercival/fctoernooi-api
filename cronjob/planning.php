@@ -12,11 +12,15 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
+use Voetbal\Planning as PlanningBase;
+use Voetbal\Planning\Input;
+use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Sport;
 use Voetbal\Range as VoetbalRange;
 use Voetbal\Planning;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\Repository as PlanningRepository;
+use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning\Input as InputPlanning;
 use Voetbal\Planning\Config as PlanningConfig;
 use Voetbal\Structure\Service as StructureService;
@@ -27,17 +31,24 @@ $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
 $planningRepos = $voetbal->getRepository( \Voetbal\Planning::class );
-
+$planningInputRepos = $voetbal->getRepository( \Voetbal\Planning\Input::class );
 
 try {
-    createPlannings( 1, $planningRepos );
+    $timeoutSeconds = $planningRepos->getMaxTimeoutSeconds();
+    $nothingTried = createPlannings( 1, $timeoutSeconds, $planningRepos, $planningInputRepos );
+    if( $nothingTried ) {
+        $timeoutSeconds *= 2;
+        createPlannings( 1, $timeoutSeconds, $planningRepos, $planningInputRepos );
+    }
 }
 catch( \Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
 }
 
-function createPlannings( $nrOfBatchGames, PlanningRepository $planningRepos )
+function createPlannings( $nrOfBatchGames, $timeoutSeconds
+    , PlanningRepository $planningRepos, PlanningInputRepository $planningInputRepos ): bool
 {
+    $nothingTried = true;
     $maxNrOfCompetitors = 40;
     $maxNrOfSports = 1;
     $maxNrOfReferees = 20;
@@ -68,9 +79,16 @@ function createPlannings( $nrOfBatchGames, PlanningRepository $planningRepos )
 //                                    continue;
 //                                }
 
-                                $inputPlanning = new InputPlanning(
+                                $inputPlanning = $planningInputRepos->get(
                                     $structureConfig, $sportConfig, $nrOfReferees, $nrOfHeadtohead, $teamup, $selfReferee
                                 );
+
+                                if( $inputPlanning === null ) {
+                                    $inputPlanning = new InputPlanning(
+                                        $structureConfig, $sportConfig, $nrOfReferees, $nrOfHeadtohead, $teamup, $selfReferee
+                                    );
+                                    $planningInputRepos->save( $inputPlanning );
+                                }
 
                                 if ( $planningRepos->hasEndSuccess( $inputPlanning ) ) {
                                     continue;
@@ -92,12 +110,14 @@ function createPlannings( $nrOfBatchGames, PlanningRepository $planningRepos )
 
                                 $nrOfBatchGamesRange = new VoetbalRange( $nrOfBatchGames, $nrOfBatchGames );
                                 if ( $planningRepos->hasTried( $inputPlanning, $nrOfBatchGamesRange ) === false ) {
-                                    tryPlanning( $inputPlanning, $nrOfBatchGamesRange, $maxNrOfGamesInARow, $planningRepos);
+                                    tryPlanning( $inputPlanning, $nrOfBatchGamesRange, $maxNrOfGamesInARow, $planningRepos, $timeoutSeconds);
+                                    $nothingTried = false;
                                 }
 
                                 $nrOfBatchGamesRange = new VoetbalRange( $nrOfBatchGames - 1, $nrOfBatchGames );
                                 if ( $planningRepos->hasTried( $inputPlanning, $nrOfBatchGamesRange ) === false ) {
-                                    tryPlanning( $inputPlanning, $nrOfBatchGamesRange, $maxNrOfGamesInARow, $planningRepos);
+                                    tryPlanning( $inputPlanning, $nrOfBatchGamesRange, $maxNrOfGamesInARow, $planningRepos, $timeoutSeconds);
+                                    $nothingTried = false;
                                 }
 
 
@@ -118,12 +138,7 @@ function createPlannings( $nrOfBatchGames, PlanningRepository $planningRepos )
                                 //                            }
 
 
-                                echo
-                                    'nrOfCompetitors ' . $nrOfCompetitors . ', nrOfPoules ' . $nrOfPoules . ', nrOfSports ' . $nrOfSports
-                                    . ', nrOfReferees ' . $nrOfReferees
-                                    . ', nrOfFields ' . $nrOfFields . ', nrOfHeadtohead ' . $nrOfHeadtohead
-                                    . ', teamup ' . ( $teamup ? '1' : '0' ) . ', selfReferee ' . ( $selfReferee ? '1' : '0' )
-                                    . PHP_EOL;
+
 
                                 $variations++;
                             }
@@ -134,10 +149,11 @@ function createPlannings( $nrOfBatchGames, PlanningRepository $planningRepos )
         }
     }
     echo "nrofvariations: " . $variations . PHP_EOL;
+    return $nothingTried;
 }
 
 function tryPlanning( InputPlanning $inputPlanning, VoetbalRange $nrOfBatchGamesRange, int $maxNrOfGamesInARow
-    , PlanningRepository $planingRepos ) {
+    , PlanningRepository $planingRepos,int $timeoutSeconds ) {
 
     for ( $maxNrOfGamesInARowIt = $maxNrOfGamesInARow ; $maxNrOfGamesInARowIt >= 1 ; $maxNrOfGamesInARowIt-- ) {
         if( $maxNrOfGamesInARowIt < $maxNrOfGamesInARow ) {
@@ -147,12 +163,29 @@ function tryPlanning( InputPlanning $inputPlanning, VoetbalRange $nrOfBatchGames
             }
         }
         $planningService = new PlanningService();
+
         // alles moet naar planningsobjecten gaan
 
         // vantevoren is al duidelijk hoeveel de h2h wordt deze kunnen dan al worden berekend!!
         // Tijdens het genereren hoeft niet meer gekeken te worden naar meer h2h,
         // sufficienth2h zal dus uit gamegenerator gaan en moet dus al bekend zijn voordat games gegenereerd worden!
-        $planningService->create()
+
+        $planning = $planningService->create( $inputPlanning, $nrOfBatchGamesRange, $maxNrOfGamesInARowIt, $timeoutSeconds );
+
+        $planingRepos->save( $planning );
+
+        echo
+            'nrOfCompetitors ' . $inputPlanning->getStructure()->getNrOfPlaces()
+            . ', structure ' . implode( '|', $inputPlanning->getStructureConfig())
+            . ', nrOfSports ' . count( $inputPlanning->getSportConfig())
+            . ', nrOfReferees ' . $inputPlanning->getNrOfReferees()
+            . ', nrOfFields ' . $inputPlanning->getNrOfFields()
+            . ', nrOfHeadtohead ' . $inputPlanning->getNrOfHeadtohead()
+            . ', teamup ' . ( $inputPlanning->getTeamup() ? '1' : '0' )
+            . ', selfReferee ' . ( $inputPlanning->getSelfReferee() ? '1' : '0' )
+            . PHP_EOL;
+
+        die();
     }
 }
 
