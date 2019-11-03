@@ -62,6 +62,12 @@ class Tournament
     const MINNROFCOMPETITORS = 2;
     const MAXNROFCOMPETITORS = 40;
 
+    const MAXNROFSPORTS = 1;
+    const MAXNROFREFEREES = 20;
+    const MAXNROFFIELDS = 20;
+    const PLANNING_MAXNROFHEADTOHEAD = 2;
+
+
     public function __construct( Competition $competition )
     {
         $this->competition = $competition;
