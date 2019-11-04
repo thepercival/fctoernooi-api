@@ -63,11 +63,12 @@ function processPlanning( bool $doTimeouts, PlanningRepository $planningRepos, P
     if ($doTimeouts) {
         //  with state Planning::STATE_TIMEOUT
     } else {
-        $inputPlanning = $planningInputRepos->getUnsuccesfull();
-        $planningToTry = $planningRepos->createNew( $inputPlanning );
+        $inputPlanning = $planningInputRepos->getFirstUnsuccesfull();
+        if( $inputPlanning === null ) {
+            throw new \Exception("all plannings are succesfull", E_ERROR );
+        }
+        $planningToTry = $planningRepos->createNextTry( $inputPlanning );
         if ($planningToTry === null) {
-//            $planningToTry = $planningService->createPlanning( $inputPlanning );
-//            $planningToTry = $planningInputRepos->createTryable();
             throw new \Exception("should always be possible to create", E_ERROR );
         }
     }
