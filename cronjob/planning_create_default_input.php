@@ -88,7 +88,7 @@ function createPlanningInputs( PlanningInputRepository $planningInputRepos )
             }
             echo " => saved!" . PHP_EOL;
         }
-        if( $nrOfCompetitors > 10 ) {
+        if( $nrOfCompetitors >= 10 ) {
             break;
         }
     }

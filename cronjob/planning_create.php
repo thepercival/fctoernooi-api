@@ -24,16 +24,16 @@ $planningRepos = $voetbal->getRepository( \Voetbal\Planning::class );
 $planningInputRepos = $voetbal->getRepository( \Voetbal\Planning\Input::class );
 
 try {
-    if( count($argv) !== 2 ) {
+    if( count($argv) !== 3 ) {
         throw new \Exception("first parameter must be doTimeouts" .
             ", third parameter must be intervalMinutes"
             , E_ERROR);
     }
-    $doTimeouts = filter_var($argv[2], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    $doTimeouts = filter_var($argv[1], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     if( $doTimeouts === null ) {
         throw new \Exception("second parameter doTimeouts must be true or false", E_ERROR);
     }
-    $intervalMinutes = filter_var($argv[3], FILTER_VALIDATE_INT);
+    $intervalMinutes = filter_var($argv[2], FILTER_VALIDATE_INT);
     if( $intervalMinutes === false ) {
         throw new \Exception("third parameter timoutSeconds must be a number", E_ERROR);
     }
@@ -63,7 +63,7 @@ function processPlanning( bool $doTimeouts, PlanningRepository $planningRepos, P
     if ($doTimeouts) {
         //  with state Planning::STATE_TIMEOUT
     } else {
-        $inputPlanning = $planningInputRepos->getFirstUnsuccesfull();
+        $inputPlanning = $planningInputRepos->getFirstUnsuccessful();
         if( $inputPlanning === null ) {
             throw new \Exception("all plannings are succesfull", E_ERROR );
         }
