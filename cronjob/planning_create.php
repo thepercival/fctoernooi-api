@@ -11,6 +11,7 @@ $settings = require __DIR__ . '/../conf/settings.php';
 $app = new \Slim\App($settings);
 require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
+require __DIR__ . '/helpers/console.php';
 
 use Voetbal\Planning;
 use Voetbal\Planning\Input as PlanningInput;
@@ -61,7 +62,7 @@ function processPlanning( PlanningRepository $planningRepos, PlanningInputReposi
     $planningToTry = $planningRepos->createNextTry( $inputPlanning );
     if ($planningToTry === null
         && $inputPlanning->getState() === PlanningInput::STATE_FAILED
-        && $inputPlanning->hasPlanning( Planning::STATE_SUCCESS )
+        && $inputPlanning->hasPlanning( Planning::STATE_SUCCESS_PARTIAL )
     ) {
         $inputPlanning->setState( PlanningInput::STATE_SUCCESS );
         $planningInputRepos->save( $inputPlanning );
@@ -80,7 +81,7 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
     $inputPlanning = $planning->getInput();
     echo
         'trying nrOfCompetitors ' . $planning->getStructure()->getNrOfPlaces()
-        . ', structure ' . implode( '|', $inputPlanning->getStructureConfig())
+        . ', structure [' . implode( '|', $inputPlanning->getStructureConfig()) . ']'
         . ', nrOfSports ' . count( $inputPlanning->getSportConfig())
         . ', nrOfReferees ' . $inputPlanning->getNrOfReferees()
         . ', nrOfFields ' . $inputPlanning->getNrOfFields()
@@ -95,15 +96,18 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
     $planningService = new PlanningService();
 
     $newState = $planningService->createGames( $planning );
-    if( $planning->getState() !== $newState ) {
-        $planning->setState( $newState );
-        $planningRepos->save( $planning );
-    }
+
+    $planning->setState( $newState );
+    $planningRepos->save( $planning );
 
     echo
         $planning->getState() === Planning::STATE_FAILED ? "failed" :
         ( $planning->getState() === Planning::STATE_TIMEOUT ? "timeout(".$planning->getTimeoutSeconds().")" : "success" )
         . PHP_EOL;
+
+    if( $planning->getState() === Planning::STATE_SUCCESS_PARTIAL ) {
+        consoleGames( $planning->getGames()->toArray() );
+    }
 }
 
 
