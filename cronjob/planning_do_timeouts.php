@@ -13,7 +13,6 @@ require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
 use Voetbal\Planning;
-use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
@@ -26,13 +25,17 @@ $planningInputRepos = $voetbal->getRepository( \Voetbal\Planning\Input::class );
 
 try {
     if( count($argv) !== 3 ) {
-        throw new \Exception("first parameter must be intervalMinutes"
+        throw new \Exception("first parameter must be doTimeouts" .
+            ", second parameter must be intervalMinutes"
             , E_ERROR);
     }
-
+    $doTimeouts = filter_var($argv[1], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+    if( $doTimeouts === null ) {
+        throw new \Exception("first parameter doTimeouts must be true or false", E_ERROR);
+    }
     $intervalMinutes = filter_var($argv[2], FILTER_VALIDATE_INT);
     if( $intervalMinutes === false ) {
-        throw new \Exception("first parameter intervalMinutes must be a number", E_ERROR);
+        throw new \Exception("second parameter timoutSeconds must be a number", E_ERROR);
     }
 
     $startDate = new \DateTimeImmutable();
@@ -44,7 +47,7 @@ try {
             sleep(10);
             // continue;
         }
-        processPlanning( $planningRepos, $planningInputRepos );
+        processPlanning( $doTimeouts, $planningRepos, $planningInputRepos );
         sleep(1);
     // }
 }
@@ -52,25 +55,33 @@ catch ( Exception $e ) {
     echo $e->getMessage() . PHP_EOL;
 }
 
-function processPlanning( PlanningRepository $planningRepos, PlanningInputRepository $planningInputRepos )
+function processPlanning( bool $doTimeouts, PlanningRepository $planningRepos, PlanningInputRepository $planningInputRepos )
 {
-    $inputPlanning = $planningInputRepos->getFirstUnsuccessful();
-    if( $inputPlanning === null ) {
-        throw new \Exception("all plannings are succesfull", E_ERROR );
-    }
-    $planningToTry = $planningRepos->createNextTry( $inputPlanning );
-    if ($planningToTry === null
-        && $inputPlanning->getState() === PlanningInput::STATE_FAILED
-        && $inputPlanning->hasPlanning( Planning::STATE_SUCCESS )
-    ) {
-        $inputPlanning->setState( PlanningInput::STATE_SUCCESS );
-        $planningInputRepos->save( $inputPlanning );
-        echo "updating inputstate failed to success" . PHP_EOL;
-        return;
+    $planningToTry = null;
+
+    // get a planning
+    if ($doTimeouts) {
+        //  with state Planning::STATE_TIMEOUT
+    } else {
+        $inputPlanning = $planningInputRepos->getFirstUnsuccessful();
+        if( $inputPlanning === null ) {
+            throw new \Exception("all plannings are succesfull", E_ERROR );
+        }
+        $planningToTry = $planningRepos->createNextTry( $inputPlanning );
+        if ($planningToTry === null) {
+
+            throw new \Exception("should always be possible to create", E_ERROR );
+        }
     }
 
+    // process it!!
     processPlanningHelper( $planningToTry, $planningRepos, $planningInputRepos );
 
+    // check if there is an new succes planning, also check if all plannings haven been tried!
+//    if ($planningToTry->getState() === Planning::STATE_FAILED || $planningToTry->getState() === Planning::STATE_TIMEOUT ) {
+//        // nrofbatchgames should be
+//        $planningRepos->updateSuccess( $planningToTry->getInput() );
+//    }
 }
 
 function processPlanningHelper( Planning $planning, PlanningRepository $planningRepos, PlanningInputRepository $planningInputRepos )
@@ -79,7 +90,7 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
     $planningRepos->save( $planning );
     $inputPlanning = $planning->getInput();
     echo
-        'trying nrOfCompetitors ' . $planning->getStructure()->getNrOfPlaces()
+        'trying nrOfCompetitors ' . $inputPlanning->getStructure()->getNrOfPlaces()
         . ', structure ' . implode( '|', $inputPlanning->getStructureConfig())
         . ', nrOfSports ' . count( $inputPlanning->getSportConfig())
         . ', nrOfReferees ' . $inputPlanning->getNrOfReferees()
@@ -98,6 +109,8 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
     if( $planning->getState() !== $newState ) {
         $planning->setState( $newState );
         $planningRepos->save( $planning );
+        // hier moet ik bepalen als de status moet worden aangepast???
+        // if( $newState === Planning::STATE_SUCCESS )
     }
 
     echo
@@ -105,6 +118,4 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
         ( $planning->getState() === Planning::STATE_TIMEOUT ? "timeout(".$planning->getTimeoutSeconds().")" : "success" )
         . PHP_EOL;
 }
-
-
 

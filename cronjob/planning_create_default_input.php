@@ -30,7 +30,6 @@ use Voetbal\Round\Number as RoundNumber;
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
 $voetbal = $app->getContainer()->get('voetbal');
-$planningRepos = $voetbal->getRepository( \Voetbal\Planning::class );
 $planningInputRepos = $voetbal->getRepository( \Voetbal\Planning\Input::class );
 
 try {
