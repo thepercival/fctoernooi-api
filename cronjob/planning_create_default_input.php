@@ -103,9 +103,9 @@ function createPlanningInputs( PlanningInputRepository $planningInputRepos )
 function getSportConfig( $nrOfSports, $nrOfFields ): array {
     $sports = [];
     for ($sportNr = 1; $sportNr <= $nrOfSports; $sportNr++) {
-        for ($fieldNr = 1; $fieldNr <= $nrOfFields; $fieldNr++) {
-            $sports[] = [ "nrOfFields" => $fieldNr, "nrOfGamePlaces" => Sport::TEMPDEFAULT ];
-        }
+        // for ($fieldNr = 1; $fieldNr <= $nrOfFields; $fieldNr++) {
+            $sports[] = [ "nrOfFields" => $nrOfFields, "nrOfGamePlaces" => Sport::TEMPDEFAULT ];
+        // }
     }
     return $sports;
 }
