@@ -4,6 +4,7 @@ use Voetbal\Planning\Game;
 use Voetbal\Game as GameBase;
 use Voetbal\NameService;
 use Voetbal\Planning\Batch as PlanningResourceBatch;
+use Monolog\Logger;
 
 function consoleBatch(PlanningResourceBatch $batch ) {
     echo '------batch ' . $batch->getNumber() . ' assigned -------------' . PHP_EOL;
@@ -21,32 +22,42 @@ function consoleBatchHelper(PlanningResourceBatch $batch) {
  * @param array|Game[] $games
  * @param PlanningResourceBatch|null $batch
  */
-function consoleGames(array $games, PlanningResourceBatch $batch = null) {
+function consoleGames( Logger $logger, array $games, PlanningResourceBatch $batch = null) {
     foreach( $games as $game ) {
-        consoleGame($game, $batch);
+        consoleGame($logger, $game, $batch);
     }
 }
 
-function consoleGame(Game $game, PlanningResourceBatch $batch = null) {
-    $nameService = new NameService();
-    $refDescr = ($game->getRefereePlace() ? $game->getRefereePlace()->getLocation() : '');
-    $refNumber = $game->getRefereePlace() ? $game->getRefereePlace()->getNumber() : 0;
-    echo consoleColor($game->getBatchNr() % 10, 'batch ' . $game->getBatchNr() ) . " " .
-        // . '(' . $game->getRoundNumber(), 2 ) . consoleString( $game->getSubNumber(), 2 ) . ") "
-        'poule ' . $game->getPoule()->getNumber()
-        . ', ' . consolePlaces($game, GameBase::HOME, $batch)
-        . ' vs ' . consolePlaces($game, GameBase::AWAY, $batch)
-        . ' , ref ' . consoleColor($refNumber, $refDescr)
-
-        . ', ' . consoleColor($game->getField()->getNumber(), 'field ' . $game->getField()->getNumber())
-        . ', sport ' . $game->getField()->getSport()->getNumber()
-    . PHP_EOL;
+function useColors( Logger $logger ): bool {
+    foreach( $logger->getHandlers() as $handler ) {
+        if( $handler->getUrl() !== "php://stdout" ) {
+            return false;
+        }
+    }
+    return true;
 }
 
-function consolePlaces( Game $game, bool $homeAway, PlanningResourceBatch $batch = null ): string {
-    $nameService = new NameService();
-    $placesAsArrayOfStrings = $game->getPlaces($homeAway)->map( function( $gamePlace ) use ($nameService, $batch) {
-        $colorNumber = $gamePlace->getPlace()->getNumber();
+function consoleGame(Logger $logger, Game $game, PlanningResourceBatch $batch = null) {
+    $useColors = useColors( $logger );
+    $refDescr = ($game->getRefereePlace() ? $game->getRefereePlace()->getLocation() : '');
+    $refNumber = $useColors ? ($game->getRefereePlace() ? $game->getRefereePlace()->getNumber() : 0 ) : -1;
+    $batchColor = $useColors ? ($game->getBatchNr() % 10) : -1;
+    $fieldColor = $useColors ? $game->getField()->getNumber() : -1;
+    $logger->info( consoleColor($batchColor, 'batch ' . $game->getBatchNr() ) . " " .
+        // . '(' . $game->getRoundNumber(), 2 ) . consoleString( $game->getSubNumber(), 2 ) . ") "
+        'poule ' . $game->getPoule()->getNumber()
+        . ', ' . consolePlaces($game, GameBase::HOME, $useColors, $batch)
+        . ' vs ' . consolePlaces($game, GameBase::AWAY, $useColors, $batch)
+        . ' , ref ' . consoleColor($refNumber, $refDescr)
+
+        . ', ' . consoleColor($fieldColor, 'field ' . $game->getField()->getNumber())
+        . ', sport ' . $game->getField()->getSport()->getNumber()
+    );
+}
+
+function consolePlaces( Game $game, bool $homeAway, bool $useColors, PlanningResourceBatch $batch = null ): string {
+    $placesAsArrayOfStrings = $game->getPlaces($homeAway)->map( function( $gamePlace ) use ($useColors, $batch) {
+        $colorNumber = $useColors ? $gamePlace->getPlace()->getNumber() : -1;
         $gamesInARow = $batch ? ('(' . $batch->getGamesInARow($gamePlace->getPlace()) . ')') : '';
         return consoleColor($colorNumber, $gamePlace->getPlace()->getLocation() . $gamesInARow);
     })->toArray();
@@ -73,6 +84,8 @@ function consoleColor(int $number, string $content ): string {
         $sColor = '1;32'; // light green
     } else if ($number === 9) {
         $sColor = '1;36'; // light cyan
+    } else if ($number === -1) {
+        return $content;
     } else {
         $sColor = '1;37'; // white
     }

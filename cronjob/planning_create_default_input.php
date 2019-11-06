@@ -59,8 +59,8 @@ function createPlanningInputs( PlanningInputRepository $planningInputRepos )
                                 $teamup = $selfRefereeTeamupVariation->teamup;
                                 $selfReferee = $selfRefereeTeamupVariation->selfReferee;
 
-//                                if ($nrOfCompetitors !== 6 || $nrOfPoules !== 1 || $nrOfSports !== 1 || $nrOfFields !== 1
-//                                    || $nrOfHeadtohead !== 1 || $teamup !== false || $selfReferee !== false ) {
+//                                if ($nrOfCompetitors !== 6 || $nrOfPoules !== 1 || $nrOfSports !== 1 || $nrOfFields !== 3
+//                                    || $nrOfHeadtohead !== 1 /*|| $teamup !== false || $selfReferee !== false*/ ) {
 //                                    continue;
 //                                }
 
