@@ -327,8 +327,8 @@ final class Tournament
 
             $this->structureReposistory->customPersist($newStructure);
 
-            $planningService = new PlanningService($newTournament->getCompetition());
-            $games = $planningService->create( $newStructure->getFirstRoundNumber(), $startDateTime );
+            $planningService = new PlanningService();
+            $games = $planningService->createGames( $newStructure->getFirstRoundNumber()->getPlanningInput()->getBestPlanning() );
             foreach( $games as $game ) {
                 $this->em->persist($game);
             }

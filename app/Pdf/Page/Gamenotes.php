@@ -100,7 +100,7 @@ class Gamenotes extends ToernooiPdfPage
         if( $bNeedsRanking ) {
             $this->drawCell( "speelronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getRoundNumber(), $nX2, $nY, $nWidthResult, $nRowHeight );
+            $this->drawCell( $game->getRound()->getNumber()->getNumber(), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
         }
 

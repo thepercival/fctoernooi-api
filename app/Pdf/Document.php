@@ -66,7 +66,7 @@ class Document extends \Zend_Pdf
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->planningService = new PlanningService($tournament->getCompetition());
+        $this->planningService = new PlanningService();
         $this->config = $config;
     }
 
@@ -177,7 +177,7 @@ class Document extends \Zend_Pdf
         if( count($games) > 0 ) {
             $nY = $page->drawGamesHeader($roundNumber, $nY);
         }
-        $games = $this->getPlanningService()->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH);
+        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {
@@ -224,7 +224,7 @@ class Document extends \Zend_Pdf
         if( count($games) > 0 ) {
             $nY = $page->drawGamesHeader($roundNumber, $nY);
         }
-        $games = $this->getPlanningService()->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH);
+        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight($game);
             if ($nY - $gameHeight < $page->getPageMargin() ) {
@@ -330,7 +330,7 @@ class Document extends \Zend_Pdf
         };
         $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
             if( $roundNumber->getValidPlanningConfig()->getSelfReferee() ) {
-                $games = $this->planningService->getGamesForRoundNumber($roundNumber, Game::ORDER_RESOURCEBATCH );
+                $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
                 if( count( array_filter( $games, function( $game ) {
                         return $game->getRefereePlace() !== null;
                     } ) ) > 0 ) {

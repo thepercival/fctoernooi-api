@@ -11,14 +11,15 @@ $settings = require __DIR__ . '/../conf/settings.php';
 $app = new \Slim\App($settings);
 require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
-require __DIR__ . '/helpers/console.php';
 
 use Monolog\Logger;
 use Voetbal\Planning;
 use Voetbal\Planning\Input as PlanningInput;
+use Voetbal\Planning\Poule;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
+use Voetbal\Game as GameBase;
 
 $settings = $app->getContainer()->get('settings');
 $em = $app->getContainer()->get('em');
@@ -28,10 +29,10 @@ $planningInputRepos = $voetbal->getRepository( \Voetbal\Planning\Input::class );
 
 $logger = new Logger('planning-create');
 $output = 'php://stdout';
-if( $settings['environment'] !== 'development' ) {
-    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
-    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-}
+// if( $settings['environment'] !== 'development' ) {
+//    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
+//    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+// }
 $handler = new \Monolog\Handler\StreamHandler($output, $settings['logger']['level']);
 $logger->pushHandler( $handler );
 
@@ -64,6 +65,7 @@ try {
         processPlanning( $planningRepos, $planningInputRepos, $logger );
         sleep(1);
         $logger->info( "sleeping 1 seconds.." );
+        // break; @FREDDY
     }
     $endDate = new \DateTimeImmutable();
     $logger->info( "end job at " . $endDate->format("Y-m-d H:i") . ' which started at ' . $startDate->format("Y-m-d H:i") );
@@ -80,12 +82,10 @@ function processPlanning( PlanningRepository $planningRepos, PlanningInputReposi
     }
     $planningToTry = $planningRepos->createNextTry( $inputPlanning );
     if ($planningToTry === null ) {
-        if( !$inputPlanning->hasPlanning( Planning::STATE_SUCCESS_PARTIAL ) ) {
+        if( !$inputPlanning->hasPlanning( Planning::STATE_SUCCESS ) ) {
             $logger->warning( 'no success plannings which can not occure??' );
-         } else if ( $inputPlanning->getState() !== PlanningInput::STATE_FAILED ){
-            $logger->warning( 'the planninginput is already successful, no action done' );
-        } else {
-            $inputPlanning->setState( PlanningInput::STATE_SUCCESS );
+         } else {
+            $inputPlanning->setState( PlanningInput::STATE_ALL_PLANNINGS_TRIED );
             $planningInputRepos->save( $inputPlanning );
             $logger->info( "updating inputstate failed to success" );
         }
@@ -105,9 +105,9 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
         . ', sports ' . count( $inputPlanning->getSportConfig())
         . ', referees ' . $inputPlanning->getNrOfReferees()
         . ', fields ' . $inputPlanning->getNrOfFields()
-        . ', nrOfH2h ' . $inputPlanning->getNrOfHeadtohead()
         . ', teamup ' . ( $inputPlanning->getTeamup() ? '1' : '0' )
         . ', selfRef ' . ( $inputPlanning->getSelfReferee() ? '1' : '0' )
+        . ', nrOfH2h ' . $inputPlanning->getNrOfHeadtohead()
         . ', batchGames ' . $planning->getNrOfBatchGames()->min . '->' . $planning->getNrOfBatchGames()->max
         . ', gamesInARow ' . $planning->getMaxNrOfGamesInARow()
         . ', timeout ' . $planning->getTimeoutSeconds()
@@ -126,10 +126,10 @@ function processPlanningHelper( Planning $planning, PlanningRepository $planning
         )
     );
 
-    if( $planning->getState() === Planning::STATE_SUCCESS_PARTIAL ) {
-        $sortedGames = $planning->getGames()->toArray();
-        uasort( $sortedGames, function( $g1, $g2 ) { return $g1->getBatchNr() - $g2->getBatchNr(); } );
-        consoleGames( $logger, $sortedGames );
+    if( $planning->getState() === Planning::STATE_SUCCESS ) {
+        $sortedGames = $planning->getStructure()->getGames( GameBase::ORDER_BY_BATCH );
+        $planningOutput = new Voetbal\Planning\Output( $logger );
+        $planningOutput->consoleGames( $sortedGames );
     } else {
         $r = "failed";
     }
