@@ -23,6 +23,7 @@ use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning\Input as InputPlanning;
 use Voetbal\Planning\Config as PlanningConfig;
+use Voetbal\Planning\Config\Service as PlanningConfigService;
 use Voetbal\Structure\Service as StructureService;
 
 use Voetbal\Round\Number as RoundNumber;
@@ -51,10 +52,9 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
             echo "saving default inputs for " . $nrOfCompetitors . " competitors [".implode(",", $structureConfig )."] ...." . PHP_EOL;
             for ($nrOfSports = 1; $nrOfSports <= Tournament::MAXNROFSPORTS; $nrOfSports++) {
                 for ($nrOfReferees = 0; $nrOfReferees <= Tournament::MAXNROFREFEREES; $nrOfReferees++) {
-                    $selfRefereeTeamupVariations = getSelfRefereeTeamupVariations( $nrOfReferees, $nrOfCompetitors, $structureConfig );
                     for ($nrOfFields = 1; $nrOfFields <= Tournament::MAXNROFFIELDS; $nrOfFields++) {
                         $sportConfig = getSportConfig( $nrOfSports, $nrOfFields );
-
+                        $selfRefereeTeamupVariations = getSelfRefereeTeamupVariations( $nrOfReferees, $nrOfCompetitors, $structureConfig, $sportConfig );
                         for ($nrOfHeadtohead = 1; $nrOfHeadtohead <= Tournament::PLANNING_MAXNROFHEADTOHEAD; $nrOfHeadtohead++) {
                             foreach( $selfRefereeTeamupVariations as $selfRefereeTeamupVariation ) {
                                 $teamup = $selfRefereeTeamupVariation->teamup;
@@ -115,7 +115,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
             }
             // echo " => saved!" . PHP_EOL;
         }
-        if( $nrOfCompetitors >= 10 ) {
+        if( $nrOfCompetitors >= 9 ) {
             break;
         }
     }
@@ -138,24 +138,15 @@ function getSportConfig( $nrOfSports, $nrOfFields ): array {
     return $sports;
 }
 
-function getSelfRefereeTeamupVariations( int $nrOfReferees, int $nrOfPlaces, array $structureConfig ): array {
-    $minNrOfPlacesPerPoule = null; $maxNrOfPlacesPerPoule = null;
-    foreach( $structureConfig as $nrOfPlacesPerPoule ) {
-        if( $minNrOfPlacesPerPoule === null || $nrOfPlacesPerPoule < $minNrOfPlacesPerPoule ) {
-            $minNrOfPlacesPerPoule = $nrOfPlacesPerPoule;
-        }
-        if( $maxNrOfPlacesPerPoule === null || $nrOfPlacesPerPoule > $maxNrOfPlacesPerPoule ) {
-            $maxNrOfPlacesPerPoule = $nrOfPlacesPerPoule;
-        }
-    }
-
+function getSelfRefereeTeamupVariations( int $nrOfReferees, int $nrOfPlaces, array $structureConfig, array $sportConfig ): array {
     $variations = [ json_decode( json_encode( ["selfReferee" => false, "teamup" => false ])) ];
     if( $nrOfPlaces > 2 && $nrOfReferees === 0 ) {
         $variations = array_merge( $variations, [
             json_decode( json_encode( ["selfReferee" => true, "teamup" => false ]))
         ] );
     }
-    if( $minNrOfPlacesPerPoule >= PlanningConfig::TEAMUP_MIN && $maxNrOfPlacesPerPoule <= PlanningConfig::TEAMUP_MAX ) {
+    $planningConfigService = new PlanningConfigService();
+    if( $planningConfigService->canTeamupBeAvailable( $structureConfig, $sportConfig ) ) {
         $variations = array_merge( $variations, [
             json_decode( json_encode( ["selfReferee" => false, "teamup" => true ]))
         ] );
