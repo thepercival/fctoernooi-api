@@ -3,7 +3,7 @@
 // Routes
 //$app->any('/voetbal/external/{resourceType}[/{id}]', \Voetbal\App\Action\Slim\ExternalHandler::class );
 $app->any('/voetbal/{resourceType}[/{id}]', VoetbalApp\Action\Slim\Handler::class );
-// $app->get('/voetbal/planning/isbetteravailable/{id}', VoetbalApp\Action\Slim\Handler::class );
+// $app->get('/voetbal/planning/hasbeenfound/{id}', VoetbalApp\Action\Slim\Handler::class );
 
 $app->group('/auth', function () use ($app) {
 	$app->post('/register', 'App\Action\Auth:register');

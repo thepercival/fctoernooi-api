@@ -67,7 +67,8 @@ class Authentication
         if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
             || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
             || substr($request->getUri()->getPath(), 0, 5) === "/auth"
-            /*|| substr($request->getUri()->getPath(), 0, 35) === "/voetbal/planning/isbetteravailable"*/ )
+            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
+        )
         {
             return $next($request, $response);
         }

@@ -70,7 +70,7 @@ try {
             processPlanningTimeout( $planningRepos, $logger );
         } else {
             $logger->info( 'processing input: ' . planningInputToString( $planningInput ) . " .." );
-            processPlanningInputHelper( $planningInput, $inputService, $planningRepos, false, $logger );
+            processPlanningInput( $planningInput, $inputService, $planningRepos, $planningInputRepos, $logger );
 
         }
         sleep(1);
@@ -91,26 +91,31 @@ function processPlanningInput( PlanningInput $planningInput,
     if( $planningInput->getState() === PlanningInput::STATE_CREATED ) {
         $planningInput->setState( PlanningInput::STATE_TRYING_PLANNINGS );
         $planningInputRepos->save( $planningInput );
-        $logger->info( '    update state => STATE_TRYING_PLANNINGS' );
+        $logger->info( '   update state => STATE_TRYING_PLANNINGS' );
     }
+    $planningService = new PlanningService();
 
     // als nog niet is, dan nieuwe aanmaken
-    $minIsMaxPlanning = $planningInput->getMinIsMaxSuccessPlanning();
+    $minIsMaxPlanning = $planningService->getMinIsMax( $planningInput, Planning::STATE_SUCCESS );
     if( $minIsMaxPlanning === null ) {
-        $minIsMaxPlanning = $planningInput->createMinIsMaxPlanning();
+        $minIsMaxPlanning = $planningService->createNextMinIsMaxPlanning( $planningInput );
         processPlanningHelper( $minIsMaxPlanning, $planningRepos, false, $logger );
         return processPlanningInput( $planningInput, $inputService, $planningRepos, $planningInputRepos, $logger );
     }
 
-    $planningMaxPlusOne = getMinIsMaxAndMaxIsMaxPlusOnePlanning( $minIsMaxPlanning );
-    if( $planningMaxPlusOne === null ) {
-        $planningMaxPlusOne = $planningInput->createMaxPlusOnePlanning( $minIsMaxPlanning->getMinNrOfBatchGames() );
-        processPlanningHelper( $planningMaxPlusOne, $planningRepos, false, $logger );
-        return processPlanningInput( $planningInput, $inputService, $planningRepos, $planningInputRepos, $logger );
+    $planningMaxPlusOne = null;
+    if( $minIsMaxPlanning->getMaxNrOfBatchGames() < $minIsMaxPlanning->getInput()->getMaxNrOfBatchGames() ) {
+        $planningMaxPlusOne = $planningService->getPlusOnePlanning( $minIsMaxPlanning );
+        if( $planningMaxPlusOne === null ) {
+            $planningMaxPlusOne = $planningService->createPlusOnePlanning( $minIsMaxPlanning );
+            processPlanningHelper( $planningMaxPlusOne, $planningRepos, false, $logger );
+            return processPlanningInput( $planningInput, $inputService, $planningRepos, $planningInputRepos, $logger );
+        }
     }
 
-    $planning = getOneWithLeastBatches( $minIsMaxPlanning, $planningMaxPlusOne );
-    $planningNextInARow =  $planningInput->createNextInARowPlanning( $planning );
+    $planning = ($planningMaxPlusOne && $planningMaxPlusOne->getState() === Planning::STATE_SUCCESS) ? $planningMaxPlusOne : $minIsMaxPlanning;
+
+    $planningNextInARow =  $planningService->createNextInARowPlanning( $planning );
     if( $planningNextInARow !== null ) {
         processPlanningHelper( $planningNextInARow, $planningRepos, false, $logger );
         return processPlanningInput( $planningInput, $inputService, $planningRepos, $planningInputRepos, $logger );
@@ -118,7 +123,7 @@ function processPlanningInput( PlanningInput $planningInput,
 
     $planningInput->setState( PlanningInput::STATE_ALL_PLANNINGS_TRIED );
     $planningInputRepos->save( $planningInput );
-    $logger->info( '    update state => STATE_ALL_PLANNINGS_TRIED' );
+    $logger->info( '   update state => STATE_ALL_PLANNINGS_TRIED' );
 }
 
 function planningInputToString( PlanningInput $planningInput ): string {
@@ -145,7 +150,7 @@ function processPlanningTimeout( PlanningRepository $planningRepos, Logger $logg
 {
     $planning = $planningRepos->getTimeout();
     if ($planning === null) {
-        $logger->info("     all plannings(also timeout) are tried");
+        $logger->info("   all plannings(also timeout) are tried");
         return;
     }
     processPlanningHelper( $planning, $planningRepos, true, $logger );
@@ -158,23 +163,26 @@ function processPlanningTimeout( PlanningRepository $planningRepos, Logger $logg
 
 function processPlanningHelper( Planning $planning, PlanningRepository $planningRepos, bool $timeout, Logger $logger )
 {
-    $planning->setState( Planning::STATE_PROCESSING );
+    // $planning->setState( Planning::STATE_PROCESSING );
     if( $timeout ) {
+        $logger->info( '   ' . planningToString( $planning, $timeout ) . " timeout => " . $planning->getTimeoutSeconds() * Planning::TIMEOUT_MULTIPLIER  );
         $planning->setTimeoutSeconds($planning->getTimeoutSeconds() * Planning::TIMEOUT_MULTIPLIER);
+        $planningRepos->save( $planning );
     }
-    $planningRepos->save( $planning );
-    $logger->info( '   ' . planningToString( $planning, $timeout ) . " trying .. " );
+    $output = '   ' . planningToString( $planning, $timeout ) . " trying .. ";
+    try {
+        $planningService = new PlanningService();
+        $newState = $planningService->createGames( $planning );
+        $planning->setState( $newState );
+        $planningRepos->save( $planning );
 
-    $planningService = new PlanningService();
-    $newState = $planningService->createGames( $planning );
-    $planning->setState( $newState );
-    $planningRepos->save( $planning );
+        $stateDescription = $planning->getState() === Planning::STATE_FAILED ? "failed" :
+            ( $planning->getState() === Planning::STATE_TIMEOUT ? "timeout(".$planning->getTimeoutSeconds().")" : "success" );
 
-    $stateDescription = $planning->getState() === Planning::STATE_FAILED ? "failed" :
-        ( $planning->getState() === Planning::STATE_TIMEOUT ? "timeout(".$planning->getTimeoutSeconds().")" : "success" );
-
-    $logger->info( '   ' . planningToString( $planning, $timeout ) . " => " . $stateDescription );
-
+        $logger->info( $output . " => " . $stateDescription );
+    } catch( \Exception $e ) {
+        $logger->error( $output . " => " . $e->getMessage() );
+    }
 
 //    if( $planning->getState() === Planning::STATE_SUCCESS ) {
 //        $sortedGames = $planning->getStructure()->getGames( GameBase::ORDER_BY_BATCH );

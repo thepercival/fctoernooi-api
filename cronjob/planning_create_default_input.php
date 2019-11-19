@@ -49,7 +49,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
     $planningService = new PlanningService();
     $inputService = new PlanningInputService();
     for ($nrOfCompetitors = Tournament::MINNROFCOMPETITORS; $nrOfCompetitors <= Tournament::MAXNROFCOMPETITORS; $nrOfCompetitors++) {
-        if( $nrOfCompetitors > 4 ) {
+        if( $nrOfCompetitors !== 7 ) {
             continue;
         }
         $nrOfPoules = 0;
@@ -82,7 +82,6 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                                     $structureConfig, $sportConfig, $nrOfReferees, $teamup, $selfReferee, $nrOfHeadtohead
                                 );
 
-                                $planningInput->setState( PlanningInput::STATE_TRYING_PLANNINGS );
                                 $maxNrOfFieldsInPlanning = $planningInput->getMaxNrOfBatchGames( Resources::REFEREES + Resources::PLACES );
                                 if ($nrOfFields > $maxNrOfFieldsInPlanning ) {
                                     continue;
@@ -93,7 +92,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                                 }
 
                                 $planningInputRepos->save( $planningInput );
-
+                                die();
 //                                $planning = $inputService->createNextTry( $planningInput );
 //
 //                                echo
@@ -123,6 +122,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
             }
             // echo " => saved!" . PHP_EOL;
         }
+
     }
 }
 
