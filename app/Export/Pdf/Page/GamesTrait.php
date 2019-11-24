@@ -6,11 +6,11 @@
  * Time: 19:15
  */
 
-namespace App\Pdf\Page;
+namespace App\Export\Pdf\Page;
 
 use Voetbal\Game;
 use Voetbal\Round\Number as RoundNumber;
-use App\Pdf\Page;
+use App\Export\Pdf\Page;
 use Voetbal\State;
 use Voetbal\NameService;
 
@@ -31,11 +31,10 @@ trait GamesTrait
         $this->columnWidths["referee"] = $this->selfRefereesAssigned ? 0.22 : 0.08;
         $this->columnWidths["home"] = $this->selfRefereesAssigned ? 0.21 : 0.28;
         $this->columnWidths["away"] = $this->selfRefereesAssigned ? 0.21 : 0.28;
-        $planningService = $this->getParent()->getPlanningService();
-        if( !$planningService->canCalculateStartDateTime($roundNumber) ) {
+        if( !$roundNumber->getValidPlanningConfig()->getEnableTime() ) {
             $this->columnWidths["home"] += ( $this->columnWidths["start"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["start"] / 2 );
-        } else if( $planningService->gamesOnSameDay( $roundNumber ) ) {
+        } else if( $this->getParent()->gamesOnSameDay( $roundNumber ) ) {
             $this->columnWidths["start"] /= 2;
             $this->columnWidths["home"] += ( $this->columnWidths["start"] / 2 );
             $this->columnWidths["away"] += ( $this->columnWidths["start"] / 2 );
@@ -113,10 +112,9 @@ trait GamesTrait
         }
         $nX = $this->drawCell( $text, $nX, $nY, $gamePouleWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
 
-        $planningService = $this->getParent()->getPlanningService();
-        if( $planningService->canCalculateStartDateTime($roundNumber) ) {
+        if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
             $text = null;
-            if( $planningService->gamesOnSameDay( $roundNumber ) ) {
+            if( $this->getParent()->gamesOnSameDay( $roundNumber ) ) {
                 $text = "tijd";
             } else {
                 $text = "datum tijd";
@@ -159,11 +157,10 @@ trait GamesTrait
             "black");
 
         $nameService = new NameService();
-        $planningService = $this->getParent()->getPlanningService();
-        if ($planningService->canCalculateStartDateTime($roundNumber)) {
+        if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
             $text = "";
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            if (!$planningService->gamesOnSameDay($roundNumber)) {
+            if (!$this->getParent()->gamesOnSameDay($roundNumber)) {
 //                $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
 //                $dateElements = explode(" ", $df->format($game->getStartDateTime()));
 //                $month = strtolower( substr( $dateElements[1], 0, 3 ) );

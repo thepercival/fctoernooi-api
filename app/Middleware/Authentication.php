@@ -83,7 +83,7 @@ class Authentication
         if ($user === null) {
             return new ForbiddenResponse("gebruiker kan niet gevonden worden", 401);
         }
-        $id = (array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
+        $id = (is_array($args) && array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
         if (!$this->authorized($user, $resourceType, $request->getMethod(), $request->getQueryParams(), $id)) {
             return new ForbiddenResponse("geen autorisatie voor actie gevonden", 401);
         }

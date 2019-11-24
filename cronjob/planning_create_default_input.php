@@ -49,7 +49,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
     $planningService = new PlanningService();
     $inputService = new PlanningInputService();
     for ($nrOfCompetitors = Tournament::MINNROFCOMPETITORS; $nrOfCompetitors <= Tournament::MAXNROFCOMPETITORS; $nrOfCompetitors++) {
-        if( $nrOfCompetitors !== 7 ) {
+        if( $nrOfCompetitors > 4 ) {
             continue;
         }
         $nrOfPoules = 0;
@@ -92,7 +92,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                                 }
 
                                 $planningInputRepos->save( $planningInput );
-                                die();
+                                // die();
 //                                $planning = $inputService->createNextTry( $planningInput );
 //
 //                                echo

@@ -6,7 +6,7 @@
  * Time: 14:59
  */
 
-namespace App\Pdf;
+namespace App\Export\Pdf;
 
 /**
  * @package ZendExt
@@ -102,7 +102,7 @@ abstract class Page extends \Zend_Pdf_Page
             $widthCenter -= ( $margin + $widthRight );
         }
 
-        $img = \Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/logo.jpg');
+        $img = \Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../logo.jpg');
         $this->drawImage( $img, $xLeft, $nY - $imgSize, $xLeft + $imgSize, $nY );
 
         $arrLineColors = array( "b" => "black" );

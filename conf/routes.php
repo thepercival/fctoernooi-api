@@ -26,14 +26,14 @@ $app->group('/tournaments', function () use ($app) {
     $app->delete('/{id}', 'App\Action\Tournament:remove');
     $app->post('/syncrefereeroles/{id}', 'App\Action\Tournament:syncRefereeRoles');
     $app->get('/userrefereeid/{id}', 'App\Action\Tournament:getUserRefereeId');
-    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');
+    $app->get('/export/{id}', 'App\Action\Tournament:export');
     $app->post('/copy/{id}', 'App\Action\Tournament:copy');
 });
 
 $app->group('/tournamentspublic', function () use ($app) {
-    $app->get('', 'App\Action\TournamentShell:fetch');             // #DEPRECATED
+    $app->get('', 'App\Action\TournamentShell:fetch');             // @TODO #DEPRECATED
     $app->get('/{id}', 'App\Action\Tournament:fetchOnePublic');
-    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');       // #DEPRECATED
+    $app->get('/pdf/{id}', 'App\Action\Tournament:fetchPdf');       // @TODO #DEPRECATED
 });
 
 $app->get('/tournamentshells', 'App\Action\Tournament\Shell:fetch');

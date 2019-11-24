@@ -6,7 +6,7 @@
  * Time: 15:06
  */
 
-namespace App\Pdf;
+namespace App\Export\Pdf;
 
 use FCToernooi\Tournament;
 use Voetbal\State;
@@ -15,31 +15,13 @@ use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
-use App\Pdf\Page\PoulePivotTables as PagePoules;
-use App\Pdf\Page\Planning as PagePlanning;
+use App\Export\Pdf\Page\PoulePivotTables as PagePoules;
+use App\Export\Pdf\Page\Planning as PagePlanning;
+use App\Export\TournamentConfig;
+use App\Export\Document as ExportDocument;
 
 class Document extends \Zend_Pdf
 {
-    /**
-     * @var Tournament
-     */
-    protected $tournament;
-    /**
-     * @var Structure
-     */
-    protected $structure;
-    /**
-     * @var PlanningService
-     */
-    protected $planningService;
-    /**
-     * @var TournamentConfig
-     */
-    protected $config;
-    /**
-     * @var array
-     */
-    protected $allRoundByNumber;
     /**
      * @var int
      */
@@ -52,10 +34,8 @@ class Document extends \Zend_Pdf
      * @var array
      */
     protected $widthText = [];
-    /**
-     * @var bool
-     */
-    protected $areSelfRefereesAssigned;
+
+    use ExportDocument;
 
     public function __construct(
         Tournament $tournament,
@@ -70,27 +50,6 @@ class Document extends \Zend_Pdf
         $this->config = $config;
     }
 
-    /**
-     * @return Structure
-     */
-    public function getStructure()
-    {
-        return $this->structure;
-    }
-
-    /**
-     * @return PlanningService
-     */
-    public function getPlanningService()
-    {
-        return $this->planningService;
-    }
-
-    public function getRoundsByRumber( int $roundNr )
-    {
-        return $this->allRoundByNumber[$roundNr];
-    }
-
     public function getFontHeight()
     {
         return 14;
@@ -98,14 +57,6 @@ class Document extends \Zend_Pdf
 
     public function getFontHeightSubHeader() {
         return 16;
-    }
-
-    /**
-     * @return Tournament
-     */
-    public function getTournament()
-    {
-        return $this->tournament;
     }
 
     public function render( $newSegmentOnly = false, $outputStream = null )
@@ -127,7 +78,7 @@ class Document extends \Zend_Pdf
 
     public static function getFont( $bBold = false, $bItalic = false )
     {
-        $sFontDir = __DIR__ . "/../../fonts/";
+        $sFontDir = __DIR__ . "/../../../fonts/";
         if ( $bBold === false and $bItalic === false )
             return \Zend_Pdf_Font::fontWithPath( $sFontDir . "times.ttf" );
         if ( $bBold === true and $bItalic === false )
@@ -322,46 +273,6 @@ class Document extends \Zend_Pdf
         $page->putParent( $this );
         $this->pages[] = $page;
         return $page;
-    }
-
-    protected function areSelfRefereesAssigned(): bool {
-        if( $this->areSelfRefereesAssigned !== null ){
-            return $this->areSelfRefereesAssigned;
-        };
-        $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
-            if( $roundNumber->getValidPlanningConfig()->getSelfReferee() ) {
-                $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
-                if( count( array_filter( $games, function( $game ) {
-                        return $game->getRefereePlace() !== null;
-                    } ) ) > 0 ) {
-                    return true;
-                }
-            }
-            if( $roundNumber->hasNext() === false ) {
-                return false;
-            }
-            return $hasSelfRefereeHelper( $roundNumber->getNext() );
-        };
-        $this->areSelfRefereesAssigned = $hasSelfRefereeHelper( $this->structure->getFirstRoundNumber() );
-        return $this->areSelfRefereesAssigned;
-    }
-
-    protected function areRefereesAssigned() {
-        return $this->tournament->getCompetition()->getReferees()->count() > 0 || $this->areSelfRefereesAssigned();
-    }
-
-    /**
-     * @param Round $round
-     * @param array $games
-     * @return array
-     */
-    protected function getScheduledGames( Round $round, $games = [] ): array
-    {
-        $games = array_merge( $games, $round->getGamesWithState(State::Created));
-        foreach( $round->getChildren() as $childRound ) {
-            $games = $this->getScheduledGames( $childRound, $games);
-        }
-        return $games;
     }
 
     public function hasTextWidth( string $key ) {

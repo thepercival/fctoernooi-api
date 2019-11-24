@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Pdf;
+namespace App\Export;
 
 class TournamentConfig
 {

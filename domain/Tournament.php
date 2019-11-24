@@ -10,7 +10,7 @@ namespace FCToernooi;
 
 use \Doctrine\Common\Collections\ArrayCollection;
 use Voetbal\Competition;
-use FCToernooi\Tournament\BreakX;
+use League\Period\Period;
 
 class Tournament
 {
@@ -52,7 +52,12 @@ class Tournament
     /**
      * @var bool
      */
-    protected $printed;
+    protected $printed; // @TODO move to exported
+
+    /**
+     * @var integer
+     */
+    protected $exported;
 
     /**
      * @var bool
@@ -67,6 +72,8 @@ class Tournament
     const MAXNROFFIELDS = 20;
     const PLANNING_MAXNROFHEADTOHEAD = 2;
 
+    const EXPORTED_PDF = 1;
+    const EXPORTED_EXCEL = 2;
 
     public function __construct( Competition $competition )
     {
@@ -111,9 +118,9 @@ class Tournament
     }
 
     /**
-     * @return \DateTimeImmutable
+     * @return \DateTimeImmutable|null
      */
-    public function getBreakStartDateTime()
+    public function getBreakStartDateTime(): ?\DateTimeImmutable
     {
         return $this->breakStartDateTime;
     }
@@ -142,6 +149,27 @@ class Tournament
         $this->breakDuration = $breakDuration;
     }
 
+
+    public function getBreak(): ?Period
+    {
+        if( $this->getBreakStartDateTime() === null ) {
+            return null;
+        }
+        $endDate = $this->getBreakStartDateTime()->modify("+".$this->getBreakDuration()." minutes");
+        return new Period( $this->getBreakStartDateTime(), $endDate );
+    }
+
+    /**
+     * @param Period|null $period
+     */
+    public function setBreak( Period $period = null )
+    {
+        $breakStartDateTime = $period !== null ? $period->getStartDate() : null;
+        $breakDuration = $period !== null ? ((int)$period->getDateInterval()->format('i')) : 0;
+        $this->setBreakStartDateTime( $breakStartDateTime );
+        $this->setBreakDuration( $breakDuration );
+    }
+
     /**
      * @return ?bool
      */
@@ -156,17 +184,6 @@ class Tournament
     public function setPublic( bool $public )
     {
         $this->public = $public;
-    }
-
-    /**
-     * @param BreakX $break
-     */
-    public function setBreak( BreakX $break = null )
-    {
-        $breakStartDateTime = $break !== null ? $break->getStartDateTime() : null;
-        $breakDuration = $break !== null ? $break->getDuration() : 0;
-        $this->setBreakStartDateTime( $breakStartDateTime );
-        $this->setBreakDuration( $breakDuration );
     }
 
     /**
@@ -208,18 +225,18 @@ class Tournament
     }
 
     /**
-     * @return bool
+     * @return integer
      */
-    public function getPrinted()
+    public function getExported()
     {
-        return $this->printed;
+        return $this->exported;
     }
 
     /**
-     * @param bool $printed
+     * @param integer $exported
      */
-    public function setPrinted($printed)
+    public function setExported($exported)
     {
-        $this->printed = $printed;
+        $this->exported = $exported;
     }
 }

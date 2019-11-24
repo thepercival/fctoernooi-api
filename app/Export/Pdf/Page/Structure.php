@@ -6,9 +6,9 @@
  * Time: 15:03
  */
 
-namespace App\Pdf\Page;
+namespace App\Export\Pdf\Page;
 
-use App\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
 use Voetbal\Poule;
 use Voetbal\NameService;

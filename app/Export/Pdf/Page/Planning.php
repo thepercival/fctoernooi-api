@@ -6,11 +6,10 @@
  * Time: 19:28
  */
 
-namespace App\Pdf\Page;
+namespace App\Export\Pdf\Page;
 
-use App\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Round;
-use Voetbal\Field;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;

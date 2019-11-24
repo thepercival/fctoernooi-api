@@ -24,6 +24,10 @@ FCToernooi\Tournament:
       type: boolean
       nullable: true
       unique: false
+    exported:
+      type: smallint
+      nullable: true
+      unique: false
     public:
       type: boolean
       nullable: true

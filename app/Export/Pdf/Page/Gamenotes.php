@@ -6,9 +6,9 @@
  * Time: 15:03
  */
 
-namespace App\Pdf\Page;
+namespace App\Export\Pdf\Page;
 
-use App\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use Voetbal\Game;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;
@@ -104,7 +104,7 @@ class Gamenotes extends ToernooiPdfPage
             $nY -= $nRowHeight;
         }
 
-        if( $planningService->canCalculateStartDateTime($roundNumber) === true ) {
+        if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
             setlocale(LC_ALL, 'nl_NL.UTF-8'); //
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
             $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );

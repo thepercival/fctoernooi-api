@@ -36,7 +36,7 @@ $container["JwtAuthentication"] = function ($container) {
                 "path" => "/",
                 "ignore" => [
                     "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                    "/tournamentshells", "/tournamentspublic", "/tournaments/pdf",
+                    "/tournamentshells", "/tournamentspublic", "/tournaments/export",
                     "/voetbal/structures", "/voetbal/sports"
                 ]
             ]),

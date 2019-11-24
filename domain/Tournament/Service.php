@@ -143,17 +143,17 @@ class Service
     /**
      * @param Tournament $tournament
      * @param \DateTimeImmutable $dateTime
-     * @param BreakX|null $break
+     * @param Period|null $period
      * @return Tournament
      * @throws \Exception
      */
-    public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, BreakX $break = null)
+    public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, Period $period = null)
     {
         $competitionService = $this->voetbalService->getService(Competition::class);
         $competition = $tournament->getCompetition();
         $competitionService->changeStartDateTime( $competition, $dateTime );
 
-        $tournament->setBreak( $break );
+        $tournament->setBreak( $period );
 
         return $tournament;
     }
