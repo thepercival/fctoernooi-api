@@ -27,8 +27,23 @@ class Spreadsheet extends SpreadsheetBase
     }
 
     public function fillContents() {
+        $this->setMetadata();
+        // maak sowieso de structuur sheet
+        // maak sowieso het wedstrijdschema sheet
+        // daarna kun je met links werken om onder andere namen en standen te vullen!
         $sheet = $this->getActiveSheet();
         $sheet->setCellValue('A1', 'Hello World !');
+    }
+
+    protected function setMetadata() {
+        $this->getProperties()
+            ->setCreator("FCToernooi")
+            ->setLastModifiedBy("Coen Dunnink")
+            ->setTitle("Office 2007 XLSX Toernooi-document")
+            ->setSubject("Office 2007 XLSX Toernooi-")
+            ->setDescription("This document is created by fctoernooi.nl")
+            ->setKeywords("office 2007 openxml")
+            ->setCategory("toernooi");
     }
 
 }
