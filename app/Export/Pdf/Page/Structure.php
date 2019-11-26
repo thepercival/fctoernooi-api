@@ -75,7 +75,7 @@ class Structure extends ToernooiPdfPage
                 }
                 $numberWidth = $pouleWidth * $percNumberWidth;
                 $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-                $this->drawCell( $this->getParent()->getPouleName( $poule ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
+                $this->drawCell( $this->getParent()->getNameService()->getPouleName( $poule, true ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
                 $this->setFont( $this->getParent()->getFont(), $fontHeight );
                 $nY = $nYPouleStart - $nRowHeight;
                 foreach( $poule->getPlaces() as $place ) {

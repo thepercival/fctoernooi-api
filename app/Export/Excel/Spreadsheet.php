@@ -52,6 +52,9 @@ class Spreadsheet extends SpreadsheetBase
         }
         // if( $this->config->getPlanning() ) {
             $planningSheet = new PlanningSheet($this);
+            $selfRefereesAssigned = $this->areSelfRefereesAssigned();
+            $planningSheet->setSelfRefereesAssigned($selfRefereesAssigned);
+            $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         // }
         if( $this->config->getRules() ) {
@@ -81,5 +84,9 @@ class Spreadsheet extends SpreadsheetBase
             ->setDescription("This document is created by fctoernooi.nl")
             ->setKeywords("office 2007 openxml")
             ->setCategory("toernooi");
+    }
+
+    public function getCellForName( Place $place ): string {
+
     }
 }

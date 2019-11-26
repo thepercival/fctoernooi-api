@@ -11,6 +11,7 @@ namespace App\Export\Excel\Worksheet;
 use App\Export\Excel\Spreadsheet;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use Voetbal\Round;
+use Voetbal\Game;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
@@ -47,6 +48,7 @@ class Planning extends FCToernooiWorksheet
 
 //        $this->setLineWidth( 0.5 );
         $this->sportScoreConfigService = new SportScoreConfigService();
+
         /*$this->maxPoulesPerLine = 3;
         $this->placeWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
@@ -114,6 +116,9 @@ class Planning extends FCToernooiWorksheet
         $firstRoundNumber = $this->getParent()->getStructure()->getFirstRoundNumber();
         $row = 1;
         $this->drawRoundNumber( $firstRoundNumber, $row );
+        for( $columnNr = 1 ; $columnNr <= Planning::NR_OF_COLUMNS ; $columnNr++ ) {
+            $this->getColumnDimensionByColumn($columnNr)->setAutoSize(true);
+        }
     }
 
     protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
@@ -124,15 +129,10 @@ class Planning extends FCToernooiWorksheet
         if( count($games) > 0 ) {
             $row = $this->drawGamesHeader($roundNumber, $row);
         }
-//        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
-//        foreach ($games as $game) {
-//            $gameHeight = $page->getGameHeight($game);
-//            if ($nY - $gameHeight < $page->getPageMargin() ) {
-//                list($page, $nY) = $this->createPagePlanning("wedstrijden");
-//                $nY = $page->drawGamesHeader($roundNumber, $nY);
-//            }
-//            $nY = $page->drawGame($game, $nY);
-//        }
+        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
+        foreach ($games as $game) {
+            $row = $this->drawGame($game, $row);
+        }
 
         if( $roundNumber->hasNext() ) {
             $this->drawRoundNumber( $roundNumber->getNext(), $row + 2 );

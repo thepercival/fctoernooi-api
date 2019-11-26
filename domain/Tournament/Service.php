@@ -89,18 +89,8 @@ class Service
         $league = new League( $association, $leagueSer->getName() );
         $league->setSportDep( 'voetbal' ); // DEPRECATED
 
-        // check season, per jaar een seizoen, als seizoen niet bestaat, dan aanmaken
-        $getSeason = function( int $year) {
-            $seasonRepos = $this->voetbalService->getRepository( Season::class );
-            $season = $seasonRepos->findOneBy( array('name' => $year ) );
-            if( $season === null ){
-                $seasonService = $this->voetbalService->getService( Season::class );
-                $period = new Period( new \DateTimeImmutable($year."-01-01"), new \DateTimeImmutable(($year+1)."-01-01") );
-                $season = $seasonService->create( $year, $period );
-            }
-            return $season;
-        };
-        $season = $getSeason( (int) $competitionSer->getStartDateTime()->format("Y") );
+        $seasonRepos = $this->voetbalService->getRepository( Season::class );
+        $season = $seasonRepos->findOneBy( array('name' => '9999' ) );
 
         $competitionService = $this->voetbalService->getService(Competition::class);
         $sportConfigService = $this->voetbalService->getService(SportConfig::class);
