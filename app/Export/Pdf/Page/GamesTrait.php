@@ -152,11 +152,11 @@ trait GamesTrait
         $nRowHeight = $this->getRowHeight();
         $roundNumber = $game->getRound()->getNumber();
 
-        $pouleName = (new NameService())->getPouleName($game->getPoule(), false);
+        $pouleName = $this->getParent()->getNameService()->getPouleName($game->getPoule(), false);
         $nX = $this->drawCell($pouleName, $nX, $nY, $this->getGamesPouleWidth(), $nRowHeight, Page::ALIGNCENTER,
             "black");
 
-        $nameService = new NameService();
+        $nameService = $this->getParent()->getNameService();
         if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
             $text = "";
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));

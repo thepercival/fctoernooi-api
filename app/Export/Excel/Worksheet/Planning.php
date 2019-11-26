@@ -6,15 +6,16 @@
  * Time: 19:28
  */
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Excel\Worksheet;
 
-use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Excel\Spreadsheet;
+use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
-class Planning extends ToernooiPdfPage
+class Planning extends FCToernooiWorksheet
 {
     /**
      * @var SportScoreConfigService
@@ -27,19 +28,24 @@ class Planning extends ToernooiPdfPage
      * @var mixed
      */
     protected $gameFilter;
-    /**
-     * @var string
-     */
-    protected $title;
-    /*protected $maxPoulesPerLine;
-    protected $placeWidthStructure;
-    protected $pouleMarginStructure;
-    */protected $rowHeight;
 
-    public function __construct( $param1 )
+    const COLUMN_POULE = 1;
+    const COLUMN_START = 2;
+    const COLUMN_FIELD = 3;
+    const COLUMN_HOME = 4;
+    const COLUMN_SCORE = 5;
+    const COLUMN_AWAY = 6;
+    const COLUMN_REFEREE = 7;
+
+    const NR_OF_COLUMNS = 7;
+
+    public function __construct( Spreadsheet $parent = null )
     {
-        parent::__construct( $param1 );
-        $this->setLineWidth( 0.5 );
+        parent::__construct( $parent, 'planning' );
+        $parent->addSheet($this, Spreadsheet::INDEX_PLANNING );
+
+
+//        $this->setLineWidth( 0.5 );
         $this->sportScoreConfigService = new SportScoreConfigService();
         /*$this->maxPoulesPerLine = 3;
         $this->placeWidthStructure = 30;
@@ -57,15 +63,15 @@ class Planning extends ToernooiPdfPage
       </colgroup>*/
     }
 
-    public function getTitle(): ?string {
-        return $this->title;
-    }
-    public function setTitle( string $title ) {
-        $this->title = $title;
-    }
+//    public function getTitle(): ?string {
+//        return $this->title;
+//    }
+//    public function setTitle( string $title ) {
+//        $this->title = $title;
+//    }
 
-    public function getPageMargin(){ return 20; }
-    public function getHeaderHeight(){ return 0; }
+//    public function getPageMargin(){ return 20; }
+//    public function getHeaderHeight(){ return 0; }
 
     public function getGameFilter() {
         return $this->gameFilter;
@@ -88,25 +94,6 @@ class Planning extends ToernooiPdfPage
         return $games;
     }
 
-    protected function getRowHeight() {
-        if( $this->rowHeight === null ) {
-            $this->rowHeight = 18;
-        }
-        return $this->rowHeight;
-    }
-
-    public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
-    {
-        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
-        $nX = $this->getPageMargin();
-        $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber);
-        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
-        return $nY - ( 2 * $fontHeightSubHeader );
-    }
-
     /**
      * add winnerslosers if roundnumber is 2 and has sibling
      *
@@ -123,7 +110,32 @@ class Planning extends ToernooiPdfPage
 //        return $roundName;
 //    }
 
+    public function draw() {
+        $firstRoundNumber = $this->getParent()->getStructure()->getFirstRoundNumber();
+        $row = 1;
+        $this->drawRoundNumber( $firstRoundNumber, $row );
+    }
 
+    protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
 
+        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
+        $row =  $this->drawSubHeader( $row, $subHeader );
+        $games = $this->getGames($roundNumber);
+        if( count($games) > 0 ) {
+            $row = $this->drawGamesHeader($roundNumber, $row);
+        }
+//        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
+//        foreach ($games as $game) {
+//            $gameHeight = $page->getGameHeight($game);
+//            if ($nY - $gameHeight < $page->getPageMargin() ) {
+//                list($page, $nY) = $this->createPagePlanning("wedstrijden");
+//                $nY = $page->drawGamesHeader($roundNumber, $nY);
+//            }
+//            $nY = $page->drawGame($game, $nY);
+//        }
 
+        if( $roundNumber->hasNext() ) {
+            $this->drawRoundNumber( $roundNumber->getNext(), $row + 2 );
+        }
+    }
 }

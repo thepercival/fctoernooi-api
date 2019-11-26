@@ -63,7 +63,7 @@ class PoulePivotTables extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
         $nX = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = (new NameService())->getRoundNumberName( $roundNumber);
+        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber);
         $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
         return $nY - ( 2 * $fontHeightSubHeader );
@@ -107,12 +107,6 @@ class PoulePivotTables extends ToernooiPdfPage
         }
     }*/
 
-    protected function getPouleName( Poule $poule )
-    {
-        $nameService = new NameService();
-        return $nameService->getPouleName( $poule, true );
-    }
-
     public function drawPouleHeader( Poule $poule, $nY )
     {
         $nrOfPlaces = $poule->getPlaces()->count();
@@ -121,11 +115,11 @@ class PoulePivotTables extends ToernooiPdfPage
         $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
 
         $nX = $this->getPageMargin();
-        $nX = $this->drawCell( (new NameService())->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
+        $nX = $this->drawCell( $this->getParent()->getNameService()->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
 
         $nVersus = 0;
         foreach( $poule->getPlaces() as $place ) {
-            $nX = $this->drawCell((new NameService())->getPlaceFromName($place, true), $nX, $nY, $versusColumnWidth,
+            $nX = $this->drawCell($this->getParent()->getNameService()->getPlaceFromName($place, true), $nX, $nY, $versusColumnWidth,
                 $height, ToernooiPdfPage::ALIGNCENTER, 'black', $degrees);
             $nVersus++;
         }
@@ -157,7 +151,7 @@ class PoulePivotTables extends ToernooiPdfPage
 
         foreach( $poule->getPlaces() as $place ) {
             $nX = $this->getPageMargin();
-            $nX = $this->drawCell( (new NameService())->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
+            $nX = $this->drawCell( $this->getParent()->getNameService()->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
             $placeGames = $poule->getGames()->filter( function( Game $game ) use ($place) {
                 return $game->isParticipating( $place );
             })->toArray();
@@ -252,7 +246,7 @@ class PoulePivotTables extends ToernooiPdfPage
         if( $this->getParent()->hasTextWidth($key) ) {
             return $this->getParent()->getTextWidth();
         }
-        $width = $this->getTextWidth( (new NameService())->getPlaceFromName($place, true));
+        $width = $this->getTextWidth( $this->getParent()->getNameService()->getPlaceFromName($place, true));
         return $this->getParent()->setTextWidth($width);
     }
 

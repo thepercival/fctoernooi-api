@@ -76,7 +76,7 @@ class Gamenotes extends ToernooiPdfPage
         $nWidthResult = $nWidth / 2;
         $nX2 = $nSecondBorder + ( $nMargin * 0.5 );
 
-        $nameService = new NameService();
+        $nameService = $this->getParent()->getNameService();
         $roundNumberName = $nameService->getRoundNumberName( $roundNumber );
         $this->drawCell( "ronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
         $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );

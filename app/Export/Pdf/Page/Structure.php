@@ -48,12 +48,6 @@ class Structure extends ToernooiPdfPage
         $this->drawRoundStructure( $rooRound, $nY );
     }
 
-    protected function getPouleName( Poule $poule )
-    {
-        $nameService = new NameService();
-        return $nameService->getPouleName( $poule, true );
-    }
-
     /*********************** GROUPING **************************/
 
     public function drawGrouping( Round $round, $nY )
@@ -65,7 +59,7 @@ class Structure extends ToernooiPdfPage
         $poules = $round->getPoules()->toArray();
         $nrOfPoules = $round->getPoules()->count();
         $percNumberWidth = 0.1;
-        $nameService = new NameService();
+        $nameService = $this->getParent()->getNameService();
         $nYPouleStart = $nY;
         $maxNrOfPlacesPerPoule = null;
         $nrOfLines = $this->getNrOfLines( $nrOfPoules );
@@ -81,7 +75,7 @@ class Structure extends ToernooiPdfPage
                 }
                 $numberWidth = $pouleWidth * $percNumberWidth;
                 $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-                $this->drawCell( $this->getPouleName( $poule ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
+                $this->drawCell( $this->getParent()->getPouleName( $poule ), $nX, $nYPouleStart, $pouleWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, "black" );
                 $this->setFont( $this->getParent()->getFont(), $fontHeight );
                 $nY = $nYPouleStart - $nRowHeight;
                 foreach( $poule->getPlaces() as $place ) {
@@ -158,7 +152,7 @@ class Structure extends ToernooiPdfPage
         $nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         $this->setFont( $this->getParent()->getFont( true ), $fontHeight );
-        $nameService = new NameService();
+        $nameService = $this->getParent()->getNameService();
         $margin = 20;
         $arrLineColors = !$round->isRoot() ? array( "t" => "black" ) : null;
         $roundName = $nameService->getRoundName($round);

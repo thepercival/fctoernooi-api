@@ -4,7 +4,9 @@ namespace App\Export;
 
 use FCToernooi\Tournament;
 use Voetbal\Game;
+use Voetbal\NameService;
 use Voetbal\Planning\Service as PlanningService;
+use Voetbal\Poule;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\State;
@@ -32,6 +34,10 @@ trait Document
      * @var bool
      */
     protected $areSelfRefereesAssigned;
+    /**
+     * @var NameService
+     */
+    protected $nameService;
 
     /**
      * @return Structure
@@ -100,9 +106,19 @@ trait Document
     public function gamesOnSameDay( RoundNumber $roundNumber ) {
         $dateOne = $roundNumber->getFirstStartDateTime();
         $dateTwo = $roundNumber->getLastStartDateTime();
-        if ($dateOne === null && $dateTwo === null) {
-            return true;
-        }
+//        if ($dateOne === null && $dateTwo === null) {
+//            return true;
+//        }
         return $dateOne->format('Y-m-d') === $dateTwo->format('Y-m-d');
     }
+
+    public function getNameService(): NameService {
+        if( $this->nameService === null ) {
+            $this->nameService = new NameService();
+        }
+        return $this->nameService;
+    }
+
+    // public function getPouleName( Poule $poule )
+    //    return $nameService->getPouleName( $poule, true );
 }
