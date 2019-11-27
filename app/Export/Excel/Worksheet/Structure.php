@@ -30,6 +30,7 @@ class Structure extends FCToernooiWorksheet
         parent::__construct( $parent, 'structuur' );
         $parent->addSheet($this, Spreadsheet::INDEX_STRUCTURE );
         $this->setWidthColumns();
+        $this->setCustomHeader();
     }
 
     protected function setWidthColumns()
@@ -116,16 +117,8 @@ class Structure extends FCToernooiWorksheet
                     $cellPlace = $this->getCellByColumnAndRow($column + $placeColumnDelta, $row + $placeRowDelta);
                     $cellPlace->setValue( $this->getParent()->getNameService()->getPlaceFromName( $place, false ) );
                     $cellPlace->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-                    $styleArray = [
-                        'borders' => [
-                            'outline' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                                'color' => ['argb' => Indeling::BORDER_COLOR],
-                            ],
-                        ],
-                    ];
                     $range = $this->range( $column + $placeColumnDelta, $cellPlace->getRow(), $column + $placeColumnDelta, $cellPlace->getRow() );
-                    $this->getStyle( $range )->applyFromArray($styleArray);
+                    $this->border( $this->getStyle( $range ), 'outline' );
 
                     if ( ( $place->getNumber() % 2 ) === 0 ) {
                         $placeColumnDelta++;

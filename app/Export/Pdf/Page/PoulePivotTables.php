@@ -231,25 +231,6 @@ class PoulePivotTables extends ToernooiPdfPage
         return $finalScore->getHome() . $score . $finalScore->getAway();
     }
 
-    protected function getPoulePlaceNamesWidth( Poule $poule ) {
-        $width = 0;
-        foreach( $poule->getPlaces() as $place ) {
-            $width += $this->getPlaceWidth( $place );
-        }
-        return $width;
-    }
-
-
-    public function getPlaceWidth( Place $place, int $nFontSize = null )
-    {
-        $key = $place->getId();
-        if( $this->getParent()->hasTextWidth($key) ) {
-            return $this->getParent()->getTextWidth();
-        }
-        $width = $this->getTextWidth( $this->getParent()->getNameService()->getPlaceFromName($place, true));
-        return $this->getParent()->setTextWidth($width);
-    }
-
     public function getDegrees( int $nrOfPlaces ): int {
         if( $nrOfPlaces <= 3 ) {
             return 0;

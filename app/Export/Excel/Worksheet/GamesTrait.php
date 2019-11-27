@@ -40,8 +40,6 @@ trait GamesTrait
     }
 
     public function drawGamesHeader( RoundNumber $roundNumber, int $row ): int {
-        $range = $this->range( Planning::COLUMN_POULE, $row, Planning::COLUMN_POULE, $row);
-
 
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_POULE, $row);
         $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
@@ -82,15 +80,19 @@ trait GamesTrait
     /**
      * @param Game $game
      * @param int $row
+     * @param bool $striped
      * @return int
      */
-    public function drawGame( Game $game, int $row ): int
+    public function drawGame( Game $game, int $row, bool $striped = true ): int
     {
         if( $this->gameFilter !== null && !$this->getGameFilter()($game) ) {
             return $row;
         }
 
-        #DFD7CA
+        if( ($game->getBatchNr() % 2) === 0 && $striped === true ) {
+            $range = $this->range( Planning::COLUMN_POULE, $row, Planning::NR_OF_COLUMNS, $row);
+            $this->fill( $this->getStyle($range), 'EEEEEE');
+        }
 
         $pouleName = $this->getParent()->getNameService()->getPouleName($game->getPoule(), false);
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_POULE, $row);

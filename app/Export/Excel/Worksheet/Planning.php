@@ -16,7 +16,7 @@ use Voetbal\Round\Number as RoundNumber;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
-class Planning extends FCToernooiWorksheet
+abstract class Planning extends FCToernooiWorksheet
 {
     /**
      * @var SportScoreConfigService
@@ -40,61 +40,16 @@ class Planning extends FCToernooiWorksheet
 
     const NR_OF_COLUMNS = 7;
 
-    public function __construct( Spreadsheet $parent = null )
+    public function __construct( Spreadsheet $parent, string $title, int $index )
     {
-        parent::__construct( $parent, 'planning' );
-        $parent->addSheet($this, Spreadsheet::INDEX_PLANNING );
-
-
-//        $this->setLineWidth( 0.5 );
+        parent::__construct($parent, $title);
+        $parent->addSheet($this, $index);
         $this->sportScoreConfigService = new SportScoreConfigService();
-
-        /*$this->maxPoulesPerLine = 3;
-        $this->placeWidthStructure = 30;
-        $this->pouleMarginStructure = 10;*/
-/*
-        <colgroup>
-        <col *ngIf="aRoundNeedsRanking(roundsByNumber)">
-        <col *ngIf="!aRoundNeedsRanking(roundsByNumber)">
-        <col *ngIf="planningService.canCalculateStartDateTime(roundNumber)">
-        <col>
-        <col class="width-25">
-        <col>
-        <col class="width-25">
-        <col *ngIf="hasReferees()" class="d-none d-sm-table-cell">
-      </colgroup>*/
+        $this->setCustomHeader();
     }
 
-//    public function getTitle(): ?string {
-//        return $this->title;
-//    }
-//    public function setTitle( string $title ) {
-//        $this->title = $title;
-//    }
 
-//    public function getPageMargin(){ return 20; }
-//    public function getHeaderHeight(){ return 0; }
 
-    public function getGameFilter() {
-        return $this->gameFilter;
-    }
-    public function setGameFilter( $gameFilter ) {
-        $this->gameFilter = $gameFilter;
-    }
-
-    public function getGames( RoundNumber $roundNumber ): array {
-        $games = [];
-        foreach( $roundNumber->getRounds() as $round ) {
-            foreach( $round->getPoules() as $poule ) {
-                foreach( $poule->getGames() as $game ) {
-                    if( $this->gameFilter === null || $this->getGameFilter()($game) ) {
-                        $games[] = $game;
-                    }
-                }
-            }
-        }
-        return $games;
-    }
 
     /**
      * add winnerslosers if roundnumber is 2 and has sibling
@@ -112,30 +67,6 @@ class Planning extends FCToernooiWorksheet
 //        return $roundName;
 //    }
 
-    public function draw() {
-        $firstRoundNumber = $this->getParent()->getStructure()->getFirstRoundNumber();
-        $row = 1;
-        $this->drawRoundNumber( $firstRoundNumber, $row );
-        for( $columnNr = 1 ; $columnNr <= Planning::NR_OF_COLUMNS ; $columnNr++ ) {
-            $this->getColumnDimensionByColumn($columnNr)->setAutoSize(true);
-        }
-    }
+    abstract public function draw();
 
-    protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
-
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-        $row =  $this->drawSubHeader( $row, $subHeader );
-        $games = $this->getGames($roundNumber);
-        if( count($games) > 0 ) {
-            $row = $this->drawGamesHeader($roundNumber, $row);
-        }
-        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
-        foreach ($games as $game) {
-            $row = $this->drawGame($game, $row);
-        }
-
-        if( $roundNumber->hasNext() ) {
-            $this->drawRoundNumber( $roundNumber->getNext(), $row + 2 );
-        }
-    }
 }

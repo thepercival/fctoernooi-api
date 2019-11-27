@@ -29,8 +29,9 @@ class Indeling extends FCToernooiWorksheet
     public function __construct( Spreadsheet $parent = null )
     {
         parent::__construct( $parent, 'indeling' );
-        $parent->addSheet($this, Spreadsheet::INDEX_STRUCTURE );
+        $parent->addSheet($this, Spreadsheet::INDEX_INDELING );
         $this->setWidthColumns();
+        $this->setCustomHeader();
     }
 
     protected function setWidthColumns()
