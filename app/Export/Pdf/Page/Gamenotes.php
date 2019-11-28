@@ -125,7 +125,7 @@ class Gamenotes extends ToernooiPdfPage
             $nY -= $nRowHeight;
         }
 
-        if( $game->getField() !== null ) {
+        {
             $this->drawCell( "veld", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
             $fieldDescription = $game->getField()->getName();
@@ -137,12 +137,12 @@ class Gamenotes extends ToernooiPdfPage
         }
 
         if( $game->getReferee() !== null ) {
-            $this->drawCell( "scheidrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+            $this->drawCell( "scheidsrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
             $this->drawCell( $game->getReferee()->getInitials(), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
         } else if( $game->getRefereePlace() !== null ) {
-            $this->drawCell( "scheidrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
+            $this->drawCell( "scheidsrechter", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
             $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
             $this->drawCell( $nameService->getPlaceName( $game->getRefereePlace(), true, true), $nX2, $nY, $nWidthResult, $nRowHeight );
             $nY -= $nRowHeight;
@@ -168,7 +168,6 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
         $nX = $nFirstBorder + $nMargin;
 
-        $n = $roundNumber->getNumber();
         $inputScoreConfig = $this->sportScoreConfigService->getInput( $game->getSportScoreConfig() );
         $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $game->getSportScoreConfig() );
 

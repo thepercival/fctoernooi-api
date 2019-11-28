@@ -5,20 +5,16 @@ namespace App\Export\Excel;
 use App\Export\Document as ExportDocument;
 use App\Export\TournamentConfig;
 use FCToernooi\Tournament;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpParser\Node\Name;
-use Voetbal\Game;
-use Voetbal\NameService;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Structure;
 use PhpOffice\PhpSpreadsheet\Spreadsheet as SpreadsheetBase;
 use App\Export\Excel\Worksheet\Structure as StructureSheet;
 use App\Export\Excel\Worksheet\Indeling as IndelingSheet;
-use App\Export\Excel\Worksheet\Planning as PlanningSheet;
 use App\Export\Excel\Worksheet\Planning\All as PlanningAllSheet;
 use App\Export\Excel\Worksheet\Planning\PerPoule as PlanningPerPouleSheet;
 use App\Export\Excel\Worksheet\Planning\PerField as PlanningPerFieldSheet;
 use App\Export\Excel\Worksheet\PoulePivotTables as PoulePivotTablesSheet;
+use App\Export\Excel\Worksheet\Gamenotes as GamenotesSheet;
 use App\Export\Excel\Worksheet\QRCode as QRCodeSheet;
 
 class Spreadsheet extends SpreadsheetBase
@@ -59,10 +55,7 @@ class Spreadsheet extends SpreadsheetBase
             $structureSheet = new StructureSheet($this);
             $structureSheet->draw();
         }
-        if( $this->config->getPoulePivotTables() ) {
-            $poulePivotTablesSheet = new PoulePivotTablesSheet($this);
-            $poulePivotTablesSheet->draw();
-        }
+
         if( $this->config->getPlanning() ) {
             $planningSheet = new PlanningAllSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
@@ -73,7 +66,8 @@ class Spreadsheet extends SpreadsheetBase
 
         }
         if( $this->config->getGamenotes() ) {
-//            $this->drawGamenotes();
+            $gamenotesSheet = new GamenotesSheet($this);
+            $gamenotesSheet->draw();
         }
         if( $this->config->getGamesperpoule() ) {
             $planningSheet = new PlanningPerPouleSheet($this);
@@ -87,10 +81,15 @@ class Spreadsheet extends SpreadsheetBase
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
+        if( $this->config->getPoulePivotTables() ) {
+            $poulePivotTablesSheet = new PoulePivotTablesSheet($this);
+            $poulePivotTablesSheet->draw();
+        }
         if( $this->config->getQRCode() ) {
             $qrcodeSheet = new QRCodeSheet($this);
             $qrcodeSheet->draw();
         }
+        $this->setActiveSheetIndex(0);
     }
 
     protected function setMetadata() {

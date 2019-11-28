@@ -94,7 +94,7 @@ trait Document
      * @param array $games
      * @return array
      */
-    protected function getScheduledGames( Round $round, $games = [] ): array
+    public function getScheduledGames( Round $round, $games = [] ): array
     {
         $games = array_merge( $games, $round->getGamesWithState(State::Created));
         foreach( $round->getChildren() as $childRound ) {
