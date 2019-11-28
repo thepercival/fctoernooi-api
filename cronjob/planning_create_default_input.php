@@ -48,12 +48,10 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
 {
     $structureOptions = new TournamentStructureOptions();
     $structureService = new StructureService( $structureOptions );
-    $planningService = new PlanningService();
-    $inputService = new PlanningInputService();
     for ($nrOfCompetitors = $structureOptions->getPlaceRange()->min; $nrOfCompetitors <= $structureOptions->getPlaceRange()->max; $nrOfCompetitors++) {
-        if( $nrOfCompetitors !== 14 ) {
-            continue;
-        }
+//        if( $nrOfCompetitors !== 14 ) {
+//            continue;
+//        }
         $nrOfPoules = 1;
 
         $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule( $nrOfCompetitors, $nrOfPoules, true );
@@ -73,13 +71,10 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                             foreach( $selfRefereeTeamupVariations as $selfRefereeTeamupVariation ) {
                                 $teamup = $selfRefereeTeamupVariation->teamup;
                                 $selfReferee = $selfRefereeTeamupVariation->selfReferee;
-
 //                                if ($nrOfCompetitors !== 6 || $nrOfPoules !== 1 || $nrOfSports !== 1 || $nrOfFields !== 3
 //                                    || $nrOfHeadtohead !== 1 /*|| $teamup !== false || $selfReferee !== false*/ ) {
 //                                    continue;
 //                                }
-
-
                                 $planningInput = $planningInputRepos->get(
                                     $structureConfig, $sportConfig, $nrOfReferees, $teamup, $selfReferee, $nrOfHeadtohead
                                 );
@@ -101,37 +96,13 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
 
                                 $planningInputRepos->save( $planningInput );
                                 // die();
-//                                $planning = $inputService->createNextTry( $planningInput );
-//
-//                                echo
-//                                    '   saving default planning for nrOfCompetitors ' . $planning->getStructure()->getNrOfPlaces()
-//                                    . ', structure [' . implode( '|', $planningInput->getStructureConfig()) . ']'
-//                                    . ', sports ' . count( $planningInput->getSportConfig())
-//                                    . ', referees ' . $planningInput->getNrOfReferees()
-//                                    . ', fields ' . $planningInput->getNrOfFields()
-//                                    . ', teamup ' . ( $planningInput->getTeamup() ? '1' : '0' )
-//                                    . ', selfRef ' . ( $planningInput->getSelfReferee() ? '1' : '0' )
-//                                    . ', nrOfH2h ' . $planningInput->getNrOfHeadtohead()
-//                                    . ', batchGames ' . $planning->getNrOfBatchGames()->min . '->' . $planning->getNrOfBatchGames()->max
-//                                    . ', gamesInARow ' . $planning->getMaxNrOfGamesInARow()
-//                                    . ', timeout ' . $planning->getTimeoutSeconds()
-//                                    . " .. ";
-//
-//                                $planningService = new PlanningService();
-//                                $newState = $planningService->createGames( $planning );
-//                                $planning->setState( $newState );
-//                                $planningRepos->save( $planning );
-//
-//                                echo " => saved!" . PHP_EOL;
                             }
                         }
                     }
                 }
             }
-            // echo " => saved!" . PHP_EOL;
             $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule( $nrOfCompetitors, ++$nrOfPoules, true );
         }
-
     }
 }
 
