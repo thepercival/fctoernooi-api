@@ -51,7 +51,7 @@ class PerPoule extends PlanningWorksheet
         $roundNumber = $poule->getRound()->getNumber();
         $subHeader = $this->getParent()->getNameService()->getPouleName( $poule, true );
         $subHeader .= " - " . $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-        $row =  $this->drawSubHeader( $row, $subHeader );
+        $row =  $this->drawSubHeaderHelper( $row, $subHeader );
 
         foreach( $poule->getGames() as $game ) {
             $row = $this->drawGame( $game, $row, false );

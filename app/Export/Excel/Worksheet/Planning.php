@@ -25,11 +25,6 @@ abstract class Planning extends FCToernooiWorksheet
 
     use GamesTrait;
 
-    /**
-     * @var mixed
-     */
-    protected $gameFilter;
-
     const COLUMN_POULE = 1;
     const COLUMN_START = 2;
     const COLUMN_FIELD = 3;

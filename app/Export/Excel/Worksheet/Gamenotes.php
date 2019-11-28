@@ -91,7 +91,7 @@ class Gamenotes extends FCToernooiWorksheet
 
         // speelronde
         if( $bNeedsRanking ) {
-            $row = $this->drawGameRow( $row, "speelronde", $game->getRound()->getNumber()->getNumber() );
+            $row = $this->drawGameRow( $row, "speelronde", "" . $game->getRound()->getNumber()->getNumber() );
         }
 
 

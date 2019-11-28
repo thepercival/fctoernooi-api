@@ -135,7 +135,7 @@ class Document extends \Zend_Pdf
                 list($page, $nY) = $this->createPagePlanning("wedstrijden");
                 $nY = $page->drawGamesHeader($roundNumber, $nY);
             }
-            $nY = $page->drawGame($game, $nY);
+            $nY = $page->drawGame($game, $nY, true);
         }
 
         if( $roundNumber->hasNext() ) {

@@ -37,7 +37,7 @@ class All extends PlanningWorksheet
     protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
 
         $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-        $row =  $this->drawSubHeader( $row, $subHeader );
+        $row =  $this->drawSubHeaderHelper( $row, $subHeader );
         $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
         if( count($games) > 0 ) {
             $row = $this->drawGamesHeader($roundNumber, $row);

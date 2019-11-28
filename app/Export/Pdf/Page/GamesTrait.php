@@ -8,6 +8,7 @@
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Excel\Worksheet\Planning;
 use Voetbal\Game;
 use Voetbal\Round\Number as RoundNumber;
 use App\Export\Pdf\Page;
@@ -90,6 +91,20 @@ trait GamesTrait
         return $this->getGamesWidthHelper( "referee" );
     }
 
+    protected function getGameWidth(): int
+    {
+        $width = $this->getGamesPouleWidth() +
+            $this->getGamesStartWidth() +
+            $this->getGamesFieldWidth() +
+            $this->getGamesHomeWidth() +
+            $this->getGamesScoreWidth() +
+            $this->getGamesAwayWidth();
+        if ($this->refereesAssigned || $this->selfRefereesAssigned) {
+            $width += $this->getGamesRefereeWidth();
+        }
+        return $width;
+    }
+
     public function drawGamesHeader( RoundNumber $roundNumber, $nY ) {
 
         $this->setGamesColumns( $roundNumber );
@@ -136,13 +151,14 @@ trait GamesTrait
             $title = $this->selfRefereesAssigned ? 'scheidsrechter' : 'sch.';
             $this->drawCell( $title, $nX, $nY, $gameRefereeWidth, $nRowHeight, Page::ALIGNCENTER, "black" );
         }
+
         return $nY - $nRowHeight;
     }
 
     /**
      * @return int
      */
-    public function drawGame( Game $game, $nY )
+    public function drawGame( Game $game, $nY, bool $striped = false )
     {
         if( $this->gameFilter !== null && !$this->getGameFilter()($game) ) {
             return $nY;
@@ -151,6 +167,9 @@ trait GamesTrait
         $nX = $this->getPageMargin();
         $nRowHeight = $this->getRowHeight();
         $roundNumber = $game->getRound()->getNumber();
+
+        $grayScale = ( ($game->getBatchNr() % 2) === 0 && $striped === true ) ? 0.9 : 1;
+        $this->setFillColor( new \Zend_Pdf_Color_GrayScale( $grayScale ) );
 
         $pouleName = $this->getParent()->getNameService()->getPouleName($game->getPoule(), false);
         $nX = $this->drawCell($pouleName, $nX, $nY, $this->getGamesPouleWidth(), $nRowHeight, Page::ALIGNCENTER,

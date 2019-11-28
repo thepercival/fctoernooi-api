@@ -15,6 +15,8 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
+use Voetbal\Structure\Service as StructureService;
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 use Voetbal\External\Structure\Creator as StructureCreator;
 use Monolog\Logger;
 
@@ -28,7 +30,7 @@ $logger->pushHandler(new \Monolog\Handler\StreamHandler($settings['logger']['cro
 
 try {
     $importer = new StructureCreator(
-        $voetbal->getService( \Voetbal\Structure::class ),
+        new StructureService( new TournamentStructureOptions() ),
         $voetbal,
         $em->getConnection(),
         $logger

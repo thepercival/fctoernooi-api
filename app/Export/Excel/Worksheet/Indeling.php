@@ -58,11 +58,11 @@ class Indeling extends FCToernooiWorksheet
         $rooRound = $this->getParent()->getStructure()->getRootRound();
 
         $row = 1;
-        $row = $this->drawSubHeader( $row, "Indeling" );
+        $row = $this->drawSubHeaderHelper( $row, "Indeling" );
         $row = $this->drawGrouping( $rooRound, $row  );
     }
 
-    protected function drawSubHeader( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
+    protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
         if( $colStart === null ) {
             $colStart = 1;
         }

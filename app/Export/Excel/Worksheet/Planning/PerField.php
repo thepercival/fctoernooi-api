@@ -46,7 +46,7 @@ class PerField extends PlanningWorksheet
         if( count( $games ) > 0 ) {
             $subHeader = "veld " . $field->getName();
             $subHeader .= " - " . $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-            $row =  $this->drawSubHeader( $row, $subHeader );
+            $row =  $this->drawSubHeaderHelper( $row, $subHeader );
 
             foreach( $games as $game ) {
                 $row = $this->drawGame( $game, $row, false );

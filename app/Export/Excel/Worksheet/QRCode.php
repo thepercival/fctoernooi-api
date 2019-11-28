@@ -22,6 +22,11 @@ class QRCode extends FCToernooiWorksheet
     const WIDTH_COLUMN_MARGIN = 10;
     const WIDTH_COLUMN_MAIN = 50;
 
+    /**
+     * @var QRService
+     */
+    protected $qrService;
+
     public function __construct( Spreadsheet $parent = null )
     {
         parent::__construct( $parent, 'qrcode' );

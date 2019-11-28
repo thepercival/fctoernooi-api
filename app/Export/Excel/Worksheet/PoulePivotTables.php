@@ -143,6 +143,7 @@ class PoulePivotTables extends FCToernooiWorksheet
         }
         $nrOfPlaces = $poule->getPlaces()->count();
 
+        $columnEnd = $columnStart;
         foreach( $poule->getPlaces() as $place ) {
             $column = $columnStart;
             $placeName = $this->getParent()->getNameService()->getPlaceFromName( $place, true );
@@ -187,8 +188,9 @@ class PoulePivotTables extends FCToernooiWorksheet
             $cell->setValue( $rank );
 
             $row++;
+            $columnEnd = $column;
         }
-        $range = $this->range( $columnStart, $rowStart - 1, $column - 1, $row - 1 );
+        $range = $this->range( $columnStart, $rowStart - 1, $columnEnd - 1, $row - 1 );
         $this->border( $this->getStyle( $range ), 'allBorders' );
 
         return $row + 2;

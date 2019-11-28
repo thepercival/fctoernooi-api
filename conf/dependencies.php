@@ -3,6 +3,8 @@
 
 use \JMS\Serializer\SerializerBuilder;
 use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Structure\Service as StructureService;
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 
 $container = $app->getContainer();
 
@@ -96,7 +98,7 @@ $container['App\Action\Tournament'] = function ($c) {
         $c->get('toernooi'),
         $tournamentRepos,
         $userRepository,
-        $c->get('voetbal')->getService(Voetbal\Structure::class),
+        new StructureService( new TournamentStructureOptions() ),
         new StructureRepository($em),
         $c->get('voetbal')->getRepository(Voetbal\Game::class),
         $c->get('voetbal')->getService(Voetbal\Competitor::class),

@@ -21,7 +21,7 @@ trait GamesTrait
     protected $selfRefereesAssigned;
     protected $refereesAssigned;
 
-    protected function drawSubHeader( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
+    protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
         if( $colStart === null ) {
             $colStart = 1;
         }
@@ -85,10 +85,6 @@ trait GamesTrait
      */
     public function drawGame( Game $game, int $row, bool $striped = true ): int
     {
-        if( $this->gameFilter !== null && !$this->getGameFilter()($game) ) {
-            return $row;
-        }
-
         if( ($game->getBatchNr() % 2) === 0 && $striped === true ) {
             $range = $this->range( Planning::COLUMN_POULE, $row, Planning::NR_OF_COLUMNS, $row);
             $this->fill( $this->getStyle($range), 'EEEEEE');

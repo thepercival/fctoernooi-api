@@ -56,11 +56,11 @@ class Structure extends FCToernooiWorksheet
         $column = 1;
         $maxNrOfCells = $this->getMaxNrOfColumns();
 
-        $row = $this->drawSubHeader( $row, "Structuur" );
+        $row = $this->drawSubHeaderHelper( $row, "Structuur" );
         $this->drawRoundStructure( $rooRound, $row, $column, $maxNrOfCells );
     }
 
-    protected function drawSubHeader( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
+    protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
         if( $colStart === null ) {
             $colStart = 1;
         }
