@@ -64,9 +64,6 @@ class Tournament
      */
     protected $updated; // DEP
 
-    const MINNROFCOMPETITORS = 2;
-    const MAXNROFCOMPETITORS = 40;
-
     const MAXNROFSPORTS = 1;
     const MAXNROFREFEREES = 20;
     const MAXNROFFIELDS = 20;

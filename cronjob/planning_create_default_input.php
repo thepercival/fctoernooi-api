@@ -27,6 +27,7 @@ use Voetbal\Planning\Input as InputPlanning;
 use Voetbal\Planning\Config as PlanningConfig;
 use Voetbal\Planning\Config\Service as PlanningConfigService;
 use Voetbal\Structure\Service as StructureService;
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 
 use Voetbal\Round\Number as RoundNumber;
 
@@ -45,15 +46,22 @@ catch( \Exception $e ) {
 
 function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputRepository $planningInputRepos )
 {
-    $structureService = new StructureService( new VoetbalRange( Tournament::MINNROFCOMPETITORS, Tournament::MAXNROFCOMPETITORS ) );
+    $structureOptions = new TournamentStructureOptions();
+    $structureService = new StructureService( $structureOptions );
     $planningService = new PlanningService();
     $inputService = new PlanningInputService();
-    for ($nrOfCompetitors = Tournament::MINNROFCOMPETITORS; $nrOfCompetitors <= Tournament::MAXNROFCOMPETITORS; $nrOfCompetitors++) {
-        if( $nrOfCompetitors > 4 ) {
+    for ($nrOfCompetitors = $structureOptions->getPlaceRange()->min; $nrOfCompetitors <= $structureOptions->getPlaceRange()->max; $nrOfCompetitors++) {
+        if( $nrOfCompetitors !== 14 ) {
             continue;
         }
-        $nrOfPoules = 0;
-        while ( ((int) floor($nrOfCompetitors / ++$nrOfPoules)) >= 2) {
+        $nrOfPoules = 1;
+
+        $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule( $nrOfCompetitors, $nrOfPoules, true );
+        while ( $nrOfPlacesPerPoule >= $structureOptions->getPlacesPerPouleRange()->min ) {
+            if( $nrOfPlacesPerPoule > $structureOptions->getPlacesPerPouleRange()->max ) {
+                $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule( $nrOfCompetitors, ++$nrOfPoules, true );
+                continue;
+            }
             $structureConfig = $structureService->getStructureConfig( $nrOfCompetitors, $nrOfPoules );
             echo "saving default inputs for " . $nrOfCompetitors . " competitors [".implode(",", $structureConfig )."] ...." . PHP_EOL;
             for ($nrOfSports = 1; $nrOfSports <= Tournament::MAXNROFSPORTS; $nrOfSports++) {
@@ -121,6 +129,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                 }
             }
             // echo " => saved!" . PHP_EOL;
+            $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule( $nrOfCompetitors, ++$nrOfPoules, true );
         }
 
     }
@@ -147,8 +156,8 @@ function getSelfRefereeTeamupVariations( int $nrOfReferees, int $nrOfPlaces, arr
     $variations = [ json_decode( json_encode( ["selfReferee" => false, "teamup" => false ])) ];
     $planningConfigService = new PlanningConfigService();
 
-
-    if( $planningConfigService->canSelfRefereeBeAvailable( $nrOfPlaces, $nrOfReferees )  ) {
+    $selfRefereeIsAvailable = ( $nrOfReferees === 0 && $planningConfigService->canSelfRefereeBeAvailable( $nrOfPlaces ) );
+    if( $selfRefereeIsAvailable ) {
         $variations = array_merge( $variations, [
             json_decode( json_encode( ["selfReferee" => true, "teamup" => false ]))
         ] );
@@ -158,7 +167,7 @@ function getSelfRefereeTeamupVariations( int $nrOfReferees, int $nrOfPlaces, arr
         $variations = array_merge( $variations, [
             json_decode( json_encode( ["selfReferee" => false, "teamup" => true ]))
         ] );
-        if( /*$nrOfPlaces > 2 &&*/ $nrOfReferees === 0 ) {
+        if( $selfRefereeIsAvailable ) {
             $variations = array_merge( $variations, [
                 json_decode( json_encode( ["selfReferee" => true, "teamup" => true ]))
             ] );
