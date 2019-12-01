@@ -54,7 +54,7 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
     $structureOptions = new TournamentStructureOptions();
     $structureService = new StructureService( $structureOptions );
     for ($nrOfCompetitors = $structureOptions->getPlaceRange()->min; $nrOfCompetitors <= $structureOptions->getPlaceRange()->max; $nrOfCompetitors++) {
-        if( $nrOfCompetitors !== 3 ) {
+        if( $nrOfCompetitors !== 5 ) {
             continue;
         }
         $nrOfPoules = 1;

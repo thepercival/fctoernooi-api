@@ -36,7 +36,7 @@ $planningRepository = $voetbal->getRepository( \Voetbal\Round\Number::class );
 $inputService = new PlanningInputService();
 
 $logger = new Logger('planning-create');
-$output = 'php://stdout';
+ $output = 'php://stdout';
 // if( $settings['environment'] !== 'development' ) {
 //    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
 //    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
@@ -51,6 +51,7 @@ try {
         throw new \Exception("first parameter must be intervalMinutes"
             , E_ERROR);
     }
+
 
 //    $intervalMinutes = filter_var($argv[1], FILTER_VALIDATE_INT);
 //    if( $intervalMinutes === false ) {
