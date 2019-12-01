@@ -64,11 +64,6 @@ class Tournament
      */
     protected $updated; // DEP
 
-    const MAXNROFSPORTS = 1;
-    const MAXNROFREFEREES = 20;
-    const MAXNROFFIELDS = 20;
-    const PLANNING_MAXNROFHEADTOHEAD = 2;
-
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
 
