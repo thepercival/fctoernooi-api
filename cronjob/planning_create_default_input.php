@@ -87,7 +87,9 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                                 $multipleSports = count($sportConfig) > 1;
                                 $newNrOfHeadtohead = $nrOfHeadtohead;
                                 if( $multipleSports ) {
-                                    if( count($sportConfig) > 3 && $sportConfig[0]["nrOfFields"] == 2 && $sportConfig[1]["nrOfFields"] == 1 ) {
+                                    if( count($sportConfig) === 4 && $sportConfig[0]["nrOfFields"] == 2 && $sportConfig[1]["nrOfFields"] == 1
+                                        && $sportConfig[2]["nrOfFields"] == 1 && $sportConfig[3]["nrOfFields"] == 1
+                                        && $teamup === false && $selfReferee === false && $nrOfHeadtohead === 1 && $structureConfig == [3]  ) {
                                         $e = 2;
                                     }
                                     $newNrOfHeadtohead = $planningInputSerivce->getSufficientNrOfHeadtohead(
