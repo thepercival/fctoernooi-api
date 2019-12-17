@@ -25,6 +25,7 @@ $app->group('/tournaments', function () use ($app) {
     $app->put('/{id}', 'App\Action\Tournament:edit');
     $app->delete('/{id}', 'App\Action\Tournament:remove');
     $app->post('/syncrefereeroles/{id}', 'App\Action\Tournament:syncRefereeRoles');
+    $app->post('/sendrequestoldstructure/{id}', 'App\Action\Tournament:sendRequestOldStructure');
     $app->get('/userrefereeid/{id}', 'App\Action\Tournament:getUserRefereeId');
     $app->get('/export/{id}', 'App\Action\Tournament:export');
     $app->post('/copy/{id}', 'App\Action\Tournament:copy');

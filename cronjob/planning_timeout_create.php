@@ -35,10 +35,6 @@ $logger->pushHandler( $handler );
 $planningSeeker = new PlanningSeeker( $logger, $planningInputRepos, $planningRepos );
 
 try {
-    if( count($argv) !== 2 ) {
-        throw new \Exception("first parameter must be intervalMinutes"
-            , E_ERROR);
-    }
 
 //    $intervalMinutes = filter_var($argv[1], FILTER_VALIDATE_INT);
 //    if( $intervalMinutes === false ) {
@@ -55,14 +51,20 @@ try {
 //    $endDate = $startDate->modify( "+ " . $nNrOfSecondsWithMargin . " seconds" );
 
     // while( (new \DateTimeImmutable()) < $endDate ) {
-    if( $planningInputRepos->isProcessing() ) {
-        $logger->info( "still processing, sleeping 10 seconds.." );
-        return;
-    }
+
+    // @TODO ZOU EIGENLIJK EERST FAILED MET PLANNINGEN MOETEN PAKKEN
+    // EN DAARNA PAS TIMEOUTS MET SUCCESVOLLE INPUT
+//    if( $planningInputRepos->isProcessing() ) {
+//        $logger->info( "still processing, sleeping 10 seconds.." );
+//        return;
+//    }
     $planning = $planningRepos->getTimeout();
     if ($planning === null) {
         $logger->info("   all plannings(also timeout) are tried");
         return;
+    }
+    if( array_key_exists(1, $argv) ) {
+        $planning = $planningRepos->find( (int) $argv[1] );
     }
     $planningSeeker->processTimeout( $planning );
 

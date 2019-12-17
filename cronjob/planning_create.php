@@ -12,6 +12,8 @@ $app = new \Slim\App($settings);
 require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
+ini_set('memory_limit','1G');
+
 use Monolog\Logger;
 use Voetbal\Planning\ConvertService;
 use Voetbal\Planning\Input\Service as PlanningInputService;
@@ -51,13 +53,13 @@ $inputService = new PlanningInputService();
 
 $logger = new Logger('planning-create');
 $output = 'php://stdout';
-  if( $settings['environment'] !== 'development' ) {
-    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
-    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-}
+ //  if( $settings['environment'] !== 'development' ) {
+//    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
+//    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
+// }
 $handler = new \Monolog\Handler\StreamHandler($output, $settings['logger']['level']);
 $logger->pushHandler( $handler );
-
+$logger->info( "start process" );
 $planningSeeker = new PlanningSeeker( $logger, $planningInputRepos, $planningRepos );
 
 try {
@@ -66,6 +68,9 @@ try {
         return;
     }
     $planningInput = $planningInputRepos->getFirstUnsuccessful();
+    if( array_key_exists(1, $argv) ) {
+        $planningInput = $planningInputRepos->find( (int) $argv[1] );
+    }
     if( $planningInput === null ) {
         $logger->info( "nothing to process" );
         return;

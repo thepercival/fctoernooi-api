@@ -62,7 +62,7 @@ class Tournament
     /**
      * @var bool
      */
-    protected $updated; // DEP
+    protected $updated; // DEP, false = old struct
 
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
@@ -73,6 +73,7 @@ class Tournament
         $this->roles = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
         $this->breakDuration = 0;
+        $this->updated = true;
     }
 
     /**

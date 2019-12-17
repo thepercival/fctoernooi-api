@@ -194,7 +194,27 @@ final class Tournament
             return $response
                 ->withStatus(201)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $roles, 'json' ));
+                ->write($this->serializer->serialize( true, 'json' ));
+            ;
+        }
+        catch( \Exception $e ){
+            return $response->withStatus(422 )->write( $e->getMessage() );
+        }
+    }
+
+    public function sendRequestOldStructure($request, $response, $args)
+    {
+        try {
+            /** @var \FCToernooi\Tournament|null $tournament */
+            $tournament = $this->repos->find($args['id']);
+            if ($tournament === null) {
+                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
+            }
+            $this->sendEmailOldStructure( $tournament );
+            return $response
+                ->withStatus(201)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8')
+                ->write($this->serializer->serialize( true, 'json' ));
             ;
         }
         catch( \Exception $e ){
@@ -439,6 +459,32 @@ final class Tournament
             return "qrcode-en-link";
         }
         return "toernooi";
+    }
+
+    protected function sendEmailOldStructure( TournamentBase $tournament )
+    {
+        $subject = 'omzetten structuur fctoernooi';
+        $body = '
+            <p>https://www.fctoernooi.nl/toernooi/structure/'.$tournament->getId().'</p>
+            <p>
+            met vriendelijke groet,
+            <br>
+            FCToernooi
+            </p>';
+
+        $from = "FCToernooi";
+        $fromEmail = "noreply@fctoernooi.nl";
+        $headers  = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
+        $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
+        $headers .= "X-Mailer: PHP/" . phpversion();
+        $params = "-r ".$fromEmail;
+
+        if ( !mail( "fctoernooi2018@gmail.com", $subject, $body, $headers, $params) ) {
+            // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
+            error_log('Mailer Error!' );
+            // $app->halt(500);
+        }
     }
 
     /*
