@@ -80,7 +80,7 @@ try {
     $logger->info( $nrUpdated . " roundnumber(s)-planning updated" );
 }
 catch ( Exception $e ) {
-    echo $e->getMessage() . PHP_EOL;
+    $logger->error( $e->getMessage()  );
 }
 
 function addPlannigsToRoundNumbers( PlanningInput $planningInput, RoundNumberRepository $roundNumberRepos,

@@ -79,10 +79,10 @@ function createPlanningInputs( PlanningRepository $planningRepos, PlanningInputR
                             foreach( $selfRefereeTeamupVariations as $selfRefereeTeamupVariation ) {
                                 $teamup = $selfRefereeTeamupVariation->teamup;
                                 $selfReferee = $selfRefereeTeamupVariation->selfReferee;
-                                if ($nrOfCompetitors === 6 && $nrOfPoules === 1 && $nrOfSports === 1 && $nrOfFields === 2
+                                /*if ($nrOfCompetitors === 6 && $nrOfPoules === 1 && $nrOfSports === 1 && $nrOfFields === 2
                                     && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
                                     $w1 = 1;
-                                } else if ($nrOfCompetitors === 12 && $nrOfPoules === 2 && $nrOfSports === 1 && $nrOfFields === 4
+                                } else*/ if ($nrOfCompetitors === 12 && $nrOfPoules === 2 && $nrOfSports === 1 && $nrOfFields === 4
                                     && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
                                     $w1 = 1;
                                 } else {

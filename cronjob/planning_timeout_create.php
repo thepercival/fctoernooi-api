@@ -13,6 +13,8 @@ require __DIR__ . '/../conf/dependencies.php';
 require __DIR__ . '/mailHelper.php';
 
 use Monolog\Logger;
+use Voetbal\Planning as PlanningBase;
+use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
 
@@ -31,33 +33,10 @@ $output = 'php://stdout';
 // }
 $handler = new \Monolog\Handler\StreamHandler($output, $settings['logger']['level']);
 $logger->pushHandler( $handler );
-
+$logger->info( "start process" );
 $planningSeeker = new PlanningSeeker( $logger, $planningInputRepos, $planningRepos );
 
 try {
-
-//    $intervalMinutes = filter_var($argv[1], FILTER_VALIDATE_INT);
-//    if( $intervalMinutes === false ) {
-//        throw new \Exception("first parameter intervalMinutes must be a number", E_ERROR);
-//    }
-//    if( $intervalMinutes < 10 ) {
-//        throw new \Exception("intervalMinutes should be at least 10 minutes", E_ERROR);
-//    }
-//
-//    $startDate = new \DateTimeImmutable();
-//
-//    $logger->info( "start job at " . $startDate->format("Y-m-d H:i") );
-//    $nNrOfSecondsWithMargin = ($intervalMinutes * 60) * 0.9;
-//    $endDate = $startDate->modify( "+ " . $nNrOfSecondsWithMargin . " seconds" );
-
-    // while( (new \DateTimeImmutable()) < $endDate ) {
-
-    // @TODO ZOU EIGENLIJK EERST FAILED MET PLANNINGEN MOETEN PAKKEN
-    // EN DAARNA PAS TIMEOUTS MET SUCCESVOLLE INPUT
-//    if( $planningInputRepos->isProcessing() ) {
-//        $logger->info( "still processing, sleeping 10 seconds.." );
-//        return;
-//    }
     $planning = $planningRepos->getTimeout();
     if ($planning === null) {
         $logger->info("   all plannings(also timeout) are tried");
@@ -67,13 +46,29 @@ try {
         $planning = $planningRepos->find( (int) $argv[1] );
     }
     $planningSeeker->processTimeout( $planning );
-
-//        sleep(3);
-//        $logger->info( "sleeping 3 seconds.." );
+//    if( $planning->getState() !== PlanningBase::STATE_SUCCESS ) {
+//        return;
 //    }
-//    $endDate = new \DateTimeImmutable();
-//    $logger->info( "end job at " . $endDate->format("Y-m-d H:i") . ' which started at ' . $startDate->format("Y-m-d H:i") );
+    // update planninginputs
+    for ( $reverseGCD = 2 ; $reverseGCD <= 8 ; $reverseGCD++ ) {
+
+        $reverseGCDInputTmp = $inputService->getReverseGCDInput( $planning->getInput(), $reverseGCD );
+        $reverseGCDInput = $planningInputRepos->getFromInput( $reverseGCDInputTmp );
+        if( $reverseGCDInput === null ) {
+            continue;
+        }
+
+        $plannings = $reverseGCDInput->getPlannings();
+        while ( $plannings->count() > 0 ) {
+            $removePlanning = $plannings->first();
+            $plannings->removeElement( $removePlanning );
+            $planningRepos->remove( $removePlanning );
+        }
+
+        $reverseGCDInput->setState( PlanningInput::STATE_CREATED );
+        $planningInputRepos->save( $reverseGCDInput );
+    }
 }
 catch ( Exception $e ) {
-    echo $e->getMessage() . PHP_EOL;
+    $logger->error( $e->getMessage()  );
 }
