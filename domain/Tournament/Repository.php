@@ -17,6 +17,8 @@ use Voetbal\Referee;
 use Voetbal\Competition;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\League\Repository as LeagueRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Repository
@@ -24,6 +26,11 @@ use Voetbal\League\Repository as LeagueRepository;
  */
 class Repository extends \Voetbal\Repository
 {
+    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
+    {
+        return parent::__construct($em, $class);
+    }
+
     public function customPersist( Tournament $tournament, bool $flush )
     {
         $leagueRepos = new LeagueRepository($this->_em,$this->_em->getClassMetaData(League::class));

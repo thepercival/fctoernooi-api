@@ -14,9 +14,10 @@ declare(strict_types=1);
  */
 namespace App\Response;
 use Crell\ApiProblem\ApiProblem;
-use Slim\Http\Headers;
-use Slim\Http\Response;
-use Slim\Http\Stream;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Response;
+use Slim\Psr7\Stream;
+
 class Forbidden extends Response
 {
     public function __construct($message, $status = 403)
@@ -26,8 +27,8 @@ class Forbidden extends Response
         $handle = fopen("php://temp", "wb+");
         $body = new Stream($handle);
         $body->write($problem->asJson(true));
-        $headers = new Headers;
-        $headers->set("Content-type", "application/problem+json");
+        $headers = new Headers();
+        $headers->setHeader("Content-type", "application/problem+json");
         parent::__construct($status, $headers, $body);
     }
 }

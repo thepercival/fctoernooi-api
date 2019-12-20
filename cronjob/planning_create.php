@@ -14,6 +14,7 @@ require __DIR__ . '/mailHelper.php';
 
 ini_set('memory_limit','1G');
 
+use Psr\Log\LoggerInterface;
 use Monolog\Logger;
 use Voetbal\Planning\ConvertService;
 use Voetbal\Planning\Input\Service as PlanningInputService;
@@ -54,10 +55,10 @@ $inputService = new PlanningInputService();
 $logger = new Logger('planning-create');
 $output = 'php://stdout';
  //  if( $settings['environment'] !== 'development' ) {
-//    $output = $settings['logger']['cronjobpath'] . 'planning_create.log';
+//    $output = $settings[LoggerInterface::class]['cronjobpath'] . 'planning_create.log';
 //    $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
 // }
-$handler = new \Monolog\Handler\StreamHandler($output, $settings['logger']['level']);
+$handler = new \Monolog\Handler\StreamHandler($output, $settings[LoggerInterface::class]['level']);
 $logger->pushHandler( $handler );
 $logger->info( "start process" );
 $planningSeeker = new PlanningSeeker( $logger, $planningInputRepos, $planningRepos );

@@ -6,7 +6,7 @@
  * Time: 11:46
  */
 
-namespace App\Action\Tournament;
+namespace App\Actions\Tournament;
 
 use Doctrine\ORM\EntityManager;
 use JMS\Serializer\Serializer;

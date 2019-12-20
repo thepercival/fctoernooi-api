@@ -18,7 +18,7 @@
         <cascade-persist/>
       </cascade>
       <join-columns>
-        <join-column name="userid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+        <join-column name="userid" referenced-column-name="id" nullable="false"/>
       </join-columns>
     </many-to-one>
     <unique-constraints>

@@ -1,34 +1,76 @@
 <?php
-if (PHP_SAPI == 'cli-server') {
-    // To help the built-in PHP dev server, check if the request was actually for
-    // something which should probably be served as a static file
-    $url  = parse_url($_SERVER['REQUEST_URI']);
-    $file = __DIR__ . $url['path'];
-    if (is_file($file)) {
-        return false;
-    }
-}
 
-// this line can move to php.settings if allwebsites use it
-date_default_timezone_set ( 'UTC' );
+declare(strict_types=1);
+// error_reporting(E_ALL & ~E_DEPRECATED);
+error_reporting(0);
+
+use App\Handlers\HttpErrorHandler;
+use App\Handlers\ShutdownHandler;
+use App\ResponseEmitter\ResponseEmitter;
+use DI\ContainerBuilder;
+use Slim\Factory\AppFactory;
+use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-session_start();
+// Instantiate PHP-DI ContainerBuilder
+$containerBuilder = new ContainerBuilder();
 
-// Instantiate the app
+if (false) { // Should be set to true in production
+    $containerBuilder->enableCompilation(__DIR__ . '/../var/cache');
+}
+
+// Set up settings
 $settings = require __DIR__ . '/../conf/settings.php';
-$app = new \Slim\App($settings);
+$containerBuilder->addDefinitions($settings);
 
 // Set up dependencies
-require __DIR__ . '/../conf/dependencies.php';
+$dependencies = require __DIR__ . '/../conf/dependencies.php';
+$dependencies($containerBuilder);
+
+// Set up repositories
+$repositories = require __DIR__ . '/../conf/repositories.php';
+$repositories($containerBuilder);
+
+// Build PHP-DI Container instance
+$container = $containerBuilder->build();
+
+// Instantiate the app
+AppFactory::setContainer($container);
+$app = AppFactory::create();
+$callableResolver = $app->getCallableResolver();
 
 // Register middleware
-require __DIR__ . '/../conf/middleware.php';
+$middleware = require __DIR__ . '/../conf/middleware.php';
+$middleware($app);
 
 // Register routes
-require __DIR__ . '/../conf/routes.php';
+$routes = require __DIR__ . '/../conf/routes.php';
+$routes($app);
 
-// Run app
-$app->run();
+/** @var bool $displayErrorDetails */
+$displayErrorDetails = $container->get('settings')['displayErrorDetails'];
 
+// Create Request object from globals
+$serverRequestCreator = ServerRequestCreatorFactory::create();
+$request = $serverRequestCreator->createServerRequestFromGlobals();
+
+// Create Error Handler
+$responseFactory = $app->getResponseFactory();
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+
+// Create Shutdown Handler
+$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+register_shutdown_function($shutdownHandler);
+
+// Add Routing Middleware
+$app->addRoutingMiddleware();
+
+// Add Error Middleware
+$errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, false, false);
+$errorMiddleware->setDefaultErrorHandler($errorHandler);
+
+// Run App & Emit Response
+$response = $app->handle($request);
+$responseEmitter = new ResponseEmitter();
+$responseEmitter->emit($response);

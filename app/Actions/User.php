@@ -6,7 +6,7 @@
  * Time: 21:36
  */
 
-namespace App\Action;
+namespace App\Actions;
 
 use JMS\Serializer\Serializer;
 use FCToernooi\User\Repository as UserRepository;

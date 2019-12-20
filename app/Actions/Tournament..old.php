@@ -6,7 +6,7 @@
  * Time: 11:40
  */
 
-namespace App\Action;
+namespace App\Actions;
 
 use Doctrine\ORM\EntityManager;
 use Slim\Http\Request;
@@ -29,6 +29,8 @@ use JMS\Serializer\SerializationContext;
 use App\Export\TournamentConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
+
 
 final class Tournament
 {
@@ -79,10 +81,8 @@ final class Tournament
         TournamentService $service,
         TournamentRepository $repos,
         UserRepository $userRepository,
-        StructureService $structureService,
         StructureRepository $structureRepository,
         GameRepository $gameRepository,
-        CompetitorService $competitorService,
         Serializer $serializer,
         Token $token,
         EntityManager $em
@@ -91,13 +91,15 @@ final class Tournament
         $this->service = $service;
         $this->repos = $repos;
         $this->userRepository = $userRepository;
-        $this->structureService = $structureService;
         $this->structureReposistory = $structureRepository;
         $this->gameRepository = $gameRepository;
-        $this->competitorService = $competitorService;
         $this->serializer = $serializer;
         $this->token = $token;
         $this->em = $em;
+
+        $this->competitorService = new CompetitorService();
+        $this->structureService = new StructureService( new TournamentStructureOptions() );
+//        $container->get('voetbal')->getService(Voetbal\Competitor::class),
     }
 
     public function fetchOnePublic($request, $response, $args)

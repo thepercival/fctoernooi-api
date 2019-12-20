@@ -6,7 +6,7 @@
  * Time: 12:23
  */
 
-namespace App\Action;
+namespace App\Actions;
 
 use \Suin\ImageResizer\ImageResizer;
 use JMS\Serializer\Serializer;

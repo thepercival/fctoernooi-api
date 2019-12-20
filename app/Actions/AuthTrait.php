@@ -6,7 +6,7 @@
  * Time: 13:02
  */
 
-namespace App\Action;
+namespace App\Actions;
 
 use FCToernooi\Token;
 use FCToernooi\User\Repository as UserRepository;

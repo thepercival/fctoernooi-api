@@ -1,15 +1,12 @@
 <?php
 
-$dotenv = new \Dotenv\Dotenv(__DIR__ . '/../');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
 return [
     'settings' => [
         'environment' => getenv('ENVIRONMENT'),
         'displayErrorDetails' => ( getenv('ENVIRONMENT') === "development" ),
-        'addContentLengthHeader' => false, // Allow the web server to send the content-length header
-	    'determineRouteBeforeAppMiddleware' => true,
-
         // Renderer settings
         'renderer' => [
             'template_path' => __DIR__ . '/../templates/',

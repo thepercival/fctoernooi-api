@@ -8,8 +8,8 @@
 
 namespace App\Middleware;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+//use Slim\Http\Request; replace  depr
+//use Slim\Http\Response; replace depr
 use FCToernooi\User\Repository as UserRepos;
 use FCToernooi\Tournament\Repository as TournamentRepos;
 use FCToernooi\Tournament\Service as TournamentService;
@@ -18,6 +18,9 @@ use FCToernooi\User;
 use App\Response\Forbidden as ForbiddenResponse;
 use Voetbal\Service as VoetbalService;
 use FCToernooi\Role;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 class Authentication
 {
@@ -56,7 +59,7 @@ class Authentication
         $this->voetbalService = $voetbalService;
     }
 
-    public function __invoke(Request $request, Response $response, callable $next)
+    public function __invoke(Request $request, RequestHandler $handler): Response
     {
         $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
 
@@ -73,6 +76,7 @@ class Authentication
             return $next($request, $response);
         }
 
+        return new ForbiddenResponse("routeInfo is deprecated", 401);
         $args = $request->getAttribute('routeInfo')[2];
         if (array_key_exists('resourceType', $args) === false) {
             return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden", 401);
