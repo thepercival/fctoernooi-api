@@ -1,7 +1,6 @@
 <?php
 
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
-use Symfony\Component\Yaml\Yaml;
 
 require 'vendor/autoload.php';
 
@@ -13,7 +12,8 @@ $config = \Doctrine\ORM\Tools\Setup::createConfiguration(
 	$settings['meta']['proxy_dir'],
 	$settings['meta']['cache']
 );
-$config->setMetadataDriverImpl( new App\YamlDriver( $settings['meta']['entity_path'] ));
+$driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver( $settings['meta']['entity_path'] );
+$config->setMetadataDriverImpl($driver);
 
 $em = \Doctrine\ORM\EntityManager::create($settings['connection'], $config);
 

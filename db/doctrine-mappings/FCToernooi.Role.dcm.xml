@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="FCToernooi\Role" table="tournamentroles" repository-class="FCToernooi\Role\Repository">
+    <id name="id" type="integer" column="id">
+      <generator strategy="AUTO"/>
+    </id>
+    <field name="value" column="role" type="integer" nullable="false" unique="false"/>
+    <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="roles">
+      <cascade>
+        <cascade-persist/>
+      </cascade>
+      <join-columns>
+        <join-column name="tournamentid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+      </join-columns>
+    </many-to-one>
+    <many-to-one field="user" target-entity="FCToernooi\User">
+      <cascade>
+        <cascade-persist/>
+      </cascade>
+      <join-columns>
+        <join-column name="userid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+      </join-columns>
+    </many-to-one>
+    <unique-constraints>
+      <unique-constraint columns="tournamentid,userid,role" name="main_u_idx" />
+    </unique-constraints>
+  </entity>
+</doctrine-mapping>

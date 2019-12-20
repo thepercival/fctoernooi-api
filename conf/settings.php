@@ -33,8 +33,8 @@ return [
         'doctrine' => [
             'meta' => [
                 'entity_path' => [
-                    __DIR__ . '/../vendor/thepercival/voetbal/db/yml-mapping',
-                    __DIR__ . '/../db/yml-mapping'
+                    __DIR__ . '/../vendor/thepercival/voetbal/db/doctrine-mappings',
+                    __DIR__ . '/../db/doctrine-mappings'
                 ],
                 'dev_mode' => ( getenv('ENVIRONMENT') === "development" ),
                 'proxy_dir' => __DIR__ . '/../cache/proxies',

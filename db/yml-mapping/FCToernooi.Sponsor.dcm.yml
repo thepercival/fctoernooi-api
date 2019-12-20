@@ -21,6 +21,7 @@ FCToernooi\Sponsor:
       nullable: true
       unique: false
       length : !php/const FCToernooi\Sponsor::MAX_LENGTH_URL
+
     logoUrl:
       type: string
       nullable: true
