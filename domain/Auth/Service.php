@@ -8,12 +8,15 @@
 
 namespace FCToernooi\Auth;
 
-use Doctrine\DBAL\Connection;
+use FCToernooi\Tournament;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Role;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use Firebase\JWT\JWT;
+use Tuupola\Base62;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Service
 {
@@ -30,36 +33,56 @@ class Service
      */
     protected $tournamentRepos;
     /**
-     * @var Connection
+     * @var Settings
      */
-    protected $conn;
+    protected $settings;
 
     /**
      * Service constructor.
      * @param UserRepository $userRepos
      * @param RoleRepository $roleRepos
      * @param TournamentRepository $tournamentRepos
-     * @param Connection $conn
+     * @param Settings $settings
      */
 	public function __construct(
 	    UserRepository $userRepos,
         RoleRepository $roleRepos,
         TournamentRepository $tournamentRepos,
-        Connection $conn )
+        Settings $settings )
 	{
 		$this->userRepos = $userRepos;
         $this->roleRepos = $roleRepos;
         $this->tournamentRepos = $tournamentRepos;
-		$this->conn = $conn;
+        $this->settings = $settings;
 	}
 
-	/**
-	 * @param string $emailaddress
-	 * @param string $password
-	 * @param string $name
-	 *
-	 * @throws \Exception
-	 */
+    public function checkAuth( Request $request, Tournament $tournament = null ): User
+    {
+        $user = $this->getUser($request);
+        if ( $user === null ){
+            throw new \Exception("de ingelogde gebruikers kon niet gevonden worden", E_ERROR );
+        }
+        if( $tournament !== null && !$tournament->hasRole( $user, Role::ADMIN ) ) {
+            throw new \Exception( "je hebt geen rechten om het toernooi aan te passen" );
+        }
+        return $user;
+    }
+
+    public function getUser( Request $request ): ?User {
+        $token = $request->getAttribute('token');
+        if ( $token === null || !$token->isPopulated() ) {
+            return null;
+        }
+        return $user = $this->userRepos->find($token->getUserId());
+    }
+
+    /**
+     * @param $emailaddress
+     * @param $password
+     * @param null $name
+     * @return |null
+     * @throws \Doctrine\DBAL\ConnectionException
+     */
 	public function register( $emailaddress, $password, $name = null )
 	{
         if ( strlen( $password ) < User::MIN_LENGTH_PASSWORD or strlen( $password ) > User::MAX_LENGTH_PASSWORD ){
@@ -80,15 +103,16 @@ class Service
         $user->setSalt( bin2hex(random_bytes(15) ) );
         $user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
 
-        $this->conn->beginTransaction();
+        $conn = $this->userRepos->getEM()->getConnection();
+        $conn->beginTransaction();
         $savedUser = null;
         try {
             $savedUser = $this->userRepos->save($user);
             $roles = $this->syncRefereeRolesForUser( $user );
             $this->sendRegisterEmail( $emailaddress, $roles );
-            $this->conn->commit();
+            $conn->commit();
         } catch (\Exception $e) {
-            $this->conn->rollback();
+            $conn->rollback();
             throw $e;
         }
 		return $savedUser;
@@ -169,6 +193,23 @@ class Service
         $this->userRepos->save( $user );
         $this->mailPasswordCode( $user );
         return true;
+    }
+
+    public function getToken( User $user)
+    {
+        $jti = (new Base62)->encode(random_bytes(16));
+
+        $now = new \DateTime();
+        $future = new \DateTime("now +3 months");
+
+        $payload = [
+            "iat" => $now->getTimeStamp(),
+            "exp" => $future->getTimeStamp(),
+            "jti" => $jti,
+            "sub" => $user->getId(),
+        ];
+
+        return JWT::encode($payload, $this->settings->getJwtSecret() );
     }
 
     protected function mailPasswordCode( User $user )

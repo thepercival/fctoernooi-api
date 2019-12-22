@@ -20,17 +20,18 @@ use Slim\Psr7\Headers;
 use Slim\Psr7\Response;
 use Slim\Psr7\Stream;
 
-class Unauthorized extends Response
+class UnauthorizedResponse extends Response
 {
     public function __construct($message, $status = 401)
     {
-        $problem = new ApiProblem($message, "about:blank");
-        $problem->setStatus($status);
+        $headers = new Headers;
+        $headers->setHeader("Content-type", "application/json");
+
         $handle = fopen("php://temp", "wb+");
         $body = new Stream($handle);
-        $body->write($problem->asJson(true));
-        $headers = new Headers;
-        $headers->setHeader("Content-type", "application/problem+json");
+        $body->write( json_encode(["message" => $message], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) );
+
         parent::__construct($status, $headers, $body);
+
     }
 }

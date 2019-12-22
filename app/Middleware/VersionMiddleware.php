@@ -25,5 +25,4 @@ class VersionMiddleware implements Middleware
         }
         return $handler->handle($request);
     }
-
 }

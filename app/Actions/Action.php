@@ -20,21 +20,6 @@ abstract class Action
     protected $logger;
 
     /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * @var Response
-     */
-    protected $response;
-
-    /**
-     * @var array
-     */
-    protected $args;
-
-    /**
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger)
@@ -42,62 +27,62 @@ abstract class Action
         $this->logger = $logger;
     }
 
-    /**
-     * @param Request  $request
-     * @param Response $response
-     * @param array    $args
-     * @return Response
-     * @throws HttpNotFoundException
-     * @throws HttpBadRequestException
-     */
-    public function __invoke(Request $request, Response $response, $args): Response
-    {
-        $this->request = $request;
-        $this->response = $response;
-        $this->args = $args;
-
-        try {
-            return $this->action($request, $response, $args);
-        } catch (DomainRecordNotFoundException $e) {
-            throw new HttpNotFoundException($this->request, $e->getMessage());
-        }
-    }
-
-    /**
-     * @return Response
-     * @throws DomainRecordNotFoundException
-     * @throws HttpBadRequestException
-     */
-    abstract protected function fetchOne( Request $request, Response $response, $args ): Response;
-    abstract protected function fetch( Request $request, Response $response, $args ): Response;
-    abstract protected function add( Request $request, Response $response, $args ): Response;
-    abstract protected function edit( Request $request, Response $response, $args ): Response;
-    abstract protected function remove( Request $request, Response $response, $args ): Response;
-
-    protected function action( Request $request, Response $response, $args ): Response
-    {
-        $id = array_key_exists("id", $args) ? $args["id"] : null;
-
-        if ($request->getMethod() === 'GET') {
-            if ($id) {
-                return $this->fetchOne($request, $response, $args);
-            } else {
-                return $this->fetch($request, $response, $args);
-            }
-        } elseif ($request->getMethod() === 'POST') {
-            return $this->add($request, $response, $args);
-        } elseif ($request->getMethod() === 'PUT') {
-            return $this->edit($request, $response, $args);
-        } elseif ($request->getMethod() === 'DELETE') {
-            return $this->remove($request, $response, $args);
-        }
-    }
+//    /**
+//     * @param Request  $request
+//     * @param Response $response
+//     * @param array    $args
+//     * @return Response
+//     * @throws HttpNotFoundException
+//     * @throws HttpBadRequestException
+//     */
+//    public function __invoke(Request $request, Response $response, $args): Response
+//    {
+//        $this->request = $request;
+//        $this->response = $response;
+//        $this->args = $args;
+//
+//        try {
+//            return $this->action($request, $response, $args);
+//        } catch (DomainRecordNotFoundException $e) {
+//            throw new HttpNotFoundException($this->request, $e->getMessage());
+//        }
+//    }
+//
+//    /**
+//     * @return Response
+//     * @throws DomainRecordNotFoundException
+//     * @throws HttpBadRequestException
+//     */
+//    abstract protected function fetchOne( Request $request, Response $response, $args ): Response;
+//    abstract protected function fetch( Request $request, Response $response, $args ): Response;
+//    abstract protected function add( Request $request, Response $response, $args ): Response;
+//    abstract protected function edit( Request $request, Response $response, $args ): Response;
+//    abstract protected function remove( Request $request, Response $response, $args ): Response;
+//
+//    protected function action( Request $request, Response $response, $args ): Response
+//    {
+//        $id = array_key_exists("id", $args) ? $args["id"] : null;
+//
+//        if ($request->getMethod() === 'GET') {
+//            if ($id) {
+//                return $this->fetchOne($request, $response, $args);
+//            } else {
+//                return $this->fetch($request, $response, $args);
+//            }
+//        } elseif ($request->getMethod() === 'POST') {
+//            return $this->add($request, $response, $args);
+//        } elseif ($request->getMethod() === 'PUT') {
+//            return $this->edit($request, $response, $args);
+//        } elseif ($request->getMethod() === 'DELETE') {
+//            return $this->remove($request, $response, $args);
+//        }
+//    }
 
     /**
      * @return array|object
      * @throws HttpBadRequestException
      */
-    protected function getFormData()
+    protected function getFormData( Request $request )
     {
         $input = json_decode(file_get_contents('php://input'));
 
@@ -113,22 +98,22 @@ abstract class Action
      * @return mixed
      * @throws HttpBadRequestException
      */
-    protected function resolveArg(string $name)
+    protected function resolveArg( Request $request, $args, string $name)
     {
-        if (!isset($this->args[$name])) {
-            throw new HttpBadRequestException($this->request, "Could not resolve argument `{$name}`.");
+        if (!isset($args[$name])) {
+            throw new HttpBadRequestException($request, "Could not resolve argument `{$name}`.");
         }
 
-        return $this->args[$name];
+        return $args[$name];
     }
 
     /**
      * @param string $json
      * @return Response
      */
-    protected function respondWithJson(string $json): Response
+    protected function respondWithJson(Response $response, string $json): Response
     {
-        $this->response->getBody()->write($json);
-        return $this->response->withHeader('Content-Type', 'application/json');
+        $response->getBody()->write($json);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

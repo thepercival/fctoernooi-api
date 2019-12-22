@@ -8,26 +8,28 @@
 
 namespace App\Actions;
 
-use JMS\Serializer\Serializer;
+use JMS\Serializer\SerializerInterface;
 use FCToernooi\User;
 use \Firebase\JWT\JWT;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Auth\Service as AuthService;
 use \Slim\Middleware\JwtAuthentication;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Tuupola\Base62;
 
-final class Auth
+final class Auth extends Action
 {
     /**
      * @var AuthService
      */
-	private $service;
+	private $authService;
     /**
      * @var UserRepository
      */
     private $userRepository;
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     protected $serializer;
     /**
@@ -35,12 +37,11 @@ final class Auth
      */
 	protected $settings;
 
-	public function __construct(AuthService $service, UserRepository $userRepository, Serializer $serializer, $settings )
+	public function __construct(AuthService $authService, UserRepository $userRepository, SerializerInterface $serializer )
 	{
-        $this->service = $service;
+        $this->authService = $authService;
         $this->userRepository = $userRepository;
 		$this->serializer = $serializer;
-		$this->settings = $settings;
 	}
 
     public function validateToken( $request, $response, $args)
@@ -48,7 +49,7 @@ final class Auth
         return $response->withStatus(200);
     }
 
-	public function register( $request, $response, $args)
+	public function register( Request $request, Response $response, $args): Response
 	{
 		$sErrorMessage = null;
 		try{
@@ -62,7 +63,7 @@ final class Auth
             $emailAddress = $arrRegisterData["emailaddress"];
             $password = $arrRegisterData["password"];
 
-			$user = $this->service->register( $emailAddress, $password );
+			$user = $this->authService->register( $emailAddress, $password );
 			if ($user === null or !($user instanceof User)) {
 				throw new \Exception( "de nieuwe gebruiker kan niet worden geretourneerd");
             }
@@ -87,49 +88,47 @@ final class Auth
         return $response->withStatus(400)->write( $sErrorMessage );
 	}
 
-	public function login($request, $response, $args)
+    public function login( Request $request, Response $response, $args): Response
 	{
-//	    var_dump($request->getParams());
-//	    var_dump($args);
-//	    die();
-        $emailaddress = $request->getParam('emailaddress');
-		$password = $request->getParam('password');
+       try{
+           $authData = $this->getFormData( $request );
+           if( !property_exists( $authData, "emailaddress") || strlen($authData->emailaddress) === 0 ) {
+               throw new \Exception( "het emailadres is niet opgegeven");
+           }
+           $emailaddress = filter_var($authData->emailaddress, FILTER_VALIDATE_EMAIL);
+           if( $emailaddress === false ) {
+               throw new \Exception( "het emailadres \"".$authData->emailaddress."\" is onjuist");
+           }
+           if( !property_exists( $authData, "password") || strlen($authData->password) === 0 ) {
+               throw new \Exception( "het wachtwoord is niet opgegeven");
+           }
 
-		$sErrorMessage = null;
-		try{
-			$user = $this->userRepository->findOneBy(
-				array( 'emailaddress' => $emailaddress )
-			);
+           $user = $this->userRepository->findOneBy(
+               array( 'emailaddress' => $emailaddress )
+           );
 
-            if (!$user or !password_verify( $user->getSalt() . $password, $user->getPassword() ) ) {
-				throw new \Exception( "ongeldige emailadres en wachtwoord combinatie");
-			}
+           if (!$user or !password_verify( $user->getSalt() . $authData->password, $user->getPassword() ) ) {
+               throw new \Exception( "ongeldige emailadres en wachtwoord combinatie");
+           }
 
-			/*if ( !$user->getActive() ) {
-				throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
-			}*/
+           /*if ( !$user->getActive() ) {
+		    throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
+		    }*/
 
+           $data = [
+               "token" => $this->authService->getToken( $user ),
+               "userid" => $user->getId()
+           ];
 
-            $data = [
-                "token" => $this->getToken( $user),
-                "userid" => $user->getId()
-            ];
-
-			return $response
-				->withStatus(201)
-				->withHeader('Content-Type', 'application/json;charset=utf-8')
-				->write($this->serializer->serialize( $data, 'json'));
-			;
+           return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
 		}
 		catch( \Exception $e ){
-			$sErrorMessage = $e->getMessage();
+            return $response->withStatus(400)->write( $e->getMessage() );
 		}
-		return $response->withStatus(400)->write( $sErrorMessage );
 	}
 
     public function passwordreset($request, $response, $args)
     {
-        $sErrorMessage = null;
         try{
             $arrRegisterData = $request->getParsedBody();
             if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
@@ -137,7 +136,7 @@ final class Auth
             }
             $emailAddress = $arrRegisterData["emailaddress"];
 
-            $retVal = $this->service->sendPasswordCode( $emailAddress );
+            $retVal = $this->authService->sendPasswordCode( $emailAddress );
 
             $data = [ "retval" => $retVal ];
             return $response
@@ -147,9 +146,8 @@ final class Auth
             ;
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return $response->withStatus(400)->write( $e->getMessage() );
         }
-        return $response->withStatus(400)->write( $sErrorMessage );
     }
 
     public function passwordchange($request, $response, $args)
@@ -170,7 +168,7 @@ final class Auth
             $password = $arrRegisterData["password"];
             $code = (string) $arrRegisterData["code"];
 
-            $user = $this->service->changePassword( $emailAddress, $password, $code );
+            $user = $this->authService->changePassword( $emailAddress, $password, $code );
 
             $data = [
                 "token" => $this->getToken( $user),
@@ -187,23 +185,6 @@ final class Auth
             $sErrorMessage = $e->getMessage();
         }
         return $response->withStatus(400)->write( $sErrorMessage );
-    }
-
-	protected function getToken( User $user)
-    {
-        $jti = (new Base62)->encode(random_bytes(16));
-
-        $now = new \DateTime();
-        $future = new \DateTime("now +3 months");
-
-        $payload = [
-            "iat" => $now->getTimeStamp(),
-            "exp" => $future->getTimeStamp(),
-            "jti" => $jti,
-            "sub" => $user->getId(),
-        ];
-
-        return JWT::encode($payload, $this->settings['auth']['jwtsecret'] );
     }
 
 	/*

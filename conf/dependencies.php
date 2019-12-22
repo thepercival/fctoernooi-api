@@ -4,7 +4,6 @@ declare(strict_types=1);
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
 use Psr\Container\ContainerInterface;
-use FCToernooi\Token;
 use Doctrine\ORM\EntityManager;
 
 use DI\ContainerBuilder;
@@ -12,6 +11,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
+
+use FCToernooi\Auth\Settings as AuthSettings;
 
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
@@ -90,16 +91,13 @@ return function (ContainerBuilder $containerBuilder) {
             $serializerBuilder->addDefaultHandlers();
 
             return $serializerBuilder->build();
-
         },
-        Voetbal\Service::class => function( ContainerInterface $container ) {
-            return new Voetbal\Service($container->get( EntityManager::class ));
+        AuthSettings::class => function( ContainerInterface $container ) {
+            $authSettings = $container->get('settings')['auth'];
+            return new AuthSettings($authSettings['jwtsecret'], $authSettings['jwtalgorithm'], $authSettings['activationsecret']);
         },
         'jwt' => function( ContainerInterface $container ) {
             return new \stdClass;
-        },
-        Token::class => function ( ContainerInterface $container ) {
-            return new Token;
         }
     ]);
 };

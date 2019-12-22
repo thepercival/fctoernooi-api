@@ -8,13 +8,18 @@
 
 declare(strict_types=1);
 
-namespace FCToernooi;
+namespace FCToernooi\Auth;
 
 class Token
 {
     protected $decoded;
 
-    public function populate($decoded)
+    public function __construct( array $decoded )
+    {
+        $this->populate( $decoded );
+    }
+
+    protected function populate($decoded)
     {
         $this->decoded = $decoded;
     }

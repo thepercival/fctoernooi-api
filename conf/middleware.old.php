@@ -8,8 +8,8 @@ use App\Response\Forbidden as ForbiddenResponse;
 use Gofabian\Negotiation\NegotiationMiddleware;
 use Tuupola\Middleware\JwtAuthentication;
 use Tuupola\Middleware\CorsMiddleware;
-use App\Response\Unauthorized;
-use App\Middleware\Authentication;
+use App\Response\UnauthorizedResponse;
+use App\Middleware\AuthenticationMiddleware;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
@@ -52,7 +52,7 @@ $jwtAuthentication = function ( ContainerInterface $container) {
             if( $message === "Expired token" ) {
               $message = "token is niet meer geldig, log opnieuw in";
             }
-            return new Unauthorized($message, 401);
+            return new UnauthorizedResponse($message, 401);
         },
         "before" => function ($request, $arguments) use ($container) {
             $container->get("token")->populate($arguments["decoded"]);
@@ -70,18 +70,13 @@ $corsMiddleware = function (ContainerInterface $container) {
         "credentials" => true,
         "cache" => 300,
         "error" => function ($request, $response, $arguments) {
-            return new Unauthorized($arguments["message"], 401);
+            return new UnauthorizedResponse($arguments["message"], 401);
         }
-    ]);
-};
-$negotiationMiddleware = function (ContainerInterface $container) {
-    return new NegotiationMiddleware([
-        "accept" => ["application/json"]
     ]);
 };
 
 $myAuthentication = function ( ContainerInterface $container) {
-    return new Authentication(
+    return new AuthenticationMiddleware(
         $container->get('token'),
         new FCToernooi\User\Repository($container->get('em'),$container->get('em')->getClassMetaData(FCToernooi\User::class)),
         new FCToernooi\Tournament\Repository($container->get('em'),$container->get('em')->getClassMetaData(FCToernooi\Tournament::class)),
@@ -107,83 +102,6 @@ $app->add(function ( $request,  $response, callable $next) use ( $container ){
     return $next($request, $response);
 });
 
-$app->add(function ( $request,  $response, callable $next) use ( $container ){
-    $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
-    if( strlen( $apiVersion ) === 0 ) {
-        $apiVersion = "1";
-    }
-
-    $container['serializer'] = function() use ($container, $apiVersion) {
-        $settings = $container->get('settings');
-        $serializerBuilder = SerializerBuilder::create()->setDebug($settings['displayErrorDetails']);
-        if( $settings["environment"] === "production") {
-            $serializerBuilder = $serializerBuilder->setCacheDir($settings['serializer']['cache_dir']);
-        }
-        $serializerBuilder->setPropertyNamingStrategy(new \JMS\Serializer\Naming\SerializedNameAnnotationStrategy(new \JMS\Serializer\Naming\IdenticalPropertyNamingStrategy()));
-
-        $serializerBuilder->setSerializationContextFactory(function () use ($apiVersion) {
-            return SerializationContext::create()
-                ->setGroups(array('Default'))
-                ->setVersion($apiVersion);
-        });
-        $serializerBuilder->setDeserializationContextFactory(function () use ($apiVersion) {
-            return DeserializationContext::create()
-                ->setGroups(array('Default'))
-                ->setVersion($apiVersion);
-        });
-        foreach( $settings['serializer']['yml_dir'] as $ymlnamespace => $ymldir ){
-            $serializerBuilder->addMetadataDir($ymldir,$ymlnamespace);
-        }
-        $serializerBuilder->configureHandlers(function(JMS\Serializer\Handler\HandlerRegistry $registry) {
-            $registry->registerSubscribingHandler(new StructureSerializationHandler());
-            $registry->registerSubscribingHandler(new RoundNumberSerializationHandler());
-            $registry->registerSubscribingHandler(new RoundSerializationHandler());
-//            $registry->registerSubscribingHandler(new QualifyGroupSerializationHandler());
-        });
-        $serializerBuilder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
-            /*$dispatcher->addListener('serializer.pre_serialize',
-                function(JMS\Serializer\EventDispatcher\PreSerializeEvent $event) {
-                    // do something
-                }
-            );*/
-            //$dispatcher->addSubscriber(new RoundNumberEventSubscriber());
-            $dispatcher->addSubscriber(new RoundNumberEventSubscriber());
-        });
-        $serializerBuilder->addDefaultHandlers();
-
-        return $serializerBuilder->build();
-    };
-
-    $response = $next($request, $response);
-    header_remove("X-Powered-By");
-    return $response;
-});
-
-//$container["cache"] = function ($container) {
-//    return new CacheUtil;
-//};
-
-$errorMiddleware = $app->addErrorMiddleware( $container->get("settings")['ENVIRONMENT'] === "development" , true, true);
-
-// Set the Not Found Handler
-$errorMiddleware->setErrorHandler(
-    HttpNotFoundException::class,
-    function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-        $response = new Response();
-        $response->getBody()->write('404 NOT FOUND');
-
-        return $response->withStatus(404);
-    });
-
-// Set the Not Allowed Handler
-$errorMiddleware->setErrorHandler(
-    HttpMethodNotAllowedException::class,
-    function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
-        $response = new Response();
-        $response->getBody()->write('405 NOT ALLOWED');
-
-        return $response->withStatus(405);
-    });
 
 
 

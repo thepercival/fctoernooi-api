@@ -20,26 +20,22 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Service as RoleService;
-use Voetbal\Sport\Repository as SportRepository ;
+use Voetbal\Sport\Repository as SportRepository;
+use Voetbal\Season\Repository as SeasonRepository;
+use Voetbal\League\Repository as LeagueRepository;
+use Voetbal\Competition\Repository as CompetitionRepository;
+use Voetbal\Competition\Service as CompetitionService;
 use FCToernooi\Role;
 use Voetbal\Sport\Config as SportConfig;
+use Voetbal\Sport\Config\Service as SportConfigService;
 use League\Period\Period;
 
 class Service
 {
-
-    /**
-     * @var \Voetbal\Service
-     */
-    protected $voetbalService;
     /**
      * @var TournamentRepository
      */
-    protected $repos;
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
+    protected $tournamentRepos;
     /**
      * @var RoleRepository
      */
@@ -48,29 +44,41 @@ class Service
      * @var UserRepository
      */
     protected $userRepos;
-
-
     /**
-     * Service constructor.
-     * @param \Voetbal\Service $voetbalService
-     * @param Repository $tournamentRepos
-     * * @param SportRepository $sportRepos
-     * @param RoleRepository $roleRepos
-     * @param UserRepository $userRepos
+     * @var SportRepository
      */
+    protected $sportRepos;
+    /**
+     * @var SeasonRepository
+     */
+    protected $seasonRepos;
+    /**
+     * @var LeagueRepository
+     */
+    protected $leagueRepos;
+    /**
+     * @var CompetitionRepository
+     */
+    protected $competitionRepos;
+
+
     public function __construct(
-        \Voetbal\Service $voetbalService,
         TournamentRepository $tournamentRepos,
-        SportRepository $sportRepos,
         RoleRepository $roleRepos,
-        UserRepository $userRepos
+        UserRepository $userRepos,
+        SportRepository $sportRepos,
+        SeasonRepository $seasonRepos,
+        LeagueRepository $leagueRepos,
+        CompetitionRepository $competitionRepos
     )
     {
-        $this->voetbalService = $voetbalService;
-        $this->repos = $tournamentRepos;
-        $this->sportRepos = $sportRepos;
+        $this->tournamentRepos = $tournamentRepos;
         $this->roleRepos = $roleRepos;
         $this->userRepos = $userRepos;
+        $this->sportRepos = $sportRepos;
+        $this->seasonRepos = $seasonRepos;
+        $this->leagueRepos = $leagueRepos;
+        $this->competitionRepos = $competitionRepos;
     }
 
     /**
@@ -89,15 +97,14 @@ class Service
         $league = new League( $association, $leagueSer->getName() );
         $league->setSportDep( 'voetbal' ); // DEPRECATED
 
-        $seasonRepos = $this->voetbalService->getRepository( Season::class );
-        $season = $seasonRepos->findOneBy( array('name' => '9999' ) );
+        $season = $this->seasonRepos->findOneBy( array('name' => '9999' ) );
 
-        $competitionService = $this->voetbalService->getService(Competition::class);
-        $sportConfigService = $this->voetbalService->getService(SportConfig::class);
         $ruleSet = $competitionSer->getRuleSet();
+        $competitionService = new CompetitionService();
         $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
 
         // add serialized fields and referees to source-competition
+        $sportConfigService = new SportConfigService();
         $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $competition, $sportConfigService ) {
             foreach( $sportConfigsSer as $sportConfigSer ) {
                 $sport = $this->sportRepos->find( $sportConfigSer->getSportIdSer() );
@@ -139,7 +146,7 @@ class Service
      */
     public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, Period $period = null)
     {
-        $competitionService = $this->voetbalService->getService(Competition::class);
+        $competitionService = new CompetitionService();
         $competition = $tournament->getCompetition();
         $competitionService->changeStartDateTime( $competition, $dateTime );
 
@@ -153,8 +160,7 @@ class Service
      */
     public function remove( Tournament $tournament )
     {
-        $leagueRepos = $this->voetbalService->getRepository(League::class);
-        return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
+        return $this->leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
 
     protected function createAssociationFromUserIdAndDateTime( $userId ): Association {
@@ -165,7 +171,7 @@ class Service
     public function mayUserChangeCompetitor( User $user, Association  $association )
     {
         $roleValues = Role::STRUCTUREADMIN;
-        $tournaments = $this->repos->findByPermissions($user, $roleValues);
+        $tournaments = $this->tournamentRepos->findByPermissions($user, $roleValues);
         foreach ($tournaments as $tournament) {
             if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {
                 return true;

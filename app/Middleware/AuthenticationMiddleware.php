@@ -8,12 +8,11 @@
 
 namespace App\Middleware;
 
-//use Slim\Http\Request; replace  depr
-//use Slim\Http\Response; replace depr
+use FCToernooi\Tournament;
 use FCToernooi\User\Repository as UserRepos;
 use FCToernooi\Tournament\Repository as TournamentRepos;
 use FCToernooi\Tournament\Service as TournamentService;
-use FCToernooi\Token;
+use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
 use App\Response\Forbidden as ForbiddenResponse;
 use Voetbal\Service as VoetbalService;
@@ -22,12 +21,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
-class Authentication
+class AuthenticationMiddleware
 {
-    /**
-     * @var Token
-     */
-    protected $token;
     /**
      * @var UserRepos
      */
@@ -46,13 +41,11 @@ class Authentication
     protected $voetbalService;
 
     public function __construct(
-        Token $token,
         UserRepos $userRepos,
         TournamentRepos $tournamentRepos,
         TournamentService $tournamentService,
         VoetbalService $voetbalService
     ) {
-        $this->token = $token;
         $this->userRepos = $userRepos;
         $this->tournamentRepos = $tournamentRepos;
         $this->tournamentService = $tournamentService;
@@ -61,19 +54,22 @@ class Authentication
 
     public function __invoke(Request $request, RequestHandler $handler): Response
     {
-        $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
-
-        // user is not known, no need to check authorization
-        if ($this->token->isPopulated() !== true) {
-            return $next($request, $response);
+        // $request = $request->withAttribute('foo2', 'bar2');
+        $token = $request->getAttribute('token');
+        if ($token === null || $token->isPopulated() !== true) {
+            return $handler->handle($request);
         }
+
+        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
+
+
         if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
             || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
             || substr($request->getUri()->getPath(), 0, 5) === "/auth"
             /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
         )
         {
-            return $next($request, $response);
+            return $handler->handle($request);
         }
 
         return new ForbiddenResponse("routeInfo is deprecated", 401);
@@ -92,15 +88,15 @@ class Authentication
             return new ForbiddenResponse("geen autorisatie voor actie gevonden", 401);
         }
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 
-    protected function getUser()
+    protected function getUser( AuthToken $token ): ?User
     {
-        if ($this->token->getUserId() === null) {
+        if ($token->getUserId() === null) {
             return null;
         }
-        return $this->userRepos->find($this->token->getUserId());
+        return $this->userRepos->find($token->getUserId());
     }
 
     protected function authorized(User $user, string $resourceType, string $method, array $queryParams, int $id = null)
