@@ -9,23 +9,24 @@
 namespace App\Actions;
 
 use \Suin\ImageResizer\ImageResizer;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\Serializer;
-use FCToernooi\User\Repository as UserRepository;
+use FCToernooi\Auth\Service as AuthService;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Token;
 use FCToernooi\Sponsor as SponsorBase;
 
-final class Sponsor
+final class Sponsor extends Action
 {
     /**
      * @var SponsorRepository
      */
-    private $repos;
+    private $sponsorRepos;
     /**
-     * @var UserRepository
+     * @var AuthService
      */
-    private $userRepos;
+    private $authService;
     /**
      * @var TournamentRepository
      */
@@ -34,59 +35,45 @@ final class Sponsor
      * @var Serializer
      */
     protected $serializer;
-
-    /**
-     * @var Token
-     */
-    protected $token;
-
     /**
      * @var array
      */
     protected $settings;
 
-    use AuthTrait;
-
     const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
 
     public function __construct(
-        SponsorRepository $repos,
+        SponsorRepository $sponsorRepos,
         TournamentRepository $tournamentRepos,
-        UserRepository $userRepository,
+        AuthService $authService,
         Serializer $serializer,
-        Token $token,
-        $settings
+        AuthSettings $settings
     )
     {
-        $this->repos = $repos;
+        $this->sponsorRepos = $sponsorRepos;
         $this->tournamentRepos = $tournamentRepos;
-        $this->userRepos = $userRepository;
+        $this->authService = $authService;
         $this->serializer = $serializer;
-        $this->token = $token;
         $this->settings = $settings;
     }
 
-    public function fetch($request, $response, $args)
+    public function fetch( Request $request, Response $response, $args ): Response
     {
-        $sErrorMessage = null;
         try {
             $tournamentId = (int)$request->getParam("tournamentid");
             $tournament = $this->tournamentRepos->find($tournamentId);
             if (!$tournament) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament->getSponsors(), 'json'));
-            ;
+            $json = $this->serializer->serialize( $tournament->getSponsors(), 'json');
+            return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return $response->withStatus(422)->write( $e->getMessage() );
         }
-        return $response->withStatus(422)->write( $sErrorMessage);
     }
 
-    public function fetchOne($request, $response, $args)
+    public function fetchOne( Request $request, Response $response, $args ): Response
     {
         $sErrorMessage = null;
         try {
@@ -96,7 +83,7 @@ final class Sponsor
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            $sponsor = $this->repos->find($args['id']);
+            $sponsor = $this->sponsorRepos->find($args['id']);
             if (!$sponsor) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
@@ -122,7 +109,7 @@ final class Sponsor
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            $user = $this->checkAuth( $this->token, $this->userRepos );
+            $user = $this->authService->checkAuth( $request );
 
             /** @var \FCToernooi\Sponsor $sponsorSer */
             $sponsorSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Sponsor', 'json');
@@ -158,7 +145,7 @@ final class Sponsor
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
+            $this->authService->checkAuth( $request, $tournament );
 
             /** @var \FCToernooi\Sponsor $sponsorSer */
             $sponsorSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Sponsor', 'json');
@@ -168,13 +155,13 @@ final class Sponsor
                 return $response->withStatus(404)->write( "de te wijzigen sponsor kon niet gevonden worden" );
             }
 
-            $this->repos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor );
+            $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor );
 
             $sponsor->setName( $sponsorSer->getName() );
             $sponsor->setUrl( $sponsorSer->getUrl() );
             $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
             $sponsor->setScreenNr( $sponsorSer->getScreenNr() );
-            $this->repos->save($sponsor);
+            $this->sponsorRepos->save($sponsor);
 
             return $response
                 ->withStatus(200)
@@ -199,14 +186,14 @@ final class Sponsor
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
+            $this->authService->checkAuth( $request, $tournament );
 
             /** @var \FCToernooi\Sponsor|null $sponsor */
-            $sponsor = $this->repos->find( $args['id'] );
+            $sponsor = $this->sponsorRepos->find( $args['id'] );
             if ( $sponsor === null ){
                 return $response->withStatus(404)->write("de te verwijderen sponsor kon niet gevonden worden" );
             }
-            $this->repos->remove( $sponsor );
+            $this->sponsorRepos->remove( $sponsor );
 
             return $response->withStatus(200);
         }
@@ -225,12 +212,12 @@ final class Sponsor
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
-            $sponsor = $this->repos->find((int)$request->getParam("sponsorid"));
+            $sponsor = $this->sponsorRepos->find((int)$request->getParam("sponsorid"));
             if (!$sponsor) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
 
-            $user = $this->checkAuth( $this->token, $this->userRepos, $tournament );
+            $this->authService->checkAuth( $request, $tournament );
 
             $uploadedFiles = $request->getUploadedFiles();
             if( !array_key_exists("logostream", $uploadedFiles ) ) {
@@ -273,7 +260,7 @@ final class Sponsor
             }
 
             $sponsor->setLogoUrl( $logoUrl );
-            $this->repos->save($sponsor);
+            $this->sponsorRepos->save($sponsor);
 
             return $response
                 ->withStatus(200)
@@ -284,7 +271,6 @@ final class Sponsor
         catch( \Exception $e ){
             return $response->withStatus(422)->write( $e->getMessage() );
         }
-
     }
 
     private function fn_resize($image_resource_id,$width,$height) {

@@ -13,22 +13,14 @@ declare(strict_types=1);
  *
  */
 namespace App\Response;
-use Crell\ApiProblem\ApiProblem;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Response;
 use Slim\Psr7\Stream;
 
-class Forbidden extends Response
+class Forbidden extends ErrorResponse
 {
-    public function __construct($message, $status = 403)
+    public function __construct($message)
     {
-        $problem = new ApiProblem($message, "about:blank");
-        $problem->setStatus($status);
-        $handle = fopen("php://temp", "wb+");
-        $body = new Stream($handle);
-        $body->write($problem->asJson(true));
-        $headers = new Headers();
-        $headers->setHeader("Content-type", "application/problem+json");
-        parent::__construct($status, $headers, $body);
+        parent::__construct($message, 403);
     }
 }

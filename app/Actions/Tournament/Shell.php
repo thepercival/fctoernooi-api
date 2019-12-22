@@ -9,118 +9,107 @@
 namespace App\Actions\Tournament;
 
 use Doctrine\ORM\EntityManager;
-use JMS\Serializer\Serializer;
-use FCToernooi\User\Repository as UserRepository;
+use JMS\Serializer\SerializerInterface;
+use App\Response\ErrorResponse;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Role;
 use FCToernooi\User;
-use FCToernooi\Token;
+use FCToernooi\Auth\Service as AuthService;
+use App\Actions\Action;
 use FCToernooi\Tournament\Shell as TournamentShell;
 
-final class Shell
+final class Shell extends Action
 {
     /**
      * @var TournamentRepository
      */
-    private $repos;
-
+    private $tournamentRepos;
     /**
-     * @var UserRepository
+     * @var AuthService
      */
-    private $userRepository;
+    private $authService;
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     protected $serializer;
-    /**
-     * @var Token
-     */
-    protected $token;
     /**
      * @var EntityManager
      */
     protected $em;
 
     public function __construct(
-        TournamentRepository $repos,
-        UserRepository $userRepository,
-        Serializer $serializer,
-        Token $token,
+        TournamentRepository $tournamentRepos,
+        AuthService $authService,
+        SerializerInterface $serializer,
         EntityManager $em
     ) {
-        $this->repos = $repos;
-        $this->userRepository = $userRepository;
+        $this->tournamentRepos = $tournamentRepos;
+        $this->authService = $authService;
         $this->serializer = $serializer;
-        $this->token = $token;
         $this->em = $em;
     }
 
-    public function fetch($request, $response, $args)
+    public function fetch( Request $request, Response $response, $args ): Response
     {
         return $this->fetchHelper($request, $response, $args, true);
     }
 
-    public function fetchWithRoles($request, $response, $args)
+    public function fetchWithRoles( Request $request, Response $response, $args ): Response
     {
-        $user = null;
-        if ( $this->token->isPopulated() ) {
-            $user = $this->userRepository->find($this->token->getUserId());
-        }
+        $user = $this->authService->getUser( $request );
         return $this->fetchHelper($request, $response, $args, null, $user);
     }
 
-    public function fetchHelper($request, $response, $args, bool $public = null, User $user = null)
+    public function fetchHelper( Request $request, Response $response, $args, bool $public = null, User $user = null ): Response
     {
-        $sErrorMessage = null;
         try {
+            $queryParams = $request->getQueryParams();
+
             $name = null;
-            if (strlen($request->getParam('name')) > 0) {
-                $name = $request->getParam('name');
+            if (array_key_exists("name", $queryParams) && strlen($queryParams["name"]) > 0) {
+                $name = $queryParams["name"];
             }
 
             $startDateTime = null;
-            if (strlen($request->getParam('startDate')) > 0) {
-                $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z',
-                    $request->getParam('startDate'));
+            if (array_key_exists("startDate", $queryParams) && strlen($queryParams["startDate"]) > 0) {
+                $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["startDate"]);
             }
             if ($startDateTime === false) {
                 $startDateTime = null;
             }
 
             $endDateTime = null;
-            if (strlen($request->getParam('endDate')) > 0) {
-                $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('endDate'));
+            if (array_key_exists("endDate", $queryParams) && strlen($queryParams["endDate"]) > 0) {
+                $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["endDate"]);
             }
             if ($endDateTime === false) {
                 $endDateTime = null;
             }
 
             $withRoles = null;
-            if (strlen($request->getParam('withRoles')) > 0) {
-                $withRoles = $request->getParam('withRoles') === 'true';
+            if (array_key_exists("withRoles", $queryParams) && strlen($queryParams["withRoles"]) > 0) {
+                $withRoles = filter_var( $queryParams["withRoles"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
             }
-
             $shells = [];
             {
                 if ($user !== null && $withRoles === true) {
-                    $tournamentsByRole = $this->repos->findByPermissions($user, Role::ADMIN);
+                    $tournamentsByRole = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
                     foreach ($tournamentsByRole as $tournament) {
                         $shells[] = new TournamentShell($tournament, $user);
                     }
                 } else {
-                    $tournamentsByDates = $this->repos->findByFilter($name, $startDateTime, $endDateTime, $public);
+                    $tournamentsByDates = $this->tournamentRepos->findByFilter($name, $startDateTime, $endDateTime, $public);
                     foreach ($tournamentsByDates as $tournament) {
                         $shells[] = new TournamentShell($tournament, $user);
                     }
                 }
             }
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize($shells, 'json'));
-
+            $json = $this->serializer->serialize( $shells, 'json' );
+            return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
-            $sErrorMessage = $e->getMessage();
+            return new ErrorResponse($e->getMessage(), 422);
         }
-        return $response->withStatus(422)->write($sErrorMessage);
     }
 }

@@ -35,7 +35,6 @@ class Service
      * @param Tournament $tournament
      * @param User $user
      * @param int $roleValues
-     * @return ArrayCollection
      * @throws \Exception
      */
     public function create( Tournament $tournament, User $user, int $roleValues )

@@ -85,9 +85,12 @@ abstract class Action
     protected function getFormData( Request $request )
     {
         $input = json_decode(file_get_contents('php://input'));
+        if( $input === null ) {
+            return new \stdClass();
+        }
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new HttpBadRequestException($this->request, 'Malformed JSON input.');
+            throw new HttpBadRequestException($request, 'Malformed JSON input.');
         }
 
         return $input;

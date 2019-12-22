@@ -19,7 +19,7 @@ class VersionMiddleware implements Middleware
         $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
         if( ($request->getMethod() === "POST" && $request->getUri()->getPath() === "/validatetoken" )
             || ($request->getMethod() === "GET" && $request->getUri()->getPath() === "/tournamentshells") ) {
-            if( $apiVersion !== "18" ) {
+            if( $apiVersion !== "17" ) {
                 return new ForbiddenResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
             }
         }

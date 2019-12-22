@@ -77,13 +77,13 @@ class Service
     }
 
     /**
-     * @param $emailaddress
-     * @param $password
-     * @param null $name
-     * @return |null
+     * @param string $emailaddress
+     * @param string $password
+     * @param string|null $name
+     * @return User|null
      * @throws \Doctrine\DBAL\ConnectionException
      */
-	public function register( $emailaddress, $password, $name = null )
+	public function register( $emailaddress, $password, $name = null ): ?User
 	{
         if ( strlen( $password ) < User::MIN_LENGTH_PASSWORD or strlen( $password ) > User::MAX_LENGTH_PASSWORD ){
             throw new \InvalidArgumentException( "het wachtwoord moet minimaal ".User::MIN_LENGTH_PASSWORD." karakters bevatten en mag maximaal ".User::MAX_LENGTH_PASSWORD." karakters bevatten", E_ERROR );

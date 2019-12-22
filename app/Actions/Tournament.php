@@ -6,6 +6,7 @@ namespace App\Actions;
 use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\TournamentConfig;
+use App\Response\ErrorResponse;
 use FCToernooi\Role;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\Auth\Service as AuthService;
@@ -54,7 +55,7 @@ class Tournament extends Action
 
     public function fetch( Request $request, Response $response, $args ): Response
     {
-        return $response->withStatus(422)->write( "not implemented" );
+        return new ErrorResponse("not implemented", 422);
     }
 
     public function fetchOnePublic( Request $request, Response $response, $args ): Response
@@ -80,7 +81,7 @@ class Tournament extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -120,7 +121,7 @@ class Tournament extends Action
             ;
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -143,7 +144,7 @@ class Tournament extends Action
             ;
         }
         catch( \Exception $e ){
-            return $response->withStatus(422 )->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -163,7 +164,7 @@ class Tournament extends Action
             ;
         }
         catch( \Exception $e ){
-            return $response->withStatus(422 )->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -185,7 +186,7 @@ class Tournament extends Action
             ;
         }
         catch( \Exception $e ){
-            return $response->withStatus(422 )->write( urldecode($e->getMessage()) );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -217,7 +218,7 @@ class Tournament extends Action
             ;
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -244,7 +245,7 @@ class Tournament extends Action
             return $response->withStatus(200);
         }
         catch( \Exception $e ){
-            return $response->withStatus(404)->write('het toernooi is niet verwijdered : ' . $e->getMessage() );
+            return new ErrorResponse('het toernooi is niet verwijdered : ' . $e->getMessage(), 404);
         }
 
     }
@@ -302,7 +303,7 @@ class Tournament extends Action
         }
         catch( \Exception $e ){
             $this->em->getConnection()->rollBack();
-            return $response->withStatus(422)->write( $e->getMessage());
+            return new ErrorResponse( $e->getMessage(), 422);
         }
     }
 
@@ -329,7 +330,7 @@ class Tournament extends Action
             }
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write($e->getMessage());
+            return new ErrorResponse( $e->getMessage(), 422);
         }
     }
 

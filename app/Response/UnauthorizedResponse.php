@@ -22,16 +22,9 @@ use Slim\Psr7\Stream;
 
 class UnauthorizedResponse extends Response
 {
-    public function __construct($message, $status = 401)
+    public function __construct($message)
     {
-        $headers = new Headers;
-        $headers->setHeader("Content-type", "application/json");
-
-        $handle = fopen("php://temp", "wb+");
-        $body = new Stream($handle);
-        $body->write( json_encode(["message" => $message], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) );
-
-        parent::__construct($status, $headers, $body);
+        parent::__construct($message, 401);
 
     }
 }
