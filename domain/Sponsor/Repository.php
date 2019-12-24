@@ -19,6 +19,11 @@ class Repository extends \Voetbal\Repository
 {
     const MAXNROFSPONSORSPERSCREEN = 9;
 
+    public function find($id, $lockMode = null, $lockVersion = null): Sponsor
+    {
+        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
+    }
+
     public function checkNrOfSponsors( Tournament $tournament, int $newScreenNr, Sponsor $sponsor = null ) {
         $max = static::MAXNROFSPONSORSPERSCREEN;
         if( $sponsor === null || $sponsor->getScreenNr() !== $newScreenNr ) {

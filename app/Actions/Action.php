@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpMethodNotAllowedException;
+use JMS\Serializer\SerializerInterface;
 
 abstract class Action
 {
@@ -18,13 +19,20 @@ abstract class Action
      * @var LoggerInterface
      */
     protected $logger;
+    /**
+     * @var SerializerInterface
+     */
+    protected $serializer;
 
     /**
+     * Action constructor.
      * @param LoggerInterface $logger
+     * @param SerializerInterface $serializer
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, SerializerInterface $serializer)
     {
         $this->logger = $logger;
+        $this->serializer = $serializer;
     }
 
 //    /**

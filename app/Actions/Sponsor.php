@@ -8,14 +8,18 @@
 
 namespace App\Actions;
 
+use App\Response\ErrorResponse;
 use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use JMS\Serializer\Serializer;
+use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerInterface;
 use FCToernooi\Auth\Service as AuthService;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Sponsor as SponsorBase;
+use App\Settings\Www as WwwSettings;
+use App\Settings\Image as ImageSettings;
 
 final class Sponsor extends Action
 {
@@ -32,29 +36,32 @@ final class Sponsor extends Action
      */
     private $tournamentRepos;
     /**
-     * @var Serializer
+     * @var WwwSettings
      */
-    protected $serializer;
+    protected $wwwSettings;
     /**
-     * @var array
+     * @var ImageSettings
      */
-    protected $settings;
+    protected $imageSettings;
 
     const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
 
     public function __construct(
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
         SponsorRepository $sponsorRepos,
         TournamentRepository $tournamentRepos,
         AuthService $authService,
-        Serializer $serializer,
-        AuthSettings $settings
+        WwwSettings $wwwSettings,
+        ImageSettings $imageSettings
     )
     {
+        parent::__construct($logger,$serializer);
         $this->sponsorRepos = $sponsorRepos;
         $this->tournamentRepos = $tournamentRepos;
         $this->authService = $authService;
-        $this->serializer = $serializer;
-        $this->settings = $settings;
+        $this->wwwSettings = $wwwSettings;
+        $this->imageSettings = $imageSettings;
     }
 
     public function fetch( Request $request, Response $response, $args ): Response
@@ -69,7 +76,7 @@ final class Sponsor extends Action
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -82,25 +89,20 @@ final class Sponsor extends Action
             if (!$tournament) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
-
             $sponsor = $this->sponsorRepos->find($args['id']);
             if (!$sponsor) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $sponsor, 'json'));
-            ;
+            $json = $this->serializer->serialize( $sponsor, 'json');
+            return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return new ErrorResponse($e->getMessage(), 422);
         }
-        return $response->withStatus(422)->write( $sErrorMessage);
     }
 
-    public function add( $request, $response, $args)
+    public function add( Request $request, Response $response, $args ): Response
     {
-        $sErrorMessage = null;
         try {
             $tournamentId = (int)$request->getParam("tournamentid");
             /** @var \FCToernooi\Tournament|null $tournament */
@@ -122,21 +124,16 @@ final class Sponsor extends Action
             $sponsor->setScreenNr( $sponsorSer->getScreenNr() );
             $this->repos->save($sponsor);
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $sponsor, 'json'));
-            ;
+            $json = $this->serializer->serialize( $sponsor, 'json');
+            return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return new ErrorResponse($e->getMessage(), 422);
         }
-        return $response->withStatus(422 )->write( $sErrorMessage );
     }
 
-    public function edit( $request, $response, $args)
+    public function edit( Request $request, Response $response, $args ): Response
     {
-        $sErrorMessage = null;
         try {
             $tournamentId = (int)$request->getParam("tournamentid");
             /** @var \FCToernooi\Tournament|null $tournament */
@@ -163,19 +160,15 @@ final class Sponsor extends Action
             $sponsor->setScreenNr( $sponsorSer->getScreenNr() );
             $this->sponsorRepos->save($sponsor);
 
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $sponsor, 'json'));
-            ;
+            $json = $this->serializer->serialize( $sponsor, 'json');
+            return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return new ErrorResponse($e->getMessage(), 422);
         }
-        return $response->withStatus(422)->write( $sErrorMessage );
     }
 
-    public function remove( $request, $response, $args)
+    public function remove( Request $request, Response $response, $args ): Response
     {
         $errorMessage = null;
         try{
@@ -198,12 +191,11 @@ final class Sponsor extends Action
             return $response->withStatus(200);
         }
         catch( \Exception $e ){
-            $errorMessage = $e->getMessage();
+            return new ErrorResponse('de sponsor is niet verwijdered : ' . $e->getMessage(), 404);
         }
-        return $response->withStatus(404)->write('de sponsor is niet verwijdered : ' . $errorMessage );
     }
 
-    public function upload( $request, $response, $args)
+    public function upload( Request $request, Response $response, $args ): Response
     {
         try {
             /** @var \FCToernooi\Tournament|null $tournament */
@@ -235,8 +227,8 @@ final class Sponsor extends Action
                 throw new \Exception("alleen jpg en png zijn toegestaan", E_ERROR);
             }
 
-            $localPath = $this->settings["www"]["apiurl-localpath"] . $this->settings["images"]["sponsors"]["pathpostfix"];
-            $urlPath = $this->settings["www"]["apiurl"] . $this->settings["images"]["sponsors"]["pathpostfix"];
+            $localPath = $this->wwwSettings->getApiUrlLocalPath() . $this->imageSettings->getSponsorsPathPostfix();
+            $urlPath = $this->wwwSettings->getApiUrl() . $this->imageSettings->getSponsorsPathPostfix();
 
             $logoUrl = $urlPath . $sponsor->getId() . '.' . $extension;
 
@@ -262,14 +254,11 @@ final class Sponsor extends Action
             $sponsor->setLogoUrl( $logoUrl );
             $this->sponsorRepos->save($sponsor);
 
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $sponsor, 'json'));
-            ;
+            $json = $this->serializer->serialize( $sponsor, 'json');
+            return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            return $response->withStatus(422)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 

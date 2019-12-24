@@ -13,6 +13,8 @@ use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 
 use FCToernooi\Auth\Settings as AuthSettings;
+use App\Settings\Www as WwwhSettings;
+use App\Settings\Image as ImageSettings;
 
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
@@ -96,9 +98,15 @@ return function (ContainerBuilder $containerBuilder) {
             $authSettings = $container->get('settings')['auth'];
             return new AuthSettings($authSettings['jwtsecret'], $authSettings['jwtalgorithm'], $authSettings['activationsecret']);
         },
+        WwwhSettings::class => function( ContainerInterface $container ) {
+            return new WwwhSettings( $container->get('settings')['www'] );
+        },
+        ImageSettings::class => function( ContainerInterface $container ) {
+            return new ImageSettings( $container->get('settings')['image'] );
+        }/*,
         'jwt' => function( ContainerInterface $container ) {
             return new \stdClass;
-        }
+        }*/
     ]);
 };
 

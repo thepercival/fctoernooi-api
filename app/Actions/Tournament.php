@@ -17,9 +17,9 @@ use Slim\Exception\HttpBadRequestException;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use App\Exceptions\DomainRecordNotFoundException;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use Voetbal\Planning\Service as PlanningService;
+use JMS\Serializer\SerializerInterface;
 
 class Tournament extends Action
 {
@@ -32,25 +32,16 @@ class Tournament extends Action
      */
     protected $authService;
 
-    /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
 
-    /**
-     * @param LoggerInterface $logger
-     * @param TournamentRepository  $tournamentRepository
-     */
     public function __construct(
         LoggerInterface $logger,
+        SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
-        AuthService $authService,
-        SerializerInterface $serializer )
+        AuthService $authService )
     {
-        parent::__construct($logger);
+        parent::__construct($logger,$serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->authService = $authService;
-        $this->serializer = $serializer;
     }
 
     public function fetch( Request $request, Response $response, $args ): Response

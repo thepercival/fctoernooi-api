@@ -8,7 +8,8 @@
 
 namespace App\Actions;
 
-use JMS\Serializer\Serializer;
+use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerInterface;
 use FCToernooi\Role\Repository as RoleRepository;
 
 final class Role
@@ -17,21 +18,15 @@ final class Role
      * @var RoleRepository
      */
     private $roleRepository;
-    /**
-     * @var Serializer
-     */
-    protected $serializer;
-    /**
-     * @var array
-     */
-    protected $settings;
 
-    public function __construct(RoleRepository $roleRepository, Serializer $serializer, $settings )
+    public function __construct(
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
+        RoleRepository $roleRepository
+    )
     {
+        parent::__construct($logger,$serializer);
         $this->roleRepository = $roleRepository;
-        // $this->authService = new Auth\Service($userRepository);
-        $this->serializer = $serializer;
-        $this->settings = $settings;
     }
 
     public function fetch($request, $response, $args)

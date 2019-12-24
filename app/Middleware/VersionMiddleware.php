@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use App\Response\Forbidden as ForbiddenResponse;
+use App\Response\ErrorResponse;
 
 class VersionMiddleware implements Middleware
 {
@@ -20,7 +20,7 @@ class VersionMiddleware implements Middleware
         if( ($request->getMethod() === "POST" && $request->getUri()->getPath() === "/validatetoken" )
             || ($request->getMethod() === "GET" && $request->getUri()->getPath() === "/tournamentshells") ) {
             if( $apiVersion !== "17" ) {
-                return new ForbiddenResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
+                return new ErrorResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
             }
         }
         return $handler->handle($request);

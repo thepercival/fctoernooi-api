@@ -6,9 +6,10 @@
  * Time: 14:02
  */
 
-namespace VoetbalApp\Action;
+namespace App\Actions\Voetbal;
 
-use JMS\Serializer\Serializer;
+use App\Response\ErrorResponse;
+use JMS\Serializer\SerializerInterface;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Structure\Repository as StructureRepository;
@@ -17,8 +18,9 @@ use Doctrine\ORM\EntityManager;
 use Voetbal\Structure as StructureBase;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Competition;
+use App\Actions\Action;
 
-final class Structure
+final class StructureAction extends Action
 {
     /**
      * @var StructureRepository
@@ -29,7 +31,7 @@ final class Structure
      */
     protected $competitionRepos;
     /**
-     * @var Serializer
+     * @var SerializerInterface
      */
     protected $serializer;
     /**
@@ -38,13 +40,13 @@ final class Structure
     protected $em;
 
     public function __construct(
-        StructureRepository $repos,
+        StructureRepository $structureRepos,
         CompetitionRepository $competitionRepos,
-        Serializer $serializer,
+        SerializerInterface $serializer,
         EntityManager $em
     )
     {
-        $this->repos = $repos;
+        $this->structureRepos = $structureRepos;
         $this->competitionRepos = $competitionRepos;
         $this->serializer = $serializer;
         $this->em = $em;
@@ -63,13 +65,11 @@ final class Structure
             return $response->withStatus(404)->write('geen indeling gevonden voor competitie');
         }
 
-        $structure = $this->repos->getStructure( $competition );
+        $structure = $this->structureRepos->getStructure( $competition );
         // var_dump($structure); die();
 
-        return $response
-            ->withHeader('Content-Type', 'application/json;charset=utf-8')
-            ->write($this->serializer->serialize( $structure, 'json'));
-        ;
+        $json = $this->serializer->serialize( $structure, 'json');
+        return $this->respondWithJson($response, $json);
     }
 
     public function add( $request, $response, $args)
@@ -91,13 +91,13 @@ final class Structure
 //                throw new \Exception("het competitieseizoen kan niet gevonden worden", E_ERROR);
 //            }
 //
-//            $roundNumber = $this->repos->findRoundNumber($competition, 1);
+//            $roundNumber = $this->structureRepos->findRoundNumber($competition, 1);
 //            if( $roundNumber !== null ) {
 //                throw new \Exception("er is al een structuur aanwezig", E_ERROR);
 //            }
 //
 //            $structure = $this->service->createFromSerialized( $structureSer, $competition );
-//            $this->repos->customPersist($structure);
+//            $this->structureRepos->customPersist($structure);
 //            $this->em->getConnection()->commit();
 //
 //            return $response
@@ -117,7 +117,7 @@ final class Structure
         $this->em->getConnection()->beginTransaction();
         try {
             /** @var \Voetbal\Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'Voetbal\Structure', 'json');
+            $structureSer = $this->serializer->deserialize( file_get_contents('php://input'), 'Voetbal\Structure', 'json');
             if ( $structureSer === false ) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
@@ -128,9 +128,9 @@ final class Structure
             $this->postSerialize( $structureSer->getFirstRoundNumber(), $competition );
 
             $roundNumberAsValue = 1;
-            $this->repos->remove( $competition, $roundNumberAsValue );
+            $this->structureRepos->remove( $competition, $roundNumberAsValue );
 
-            $roundNumber = $this->repos->customPersist($structureSer, $roundNumberAsValue);
+            $roundNumber = $this->structureRepos->customPersist($structureSer, $roundNumberAsValue);
 
 //            $planningService = new PlanningService($competition);
 //            $games = $planningService->create( $roundNumber, $competition->getStartDateTime() );
@@ -141,15 +141,12 @@ final class Structure
 
             $this->em->getConnection()->commit();
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $structureSer, 'json'));
-            ;
+            $json = $this->serializer->serialize( $structureSer, 'json');
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             $this->em->getConnection()->rollBack();
-            return $response->withStatus( 401 )->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 401);
         }
     }
 
@@ -190,7 +187,7 @@ final class Structure
         try {
             throw new \Exception("er is geen competitie zonder structuur mogelijk", E_ERROR);
         } catch (\Exception $e) {
-            return $response->withStatus(404)->write($e->getMessage());
+            return new ErrorResponse($e->getMessage(), 404);
         }
     }
 }

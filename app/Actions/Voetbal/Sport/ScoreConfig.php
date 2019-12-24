@@ -6,7 +6,7 @@
  * Time: 12:35
  */
 
-namespace VoetbalApp\Action\Sport;
+namespace App\Actions\Voetbal\Sport;
 
 use JMS\Serializer\Serializer;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;

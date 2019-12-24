@@ -22,7 +22,8 @@ use FCToernooi\Auth\Token as AuthToken;
 return function (App $app) {
     $app->add(function (Request $request, RequestHandler $handler): Response {
         $response = $handler->handle($request);
-        return $response->withoutHeader('X-Powered-By');
+        header_remove("X-Powered-By");
+        return $response; // ->withoutHeader('X-Powered-By');
     });
 
     $app->add( AuthenticationMiddleware::class);
@@ -44,7 +45,7 @@ return function (App $app) {
                 ])
             ],
             "error" => function(Response $response, $arguments) {
-                return new UnauthorizedResponse($arguments["message"], 401);
+                return new UnauthorizedResponse($arguments["message"]);
             },
             "before" => function ( Request $request, $arguments) {
                 $token = new AuthToken( $arguments["decoded"] );
@@ -64,21 +65,21 @@ return function (App $app) {
             "credentials" => true,
             "cache" => 300,
             "error" => function (Request $request, Response $response, $arguments) {
-                return new UnauthorizedResponse($arguments["message"], 401);
+                return new UnauthorizedResponse($arguments["message"]);
             }
         ])
     );
 
     $app->add( (new Middlewares\ContentType([/*'html',*/ 'json']))->errorResponse() );
 
-    /*$app->add(new NegotiationMiddleware([
-        'accept' => ['text/html', 'application/json'],
-        'accept-language' => ['en', 'de-DE'],
-        'accept-encoding' => ['gzip'],
-        'accept-charset' => ['utf-8']
-    ]));*/
+//    $app->add(new NegotiationMiddleware([
+//        'accept' => ['text/html', 'application/json'],
+//        'accept-language' => ['en', 'de-DE'],
+//        'accept-encoding' => ['gzip'],
+//        'accept-charset' => ['utf-8']
+//    ]));
 
-    // always last, so it is called first!
+//    // always last, so it is called first!
     $errorMiddleware = $app->addErrorMiddleware( $app->getContainer()->get("settings")['environment'] === "development" , true, true);
 
     // Set the Not Found Handler

@@ -3,7 +3,7 @@
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Response;
-use App\Response\Forbidden as ForbiddenResponse;
+use App\Response\ForbiddenResponse as ForbiddenResponse;
 
 use Gofabian\Negotiation\NegotiationMiddleware;
 use Tuupola\Middleware\JwtAuthentication;

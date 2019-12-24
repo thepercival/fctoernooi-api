@@ -15,12 +15,7 @@ declare(strict_types=1);
 
 namespace App\Response;
 
-use Crell\ApiProblem\ApiProblem;
-use Slim\Psr7\Headers;
-use Slim\Psr7\Response;
-use Slim\Psr7\Stream;
-
-class UnauthorizedResponse extends Response
+class UnauthorizedResponse extends ErrorResponse
 {
     public function __construct($message)
     {

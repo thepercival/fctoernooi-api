@@ -14,7 +14,7 @@ use FCToernooi\Tournament\Repository as TournamentRepos;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
-use App\Response\Forbidden as ForbiddenResponse;
+use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Voetbal\Service as VoetbalService;
 use FCToernooi\Role;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -72,8 +72,8 @@ class AuthenticationMiddleware
             return $handler->handle($request);
         }
 
-        return new ForbiddenResponse("routeInfo is deprecated", 401);
-        $args = $request->getAttribute('routeInfo')[2];
+        /** @var \Slim\Routing\RoutingResults $routingResults */
+        $routingResults = $request->getAttribute('routingResults');
         if (array_key_exists('resourceType', $args) === false) {
             return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden", 401);
         }

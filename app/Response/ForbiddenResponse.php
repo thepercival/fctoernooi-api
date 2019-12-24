@@ -13,11 +13,8 @@ declare(strict_types=1);
  *
  */
 namespace App\Response;
-use Slim\Psr7\Headers;
-use Slim\Psr7\Response;
-use Slim\Psr7\Stream;
 
-class Forbidden extends ErrorResponse
+class ForbiddenResponse extends ErrorResponse
 {
     public function __construct($message)
     {

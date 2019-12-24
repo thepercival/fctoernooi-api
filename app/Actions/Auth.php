@@ -8,6 +8,7 @@
 
 namespace App\Actions;
 
+use App\Response\ErrorResponse;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\User;
 use \Firebase\JWT\JWT;
@@ -32,10 +33,6 @@ final class Auth extends Action
      * @var SerializerInterface
      */
     protected $serializer;
-    /**
-     * @var array
-     */
-	protected $settings;
 
 	public function __construct(AuthService $authService, UserRepository $userRepository, SerializerInterface $serializer )
 	{
@@ -44,14 +41,13 @@ final class Auth extends Action
 		$this->serializer = $serializer;
 	}
 
-    public function validateToken( $request, $response, $args)
+    public function validateToken( Request $request, Response $response, $args ): Response
     {
         return $response->withStatus(200);
     }
 
 	public function register( Request $request, Response $response, $args): Response
 	{
-		$sErrorMessage = null;
 		try{
 		    $arrRegisterData = $request->getParsedBody();
             if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
@@ -76,16 +72,12 @@ final class Auth extends Action
                 ]
             ];
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $data, 'json'));
-            ;
+            $json = $this->serializer->serialize( $data, 'json' );
+            return $this->respondWithJson($response, $json);
 		}
-		catch( \Exception $e ){
-			$sErrorMessage = $e->getMessage();
-		}
-        return $response->withStatus(400)->write( $sErrorMessage );
+		catch( \Exception $e ) {
+            return new ErrorResponse($e->getMessage(), 400);
+        }
 	}
 
     public function login( Request $request, Response $response, $args): Response
@@ -123,11 +115,11 @@ final class Auth extends Action
            return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
 		}
 		catch( \Exception $e ){
-            return $response->withStatus(400)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 400);
 		}
 	}
 
-    public function passwordreset($request, $response, $args)
+    public function passwordreset( Request $request, Response $response, $args ): Response
     {
         try{
             $arrRegisterData = $request->getParsedBody();
@@ -139,20 +131,16 @@ final class Auth extends Action
             $retVal = $this->authService->sendPasswordCode( $emailAddress );
 
             $data = [ "retval" => $retVal ];
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $data, 'json'));
-            ;
+            $json = $this->serializer->serialize( $data, 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return $response->withStatus(400)->write( $e->getMessage() );
+            return new ErrorResponse($e->getMessage(), 400);
         }
     }
 
-    public function passwordchange($request, $response, $args)
+    public function passwordchange( Request $request, Response $response, $args ): Response
     {
-        $sErrorMessage = null;
         try{
             $arrRegisterData = $request->getParsedBody();
             if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
@@ -171,24 +159,20 @@ final class Auth extends Action
             $user = $this->authService->changePassword( $emailAddress, $password, $code );
 
             $data = [
-                "token" => $this->getToken( $user),
+                "token" => $this->authService->getToken( $user),
                 "userid" => $user->getId()
             ];
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $data, 'json'));
-            ;
+            $json = $this->serializer->serialize( $data, 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            $sErrorMessage = $e->getMessage();
+            return new ErrorResponse($e->getMessage(), 400);
         }
-        return $response->withStatus(400)->write( $sErrorMessage );
     }
 
 	/*
-		public function edit( $request, $response, $args)
+		public function edit( Request $request, Response $response, $args ): Response
 		{
 			$sErrorMessage = null;
 			try{
@@ -207,7 +191,7 @@ final class Auth extends Action
 			return $response->withStatus(404)->write(rawurlencode( $sErrorMessage ) );
 		}
 
-		public function remove( $request, $response, $args)
+		public function remove( Request $request, Response $response, $args ): Response
 		{
 			$sErrorMessage = null;
 			try{

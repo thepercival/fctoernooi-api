@@ -6,7 +6,7 @@
  * Time: 10:17
  */
 
-namespace VoetbalApp\Action;
+namespace App\Actions\Voetbal;
 
 use JMS\Serializer\Serializer;
 use Voetbal\Place\Repository as PlaceRepository;

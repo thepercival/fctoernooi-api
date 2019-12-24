@@ -31,6 +31,20 @@ class Repository extends \Voetbal\Repository
         parent::__construct($em, $class);
     }
 
+    /**
+     * @param $id
+     * @param null $lockMode
+     * @param null $lockVersion
+     * @return Tournament
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
+    public function find($id, $lockMode = null, $lockVersion = null): Tournament
+    {
+        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
+    }
+
     public function customPersist( Tournament $tournament, bool $flush )
     {
         $leagueRepos = new LeagueRepository($this->_em,$this->_em->getClassMetaData(League::class));

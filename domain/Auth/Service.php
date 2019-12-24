@@ -45,7 +45,7 @@ class Service
      * @param Settings $settings
      */
 	public function __construct(
-	    UserRepository $userRepos,
+        UserRepository $userRepos,
         RoleRepository $roleRepos,
         TournamentRepository $tournamentRepos,
         Settings $settings )

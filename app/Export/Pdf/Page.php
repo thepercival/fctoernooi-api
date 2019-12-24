@@ -57,6 +57,7 @@ abstract class Page extends \Zend_Pdf_Page
     {
         parent::setFillColor( $color );
         $this->m_oFillColor = $color;
+        return $this;
     }
 
     public function getLineWidth()
@@ -68,6 +69,7 @@ abstract class Page extends \Zend_Pdf_Page
     {
         parent::setLineWidth( $nLineWidth );
         $this->m_nLineWidth = $nLineWidth;
+        return $this;
     }
 
     public function getPadding()

@@ -6,9 +6,7 @@
  * Time: 12:35
  */
 
-namespace VoetbalApp\Action;
-
-
+namespace App\Actions\Voetbal;
 
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;

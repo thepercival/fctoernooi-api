@@ -6,30 +6,25 @@
  * Time: 14:04
  */
 
-namespace VoetbalApp\Action;
+namespace App\Actions\Voetbal;
 
+use App\Actions\Action;
 use Doctrine\ORM\EntityManager;
 use JMS\Serializer\Serializer;
 use League\Period\Period;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Game\Service as GameService;
 use Voetbal\Planning\ConvertService;
-use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\ScheduleService;
 use Voetbal\Poule\Repository as PouleRepository;
 use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Input\Repository as InputRepository;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
-use Voetbal\Poule;
-use Voetbal\Game as GameBase;
 use VoetbalApp\Action\PostSerialize\RefereeService as DeserializeRefereeService;
 
-final class Planning
+final class PlanningAction extends Action
 {
     /**
      * @var GameService

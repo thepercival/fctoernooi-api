@@ -6,6 +6,8 @@ use App\Actions\Tournament\Shell as TournamentShellAction;
 use App\Actions\Auth as AuthAction;
 use App\Actions\User as UserAction;
 use App\Actions\Sponsor as SponsorAction;
+use App\Actions\Voetbal\StructureAction;
+use App\Actions\Voetbal\PlanningAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -17,6 +19,10 @@ return function (App $app) {
   //   $app->any('/voetbal/{resourceType}[/{id}]', VoetbalApp\Action\Slim\Handler::class );
 
     $app->group('/auth', function ( Group $group ) {
+        $group->options('/login', function (Request $request, Response $response): Response {
+            return $response;
+        });
+
         $group->post('/register', AuthAction::class . ':register');
         $group->post('/login', AuthAction::class . ':login');
         $group->post('/validatetoken', AuthAction::class . 'validateToken');
@@ -43,9 +49,9 @@ return function (App $app) {
     });
 
     $app->group('/tournamentspublic', function ( Group $group ) {
-        $group->get('', TournamentShellAction::class . ':fetch');             // @TODO #DEPRECATED
-        $group->get('/{id}', TournamentShellAction::class . ':fetchOnePublic');
-        $group->get('/pdf/{id}', TournamentShellAction::class . ':fetchPdf');       // @TODO #DEPRECATED
+        $group->get('', TournamentAction::class . ':fetch');             // @TODO #DEPRECATED
+        $group->get('/{id}', TournamentAction::class . ':fetchOnePublic');
+        $group->get('/pdf/{id}', TournamentAction::class . ':fetchPdf');       // @TODO #DEPRECATED
     });
 
     $app->get('/tournamentshells', TournamentShellAction::class . ':fetch');
@@ -64,5 +70,18 @@ return function (App $app) {
         $group->delete('/{id}', SponsorAction::class . ':remove');
 
         $group->post('/upload/', SponsorAction::class . ':upload');
+    });
+
+    $app->group('/voetbal', function ( Group $voetbalGroup ) {
+        $voetbalGroup->group('/structures', function ( Group $group ) {
+            $group->get('/{id}', StructureAction::class . ':fetchOne');
+            $group->put('/{id}', StructureAction::class . ':edit');
+        });
+
+        $voetbalGroup->group('/planning', function ( Group $group ) {
+            $group->get('/{id}', PlanningAction::class . ':fetch');
+            $group->post('/{id}', PlanningAction::class . ':add');
+            $group->put('/{id}', PlanningAction::class . ':edit');
+        });
     });
 };
