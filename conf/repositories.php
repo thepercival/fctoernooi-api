@@ -22,6 +22,8 @@ use Voetbal\League;
 use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Competition;
 
+use Voetbal\Structure\Repository as StructureRepository;
+
 return function (ContainerBuilder $containerBuilder) {
     // Here we map our UserRepository interface to its in memory implementation
     $containerBuilder->addDefinitions([
@@ -57,6 +59,11 @@ return function (ContainerBuilder $containerBuilder) {
         CompetitionRepository::class => function (ContainerInterface $container) {
             $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
             return new CompetitionRepository($entityManager ,$entityManager ->getClassMetaData(Competition::class));
+        },
+
+        StructureRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new StructureRepository($entityManager);
         },
     ]);
 };

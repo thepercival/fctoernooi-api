@@ -12,6 +12,7 @@ use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\Auth\Service as AuthService;
 use FCToernooi\Tournament\Service as TournamentService;
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 use FCToernooi\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -22,6 +23,9 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use Voetbal\Planning\Service as PlanningService;
+use Voetbal\Competitor\Service as CompetitorService;
+use Voetbal\Structure\Service as StructureService;
+use Voetbal\Structure\Repository as StructureRepository;
 use JMS\Serializer\SerializerInterface;
 use App\Deserializers\TournamentDeserializer;
 
@@ -40,6 +44,10 @@ class Tournament extends Action
      */
     protected $roleRepos;
     /**
+     * @var StructureRepository
+     */
+    protected $structureRepos;
+    /**
      * @var AuthService
      */
     protected $authService;
@@ -51,12 +59,14 @@ class Tournament extends Action
         TournamentRepository $tournamentRepos,
         TournamentDeserializer $tournamentDeserializer,
         RoleRepository $roleRepos,
+        StructureRepository $structureRepos,
         AuthService $authService )
     {
         parent::__construct($logger,$serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->tournamentDeserializer = $tournamentDeserializer;
         $this->roleRepos = $roleRepos;
+        $this->structureRepos = $structureRepos;
         $this->authService = $authService;
     }
 //
@@ -297,17 +307,19 @@ class Tournament extends Action
             $newTournament->getCompetition()->setStartDateTime( $startDateTime );
             $this->tournamentRepos->customPersist($newTournament, true);
 
-            $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
-            $newCompetitors = $this->competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
+            $structure = $this->structureRepos->getStructure( $tournament->getCompetition() );
+            $competitorService = new CompetitorService();
+            $newCompetitors = $competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
             foreach( $newCompetitors as $newCompetitor ) {
                 $em->persist($newCompetitor);
             }
 
-            $newStructure = $this->structureService->copy( $structure, $newTournament->getCompetition() );
+            $structureService = new StructureService( new TournamentStructureOptions() );
+            $newStructure = $structureService->copy( $structure, $newTournament->getCompetition() );
 
-            $this->competitorService->assignCompetitors( $newStructure, $newCompetitors );
+            $competitorService->assignCompetitors( $newStructure, $newCompetitors );
 
-            $this->structureReposistory->customPersist($newStructure);
+            $this->structureRepos->customPersist($newStructure);
 
             $planningService = new PlanningService();
             $games = $planningService->createGames( $newStructure->getFirstRoundNumber()->getPlanningInput()->getBestPlanning() );
@@ -331,7 +343,7 @@ class Tournament extends Action
     {
         try {
             $tournament = $this->tournamentRepos->find((int)$args['id']);
-            if (!$tournament) {
+            if ( $tournament === null ) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
 
