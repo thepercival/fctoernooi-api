@@ -59,36 +59,31 @@ class AuthenticationMiddleware
             return $handler->handle($request);
         }
 
-//        $token = $request->getAttribute('token');
-//        if ($token === null || $token->isPopulated() !== true) {
-//            return $handler->handle($request);
-//        }
-//
-//        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
-//
-//
-//        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
-//            || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
-//            || substr($request->getUri()->getPath(), 0, 5) === "/auth"
-//            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
-//        )
-//        {
-//            return $handler->handle($request);
-//        }
+        $token = $request->getAttribute('token');
+        if ($token === null || $token->isPopulated() !== true) {
+            return $handler->handle($request);
+        }
 
-        BEPAAL RESOURCE TYPE OP BASIS VAN URI, MISSCHIEN KAN OOK MIDDLEWARE AAN ROUTE-GROUPEN WORDEN TOEGEVOEGD
-        OM MEER LOKAAL DE AUTORISATIE TE BEPALEN
+        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
+
+
+        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
+            || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
+            || substr($request->getUri()->getPath(), 0, 5) === "/auth"
+            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
+        )
+        {
+            return $handler->handle($request);
+        }
 
         /** @var \Slim\Routing\RoutingResults $routingResults */
         $routingResults = $request->getAttribute('routingResults');
-        $a = $routingResults->getRouteArguments();
-        $b = $routingResults->getRouteIdentifier();
-        $c = $routingResults->getDispatcher();
-        if (array_key_exists('resourceType', $args) === false) {
+        $args = $routingResults->getRouteArguments();
+
+        $resourceType = $this->getResourceType( $request->getUri()->getPath() );
+        if ( $resourceType === null ) {
             return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden");
         }
-        $resourceType = $args['resourceType'];
-
         $user = $this->getUser();
         if ($user === null) {
             return new ForbiddenResponse("gebruiker kan niet gevonden worden");
@@ -107,6 +102,21 @@ class AuthenticationMiddleware
             return null;
         }
         return $this->userRepos->find($token->getUserId());
+    }
+
+    protected function getResourceType( string $uriPath ): ?string
+    {
+        $voetbalPrefix = "/voetbal/";
+        $strpos = strpos( $uriPath, $voetbalPrefix );
+        if( $strpos === false ) {
+            return null;
+        }
+        $resourceType = substr( $uriPath, $strpos + strlen($voetbalPrefix) );
+        $strpos = strpos( $resourceType, "/" );
+        if( $strpos === false ) {
+            return $resourceType;
+        }
+        return substr( $resourceType, 0, $strpos );
     }
 
     protected function authorized(User $user, string $resourceType, string $method, array $queryParams, int $id = null)

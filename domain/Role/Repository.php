@@ -41,6 +41,7 @@ class Repository extends \Voetbal\Repository
                 if( strlen( $referee->getEmailaddress() ) === 0 ) {
                     continue;
                 }
+                /** @var \FCToernooi\User $user */
                 $user = $userRepos->findOneBy( ['emailaddress' => $referee->getEmailaddress()] );
                 if( $user === null ) {
                     continue;

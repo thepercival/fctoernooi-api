@@ -20,6 +20,7 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use App\Exceptions\DomainRecordNotFoundException;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\DeserializationContext;
 use Voetbal\Planning\Service as PlanningService;
 use JMS\Serializer\SerializerInterface;
 use App\Deserializers\TournamentDeserializer;
@@ -111,6 +112,15 @@ class Tournament extends Action
         }
     }
 
+    protected function getDeserializationContext( User $user = null ) {
+        $serGroups = ['Default'];
+
+        if ($user !== null ) {
+            $serGroups[] = 'privacy';
+        }
+        return DeserializationContext::create()->setGroups($serGroups);
+    }
+
     protected function getSerializationContext( TournamentBase $tournament, User $user = null ) {
         $serGroups = ['Default'];
 
@@ -190,10 +200,11 @@ class Tournament extends Action
     public function add( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournamentSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Tournament', 'json');
-
             $user = $this->authService->checkAuth( $request );
+
+            $deserializationContext = $this->getDeserializationContext($user);
+            $tournamentSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Tournament', 'json', $deserializationContext);
+
             $tournament = $this->tournamentDeserializer->post( $tournamentSer, $user );
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
@@ -262,20 +273,12 @@ class Tournament extends Action
         }
     }
 
-    /**
-     * echt nieuwe aanmaken via service
-     * bestaande toernooi deserialising en dan weer opslaan
-     *
-     * @param Request $request
-     * @param Response $response
-     * @param array $args
-     * @return mixed
-     */
     public function copy( Request $request, Response $response, $args ): Response
     {
-        $this->em->getConnection()->beginTransaction();
+        $em = $this->tournamentRepos->getEM();
+        $conn = $em->getConnection();
+        $conn->beginTransaction();
         try {
-            /** @var \FCToernooi\Tournament|null $tournament */
             $tournament = $this->tournamentRepos->find($args['id']);
             if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
@@ -283,7 +286,12 @@ class Tournament extends Action
             /** @var \FCToernooi\User $user */
             $user = $this->authService->checkAuth( $request, $tournament );
 
-            $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
+            $copyData = $this->getFormData( $request );
+            if( property_exists( $copyData, "startdatetime" ) === false ) {
+                throw new \Exception( "er is geen nieuwe startdatum-tijd opgegeven");
+            }
+
+            $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime );
 
             $newTournament = $this->tournamentDeserializer->post( $tournament, $user );
             $newTournament->getCompetition()->setStartDateTime( $startDateTime );
@@ -292,7 +300,7 @@ class Tournament extends Action
             $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
             $newCompetitors = $this->competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
             foreach( $newCompetitors as $newCompetitor ) {
-                $this->em->persist($newCompetitor);
+                $em->persist($newCompetitor);
             }
 
             $newStructure = $this->structureService->copy( $structure, $newTournament->getCompetition() );
@@ -304,17 +312,17 @@ class Tournament extends Action
             $planningService = new PlanningService();
             $games = $planningService->createGames( $newStructure->getFirstRoundNumber()->getPlanningInput()->getBestPlanning() );
             foreach( $games as $game ) {
-                $this->em->persist($game);
+                $em->persist($game);
             }
-            $this->em->flush();
+            $em->flush();
 
-            $this->em->getConnection()->commit();
+            $conn->commit();
 
             $json = $this->serializer->serialize( $newTournament->getId(), 'json' );
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            $this->em->getConnection()->rollBack();
+            $conn->rollBack();
             return new ErrorResponse( $e->getMessage(), 422);
         }
     }

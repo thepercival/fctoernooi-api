@@ -37,7 +37,7 @@ return function (App $app) {
                     "path" => "/",
                     "ignore" => [
                         "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                        "/tournaments/shells", "/tournamentspublic", "/tournaments/export",
+                        "/tournaments/shells", "/tournaments/public",
                         "/voetbal/structures", "/voetbal/sports"
                     ]
                 ]),
@@ -71,14 +71,9 @@ return function (App $app) {
         ])
     );
 
-    $app->add( (new Middlewares\ContentType([/*'html',*/ 'json']))->errorResponse() );
-
-//    $app->add(new NegotiationMiddleware([
-//        'accept' => ['text/html', 'application/json'],
-//        'accept-language' => ['en', 'de-DE'],
-//        'accept-encoding' => ['gzip'],
-//        'accept-charset' => ['utf-8']
-//    ]));
+    $app->add( (new Middlewares\ContentType(['html', 'json']))->errorResponse() );
+    $app->add( (new Middlewares\ContentType())->charsets(['UTF-8'])->errorResponse() );
+    $app->add( (new Middlewares\ContentEncoding(['gzip', 'deflate'])) );
 
     // Add Routing Middleware
     $app->addRoutingMiddleware();
