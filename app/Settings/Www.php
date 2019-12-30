@@ -23,11 +23,10 @@ class Www
      */
     protected $apiUrlLocalpath;
 
-	public function __construct(
-	    array $settings )
+	public function __construct(array $settings )
 	{
 	    if( array_key_exists( 'urls', $settings ) ) {
-            $this->urls = explode(',', $settings['urls'] );
+            $this->urls = $settings['urls'];
         }
         if( array_key_exists( 'apiurl', $settings ) ) {
             $this->apiUrl = $settings['apiurl'];

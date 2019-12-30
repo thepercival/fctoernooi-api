@@ -19,6 +19,7 @@ use FCToernooi\User;
 use FCToernooi\Auth\Service as AuthService;
 use App\Actions\Action;
 use FCToernooi\Tournament\Shell as TournamentShell;
+use Psr\Log\LoggerInterface;
 
 final class Shell extends Action
 {
@@ -31,20 +32,18 @@ final class Shell extends Action
      */
     private $authService;
     /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
-    /**
      * @var EntityManager
      */
     protected $em;
 
     public function __construct(
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
         AuthService $authService,
-        SerializerInterface $serializer,
         EntityManager $em
     ) {
+        parent::__construct($logger,$serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->authService = $authService;
         $this->serializer = $serializer;
@@ -53,16 +52,16 @@ final class Shell extends Action
 
     public function fetch( Request $request, Response $response, $args ): Response
     {
-        return $this->fetchHelper($request, $response, $args, true);
+        return $this->fetchHelper($request, $response, true);
     }
 
     public function fetchWithRoles( Request $request, Response $response, $args ): Response
     {
         $user = $this->authService->getUser( $request );
-        return $this->fetchHelper($request, $response, $args, null, $user);
+        return $this->fetchHelper($request, $response, null, $user);
     }
 
-    public function fetchHelper( Request $request, Response $response, $args, bool $public = null, User $user = null ): Response
+    public function fetchHelper( Request $request, Response $response, bool $public = null, User $user = null ): Response
     {
         try {
             $queryParams = $request->getQueryParams();

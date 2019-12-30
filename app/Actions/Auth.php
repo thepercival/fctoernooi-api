@@ -8,6 +8,7 @@
 
 namespace App\Actions;
 
+use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\User;
@@ -49,15 +50,15 @@ final class Auth extends Action
 	public function register( Request $request, Response $response, $args): Response
 	{
 		try{
-		    $arrRegisterData = $request->getParsedBody();
-            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+            $registerData = $this->getFormData( $request );
+		    if( property_exists( $registerData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
             }
-            if( array_key_exists("password", $arrRegisterData ) === false ) {
+            if( property_exists($registerData, "password" ) === false ) {
                 throw new \Exception( "geen wachtwoord ingevoerd");
             }
-            $emailAddress = $arrRegisterData["emailaddress"];
-            $password = $arrRegisterData["password"];
+            $emailAddress = $registerData->emailaddress;
+            $password = $registerData->password;
 
 			$user = $this->authService->register( $emailAddress, $password );
 			if ($user === null or !($user instanceof User)) {
@@ -65,7 +66,7 @@ final class Auth extends Action
             }
 
             $data = [
-                "token" => $this->getToken( $user),
+                "token" => $this->authService->getToken( $user),
                 "user" => [
                     "id" => $user->getId(),
                     "emailaddress" => $user->getEmailaddress()
@@ -122,11 +123,11 @@ final class Auth extends Action
     public function passwordreset( Request $request, Response $response, $args ): Response
     {
         try{
-            $arrRegisterData = $request->getParsedBody();
-            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+            $paswordResetData = $this->getFormData( $request );
+            if( property_exists($paswordResetData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
             }
-            $emailAddress = $arrRegisterData["emailaddress"];
+            $emailAddress = $paswordResetData->emailaddress;
 
             $retVal = $this->authService->sendPasswordCode( $emailAddress );
 
@@ -142,19 +143,19 @@ final class Auth extends Action
     public function passwordchange( Request $request, Response $response, $args ): Response
     {
         try{
-            $arrRegisterData = $request->getParsedBody();
-            if( array_key_exists("emailaddress", $arrRegisterData ) === false ) {
+            $paswordChangeData = $this->getFormData( $request );
+            if( property_exists($paswordChangeData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
             }
-            if( array_key_exists("password", $arrRegisterData ) === false ) {
+            if( property_exists($paswordChangeData, "password" ) === false ) {
                 throw new \Exception( "geen wachtwoord ingevoerd");
             }
-            if( array_key_exists("code", $arrRegisterData ) === false ) {
+            if( property_exists($paswordChangeData, "code" ) === false ) {
                 throw new \Exception( "geen code ingevoerd");
             }
-            $emailAddress = $arrRegisterData["emailaddress"];
-            $password = $arrRegisterData["password"];
-            $code = (string) $arrRegisterData["code"];
+            $emailAddress = $paswordChangeData->emailaddress;
+            $password = $paswordChangeData->password;
+            $code = (string) $paswordChangeData->code;
 
             $user = $this->authService->changePassword( $emailAddress, $password, $code );
 

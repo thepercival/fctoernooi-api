@@ -117,7 +117,7 @@ final class StructureAction extends Action
         $this->em->getConnection()->beginTransaction();
         try {
             /** @var \Voetbal\Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize( file_get_contents('php://input'), 'Voetbal\Structure', 'json');
+            $structureSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Structure', 'json');
             if ( $structureSer === false ) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }

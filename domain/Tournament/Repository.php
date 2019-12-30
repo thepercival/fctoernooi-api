@@ -35,12 +35,12 @@ class Repository extends \Voetbal\Repository
      * @param $id
      * @param null $lockMode
      * @param null $lockVersion
-     * @return Tournament
+     * @return Tournament|null
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\TransactionRequiredException
      */
-    public function find($id, $lockMode = null, $lockVersion = null): Tournament
+    public function find($id, $lockMode = null, $lockVersion = null): ?Tournament
     {
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
@@ -139,6 +139,12 @@ class Repository extends \Voetbal\Repository
         $qb = $qb->setParameter('emailaddress', $emailladdress);
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function remove( $tournament )
+    {
+        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
+        return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
 
 }

@@ -8,8 +8,10 @@ use App\Export\Pdf\Document as PdfDocument;
 use App\Export\TournamentConfig;
 use App\Response\ErrorResponse;
 use FCToernooi\Role;
+use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\Auth\Service as AuthService;
+use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -20,6 +22,7 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use Voetbal\Planning\Service as PlanningService;
 use JMS\Serializer\SerializerInterface;
+use App\Deserializers\TournamentDeserializer;
 
 class Tournament extends Action
 {
@@ -27,6 +30,14 @@ class Tournament extends Action
      * @var TournamentRepository
      */
     protected $tournamentRepos;
+    /**
+     * @var TournamentDeserializer
+     */
+    protected $tournamentDeserializer;
+    /**
+     * @var RoleRepository
+     */
+    protected $roleRepos;
     /**
      * @var AuthService
      */
@@ -37,17 +48,41 @@ class Tournament extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
+        TournamentDeserializer $tournamentDeserializer,
+        RoleRepository $roleRepos,
         AuthService $authService )
     {
         parent::__construct($logger,$serializer);
         $this->tournamentRepos = $tournamentRepos;
+        $this->tournamentDeserializer = $tournamentDeserializer;
+        $this->roleRepos = $roleRepos;
         $this->authService = $authService;
     }
-
-    public function fetch( Request $request, Response $response, $args ): Response
-    {
-        return new ErrorResponse("not implemented", 422);
-    }
+//
+//    public function __invoke(Request $request, Response $response, $args): Response
+//    {
+//        try {
+//            $id = array_key_exists("id", $args) ? $args["id"] : null;
+//
+//            if ($request->getMethod() === 'GET') {
+//                if ($id) {
+//                    return $this->fetchOne($request, $response, $args);
+//                } else {
+//                    return $this->fetch($request, $response, $args);
+//                }
+//            } elseif ($request->getMethod() === 'POST') {
+//                return $this->add($request, $response, $args);
+//            } elseif ($request->getMethod() === 'PUT') {
+//                return $this->edit($request, $response, $args);
+//            } elseif ($request->getMethod() === 'DELETE') {
+//                return $this->remove($request, $response, $args);
+//            }
+//
+//            throw new HttpMethodNotAllowedException($request, 'method "'. $request->getMethod() . '" not allowed for action "' . get_called_class(). '"');
+//        } catch (DomainRecordNotFoundException $e) {
+//            throw new HttpNotFoundException($request, $e->getMessage());
+//        }
+//    }
 
     public function fetchOnePublic( Request $request, Response $response, $args ): Response
     {
@@ -88,7 +123,7 @@ class Tournament extends Action
         return SerializationContext::create()->setGroups($serGroups);
     }
 
-    public function getUserRefereeId($request, $response, $args)
+    public function getUserRefereeId( Request $request, Response $response, $args ): Response
     {
         try {
             /** @var \FCToernooi\Tournament|null $tournament */
@@ -100,23 +135,21 @@ class Tournament extends Action
 
             $refereeId = 0;
             if (strlen( $user->getEmailaddress() ) > 0 ) {
-                $referee = $this->service->getReferee( $tournament, $user->getEmailaddress() );
+                $referee = $tournament->getReferee( $user->getEmailaddress() );
                 if( $referee !== null ) {
                     $refereeId = $referee->getId();
                 }
             }
 
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $refereeId, 'json'));
-            ;
+            $json = $this->serializer->serialize( $refereeId, 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    public function syncRefereeRoles($request, $response, $args)
+    public function syncRefereeRoles( Request $request, Response $response, $args ): Response
     {
         try {
             /** @var \FCToernooi\Tournament|null $tournament */
@@ -126,33 +159,27 @@ class Tournament extends Action
             }
             $this->authService->checkAuth( $request );
 
-            $roles = $this->service->syncRefereeRoles( $tournament );
+            $roles = $this->roleRepos->syncRefereeRoles( $tournament );
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( true, 'json' ));
-            ;
+            $json = $this->serializer->serialize( true, 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    public function sendRequestOldStructure($request, $response, $args)
+    public function sendRequestOldStructure( Request $request, Response $response, $args ): Response
     {
         try {
             /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->repos->find($args['id']);
+            $tournament = $this->tournamentRepos->find($args['id']);
             if ($tournament === null) {
                 throw new DomainRecordNotFoundException("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
             $this->sendEmailOldStructure( $tournament );
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( true, 'json' ));
-            ;
+            $json = $this->serializer->serialize( true, 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
@@ -164,17 +191,14 @@ class Tournament extends Action
     {
         try {
             /** @var \FCToernooi\Tournament $tournament */
-            $tournamentSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
+            $tournamentSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Tournament', 'json');
 
             $user = $this->authService->checkAuth( $request );
-            $tournament = $this->service->createFromSerialized( $tournamentSer, $user );
+            $tournament = $this->tournamentDeserializer->post( $tournamentSer, $user );
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json', $serializationContext));
-            ;
+            $json = $this->serializer->serialize( $tournament, 'json', $serializationContext );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
@@ -184,10 +208,10 @@ class Tournament extends Action
     public function edit( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournamentSer = $this->serializer->deserialize( json_encode($request->getParsedBody()), 'FCToernooi\Tournament', 'json');
+            /** @var \FCToernooi\Tournament $tournamentSer */
+            $tournamentSer = $this->serializer->deserialize( $this->getRawData() , 'FCToernooi\Tournament', 'json');
 
-            $tournament = $this->repos->find( $tournamentSer->getId() );
+            $tournament = $this->tournamentRepos->find( (int)$args['id'] );
             if ( $tournament === null ){
                 return $response->withStatus(404)->write("het te wijzigen toernooi kon niet gevonden worden" );
             }
@@ -196,17 +220,15 @@ class Tournament extends Action
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
-            $tournament = $this->service->changeBasics( $tournament, $dateTime, $tournamentSer->getBreakStartDateTime() );
+            $tournamentService = new TournamentService();
+            $tournament = $tournamentService->changeBasics( $tournament, $dateTime, $tournamentSer->getBreak() );
             $tournament->setPublic( $tournamentSer->getPublic() );
             $tournament->getCompetition()->getLeague()->setName($name);
-            $this->repos->customPersist($tournament, true);
+            $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
 
-            return $response
-                ->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $tournament, 'json', $serializationContext ));
-            ;
+            $json = $this->serializer->serialize( $tournament, 'json', $serializationContext );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
@@ -223,22 +245,21 @@ class Tournament extends Action
     {
         try{
             /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->repos->find( $args['id'] );
+            $tournament = $this->tournamentRepos->find( $args['id'] );
 
             if ( $tournament === null ){
-                return $response->withStatus(404)->write("het te verwijderen toernooi kon niet gevonden worden" );
+                throw new \Exception("het te verwijderen toernooi kon niet gevonden worden", E_ERROR);
             }
 
             $user = $this->authService->checkAuth( $request, $tournament );
 
-            $this->service->remove( $tournament );
+            $this->tournamentRepos->remove( $tournament );
 
             return $response->withStatus(200);
         }
         catch( \Exception $e ){
             return new ErrorResponse('het toernooi is niet verwijdered : ' . $e->getMessage(), 404);
         }
-
     }
 
     /**
@@ -255,7 +276,7 @@ class Tournament extends Action
         $this->em->getConnection()->beginTransaction();
         try {
             /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->repos->find($args['id']);
+            $tournament = $this->tournamentRepos->find($args['id']);
             if ($tournament === null) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }
@@ -263,8 +284,10 @@ class Tournament extends Action
             $user = $this->authService->checkAuth( $request, $tournament );
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('startdatetime'));
-            $newTournament = $this->service->copy( $tournament, $user, $startDateTime);
-            $this->repos->customPersist($newTournament, true);
+
+            $newTournament = $this->tournamentDeserializer->post( $tournament, $user );
+            $newTournament->getCompetition()->setStartDateTime( $startDateTime );
+            $this->tournamentRepos->customPersist($newTournament, true);
 
             $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
             $newCompetitors = $this->competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
@@ -286,11 +309,9 @@ class Tournament extends Action
             $this->em->flush();
 
             $this->em->getConnection()->commit();
-            return $response
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize( $newTournament->getId(), 'json'))
-                ;
-            ;
+
+            $json = $this->serializer->serialize( $newTournament->getId(), 'json' );
+            return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
             $this->em->getConnection()->rollBack();
@@ -301,7 +322,7 @@ class Tournament extends Action
     public function export( Request $request, Response $response, $args ): Response
     {
         try {
-            $tournament = $this->repos->find((int)$args['id']);
+            $tournament = $this->tournamentRepos->find((int)$args['id']);
             if (!$tournament) {
                 throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
             }

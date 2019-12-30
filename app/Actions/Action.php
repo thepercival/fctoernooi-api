@@ -35,26 +35,16 @@ abstract class Action
         $this->serializer = $serializer;
     }
 
-//    /**
-//     * @param Request  $request
-//     * @param Response $response
-//     * @param array    $args
-//     * @return Response
-//     * @throws HttpNotFoundException
-//     * @throws HttpBadRequestException
-//     */
-//    public function __invoke(Request $request, Response $response, $args): Response
-//    {
-//        $this->request = $request;
-//        $this->response = $response;
-//        $this->args = $args;
-//
-//        try {
-//            return $this->action($request, $response, $args);
-//        } catch (DomainRecordNotFoundException $e) {
-//            throw new HttpNotFoundException($this->request, $e->getMessage());
-//        }
-//    }
+    /**
+     * @param Request  $request
+     * @param Response $response
+     * @param array    $args
+     * @return Response
+     * @throws HttpNotFoundException
+     * @throws HttpBadRequestException
+     */
+    // abstract public function __invoke(Request $request, Response $response, $args): Response;
+
 //
 //    /**
 //     * @return Response
@@ -67,24 +57,10 @@ abstract class Action
 //    abstract protected function edit( Request $request, Response $response, $args ): Response;
 //    abstract protected function remove( Request $request, Response $response, $args ): Response;
 //
-//    protected function action( Request $request, Response $response, $args ): Response
-//    {
-//        $id = array_key_exists("id", $args) ? $args["id"] : null;
-//
-//        if ($request->getMethod() === 'GET') {
-//            if ($id) {
-//                return $this->fetchOne($request, $response, $args);
-//            } else {
-//                return $this->fetch($request, $response, $args);
-//            }
-//        } elseif ($request->getMethod() === 'POST') {
-//            return $this->add($request, $response, $args);
-//        } elseif ($request->getMethod() === 'PUT') {
-//            return $this->edit($request, $response, $args);
-//        } elseif ($request->getMethod() === 'DELETE') {
-//            return $this->remove($request, $response, $args);
-//        }
-//    }
+
+    public function options( Request $request, Response $response, $args ): Response {
+        return $response;
+    }
 
     /**
      * @return array|object
@@ -92,7 +68,7 @@ abstract class Action
      */
     protected function getFormData( Request $request )
     {
-        $input = json_decode(file_get_contents('php://input'));
+        $input = json_decode( $this->getRawData() );
         if( $input === null ) {
             return new \stdClass();
         }
@@ -102,6 +78,11 @@ abstract class Action
         }
 
         return $input;
+    }
+
+    protected function getRawData()
+    {
+        return file_get_contents('php://input');
     }
 
     /**

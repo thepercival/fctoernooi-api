@@ -13,7 +13,7 @@ use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 
 use FCToernooi\Auth\Settings as AuthSettings;
-use App\Settings\Www as WwwhSettings;
+use App\Settings\Www as WwwSettings;
 use App\Settings\Image as ImageSettings;
 
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
@@ -22,6 +22,8 @@ use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
+
+use App\Deserializers\TournamentDeserializer;
 
 
 return function (ContainerBuilder $containerBuilder) {
@@ -98,91 +100,15 @@ return function (ContainerBuilder $containerBuilder) {
             $authSettings = $container->get('settings')['auth'];
             return new AuthSettings($authSettings['jwtsecret'], $authSettings['jwtalgorithm'], $authSettings['activationsecret']);
         },
-        WwwhSettings::class => function( ContainerInterface $container ) {
-            return new WwwhSettings( $container->get('settings')['www'] );
+        WwwSettings::class => function( ContainerInterface $container ) {
+            return new WwwSettings( $container->get('settings')['www'] );
         },
         ImageSettings::class => function( ContainerInterface $container ) {
-            return new ImageSettings( $container->get('settings')['image'] );
+            return new ImageSettings( $container->get('settings')['images'] );
         }/*,
         'jwt' => function( ContainerInterface $container ) {
             return new \stdClass;
         }*/
     ]);
 };
-
-// should be loaded by callableresolver!!!
-
-// actions
-//'toernooi', function( ContainerInterface $container ) {
-//    $em = $container->get('em');
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $sportRepos = new Voetbal\Sport\Repository($em,$em->getClassMetaData(Voetbal\Sport::class));
-//    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
-//    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    return new FCToernooi\Tournament\Service(
-//        $container->get('voetbal'),
-//        $tournamentRepos,
-//        $sportRepos,
-//        $roleRepos,
-//        $userRepos
-//    );
-//},
-
-//$app->getContainer()->set('App\Action\Auth', function ( ContainerInterface $container ) {
-//	$em = $container->get('em');
-//    $userRepos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    $roleRepos = new FCToernooi\Role\Repository($em,$em->getClassMetaData(FCToernooi\Role::class));
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $service = new FCToernooi\Auth\Service(
-//        $userRepos,
-//        $roleRepos,
-//        $tournamentRepos,
-//        $em->getConnection()
-//    );
-//	return new App\Action\Auth($service, $userRepos,$container->get('serializer'),$container->get('settings'));
-//});
-//$app->getContainer()->set('App\Action\User', function ( ContainerInterface $container ) {
-//	$em = $container->get('em');
-//    $repos = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//	return new App\Action\User($repos,$container->get('serializer'),$container->get('settings'));
-//});
-//$app->getContainer()->set('App\Action\Tournament', function ( ContainerInterface $container ) {
-//    $em = $container->get('em');
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    return new App\Action\Tournament(
-//        $container->get('toernooi'),
-//        $tournamentRepos,
-//        $userRepository,
-//        new StructureRepository($em),
-//        $container->get('voetbal')->getRepository(Voetbal\Game::class),
-//        $container->get('serializer'),
-//        $container->get('token'),
-//        $em);
-//});
-//$app->getContainer()->set('App\Action\Tournament\Shell', function ( ContainerInterface $container ) {
-//    $em = $container->get('em');
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    return new App\Action\Tournament\Shell(
-//        $tournamentRepos,
-//        $userRepository,
-//        $container->get('serializer'),
-//        $container->get('token'),
-//        $em);
-//});
-//$app->getContainer()->set('App\Action\Sponsor', function ( ContainerInterface $container ) {
-//    $em = $container->get('em');
-//    $repos = new FCToernooi\Sponsor\Repository($em,$em->getClassMetaData(FCToernooi\Sponsor::class));
-//    $tournamentRepos = new FCToernooi\Tournament\Repository($em,$em->getClassMetaData(FCToernooi\Tournament::class));
-//    $userRepository = new FCToernooi\User\Repository($em,$em->getClassMetaData(FCToernooi\User::class));
-//    return new App\Action\Sponsor(
-//        $repos,
-//        $tournamentRepos,
-//        $userRepository,
-//        $container->get('serializer'),
-//        $container->get('token'),
-//        $container->get('settings'));
-//});
-//
 

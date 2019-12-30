@@ -15,6 +15,7 @@ use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Voetbal\Association;
 use Voetbal\Service as VoetbalService;
 use FCToernooi\Role;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -54,38 +55,47 @@ class AuthenticationMiddleware
 
     public function __invoke(Request $request, RequestHandler $handler): Response
     {
-        // $request = $request->withAttribute('foo2', 'bar2');
-        $token = $request->getAttribute('token');
-        if ($token === null || $token->isPopulated() !== true) {
+        if ($request->getMethod() === "OPTIONS" ) {
             return $handler->handle($request);
         }
 
-        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
+//        $token = $request->getAttribute('token');
+//        if ($token === null || $token->isPopulated() !== true) {
+//            return $handler->handle($request);
+//        }
+//
+//        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
+//
+//
+//        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
+//            || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
+//            || substr($request->getUri()->getPath(), 0, 5) === "/auth"
+//            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
+//        )
+//        {
+//            return $handler->handle($request);
+//        }
 
-
-        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
-            || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
-            || substr($request->getUri()->getPath(), 0, 5) === "/auth"
-            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
-        )
-        {
-            return $handler->handle($request);
-        }
+        BEPAAL RESOURCE TYPE OP BASIS VAN URI, MISSCHIEN KAN OOK MIDDLEWARE AAN ROUTE-GROUPEN WORDEN TOEGEVOEGD
+        OM MEER LOKAAL DE AUTORISATIE TE BEPALEN
 
         /** @var \Slim\Routing\RoutingResults $routingResults */
         $routingResults = $request->getAttribute('routingResults');
+        $a = $routingResults->getRouteArguments();
+        $b = $routingResults->getRouteIdentifier();
+        $c = $routingResults->getDispatcher();
         if (array_key_exists('resourceType', $args) === false) {
-            return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden", 401);
+            return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden");
         }
         $resourceType = $args['resourceType'];
 
         $user = $this->getUser();
         if ($user === null) {
-            return new ForbiddenResponse("gebruiker kan niet gevonden worden", 401);
+            return new ForbiddenResponse("gebruiker kan niet gevonden worden");
         }
         $id = (is_array($args) && array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
         if (!$this->authorized($user, $resourceType, $request->getMethod(), $request->getQueryParams(), $id)) {
-            return new ForbiddenResponse("geen autorisatie voor actie gevonden", 401);
+            return new ForbiddenResponse("geen autorisatie voor actie gevonden");
         }
 
         return $handler->handle($request);
@@ -132,11 +142,23 @@ class AuthenticationMiddleware
         if ($association === null) {
             return false;
         }
-        if( $this->tournamentService->mayUserChangeCompetitor( $user, $association ) === false ) {
+        if( $this->mayUserChangeCompetitor( $user, $association ) === false ) {
             return false;
         }
 
         return true;
+    }
+
+    protected function mayUserChangeCompetitor( User $user, Association $association )
+    {
+        $roleValues = Role::STRUCTUREADMIN;
+        $tournaments = $this->tournamentRepos->findByPermissions($user, $roleValues);
+        foreach ($tournaments as $tournament) {
+            if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function placeActionAuthorized(User $user, string $method, array $queryParams, int $id = null)

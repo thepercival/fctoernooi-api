@@ -232,4 +232,15 @@ class Tournament
     {
         $this->exported = $exported;
     }
+
+    public function getReferee( string $emailaddress )
+    {
+        $referees = $this->getCompetition()->getReferees();
+        foreach( $referees as $referee ) {
+            if( $referee->getEmailaddress() === $emailaddress ) {
+                return $referee;
+            }
+        }
+        return null;
+    }
 }

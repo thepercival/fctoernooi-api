@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use App\Response\UnauthorizedResponse;
+use App\Response\ErrorResponse;
 use Gofabian\Negotiation\NegotiationMiddleware;
 use Tuupola\Middleware\JwtAuthentication;
 use Tuupola\Middleware\CorsMiddleware;
@@ -36,7 +37,7 @@ return function (App $app) {
                     "path" => "/",
                     "ignore" => [
                         "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                        "/tournamentshells", "/tournamentspublic", "/tournaments/export",
+                        "/tournaments/shells", "/tournamentspublic", "/tournaments/export",
                         "/voetbal/structures", "/voetbal/sports"
                     ]
                 ]),
@@ -79,6 +80,9 @@ return function (App $app) {
 //        'accept-charset' => ['utf-8']
 //    ]));
 
+    // Add Routing Middleware
+    $app->addRoutingMiddleware();
+
 //    // always last, so it is called first!
     $errorMiddleware = $app->addErrorMiddleware( $app->getContainer()->get("settings")['environment'] === "development" , true, true);
 
@@ -86,18 +90,14 @@ return function (App $app) {
     $errorMiddleware->setErrorHandler(
         HttpNotFoundException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
-            $response = new Response();
-            $response->getBody()->write('404 NOT FOUND');
-            return $response->withStatus(404);
+            return new ErrorResponse($exception->getMessage(), 404);
         });
 
     // Set the Not Allowed Handler
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
-            $response = new Response();
-            $response->getBody()->write('405 NOT ALLOWED');
-            return $response->withStatus(405);
+            return new ErrorResponse($exception->getMessage(), 405);
         });
 };
 

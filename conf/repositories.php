@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use DI\ContainerBuilder;
+use Psr\Container\ContainerInterface;
 
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament;
@@ -8,10 +10,9 @@ use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Role;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\User;
+use FCToernooi\Sponsor\Repository as SponsorRepository;
+use FCToernooi\Sponsor;
 
-use App\Infrastructure\Persistence\User\InMemoryUserRepository;
-use DI\ContainerBuilder;
-use Psr\Container\ContainerInterface;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Sport;
 use Voetbal\Season\Repository as SeasonRepository;
@@ -35,6 +36,10 @@ return function (ContainerBuilder $containerBuilder) {
         UserRepository::class => function (ContainerInterface $container) {
             $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
             return new UserRepository($entityManager ,$entityManager ->getClassMetaData(User::class));
+        },
+        SponsorRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new SponsorRepository($entityManager ,$entityManager ->getClassMetaData(Sponsor::class));
         },
 
         SportRepository::class => function (ContainerInterface $container) {

@@ -8,8 +8,6 @@
 
 namespace FCToernooi\Role;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
 use FCToernooi\User;
@@ -17,18 +15,10 @@ use FCToernooi\User;
 class Service
 {
     /**
-     * @var RoleRepository
-     */
-    protected $repos;
-
-    /**
      * Service constructor.
-     *
-     * @param RoleRepository $repos
      */
-    public function __construct( RoleRepository $repos )
+    public function __construct()
     {
-        $this->repos = $repos;
     }
 
     /**
@@ -63,22 +53,5 @@ class Service
 //        }
 //
 //        return $rolesRet;
-    }
-
-    /**
-     * @param Tournament $tournament
-     * @param User $user
-     */
-    protected function flushRolesDep( Tournament $tournament, User $user )
-    {
-        $roles = $this->repos->findBy(
-            array(
-                'tournament' => $tournament,
-                'user' => $user
-            )
-        );
-        foreach( $roles as $role ){
-            $this->repos->remove($role);
-        }
     }
 }
