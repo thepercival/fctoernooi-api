@@ -23,9 +23,6 @@ use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
 
-use App\Deserializers\TournamentDeserializer;
-
-
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
         /*'renderer' => function ( ContainerInterface $container ) {

@@ -27,7 +27,7 @@ use Voetbal\Competitor\Service as CompetitorService;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Structure\Repository as StructureRepository;
 use JMS\Serializer\SerializerInterface;
-use App\Deserializers\TournamentDeserializer;
+use App\Copiers\TournamentCopier;
 
 class Tournament extends Action
 {
@@ -36,9 +36,9 @@ class Tournament extends Action
      */
     protected $tournamentRepos;
     /**
-     * @var TournamentDeserializer
+     * @var TournamentCopier
      */
-    protected $tournamentDeserializer;
+    protected $tournamentCopier;
     /**
      * @var RoleRepository
      */
@@ -57,14 +57,14 @@ class Tournament extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
-        TournamentDeserializer $tournamentDeserializer,
+        TournamentCopier $tournamentCopier,
         RoleRepository $roleRepos,
         StructureRepository $structureRepos,
         AuthService $authService )
     {
         parent::__construct($logger,$serializer);
         $this->tournamentRepos = $tournamentRepos;
-        $this->tournamentDeserializer = $tournamentDeserializer;
+        $this->tournamentCopier = $tournamentCopier;
         $this->roleRepos = $roleRepos;
         $this->structureRepos = $structureRepos;
         $this->authService = $authService;
@@ -215,7 +215,7 @@ class Tournament extends Action
             $deserializationContext = $this->getDeserializationContext($user);
             $tournamentSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Tournament', 'json', $deserializationContext);
 
-            $tournament = $this->tournamentDeserializer->post( $tournamentSer, $user );
+            $tournament = $this->tournamentCopier->copy( $tournamentSer, $user );
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize( $tournament, 'json', $serializationContext );
@@ -303,7 +303,7 @@ class Tournament extends Action
 
             $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime );
 
-            $newTournament = $this->tournamentDeserializer->post( $tournament, $user );
+            $newTournament = $this->tournamentCopier->copy( $tournament, $user );
             $newTournament->getCompetition()->setStartDateTime( $startDateTime );
             $this->tournamentRepos->customPersist($newTournament, true);
 

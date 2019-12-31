@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Deserializers;
+namespace App\Copiers;
 
 use Voetbal\Association;
 use Voetbal\Sport\Repository as SportRepository;
@@ -17,7 +17,7 @@ use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
 
-class TournamentDeserializer
+class TournamentCopier
 {
     /**
      * @var SportRepository
@@ -37,7 +37,7 @@ class TournamentDeserializer
     }
 
 
-    public function post( Tournament $tournamentSer, User $user ): Tournament
+    public function copy( Tournament $tournamentSer, User $user ): Tournament
     {
         $competitionSer = $tournamentSer->getCompetition();
 

@@ -9,6 +9,7 @@
 namespace App\Actions\Voetbal;
 
 use App\Response\ErrorResponse;
+use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Voetbal\Structure\Service as StructureService;
 use Voetbal\Planning\Service as PlanningService;
@@ -31,21 +32,19 @@ final class StructureAction extends Action
      */
     protected $competitionRepos;
     /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
-    /**
      * @var EntityManager
      */
     protected $em;
 
     public function __construct(
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
         StructureRepository $structureRepos,
         CompetitionRepository $competitionRepos,
-        SerializerInterface $serializer,
         EntityManager $em
     )
     {
+        parent::__construct($logger,$serializer);
         $this->structureRepos = $structureRepos;
         $this->competitionRepos = $competitionRepos;
         $this->serializer = $serializer;
@@ -114,6 +113,8 @@ final class StructureAction extends Action
 
     public function edit( $request, $response, $args)
     {
+        na toevoegen toernooi, moet de structuur worden toegevoegd, daarna kun je kijken als het kopieren werkt!!!!!
+
         $this->em->getConnection()->beginTransaction();
         try {
             /** @var \Voetbal\Structure|false $structureSer */
