@@ -92,16 +92,17 @@ return function (App $app) {
     //   $app->any('/voetbal/{resourceType}[/{id}]', VoetbalApp\Action\Slim\Handler::class ); // POSTMAN TODO
 
 
-//    $app->group('/voetbal', function ( Group $voetbalGroup ) {
-//        $voetbalGroup->group('/structures', function ( Group $group ) {
-//            $group->get('/{id}', StructureAction::class . ':fetchOne');
-//            $group->put('/{id}', StructureAction::class . ':edit');
-//        });
+    $app->group('/voetbal', function ( Group $voetbalGroup ) {
+        $voetbalGroup->group('/structures', function ( Group $group ) {
+            $group->options('/', StructureAction::class . ':options');
+            $group->get('/{id}', StructureAction::class . ':fetchOne');
+            $group->put('/{id}', StructureAction::class . ':edit');
+        });
 //
 //        $voetbalGroup->group('/planning', function ( Group $group ) {
 //            $group->get('/{id}', PlanningAction::class . ':fetch');
 //            $group->post('/{id}', PlanningAction::class . ':add');
 //            $group->put('/{id}', PlanningAction::class . ':edit');
 //        });
-//    });
+    });
 };

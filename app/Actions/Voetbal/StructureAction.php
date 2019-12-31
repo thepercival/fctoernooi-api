@@ -26,7 +26,7 @@ final class StructureAction extends Action
     /**
      * @var StructureRepository
      */
-    protected $repos;
+    protected $structureRepos;
     /**
      * @var CompetitionRepository
      */
@@ -113,8 +113,6 @@ final class StructureAction extends Action
 
     public function edit( $request, $response, $args)
     {
-        na toevoegen toernooi, moet de structuur worden toegevoegd, daarna kun je kijken als het kopieren werkt!!!!!
-
         $this->em->getConnection()->beginTransaction();
         try {
             /** @var \Voetbal\Structure|false $structureSer */
