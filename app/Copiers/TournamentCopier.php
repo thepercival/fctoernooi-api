@@ -37,54 +37,59 @@ class TournamentCopier
     }
 
 
-    public function copy( Tournament $tournamentSer, User $user ): Tournament
+    public function copy( Tournament $tournament, \DateTimeImmutable $newStartDateTime, User $user ): Tournament
     {
-        $competitionSer = $tournamentSer->getCompetition();
+        $competition = $tournament->getCompetition();
 
         $association = $this->createAssociationFromUserIdAndDateTime( $user->getId() );
 
-        $leagueSer = $competitionSer->getLeague();
+        $leagueSer = $competition->getLeague();
         $league = new League( $association, $leagueSer->getName() );
         $league->setSportDep( 'voetbal' ); // DEPRECATED
 
         $season = $this->seasonRepos->findOneBy( array('name' => '9999' ) );
 
-        $ruleSet = $competitionSer->getRuleSet();
+        $ruleSet = $competition->getRuleSet();
         $competitionService = new CompetitionService();
-        $competition = $competitionService->create($league, $season, $ruleSet, $competitionSer->getStartDateTime() );
+        $newCompetition = $competitionService->create($league, $season, $ruleSet, $competition->getStartDateTime() );
 
         // add serialized fields and referees to source-competition
         $sportConfigService = new SportConfigService();
-        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $competition, $sportConfigService ) {
+        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $newCompetition, $sportConfigService ) {
             foreach( $sportConfigsSer as $sportConfigSer ) {
                 $sport = $this->sportRepos->find( $sportConfigSer->getSportIdSer() );
-                $sportConfigService->copy( $sportConfigSer, $competition, $sport );
+                $sportConfigService->copy( $sportConfigSer, $newCompetition, $sport );
             }
             foreach( $fieldsSer as $fieldSer ) {
-                $field = new Field( $competition, $fieldSer->getNumber() );
+                $field = new Field( $newCompetition, $fieldSer->getNumber() );
                 $field->setName( $fieldSer->getName() );
                 $sport = $this->sportRepos->find( $fieldSer->getSportIdSer() );
                 $field->setSport( $sport );
             }
             foreach( $refereesSer as $refereeSer ) {
-                $referee = new Referee( $competition, $refereeSer->getRank() );
+                $referee = new Referee( $newCompetition, $refereeSer->getRank() );
                 $referee->setInitials( $refereeSer->getInitials() );
                 $referee->setName( $refereeSer->getName() );
                 $referee->setEmailaddress( $refereeSer->getEmailaddress() );
                 $referee->setInfo( $refereeSer->getInfo() );
             }
         };
-        $createFieldsAndReferees( $competitionSer->getSportConfigs(), $competitionSer->getFields(), $competitionSer->getReferees() );
+        $createFieldsAndReferees( $competition->getSportConfigs(), $competition->getFields(), $competition->getReferees() );
 
-        $tournament = new TournamentBase( $competition );
-        $tournament->setBreakDuration( 0 );
-        $public = $tournamentSer->getPublic() !== null ? $tournamentSer->getPublic() : true;
-        $tournament->setPublic( $public );
+        $newTournament = new TournamentBase( $newCompetition );
+        $newTournament->getCompetition()->setStartDateTime( $newStartDateTime );
+        if( $tournament->getBreakStartDateTime() !== null ) {
+            $diff = $tournament->getBreakStartDateTime()->diff( $tournament->getCompetition()->getStartDateTime() );
+            $newTournament->setBreakStartDateTime( $newStartDateTime->add( $diff ) );
+            $newTournament->setBreakDuration( $tournament->getBreakDuration() );
+        }
+        $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
+        $newTournament->setPublic( $public );
 
         $roleService = new RoleService();
-        $roleService->create( $tournament, $user, Role::ALL );
+        $roleService->create( $newTournament, $user, Role::ALL );
 
-        return $tournament;
+        return $newTournament;
     }
 
     protected function createAssociationFromUserIdAndDateTime( $userId ): Association {

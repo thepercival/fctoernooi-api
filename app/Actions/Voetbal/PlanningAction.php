@@ -23,6 +23,7 @@ use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Input\Repository as InputRepository;
 use VoetbalApp\Action\PostSerialize\RefereeService as DeserializeRefereeService;
+use Voetbal\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
@@ -111,7 +112,9 @@ final class PlanningAction extends Action
         try {
             list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request );
 
-            $this->createPlanning( $roundNumber, $blockedPeriod );
+            $roundNumberPlanningCreator = new RoundNumberPlanningCreator( $this->inputRepos, $this->repos );
+
+            $roundNumberPlanningCreator->create( $roundNumber, $blockedPeriod );
 
             return $response
                 ->withStatus(201)
@@ -122,28 +125,7 @@ final class PlanningAction extends Action
         }
     }
 
-    protected function createPlanning( RoundNumber $roundNumber, Period $blockedPeriod = null ) {
-        $this->repos->removeRoundNumber( $roundNumber );
 
-        $inputService = new PlanningInputService();
-        $defaultPlanningInput = $inputService->get( $roundNumber );
-        $planningInput = $this->inputRepos->getFromInput( $defaultPlanningInput );
-        if( $planningInput === null ) {
-            $planningInput = $this->inputRepos->save( $defaultPlanningInput );
-        }
-        $planning = $planningInput->getBestPlanning();
-
-        $hasPlanning = false;
-        if( $planning !== null ) {
-            $convertService = new ConvertService(new ScheduleService($blockedPeriod));
-            $convertService->createGames($roundNumber, $planning);
-            $hasPlanning = true;
-        }
-        $this->repos->saveRoundNumber($roundNumber, $hasPlanning);
-        if( $roundNumber->hasNext() ) {
-            $this->createPlanning( $roundNumber->getNext(), $blockedPeriod );
-        }
-    }
 
     /**
      * do game remove and add for multiple games

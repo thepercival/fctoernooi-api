@@ -23,6 +23,10 @@ use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Competition;
 
 use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Planning\Repository as PlanningRepository;
+use Voetbal\Planning;
+use Voetbal\Planning\Input\Repository as PlanningInputRepository;
+use Voetbal\Planning\Input as PlanningInput;
 
 return function (ContainerBuilder $containerBuilder) {
     // Here we map our UserRepository interface to its in memory implementation
@@ -65,5 +69,15 @@ return function (ContainerBuilder $containerBuilder) {
             $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
             return new StructureRepository($entityManager);
         },
+        PlanningRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new PlanningRepository($entityManager,$entityManager ->getClassMetaData(Planning::class));
+        },
+        PlanningInputRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new PlanningInputRepository($entityManager ,$entityManager ->getClassMetaData(PlanningInput::class));
+        },
+
+
     ]);
 };
