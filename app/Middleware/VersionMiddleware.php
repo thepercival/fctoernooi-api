@@ -17,8 +17,8 @@ class VersionMiddleware implements Middleware
     public function process(Request $request, RequestHandler $handler): Response
     {
         $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
-        if( ($request->getMethod() === "POST" && $request->getUri()->getPath() === "/validatetoken" )
-            || ($request->getMethod() === "GET" && $request->getUri()->getPath() === "/tournaments/shells") ) {
+        if( ($request->getMethod() === "POST" && $request->getUri()->getPath() === "/auth/validatetoken" )
+            || ($request->getMethod() === "GET" && $request->getUri()->getPath() === "/public/shells") ) {
             if( $apiVersion !== "17" ) {
                 return new ErrorResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
             }

@@ -8,6 +8,7 @@ use App\Actions\User as UserAction;
 use App\Actions\Sponsor as SponsorAction;
 use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
+use App\Actions\Voetbal\SportAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -60,8 +61,8 @@ return function (App $app) {
     $app->group('/tournaments', function ( Group $group )  {
         $group->options('/{tournamentId}', TournamentAction::class . ':options');
         $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne');
-        $group->options('/', TournamentAction::class . ':options');
-        $group->post('/', TournamentAction::class . ':add');
+        $group->options('', TournamentAction::class . ':options');
+        $group->post('', TournamentAction::class . ':add');
         // $group->options('/{tournamentId}', TournamentAction::class . ':options');
         $group->put('/{tournamentId}', TournamentAction::class . ':edit');
         // $group->options('/{tournamentId}', TournamentAction::class . ':options');
@@ -92,7 +93,6 @@ return function (App $app) {
                 $group->post('{sponsorId}/upload', SponsorAction::class . ':upload');         // POSTMAN NOT FINISHED
             });
 
-
             $group->options('structure', StructureAction::class . ':options');
             $group->get('structure', StructureAction::class . ':fetchOne');
             $group->put('structure', StructureAction::class . ':edit');
@@ -103,13 +103,13 @@ return function (App $app) {
                 $group->put('/{roundnumber}', PlanningAction::class . ':reschedule');
             });
         });
-
     });
 
-    $app->group('/shells', function ( Group $group ) {
-        $group->options('/', TournamentShellAction::class . ':options');
-        $group->get('/', TournamentShellAction::class . ':fetchWithRoles');
-    });
+    $app->options('/shells', TournamentShellAction::class . ':options');
+    $app->get('/shells', TournamentShellAction::class . ':fetchWithRoles');
 
-
+    $app->options('/sports/{sportId}', SportAction::class . ':options');
+    $app->get('/sports/{sportId}', SportAction::class . ':fetchOne');
+    $app->options('/sports', SportAction::class . ':options');
+    $app->post('/sports', SportAction::class . ':add');
 };

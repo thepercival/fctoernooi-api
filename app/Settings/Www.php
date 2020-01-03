@@ -13,7 +13,7 @@ class Www
 	/**
 	 * @var array
 	 */
-	protected $urls;
+	protected $wwwUrl;
     /**
      * @var string
      */
@@ -25,8 +25,8 @@ class Www
 
 	public function __construct(array $settings )
 	{
-	    if( array_key_exists( 'urls', $settings ) ) {
-            $this->urls = $settings['urls'];
+	    if( array_key_exists( 'wwwurl', $settings ) ) {
+            $this->wwwUrl = $settings['wwwurl'];
         }
         if( array_key_exists( 'apiurl', $settings ) ) {
             $this->apiUrl = $settings['apiurl'];
@@ -36,8 +36,8 @@ class Www
         }
 	}
 
-	public function getUrls(): array {
-	    return $this->urls;
+	public function getWwwUrl(): string {
+	    return $this->wwwUrl;
     }
 
     public function getApiUrl(): string {

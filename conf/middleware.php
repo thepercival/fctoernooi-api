@@ -37,11 +37,7 @@ return function (App $app) {
             "rules" => [
                 new JwtAuthentication\RequestPathRule([
                     "path" => "/",
-                    "ignore" => ["/public"]/*
-                        "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
-                        "/tournaments/shells", "/tournaments/public",
-                        "/voetbal/structures", "/voetbal/sports"
-                    ]*/
+                    "ignore" => ["/public"]
                 ]),
                 new JwtAuthentication\RequestMethodRule([
                     "ignore" => ["OPTIONS"]
@@ -58,20 +54,6 @@ return function (App $app) {
     );
 
     $app->add(VersionMiddleware::class);
-
-    $app->add( new CorsMiddleware([
-            "logger" => $app->getContainer()->get( LoggerInterface::class ),
-            "origin" => $app->getContainer()->get('settings')['www']['urls'],
-            "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
-            "headers.allow" => ["Authorization", "If-Match", "If-Unmodified-Since","Content-Type","X-Api-Version"],
-            "headers.expose" => ["Authorization", "Etag"],
-            "credentials" => true,
-            "cache" => 300,
-            "error" => function (Request $request, Response $response, $arguments) {
-                return new UnauthorizedResponse($arguments["message"]);
-            }
-        ])
-    );
 
     $app->add( (new Middlewares\ContentType(['html', 'json']))->errorResponse() );
     $app->add( (new Middlewares\ContentType())->charsets(['UTF-8'])->errorResponse() );

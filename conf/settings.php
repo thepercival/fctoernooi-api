@@ -58,7 +58,7 @@ return [
             'activationsecret' => getenv('ACTIVATION_SECRET'),
         ],
         'www' => [
-            'urls' => explode(",", getenv('WWW_URLS') ),
+            'wwwurl' => getenv('WWW_URL'),
             'apiurl' => getenv('API_URL'),
             "apiurl-localpath" =>  realpath( __DIR__ . '/../public/' ) . '/',
         ],

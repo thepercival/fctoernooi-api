@@ -63,5 +63,5 @@ register_shutdown_function($shutdownHandler);
 
 // Run App & Emit Response
 $response = $app->handle($request);
-$responseEmitter = new ResponseEmitter();
+$responseEmitter = new ResponseEmitter( $container->get('settings')['www']['wwwurl'] );
 $responseEmitter->emit($response);
