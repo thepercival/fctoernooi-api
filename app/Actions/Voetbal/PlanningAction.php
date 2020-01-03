@@ -8,29 +8,24 @@
 
 namespace App\Actions\Voetbal;
 
+use App\Response\ErrorResponse;
+use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerInterface;
 use App\Actions\Action;
 use Doctrine\ORM\EntityManager;
 use JMS\Serializer\Serializer;
 use League\Period\Period;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Game\Service as GameService;
-use Voetbal\Planning\ConvertService;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\ScheduleService;
-use Voetbal\Poule\Repository as PouleRepository;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Input\Repository as InputRepository;
-use VoetbalApp\Action\PostSerialize\RefereeService as DeserializeRefereeService;
+use App\Actions\Voetbal\Deserialize\RefereeService as DeserializeRefereeService;
 use Voetbal\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
-    /**
-     * @var GameService
-     */
-    protected $gameService;
     /**
      * @var PlanningRepository
      */
@@ -44,62 +39,40 @@ final class PlanningAction extends Action
      */
     protected $structureRepos;
     /**
-     * @var PouleRepository
-     */
-    protected $pouleRepos;
-    /**
-     * @var CompetitionRepository
-     */
-    protected $competitionRepos;
-    /**
-     * @var Serializer
-     */
-    protected $serializer;
-    /**
-     * @var EntityManager
-     */
-    protected $em;
-    /**
      * @var DeserializeRefereeService
      */
     protected $deserializeRefereeService;
 
     public function __construct(
-        GameService $gameService,
+        LoggerInterface $logger,
+        SerializerInterface $serializer,
         PlanningRepository $repos,
         InputRepository $inputRepos,
-        StructureRepository $structureRepos,
-        PouleRepository $pouleRepos,
-        CompetitionRepository $competitionRepos,
-        Serializer $serializer,
-        EntityManager $em
+        StructureRepository $structureRepos
     ) {
-        $this->gameService = $gameService;
+        parent::__construct($logger,$serializer);
+
         $this->repos = $repos;
         $this->inputRepos = $inputRepos;
         $this->structureRepos = $structureRepos;
-        $this->pouleRepos = $pouleRepos;
-        $this->competitionRepos = $competitionRepos;
         $this->serializer = $serializer;
-        $this->em = $em;
         $this->deserializeRefereeService = new DeserializeRefereeService();
     }
 
-    public function fetch( $request, $response, $args)
+    public function fetch( Request $request, Response $response, $args ): Response
     {
-        list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request );
-        return $response
-            ->withHeader('Content-Type', 'application/json;charset=utf-8')
-            ->write( $this->serializer->serialize( $structure, 'json') );
-        ;
+        list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
+        $json = $this->serializer->serialize( $structure, 'json');
+        return $this->respondWithJson($response, $json);
     }
 
     protected function getBlockedPeriodFromInput( $request ): ?Period {
-        if( $request->getParam('blockedperiodstart') === null || $request->getParam('blockedperiodend') === null ) {
+        $queryParams = $request->getQueryParams();
+        if( array_key_exists("blockedperiodstart", $queryParams ) === false || array_key_exists("blockedperiodend", $queryParams ) === false ) {
             return null;
         }
-        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('blockedperiodstart'));
-        $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $request->getParam('blockedperiodend'));
+        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams['blockedperiodstart']);
+        $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams['blockedperiodend']);
         return new Period( $startDateTime, $endDateTime );
     }
 
@@ -107,21 +80,19 @@ final class PlanningAction extends Action
      * do game remove and add for multiple games
      *
      */
-    public function add($request, $response, $args)
+    public function create( Request $request, Response $response, $args ): Response
     {
         try {
-            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request );
+            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
 
             $roundNumberPlanningCreator = new RoundNumberPlanningCreator( $this->inputRepos, $this->repos );
 
             $roundNumberPlanningCreator->create( $roundNumber, $blockedPeriod );
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize($structure, 'json'));
+            $json = $this->serializer->serialize( $structure, 'json');
+            return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
-            return $response->withStatus(422)->write($e->getMessage());
+            return new ErrorResponse($e->getMessage(), 401);
         }
     }
 
@@ -130,37 +101,31 @@ final class PlanningAction extends Action
     /**
      * do game remove and add for multiple games
      */
-    public function edit($request, $response, $args)
+    public function reschedule( Request $request, Response $response, $args ): Response
     {
         try {
-            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request );
+            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
             $scheduleService = new ScheduleService( $blockedPeriod );
             $dates = $scheduleService->rescheduleGames( $roundNumber );
 
             $this->repos->saveRoundNumber( $roundNumber );
 
-            return $response
-                ->withStatus(201)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8')
-                ->write($this->serializer->serialize($dates, 'json'));;
+            $json = $this->serializer->serialize( $dates, 'json');
+            return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
-            return $response->withStatus(422)->write($e->getMessage());
+            return new ErrorResponse($e->getMessage(), 401);
         }
     }
 
-    protected function getFromRequest( $request ): array {
-        /** @var \Voetbal\Competition|null $competition */
-        $competition = $this->competitionRepos->find( (int) $request->getParam("competitionid") );
-        if ($competition === null) {
-            throw new \Exception("er kan geen competitie worden gevonden o.b.v. de invoergegevens", E_ERROR);
-        }
-        $roundNumberAsValue = (int)$request->getParam("roundnumber");
-        if ( $roundNumberAsValue === 0 ) {
+    protected function getFromRequest( Request $request, $args ): array {
+        $competition = $request->getAttribute("tournament")->getCompetition();
+
+        if( array_key_exists("roundnumber", $args ) === false ) {
             throw new \Exception("geen rondenummer opgegeven", E_ERROR);
         }
         /** @var \Voetbal\Structure $structure */
         $structure = $this->structureRepos->getStructure( $competition );
-        $roundNumber = $structure->getRoundNumber( $roundNumberAsValue );
+        $roundNumber = $structure->getRoundNumber( $args["roundnumber"] );
         $blockedPeriod = $this->getBlockedPeriodFromInput( $request );
 
         return [$structure, $roundNumber, $blockedPeriod];

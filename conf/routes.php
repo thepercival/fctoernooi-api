@@ -76,7 +76,7 @@ return function (App $app) {
             $group->options('userrefereeid', TournamentAction::class . ':options');
             $group->get('userrefereeid', TournamentAction::class . ':getUserRefereeId');
             $group->options('export', TournamentAction::class . ':options');
-            $group->get('export', TournamentAction::class . ':export');                                       // POSTMAN NOT FINISHED
+            $group->get('export', TournamentAction::class . ':export');
             $group->options('copy', TournamentAction::class . ':options');
             $group->post('copy', TournamentAction::class . ':copy');
 
@@ -97,13 +97,11 @@ return function (App $app) {
             $group->get('structure', StructureAction::class . ':fetchOne');
             $group->put('structure', StructureAction::class . ':edit');
 
-
-//
-//        $voetbalGroup->group('/planning', function ( Group $group ) {
-//            $group->get('/{id}', PlanningAction::class . ':fetch');
-//            $group->post('/{id}', PlanningAction::class . ':add');
-//            $group->put('/{id}', PlanningAction::class . ':edit');
-//        });
+            $group->group('planning', function ( Group $group ) {
+                $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
+                $group->post('/{roundnumber}', PlanningAction::class . ':create');
+                $group->put('/{roundnumber}', PlanningAction::class . ':reschedule');
+            });
         });
 
     });

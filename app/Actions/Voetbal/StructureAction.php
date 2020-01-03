@@ -61,12 +61,8 @@ final class StructureAction extends Action
             $structureCopier = new StructureCopier( $competition );
             $newStructure = $structureCopier->copy( $structureSer );
 
-            voeg deze 2 samen binnen een transactie!!!
             $roundNumberAsValue = 1;
-            $this->structureRepos->remove( $competition, $roundNumberAsValue );
-
-            $roundNumber = $this->structureRepos->customPersist( $newStructure, $roundNumberAsValue);
-
+            $this->structureRepos->removeAndAdd( $competition, $newStructure, $roundNumberAsValue );
 
             $json = $this->serializer->serialize( $newStructure, 'json');
             return $this->respondWithJson($response, $json);

@@ -20,7 +20,7 @@ use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal;
 use Voetbal\Poule;
 use Voetbal\Game as GameBase;
-use VoetbalApp\Action\PostSerialize\RefereeService as DeserializeRefereeService;
+use VoetbalApp\Action\Deserialize\RefereeService as DeserializeRefereeService;
 
 final class Game
 {

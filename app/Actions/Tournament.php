@@ -272,7 +272,7 @@ class Tournament extends Action
             // $structureService = new StructureService( new TournamentStructureOptions() );
             $structureCopier = new StructureCopier( $newTournament->getCompetition() );
             $newStructure = $structureCopier->copy( $structure );
-            $this->structureRepos->customPersist($newStructure);
+            $this->structureRepos->add($newStructure);
 
             $this->planningCreator->create( $newStructure->getFirstRoundNumber(), $newTournament->getBreak() );
 
@@ -293,13 +293,17 @@ class Tournament extends Action
             /** @var \FCToernooi\Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            $type = filter_var($request->getParam("type"), FILTER_SANITIZE_STRING);
+            $queryParams = $request->getQueryParams();
+            if( array_key_exists("type", $queryParams) === false ) {
+                throw new \Exception("kies een type export(pdf/excel)", E_ERROR);
+            }
+
+            $type = filter_var($queryParams["type"], FILTER_SANITIZE_STRING);
             $type = $type === "pdf" ? TournamentBase::EXPORTED_PDF : TournamentBase::EXPORTED_EXCEL;
-            $config = $this->getExportConfig( $request );
+            $config = $this->getExportConfig( $queryParams );
 
             $tournament->setExported( $tournament->getExported() | $type );
-            $this->em->persist($tournament);
-            $this->em->flush();
+            $this->tournamentRepos->save($tournament);
 
             if( $type === TournamentBase::EXPORTED_PDF ) {
                 return $this->writePdf($response, $config, $tournament );
@@ -312,17 +316,23 @@ class Tournament extends Action
         }
     }
 
-    protected function getExportConfig( $request ): TournamentConfig
+    protected function getExportConfig( array $queryParams ): TournamentConfig
     {
+        $getParam = function( string $param ) use ( $queryParams ): bool {
+            if (array_key_exists($param, $queryParams) && strlen($queryParams[$param]) > 0) {
+                return filter_var($queryParams[$param], FILTER_VALIDATE_BOOLEAN);
+            }
+            return false;
+        };
         $exportConfig = new TournamentConfig(
-            filter_var($request->getParam("gamenotes"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("structure"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("rules"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("gamesperpoule"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("gamesperfield"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("planning"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("poulepivottables"), FILTER_VALIDATE_BOOLEAN),
-            filter_var($request->getParam("qrcode"), FILTER_VALIDATE_BOOLEAN)
+            $getParam("gamenotes"),
+            $getParam("structure"),
+            $getParam("rules"),
+            $getParam("gamesperpoule"),
+            $getParam("gamesperfield"),
+            $getParam("planning"),
+            $getParam("poulepivottables"),
+            $getParam("qrcode")
         );
         if( $exportConfig->allOptionsOff() ) {
             throw new \Exception("kies minimaal 1 exportoptie", E_ERROR);
@@ -332,23 +342,23 @@ class Tournament extends Action
 
     protected function writePdf($response, $config, $tournament ){
         $fileName = $this->getFileName( $config);
-        $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
+        $structure = $this->structureRepos->getStructure( $tournament->getCompetition() );
 
         $pdf = new PdfDocument( $tournament, $structure, $config );
         $vtData = $pdf->render();
 
+        $response->getBody()->write($vtData);
         return $response
             ->withHeader('Cache-Control', 'must-revalidate')
             ->withHeader('Pragma', 'public')
             ->withHeader('Content-Disposition', 'inline; filename="'.$fileName.'.pdf";')
             ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
-            ->withHeader('Content-Length', strlen( $vtData ))
-            ->write($vtData);
+            ->withHeader('Content-Length', strlen( $vtData ));
     }
 
     protected function writeExcel($response, $config, $tournament ){
         $fileName = $this->getFileName( $config);
-        $structure = $this->structureReposistory->getStructure( $tournament->getCompetition() );
+        $structure = $this->structureRepos->getStructure( $tournament->getCompetition() );
 
         $spreadsheet = new FCToernooiSpreadsheet( $tournament, $structure, $config );
         $spreadsheet->fillContents();
