@@ -57,8 +57,7 @@ final class Shell extends Action
 
     public function fetchWithRoles( Request $request, Response $response, $args ): Response
     {
-        $user = $this->authService->getUser( $request );
-        return $this->fetchHelper($request, $response, null, $user);
+        return $this->fetchHelper($request, $response, null, $request->getAttribute("user"));
     }
 
     public function fetchHelper( Request $request, Response $response, bool $public = null, User $user = null ): Response

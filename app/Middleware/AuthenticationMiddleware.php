@@ -9,14 +9,13 @@
 namespace App\Middleware;
 
 use FCToernooi\Tournament;
-use FCToernooi\User\Repository as UserRepos;
-use FCToernooi\Tournament\Repository as TournamentRepos;
+use FCToernooi\User\Repository as UserRepository;
+use FCToernooi\Tournament\Repository as TournamentRepository;
+use Voetbal\Game\Repository as GameRepository;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use Voetbal\Association;
-use Voetbal\Service as VoetbalService;
 use FCToernooi\Role;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -25,32 +24,32 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 class AuthenticationMiddleware
 {
     /**
-     * @var UserRepos
-     */
-    protected $userRepos;
-    /**
-     * @var TournamentRepos
-     */
-    protected $tournamentRepos;
-    /**
      * @var TournamentService
      */
     protected $tournamentService;
     /**
-     * @var VoetbalService
+     * @var UserRepository
      */
-    protected $voetbalService;
+    protected $userRepos;
+    /**
+     * @var TournamentRepository
+     */
+    protected $tournamentRepos;
+    /**
+     * @var GameRepository
+     */
+    protected $gameRepos;
 
     public function __construct(
-        UserRepos $userRepos,
-        TournamentRepos $tournamentRepos,
         TournamentService $tournamentService,
-        VoetbalService $voetbalService
+        UserRepository $userRepos,
+        TournamentRepository $tournamentRepos,
+        GameRepository $gameRepos
     ) {
         $this->userRepos = $userRepos;
         $this->tournamentRepos = $tournamentRepos;
         $this->tournamentService = $tournamentService;
-        $this->voetbalService = $voetbalService;
+        $this->gameRepos = $gameRepos;
     }
 
     public function __invoke(Request $request, RequestHandler $handler): Response
@@ -64,34 +63,23 @@ class AuthenticationMiddleware
             return $handler->handle($request);
         }
 
-        // THIS SHOULD WORK ALSO CHECK TOKEN WITH DEBUGSESSIONS if (in_array("delete", $token["scope"])) {
+        $user = $this->getUser($token);
+        if ( $user === null ){
+            return new ForbiddenResponse("de ingelogde gebruikers kon niet gevonden worden");
+        }
+        $request = $request->withAttribute("user", $user);
 
-
-        if (substr($request->getUri()->getPath(), 0, 12) === "/tournaments"
-            || substr($request->getUri()->getPath(), 0, 9) === "/sponsors"
-            || substr($request->getUri()->getPath(), 0, 5) === "/auth"
-            /*|| substr($request->getUri()->getPath(), 0, 30) === "/voetbal/planning/hasbeenfound"*/
-        )
-        {
+        $tournament = $request->getAttribute("tournament");
+        if( $tournament === null ) {
             return $handler->handle($request);
         }
-
         /** @var \Slim\Routing\RoutingResults $routingResults */
         $routingResults = $request->getAttribute('routingResults');
         $args = $routingResults->getRouteArguments();
-
-        $resourceType = $this->getResourceType( $request->getUri()->getPath() );
-        if ( $resourceType === null ) {
-            return new ForbiddenResponse("niet geautoriseerd, het pad kan niet bepaalt worden");
+        if( $this->isAuthorized( $user, $tournament, $args ) === false ) {
+            return new ForbiddenResponse("je hebt geen rechten om het toernooi aan te passen");
         }
-        $user = $this->getUser();
-        if ($user === null) {
-            return new ForbiddenResponse("gebruiker kan niet gevonden worden");
-        }
-        $id = (is_array($args) && array_key_exists('id', $args) && ctype_digit($args['id'])) ? (int)$args['id'] : null;
-        if (!$this->authorized($user, $resourceType, $request->getMethod(), $request->getQueryParams(), $id)) {
-            return new ForbiddenResponse("geen autorisatie voor actie gevonden");
-        }
+        $request = $request->withAttribute("tournament", $tournament);
 
         return $handler->handle($request);
     }
@@ -104,101 +92,41 @@ class AuthenticationMiddleware
         return $this->userRepos->find($token->getUserId());
     }
 
-    protected function getResourceType( string $uriPath ): ?string
+    protected function isAuthorized(User $user, Tournament $tournament, $args ): bool
     {
-        $voetbalPrefix = "/voetbal/";
-        $strpos = strpos( $uriPath, $voetbalPrefix );
-        if( $strpos === false ) {
-            return null;
+        if( array_key_exists("gameId", $args ) ) {
+            return $this->isAuthorizedForGame( $user, $tournament, (int)$args["gameId"] );
         }
-        $resourceType = substr( $uriPath, $strpos + strlen($voetbalPrefix) );
-        $strpos = strpos( $resourceType, "/" );
-        if( $strpos === false ) {
-            return $resourceType;
-        }
-        return substr( $resourceType, 0, $strpos );
-    }
+        return $tournament->hasRole( $user, Role::ADMIN );
 
-    protected function authorized(User $user, string $resourceType, string $method, array $queryParams, int $id = null)
-    {
+
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
-        if ($resourceType === 'competitors') {
-            return $this->competitorActionAuthorized($user, $method, $queryParams);
-        } elseif ($resourceType === 'places') {
-            return $this->placeActionAuthorized($user, $method, $queryParams, $id);
-        } elseif ($resourceType === 'games') {
-            return $this->gameActionAuthorized($user, $method, $queryParams, $id);
-        } elseif ($resourceType === 'sports') {
-            return true;
-        } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
-            || $resourceType === 'structures' || $resourceType === 'sportconfigs' || $resourceType === 'planningconfigs'
-            || $resourceType === 'sportscoreconfigs'
-        ) {
-            return $this->otherActionAuthorized($user, $queryParams);
-        }
-        return false;
+//        if ($resourceType === 'competitors') {
+//            return $this->competitorActionAuthorized($user, $method, $queryParams);
+//        } elseif ($resourceType === 'places') {
+//            return $this->placeActionAuthorized($user, $method, $queryParams, $id);
+//        } elseif ($resourceType === 'games') {
+//            return $this->gameActionAuthorized($user, $method, $queryParams, $id);
+//        } elseif ($resourceType === 'sports') {
+//            return true;
+//        } elseif ($resourceType === 'fields' || $resourceType === 'planning' || $resourceType === 'referees'
+//            || $resourceType === 'structures' || $resourceType === 'sportconfigs' || $resourceType === 'planningconfigs'
+//            || $resourceType === 'sportscoreconfigs'
+//        ) {
+//            return $this->otherActionAuthorized($user, $queryParams);
+//        }
+//        return false;
     }
 
-    protected function competitorActionAuthorized(User $user, string $method, array $queryParams)
+    protected function isAuthorizedForGame(User $user, Tournament $tournament, int $gameId ): bool
     {
-        if (array_key_exists("associationid", $queryParams) !== true) {
-            return false;
-        }
-        if ($method !== 'POST' && $method !== 'PUT') {
-            return false;
-        }
-        $assRepos = $this->voetbalService->getRepository(\Voetbal\Association::class);
-        $association = $assRepos->find($queryParams["associationid"]);
-        if ($association === null) {
-            return false;
-        }
-        if( $this->mayUserChangeCompetitor( $user, $association ) === false ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected function mayUserChangeCompetitor( User $user, Association $association )
-    {
-        $roleValues = Role::STRUCTUREADMIN;
-        $tournaments = $this->tournamentRepos->findByPermissions($user, $roleValues);
-        foreach ($tournaments as $tournament) {
-            if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected function placeActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
-    {
-        if ($method !== 'PUT') {
-            return false;
-        }
-        return $this->otherActionAuthorized($user, $queryParams);
-    }
-
-    protected function gameActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
-    {
-        if ($method !== 'PUT') {
-            return false;
-        }
-        if (array_key_exists("competitionid", $queryParams) !== true) {
-            return false;
-        }
-        $tournament = $this->tournamentRepos->findOneBy(["competition" => $queryParams["competitionid"]]);
-        if ($tournament === null) {
-            return false;
-        }
-        if ($tournament->hasRole($user, Role::GAMERESULTADMIN)) {
+        if ($tournament->hasRole($user, Role::GAMERESULTADMIN + Role::ADMIN )) {
             return true;
         }
         if (!$tournament->hasRole($user, Role::REFEREE)) {
             return false;
         }
-        $gameRepos = $this->voetbalService->getRepository(\Voetbal\Game::class);
-        $game = $gameRepos->find($id);
+        $game = $this->gameRepos->find( $gameId );
         if ($game === null || $game->getReferee() === null ) {
             return false;
         }
@@ -208,18 +136,61 @@ class AuthenticationMiddleware
         return false;
     }
 
-    protected function otherActionAuthorized(User $user, array $queryParams): bool
-    {
-        if (array_key_exists("competitionid", $queryParams) !== true) {
-            return false;
-        }
-        $tournament = $this->tournamentRepos->findOneBy(["competition" => $queryParams["competitionid"]]);
-        if ($tournament === null) {
-            return false;
-        }
-        if (!$tournament->hasRole($user, Role::ADMIN)) {
-            return false;
-        }
-        return true;
-    }
+
+//    protected function competitorActionAuthorized(User $user, string $method, array $queryParams)
+//    {
+//        if (array_key_exists("associationid", $queryParams) !== true) {
+//            return false;
+//        }
+//        if ($method !== 'POST' && $method !== 'PUT') {
+//            return false;
+//        }
+//        $assRepos = $this->voetbalService->getRepository(\Voetbal\Association::class);
+//        $association = $assRepos->find($queryParams["associationid"]);
+//        if ($association === null) {
+//            return false;
+//        }
+//        if( $this->mayUserChangeCompetitor( $user, $association ) === false ) {
+//            return false;
+//        }
+//
+//        return true;
+//    }
+
+//    protected function mayUserChangeCompetitor( User $user, Association $association )
+//    {
+//        $roleValues = Role::STRUCTUREADMIN;
+//        $tournaments = $this->tournamentRepos->findByPermissions($user, $roleValues);
+//        foreach ($tournaments as $tournament) {
+//            if ($tournament->getCompetition()->getLeague()->getAssociation() === $association) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    protected function placeActionAuthorized(User $user, string $method, array $queryParams, int $id = null)
+//    {
+//        if ($method !== 'PUT') {
+//            return false;
+//        }
+//        return $this->otherActionAuthorized($user, $queryParams);
+//    }
+
+
+
+//    protected function otherActionAuthorized(User $user, array $queryParams): bool
+//    {
+//        if (array_key_exists("competitionid", $queryParams) !== true) {
+//            return false;
+//        }
+//        $tournament = $this->tournamentRepos->findOneBy(["competition" => $queryParams["competitionid"]]);
+//        if ($tournament === null) {
+//            return false;
+//        }
+//        if (!$tournament->hasRole($user, Role::ADMIN)) {
+//            return false;
+//        }
+//        return true;
+//    }
 }

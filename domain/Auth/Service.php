@@ -56,26 +56,6 @@ class Service
         $this->settings = $settings;
 	}
 
-    public function checkAuth( Request $request, Tournament $tournament = null ): User
-    {
-        $user = $this->getUser($request);
-        if ( $user === null ){
-            throw new \Exception("de ingelogde gebruikers kon niet gevonden worden", E_ERROR );
-        }
-        if( $tournament !== null && !$tournament->hasRole( $user, Role::ADMIN ) ) {
-            throw new \Exception( "je hebt geen rechten om het toernooi aan te passen" );
-        }
-        return $user;
-    }
-
-    public function getUser( Request $request ): ?User {
-        $token = $request->getAttribute('token');
-        if ( $token === null || !$token->isPopulated() ) {
-            return null;
-        }
-        return $user = $this->userRepos->find($token->getUserId());
-    }
-
     /**
      * @param string $emailaddress
      * @param string $password

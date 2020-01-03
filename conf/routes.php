@@ -14,20 +14,34 @@ use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
 return function (App $app) {
-    // Routes
+
+    $app->group('/public', function ( Group $group ) {
+        $group->group('/auth', function ( Group $group ) {
+            $group->options('/register', AuthAction::class . ':options');
+            $group->post('/register', AuthAction::class . ':register');
+            $group->options('/login', AuthAction::class . ':options');
+            $group->post('/login', AuthAction::class . ':login');
+            $group->options('/passwordreset', AuthAction::class . ':options');
+            $group->post('/passwordreset', AuthAction::class . ':passwordreset');
+            $group->options('/passwordchange', AuthAction::class . ':options');
+            $group->post('/passwordchange', AuthAction::class . ':passwordchange');
+        });
+        $group->group('/tournaments/', function ( Group $group ) {
+            $group->options('{tournamentId}', TournamentAction::class . ':options');
+            $group->get('{tournamentId}', TournamentAction::class . ':fetchOnePublic');
+
+            $group->group('{tournamentId}/', function ( Group $group ) {
+                $group->options('structure', StructureAction::class . ':options');
+                $group->get('structure', StructureAction::class . ':fetchOne');
+            });
+        });
+        $group->options('/shells', TournamentShellAction::class . ':options');
+        $group->get('/shells', TournamentShellAction::class . ':fetch');
+    });
 
     $app->group('/auth', function ( Group $group ) {
-        $group->options('/register', AuthAction::class . ':options');
-        $group->post('/register', AuthAction::class . ':register');
-        $group->options('/login', AuthAction::class . ':options');
-        $group->post('/login', AuthAction::class . ':login');
         $group->options('/validatetoken', AuthAction::class . 'options');
         $group->post('/validatetoken', AuthAction::class . ':validateToken');
-        /*$group->post('/auth/activate', 'AuthAction::class . ':activate');*/
-        $group->options('/passwordreset', AuthAction::class . ':options');
-        $group->post('/passwordreset', AuthAction::class . ':passwordreset');
-        $group->options('/passwordchange', AuthAction::class . ':options');
-        $group->post('/passwordchange', AuthAction::class . ':passwordchange');
     });
 
     // admin module
@@ -44,65 +58,60 @@ return function (App $app) {
 //    });
 
     $app->group('/tournaments', function ( Group $group )  {
-        $group->options('/{id}', TournamentAction::class . ':options');
-        $group->get('/{id}', TournamentAction::class . ':fetchOne');
+        $group->options('/{tournamentId}', TournamentAction::class . ':options');
+        $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne');
         $group->options('/', TournamentAction::class . ':options');
         $group->post('/', TournamentAction::class . ':add');
-        // $group->options('/{id}', TournamentAction::class . ':options');
-        $group->put('/{id}', TournamentAction::class . ':edit');
-        // $group->options('/{id}', TournamentAction::class . ':options');
-        $group->delete('/{id}', TournamentAction::class . ':remove');
-        $group->options('/syncrefereeroles/{id}', TournamentAction::class . ':options');
-        $group->post('/syncrefereeroles/{id}', TournamentAction::class . ':syncRefereeRoles');
-        $group->options('/sendrequestoldstructure/{id}', TournamentAction::class . ':options');
-        $group->post('/sendrequestoldstructure/{id}', TournamentAction::class . ':sendRequestOldStructure');
-        $group->options('/userrefereeid/{id}', TournamentAction::class . ':options');
-        $group->get('/userrefereeid/{id}', TournamentAction::class . ':getUserRefereeId');
-        $group->options('/export/{id}', TournamentAction::class . ':options');
-        $group->get('/export/{id}', TournamentAction::class . ':export');                                       // POSTMAN NOT FINISHED
-        $group->options('/copy/{id}', TournamentAction::class . ':options');
-        $group->post('/copy/{id}', TournamentAction::class . ':copy');                                          // POSTMAN NOT FINISHED
+        // $group->options('/{tournamentId}', TournamentAction::class . ':options');
+        $group->put('/{tournamentId}', TournamentAction::class . ':edit');
+        // $group->options('/{tournamentId}', TournamentAction::class . ':options');
+        $group->delete('/{tournamentId}', TournamentAction::class . ':remove');
 
-        $group->group('/shells', function ( Group $group ) {
-            $group->options('/', TournamentShellAction::class . ':options');
-            $group->get('/', TournamentShellAction::class . ':fetch');
-            $group->options('/withroles', TournamentShellAction::class . ':options');
-            $group->get('/withroles', TournamentShellAction::class . ':fetchWithRoles');
-        });
+        $group->group('/{tournamentId}/', function ( Group $group ) {
 
-        $group->group('/public', function ( Group $group ) {
-            $group->options('/{id}', TournamentAction::class . ':options');
-            $group->get('/{id}', TournamentAction::class . ':fetchOnePublic');
-        });
-    });
+            $group->options('syncrefereeroles', TournamentAction::class . ':options');
+            $group->post('syncrefereeroles', TournamentAction::class . ':syncRefereeRoles');
+            $group->options('sendrequestoldstructure', TournamentAction::class . ':options');
+            $group->post('sendrequestoldstructure', TournamentAction::class . ':sendRequestOldStructure');
+            $group->options('userrefereeid', TournamentAction::class . ':options');
+            $group->get('userrefereeid', TournamentAction::class . ':getUserRefereeId');
+            $group->options('export', TournamentAction::class . ':options');
+            $group->get('export', TournamentAction::class . ':export');                                       // POSTMAN NOT FINISHED
+            $group->options('copy', TournamentAction::class . ':options');
+            $group->post('copy', TournamentAction::class . ':copy');
 
-    $app->group('/sponsors', function ( Group $group ) {
-        $group->options('', SponsorAction::class . ':options');
-        $group->get('/', SponsorAction::class . ':fetch');
-        $group->get('/{id}', SponsorAction::class . ':fetchOne');
-        $group->post('', SponsorAction::class . ':add');
-        $group->options('/{id}', SponsorAction::class . ':options');
-        $group->put('/{id}', SponsorAction::class . ':edit');
-        $group->delete('/{id}', SponsorAction::class . ':remove');
-        $group->options('/upload/', SponsorAction::class . ':options');
-        $group->post('/upload/', SponsorAction::class . ':upload');         // POSTMAN NOT FINISHED
-    });
-
-    // deze verplaatsen naar fctoernooi
-    //   $app->any('/voetbal/{resourceType}[/{id}]', VoetbalApp\Action\Slim\Handler::class ); // POSTMAN TODO
+            $group->group('sponsors/', function ( Group $group ) {
+                $group->options('', SponsorAction::class . ':options');
+                $group->get('', SponsorAction::class . ':fetch');
+                $group->get('{sponsorId}', SponsorAction::class . ':fetchOne');
+                $group->post('', SponsorAction::class . ':add');
+                $group->options('{sponsorId}', SponsorAction::class . ':options');
+                $group->put('{sponsorId}', SponsorAction::class . ':edit');
+                $group->delete('{sponsorId}', SponsorAction::class . ':remove');
+                $group->options('{sponsorId}/upload', SponsorAction::class . ':options');
+                $group->post('{sponsorId}/upload', SponsorAction::class . ':upload');         // POSTMAN NOT FINISHED
+            });
 
 
-    $app->group('/voetbal', function ( Group $voetbalGroup ) {
-        $voetbalGroup->group('/structures', function ( Group $group ) {
-            $group->options('/', StructureAction::class . ':options');
-            $group->get('/{id}', StructureAction::class . ':fetchOne');
-            $group->put('/{id}', StructureAction::class . ':edit');
-        });
+            $group->options('structure', StructureAction::class . ':options');
+            $group->get('structure', StructureAction::class . ':fetchOne');
+            $group->put('structure', StructureAction::class . ':edit');
+
+
 //
 //        $voetbalGroup->group('/planning', function ( Group $group ) {
 //            $group->get('/{id}', PlanningAction::class . ':fetch');
 //            $group->post('/{id}', PlanningAction::class . ':add');
 //            $group->put('/{id}', PlanningAction::class . ':edit');
 //        });
+        });
+
     });
+
+    $app->group('/shells', function ( Group $group ) {
+        $group->options('/', TournamentShellAction::class . ':options');
+        $group->get('/', TournamentShellAction::class . ':fetchWithRoles');
+    });
+
+
 };

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Middleware\VersionMiddleware;
 use App\Middleware\AuthenticationMiddleware;
+use App\Middleware\TournamentMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
@@ -28,6 +29,7 @@ return function (App $app) {
     });
 
     $app->add( AuthenticationMiddleware::class);
+    $app->add( TournamentMiddleware::class);
 
     $app->add( new JwtAuthentication([
             "secret" => $app->getContainer()->get( AuthSettings::class )->getJwtSecret(),
@@ -35,11 +37,11 @@ return function (App $app) {
             "rules" => [
                 new JwtAuthentication\RequestPathRule([
                     "path" => "/",
-                    "ignore" => [
+                    "ignore" => ["/public"]/*
                         "/auth/register", "/auth/login","/auth/passwordreset","/auth/passwordchange",
                         "/tournaments/shells", "/tournaments/public",
                         "/voetbal/structures", "/voetbal/sports"
-                    ]
+                    ]*/
                 ]),
                 new JwtAuthentication\RequestMethodRule([
                     "ignore" => ["OPTIONS"]

@@ -27,6 +27,8 @@ use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning\Input as PlanningInput;
+use Voetbal\Game\Repository as GameRepository;
+use Voetbal\Game;
 
 return function (ContainerBuilder $containerBuilder) {
     // Here we map our UserRepository interface to its in memory implementation
@@ -76,6 +78,10 @@ return function (ContainerBuilder $containerBuilder) {
         PlanningInputRepository::class => function (ContainerInterface $container) {
             $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
             return new PlanningInputRepository($entityManager ,$entityManager ->getClassMetaData(PlanningInput::class));
+        },
+        GameRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new GameRepository($entityManager ,$entityManager ->getClassMetaData(Game::class));
         },
 
 

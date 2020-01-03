@@ -9,12 +9,12 @@
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
+use App\Response\ForbiddenResponse as ForbiddenResponse;
 use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use FCToernooi\Auth\Service as AuthService;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Sponsor as SponsorBase;
@@ -27,10 +27,6 @@ final class Sponsor extends Action
      * @var SponsorRepository
      */
     private $sponsorRepos;
-    /**
-     * @var AuthService
-     */
-    private $authService;
     /**
      * @var TournamentRepository
      */
@@ -51,7 +47,6 @@ final class Sponsor extends Action
         SerializerInterface $serializer,
         SponsorRepository $sponsorRepos,
         TournamentRepository $tournamentRepos,
-        AuthService $authService,
         WwwSettings $wwwSettings,
         ImageSettings $imageSettings
     )
@@ -59,7 +54,6 @@ final class Sponsor extends Action
         parent::__construct($logger,$serializer);
         $this->sponsorRepos = $sponsorRepos;
         $this->tournamentRepos = $tournamentRepos;
-        $this->authService = $authService;
         $this->wwwSettings = $wwwSettings;
         $this->imageSettings = $imageSettings;
     }
@@ -67,15 +61,8 @@ final class Sponsor extends Action
     public function fetch( Request $request, Response $response, $args ): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
-            }
-
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ( $tournament === null ) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
             $json = $this->serializer->serialize( $tournament->getSponsors(), 'json');
             return $this->respondWithJson( $response, $json );
         }
@@ -87,20 +74,15 @@ final class Sponsor extends Action
     public function fetchOne( Request $request, Response $response, $args ): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
-            }
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
-            /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ($tournament === null) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
-
-            $sponsor = $this->sponsorRepos->find($args['id']);
+            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
             if ( $sponsor === null ) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
+            }
+            if ( $sponsor->getTournament() !== $tournament ) {
+                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
             }
             $json = $this->serializer->serialize( $sponsor, 'json');
             return $this->respondWithJson( $response, $json );
@@ -113,30 +95,21 @@ final class Sponsor extends Action
     public function add( Request $request, Response $response, $args ): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
-            }
-            /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ($tournament === null) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
-            $user = $this->authService->checkAuth( $request );
+            /** @var \FCToernooi\Sponsor $sponsor */
+            $sponsor = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Sponsor', 'json');
 
-            /** @var \FCToernooi\Sponsor $sponsorSer */
-            $sponsorSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Sponsor', 'json');
+            $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsor->getScreenNr() );
 
-            $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr() );
+            $newSponsor = new SponsorBase( $tournament, $sponsor->getName() );
+            $newSponsor->setUrl( $sponsor->getUrl() );
+            $newSponsor->setLogoUrl( $sponsor->getLogoUrl() );
+            $newSponsor->setScreenNr( $sponsor->getScreenNr() );
+            $this->sponsorRepos->save($newSponsor);
 
-            $sponsor = new SponsorBase( $tournament, $sponsorSer->getName() );
-            $sponsor->setUrl( $sponsorSer->getUrl() );
-            $sponsor->setLogoUrl( $sponsorSer->getLogoUrl() );
-            $sponsor->setScreenNr( $sponsorSer->getScreenNr() );
-            $this->sponsorRepos->save($sponsor);
-
-            $json = $this->serializer->serialize( $sponsor, 'json');
+            $json = $this->serializer->serialize( $newSponsor, 'json');
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
@@ -147,25 +120,18 @@ final class Sponsor extends Action
     public function edit( Request $request, Response $response, $args ): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
-            }
-
-            /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ($tournament === null) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
-
-            $this->authService->checkAuth( $request, $tournament );
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
             /** @var \FCToernooi\Sponsor $sponsorSer */
             $sponsorSer = $this->serializer->deserialize( $this->getRawData(), 'FCToernooi\Sponsor', 'json');
 
-            $sponsor = $this->sponsorRepos->find( (int)$args['id'] );
-            if ( $sponsor === null ){
-                throw new \Exception("de te wijzigen sponsor kon niet gevonden worden", E_ERROR );
+            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
+            if ( $sponsor === null ) {
+                throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
+            }
+            if ( $sponsor->getTournament() !== $tournament ) {
+                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
             }
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor );
@@ -186,24 +152,16 @@ final class Sponsor extends Action
 
     public function remove( Request $request, Response $response, $args ): Response
     {
-        $errorMessage = null;
         try{
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
+            if ( $sponsor === null ) {
+                throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
-
-            /** @var \FCToernooi\Tournament|null $tournament */
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ($tournament === null) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
-
-            $this->authService->checkAuth( $request, $tournament );
-
-            $sponsor = $this->sponsorRepos->find( (int)$args['id'] );
-            if ( $sponsor === null ){
-                throw new \Exception("de te verwijderen sponsor kon niet gevonden worden", E_ERROR );
+            if ( $sponsor->getTournament() !== $tournament ) {
+                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
             }
 
             $this->sponsorRepos->remove( $sponsor );
@@ -218,28 +176,16 @@ final class Sponsor extends Action
     public function upload( Request $request, Response $response, $args ): Response
     {
         try {
-            $queryParams = $request->getQueryParams();
-            if( array_key_exists("tournamentid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen toernooi-id opgegeven");
-            }
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
-            $tournament = $this->tournamentRepos->find( (int)$queryParams["tournamentid"] );
-            if ($tournament === null) {
-                throw new \Exception("geen toernooi met het opgegeven id gevonden", E_ERROR);
-            }
-
-            $this->authService->checkAuth( $request, $tournament );
-
-            if( array_key_exists("sponsorid", $queryParams ) === false ) {
-                throw new \Exception( "er is geen sponsor-id opgegeven");
-            }
-
-            $sponsor = $this->sponsorRepos->find( (int)$queryParams["sponsorid"] );
-            if ( $sponsor === null ){
+            $sponsor = $this->sponsorRepos->find((int) $args['sponsorId']);
+            if ( $sponsor === null ) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
-
-            $this->authService->checkAuth( $request, $tournament );
+            if ( $sponsor->getTournament() !== $tournament ) {
+                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
+            }
 
             $uploadedFiles = $request->getUploadedFiles();
             if( !array_key_exists("logostream", $uploadedFiles ) ) {
