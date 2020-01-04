@@ -7,6 +7,7 @@ use App\Actions\Auth as AuthAction;
 use App\Actions\User as UserAction;
 use App\Actions\Sponsor as SponsorAction;
 use App\Actions\Voetbal\StructureAction;
+use App\Actions\Voetbal\FieldAction;
 use App\Actions\Voetbal\PlanningAction;
 use App\Actions\Voetbal\SportAction;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -96,6 +97,14 @@ return function (App $app) {
             $group->options('structure', StructureAction::class . ':options');
             $group->get('structure', StructureAction::class . ':fetchOne');
             $group->put('structure', StructureAction::class . ':edit');
+
+            $group->group('fields', function ( Group $group ) {
+                $group->options('', FieldAction::class . ':options');
+                $group->post('', FieldAction::class . ':add');
+                $group->options('/{fieldId}', FieldAction::class . ':options');
+                $group->put('/{fieldId}', FieldAction::class . ':edit');
+                $group->delete('/{fieldId}', FieldAction::class . ':remove');
+            });
 
             $group->group('planning', function ( Group $group ) {
                 $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
