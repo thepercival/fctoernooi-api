@@ -82,7 +82,7 @@ final class FieldAction extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 401);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -118,7 +118,7 @@ final class FieldAction extends Action
             $json = $this->serializer->serialize( $field, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 401);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -135,7 +135,7 @@ final class FieldAction extends Action
             return $response->withStatus(200);
         }
         catch( \Exception $e ){
-            return new ErrorResponse( $e->getMessage(), 404);
+            return new ErrorResponse( $e->getMessage(), 422);
         }
     }
 
@@ -150,5 +150,4 @@ final class FieldAction extends Action
         }
         return $field;
     }
-
 }

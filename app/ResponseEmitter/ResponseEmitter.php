@@ -19,7 +19,7 @@ class ResponseEmitter extends SlimResponseEmitter
     public function __construct(string $origin, int $responseChunkSize = 4096)
     {
         $this->origin = $origin;
-        parent::__construct();
+        parent::__construct( $responseChunkSize );
     }
 
     /**

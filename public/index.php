@@ -48,6 +48,8 @@ $routes($app);
 
 /** @var bool $displayErrorDetails */
 $displayErrorDetails = $container->get('settings')['displayErrorDetails'];
+/** @var string $origin */
+$origin = $container->get('settings')['www']['wwwurl'];
 
 // Create Request object from globals
 $serverRequestCreator = ServerRequestCreatorFactory::create();
@@ -58,10 +60,10 @@ $responseFactory = $app->getResponseFactory();
 $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
 
 // Create Shutdown Handler
-$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+$shutdownHandler = new ShutdownHandler($origin, $request, $errorHandler, $displayErrorDetails);
 register_shutdown_function($shutdownHandler);
 
 // Run App & Emit Response
 $response = $app->handle($request);
-$responseEmitter = new ResponseEmitter( $container->get('settings')['www']['wwwurl'] );
+$responseEmitter = new ResponseEmitter( $origin );
 $responseEmitter->emit($response);

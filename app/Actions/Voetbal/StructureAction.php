@@ -68,7 +68,7 @@ final class StructureAction extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 401);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 }

@@ -31,6 +31,14 @@ use Voetbal\Game\Repository as GameRepository;
 use Voetbal\Game;
 use Voetbal\Field\Repository as FieldRepository;
 use Voetbal\Field;
+use Voetbal\Referee\Repository as RefereeRepository;
+use Voetbal\Referee;
+use Voetbal\Sport\Config\Repository as SportConfigRepository;
+use Voetbal\Sport\Config as SportConfig;
+use Voetbal\Competitor\Repository as CompetitorRepository;
+use Voetbal\Competitor;
+use Voetbal\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
+use Voetbal\Sport\ScoreConfig as SportScoreConfig;
 
 return function (ContainerBuilder $containerBuilder) {
     // Here we map our UserRepository interface to its in memory implementation
@@ -89,7 +97,21 @@ return function (ContainerBuilder $containerBuilder) {
             $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
             return new FieldRepository($entityManager ,$entityManager ->getClassMetaData(Field::class));
         },
-
-
+        RefereeRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new RefereeRepository($entityManager ,$entityManager ->getClassMetaData(Referee::class));
+        },
+        SportConfigRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new SportConfigRepository($entityManager ,$entityManager ->getClassMetaData(SportConfig::class));
+        },
+        CompetitorRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new CompetitorRepository($entityManager ,$entityManager ->getClassMetaData(Competitor::class));
+        },
+        SportScoreConfigRepository::class => function (ContainerInterface $container) {
+            $entityManager = $container->get( \Doctrine\ORM\EntityManager::class );
+            return new SportScoreConfigRepository($entityManager ,$entityManager ->getClassMetaData(SportScoreConfig::class));
+        },
     ]);
 };

@@ -141,17 +141,6 @@ final class Competitor
 
     protected function getCompetitor( int $id, int $associationId ): CompetitorBase
     {
-        $association = $this->associationRepos->find($associationId);
-        if ( $association === null ) {
-            throw new \Exception("er kan bond worden gevonden o.b.v. de invoergegevens", E_ERROR);
-        }
-        $competitor = $this->repos->find($id);
-        if ( $competitor === null ) {
-            throw new \Exception("de deelnemer kon niet gevonden worden o.b.v. de invoer", E_ERROR);
-        }
-        if ($competitor->getAssociation() !== $association) {
-            throw new \Exception("de bond van de deelnemer komt niet overeen met de verstuurde bond", E_ERROR);
-        }
-        return $competitor;
+
     }
 }

@@ -91,7 +91,7 @@ class Tournament extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 422);
+            return new ErrorResponse($e->getMessage(), 400);
         }
     }
 

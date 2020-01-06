@@ -67,7 +67,7 @@ final class Sponsor extends Action
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 422);
+            return new ErrorResponse($e->getMessage(), 400);
         }
     }
 
@@ -88,7 +88,7 @@ final class Sponsor extends Action
             return $this->respondWithJson( $response, $json );
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 422);
+            return new ErrorResponse($e->getMessage(), 400);
         }
     }
 
@@ -169,7 +169,7 @@ final class Sponsor extends Action
             return $response->withStatus(200);
         }
         catch( \Exception $e ){
-            return new ErrorResponse( $e->getMessage(), 404);
+            return new ErrorResponse( $e->getMessage(), 422);
         }
     }
 

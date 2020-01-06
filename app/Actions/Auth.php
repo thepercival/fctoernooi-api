@@ -77,7 +77,7 @@ final class Auth extends Action
             return $this->respondWithJson($response, $json);
 		}
 		catch( \Exception $e ) {
-            return new ErrorResponse($e->getMessage(), 400);
+            return new ErrorResponse($e->getMessage(), 422);
         }
 	}
 
@@ -116,7 +116,7 @@ final class Auth extends Action
            return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
 		}
 		catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 400);
+            return new ErrorResponse($e->getMessage(), 422);
 		}
 	}
 
@@ -136,7 +136,7 @@ final class Auth extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 400);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -168,7 +168,7 @@ final class Auth extends Action
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
-            return new ErrorResponse($e->getMessage(), 400);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 

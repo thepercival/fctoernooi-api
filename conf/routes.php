@@ -7,9 +7,13 @@ use App\Actions\Auth as AuthAction;
 use App\Actions\User as UserAction;
 use App\Actions\Sponsor as SponsorAction;
 use App\Actions\Voetbal\StructureAction;
-use App\Actions\Voetbal\FieldAction;
 use App\Actions\Voetbal\PlanningAction;
 use App\Actions\Voetbal\SportAction;
+use App\Actions\Voetbal\FieldAction;
+use App\Actions\Voetbal\RefereeAction;
+use App\Actions\Voetbal\CompetitorAction;
+use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
+use App\Actions\Voetbal\Sport\ScoreConfigAction as SportScoreConfigAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -104,6 +108,38 @@ return function (App $app) {
                 $group->options('/{fieldId}', FieldAction::class . ':options');
                 $group->put('/{fieldId}', FieldAction::class . ':edit');
                 $group->delete('/{fieldId}', FieldAction::class . ':remove');
+            });
+
+            $group->group('referees', function ( Group $group ) {
+                $group->options('', RefereeAction::class . ':options');
+                $group->post('', RefereeAction::class . ':add');
+                $group->options('/{refereeId}', RefereeAction::class . ':options');
+                $group->put('/{refereeId}', RefereeAction::class . ':edit');
+                $group->delete('/{refereeId}', RefereeAction::class . ':remove');
+            });
+
+            $group->group('sportconfigs', function ( Group $group ) {
+                $group->options('', SportConfigAction::class . ':options');
+                $group->post('', SportConfigAction::class . ':add');
+                $group->options('/{sportconfigId}', SportConfigAction::class . ':options');
+                $group->put('/{sportconfigId}', SportConfigAction::class . ':edit');
+                $group->delete('/{sportconfigId}', SportConfigAction::class . ':remove');
+            });
+
+            $group->group('competitors', function ( Group $group ) {
+                $group->options('', CompetitorAction::class . ':options');
+                $group->post('', CompetitorAction::class . ':add');
+                $group->options('/{competitorId}', CompetitorAction::class . ':options');
+                $group->put('/{competitorId}', CompetitorAction::class . ':edit');
+            });
+
+
+
+            $group->group('sportscoreconfigs', function ( Group $group ) {
+                $group->options('', SportScoreConfigAction::class . ':options');
+                $group->post('', SportScoreConfigAction::class . ':add');
+                $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
+                $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
             });
 
             $group->group('planning', function ( Group $group ) {
