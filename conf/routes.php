@@ -10,6 +10,7 @@ use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
 use App\Actions\Voetbal\SportAction;
 use App\Actions\Voetbal\FieldAction;
+use App\Actions\Voetbal\PlaceAction;
 use App\Actions\Voetbal\RefereeAction;
 use App\Actions\Voetbal\CompetitorAction;
 use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
@@ -131,22 +132,35 @@ return function (App $app) {
                 $group->post('', CompetitorAction::class . ':add');
                 $group->options('/{competitorId}', CompetitorAction::class . ':options');
                 $group->put('/{competitorId}', CompetitorAction::class . ':edit');
-            });
+            }
+            );
 
+            $group->group(
+                'sportscoreconfigs',
+                function (Group $group) {
+                    $group->options('', SportScoreConfigAction::class . ':options');
+                    $group->post('', SportScoreConfigAction::class . ':add');
+                    $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
+                    $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
+                }
+            );
 
+            $group->group(
+                'places',
+                function (Group $group) {
+                    $group->options('/{placeId}', PlaceAction::class . ':options');
+                    $group->put('/{placeId}', PlaceAction::class . ':edit');
+                }
+            );
 
-            $group->group('sportscoreconfigs', function ( Group $group ) {
-                $group->options('', SportScoreConfigAction::class . ':options');
-                $group->post('', SportScoreConfigAction::class . ':add');
-                $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
-                $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
-            });
-
-            $group->group('planning', function ( Group $group ) {
-                $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
-                $group->post('/{roundnumber}', PlanningAction::class . ':create');
-                $group->put('/{roundnumber}', PlanningAction::class . ':reschedule');
-            });
+            $group->group(
+                'planning',
+                function (Group $group) {
+                    $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
+                    $group->post('/{roundnumber}', PlanningAction::class . ':create');
+                    $group->put('/{roundnumber}', PlanningAction::class . ':reschedule');
+                }
+            );
         });
     });
 
