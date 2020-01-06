@@ -4,13 +4,14 @@ declare(strict_types=1);
 use App\Actions\Tournament as TournamentAction;
 use App\Actions\Tournament\Shell as TournamentShellAction;
 use App\Actions\Auth as AuthAction;
-use App\Actions\User as UserAction;
 use App\Actions\Sponsor as SponsorAction;
 use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
+use App\Actions\Voetbal\Planning\ConfigAction as PlanningConfigAction;
 use App\Actions\Voetbal\SportAction;
 use App\Actions\Voetbal\FieldAction;
 use App\Actions\Voetbal\PlaceAction;
+use App\Actions\Voetbal\GameAction;
 use App\Actions\Voetbal\RefereeAction;
 use App\Actions\Voetbal\CompetitorAction;
 use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
@@ -154,11 +155,32 @@ return function (App $app) {
             );
 
             $group->group(
+                'games',
+                function (Group $group) {
+                    $group->options('/{gameId}', GameAction::class . ':options');
+                    $group->put('/{gameId}', GameAction::class . ':edit');
+                }
+            );
+
+            $group->group(
                 'planning',
                 function (Group $group) {
+                    $group->options('/{roundnumber}', PlanningAction::class . ':options');
                     $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
-                    $group->post('/{roundnumber}', PlanningAction::class . ':create');
-                    $group->put('/{roundnumber}', PlanningAction::class . ':reschedule');
+                    $group->options('/{roundnumber/create}', PlanningAction::class . ':options');
+                    $group->post('/{roundnumber}/create', PlanningAction::class . ':create');
+                    $group->options('/{roundnumber}/reschedule', PlanningAction::class . ':options');
+                    $group->post('/{roundnumber}/reschedule', PlanningAction::class . ':reschedule');
+                }
+            );
+
+            $group->group(
+                'planningconfigs/{roundnumber}',
+                function (Group $group) {
+                    $group->options('', PlanningConfigAction::class . ':options');
+                    $group->post('', PlanningConfigAction::class . ':add');
+                    $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
+                    $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
                 }
             );
         });

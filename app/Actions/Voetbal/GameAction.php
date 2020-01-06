@@ -10,43 +10,43 @@ namespace App\Actions\Voetbal;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Voetbal\Competitor\Repository as CompetitorRepos;
-use Voetbal\Place\Repository as PlaceRepository;
+use JMS\Serializer\SerializerInterface;
+use Voetbal\Game\Score\Repository as GameScoreRepository;
+use Voetbal\Game\Repository as GameRepository;
 use Voetbal\Poule;
 use Voetbal\Poule\Repository as PouleRepository;
 use App\Actions\Action;
-use Voetbal\Place;
 use Voetbal\Competition;
+use Voetbal\Game\Service as GameService;
 
-final class PlaceAction extends Action
+final class GameAction extends Action
 {
     /**
-     * @var PlaceRepository
+     * @var GameRepository
      */
-    protected $placeRepos;
+    protected $gameRepos;
     /**
      * @var PouleRepository
      */
     protected $pouleRepos;
     /**
-     * @var CompetitorRepos
+     * @var GameScoreRepository
      */
-    protected $competitorRepos;
+    protected $gameScoreRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        PlaceRepository $placeRepos,
+        GameRepository $gameRepos,
         PouleRepository $pouleRepos,
-        CompetitorRepos $competitorRepos
+        GameScoreRepository $gameScoreRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->placeRepos = $placeRepos;
+        $this->gameRepos = $gameRepos;
         $this->pouleRepos = $pouleRepos;
-        $this->competitorRepos = $competitorRepos;
+        $this->gameScoreRepos = $gameScoreRepos;
     }
 
     public function edit(Request $request, Response $response, $args): Response
@@ -61,24 +61,28 @@ final class PlaceAction extends Action
                 $pouleId = (int)$queryParams["pouleId"];
             }
             $poule = $this->getPouleFromInput($pouleId, $competition);
-            /** @var \Voetbal\Place $placeSer */
-            $placeSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Place', 'json');
 
-            $place = $this->placeRepos->find((int)$args["placeId"]);
-            if ($place === null) {
+            /** @var \Voetbal\Game $gameSer */
+            $gameSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Game', 'json');
+
+            $game = $this->gameRepos->find((int)$args["gameId"]);
+            if ($game === null) {
                 throw new \Exception("de pouleplek kan niet gevonden worden o.b.v. id", E_ERROR);
             }
-            if ($place->getPoule() !== $poule) {
+            if ($game->getPoule() !== $poule) {
                 throw new \Exception("de poule van de pouleplek komt niet overeen met de verstuurde poule", E_ERROR);
             }
-            $competitor = $placeSer->getCompetitor() ? $this->competitorRepos->find(
-                $placeSer->getCompetitor()->getId()
-            ) : null;
-            $place->setCompetitor($competitor);
 
-            $this->placeRepos->save($place);
+            $this->gameScoreRepos->removeScores($game);
 
-            $json = $this->serializer->serialize($place, 'json');
+            $game->setState($gameSer->getState());
+            $game->setStartDateTime($gameSer->getStartDateTime());
+            $gameService = new GameService();
+            $gameService->addScores($game, $gameSer->getScores()->toArray());
+
+            $this->gameRepos->save($game);
+
+            $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);

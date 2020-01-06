@@ -38,7 +38,7 @@ class StructureCopier
         $firstRoundNumber = null;
         $rootRound = null;
         {
-            /** @var RoundNumber $previousRoundNumber */
+            /** @var RoundNumber|null $previousRoundNumber */
             $previousRoundNumber = null;
             foreach ($structure->getRoundNumbers() as $roundNumber) {
                 $newRoundNumber = $previousRoundNumber ? $previousRoundNumber->createNext() : new RoundNumber( $this->competition, $previousRoundNumber );

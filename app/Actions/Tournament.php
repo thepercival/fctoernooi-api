@@ -216,12 +216,6 @@ class Tournament extends Action
         }
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array $args
-     * @return mixed
-     */
     public function remove( Request $request, Response $response, $args ): Response
     {
         try{

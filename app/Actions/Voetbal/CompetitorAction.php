@@ -38,7 +38,7 @@ final class CompetitorAction extends Action
     public function add( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \Voetbal\Competitor $competitorSer */
+            /** @var Competitor $competitor */
             $competitor = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Competitor', 'json');
             /** @var \Voetbal\Association $association */
             $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();

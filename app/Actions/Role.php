@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\Role\Repository as RoleRepository;
 
-final class Role
+final class Role extends Action
 {
     /**
      * @var RoleRepository

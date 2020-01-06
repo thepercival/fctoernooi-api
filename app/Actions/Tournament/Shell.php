@@ -80,7 +80,7 @@ final class Shell extends Action
 
             $endDateTime = null;
             if (array_key_exists("endDate", $queryParams) && strlen($queryParams["endDate"]) > 0) {
-                $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["endDate"]);
+                $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["endDate"]);
             }
             if ($endDateTime === false) {
                 $endDateTime = null;

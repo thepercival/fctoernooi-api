@@ -11,8 +11,8 @@ namespace App\Settings;
 class Www
 {
 	/**
-	 * @var array
-	 */
+     * @var string
+     */
 	protected $wwwUrl;
     /**
      * @var string

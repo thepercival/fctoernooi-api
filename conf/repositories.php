@@ -42,6 +42,10 @@ use Voetbal\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;
 use Voetbal\Place\Repository as PlaceRepository;
 use Voetbal\Place;
+use Voetbal\Poule\Repository as PouleRepository;
+use Voetbal\Poule;
+use Voetbal\Game\Score\Repository as GameScoreRepository;
+use Voetbal\Game\Score as GameScore;
 
 return function (ContainerBuilder $containerBuilder) {
     // Here we map our UserRepository interface to its in memory implementation
@@ -100,6 +104,10 @@ return function (ContainerBuilder $containerBuilder) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
                 return new GameRepository($entityManager, $entityManager->getClassMetaData(Game::class));
             },
+            GameScoreRepository::class => function (ContainerInterface $container) {
+                $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+                return new GameScoreRepository($entityManager, $entityManager->getClassMetaData(GameScore::class));
+            },
             FieldRepository::class => function (ContainerInterface $container) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
                 return new FieldRepository($entityManager, $entityManager->getClassMetaData(Field::class));
@@ -126,6 +134,10 @@ return function (ContainerBuilder $containerBuilder) {
             PlaceRepository::class => function (ContainerInterface $container) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
                 return new PlaceRepository($entityManager, $entityManager->getClassMetaData(Place::class));
+            },
+            PouleRepository::class => function (ContainerInterface $container) {
+                $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+                return new PouleRepository($entityManager, $entityManager->getClassMetaData(Poule::class));
             },
         ]
     );

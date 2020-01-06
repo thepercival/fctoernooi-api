@@ -54,7 +54,7 @@
 		"test": [
 			"vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
 		],
-        "stan": "vendor/bin/phpstan analyse --level=2 app domain tests",
+		"stan": "vendor/bin/phpstan analyse --level=5 app domain tests",
 		"doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
 		"doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force"
 	},

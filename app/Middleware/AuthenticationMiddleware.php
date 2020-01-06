@@ -8,6 +8,7 @@
 
 namespace App\Middleware;
 
+use Slim\Routing\RouteContext;
 use FCToernooi\Tournament;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -64,19 +65,21 @@ class AuthenticationMiddleware
         }
 
         $user = $this->getUser($token);
-        if ( $user === null ){
+        if ($user === null) {
             return new ForbiddenResponse("de ingelogde gebruikers kon niet gevonden worden");
         }
         $request = $request->withAttribute("user", $user);
 
         $tournament = $request->getAttribute("tournament");
-        if( $tournament === null ) {
+        if ($tournament === null) {
             return $handler->handle($request);
         }
-        /** @var \Slim\Routing\RoutingResults $routingResults */
-        $routingResults = $request->getAttribute('routingResults');
+
+        $routeContext = RouteContext::fromRequest($request);
+        $routingResults = $routeContext->getRoutingResults();
+
         $args = $routingResults->getRouteArguments();
-        if( $this->isAuthorized( $user, $tournament, $args ) === false ) {
+        if ($this->isAuthorized($user, $tournament, $args) === false) {
             return new ForbiddenResponse("je hebt geen rechten om het toernooi aan te passen");
         }
         $request = $request->withAttribute("tournament", $tournament);
@@ -176,7 +179,6 @@ class AuthenticationMiddleware
 //        }
 //        return $this->otherActionAuthorized($user, $queryParams);
 //    }
-
 
 
 //    protected function otherActionAuthorized(User $user, array $queryParams): bool
