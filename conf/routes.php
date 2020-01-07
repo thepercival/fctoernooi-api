@@ -163,14 +163,14 @@ return function (App $app) {
             );
 
             $group->group(
-                'planning',
+                'planning/{roundnumber}',
                 function (Group $group) {
-                    $group->options('/{roundnumber}', PlanningAction::class . ':options');
-                    $group->get('/{roundnumber}', PlanningAction::class . ':fetch');
-                    $group->options('/{roundnumber/create}', PlanningAction::class . ':options');
-                    $group->post('/{roundnumber}/create', PlanningAction::class . ':create');
-                    $group->options('/{roundnumber}/reschedule', PlanningAction::class . ':options');
-                    $group->post('/{roundnumber}/reschedule', PlanningAction::class . ':reschedule');
+                    $group->options('', PlanningAction::class . ':options');
+                    $group->get('', PlanningAction::class . ':fetch');
+                    $group->options('/create', PlanningAction::class . ':options');
+                    $group->post('/create', PlanningAction::class . ':create');
+                    $group->options('/reschedule', PlanningAction::class . ':options');
+                    $group->post('/reschedule', PlanningAction::class . ':reschedule');
                 }
             );
 

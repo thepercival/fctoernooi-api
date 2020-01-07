@@ -28,7 +28,7 @@ class ErrorResponse extends Response
 
         $handle = fopen("php://temp", "wb+");
         $body = new Stream($handle);
-        $body->write( json_encode(["message" => $message], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) );
+        $body->write(json_encode(["message" => $message]/*, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT*/));
 
         parent::__construct($status, $headers, $body);
     }

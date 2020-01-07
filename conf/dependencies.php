@@ -15,6 +15,7 @@ use Psr\Log\LoggerInterface;
 use FCToernooi\Auth\Settings as AuthSettings;
 use App\Settings\Www as WwwSettings;
 use App\Settings\Image as ImageSettings;
+use App\Mailer;
 
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
@@ -93,16 +94,29 @@ return function (ContainerBuilder $containerBuilder) {
 
             return $serializerBuilder->build();
         },
-        AuthSettings::class => function( ContainerInterface $container ) {
-            $authSettings = $container->get('settings')['auth'];
-            return new AuthSettings($authSettings['jwtsecret'], $authSettings['jwtalgorithm'], $authSettings['activationsecret']);
-        },
-        WwwSettings::class => function( ContainerInterface $container ) {
-            return new WwwSettings( $container->get('settings')['www'] );
-        },
-        ImageSettings::class => function( ContainerInterface $container ) {
-            return new ImageSettings( $container->get('settings')['images'] );
-        }/*,
+                                          Mailer::class => function (ContainerInterface $container) {
+                                              $mailSettings = $container->get('settings')['email'];
+                                              return new Mailer(
+                                                  $container->get(LoggerInterface::class),
+                                                  $mailSettings['from'],
+                                                  $mailSettings['fromname'],
+                                                  $mailSettings['admin']
+                                              );
+                                          },
+                                          AuthSettings::class => function (ContainerInterface $container) {
+                                              $authSettings = $container->get('settings')['auth'];
+                                              return new AuthSettings(
+                                                  $authSettings['jwtsecret'],
+                                                  $authSettings['jwtalgorithm'],
+                                                  $authSettings['activationsecret']
+                                              );
+                                          },
+                                          WwwSettings::class => function (ContainerInterface $container) {
+                                              return new WwwSettings($container->get('settings')['www']);
+                                          },
+                                          ImageSettings::class => function (ContainerInterface $container) {
+                                              return new ImageSettings($container->get('settings')['images']);
+                                          }/*,
         'jwt' => function( ContainerInterface $container ) {
             return new \stdClass;
         }*/

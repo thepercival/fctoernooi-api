@@ -24,6 +24,8 @@ use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Competition;
 
 use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Round\Number\Repository as RoundNumberRepository;
+use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
@@ -88,6 +90,10 @@ return function (ContainerBuilder $containerBuilder) {
             StructureRepository::class => function (ContainerInterface $container) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
                 return new StructureRepository($entityManager);
+            },
+            RoundNumberRepository::class => function (ContainerInterface $container) {
+                $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+                return new RoundNumberRepository($entityManager, $entityManager->getClassMetaData(RoundNumber::class));
             },
             PlanningRepository::class => function (ContainerInterface $container) {
                 $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

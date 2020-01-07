@@ -10,10 +10,14 @@ namespace App\Settings;
 
 class Www
 {
-	/**
+    /**
      * @var string
      */
-	protected $wwwUrl;
+    protected $wwwUrl;
+    /**
+     * @var string
+     */
+    protected $wwwUrlLocalpath;
     /**
      * @var string
      */
@@ -23,28 +27,39 @@ class Www
      */
     protected $apiUrlLocalpath;
 
-	public function __construct(array $settings )
-	{
-	    if( array_key_exists( 'wwwurl', $settings ) ) {
+    public function __construct(array $settings)
+    {
+        if (array_key_exists('wwwurl', $settings)) {
             $this->wwwUrl = $settings['wwwurl'];
         }
-        if( array_key_exists( 'apiurl', $settings ) ) {
+        if (array_key_exists('wwwurl-localpath', $settings)) {
+            $this->wwwUrlLocalpath = $settings['wwwurl-localpath'];
+        }
+        if (array_key_exists('apiurl', $settings)) {
             $this->apiUrl = $settings['apiurl'];
         }
-        if( array_key_exists( 'apiurl-localpath', $settings ) ) {
+        if (array_key_exists('apiurl-localpath', $settings)) {
             $this->apiUrlLocalpath = $settings['apiurl-localpath'];
         }
-	}
-
-	public function getWwwUrl(): string {
-	    return $this->wwwUrl;
     }
 
-    public function getApiUrl(): string {
+    public function getWwwUrl(): string
+    {
+        return $this->wwwUrl;
+    }
+
+    public function getWwwUrlLocalpath(): string
+    {
+        return $this->wwwUrlLocalpath;
+    }
+
+    public function getApiUrl(): string
+    {
         return $this->apiUrl;
     }
 
-    public function getApiUrlLocalpath(): string {
+    public function getApiUrlLocalpath(): string
+    {
         return $this->apiUrlLocalpath;
     }
 }

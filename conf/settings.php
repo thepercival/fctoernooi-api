@@ -59,12 +59,14 @@ return [
         ],
         'www' => [
             'wwwurl' => getenv('WWW_URL'),
+            'wwwurl-localpath' => realpath(__DIR__ . "/../../") . "/fctoernooi/dist/",
             'apiurl' => getenv('API_URL'),
-            "apiurl-localpath" =>  realpath( __DIR__ . '/../public/' ) . '/',
+            "apiurl-localpath" => realpath(__DIR__ . '/../public/') . '/',
         ],
         'email' => [
             'from' => "noreply@fctoernooi.nl",
-            'fromname' => "FCToernooi"
+            'fromname' => "FCToernooi",
+            'admin' => "fctoernooi2018@gmail.com"
         ],
         'images' => [
             'sponsors' => [
