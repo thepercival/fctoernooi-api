@@ -51,7 +51,7 @@ final class Mailer
 
         if (!mail($toEmailaddress, $subject, $body, $headers, $params)) {
             // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
-            $this->logger('Mailer Error!');
+            $this->logger->error('Mailer Error for ' . $toEmailaddress);
             // $app->halt(500);
         }
     }

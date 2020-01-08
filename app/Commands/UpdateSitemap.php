@@ -77,8 +77,8 @@ class UpdateSitemap extends Command
             chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $e) {
             if ($this->env === 'production') {
-                $this->mailer->send("error creating sitemap", $e->getMessage());
-                $this->logger->addError("GENERAL ERROR: " . $e->getMessage());
+                $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
+                $this->logger->error("GENERAL ERROR: " . $e->getMessage());
             } else {
                 echo $e->getMessage() . PHP_EOL;
             }

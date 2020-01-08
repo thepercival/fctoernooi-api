@@ -21,7 +21,7 @@ use Slim\Psr7\Stream;
 
 class ErrorResponse extends Response
 {
-    public function __construct($message, $status )
+    public function __construct(string $message, int $status)
     {
         $headers = new Headers;
         $headers->setHeader("Content-type", "application/json");

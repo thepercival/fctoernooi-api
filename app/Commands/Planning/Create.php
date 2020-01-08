@@ -64,7 +64,7 @@ class Create extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:create-plannings')
+            ->setName('app:create-planning')
             // the short description shown while running "php bin/console list"
             ->setDescription('Creates the plannings from the inputs')
             // the full command description shown when running the command with

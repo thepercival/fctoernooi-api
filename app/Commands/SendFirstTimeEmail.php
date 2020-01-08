@@ -14,8 +14,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use App\Settings\Www as WwwSettings;
 use App\Mailer;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-
-use function App\Cronjob\mailHelp;
+use FCToernooi\User\Repository as UserRepository;
 
 class SendFirstTimeEmail extends Command
 {
@@ -32,6 +31,10 @@ class SendFirstTimeEmail extends Command
      */
     protected $tournamentRepos;
     /**
+     * @var UserRepository
+     */
+    protected $userRepos;
+    /**
      * @var WwwSettings
      */
     protected $wwwSettings;
@@ -43,6 +46,7 @@ class SendFirstTimeEmail extends Command
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
+        $this->userRepos = $container->get(UserRepository::class);
         $this->logger = $container->get(LoggerInterface::class);
         $this->mailer = $container->get(Mailer::class);
 
@@ -83,8 +87,8 @@ class SendFirstTimeEmail extends Command
             }
         } catch (\Exception $e) {
             if ($this->env === 'production') {
-                $this->mailer->send("error sending firsttime-mail", $e->getMessage());
-                $this->logger->addError("GENERAL ERROR: " . $e->getMessage());
+                $this->mailer->sendToAdmin("error sending firsttime-mail", $e->getMessage());
+                $this->logger->error("GENERAL ERROR: " . $e->getMessage());
             } else {
                 echo $e->getMessage() . PHP_EOL;
             }

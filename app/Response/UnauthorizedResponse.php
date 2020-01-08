@@ -17,9 +17,8 @@ namespace App\Response;
 
 class UnauthorizedResponse extends ErrorResponse
 {
-    public function __construct($message)
+    public function __construct(string $message)
     {
         parent::__construct($message, 401);
-
     }
 }
