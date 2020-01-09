@@ -21,10 +21,8 @@ return [
         ],
         // Monolog settings
         'logger' => [
-            'name' => 'cronjob',
-            'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/application.log',
-            'level' => ( getenv('ENVIRONMENT') === "development" ? \Monolog\Logger::DEBUG : \Monolog\Logger::ERROR),
-            'cronjobpath' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../logs/cronjob_',
+            'path' => __DIR__ . '/../logs/',
+            'level' => (getenv('ENVIRONMENT') === "development" ? \Monolog\Logger::DEBUG : \Monolog\Logger::ERROR),
         ],
         // Doctrine settings
         'doctrine' => [

@@ -4,23 +4,19 @@ namespace App\Commands\Planning;
 
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
+use App\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-
+use Voetbal\Planning;
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
 
 class RetryTimeout extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
     /**
      * @var PlanningInputRepository
      */
@@ -35,9 +31,7 @@ class RetryTimeout extends Command
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningRepos = $container->get(PlanningRepository::class);
-
-        $this->logger = $container->get(LoggerInterface::class);
-        parent::__construct();
+        parent::__construct($container, 'cron-retry-timeout-planning');
     }
 
     protected function configure()
@@ -66,9 +60,9 @@ class RetryTimeout extends Command
 //                $planning = $this->planningRepos->find( (int) $argv[1] );
 //            }
             $planningSeeker->processTimeout($planning);
-//    if( $planning->getState() !== PlanningBase::STATE_SUCCESS ) {
-//        return;
-//    }
+            if ($planning->getState() !== Planning::STATE_SUCCESS) {
+                return 0;
+            }
             $inputService = new PlanningInputService();
             // update planninginputs
             for ($reverseGCD = 2; $reverseGCD <= 8; $reverseGCD++) {

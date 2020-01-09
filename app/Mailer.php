@@ -27,18 +27,18 @@ final class Mailer
     /**
      * @var string
      */
-    protected $toEmailaddress;
+    protected $adminEmailaddress;
 
     public function __construct(
         LoggerInterface $logger,
         string $fromEmailaddress,
         string $fromName,
-        string $toEmailaddress
+        string $adminEmailaddress
     ) {
         $this->logger = $logger;
         $this->fromEmailaddress = $fromEmailaddress;
         $this->fromName = $fromName;
-        $this->toEmailaddress = $toEmailaddress;
+        $this->adminEmailaddress = $adminEmailaddress;
     }
 
     public function send(string $subject, string $body, string $toEmailaddress)
@@ -58,6 +58,6 @@ final class Mailer
 
     public function sendToAdmin(string $subject, string $body)
     {
-        $this->send($subject, $body, $this->toEmailaddress);
+        $this->send($subject, $body, $this->adminEmailaddress);
     }
 }

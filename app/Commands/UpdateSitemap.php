@@ -4,7 +4,7 @@ namespace App\Commands;
 
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
+use App\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,14 +15,6 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 class UpdateSitemap extends Command
 {
     /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
-    /**
      * @var TournamentRepository
      */
     protected $tournamentRepos;
@@ -30,19 +22,12 @@ class UpdateSitemap extends Command
      * @var WwwSettings
      */
     protected $wwwSettings;
-    /**
-     * @var string
-     */
-    protected $env;
 
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->logger = $container->get(LoggerInterface::class);
-        $this->mailer = $container->get(Mailer::class);
         $this->wwwSettings = $container->get(WwwSettings::class);
-        $this->env = $container->get('settings')['environment'];
-        parent::__construct();
+        parent::__construct($container, 'cron-update-sitemap');
     }
 
     protected function configure()
@@ -78,7 +63,7 @@ class UpdateSitemap extends Command
         } catch (\Exception $e) {
             if ($this->env === 'production') {
                 $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
-                $this->logger->error("GENERAL ERROR: " . $e->getMessage());
+                $this->logger->error($e->getMessage());
             } else {
                 echo $e->getMessage() . PHP_EOL;
             }

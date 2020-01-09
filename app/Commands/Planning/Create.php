@@ -2,9 +2,10 @@
 
 namespace App\Commands\Planning;
 
+use App\Mailer;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
+use App\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,21 +16,13 @@ use Voetbal\Round\Number\Repository as RoundNumberRepository;
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
-use Voetbal\Planning\Resources;
-use Voetbal\Sport;
-use Voetbal\Planning\Input as InputPlanning;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\ConvertService as PlanningConvertService;
 use Voetbal\Planning\ScheduleService as ScheduleService;
-use Voetbal\Structure\Service as StructureService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 
 class Create extends Command
 {
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
     /**
      * @var PlanningInputRepository
      */
@@ -54,10 +47,7 @@ class Create extends Command
         $this->planningRepos = $container->get(PlanningRepository::class);
         $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-
-
-        $this->logger = $container->get(LoggerInterface::class);
-        parent::__construct();
+        parent::__construct($container, 'cron-planning-create');
     }
 
     protected function configure()
@@ -74,23 +64,29 @@ class Create extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->planningInputRepos->isProcessing()) {
-            $this->logger->info("still processing..");
-            return 0;
+        try {
+            if ($this->planningInputRepos->isProcessing()) {
+                $this->logger->info("still processing..");
+                return 0;
+            }
+            $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
+            // $planningInput = $this->planningInputRepos->find( 55492 );
+            if ($planningInput === null) {
+                $this->logger->info("nothing to process");
+                return 0;
+            }
+            $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+            $planningSeeker->process($planningInput);
+            $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
+            $this->logger->info($nrUpdated . " roundnumber(s)-planning updated");
+        } catch (\Exception $e) {
+            if ($this->env === 'production') {
+                $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
+                $this->logger->error($e->getMessage());
+            } else {
+                echo $e->getMessage() . PHP_EOL;
+            }
         }
-        $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
-//        $test = $input->getArgument("2");
-//        if( array_key_exists(1, $argv) ) {
-//            $planningInput = $planningInputRepos->find( (int) $argv[1] );
-//        }
-        if ($planningInput === null) {
-            $this->logger->info("nothing to process");
-            return 0;
-        }
-        $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
-        $planningSeeker->process($planningInput);
-        $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
-        $this->logger->info($nrUpdated . " roundnumber(s)-planning updated");
         return 0;
     }
 
