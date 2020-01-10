@@ -4,6 +4,7 @@ namespace App\Commands\Planning;
 
 use Psr\Container\ContainerInterface;
 use App\Command;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -42,7 +43,7 @@ class CreateDefaultInput extends Command
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningInputSerivce = new PlanningInputService();
-        parent::__construct($container, 'cron-planning-create-default-input');
+        parent::__construct($container->get(Configuration::class), 'cron-planning-create-default-input');
     }
 
     protected function configure()

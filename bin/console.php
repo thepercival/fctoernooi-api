@@ -1,43 +1,26 @@
-#!/usr/bin/env php
 <?php
 
-$rootPath = realpath(__DIR__ . '/..');
-require $rootPath . '/vendor/autoload.php';
-
-use DI\ContainerBuilder;
+use Psr\Container\ContainerInterface;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Application;
-use Slim\Factory\AppFactory;
-use App\Commands\Planning\CreateDefaultInput as PlanningCreateDefaultInput;
 
-// Set the absolute path to the root directory.
+if (isset($_SERVER['REQUEST_METHOD'])) {
+    echo "Only CLI allowed. Script stopped.\n";
+    exit(1);
+}
+/** @var ContainerInterface $container */
+$container = (require __DIR__ . '/../config/bootstrap.php')->getContainer();
 
 try {
-    // Instantiate PHP-DI ContainerBuilder
-    $containerBuilder = new ContainerBuilder();
-    // Set up settings
-    $settings = require __DIR__ . '/../conf/settings.php';
-    $containerBuilder->addDefinitions($settings);
-// Set up dependencies
-    $dependencies = require __DIR__ . '/../conf/dependencies.php';
-    $dependencies($containerBuilder);
-// Set up repositories
-    $repositories = require __DIR__ . '/../conf/repositories.php';
-    $repositories($containerBuilder);
-// Set up commands
-    $commands = require __DIR__ . '/../conf/commands.php';
-    $commands($containerBuilder);
-// Build PHP-DI Container instance
-    $container = $containerBuilder->build();
-
     $command = null;
     if (array_key_exists(1, $argv) === false) {
         throw new \Exception("add a parameter with the actionname", E_ERROR);
     }
+    $command = (string)$argv[1];
 
-    $app = new Application();
-    $command = $container->get($argv[1]);
-    $app->add($command);
-    $app->run();
+    $application = new Application();
+    $application->add($container->get($command));
+    $application->run();
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
 }

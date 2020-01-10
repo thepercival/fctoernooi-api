@@ -10,6 +10,7 @@ namespace App\Actions;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Selective\Config\Configuration;
 use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -32,13 +33,9 @@ final class Sponsor extends Action
      */
     private $tournamentRepos;
     /**
-     * @var WwwSettings
+     * @var Configuration
      */
-    protected $wwwSettings;
-    /**
-     * @var ImageSettings
-     */
-    protected $imageSettings;
+    protected $config;
 
     const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
 
@@ -47,15 +44,13 @@ final class Sponsor extends Action
         SerializerInterface $serializer,
         SponsorRepository $sponsorRepos,
         TournamentRepository $tournamentRepos,
-        WwwSettings $wwwSettings,
-        ImageSettings $imageSettings
+        Configuration $config
     )
     {
         parent::__construct($logger,$serializer);
         $this->sponsorRepos = $sponsorRepos;
         $this->tournamentRepos = $tournamentRepos;
-        $this->wwwSettings = $wwwSettings;
-        $this->imageSettings = $imageSettings;
+        $this->config = $config;
     }
 
     public function fetch( Request $request, Response $response, $args ): Response
@@ -193,28 +188,34 @@ final class Sponsor extends Action
             }
             $logostream = $uploadedFiles["logostream"];
             $extension = null;
-            if( $logostream->getClientMediaType() === "image/jpeg" ) {
+            if ($logostream->getClientMediaType() === "image/jpeg") {
                 $extension = "jpg";
-            } else if( $logostream->getClientMediaType() === "image/png" ) {
-                $extension = "png";
-            } else if( $logostream->getClientMediaType() === "image/gif" ) {
-                $extension = "gif";
             } else {
-                throw new \Exception("alleen jpg en png zijn toegestaan", E_ERROR);
+                if ($logostream->getClientMediaType() === "image/png") {
+                    $extension = "png";
+                } else {
+                    if ($logostream->getClientMediaType() === "image/gif") {
+                        $extension = "gif";
+                    } else {
+                        throw new \Exception("alleen jpg en png zijn toegestaan", E_ERROR);
+                    }
+                }
             }
 
-            $localPath = $this->wwwSettings->getApiUrlLocalPath() . $this->imageSettings->getSponsorsPathPostfix();
-            $urlPath = $this->wwwSettings->getApiUrl() . $this->imageSettings->getSponsorsPathPostfix();
+            $localPath = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
+                    'images.sponsors.pathpostfix'
+                );
+            $urlPath = $this->config->getString('www.apiurl') . $this->config->getString('images.sponsors.pathpostfix');
 
             $logoUrl = $urlPath . $sponsor->getId() . '.' . $extension;
 
             $newImagePath = $localPath . $sponsor->getId() . '.' . $extension;
             $source_properties = getimagesize($logostream->file);
             $image_type = $source_properties[2];
-            if( $image_type == IMAGETYPE_JPEG ) {
+            if ($image_type == IMAGETYPE_JPEG) {
                 $image_resource_id = imagecreatefromjpeg($logostream->file);
-                $target_layer = $this->fn_resize($image_resource_id,$source_properties[0],$source_properties[1]);
-                imagejpeg($target_layer,$newImagePath);
+                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                imagejpeg($target_layer, $newImagePath);
             }
             elseif( $image_type == IMAGETYPE_GIF )  {
                 $image_resource_id = imagecreatefromgif($logostream->file);

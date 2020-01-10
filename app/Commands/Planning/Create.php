@@ -6,6 +6,7 @@ use App\Mailer;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use App\Command;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -47,7 +48,7 @@ class Create extends Command
         $this->planningRepos = $container->get(PlanningRepository::class);
         $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        parent::__construct($container, 'cron-planning-create');
+        parent::__construct($container->get(Configuration::class), 'cron-planning-create');
     }
 
     protected function configure()
@@ -80,7 +81,7 @@ class Create extends Command
             $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
             $this->logger->info($nrUpdated . " roundnumber(s)-planning updated");
         } catch (\Exception $e) {
-            if ($this->env === 'production') {
+            if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
                 $this->logger->error($e->getMessage());
             } else {

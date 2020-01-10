@@ -7,6 +7,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Command\Command as SymCommand;
 
 class Command extends SymCommand
@@ -20,15 +21,15 @@ class Command extends SymCommand
      */
     protected $mailer;
     /**
-     * @var string
+     * @var Configuration
      */
-    protected $env;
+    protected $config;
 
-    public function __construct(ContainerInterface $container, string $name)
+    public function __construct(Configuration $config, string $name)
     {
-        $this->env = $container->get('settings')['environment'];
-        $this->initLogger($container->get('settings')['logger'], $name);
-        $this->initMailer($this->logger, $container->get('settings')['email']);
+        $this->config = $config;
+        $this->initLogger($config->getArray('logger'), $name);
+        $this->initMailer($this->logger, $config->getArray('email'));
         parent::__construct();
     }
 
@@ -37,7 +38,9 @@ class Command extends SymCommand
         $this->logger = new Logger($name);
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
-        $path = $this->env === "development" ? 'php://stdout' : ($loggerSettings['path'] . $name . '.log');
+        $path = $this->config->getString(
+            "environment"
+        ) === "development" ? 'php://stdout' : ($loggerSettings['path'] . $name . '.log');
         $handler = new StreamHandler($path, $loggerSettings['level']);
         $this->logger->pushHandler($handler);
     }

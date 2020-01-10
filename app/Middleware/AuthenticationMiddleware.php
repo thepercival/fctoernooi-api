@@ -18,11 +18,12 @@ use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Role;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
-class AuthenticationMiddleware
+class AuthenticationMiddleware implements MiddlewareInterface
 {
     /**
      * @var TournamentService
@@ -53,9 +54,9 @@ class AuthenticationMiddleware
         $this->gameRepos = $gameRepos;
     }
 
-    public function __invoke(Request $request, RequestHandler $handler): Response
+    public function process(Request $request, RequestHandler $handler): Response
     {
-        if ($request->getMethod() === "OPTIONS" ) {
+        if ($request->getMethod() === "OPTIONS") {
             return $handler->handle($request);
         }
 
@@ -74,16 +75,20 @@ class AuthenticationMiddleware
         if ($tournament === null) {
             return $handler->handle($request);
         }
+        $request = $request->withAttribute("tournament", $tournament);
 
         $routeContext = RouteContext::fromRequest($request);
         $routingResults = $routeContext->getRoutingResults();
 
         $args = $routingResults->getRouteArguments();
+
+        if ($tournament->getPublic() && $request->getMethod() === "GET") {
+            return $handler->handle($request);
+        }
+
         if ($this->isAuthorized($user, $tournament, $args) === false) {
             return new ForbiddenResponse("je hebt geen rechten om het toernooi aan te passen");
         }
-        $request = $request->withAttribute("tournament", $tournament);
-
         return $handler->handle($request);
     }
 

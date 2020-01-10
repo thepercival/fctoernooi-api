@@ -8,6 +8,7 @@ use FCToernooi\User;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use App\Command;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -26,17 +27,12 @@ class SendFirstTimeEmail extends Command
      * @var UserRepository
      */
     protected $userRepos;
-    /**
-     * @var WwwSettings
-     */
-    protected $wwwSettings;
 
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->userRepos = $container->get(UserRepository::class);
-        $this->wwwSettings = $container->get(WwwSettings::class);
-        parent::__construct($container, 'cron-send-firsttime-email');
+        parent::__construct($container->get(Configuration::class), 'cron-send-firsttime-email');
     }
 
     protected function configure()
@@ -70,7 +66,7 @@ class SendFirstTimeEmail extends Command
                 $this->userRepos->save($user);
             }
         } catch (\Exception $e) {
-            if ($this->env === 'production') {
+            if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error sending firsttime-mail", $e->getMessage());
                 $this->logger->error($e->getMessage());
             } else {

@@ -41,14 +41,16 @@ return function (App $app) {
             $group->group('{tournamentId}/', function ( Group $group ) {
                 $group->options('structure', StructureAction::class . ':options');
                 $group->get('structure', StructureAction::class . ':fetchOne');
+                $group->options('export', TournamentAction::class . ':options');
+                $group->get('export', TournamentAction::class . ':export');
             });
         });
         $group->options('/shells', TournamentShellAction::class . ':options');
-        $group->get('/shells', TournamentShellAction::class . ':fetch');
+        $group->get('/shells', TournamentShellAction::class . ':fetchPublic');
     });
 
     $app->group('/auth', function ( Group $group ) {
-        $group->options('/validatetoken', AuthAction::class . 'options');
+        $group->options('/validatetoken', AuthAction::class . ':options');
         $group->post('/validatetoken', AuthAction::class . ':validateToken');
     });
 
@@ -76,25 +78,26 @@ return function (App $app) {
         $group->delete('/{tournamentId}', TournamentAction::class . ':remove');
 
         $group->group('/{tournamentId}/', function ( Group $group ) {
-
             $group->options('syncrefereeroles', TournamentAction::class . ':options');
             $group->post('syncrefereeroles', TournamentAction::class . ':syncRefereeRoles');
             $group->options('sendrequestoldstructure', TournamentAction::class . ':options');
             $group->post('sendrequestoldstructure', TournamentAction::class . ':sendRequestOldStructure');
             $group->options('userrefereeid', TournamentAction::class . ':options');
             $group->get('userrefereeid', TournamentAction::class . ':getUserRefereeId');
-            $group->options('export', TournamentAction::class . ':options');
-            $group->get('export', TournamentAction::class . ':export');
+            $group->options('exportgeneratehash', TournamentAction::class . ':options');
+            $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
             $group->options('copy', TournamentAction::class . ':options');
             $group->post('copy', TournamentAction::class . ':copy');
 
-            $group->group('sponsors/', function ( Group $group ) {
-                $group->options('', SponsorAction::class . ':options');
-                $group->get('', SponsorAction::class . ':fetch');
-                $group->get('{sponsorId}', SponsorAction::class . ':fetchOne');
-                $group->post('', SponsorAction::class . ':add');
-                $group->options('{sponsorId}', SponsorAction::class . ':options');
-                $group->put('{sponsorId}', SponsorAction::class . ':edit');
+            $group->group(
+                'sponsors/',
+                function (Group $group) {
+                    $group->options('', SponsorAction::class . ':options');
+                    $group->get('', SponsorAction::class . ':fetch');
+                    $group->get('{sponsorId}', SponsorAction::class . ':fetchOne');
+                    $group->post('', SponsorAction::class . ':add');
+                    $group->options('{sponsorId}', SponsorAction::class . ':options');
+                    $group->put('{sponsorId}', SponsorAction::class . ':edit');
                 $group->delete('{sponsorId}', SponsorAction::class . ':remove');
                 $group->options('{sponsorId}/upload', SponsorAction::class . ':options');
                 $group->post('{sponsorId}/upload', SponsorAction::class . ':upload');         // POSTMAN NOT FINISHED
@@ -183,11 +186,15 @@ return function (App $app) {
                     $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
                 }
             );
-        });
-    });
+        }
+        );
+    }
+    );
 
+    $app->options('/myshells', TournamentShellAction::class . ':options');
+    $app->get('/myshells', TournamentShellAction::class . ':fetchMine');
     $app->options('/shells', TournamentShellAction::class . ':options');
-    $app->get('/shells', TournamentShellAction::class . ':fetchWithRoles');
+    $app->get('/shells', TournamentShellAction::class . ':fetchPublic');
 
     $app->options('/sports/{sportId}', SportAction::class . ':options');
     $app->get('/sports/{sportId}', SportAction::class . ':fetchOne');

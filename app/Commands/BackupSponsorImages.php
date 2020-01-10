@@ -3,14 +3,11 @@
 namespace App\Commands;
 
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use App\Command;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use App\Settings\Www as WwwSettings;
-use App\Settings\Image as ImageSettings;
-use App\Mailer;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 
 class BackupSponsorImages extends Command
@@ -19,22 +16,11 @@ class BackupSponsorImages extends Command
      * @var SponsorRepository
      */
     protected $sponsorRepos;
-    /**
-     * @var WwwSettings
-     */
-    protected $wwwSettings;
-    /**
-     * @var ImageSettings
-     */
-    protected $imageSettings;
 
     public function __construct(ContainerInterface $container)
     {
         $this->sponsorRepos = $container->get(SponsorRepository::class);
-        $this->wwwSettings = $container->get(WwwSettings::class);
-        $this->imageSettings = $container->get(ImageSettings::class);
-
-        parent::__construct($container, 'cron-backup-sponsorimages');
+        parent::__construct($container->get(Configuration::class), 'cron-backup-sponsorimages');
     }
 
     protected function configure()
@@ -51,14 +37,18 @@ class BackupSponsorImages extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path = $this->wwwSettings->getApiUrlLocalpath() . $this->imageSettings->getSponsorsPathPostfix();
-        $backupPath = $this->imageSettings->getSponsorsBackupPath() . $this->imageSettings->getSponsorsPathPostfix();
+        $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
+                'images.sponsors.pathpostfix'
+            );
+        $backupPath = $this->config->getString('images.sponsors.backuppath') . $this->config->getString(
+                'images.sponsors.pathpostfix'
+            );
         try {
             if (!is_writable($backupPath)) {
                 throw new \Exception("backuppath " . $backupPath . " is not writable", E_ERROR);
             }
 
-            $apiUrl = $this->wwwSettings->getApiUrl();
+            $apiUrl = $this->config->getString('www.apiurl');
             $sponsors = $this->sponsorRepos->findAll();
             foreach ($sponsors as $sponsor) {
                 $logoUrl = $sponsor->getLogoUrl();
@@ -66,7 +56,7 @@ class BackupSponsorImages extends Command
                     continue;
                 }
                 // $logoUrl = $settings["www"]["apiurl-localpath"];
-                $logoLocalPath = str_replace($apiUrl, $this->wwwSettings->getApiUrlLocalpath(), $logoUrl);
+                $logoLocalPath = str_replace($apiUrl, $this->config->getString('www.apiurl-localpath'), $logoUrl);
                 if (!is_readable($logoLocalPath)) {
                     throw new \Exception("sponsorimage " . $logoLocalPath . " could not be found", E_ERROR);
                 }
@@ -77,7 +67,7 @@ class BackupSponsorImages extends Command
                 }
             }
         } catch (\Exception $e) {
-            if ($this->env === 'production') {
+            if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
                 $this->logger->error($e->getMessage());
             } else {

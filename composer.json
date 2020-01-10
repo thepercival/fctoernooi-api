@@ -25,13 +25,14 @@
       "tuupola/slim-jwt-auth": "^3.4",
       "symfony/property-access": "^5.0",
       "phpmailer/phpmailer": "^6.1",
-      "zf1/zend-pdf": "^1.12",
       "endroid/qr-code": "^3.7",
       "phpoffice/phpspreadsheet": "^1.10",
       "php-di/php-di": "^6.0",
       "symfony/yaml": "^5.0",
       "middlewares/negotiation": "^2.0",
-      "symfony/console": "^5.0"
+      "symfony/console": "^5.0",
+      "zf1s/zend-pdf": "^1.13",
+      "selective/config": "^0.1.1"
     },
 	"require-dev": {
 		"phpunit/phpunit": "^8.2",
@@ -55,7 +56,7 @@
       "test": [
         "vendor/bin/phpunit --bootstrap vendor/autoload.php tests/cases/"
       ],
-      "stan": "vendor/bin/phpstan analyse --level=5 app conf domain tests",
+      "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
       "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
       "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force"
     },

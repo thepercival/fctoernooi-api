@@ -17,7 +17,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use App\Exceptions\DomainRecordNotFoundException;
+use App\Mailer;
+use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
@@ -53,6 +54,10 @@ class Tournament extends Action
      * @var PlanningCreator
      */
     protected $planningCreator;
+    /**
+     * @var Mailer
+     */
+    protected $mailer;
 
     public function __construct(
         LoggerInterface $logger,
@@ -61,14 +66,16 @@ class Tournament extends Action
         TournamentCopier $tournamentCopier,
         RoleRepository $roleRepos,
         StructureRepository $structureRepos,
-        PlanningCreator $planningCreator )
-    {
-        parent::__construct($logger,$serializer);
+        PlanningCreator $planningCreator,
+        Mailer $mailer
+    ) {
+        parent::__construct($logger, $serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->tournamentCopier = $tournamentCopier;
         $this->roleRepos = $roleRepos;
         $this->structureRepos = $structureRepos;
         $this->planningCreator = $planningCreator;
+        $this->mailer = $mailer;
     }
 
     public function fetchOnePublic( Request $request, Response $response, $args ): Response
@@ -146,7 +153,7 @@ class Tournament extends Action
             $tournament = $request->getAttribute("tournament");
             $roles = $this->roleRepos->syncRefereeRoles( $tournament );
 
-            $json = $this->serializer->serialize( true, 'json' );
+            $json = $this->serializer->serialize($roles, 'json');
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){
@@ -272,29 +279,55 @@ class Tournament extends Action
 
             $conn->commit();
 
-            $json = $this->serializer->serialize( $newTournament->getId(), 'json' );
+            $json = $this->serializer->serialize($newTournament->getId(), 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch (\Exception $e) {
             $conn->rollBack();
-            return new ErrorResponse( $e->getMessage(), 422);
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    public function export( Request $request, Response $response, $args ): Response
+    public function exportGenerateHash(Request $request, Response $response, $args): Response
+    {
+        try {
+            /** @var \FCToernooi\Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $hash = $this->getExportHash($tournament->getId());
+            return $this->respondWithJson($response, json_encode(["hash" => $hash]));
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
+    }
+
+    protected function getExportHash(int $tournamentId): string
+    {
+        $decoded = $tournamentId . getenv('EXPORT_SECRET') . $tournamentId;
+        return hash("sha1", $decoded);
+    }
+
+    public function export(Request $request, Response $response, $args): Response
     {
         try {
             /** @var \FCToernooi\Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $queryParams = $request->getQueryParams();
-            if( array_key_exists("type", $queryParams) === false ) {
+            if (array_key_exists("hash", $queryParams) === false) {
+                throw new \Exception("de link om het toernooi te exporteren is niet correct", E_ERROR);
+            }
+            if ($queryParams["hash"] !== $this->getExportHash($tournament->getId())) {
+                throw new \Exception("de link om het toernooi te exporteren is niet correct", E_ERROR);
+            }
+
+            $queryParams = $request->getQueryParams();
+            if (array_key_exists("type", $queryParams) === false) {
                 throw new \Exception("kies een type export(pdf/excel)", E_ERROR);
             }
 
             $type = filter_var($queryParams["type"], FILTER_SANITIZE_STRING);
             $type = $type === "pdf" ? TournamentBase::EXPORTED_PDF : TournamentBase::EXPORTED_EXCEL;
-            $config = $this->getExportConfig( $queryParams );
+            $config = $this->getExportConfig($queryParams);
 
             $tournament->setExported( $tournament->getExported() | $type );
             $this->tournamentRepos->save($tournament);
@@ -350,21 +383,30 @@ class Tournament extends Action
             ->withHeader('Content-Length', strlen( $vtData ));
     }
 
-    protected function writeExcel($response, $config, $tournament ){
-        $fileName = $this->getFileName( $config);
-        $structure = $this->structureRepos->getStructure( $tournament->getCompetition() );
+    protected function writeExcel($response, $config, $tournament )
+    {
+        $fileName = $this->getFileName($config);
+        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-        $spreadsheet = new FCToernooiSpreadsheet( $tournament, $structure, $config );
+        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $config);
         $spreadsheet->fillContents();
 
-        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $excelWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
 
-        return $response
-            ->withHeader('Cache-Control', 'must-revalidate')
-            ->withHeader('Pragma', 'public')
-            ->withHeader('Content-Disposition', 'attachment; filename="'.$fileName.'.xlsx";')
-            ->withHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8')
-            ->write($writer->save('php://output'));
+        $excelFileName = sys_get_temp_dir() . '/toernooi-' . $tournament->getId() . '.xlsx';
+        $excelWriter->save($excelFileName);
+
+        // For Excel2007 and above .xlsx files
+        $response = $response->withHeader('Cache-Control', 'must-revalidate');
+        $response = $response->withHeader('Pragma', 'public');
+        $response = $response->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '.xlsx";');
+        $response = $response->withHeader(
+            'Content-Type',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+        );
+
+        $newStream = new LazyOpenStream($excelFileName, 'r');
+        return $response->withBody($newStream);
     }
 
     protected function getFileName(TournamentConfig $exportConfig): string {
@@ -392,56 +434,34 @@ class Tournament extends Action
     {
         $subject = 'omzetten structuur fctoernooi';
         $body = '
-            <p>https://www.fctoernooi.nl/toernooi/structure/'.$tournament->getId().'</p>
+            <p>https://fctoernooi.nl/toernooi/structure/' . $tournament->getId() . '</p>
             <p>
             met vriendelijke groet,
             <br>
             FCToernooi
             </p>';
 
-        $from = "FCToernooi";
-        $fromEmail = "noreply@fctoernooi.nl";
-        $headers  = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-        $headers .= "From: ".$from." <" . $fromEmail . ">" . "\r\n";
-        $headers .= "X-Mailer: PHP/" . phpversion();
-        $params = "-r ".$fromEmail;
-
-        if ( !mail( "fctoernooi2018@gmail.com", $subject, $body, $headers, $params) ) {
-            // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
-            error_log('Mailer Error!' );
-            // $app->halt(500);
-        }
+        $this->mailer->sendToAdmin($subject, $body);
     }
 
     /*
-            protected function sentEmailActivation( $user )
-            {
-                $activatehash = hash ( "sha256", $user["email"] . $this->settings["auth"]["activationsecret"] );
-                // echo $activatehash;
+    protected function sentEmailActivation( $user )
+    {
+        $activatehash = hash ( "sha256", $user["email"] . $this->settings["auth"]["activationsecret"] );
+        // echo $activatehash;
 
-                $sMessage =
-                    "<div style=\"font-size:20px;\">FC Toernooi</div>"."<br>".
-                    "<br>".
-                    "Hallo ".$user["name"].","."<br>"."<br>".
-                    "Bedankt voor het registreren bij FC Toernooi.<br>"."<br>".
-                    'Klik op <a href="'.$this->settings["www"]["url"].'activate?activationkey='.$activatehash.'&email='.rawurlencode( $user["email"] ).'">deze link</a> om je emailadres te bevestigen en je account te activeren.<br>'."<br>".
-                    'Wensen, klachten of vragen kunt u met de <a href="https://github.com/thepercival/fctoernooi/issues">deze link</a> bewerkstellingen.<br>'."<br>".
-                    "Veel plezier met het gebruiken van FC Toernooi<br>"."<br>".
-                    "groeten van FC Toernooi"
-                ;
-
-                $mail = new \PHPMailer;
-                $mail->isSMTP();
-                $mail->Host = $this->settings["email"]["smtpserver"];
-                $mail->setFrom( $this->settings["email"]["from"], $this->settings["email"]["fromname"] );
-                $mail->addAddress( $user["email"] );
-                $mail->addReplyTo( $this->settings["email"]["from"], $this->settings["email"]["fromname"] );
-                $mail->isHTML(true);
-                $mail->Subject = "FC Toernooi registratiegegevens";
-                $mail->Body    = $sMessage;
-                if(!$mail->send()) {
-                    throw new \Exception("de activatie email kan niet worden verzonden");
-                }
-            }*/
+        $body =
+            "<div style=\"font-size:20px;\">FC Toernooi</div>"."<br>".
+            "<br>".
+            "Hallo ".$user["name"].","."<br>"."<br>".
+            "Bedankt voor het registreren bij FC Toernooi.<br>"."<br>".
+            'Klik op <a href="'.$this->settings["www"]["url"].'activate?activationkey='.$activatehash.'&email='.rawurlencode( $user["email"] ).'">deze link</a> om je emailadres te bevestigen en je account te activeren.<br>'."<br>".
+            'Wensen, klachten of vragen kunt u met de <a href="https://github.com/thepercival/fctoernooi/issues">deze link</a> bewerkstellingen.<br>'."<br>".
+            "Veel plezier met het gebruiken van FC Toernooi<br>"."<br>".
+            "groeten van FC Toernooi"
+        ;
+        $mail->addReplyTo( $this->settings["email"]["from"], $this->settings["email"]["fromname"] );
+        $subject = "FC Toernooi registratiegegevens";
+        this->mailer->send( $subject, $body, $user["email"] );
+    }*/
 }

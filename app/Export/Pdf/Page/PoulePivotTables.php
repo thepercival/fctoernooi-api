@@ -179,14 +179,14 @@ class PoulePivotTables extends ToernooiPdfPage
             }
 
             // draw pointsrectangle
-            $points = '?';
+            $points = '';
             if( $rankingItem !== null ) {
                 $points = '' . $rankingItem->getUnranked()->getPoints();
             }
             $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
 
             // draw rankrectangle
-            $rank = '?';
+            $rank = '';
             if( $rankingItem !== null ) {
                 $rank = '' . $rankingItem->getUniqueRank();
             }

@@ -8,7 +8,7 @@ use App\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use App\Settings\Www as WwwSettings;
+use Selective\Config\Configuration;
 use App\Mailer;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 
@@ -18,16 +18,11 @@ class UpdateSitemap extends Command
      * @var TournamentRepository
      */
     protected $tournamentRepos;
-    /**
-     * @var WwwSettings
-     */
-    protected $wwwSettings;
 
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->wwwSettings = $container->get(WwwSettings::class);
-        parent::__construct($container, 'cron-update-sitemap');
+        parent::__construct($container->get(Configuration::class), 'cron-update-sitemap');
     }
 
     protected function configure()
@@ -45,8 +40,8 @@ class UpdateSitemap extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $url = $this->wwwSettings->getWwwUrl();
-            $distPath = $this->wwwSettings->getWwwUrlLocalpath();
+            $url = $this->config->getString('www.wwwurl');
+            $distPath = $this->config->getString('www.wwwurl-localpath');
 
             $content = $url . PHP_EOL;
             $content .= $url . "user/register/" . PHP_EOL;
@@ -61,7 +56,7 @@ class UpdateSitemap extends Command
             chown($distPath . "sitemap.txt", "coen");
             chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $e) {
-            if ($this->env === 'production') {
+            if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
                 $this->logger->error($e->getMessage());
             } else {

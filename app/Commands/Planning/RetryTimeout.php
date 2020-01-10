@@ -5,6 +5,7 @@ namespace App\Commands\Planning;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use App\Command;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,7 +32,7 @@ class RetryTimeout extends Command
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningRepos = $container->get(PlanningRepository::class);
-        parent::__construct($container, 'cron-retry-timeout-planning');
+        parent::__construct($container->get(Configuration::class), 'cron-retry-timeout-planning');
     }
 
     protected function configure()
@@ -83,7 +84,12 @@ class RetryTimeout extends Command
                 $this->planningInputRepos->save($reverseGCDInput);
             }
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            if ($this->config->getString('environment') === 'production') {
+                $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
+                $this->logger->error($e->getMessage());
+            } else {
+                echo $e->getMessage() . PHP_EOL;
+            }
         }
         return 0;
     }

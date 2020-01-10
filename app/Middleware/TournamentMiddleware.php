@@ -12,10 +12,11 @@ use Slim\Routing\RouteContext;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
-class TournamentMiddleware
+class TournamentMiddleware implements MiddlewareInterface
 {
     /**
      * @var TournamentRepository
@@ -29,7 +30,7 @@ class TournamentMiddleware
         $this->tournamentRepos = $tournamentRepos;
     }
 
-    public function __invoke(Request $request, RequestHandler $handler): Response
+    public function process(Request $request, RequestHandler $handler): Response
     {
         if ($request->getMethod() === "OPTIONS") {
             return $handler->handle($request);

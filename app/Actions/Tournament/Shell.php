@@ -50,17 +50,17 @@ final class Shell extends Action
         $this->em = $em;
     }
 
-    public function fetch( Request $request, Response $response, $args ): Response
+    public function fetchPublic(Request $request, Response $response, $args): Response
     {
-        return $this->fetchHelper($request, $response, true);
+        return $this->fetchPublicHelper($request, $response, $request->getAttribute("user"));
     }
 
-    public function fetchWithRoles( Request $request, Response $response, $args ): Response
-    {
-        return $this->fetchHelper($request, $response, null, $request->getAttribute("user"));
-    }
+//    public function fetch( Request $request, Response $response, $args ): Response
+//    {
+//        return $this->fetchPublicHelper( $request, $response, $request->getAttribute("user") );
+//    }
 
-    public function fetchHelper( Request $request, Response $response, bool $public = null, User $user = null ): Response
+    protected function fetchPublicHelper(Request $request, Response $response, User $user = null): Response
     {
         try {
             $queryParams = $request->getQueryParams();
@@ -86,28 +86,43 @@ final class Shell extends Action
                 $endDateTime = null;
             }
 
-            $withRoles = null;
-            if (array_key_exists("withRoles", $queryParams) && strlen($queryParams["withRoles"]) > 0) {
-                $withRoles = filter_var( $queryParams["withRoles"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-            }
             $shells = [];
-            {
-                if ($user !== null && $withRoles === true) {
-                    $tournamentsByRole = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
-                    foreach ($tournamentsByRole as $tournament) {
-                        $shells[] = new TournamentShell($tournament, $user);
-                    }
-                } else {
-                    $tournamentsByDates = $this->tournamentRepos->findByFilter($name, $startDateTime, $endDateTime, $public);
-                    foreach ($tournamentsByDates as $tournament) {
-                        $shells[] = new TournamentShell($tournament, $user);
-                    }
-                }
+            $public = true;
+            $tournamentsByDates = $this->tournamentRepos->findByFilter($name, $startDateTime, $endDateTime, $public);
+            foreach ($tournamentsByDates as $tournament) {
+                $shells[] = new TournamentShell($tournament, $user);
             }
-            $json = $this->serializer->serialize( $shells, 'json' );
+
+            $json = $this->serializer->serialize($shells, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
+    }
+
+
+    public function fetchMine(Request $request, Response $response, $args): Response
+    {
+        try {
+            $shells = $this->getMyShells($request->getAttribute("user"));
+            $json = $this->serializer->serialize($shells, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param User $user
+     * @return array|TournamentShell[]
+     */
+    public function getMyShells(User $user): array
+    {
+        $shells = [];
+        $tournamentsByRole = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
+        foreach ($tournamentsByRole as $tournament) {
+            $shells[] = new TournamentShell($tournament, $user);
+        }
+        return $shells;
     }
 }
