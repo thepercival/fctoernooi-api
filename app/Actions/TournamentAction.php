@@ -9,30 +9,26 @@ use App\Export\TournamentConfig;
 use App\Response\ErrorResponse;
 use FCToernooi\Role;
 use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\Tournament as TournamentBase;
+use FCToernooi\Tournament as Tournament;
 use FCToernooi\Tournament\Service as TournamentService;
-use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 use FCToernooi\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpBadRequestException;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use App\Mailer;
 use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Competitor\Service as CompetitorService;
-use Voetbal\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
-use Voetbal\Structure\Service as StructureService;
 use Voetbal\Structure\Repository as StructureRepository;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
 use App\Copiers\StructureCopier;
 use Voetbal\Round\Number\PlanningCreator;
+use Selective\Config\Configuration;
 
-class Tournament extends Action
+class TournamentAction extends Action
 {
     /**
      * @var TournamentRepository
@@ -58,6 +54,10 @@ class Tournament extends Action
      * @var Mailer
      */
     protected $mailer;
+    /**
+     * @var Configuration
+     */
+    protected $config;
 
     public function __construct(
         LoggerInterface $logger,
@@ -67,7 +67,8 @@ class Tournament extends Action
         RoleRepository $roleRepos,
         StructureRepository $structureRepos,
         PlanningCreator $planningCreator,
-        Mailer $mailer
+        Mailer $mailer,
+        Configuration $config
     ) {
         parent::__construct($logger, $serializer);
         $this->tournamentRepos = $tournamentRepos;
@@ -76,6 +77,7 @@ class Tournament extends Action
         $this->structureRepos = $structureRepos;
         $this->planningCreator = $planningCreator;
         $this->mailer = $mailer;
+        $this->config = $config;
     }
 
     public function fetchOnePublic( Request $request, Response $response, $args ): Response
@@ -111,7 +113,8 @@ class Tournament extends Action
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
-    protected function getSerializationContext( TournamentBase $tournament, User $user = null ) {
+    protected function getSerializationContext(Tournament $tournament, User $user = null)
+    {
         $serGroups = ['Default'];
 
         if ($user !== null && $tournament->hasRole($user, Role::ADMIN)) {
@@ -326,16 +329,16 @@ class Tournament extends Action
             }
 
             $type = filter_var($queryParams["type"], FILTER_SANITIZE_STRING);
-            $type = $type === "pdf" ? TournamentBase::EXPORTED_PDF : TournamentBase::EXPORTED_EXCEL;
+            $type = $type === "pdf" ? Tournament::EXPORTED_PDF : Tournament::EXPORTED_EXCEL;
             $config = $this->getExportConfig($queryParams);
 
-            $tournament->setExported( $tournament->getExported() | $type );
+            $tournament->setExported($tournament->getExported() | $type);
             $this->tournamentRepos->save($tournament);
 
-            if( $type === TournamentBase::EXPORTED_PDF ) {
-                return $this->writePdf($response, $config, $tournament );
+            if ($type === Tournament::EXPORTED_PDF) {
+                return $this->writePdf($response, $config, $tournament, $this->config->getString("www.wwwurl"));
             } else {
-                return $this->writeExcel($response, $config, $tournament );
+                return $this->writeExcel($response, $config, $tournament, $this->config->getString("www.wwwurl"));
             }
         }
         catch( \Exception $e ){
@@ -361,34 +364,35 @@ class Tournament extends Action
             $getParam("poulepivottables"),
             $getParam("qrcode")
         );
-        if( $exportConfig->allOptionsOff() ) {
+        if ($exportConfig->allOptionsOff()) {
             throw new \Exception("kies minimaal 1 exportoptie", E_ERROR);
         }
         return $exportConfig;
     }
 
-    protected function writePdf($response, $config, $tournament ){
-        $fileName = $this->getFileName( $config);
-        $structure = $this->structureRepos->getStructure( $tournament->getCompetition() );
+    protected function writePdf(Response $response, TournamentConfig $config, Tournament $tournament, string $url)
+    {
+        $fileName = $this->getFileName($config);
+        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-        $pdf = new PdfDocument( $tournament, $structure, $config );
+        $pdf = new PdfDocument($tournament, $structure, $config, $url);
         $vtData = $pdf->render();
 
         $response->getBody()->write($vtData);
         return $response
             ->withHeader('Cache-Control', 'must-revalidate')
             ->withHeader('Pragma', 'public')
-            ->withHeader('Content-Disposition', 'inline; filename="'.$fileName.'.pdf";')
+            ->withHeader('Content-Disposition', 'inline; filename="' . $fileName . '.pdf";')
             ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
             ->withHeader('Content-Length', strlen( $vtData ));
     }
 
-    protected function writeExcel($response, $config, $tournament )
+    protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url)
     {
         $fileName = $this->getFileName($config);
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $config);
+        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $config, $url);
         $spreadsheet->fillContents();
 
         $excelWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -430,17 +434,14 @@ class Tournament extends Action
         return "toernooi";
     }
 
-    protected function sendEmailOldStructure( TournamentBase $tournament )
+    protected function sendEmailOldStructure(Tournament $tournament)
     {
         $subject = 'omzetten structuur fctoernooi';
-        $body = '
-            <p>https://fctoernooi.nl/toernooi/structure/' . $tournament->getId() . '</p>
-            <p>
-            met vriendelijke groet,
-            <br>
-            FCToernooi
-            </p>';
-
+        $url = $this->config->getString("www.wwwurl") . $tournament->getId();
+        $body = <<<EOT
+<p>$url</p>
+<p>met vriendelijke groet,<br/>FCToernooi</p>
+EOT;
         $this->mailer->sendToAdmin($subject, $body);
     }
 

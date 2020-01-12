@@ -33,7 +33,8 @@ class Spreadsheet extends SpreadsheetBase
     public function __construct(
         Tournament $tournament,
         Structure $structure,
-        TournamentConfig $config
+        TournamentConfig $config,
+        string $url
     )
     {
         parent::__construct();
@@ -41,6 +42,7 @@ class Spreadsheet extends SpreadsheetBase
         $this->structure = $structure;
         $this->planningService = new PlanningService();
         $this->config = $config;
+        $this->url = $url;
     }
 
     public function fillContents() {
@@ -98,7 +100,7 @@ class Spreadsheet extends SpreadsheetBase
             ->setLastModifiedBy("Coen Dunnink")
             ->setTitle("Office 2007 XLSX Toernooi-document")
             ->setSubject("Office 2007 XLSX Toernooi-")
-            ->setDescription("This document is created by fctoernooi.nl")
+            ->setDescription("This document is created by FCToernooi")
             ->setKeywords("office 2007 openxml")
             ->setCategory("toernooi");
     }

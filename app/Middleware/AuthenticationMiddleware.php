@@ -60,35 +60,27 @@ class AuthenticationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $token = $request->getAttribute('token');
-        if ($token === null || $token->isPopulated() !== true) {
-            return $handler->handle($request);
+        $user = null;
+        {
+            $token = $request->getAttribute('token');
+            if ($token !== null && $token->isPopulated()) {
+                $user = $this->getUser($token);
+                if ($user === null) {
+                    return new ForbiddenResponse("de ingelogde gebruikers kon niet gevonden worden");
+                }
+                $request = $request->withAttribute("user", $user);
+            }
         }
-
-        $user = $this->getUser($token);
-        if ($user === null) {
-            return new ForbiddenResponse("de ingelogde gebruikers kon niet gevonden worden");
-        }
-        $request = $request->withAttribute("user", $user);
 
         $tournament = $request->getAttribute("tournament");
         if ($tournament === null) {
             return $handler->handle($request);
         }
-        $request = $request->withAttribute("tournament", $tournament);
 
-        $routeContext = RouteContext::fromRequest($request);
-        $routingResults = $routeContext->getRoutingResults();
-
-        $args = $routingResults->getRouteArguments();
-
-        if ($tournament->getPublic() && $request->getMethod() === "GET") {
-            return $handler->handle($request);
+        if (!$this->isAuthorized($tournament, $request->getMethod(), $request, $user)) {
+            return new ForbiddenResponse("je hebt geen rechten voor deze pagina");
         }
 
-        if ($this->isAuthorized($user, $tournament, $args) === false) {
-            return new ForbiddenResponse("je hebt geen rechten om het toernooi aan te passen");
-        }
         return $handler->handle($request);
     }
 
@@ -100,13 +92,26 @@ class AuthenticationMiddleware implements MiddlewareInterface
         return $this->userRepos->find($token->getUserId());
     }
 
-    protected function isAuthorized(User $user, Tournament $tournament, $args ): bool
+    protected function isAuthorized(Tournament $tournament, string $method, Request $request, User $user = null): bool
     {
-        if( array_key_exists("gameId", $args ) ) {
-            return $this->isAuthorizedForGame( $user, $tournament, (int)$args["gameId"] );
-        }
-        return $tournament->hasRole( $user, Role::ADMIN );
+        $routeContext = RouteContext::fromRequest($request);
+        $routingResults = $routeContext->getRoutingResults();
+        $args = $routingResults->getRouteArguments();
 
+        $isAuthorized = function () use ($tournament, $user, $args) {
+            if (array_key_exists("gameId", $args)) {
+                return $this->isAuthorizedForGame($user, $tournament, (int)$args["gameId"]);
+            }
+            return $tournament->hasRole($user, Role::ADMIN);
+        };
+        if (!$tournament->getPublic()) {
+            if ($routeContext->getRoute()->getName() === "tournament-export") { // export is check by hash
+                return true;
+            }
+            return $user !== null && $isAuthorized();
+        }
+        return $method === "GET" || $isAuthorized();
+    }
 
         // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
 //        if ($resourceType === 'competitors') {
@@ -124,7 +129,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
 //            return $this->otherActionAuthorized($user, $queryParams);
 //        }
 //        return false;
-    }
+
 
     protected function isAuthorizedForGame(User $user, Tournament $tournament, int $gameId ): bool
     {

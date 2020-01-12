@@ -45,7 +45,7 @@ class QRCode extends FCToernooiWorksheet
 
     public function draw()
     {
-        $url = "https://www.fctoernooi.nl/" . $this->getParent()->getTournament()->getId();
+        $url = $this->getParent()->getUrl() . $this->getParent()->getTournament()->getId();
         $row = 1;
         $row = $this->drawSubHeader( $row, $url, 2, 2 );
 

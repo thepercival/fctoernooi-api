@@ -38,6 +38,10 @@ trait Document
      * @var NameService
      */
     protected $nameService;
+    /**
+     * @var string
+     */
+    protected $url;
 
     /**
      * @return Structure
@@ -63,15 +67,24 @@ trait Document
         return $this->tournament;
     }
 
-    protected function areSelfRefereesAssigned(): bool {
-        if( $this->areSelfRefereesAssigned !== null ){
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    protected function areSelfRefereesAssigned(): bool
+    {
+        if ($this->areSelfRefereesAssigned !== null) {
             return $this->areSelfRefereesAssigned;
         };
-        $hasSelfRefereeHelper = function( RoundNumber $roundNumber ) use ( &$hasSelfRefereeHelper ): bool {
-            if( $roundNumber->getValidPlanningConfig()->getSelfReferee() ) {
-                $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
-                if( count( array_filter( $games, function( Game $game ) {
-                        return $game->getRefereePlace() !== null;
+        $hasSelfRefereeHelper = function (RoundNumber $roundNumber) use (&$hasSelfRefereeHelper): bool {
+            if ($roundNumber->getValidPlanningConfig()->getSelfReferee()) {
+                $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
+                if (count(
+                        array_filter(
+                            $games,
+                            function (Game $game) {
+                                return $game->getRefereePlace() !== null;
                     } ) ) > 0 ) {
                     return true;
                 }

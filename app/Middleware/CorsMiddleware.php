@@ -21,9 +21,6 @@ final class CorsMiddleware implements MiddlewareInterface
      */
     private $origin;
 
-    /**
-     * @param int $responseChunkSize
-     */
     public function __construct(string $origin)
     {
         $this->origin = $origin;

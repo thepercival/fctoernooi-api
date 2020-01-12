@@ -40,7 +40,8 @@ class Document extends \Zend_Pdf
     public function __construct(
         Tournament $tournament,
         Structure $structure,
-        TournamentConfig $config
+        TournamentConfig $config,
+        string $url
     )
     {
         parent::__construct();
@@ -48,6 +49,7 @@ class Document extends \Zend_Pdf
         $this->structure = $structure;
         $this->planningService = new PlanningService();
         $this->config = $config;
+        $this->url = $url;
     }
 
     public function getFontHeight()

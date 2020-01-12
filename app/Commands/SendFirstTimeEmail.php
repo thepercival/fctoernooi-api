@@ -80,26 +80,28 @@ class SendFirstTimeEmail extends Command
     protected function sendMail(User $user, Tournament $tournament)
     {
         $subject = $tournament->getCompetition()->getLeague()->getName();
-        $body = '
-        <p>Hallo,</p>
-        <p>            
-        Als beheerder van <a href="https://www.fctoernooi.nl/">https://www.fctoernooi.nl/</a> zag ik dat je een toernooi hebt aangemaakt op onze website. 
-        Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.        
-        </p>
-        <p>            
-        Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://docs.google.com/document/d/1SYeUJa5yvHZzvacMyJ_Xy4MpHWTWRgAh1LYkEA2CFnM/edit?usp=sharing">hier</a> vinden.
-        </p>
-        <p>
-        met vriendelijke groet,
-        <br>
-        Coen Dunnink<br>
-        06-14363514
-        </p>';
-
+        $url = $this->config->getString("www.wwwurl");
+        $body = <<<EOT
+<p>Hallo,</p>
+<p>            
+Als beheerder van <a href="$url">$url</a> zag ik dat je een toernooi hebt aangemaakt op onze website. 
+Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.        
+</p>
+<p>            
+Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://docs.google.com/document/d/1SYeUJa5yvHZzvacMyJ_Xy4MpHWTWRgAh1LYkEA2CFnM/edit?usp=sharing">hier</a> vinden.
+</p>
+<p>
+met vriendelijke groet,
+<br>
+Coen Dunnink<br>
+06-14363514
+</p>
+EOT;
         $this->mailer->send($subject, $body, $user->getEmailaddress());
 
-        $prepend = "email: " . $user->getEmailaddress(
-            ) . "<br><br>link: https://www.fctoernooi.nl/toernooi/view/" . $tournament->getId() . "<br><br>";
+        $prepend = "email: " . $user->getEmailaddress() . "<br><br>link: " . $this->config->getString(
+                "www.wwwurl"
+            ) . $tournament->getId() . "<br><br>";
         $this->mailer->sendToAdmin($subject, $prepend . $body);
     }
 }

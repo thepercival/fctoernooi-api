@@ -18,10 +18,10 @@ use FCToernooi\Role;
 use FCToernooi\User;
 use FCToernooi\Auth\Service as AuthService;
 use App\Actions\Action;
-use FCToernooi\Tournament\Shell as TournamentShell;
+use FCToernooi\Tournament\Shell as Shell;
 use Psr\Log\LoggerInterface;
 
-final class Shell extends Action
+final class ShellAction extends Action
 {
     /**
      * @var TournamentRepository
@@ -90,7 +90,7 @@ final class Shell extends Action
             $public = true;
             $tournamentsByDates = $this->tournamentRepos->findByFilter($name, $startDateTime, $endDateTime, $public);
             foreach ($tournamentsByDates as $tournament) {
-                $shells[] = new TournamentShell($tournament, $user);
+                $shells[] = new Shell($tournament, $user);
             }
 
             $json = $this->serializer->serialize($shells, 'json');
@@ -114,14 +114,14 @@ final class Shell extends Action
 
     /**
      * @param User $user
-     * @return array|TournamentShell[]
+     * @return array|Shell[]
      */
     public function getMyShells(User $user): array
     {
         $shells = [];
         $tournamentsByRole = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
         foreach ($tournamentsByRole as $tournament) {
-            $shells[] = new TournamentShell($tournament, $user);
+            $shells[] = new Shell($tournament, $user);
         }
         return $shells;
     }

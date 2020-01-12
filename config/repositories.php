@@ -14,6 +14,8 @@ use FCToernooi\User;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Sponsor;
 
+use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
+use Voetbal\Planning\Config as PlanningConfig;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Sport;
 use Voetbal\Season\Repository as SeasonRepository;
@@ -138,8 +140,8 @@ return [
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlaceRepository($entityManager, $entityManager->getClassMetaData(Place::class));
     },
-    PouleRepository::class => function (ContainerInterface $container) {
+    PlanningConfigRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
-        return new PouleRepository($entityManager, $entityManager->getClassMetaData(Poule::class));
+        return new PlanningConfigRepository($entityManager, $entityManager->getClassMetaData(PlanningConfig::class));
     },
 ];

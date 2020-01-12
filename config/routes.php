@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
-use App\Actions\Tournament as TournamentAction;
-use App\Actions\Tournament\Shell as TournamentShellAction;
+use App\Actions\TournamentAction;
+use App\Actions\Tournament\ShellAction;
 use App\Actions\Auth as AuthAction;
 use App\Actions\Sponsor as SponsorAction;
 use App\Actions\Voetbal\StructureAction;
@@ -38,15 +39,19 @@ return function (App $app) {
             $group->options('{tournamentId}', TournamentAction::class . ':options');
             $group->get('{tournamentId}', TournamentAction::class . ':fetchOnePublic');
 
-            $group->group('{tournamentId}/', function ( Group $group ) {
-                $group->options('structure', StructureAction::class . ':options');
-                $group->get('structure', StructureAction::class . ':fetchOne');
-                $group->options('export', TournamentAction::class . ':options');
-                $group->get('export', TournamentAction::class . ':export');
-            });
-        });
-        $group->options('/shells', TournamentShellAction::class . ':options');
-        $group->get('/shells', TournamentShellAction::class . ':fetchPublic');
+            $group->group(
+                '{tournamentId}/',
+                function (Group $group) {
+                    $group->options('structure', StructureAction::class . ':options');
+                    $group->get('structure', StructureAction::class . ':fetchOne');
+                    $group->options('export', TournamentAction::class . ':options');
+                    $group->get('export', TournamentAction::class . ':export')->setName('tournament-export');
+                }
+            );
+        }
+        );
+        $group->options('/shells', ShellAction::class . ':options');
+        $group->get('/shells', ShellAction::class . ':fetchPublic');
     });
 
     $app->group('/auth', function ( Group $group ) {
@@ -191,10 +196,10 @@ return function (App $app) {
     }
     );
 
-    $app->options('/myshells', TournamentShellAction::class . ':options');
-    $app->get('/myshells', TournamentShellAction::class . ':fetchMine');
-    $app->options('/shells', TournamentShellAction::class . ':options');
-    $app->get('/shells', TournamentShellAction::class . ':fetchPublic');
+    $app->options('/myshells', ShellAction::class . ':options');
+    $app->get('/myshells', ShellAction::class . ':fetchMine');
+    $app->options('/shells', ShellAction::class . ':options');
+    $app->get('/shells', ShellAction::class . ':fetchPublic');
 
     $app->options('/sports/{sportId}', SportAction::class . ':options');
     $app->get('/sports/{sportId}', SportAction::class . ':fetchOne');
