@@ -40,42 +40,14 @@ return $app;
 //    $containerBuilder->enableCompilation(__DIR__ . '/../var/cache');
 //}
 //
-//// Set up settings
-//$settings = require __DIR__ . '/../conf/settings.php';
-//$containerBuilder->addDefinitions($settings);
-//
-//// Set up dependencies
-//$dependencies = require __DIR__ . '/../conf/dependencies.php';
-//$dependencies($containerBuilder);
-//
-//// Set up repositories
-//$repositories = require __DIR__ . '/../conf/repositories.php';
-//$repositories($containerBuilder);
-//
-//// Build PHP-DI Container instance
-//$container = $containerBuilder->build();
-//
-//// Instantiate the app
-//AppFactory::setContainer($container);
-//$app = AppFactory::create();
-//$callableResolver = $app->getCallableResolver();
-//
-//// Register middleware
-//$middleware = require __DIR__ . '/../conf/middleware.php';
-//$middleware($app);
-//
-//// Register routes
-//$routes = require __DIR__ . '/../conf/routes.php';
-//$routes($app);
-//
+
+
 ///** @var bool $displayErrorDetails */
 //$displayErrorDetails = $container->get('settings')['displayErrorDetails'];
 ///** @var string $origin */
 //$origin = $container->get('settings')['www']['wwwurl'];
 //
-//// Create Request object from globals
-//$serverRequestCreator = ServerRequestCreatorFactory::create();
-//$request = $serverRequestCreator->createServerRequestFromGlobals();
+
 //
 //// Create Error Handler
 //$responseFactory = $app->getResponseFactory();

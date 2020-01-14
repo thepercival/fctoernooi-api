@@ -11,6 +11,7 @@ namespace App\Actions;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Selective\Config\Configuration;
+use Slim\Factory\ServerRequestCreatorFactory;
 use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -18,11 +19,9 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Sponsor as SponsorBase;
-use App\Settings\Www as WwwSettings;
-use App\Settings\Image as ImageSettings;
+use FCToernooi\Sponsor;
 
-final class Sponsor extends Action
+final class SponsorAction extends Action
 {
     /**
      * @var SponsorRepository
@@ -98,8 +97,8 @@ final class Sponsor extends Action
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsor->getScreenNr() );
 
-            $newSponsor = new SponsorBase( $tournament, $sponsor->getName() );
-            $newSponsor->setUrl( $sponsor->getUrl() );
+            $newSponsor = new Sponsor($tournament, $sponsor->getName());
+            $newSponsor->setUrl($sponsor->getUrl());
             $newSponsor->setLogoUrl( $sponsor->getLogoUrl() );
             $newSponsor->setScreenNr( $sponsor->getScreenNr() );
             $this->sponsorRepos->save($newSponsor);
@@ -178,14 +177,18 @@ final class Sponsor extends Action
             if ( $sponsor === null ) {
                 throw new \Exception("geen sponsor met het opgegeven id gevonden", E_ERROR);
             }
-            if ( $sponsor->getTournament() !== $tournament ) {
+            if ($sponsor->getTournament() !== $tournament) {
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
             }
 
             $uploadedFiles = $request->getUploadedFiles();
-            if( !array_key_exists("logostream", $uploadedFiles ) ) {
+            if (!array_key_exists("logostream", $uploadedFiles)) {
                 throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
             }
+
+            // $contents = json_decode(file_get_contents('php://input'), true);
+
+            /** @var \Psr\Http\Message\UploadedFileInterface $logostream */
             $logostream = $uploadedFiles["logostream"];
             $extension = null;
             if ($logostream->getClientMediaType() === "image/jpeg") {
@@ -210,21 +213,23 @@ final class Sponsor extends Action
             $logoUrl = $urlPath . $sponsor->getId() . '.' . $extension;
 
             $newImagePath = $localPath . $sponsor->getId() . '.' . $extension;
-            $source_properties = getimagesize($logostream->file);
+
+            $logostream->moveTo($newImagePath);
+
+            $source_properties = getimagesize($newImagePath);
             $image_type = $source_properties[2];
             if ($image_type == IMAGETYPE_JPEG) {
-                $image_resource_id = imagecreatefromjpeg($logostream->file);
+                $image_resource_id = imagecreatefromjpeg($newImagePath);
                 $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
                 imagejpeg($target_layer, $newImagePath);
-            }
-            elseif( $image_type == IMAGETYPE_GIF )  {
-                $image_resource_id = imagecreatefromgif($logostream->file);
-                $target_layer = $this->fn_resize($image_resource_id,$source_properties[0],$source_properties[1]);
-                imagegif($target_layer,$newImagePath);
+            } elseif ($image_type == IMAGETYPE_GIF) {
+                $image_resource_id = imagecreatefromgif($newImagePath);
+                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                imagegif($target_layer, $newImagePath);
             }
             elseif( $image_type == IMAGETYPE_PNG ) {
-                $image_resource_id = imagecreatefrompng($logostream->file);
-                $target_layer = $this->fn_resize($image_resource_id,$source_properties[0],$source_properties[1]);
+                $image_resource_id = imagecreatefrompng($newImagePath);
+                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
                 imagepng($target_layer,$newImagePath);
             }
 
@@ -245,7 +250,7 @@ final class Sponsor extends Action
         if( $height === $target_height ) {
             return $image_resource_id;
         }
-        $thressHold = Sponsor::LOGO_ASPECTRATIO_THRESHOLD;
+        $thressHold = SponsorAction::LOGO_ASPECTRATIO_THRESHOLD;
         $aspectRatio = $width / $height;
 
         $target_width = $width - (( $height - $target_height ) * $aspectRatio );

@@ -136,6 +136,10 @@ return [
             $entityManager->getClassMetaData(SportScoreConfig::class)
         );
     },
+    PouleRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new PouleRepository($entityManager, $entityManager->getClassMetaData(Poule::class));
+    },
     PlaceRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlaceRepository($entityManager, $entityManager->getClassMetaData(Place::class));

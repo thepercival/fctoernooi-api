@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\TournamentAction;
 use App\Actions\Tournament\ShellAction;
 use App\Actions\Auth as AuthAction;
-use App\Actions\Sponsor as SponsorAction;
+use App\Actions\SponsorAction;
 use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
 use App\Actions\Voetbal\Planning\ConfigAction as PlanningConfigAction;
@@ -95,18 +95,21 @@ return function (App $app) {
             $group->post('copy', TournamentAction::class . ':copy');
 
             $group->group(
-                'sponsors/',
+                'sponsors',
                 function (Group $group) {
                     $group->options('', SponsorAction::class . ':options');
                     $group->get('', SponsorAction::class . ':fetch');
-                    $group->get('{sponsorId}', SponsorAction::class . ':fetchOne');
+                    $group->get('/{sponsorId}', SponsorAction::class . ':fetchOne');
                     $group->post('', SponsorAction::class . ':add');
-                    $group->options('{sponsorId}', SponsorAction::class . ':options');
-                    $group->put('{sponsorId}', SponsorAction::class . ':edit');
-                $group->delete('{sponsorId}', SponsorAction::class . ':remove');
-                $group->options('{sponsorId}/upload', SponsorAction::class . ':options');
-                $group->post('{sponsorId}/upload', SponsorAction::class . ':upload');         // POSTMAN NOT FINISHED
-            });
+                    $group->options('/{sponsorId}', SponsorAction::class . ':options');
+                    $group->put('/{sponsorId}', SponsorAction::class . ':edit');
+                    $group->delete('/{sponsorId}', SponsorAction::class . ':remove');
+                    $group->options('/{sponsorId}/upload', SponsorAction::class . ':options');
+                    $group->post(
+                        '/{sponsorId}/upload',
+                        SponsorAction::class . ':upload'
+                    );         // POSTMAN NOT FINISHED
+                });
 
             $group->options('structure', StructureAction::class . ':options');
             $group->get('structure', StructureAction::class . ':fetchOne');
