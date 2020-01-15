@@ -274,8 +274,8 @@ class TournamentAction extends Action
             }
 
             // $structureService = new StructureService( new TournamentStructureOptions() );
-            $structureCopier = new StructureCopier( $newTournament->getCompetition() );
-            $newStructure = $structureCopier->copy( $structure );
+            $structureCopier = new StructureCopier($newTournament->getCompetition(), $newCompetitors);
+            $newStructure = $structureCopier->copy($structure);
             $this->structureRepos->add($newStructure);
 
             $this->planningCreator->create( $newStructure->getFirstRoundNumber(), $newTournament->getBreak() );
@@ -383,8 +383,10 @@ class TournamentAction extends Action
             ->withHeader('Cache-Control', 'must-revalidate')
             ->withHeader('Pragma', 'public')
             ->withHeader('Content-Disposition', 'inline; filename="' . $fileName . '.pdf";')
-            ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
-            ->withHeader('Content-Length', strlen( $vtData ));
+            ->withHeader(
+                'Content-Type',
+                'application/pdf;charset=utf-8'
+            )/*->withHeader('Content-Length', strlen( $vtData ))*/ ;
     }
 
     protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url)

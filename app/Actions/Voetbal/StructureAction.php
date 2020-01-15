@@ -49,22 +49,22 @@ final class StructureAction extends Action
     {
         try {
             /** @var \Voetbal\Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Structure', 'json');
-            if ( $structureSer === false ) {
+            $structureSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Structure', 'json');
+            if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
+            /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
-            if ($competition === null) {
-                throw new \Exception("er kan geen competitie worden gevonden o.b.v. de invoergegevens", E_ERROR);
-            }
 
-            $structureCopier = new StructureCopier( $competition );
-            $newStructure = $structureCopier->copy( $structureSer );
+            $structure = $this->structureRepos->getStructure($competition);
+            $competitors = $structure ? $structure->getFirstRoundNumber()->getCompetitors() : [];
+            $structureCopier = new StructureCopier($competition, $competitors);
+            $newStructure = $structureCopier->copy($structureSer);
 
             $roundNumberAsValue = 1;
-            $this->structureRepos->removeAndAdd( $competition, $newStructure, $roundNumberAsValue );
+            $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
 
-            $json = $this->serializer->serialize( $newStructure, 'json');
+            $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);
         }
         catch( \Exception $e ){

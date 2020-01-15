@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Copiers;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Voetbal\Competition;
 use Voetbal\Competitor\Repository as CompetitorRepository;
 use Voetbal\Sport\Repository as SportRepository;
@@ -24,13 +25,18 @@ class StructureCopier
      * @var Competition
      */
     protected $competition;
+    /**
+     * @var array | Competitor[]
+     */
+    protected $competitors;
 
-    public function __construct( Competition $competition )
+    public function __construct(Competition $competition, array $competitors)
     {
         $this->competition = $competition;
+        $this->competitors = $competitors;
     }
 
-    public function copy(Structure $structure ): Structure
+    public function copy(Structure $structure): Structure
     {
         $planningConfigService = new PlanningConfigService();
         $sportScoreConfigService = new SportScoreConfigService();
@@ -41,11 +47,11 @@ class StructureCopier
             /** @var RoundNumber|null $previousRoundNumber */
             $previousRoundNumber = null;
             foreach ($structure->getRoundNumbers() as $roundNumber) {
-                $newRoundNumber = $previousRoundNumber ? $previousRoundNumber->createNext() : new RoundNumber( $this->competition, $previousRoundNumber );
+                $newRoundNumber = $previousRoundNumber ? $previousRoundNumber->createNext() : new RoundNumber($this->competition, $previousRoundNumber );
                 if( $roundNumber->getPlanningConfig() !== null ) {
                     $planningConfigService->copy( $roundNumber->getPlanningConfig(), $newRoundNumber );
                 }
-                foreach( $roundNumber->getSportScoreConfigs() as $sportScoreConfig ) {
+                foreach($roundNumber->getSportScoreConfigs() as $sportScoreConfig ) {
                     $sport = $this->getSportFromCompetition( $sportScoreConfig->getSport(), $this->competition );
                     $sportScoreConfigService->copy( $sport, $newRoundNumber, $sportScoreConfig );
                 }
@@ -82,7 +88,7 @@ class StructureCopier
     protected function copyRoundHelper( RoundNumber $roundNumber, array $poules, QualifyGroup $parentQualifyGroup = null ): Round
     {
         $round = new Round($roundNumber, $parentQualifyGroup);
-        foreach( $poules as $poule ) {
+        foreach($poules as $poule ) {
             $this->copyPoule( $round, $poule->getNumber(), $poule->getPlaces()->toArray() );
         }
         return $round;
@@ -95,36 +101,41 @@ class StructureCopier
      */
     protected function copyPoule( Round $round, int $number, array $places )
     {
-        $association = $this->competition->getLeague()->getAssociation();
-
         $poule = new Poule( $round, $number );
-        foreach( $places as $place ) {
-            $newPlace = new Place( $poule, $place->getNumber() );
-            if ( $place->getCompetitor() === null ){
+        foreach($places as $place ) {
+            $newPlace = new Place($poule, $place->getNumber() );
+            if ($place->getCompetitor() === null) {
                 continue;
             }
-            $competitor = $this->getCompetitorFromAssociation( $place->getCompetitor(), $association );
-            $newPlace->setCompetitor( $competitor );
+            $competitor = $this->getCompetitor($place->getCompetitor());
+            $newPlace->setCompetitor($competitor);
         }
     }
 
-    protected function getSportFromCompetition( Sport $sport, Competition $competition ): Sport {
-       $foundSports = $competition->getSports()->filter( function( $sportIt ) use ( $sport ) {
-            return $sportIt->getId() === $sport->getId();
-        } );
-        if( $foundSports->count() !== 1 ) {
-            throw new \Exception("Er kon geen overeenkomende sport worden gevonden", E_ERROR );
+    protected function getSportFromCompetition(Sport $sport, Competition $competition): Sport
+    {
+        $foundSports = $competition->getSports()->filter(
+            function ($sportIt) use ($sport) {
+                return $sportIt->getId() === $sport->getId();
+            }
+        );
+        if ($foundSports->count() !== 1) {
+            throw new \Exception("Er kon geen overeenkomende sport worden gevonden", E_ERROR);
         }
         return $foundSports->first();
     }
 
-    protected function getCompetitorFromAssociation( Competitor $competitor, Association $association ): Competitor {
-        $foundCompetitors = $association->getCompetitors()->filter( function( $competitorIt ) use ( $competitor ) {
-            return $competitorIt->getId() === $competitor->getId();
-        } );
-        if( $foundCompetitors->count() !== 1 ) {
-            throw new \Exception("Er kon geen overeenkomende deelnemer worden gevonden", E_ERROR );
+    protected function getCompetitor(Competitor $competitor): Competitor
+    {
+        $foundCompetitors = array_filter(
+            $this->competitors,
+            function ($competitorIt) use ($competitor) {
+                return $competitorIt->getName() === $competitor->getName();
+            }
+        );
+        if (count($foundCompetitors) !== 1) {
+            throw new \Exception("Er kon geen overeenkomende deelnemer worden gevonden", E_ERROR);
         }
-        return $foundCompetitors->first();
+        return reset($foundCompetitors);
     }
 }

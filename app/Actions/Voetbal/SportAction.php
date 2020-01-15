@@ -8,11 +8,9 @@
 
 namespace App\Actions\Voetbal;
 
-use App\Copiers\StructureCopier;
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Referee as RefereeBase;
 use Voetbal\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

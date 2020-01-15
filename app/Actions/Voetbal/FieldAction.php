@@ -8,7 +8,6 @@
 
 namespace App\Actions\Voetbal;
 
-use App\Copiers\StructureCopier;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Psr\Log\LoggerInterface;

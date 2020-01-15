@@ -31,7 +31,7 @@ class CreateDefaultInput extends Command
      */
     protected $planningInputSerivce;
 
-    const MAXNROPLACES = 20;
+    const MAXNROPLACES = 7;
     const MAXNROFSPORTS = 1;
     const MAXNROFREFEREES = 20;
     const MAXNROFFIELDS = 20;

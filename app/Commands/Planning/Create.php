@@ -21,6 +21,7 @@ use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Planning\ConvertService as PlanningConvertService;
 use Voetbal\Planning\ScheduleService as ScheduleService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use Voetbal\Round\Number\PlanningCreator;
 
 class Create extends Command
 {
@@ -40,6 +41,7 @@ class Create extends Command
      * @var TournamentRepository
      */
     protected $tournamentRepos;
+
 
     public function __construct(ContainerInterface $container)
     {
@@ -106,9 +108,8 @@ class Create extends Command
                 continue;
             }
             $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
-            $convertService = new PlanningConvertService(new ScheduleService($tournament->getBreak()));
-            $convertService->createGames($roundNumber, $planning);
-            $this->planningRepos->saveRoundNumber($roundNumber, true);
+            $planningCreator = new PlanningCreator($this->planningInputRepos, $this->planningRepos);
+            $planningCreator->create($roundNumber, $tournament->getBreak());
             $nrUpdated++;
         }
         return $nrUpdated;
