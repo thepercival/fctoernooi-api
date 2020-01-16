@@ -38,9 +38,11 @@ class Command extends SymCommand
         $this->logger = new Logger($name);
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
-        $path = $this->config->getString(
+        $path = /*$this->config->getString(
             "environment"
-        ) === "development" ? 'php://stdout' : ($loggerSettings['path'] . $name . '.log');
+        ) === "development" ? 'php://stdout' : (*/
+            $loggerSettings['path'] . $name . '.log'/*)*/
+        ;
         $handler = new StreamHandler($path, $loggerSettings['level']);
         $this->logger->pushHandler($handler);
     }
