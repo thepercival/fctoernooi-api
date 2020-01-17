@@ -204,8 +204,8 @@ return function (App $app) {
     $app->options('/shells', ShellAction::class . ':options');
     $app->get('/shells', ShellAction::class . ':fetchPublic');
 
-    $app->options('/sports/{sportId}', SportAction::class . ':options');
-    $app->get('/sports/{sportId}', SportAction::class . ':fetchOne');
+    $app->options('/sports/{sportCustomId}', SportAction::class . ':options');
+    $app->get('/sports/{sportCustomId}', SportAction::class . ':fetchOne');
     $app->options('/sports', SportAction::class . ':options');
     $app->post('/sports', SportAction::class . ':add');
 };

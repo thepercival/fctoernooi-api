@@ -36,7 +36,7 @@ final class SportAction extends Action
 
     public function fetchOne( Request $request, Response $response, $args ): Response
     {
-        $sport = $this->sportRepos->find((int) $args['sportId']);
+        $sport = $this->sportRepos->findOneBy(["customId" => (int)$args['sportCustomId']]);
         if ( $sport === null ) {
             throw new \Exception("geen sport met het opgegeven id gevonden", E_ERROR);
         }
