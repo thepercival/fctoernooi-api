@@ -61,19 +61,9 @@ final class PlanningAction extends Action
 
     public function fetch( Request $request, Response $response, $args ): Response
     {
-        list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
-        $json = $this->serializer->serialize( $structure, 'json');
+        list($structure, $roundNumber) = $this->getFromRequest($request, $args);
+        $json = $this->serializer->serialize($structure, 'json');
         return $this->respondWithJson($response, $json);
-    }
-
-    protected function getBlockedPeriodFromInput( $request ): ?Period {
-        $queryParams = $request->getQueryParams();
-        if( array_key_exists("blockedperiodstart", $queryParams ) === false || array_key_exists("blockedperiodend", $queryParams ) === false ) {
-            return null;
-        }
-        $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams['blockedperiodstart']);
-        $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams['blockedperiodend']);
-        return new Period( $startDateTime, $endDateTime );
     }
 
     /**
@@ -82,14 +72,17 @@ final class PlanningAction extends Action
      */
     public function create( Request $request, Response $response, $args ): Response
     {
+        /** @var \FCToernooi\Tournament $tournament */
+        $tournament = $request->getAttribute("tournament");
+
         try {
-            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
+            list($structure, $roundNumber) = $this->getFromRequest($request, $args);
 
-            $roundNumberPlanningCreator = new RoundNumberPlanningCreator( $this->inputRepos, $this->repos );
+            $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->inputRepos, $this->repos);
 
-            $roundNumberPlanningCreator->create( $roundNumber, $blockedPeriod );
+            $roundNumberPlanningCreator->create($roundNumber, $tournament->getBreak());
 
-            $json = $this->serializer->serialize( $structure, 'json');
+            $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
@@ -103,14 +96,17 @@ final class PlanningAction extends Action
      */
     public function reschedule( Request $request, Response $response, $args ): Response
     {
+        /** @var \FCToernooi\Tournament $tournament */
+        $tournament = $request->getAttribute("tournament");
+
         try {
-            list($structure, $roundNumber, $blockedPeriod) = $this->getFromRequest( $request, $args );
-            $scheduleService = new ScheduleService( $blockedPeriod );
-            $dates = $scheduleService->rescheduleGames( $roundNumber );
+            list($structure, $roundNumber) = $this->getFromRequest($request, $args);
+            $scheduleService = new ScheduleService($tournament->getBreak());
+            $dates = $scheduleService->rescheduleGames($roundNumber);
 
-            $this->repos->saveRoundNumber( $roundNumber );
+            $this->repos->saveRoundNumber($roundNumber);
 
-            $json = $this->serializer->serialize( $dates, 'json');
+            $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
@@ -119,15 +115,12 @@ final class PlanningAction extends Action
 
     protected function getFromRequest( Request $request, $args ): array {
         $competition = $request->getAttribute("tournament")->getCompetition();
-
         if( array_key_exists("roundnumber", $args ) === false ) {
             throw new \Exception("geen rondenummer opgegeven", E_ERROR);
         }
         /** @var \Voetbal\Structure $structure */
         $structure = $this->structureRepos->getStructure( $competition );
         $roundNumber = $structure->getRoundNumber( $args["roundnumber"] );
-        $blockedPeriod = $this->getBlockedPeriodFromInput( $request );
-
-        return [$structure, $roundNumber, $blockedPeriod];
+        return [$structure, $roundNumber];
     }
 }

@@ -158,9 +158,10 @@ class Tournament
     public function setBreak( Period $period = null )
     {
         $breakStartDateTime = $period !== null ? $period->getStartDate() : null;
-        $breakDuration = $period !== null ? ((int)$period->getDateInterval()->format('i')) : 0;
-        $this->setBreakStartDateTime( $breakStartDateTime );
-        $this->setBreakDuration( $breakDuration );
+        $durationInSeconds = $period !== null ? $period->getTimestampInterval() : 0;
+        $breakDuration = $period !== null ? ((int)($durationInSeconds / 60)) : 0;
+        $this->setBreakStartDateTime($breakStartDateTime);
+        $this->setBreakDuration($breakDuration);
     }
 
     /**
