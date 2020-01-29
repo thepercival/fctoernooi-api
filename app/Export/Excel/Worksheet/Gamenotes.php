@@ -157,15 +157,15 @@ class Gamenotes extends FCToernooiWorksheet
             if( $inputScoreConfig !== $calculateScoreConfig ) {
                 $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
                 for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
-                    $descr = $this->translationService->getScoreNameMultiple(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
+                    $descr = "TODO"; // $this->translationService->getScoreNameMultiple(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
                     {
                         $cell = $this->getCellByColumnAndRow(1, $row);
                         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                        $cell->setValue( $descr );
+                        $cell->setValue($descr);
 
                         $cell = $this->getCellByColumnAndRow(2, $row);
                         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                        $cell->setValue( $dots );
+                        $cell->setValue($dots);
 
                         $cell = $this->getCellByColumnAndRow(3, $row);
                         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -229,10 +229,10 @@ class Gamenotes extends FCToernooiWorksheet
             $cell->setValue( $dots );
 
             if( $inputScoreConfig !== null ) {
-                $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
+                $name = "TODO"; // "$this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
                 $cell = $this->getCellByColumnAndRow(5, $row);
                 $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $cell->setValue( $name );
+                $cell->setValue($name);
             }
         }
         return $this->getStartRow( $row );
@@ -256,17 +256,19 @@ class Gamenotes extends FCToernooiWorksheet
         return $row + 1;
     }
 
-    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string {
-        $direction = $this->getDirectionName($inputScoreConfig);
-        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
-        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
-            return $name;
-        }
-        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
+    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string
+    {
+        return "TODO";
+//        $direction = $this->getDirectionName($inputScoreConfig);
+//        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
+//        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
+//            return $name;
+//        }
+//        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
     }
 
     protected function getDirectionName(SportScoreConfig $scoreConfig ) {
-        return $scoreConfig->getDirection() === SportScoreConfig::UPWARDS ? 'naar' : 'vanaf';
+        return $this->translationService->getScoreDirection(TranslationService::language, $scoreConfig->getDirection());
     }
 
     protected function getNrOfScoreLines( int $scoreConfigMax ) : int {

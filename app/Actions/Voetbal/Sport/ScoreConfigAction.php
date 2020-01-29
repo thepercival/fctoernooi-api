@@ -83,11 +83,13 @@ final class ScoreConfigAction extends Action
 
             $sportScoreConfig = new \Voetbal\Sport\ScoreConfig( $sport, $roundNumber, null );
             $sportScoreConfig->setDirection( SportScoreConfig::UPWARDS );
-            $sportScoreConfig->setMaximum( $sportScoreConfigSer->getMaximum() );
+            $sportScoreConfig->setMaximum($sportScoreConfigSer->getMaximum());
+            $sportScoreConfig->setEnabled($sportScoreConfigSer->getEnabled());
             if( $sportScoreConfigSer->hasNext() ) {
                 $nextScoreConfig = new SportScoreConfig( $sport, $roundNumber, $sportScoreConfig );
                 $nextScoreConfig->setDirection( SportScoreConfig::UPWARDS );
-                $nextScoreConfig->setMaximum( $sportScoreConfigSer->getNext()->getMaximum() );
+                $nextScoreConfig->setMaximum($sportScoreConfigSer->getNext()->getMaximum());
+                $nextScoreConfig->setEnabled($sportScoreConfigSer->getNext()->getEnabled());
             }
 
             $this->sportScoreConfigRepos->save($sportScoreConfig);
@@ -132,11 +134,13 @@ final class ScoreConfigAction extends Action
                 throw new \Exception("er zijn geen score-instellingen gevonden om te wijzigen", E_ERROR);
             }
 
-            $sportScoreConfig->setMaximum( $sportScoreConfigSer->getMaximum() );
+            $sportScoreConfig->setMaximum($sportScoreConfigSer->getMaximum());
+            $sportScoreConfig->setEnabled($sportScoreConfigSer->getEnabled());
             $this->sportScoreConfigRepos->save($sportScoreConfig);
             if( $sportScoreConfig->hasNext() && $sportScoreConfigSer->hasNext() ) {
                 $nextScoreConfig = $sportScoreConfig->getNext();
-                $nextScoreConfig->setMaximum( $sportScoreConfigSer->getNext()->getMaximum() );
+                $nextScoreConfig->setMaximum($sportScoreConfigSer->getNext()->getMaximum());
+                $nextScoreConfig->setEnabled($sportScoreConfigSer->getNext()->getEnabled());
                 $this->sportScoreConfigRepos->save($nextScoreConfig);
             }
 

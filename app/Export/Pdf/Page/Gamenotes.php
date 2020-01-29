@@ -158,31 +158,52 @@ class Gamenotes extends ToernooiPdfPage
         $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
 
         $this->drawCell( 'wedstrijd', $this->getPageMargin(), $nY, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
-        $this->drawCell( $home, $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
-        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), true, true );
-        $this->drawCell( $away, $nX2, $nY, $nWidthResult, $nRowHeight * $larger );
+        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+        $this->drawCell(
+            $home,
+            $nX,
+            $nY,
+            $nWidthResult - ($nMargin * 0.5),
+            $nRowHeight * $larger,
+            ToernooiPdfPage::ALIGNRIGHT
+        );
+        $this->drawCell('-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger);
+        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), true, true);
+        $this->drawCell($away, $nX2, $nY, $nWidthResult, $nRowHeight * $larger);
         $nY -= 3 * $nRowHeight; // extra lege regel
 
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger );
+        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
         $nX = $nFirstBorder + $nMargin;
 
-        $inputScoreConfig = $this->sportScoreConfigService->getInput( $game->getSportScoreConfig() );
-        $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $game->getSportScoreConfig() );
+        $inputScoreConfig = $game->getSportScoreConfig();
+        $calculateScoreConfig = $game->getSportScoreConfig()->getCalculate();
 
         $dots = '...............';
-        $dotsWidth = $this->getTextWidth( $dots );
-        if( $inputScoreConfig !== null ) {
-            if( $inputScoreConfig !== $calculateScoreConfig ) {
+        $dotsWidth = $this->getTextWidth($dots);
+        if ($inputScoreConfig !== null) {
+            if ($inputScoreConfig !== $calculateScoreConfig) {
                 $nYDelta = 0;
                 $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
-                for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
-                    $descr = $this->translationService->getScoreNameMultiple(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
-                    $this->drawCell( $descr, $this->getPageMargin(), $nY - $nYDelta, $nWidth, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT );
-                    $this->drawCell( $dots, $nX, $nY - $nYDelta, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
-                    $this->drawCell( '-', $nSecondBorder, $nY - $nYDelta, $nMargin, $nRowHeight * $larger );
-                    $this->drawCell( $dots, $nX2, $nY - $nYDelta, $dotsWidth, $nRowHeight * $larger );
+                for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
+                    $descr = "TODO"; // $this->translationService->getScoreNamePlural(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
+                    $this->drawCell(
+                        $descr,
+                        $this->getPageMargin(),
+                        $nY - $nYDelta,
+                        $nWidth,
+                        $nRowHeight * $larger,
+                        ToernooiPdfPage::ALIGNRIGHT
+                    );
+                    $this->drawCell(
+                        $dots,
+                        $nX,
+                        $nY - $nYDelta,
+                        $nSecondBorder - $nX,
+                        $nRowHeight * $larger,
+                        ToernooiPdfPage::ALIGNRIGHT
+                    );
+                    $this->drawCell('-', $nSecondBorder, $nY - $nYDelta, $nMargin, $nRowHeight * $larger);
+                    $this->drawCell($dots, $nX2, $nY - $nYDelta, $dotsWidth, $nRowHeight * $larger);
                     $nYDelta += $nRowHeight * $larger;
                 }
             } else {
@@ -219,23 +240,33 @@ class Gamenotes extends ToernooiPdfPage
             $this->drawCell( '-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger );
             $this->drawCell( $dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger );
             if( $inputScoreConfig !== null ) {
-                $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
-                $this->drawCell( $name, $nX2 + $dotsWidth, $nY, $nWidthResult - ( $this->getPageMargin() + $dotsWidth ), $nRowHeight  * $larger, ToernooiPdfPage::ALIGNRIGHT );
+                $name = "TODO"; // $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
+                $this->drawCell(
+                    $name,
+                    $nX2 + $dotsWidth,
+                    $nY,
+                    $nWidthResult - ($this->getPageMargin() + $dotsWidth),
+                    $nRowHeight * $larger,
+                    ToernooiPdfPage::ALIGNRIGHT
+                );
             }
         }
     }
 
-    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string {
-        $direction = $this->getDirectionName($inputScoreConfig);
-        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
-        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
-            return $name;
-        }
-        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
+    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string
+    {
+        return "TODO";
+        // eerst invoer mooi maken, daarna zelfde logica hier inbouwen
+//        $direction = $this->getDirectionName($inputScoreConfig);
+//        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
+//        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
+//            return $name;
+//        }
+//        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
     }
 
     protected function getDirectionName(SportScoreConfig $scoreConfig ) {
-        return $scoreConfig->getDirection() === SportScoreConfig::UPWARDS ? 'naar' : 'vanaf';
+        return $this->translationService->getScoreDirection(TranslationService::language, $scoreConfig->getDirection());
     }
 
     protected function getNrOfScoreLines( int $scoreConfigMax ) : int {
