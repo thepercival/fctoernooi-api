@@ -51,10 +51,7 @@ class StructureCopier
                 if( $roundNumber->getPlanningConfig() !== null ) {
                     $planningConfigService->copy( $roundNumber->getPlanningConfig(), $newRoundNumber );
                 }
-                foreach($roundNumber->getSportScoreConfigs() as $sportScoreConfig ) {
-                    if ($sportScoreConfig->isFirst() === false) {
-                        continue;
-                    }
+                foreach ($roundNumber->getFirstSportScoreConfigs() as $sportScoreConfig) {
                     $sport = $this->getSportFromCompetition($sportScoreConfig->getSport(), $this->competition);
                     $sportScoreConfigService->copy($sport, $newRoundNumber, $sportScoreConfig);
                 }

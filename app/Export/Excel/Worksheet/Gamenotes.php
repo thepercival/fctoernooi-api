@@ -26,6 +26,7 @@ use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class Gamenotes extends FCToernooiWorksheet
 {
+    const MAXNROFSCORELINES = 9;
     /**
      * @var SportScoreConfigService
      */
@@ -116,22 +117,28 @@ class Gamenotes extends FCToernooiWorksheet
         if( $roundNumber->getCompetition()->hasMultipleSportConfigs() ) {
             $fieldDescription .= " - " . $game->getField()->getSport()->getName();
         }
-        $row = $this->drawGameRow( $row, "veld", $fieldDescription );
+        $row = $this->drawGameRow($row, "veld", $fieldDescription);
 
-        if( $game->getReferee() !== null ) {
-            $row = $this->drawGameRow( $row, "scheidsrechter", $game->getReferee()->getInitials() );
-        } else if( $game->getRefereePlace() !== null ) {
-            $refPlace = $nameService->getPlaceName( $game->getRefereePlace(), true, true);
-            $row = $this->drawGameRow( $row, "scheidsrechter",$refPlace );
+        if ($game->getReferee() !== null) {
+            $row = $this->drawGameRow($row, "scheidsrechter", $game->getReferee()->getInitials());
+        } else {
+            if ($game->getRefereePlace() !== null) {
+                $refPlace = $nameService->getPlaceName($game->getRefereePlace(), true, true);
+                $row = $this->drawGameRow($row, "scheidsrechter", $refPlace);
+            }
         }
+
+        $firstScoreConfig = $game->getSportScoreConfig();
+
+        $row = $this->drawGameRow($row, "score", $this->getScoreConfigDescription($firstScoreConfig));
         $row++;
 
         {
             $cell = $this->getCellByColumnAndRow(1, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $cell->setValue( "wedstrijd" );
+            $cell->setValue("wedstrijd");
 
-            $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
+            $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
             $cell = $this->getCellByColumnAndRow(2, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             $cell->setValue( $home );
@@ -143,69 +150,68 @@ class Gamenotes extends FCToernooiWorksheet
             $away = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
             $cell = $this->getCellByColumnAndRow(4, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $cell->setValue( $away);
+            $cell->setValue($away);
 
             $row += 2;
         }
 
-        $inputScoreConfig = $this->sportScoreConfigService->getInput( $game->getSportScoreConfig() );
-        $calculateScoreConfig = $this->sportScoreConfigService->getCalculate( $game->getSportScoreConfig() );
+        $calculateScoreConfig = $firstScoreConfig->getCalculate();
 
         $dots = '...............';
-        if( $inputScoreConfig !== null ) {
-            $inputDescr = $this->getInputScoreConfigDescription( $inputScoreConfig, $planningConfig->getEnableTime() );
-            if( $inputScoreConfig !== $calculateScoreConfig ) {
-                $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
-                for( $gameUnitNr = 1 ; $gameUnitNr <= $nrOfScoreLines ; $gameUnitNr++ ) {
-                    $descr = "TODO"; // $this->translationService->getScoreNameMultiple(TranslationService::language, $calculateScoreConfig) . ' ' . $gameUnitNr;
-                    {
-                        $cell = $this->getCellByColumnAndRow(1, $row);
-                        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                        $cell->setValue($descr);
 
-                        $cell = $this->getCellByColumnAndRow(2, $row);
-                        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                        $cell->setValue($dots);
-
-                        $cell = $this->getCellByColumnAndRow(3, $row);
-                        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                        $cell->setValue("-");
-
-                        $cell = $this->getCellByColumnAndRow(4, $row);
-                        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                        $cell->setValue( $dots);
-
-                        $cell = $this->getCellByColumnAndRow(5, $row);
-                        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                        $cell->setValue( $inputDescr );
-
-                        $row ++;
-                    }
-                }
-            } else {
+        $maxNrOfScoreLines = self::MAXNROFSCORELINES - ($planningConfig->hasExtension() ? 1 : 0);
+        $inputDescr = $this->getInputScoreConfigDescription($firstScoreConfig, $planningConfig->getEnableTime());
+        if ($firstScoreConfig !== $calculateScoreConfig) {
+            $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
+            for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines && $gameUnitNr <= $maxNrOfScoreLines; $gameUnitNr++) {
+                $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
                 {
                     $cell = $this->getCellByColumnAndRow(1, $row);
                     $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $cell->setValue( 'uitslag' );
+                    $cell->setValue($descr);
 
                     $cell = $this->getCellByColumnAndRow(2, $row);
                     $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $cell->setValue( $dots );
+                    $cell->setValue($dots);
 
                     $cell = $this->getCellByColumnAndRow(3, $row);
                     $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $cell->setValue("-" );
+                    $cell->setValue("-");
 
                     $cell = $this->getCellByColumnAndRow(4, $row);
                     $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-                    $cell->setValue( $dots );
+                    $cell->setValue($dots);
 
                     $cell = $this->getCellByColumnAndRow(5, $row);
                     $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $cell->setValue( $inputDescr );
+                    $cell->setValue($inputDescr);
 
                     $row++;
                 }
+            }
+        } else {
+            {
+                $cell = $this->getCellByColumnAndRow(1, $row);
+                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $cell->setValue('uitslag');
+
+                $cell = $this->getCellByColumnAndRow(2, $row);
+                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $cell->setValue($dots);
+
+                $cell = $this->getCellByColumnAndRow(3, $row);
+                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $cell->setValue("-");
+
+                $cell = $this->getCellByColumnAndRow(4, $row);
+                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $cell->setValue($dots);
+
+                $cell = $this->getCellByColumnAndRow(5, $row);
+                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $cell->setValue($inputDescr);
+
+                $row++;
             }
         }
 
@@ -218,22 +224,20 @@ class Gamenotes extends FCToernooiWorksheet
 
             $cell = $this->getCellByColumnAndRow(2, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $cell->setValue( $dots );
+            $cell->setValue($dots);
 
             $cell = $this->getCellByColumnAndRow(3, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $cell->setValue("-" );
+            $cell->setValue("-");
 
             $cell = $this->getCellByColumnAndRow(4, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $cell->setValue( $dots );
+            $cell->setValue($dots);
 
-            if( $inputScoreConfig !== null ) {
-                $name = "TODO"; // "$this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
-                $cell = $this->getCellByColumnAndRow(5, $row);
-                $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $cell->setValue($name);
-            }
+            $name = $this->translationService->getScoreNamePlural($firstScoreConfig);
+            $cell = $this->getCellByColumnAndRow(5, $row);
+            $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $cell->setValue($name);
         }
         return $this->getStartRow( $row );
     }
@@ -251,32 +255,57 @@ class Gamenotes extends FCToernooiWorksheet
         $align = $align !== null ? $align : Alignment::HORIZONTAL_LEFT;
         $cell = $this->getCellByColumnAndRow(4, $row);
         $cell->getStyle()->getAlignment()->setHorizontal($align);
-        $cell->setValue( $value);
+        $cell->setValue($value);
 
         return $row + 1;
     }
 
-    protected function getInputScoreConfigDescription( SportScoreConfig $inputScoreConfig, $timeEnabled): string
+    protected function getInputScoreConfigDescription(SportScoreConfig $firstScoreConfig, $timeEnabled): string
     {
-        return "TODO";
-//        $direction = $this->getDirectionName($inputScoreConfig);
-//        $name = $this->translationService->getScoreNameMultiple(TranslationService::language, $inputScoreConfig);
-//        if( $inputScoreConfig->getMaximum() === 0 || $timeEnabled === true ) {
-//            return $name;
-//        }
-//        return $direction . ' ' . $inputScoreConfig->getMaximum() . ' ' . $name;
+        $scoreNamePlural = $this->translationService->getScoreNamePlural($firstScoreConfig);
+        if ($firstScoreConfig->getMaximum() === 0) {
+            return $scoreNamePlural;
+        }
+        $direction = $this->getDirectionName($firstScoreConfig);
+        return $direction . ' ' . $firstScoreConfig->getMaximum() . ' ' . $scoreNamePlural;
     }
 
-    protected function getDirectionName(SportScoreConfig $scoreConfig ) {
+    protected function getScoreConfigDescription(SportScoreConfig $scoreConfig): string
+    {
+        $text = "";
+        if ($scoreConfig->hasNext() && $scoreConfig->getNext()->getEnabled()) {
+            if ($scoreConfig->getNext()->getMaximum() === 0) {
+                $text .= "zoveel mogelijk ";
+                $text .= $this->translationService->getScoreNamePlural($scoreConfig->getNext());
+            } else {
+                $text .= "eerst bij ";
+                $text .= $scoreConfig->getNext()->getMaximum() . " ";
+                $text .= $this->translationService->getScoreNamePlural($scoreConfig->getNext());
+            }
+            $text .= ", " . $scoreConfig->getMaximum() . " ";
+            $text .= $this->translationService->getScoreNamePlural($scoreConfig) . " per ";
+            $text .= $this->translationService->getScoreNameSingular($scoreConfig->getNext());
+        } else {
+            if ($scoreConfig->getMaximum() === 0) {
+                $text .= "zoveel mogelijk ";
+                $text .= $this->translationService->getScoreNamePlural($scoreConfig);
+            } else {
+                $text .= "eerst bij ";
+                $text .= $scoreConfig->getMaximum() . " ";
+                $text .= $this->translationService->getScoreNamePlural($scoreConfig);
+            }
+        }
+        return $text;
+    }
+
+    protected function getDirectionName(SportScoreConfig $scoreConfig)
+    {
         return $this->translationService->getScoreDirection(TranslationService::language, $scoreConfig->getDirection());
     }
 
-    protected function getNrOfScoreLines( int $scoreConfigMax ) : int {
-        $nrOfScoreLines = ($scoreConfigMax * 2) - 1;
-        if( $nrOfScoreLines > 5 ) {
-            $nrOfScoreLines = 5;
-        }
-        return $nrOfScoreLines;
+    protected function getNrOfScoreLines(int $scoreConfigMax): int
+    {
+        return (($scoreConfigMax * 2) - 1);
     }
 
     protected function getStartRow( int $row ): int {

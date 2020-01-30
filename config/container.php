@@ -89,7 +89,6 @@ return [
                 new \JMS\Serializer\Naming\IdenticalPropertyNamingStrategy()
             )
         );
-
         $serializerBuilder->setSerializationContextFactory(
             function () {
                 return SerializationContext::create()->setGroups(['Default']);
