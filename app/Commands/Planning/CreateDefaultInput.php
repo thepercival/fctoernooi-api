@@ -31,7 +31,7 @@ class CreateDefaultInput extends Command
      */
     protected $planningInputSerivce;
 
-    const MAXNROPLACES = 7;
+    const MAXNROPLACES = 6;
     const MAXNROFSPORTS = 1;
     const MAXNROFREFEREES = 20;
     const MAXNROFFIELDS = 20;
@@ -43,7 +43,7 @@ class CreateDefaultInput extends Command
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningInputSerivce = new PlanningInputService();
-        parent::__construct($container->get(Configuration::class), 'cron-planning-create-default-input');
+        parent::__construct($container->get(Configuration::class));
     }
 
     protected function configure()
@@ -56,10 +56,13 @@ class CreateDefaultInput extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Creates the default planning-inputs');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-planning-create-default-input');
+        $this->initMailer($this->logger);
         return $this->createPlanningInputs();
     }
 

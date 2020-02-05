@@ -9,30 +9,23 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Voetbal\Planning as PlanningBase;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning;
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
+use Voetbal\Planning\Resource\RefereePlaceService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
+use Voetbal\Planning\Service as PlanningService;
+use App\Commands\Planning as PlanningCommand;
+use Voetbal\Range as VoetbalRange;
 
-class RetryTimeout extends Command
+class RetryTimeout extends PlanningCommand
 {
-    /**
-     * @var PlanningInputRepository
-     */
-    protected $planningInputRepos;
-    /**
-     * @var PlanningRepository
-     */
-    protected $planningRepos;
-
     public function __construct(ContainerInterface $container)
     {
-        // $settings = $container->get('settings');
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningRepos = $container->get(PlanningRepository::class);
-        parent::__construct($container->get(Configuration::class), 'cron-retry-timeout-planning');
+        parent::__construct($container);
     }
 
     protected function configure()
@@ -45,13 +38,17 @@ class RetryTimeout extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Retries the timeout-plannings');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-retry-timeout-planning');
+        $this->initMailer($this->logger);
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
 
         try {
+            // $planning = $this->planningRepos->find( 641 );
             $planning = $this->planningRepos->getTimeout();
             if ($planning === null) {
                 $this->logger->info("   all plannings(also timeout) are tried");
@@ -64,6 +61,10 @@ class RetryTimeout extends Command
             if ($planning->getState() !== Planning::STATE_SUCCESS) {
                 return 0;
             }
+            if ($planning->getInput()->getSelfReferee()) {
+                $this->updateSelfReferee($planning->getInput());
+            }
+            $this->removeWorseTimeout($planning);
             $inputService = new PlanningInputService();
             // update planninginputs
             for ($reverseGCD = 2; $reverseGCD <= 8; $reverseGCD++) {
@@ -84,13 +85,42 @@ class RetryTimeout extends Command
                 $this->planningInputRepos->save($reverseGCDInput);
             }
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
-                $this->logger->error($e->getMessage());
-            } else {
-                echo $e->getMessage() . PHP_EOL;
+                $this->mailer->sendToAdmin("error creating timeout planning", $e->getMessage());
             }
         }
         return 0;
     }
+
+    protected function removeWorseTimeout(Planning $planning)
+    {
+        $worsePlanning = $this->getWorsePlanning($planning);
+        if ($worsePlanning === null) {
+            return;
+        }
+
+        $this->planningRepos->remove($worsePlanning);
+        $range = $worsePlanning->getNrOfBatchGames();
+        $this->logger->info(
+            '   worse timeout removed => batchGames ' . $range->min . '->' . $range->max . ', gamesInARow ' . $worsePlanning->getMaxNrOfGamesInARow(
+            )
+        );
+    }
+
+    protected function getWorsePlanning(PlanningBase $planning): ?PlanningBase
+    {
+        $range = $planning->getNrOfBatchGames();
+
+        foreach ($planning->getInput()->getPlannings() as $planningIt) {
+            if ($planningIt->getState() === PlanningBase::STATE_TIMEOUT
+                && $planningIt->getMinNrOfBatchGames() === $range->min
+                && $planningIt->getMaxNrOfBatchGames() === $range->max
+                && $planningIt->getMaxNrOfGamesInARow() > $planning->getMaxNrOfGamesInARow()) {
+                return $planningIt;
+            }
+        }
+        return null;
+    }
+
 }

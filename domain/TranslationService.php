@@ -66,18 +66,6 @@ class TranslationService {
     protected function getFirstScoreNameSingular(int $customId): string
     {
         switch ($customId) {
-            case SportCustom::Badminton:
-            case SportCustom::Basketball:
-            case SportCustom::ESports:
-            case SportCustom::Korfball:
-            case SportCustom::Chess:
-            case SportCustom::Squash:
-            case SportCustom::TableTennis:
-            case SportCustom::Volleyball:
-            case SportCustom::Baseball:
-            {
-                return 'punt';
-            }
             case SportCustom::Darts:
             {
                 return 'leg';
@@ -92,7 +80,7 @@ class TranslationService {
                 return 'goal';
             }
         }
-        return '';
+        return 'punt';
     }
 
     protected function getLastScoreNameSingular(int $customId): string
@@ -127,18 +115,6 @@ class TranslationService {
     protected function getFirstScoreNamePlural(int $customId): string
     {
         switch ($customId) {
-            case SportCustom::Badminton:
-            case SportCustom::Basketball:
-            case SportCustom::ESports:
-            case SportCustom::Korfball:
-            case SportCustom::Chess:
-            case SportCustom::Squash:
-            case SportCustom::TableTennis:
-            case SportCustom::Volleyball:
-            case SportCustom::Baseball:
-            {
-                return 'punten';
-            }
             case SportCustom::Darts:
             {
                 return 'legs';
@@ -153,7 +129,7 @@ class TranslationService {
                 return 'goals';
             }
         }
-        return '';
+        return 'punten';
     }
 
     protected function getLastScoreNamePlural(int $customId): string

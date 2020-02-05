@@ -22,7 +22,7 @@ class UpdateSitemap extends Command
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        parent::__construct($container->get(Configuration::class), 'cron-update-sitemap');
+        parent::__construct($container->get(Configuration::class));
     }
 
     protected function configure()
@@ -35,10 +35,13 @@ class UpdateSitemap extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Updates the sitemap');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-update-sitemap');
+        $this->initMailer($this->logger);
         try {
             $url = $this->config->getString('www.wwwurl');
             $distPath = $this->config->getString('www.wwwurl-localpath');
@@ -56,11 +59,9 @@ class UpdateSitemap extends Command
             chown($distPath . "sitemap.txt", "coen");
             chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
-                $this->logger->error($e->getMessage());
-            } else {
-                echo $e->getMessage() . PHP_EOL;
             }
         }
         return 0;

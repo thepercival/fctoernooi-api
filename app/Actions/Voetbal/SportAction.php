@@ -57,7 +57,8 @@ final class SportAction extends Action
             if( $newSport === null ) {
                 $newSport = new Sport( $sport->getName() );
                 $newSport->setTeam($sport->getTeam());
-                $this->sportRepos->save( $newSport );
+                $newSport->setCustomId($sport->getCustomId());
+                $this->sportRepos->save($newSport);
             }
             $this->sportRepos->save( $newSport );
 

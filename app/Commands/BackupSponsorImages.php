@@ -20,7 +20,7 @@ class BackupSponsorImages extends Command
     public function __construct(ContainerInterface $container)
     {
         $this->sponsorRepos = $container->get(SponsorRepository::class);
-        parent::__construct($container->get(Configuration::class), 'cron-backup-sponsorimages');
+        parent::__construct($container->get(Configuration::class));
     }
 
     protected function configure()
@@ -33,10 +33,13 @@ class BackupSponsorImages extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Backups the sponsorimages');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-backup-sponsorimages');
+        $this->initMailer($this->logger);
         $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
                 'images.sponsors.pathpostfix'
             );
@@ -67,11 +70,9 @@ class BackupSponsorImages extends Command
                 }
             }
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
-                $this->logger->error($e->getMessage());
-            } else {
-                echo $e->getMessage() . PHP_EOL;
             }
         }
         return 0;

@@ -3,6 +3,7 @@
 namespace App\Commands\Planning;
 
 use App\Mailer;
+use Complex\Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use App\Command;
@@ -10,8 +11,10 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Voetbal\Planning;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
+use Voetbal\Planning\Resource\RefereePlaceService;
 use Voetbal\Structure\Repository as StructureRepository;
 
 use Voetbal\Planning\Input as PlanningInput;
@@ -23,19 +26,10 @@ use Voetbal\Planning\ScheduleService as ScheduleService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Voetbal\Round\Number\PlanningCreator;
 use Voetbal\Round\Number as RoundNumber;
+use App\Commands\Planning as PlanningCommand;
 
-;
-
-class Create extends Command
+class Create extends PlanningCommand
 {
-    /**
-     * @var PlanningInputRepository
-     */
-    protected $planningInputRepos;
-    /**
-     * @var PlanningRepository
-     */
-    protected $planningRepos;
     /**
      * @var StructureRepository
      */
@@ -48,12 +42,10 @@ class Create extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        // $settings = $container->get('settings');
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningRepos = $container->get(PlanningRepository::class);
+        parent::__construct($container);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        parent::__construct($container->get(Configuration::class), 'cron-planning-create');
+
     }
 
     protected function configure()
@@ -66,31 +58,38 @@ class Create extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Creates the plannings from the inputs');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-planning-create');
+        $this->initMailer($this->logger);
+
         try {
-            if ($this->planningInputRepos->isProcessing()) {
+            if ($this->planningInputRepos->isProcessing(PlanningInput::STATE_TRYING_PLANNINGS)) {
                 $this->logger->info("still processing..");
                 return 0;
             }
             $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
-            // $planningInput = $this->planningInputRepos->find( 55492 );
+            // $planningInput = $this->planningInputRepos->find( 280 );
             if ($planningInput === null) {
                 $this->logger->info("nothing to process");
                 return 0;
             }
             $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
             $planningSeeker->process($planningInput);
+
+            if ($planningInput->getSelfReferee()) {
+                $this->updateSelfReferee($planningInput);
+            }
+
             $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
             $this->logger->info($nrUpdated . " structure(s)-planning updated");
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
-                $this->logger->error($e->getMessage());
-            } else {
-                echo $e->getMessage() . PHP_EOL;
             }
         }
         return 0;

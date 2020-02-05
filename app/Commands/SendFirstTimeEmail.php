@@ -32,7 +32,7 @@ class SendFirstTimeEmail extends Command
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->userRepos = $container->get(UserRepository::class);
-        parent::__construct($container->get(Configuration::class), 'cron-send-firsttime-email');
+        parent::__construct($container->get(Configuration::class));
     }
 
     protected function configure()
@@ -45,10 +45,13 @@ class SendFirstTimeEmail extends Command
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('Sends the first-time-email');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->initLogger($input, 'cron-send-firsttime-email');
+        $this->initMailer($this->logger);
         try {
             $users = $this->userRepos->findAll();
             foreach ($users as $user) {
@@ -66,11 +69,9 @@ class SendFirstTimeEmail extends Command
                 $this->userRepos->save($user);
             }
         } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
             if ($this->config->getString('environment') === 'production') {
                 $this->mailer->sendToAdmin("error sending firsttime-mail", $e->getMessage());
-                $this->logger->error($e->getMessage());
-            } else {
-                echo $e->getMessage() . PHP_EOL;
             }
         }
 
