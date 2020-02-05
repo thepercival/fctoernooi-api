@@ -31,7 +31,7 @@ class CreateDefaultInput extends Command
      */
     protected $planningInputSerivce;
 
-    const MAXNROPLACES = 6;
+    const MAXNROPLACES = 10;
     const MAXNROFSPORTS = 1;
     const MAXNROFREFEREES = 20;
     const MAXNROFFIELDS = 20;
@@ -150,38 +150,48 @@ class CreateDefaultInput extends Command
         array $structureConfig,
         array $sportConfig
     ): array {
-        $variations = [json_decode(json_encode(["selfReferee" => false, "teamup" => false]))];
         $planningConfigService = new PlanningConfigService();
 
+        $teamup = false;
+        $selfReferee = false;
+        $variations = $this->addVariation($teamup, $selfReferee);
         $selfRefereeIsAvailable = ($nrOfReferees === 0 && $planningConfigService->canSelfRefereeBeAvailable(
+                $teamup,
                 $nrOfPlaces
             ));
         if ($selfRefereeIsAvailable) {
-            $variations = array_merge(
-                $variations,
-                [
-                    json_decode(json_encode(["selfReferee" => true, "teamup" => false]))
-                ]
-            );
+            $variations = $this->addVariation($teamup, $selfRefereeIsAvailable, $variations);
         }
 
-        if ($planningConfigService->canTeamupBeAvailable($structureConfig, $sportConfig)) {
-            $variations = array_merge(
-                $variations,
-                [
-                    json_decode(json_encode(["selfReferee" => false, "teamup" => true]))
-                ]
-            );
-            if ($selfRefereeIsAvailable) {
-                $variations = array_merge(
-                    $variations,
-                    [
-                        json_decode(json_encode(["selfReferee" => true, "teamup" => true]))
-                    ]
-                );
-            }
+        $teamupAvailable = $planningConfigService->canTeamupBeAvailable($structureConfig, $sportConfig);
+        if ($teamupAvailable) {
+            $selfRefereeIsAvailable = false;
+            $variations = $this->addVariation($teamupAvailable, $selfRefereeIsAvailable, $variations);
+            $selfRefereeIsAvailable = ($nrOfReferees === 0 && $planningConfigService->canSelfRefereeBeAvailable(
+                    $teamupAvailable,
+                    $nrOfPlaces
+                ));
+        }
+        if ($selfRefereeIsAvailable) {
+            $variations = $this->addVariation($teamupAvailable, $selfRefereeIsAvailable, $variations);
         }
         return $variations;
+    }
+
+    protected function addVariation(
+        bool $teamup,
+        bool $selfReferee,
+        array $variations = null
+    ): array {
+        if ($variations === null) {
+            return [json_decode(json_encode(["selfReferee" => $selfReferee, "teamup" => $teamup]))];
+        }
+        return array_merge(
+            $variations,
+            [
+                json_decode(json_encode(["selfReferee" => $selfReferee, "teamup" => $teamup]))
+            ]
+        );
     }
 
     protected function addInput(
