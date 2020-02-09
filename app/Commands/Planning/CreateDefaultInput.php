@@ -8,17 +8,19 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Voetbal\Planning\Input;
+use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 
-use Voetbal\Planning\Input;
 use Voetbal\Planning\Input\Service as PlanningInputService;
+use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
 use Voetbal\Planning\Resources;
 use Voetbal\Sport;
-use Voetbal\Planning\Input as InputPlanning;
+use Voetbal\Range as VoetbalRange;
 use Voetbal\Planning\Config\Service as PlanningConfigService;
+use Voetbal\Structure\Options as StructureOptions;
 use Voetbal\Structure\Service as StructureService;
-use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 
 class CreateDefaultInput extends Command
 {
@@ -30,13 +32,6 @@ class CreateDefaultInput extends Command
      * @var PlanningInputService
      */
     protected $planningInputSerivce;
-
-    const MAXNROPLACES = 10;
-    const MAXNROFSPORTS = 1;
-    const MAXNROFREFEREES = 20;
-    const MAXNROFFIELDS = 20;
-    const MAXNROFFIELDS_FOR_MULTIPLESPORTS = 6;
-    const PLANNING_MAXNROFHEADTOHEAD = 2;
 
     public function __construct(ContainerInterface $container)
     {
@@ -68,208 +63,131 @@ class CreateDefaultInput extends Command
 
     protected function createPlanningInputs(): int
     {
-        $structureOptions = new TournamentStructureOptions();
-        $structureService = new StructureService($structureOptions);
-        for (
-            $nrOfCompetitors = self::MAXNROPLACES;
-            $nrOfCompetitors >= $structureOptions->getPlaceRange()->min;
-            $nrOfCompetitors--
-        ) {
-            //        if( !($nrOfCompetitors === 6 || $nrOfCompetitors === 12) ) {
-            //            continue;
-            //        }
-            $nrOfPoules = 1;
+        $structureOptions = new StructureOptions(
+            new VoetbalRange(1, 10), // poules
+            new VoetbalRange(9/*2*/, 9/*20*/), // places
+            new VoetbalRange(2, 10)
+        );
 
-            $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule($nrOfCompetitors, $nrOfPoules, true);
-            while ($nrOfPlacesPerPoule >= $structureOptions->getPlacesPerPouleRange()->min) {
-                if ($nrOfPlacesPerPoule > $structureOptions->getPlacesPerPouleRange()->max) {
-                    $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule(
-                        $nrOfCompetitors,
-                        ++$nrOfPoules,
-                        true
-                    );
-                    continue;
-                }
-                $structureConfig = $structureService->getStructureConfig($nrOfCompetitors, $nrOfPoules);
-                echo "saving default inputs for " . $nrOfCompetitors . " competitors [" . implode(
-                        ",",
-                        $structureConfig
-                    ) . "] ...." . PHP_EOL;
-                for ($nrOfSports = 1; $nrOfSports <= self::MAXNROFSPORTS; $nrOfSports++) {
-                    for ($nrOfReferees = 0; $nrOfReferees <= self::MAXNROFREFEREES; $nrOfReferees++) {
-                        for ($nrOfFields = 1; $nrOfFields <= self::MAXNROFFIELDS; $nrOfFields++) {
-                            if ($nrOfFields < $nrOfSports) {
-                                continue;
-                            }
-                            $sportConfig = $this->getSportConfig($nrOfSports, $nrOfFields);
-                            $selfRefereeTeamupVariations = $this->getSelfRefereeTeamupVariations(
-                                $nrOfReferees,
-                                $nrOfCompetitors,
-                                $structureConfig,
-                                $sportConfig
-                            );
-                            for ($nrOfHeadtohead = 1; $nrOfHeadtohead <= self::PLANNING_MAXNROFHEADTOHEAD; $nrOfHeadtohead++) {
-                                foreach ($selfRefereeTeamupVariations as $selfRefereeTeamupVariation) {
-                                    $this->addInput(
-                                        $structureConfig,
-                                        $sportConfig,
-                                        $nrOfReferees,
-                                        $nrOfFields,
-                                        $selfRefereeTeamupVariation->teamup,
-                                        $selfRefereeTeamupVariation->selfReferee,
-                                        $nrOfHeadtohead
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-                $nrOfPlacesPerPoule = $structureService->getNrOfPlacesPerPoule($nrOfCompetitors, ++$nrOfPoules, true);
+        $planningInputIterator = new PlanningInputIterator(
+            $structureOptions,
+            new VoetbalRange(1, 1),
+            new VoetbalRange(1, 10),
+            new VoetbalRange(0, 10),
+            new VoetbalRange(1, 2),
+        );
+
+        while ($planningInput = $planningInputIterator->increment()) {
+            $this->logger->info($this->inputToString($planningInput));
+
+//            if(  $planningInput->getNrOfPlaces() === 20 && $planningInput->getNrOfPoules() === 2
+//                && $planningInput->getNrOfFields() === 2
+//                && $planningInput->getNrOfReferees() === 0
+//                && $planningInput->getTeamup() === false  && $planningInput->getSelfReferee() === true
+//                && $planningInput->getNrOfHeadtohead() === 2 ) {
+//                $x = 2;
+//            }
+
+            if ($this->planningInputRepos->getFromInput($planningInput) === null) {
+                $this->planningInputRepos->save($planningInput);
             }
         }
         return 0;
     }
 
-    protected function getSportConfig(int $nrOfSports, int $nrOfFields): array
+    protected function inputToString(Input $planningInput): string
     {
-        $sports = [];
-        $nrOfFieldsPerSport = (int)ceil($nrOfFields / $nrOfSports);
-        for ($sportNr = 1; $sportNr <= $nrOfSports; $sportNr++) {
-            $sports[] = ["nrOfFields" => $nrOfFieldsPerSport, "nrOfGamePlaces" => Sport::TEMPDEFAULT];
-            $nrOfFields -= $nrOfFieldsPerSport;
-            if (($nrOfFieldsPerSport * ($nrOfSports - $sportNr)) > $nrOfFields) {
-                $nrOfFieldsPerSport--;
-            }
-        }
-        return $sports;
+        $sports = array_map(
+            function (array $sportConfig) {
+                return '' . $sportConfig["nrOfFields"];
+            },
+            $planningInput->getSportConfig()
+        );
+        return 'structure [' . implode('|', $planningInput->getStructureConfig()) . ']'
+            . ', sports [' . implode(',', $sports) . ']'
+            . ', referees ' . $planningInput->getNrOfReferees()
+            . ', teamup ' . ($planningInput->getTeamup() ? '1' : '0')
+            . ', selfRef ' . ($planningInput->getSelfReferee() ? '1' : '0')
+            . ', nrOfH2h ' . $planningInput->getNrOfHeadtohead();
     }
 
-    protected function getSelfRefereeTeamupVariations(
-        int $nrOfReferees,
-        int $nrOfPlaces,
-        array $structureConfig,
-        array $sportConfig
-    ): array {
-        $planningConfigService = new PlanningConfigService();
 
-        $teamup = false;
-        $selfReferee = false;
-        $variations = $this->addVariation($teamup, $selfReferee);
-        $selfRefereeIsAvailable = ($nrOfReferees === 0 && $planningConfigService->canSelfRefereeBeAvailable(
-                $teamup,
-                $nrOfPlaces
-            ));
-        if ($selfRefereeIsAvailable) {
-            $variations = $this->addVariation($teamup, $selfRefereeIsAvailable, $variations);
-        }
-
-        $teamupAvailable = $planningConfigService->canTeamupBeAvailable($structureConfig, $sportConfig);
-        if ($teamupAvailable) {
-            $selfRefereeIsAvailable = false;
-            $variations = $this->addVariation($teamupAvailable, $selfRefereeIsAvailable, $variations);
-            $selfRefereeIsAvailable = ($nrOfReferees === 0 && $planningConfigService->canSelfRefereeBeAvailable(
-                    $teamupAvailable,
-                    $nrOfPlaces
-                ));
-        }
-        if ($selfRefereeIsAvailable) {
-            $variations = $this->addVariation($teamupAvailable, $selfRefereeIsAvailable, $variations);
-        }
-        return $variations;
-    }
-
-    protected function addVariation(
-        bool $teamup,
-        bool $selfReferee,
-        array $variations = null
-    ): array {
-        if ($variations === null) {
-            return [json_decode(json_encode(["selfReferee" => $selfReferee, "teamup" => $teamup]))];
-        }
-        return array_merge(
-            $variations,
-            [
-                json_decode(json_encode(["selfReferee" => $selfReferee, "teamup" => $teamup]))
-            ]
-        );
-    }
-
-    protected function addInput(
-        array $structureConfig,
-        array $sportConfig,
-        int $nrOfReferees,
-        int $nrOfFields,
-        bool $teamup,
-        bool $selfReferee,
-        int $nrOfHeadtohead
-    ) {
-        /*if ($nrOfCompetitors === 6 && $nrOfPoules === 1 && $nrOfSports === 1 && $nrOfFields === 2
-            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
-            $w1 = 1;
-        } else*/ /*if ($nrOfCompetitors === 12 && $nrOfPoules === 2 && $nrOfSports === 1 && $nrOfFields === 4
-            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
-            $w1 = 1;
-        } else {
-            continue;
-        }*/
-
-        $multipleSports = count($sportConfig) > 1;
-        $newNrOfHeadtohead = $nrOfHeadtohead;
-        if ($multipleSports) {
-            //                                    if( count($sportConfig) === 4 && $sportConfig[0]["nrOfFields"] == 1 && $sportConfig[1]["nrOfFields"] == 1
-            //                                        && $sportConfig[2]["nrOfFields"] == 1 && $sportConfig[3]["nrOfFields"] == 1
-            //                                        && $teamup === false && $selfReferee === false && $nrOfHeadtohead === 1 && $structureConfig == [3]  ) {
-            //                                        $e = 2;
-            //                                    }
-            $newNrOfHeadtohead = $this->planningInputSerivce->getSufficientNrOfHeadtohead(
-                $nrOfHeadtohead,
-                min($structureConfig),
-                $teamup,
-                $selfReferee,
-                $sportConfig
-            );
-        }
-        $planningInput = $this->planningInputRepos->get(
-            $structureConfig,
-            $sportConfig,
-            $nrOfReferees,
-            $teamup,
-            $selfReferee,
-            $newNrOfHeadtohead
-        );
-        if ($planningInput !== null) {
-            return;
-        }
-        $planningInput = new InputPlanning(
-            $structureConfig,
-            $sportConfig,
-            $nrOfReferees,
-            $teamup,
-            $selfReferee,
-            $newNrOfHeadtohead
-        );
-
-        if (!$multipleSports) {
-            $maxNrOfFieldsInPlanning = $planningInput->getMaxNrOfBatchGames(
-                Resources::REFEREES + Resources::PLACES
-            );
-            if ($nrOfFields > $maxNrOfFieldsInPlanning) {
-                return;
-            }
-        } else {
-            if ($nrOfFields > self::MAXNROFFIELDS_FOR_MULTIPLESPORTS) {
-                return;
-            }
-        }
-
-        $maxNrOfRefereesInPlanning = $planningInput->getMaxNrOfBatchGames(
-            Resources::FIELDS + Resources::PLACES
-        );
-        if ($nrOfReferees > $maxNrOfRefereesInPlanning) {
-            return;
-        }
-
-        $this->planningInputRepos->save($planningInput);
-        // die();
-    }
+//    protected function addInput(
+//        array $structureConfig,
+//        array $sportConfig,
+//        int $nrOfReferees,
+//        int $nrOfFields,
+//        bool $teamup,
+//        bool $selfReferee,
+//        int $nrOfHeadtohead
+//    ) {
+//        /*if ($nrOfCompetitors === 6 && $nrOfPoules === 1 && $nrOfSports === 1 && $nrOfFields === 2
+//            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
+//            $w1 = 1;
+//        } else*/ /*if ($nrOfCompetitors === 12 && $nrOfPoules === 2 && $nrOfSports === 1 && $nrOfFields === 4
+//            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
+//            $w1 = 1;
+//        } else {
+//            continue;
+//        }*/
+//
+//        $multipleSports = count($sportConfig) > 1;
+//        $newNrOfHeadtohead = $nrOfHeadtohead;
+//        if ($multipleSports) {
+//            //                                    if( count($sportConfig) === 4 && $sportConfig[0]["nrOfFields"] == 1 && $sportConfig[1]["nrOfFields"] == 1
+//            //                                        && $sportConfig[2]["nrOfFields"] == 1 && $sportConfig[3]["nrOfFields"] == 1
+//            //                                        && $teamup === false && $selfReferee === false && $nrOfHeadtohead === 1 && $structureConfig == [3]  ) {
+//            //                                        $e = 2;
+//            //                                    }
+//            $newNrOfHeadtohead = $this->planningInputSerivce->getSufficientNrOfHeadtohead(
+//                $nrOfHeadtohead,
+//                min($structureConfig),
+//                $teamup,
+//                $selfReferee,
+//                $sportConfig
+//            );
+//        }
+//        $planningInput = $this->planningInputRepos->get(
+//            $structureConfig,
+//            $sportConfig,
+//            $nrOfReferees,
+//            $teamup,
+//            $selfReferee,
+//            $newNrOfHeadtohead
+//        );
+//        if ($planningInput !== null) {
+//            return;
+//        }
+//        $planningInput = new PlanningInput(
+//            $structureConfig,
+//            $sportConfig,
+//            $nrOfReferees,
+//            $teamup,
+//            $selfReferee,
+//            $newNrOfHeadtohead
+//        );
+//
+//        if (!$multipleSports) {
+//            $maxNrOfFieldsInPlanning = $planningInput->getMaxNrOfBatchGames(
+//                Resources::REFEREES + Resources::PLACES
+//            );
+//            if ($nrOfFields > $maxNrOfFieldsInPlanning) {
+//                return;
+//            }
+//        } else {
+//            if ($nrOfFields > self::MAXNROFFIELDS_FOR_MULTIPLESPORTS) {
+//                return;
+//            }
+//        }
+//
+//        $maxNrOfRefereesInPlanning = $planningInput->getMaxNrOfBatchGames(
+//            Resources::FIELDS + Resources::PLACES
+//        );
+//        if ($nrOfReferees > $maxNrOfRefereesInPlanning) {
+//            return;
+//        }
+//
+//        $this->planningInputRepos->save($planningInput);
+//        // die();
+//    }
 }
