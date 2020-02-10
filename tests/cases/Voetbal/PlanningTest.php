@@ -12,6 +12,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Voetbal\NameService;
 use Psr\Container\ContainerInterface;
+use Voetbal\Planning;
 use Voetbal\Planning\Input;
 use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
@@ -74,23 +75,41 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
             }
 
             $validator = new PlanningValidator($bestPlanning);
-            $this->assertTrue($validator->placeOneTimePerGame());
 
-            $this->assertTrue($validator->allPlacesSameNrOfGames());
+            $placeOneTimePerGame = $validator->placeOneTimePerGame();
+            if ($placeOneTimePerGame === false) {
+                $this->consolePlanning($bestPlanning);
+            }
+            $this->assertTrue($placeOneTimePerGame, "a place is assigned more than one in a game");
+
+            $allPlacesSameNrOfGames = $validator->allPlacesSameNrOfGames();
+            if ($allPlacesSameNrOfGames === false) {
+                $this->consolePlanning($bestPlanning);
+            }
+            $this->assertTrue($allPlacesSameNrOfGames, "not all places within poule have same number of games");
 
             $gamesInARow = $validator->gamesInARow();
             if ($gamesInARow === false) {
-                $logger = new Logger('planning-create');
-                $handler = new StreamHandler('php://stdout', Logger::INFO);
-                $logger->pushHandler($handler);
-                $logger->info($this->inputToString($planningInput));
-                $output = new Output($logger);
-                $output->consoleBatch($bestPlanning->getFirstBatch(), "allPlacesSameNrOfGames");
+                $this->consolePlanning($bestPlanning);
             }
             $this->assertTrue($gamesInARow, "more than allowed nrofmaxgamesinarow");
 
-            deze controle moet nog naar de validator worden verplaatst => assertValidResourcesPerBatch
+            $validResourcesPerBatch = $validator->validResourcesPerBatch();
+            if ($validResourcesPerBatch === false) {
+                $this->consolePlanning($bestPlanning);
+            }
+            $this->assertTrue($validResourcesPerBatch, "more resources per batch than allowed");
         }
+    }
+
+    protected function consolePlanning(Planning $planning)
+    {
+        $logger = new Logger('planning-create');
+        $handler = new StreamHandler('php://stdout', Logger::INFO);
+        $logger->pushHandler($handler);
+        $logger->info($this->inputToString($planning->getInput()));
+        $output = new Output($logger);
+        $output->consoleBatch($planning->getFirstBatch(), "allPlacesSameNrOfGames");
     }
 
     protected function inputToString(Input $planningInput): string
