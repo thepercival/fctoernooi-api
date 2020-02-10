@@ -65,7 +65,7 @@ class CreateDefaultInput extends Command
     {
         $structureOptions = new StructureOptions(
             new VoetbalRange(1, 10), // poules
-            new VoetbalRange(9/*2*/, 9/*20*/), // places
+            new VoetbalRange(2, 20), // places
             new VoetbalRange(2, 10)
         );
 

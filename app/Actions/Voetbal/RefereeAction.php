@@ -138,7 +138,14 @@ final class RefereeAction extends Action
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
-            $this->refereeRepos->remove( $referee );
+            $competition->getReferees()->removeElement($referee);
+            $this->refereeRepos->remove($referee);
+
+            $rank = 1;
+            foreach ($competition->getReferees() as $referee) {
+                $referee->setRank($rank++);
+            }
+            $this->refereeRepos->save($referee);
 
             return $response->withStatus(200);
         }

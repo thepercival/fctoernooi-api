@@ -129,7 +129,14 @@ final class FieldAction extends Action
 
             $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);
 
-            $this->fieldRepos->remove( $field );
+            $competition->getFields()->removeElement($field);
+            $this->fieldRepos->remove($field);
+
+            $fieldNumber = 1;
+            foreach ($competition->getFields() as $field) {
+                $field->setNumber($fieldNumber++);
+            }
+            $this->fieldRepos->save($field);
 
             return $response->withStatus(200);
         }
