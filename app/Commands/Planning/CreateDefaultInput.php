@@ -7,20 +7,13 @@ use App\Command;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Voetbal\Planning\Input;
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
-use Voetbal\Planning\Resources;
-use Voetbal\Sport;
 use Voetbal\Range as VoetbalRange;
-use Voetbal\Planning\Config\Service as PlanningConfigService;
 use Voetbal\Structure\Options as StructureOptions;
-use Voetbal\Structure\Service as StructureService;
 
 class CreateDefaultInput extends Command
 {
@@ -65,16 +58,16 @@ class CreateDefaultInput extends Command
     {
         $structureOptions = new StructureOptions(
             new VoetbalRange(1, 10), // poules
-            new VoetbalRange(2, 20), // places
+            new VoetbalRange(2, 8), // places
             new VoetbalRange(2, 10)
         );
 
         $planningInputIterator = new PlanningInputIterator(
             $structureOptions,
-            new VoetbalRange(1, 1),
-            new VoetbalRange(1, 10),
-            new VoetbalRange(0, 10),
-            new VoetbalRange(1, 2),
+            new VoetbalRange(1, 1), // sports
+            new VoetbalRange(1, 10),// fields
+            new VoetbalRange(0, 10),// referees
+            new VoetbalRange(1, 2),// headtohead
         );
 
         while ($planningInput = $planningInputIterator->increment()) {
