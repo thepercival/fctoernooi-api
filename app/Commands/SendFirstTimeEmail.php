@@ -89,7 +89,7 @@ Als beheerder van <a href="$url">$url</a> zag ik dat je een toernooi hebt aangem
 Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.        
 </p>
 <p>            
-Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://docs.google.com/document/d/1SYeUJa5yvHZzvacMyJ_Xy4MpHWTWRgAh1LYkEA2CFnM/edit?usp=sharing">hier</a> vinden.
+Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://drive.google.com/open?id=1HLwhbH4YXEbV7osGmFUt24gk_zxGjnVilTG0MpkkPUI">hier</a> vinden.
 </p>
 <p>
 met vriendelijke groet,
