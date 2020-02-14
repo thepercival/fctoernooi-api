@@ -75,6 +75,12 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
             }
 
             $validator = new PlanningValidator($bestPlanning);
+            $hasEnoughTotalNrOfGames = $validator->hasEnoughTotalNrOfGames();
+            if ($hasEnoughTotalNrOfGames === false) {
+                $this->consolePlanning($bestPlanning);
+            }
+            $this->assertTrue($hasEnoughTotalNrOfGames, "the planning has not enough games");
+
 
             $placeOneTimePerGame = $validator->placeOneTimePerGame();
             if ($placeOneTimePerGame === false) {
