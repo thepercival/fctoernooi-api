@@ -38,7 +38,7 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
 
         $structureOptions = new StructureOptions(
             new VoetbalRange(1, 10), // poules
-            new VoetbalRange(2, 6), // places
+            new VoetbalRange(2, 20), // places
             new VoetbalRange(2, 10)
         );
 
