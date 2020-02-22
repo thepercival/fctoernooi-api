@@ -2,27 +2,18 @@
 
 namespace App\Commands\Planning;
 
-use App\Mailer;
-use Complex\Exception;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use App\Command;
-use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
-use Voetbal\Planning;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Resource\RefereePlaceService;
+use Voetbal\Game as GameBase;
+use Voetbal\Planning as PlanningBase;
+use Voetbal\Planning\Output;
 use Voetbal\Structure\Repository as StructureRepository;
 
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
 use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Planning\ConvertService as PlanningConvertService;
-use Voetbal\Planning\ScheduleService as ScheduleService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Voetbal\Round\Number\PlanningCreator;
 use Voetbal\Round\Number as RoundNumber;
@@ -72,7 +63,7 @@ class Create extends PlanningCommand
                 return 0;
             }
             $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
-            // $planningInput = $this->planningInputRepos->find( 2961 );
+            // $planningInput = $this->planningInputRepos->find( 10660 );
             if ($planningInput === null) {
                 $this->logger->info("nothing to process");
                 return 0;
@@ -83,6 +74,13 @@ class Create extends PlanningCommand
             if ($planningInput->getSelfReferee()) {
                 $this->updateSelfReferee($planningInput);
             }
+
+//            $planningService = new PlanningService();
+//            $planning = $planningService->getBestPlanning($planningInput);
+//            $sortedGames = $planning->getGames(GameBase::ORDER_BY_BATCH);
+//            $planningOutput = new \Voetbal\Planning\Output($this->logger);
+//            $planningOutput->consoleGames($sortedGames);
+
 
             $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
             $this->logger->info($nrUpdated . " structure(s)-planning updated");
