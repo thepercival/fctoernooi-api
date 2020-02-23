@@ -97,6 +97,7 @@ class Planning extends ToernooiPdfPage
 
     public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
     {
+        $this->setFillColor(new \Zend_Pdf_Color_GrayScale(1));
         $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
         $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
         $nX = $this->getPageMargin();
