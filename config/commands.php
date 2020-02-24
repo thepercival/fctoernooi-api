@@ -9,6 +9,7 @@ use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
+use App\Commands\SendFirstTimeEmail;
 
 return [
     "app:create-default-planning-input" => function (ContainerInterface $container) {
@@ -25,5 +26,8 @@ return [
     },
     "app:backup-sponsorimages" => function (ContainerInterface $container) {
         return new BackupSponsorImages($container);
+    },
+    "send-firsttime-email" => function (ContainerInterface $container) {
+        return new SendFirstTimeEmail($container);
     }
 ];
