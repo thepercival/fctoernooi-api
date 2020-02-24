@@ -6,7 +6,7 @@
  * Time: 21:27
  */
 
-namespace Voetbal\Tests;
+namespace FCToernooiTest\Voetbal;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
