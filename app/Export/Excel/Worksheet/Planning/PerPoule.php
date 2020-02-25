@@ -38,7 +38,8 @@ class PerPoule extends PlanningWorksheet
 
         foreach( $roundNumber->getRounds() as $round ) {
             foreach( $round->getPoules() as $poule ) {
-                $row = $this->drawPoule( $poule, $row );
+                $this->drewbreak = false;
+                $row = $this->drawPoule($poule, $row);
             }
         }
 
@@ -54,7 +55,10 @@ class PerPoule extends PlanningWorksheet
         $row =  $this->drawSubHeaderHelper( $row, $subHeader );
 
         foreach( $poule->getGames() as $game ) {
-            $row = $this->drawGame( $game, $row, false );
+            if ($this->drawBreakBeforeGame($game)) {
+                $row = $this->drawBreak($roundNumber, $row);
+            }
+            $row = $this->drawGame($game, $row, false);
         }
         return $row + 1;
     }

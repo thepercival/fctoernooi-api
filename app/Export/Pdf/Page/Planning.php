@@ -9,6 +9,8 @@
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use League\Period\Period;
+use Voetbal\Game;
 use Voetbal\Round;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\NameService;
@@ -22,6 +24,15 @@ class Planning extends ToernooiPdfPage
     protected $sportScoreConfigService;
 
     use GamesTrait;
+    /**
+     * @var bool
+     */
+    protected $drewbreak;
+
+    /**
+     * @var Period
+     */
+    protected $tournamentBreak;
 
     /**
      * @var mixed
@@ -38,8 +49,9 @@ class Planning extends ToernooiPdfPage
 
     public function __construct( $param1 )
     {
-        parent::__construct( $param1 );
-        $this->setLineWidth( 0.5 );
+        parent::__construct($param1);
+        $this->drewbreak = false;
+        $this->setLineWidth(0.5);
         $this->sportScoreConfigService = new SportScoreConfigService();
         /*$this->maxPoulesPerLine = 3;
         $this->placeWidthStructure = 30;
@@ -57,29 +69,59 @@ class Planning extends ToernooiPdfPage
       </colgroup>*/
     }
 
-    public function getTitle(): ?string {
+    public function setTournamentBreak(Period $break)
+    {
+        $this->tournamentBreak = $break;
+    }
+
+    public function getTitle(): ?string
+    {
         return $this->title;
     }
-    public function setTitle( string $title ) {
+
+    public function setTitle(string $title)
+    {
         $this->title = $title;
     }
 
-    public function getPageMargin(){ return 20; }
-    public function getHeaderHeight(){ return 0; }
+    public function getPageMargin()
+    {
+        return 20;
+    }
 
-    public function getGameFilter() {
+    public function getHeaderHeight()
+    {
+        return 0;
+    }
+
+    public function getGameFilter()
+    {
         return $this->gameFilter;
     }
-    public function setGameFilter( $gameFilter ) {
+
+    public function setGameFilter($gameFilter)
+    {
         $this->gameFilter = $gameFilter;
     }
 
-    public function getGames( RoundNumber $roundNumber ): array {
+    public function drawBreakBeforeGame(Game $game): bool
+    {
+        if ($this->tournamentBreak === null) {
+            return false;
+        }
+        if ($this->drewbreak === true) {
+            return false;
+        }
+        return $game->getStartDateTime()->getTimestamp() === $this->tournamentBreak->getEndDate()->getTimestamp();
+    }
+
+    public function getGames(RoundNumber $roundNumber): array
+    {
         $games = [];
-        foreach( $roundNumber->getRounds() as $round ) {
-            foreach( $round->getPoules() as $poule ) {
-                foreach( $poule->getGames() as $game ) {
-                    if( $this->gameFilter === null || $this->getGameFilter()($game) ) {
+        foreach ($roundNumber->getRounds() as $round) {
+            foreach ($round->getPoules() as $poule) {
+                foreach ($poule->getGames() as $game) {
+                    if ($this->gameFilter === null || $this->getGameFilter()($game)) {
                         $games[] = $game;
                     }
                 }

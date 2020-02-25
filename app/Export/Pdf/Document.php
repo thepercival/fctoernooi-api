@@ -132,10 +132,15 @@ class Document extends \Zend_Pdf
         }
         $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
         foreach ($games as $game) {
-            $gameHeight = $page->getGameHeight($game);
-            if ($nY - $gameHeight < $page->getPageMargin() ) {
+            $gameHeight = $page->getGameHeight();
+            $drawBreak = $page->drawBreakBeforeGame($game);
+            $gameHeight += $drawBreak ? $gameHeight : 0;
+            if ($nY - $gameHeight < $page->getPageMargin()) {
                 list($page, $nY) = $this->createPagePlanning("wedstrijden");
                 $nY = $page->drawGamesHeader($roundNumber, $nY);
+            }
+            if ($drawBreak) {
+                $nY = $page->drawBreak($roundNumber, $nY);
             }
             $nY = $page->drawGame($game, $nY, true);
         }
@@ -179,12 +184,17 @@ class Document extends \Zend_Pdf
         }
         $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
         foreach ($games as $game) {
-            $gameHeight = $page->getGameHeight($game);
-            if ($nY - $gameHeight < $page->getPageMargin() ) {
+            $gameHeight = $page->getGameHeight();
+            $drawBreak = $page->drawBreakBeforeGame($game);
+            $gameHeight += $drawBreak ? $gameHeight : 0;
+            if ($nY - $gameHeight < $page->getPageMargin()) {
                 // $field = $page->getFieldFilter();
                 list($page, $nY) = $this->createPagePlanning($page->getTitle());
-                $page->setGameFilter( $page->getGameFilter() );
+                $page->setGameFilter($page->getGameFilter());
                 $nY = $page->drawGamesHeader($roundNumber, $nY);
+            }
+            if ($drawBreak) {
+                $nY = $page->drawBreak($roundNumber, $nY);
             }
             $nY = $page->drawGame($game, $nY);
         }
@@ -238,7 +248,8 @@ class Document extends \Zend_Pdf
     protected function createPagePlanning( string $title )
     {
         $selfRefereesAssigned = $this->areSelfRefereesAssigned();
-        $page = new PagePlanning( $selfRefereesAssigned ? \Zend_Pdf_Page::SIZE_A4_LANDSCAPE : \Zend_Pdf_Page::SIZE_A4 );
+        $page = new PagePlanning($selfRefereesAssigned ? \Zend_Pdf_Page::SIZE_A4_LANDSCAPE : \Zend_Pdf_Page::SIZE_A4);
+        $page->setTournamentBreak($this->tournament->getBreak());
         $page->setSelfRefereesAssigned($selfRefereesAssigned);
         $page->setRefereesAssigned($this->areRefereesAssigned());
         $page->setFont( $this->getFont(), $this->getFontHeight() );

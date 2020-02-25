@@ -49,8 +49,6 @@ trait GamesTrait
         if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
             $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
             $cell->setValue( $this->getParent()->gamesOnSameDay( $roundNumber ) ? "tijd" : "datum tijd" );
-        } else {
-            $cell->setValue( "batchNr" );
         }
 
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_FIELD, $row);
@@ -67,14 +65,28 @@ trait GamesTrait
 
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_AWAY, $row);
         $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_LEFT );
-        $cell->setValue( "uit" );
+        $cell->setValue("uit");
 
-        if( $this->refereesAssigned || $this->selfRefereesAssigned ) {
-            $cell = $this->getCellByColumnAndRow( Planning::COLUMN_REFEREE, $row);
-            $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-            $cell->setValue( $this->selfRefereesAssigned ? 'scheidsrechter' : 'sch.' );
+        if ($this->refereesAssigned || $this->selfRefereesAssigned) {
+            $cell = $this->getCellByColumnAndRow(Planning::COLUMN_REFEREE, $row);
+            $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->setValue($this->selfRefereesAssigned ? 'scheidsrechter' : 'sch.');
         }
         return $row + 2;
+    }
+
+    public function drawBreak(RoundNumber $roundNumber, int $row)
+    {
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_START, $row);
+        if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
+            $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->setValue($this->getDateTime($roundNumber, $this->tournamentBreak->getStartDate()));
+        }
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_SCORE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue("PAUZE");
+        $this->drewbreak = true;
+        return $row + 1;
     }
 
     /**
@@ -83,9 +95,9 @@ trait GamesTrait
      * @param bool $striped
      * @return int
      */
-    public function drawGame( Game $game, int $row, bool $striped = true ): int
+    public function drawGame(Game $game, int $row, bool $striped = true): int
     {
-        if( ($game->getBatchNr() % 2) === 0 && $striped === true ) {
+        if (($game->getBatchNr() % 2) === 0 && $striped === true) {
             $range = $this->range( Planning::COLUMN_POULE, $row, Planning::NR_OF_COLUMNS, $row);
             $this->fill( $this->getStyle($range), 'EEEEEE');
         }
@@ -101,16 +113,8 @@ trait GamesTrait
 //
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_START, $row);
         if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
-            $text = "";
-            $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            if (!$this->getParent()->gamesOnSameDay($roundNumber)) {
-                $text = $localDateTime->format("d-m ");
-            }
-            $text .= $localDateTime->format("H:i");
-            $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-            $cell->setValue( $text );
-        } else {
-            $cell->setValue( "batchNr" );
+            $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->setValue($this->getDateTime($roundNumber, $game->getStartDateTime()));
         }
 
         $cell = $this->getCellByColumnAndRow( Planning::COLUMN_FIELD, $row);
@@ -131,29 +135,35 @@ trait GamesTrait
         $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_LEFT );
         $cell->setValue( $away );
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_REFEREE, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_REFEREE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         if ($game->getReferee() !== null) {
-            $cell->setValue( $game->getReferee()->getInitials() );
-        }  else if( $game->getRefereePlace() !== null ) {
-            $placeRef = $this->getParent()->getNameService()->getPlaceName( $game->getRefereePlace(), true, true);
-            $cell->setValue( $placeRef );
+            $cell->setValue($game->getReferee()->getInitials());
+        } else {
+            if ($game->getRefereePlace() !== null) {
+                $placeRef = $this->getParent()->getNameService()->getPlaceName($game->getRefereePlace(), true, true);
+                $cell->setValue($placeRef);
+            }
         }
-
-//<tr *ngIf="tournament.hasBreak() && isBreakInBetween(game)" class="table-info">
-//            <td></td>
-//            <td *ngIf="planningService.canCalculateStartDateTime(roundNumber)"></td>
-//            <td></td>
-//            <td class="width-25 text-right">PAUZE</td>
-//            <td></td>
-//            <td class="width-25"></td>
-//            <td *ngIf="hasReferees()" class="d-none d-sm-table-cell"></td>
-//          </tr>
-//        <tr  >
         return $row + 1;
     }
 
-    protected function getScore(Game $game): string {
+    protected function getDateTime(RoundNumber $roundNumber, \DateTimeImmutable $dateTime): string
+    {
+        $localDateTime = $dateTime->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
+        $text = $localDateTime->format("H:i");
+        if ($this->getParent()->gamesOnSameDay($roundNumber)) {
+            return $text;
+        }
+        //                $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
+        //                $dateElements = explode(" ", $df->format($game->getStartDateTime()));
+        //                $month = strtolower( substr( $dateElements[1], 0, 3 ) );
+        //                $text = $game->getStartDateTime()->format("d") . " " . $month . " ";
+        return $localDateTime->format("d-m ") . $text;
+    }
+
+    protected function getScore(Game $game): string
+    {
         $score = ' - ';
         if ($game->getState() !== State::Finished) {
             return $score;

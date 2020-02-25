@@ -29,7 +29,8 @@ class PerField extends PlanningWorksheet
         $fields = $this->getParent()->getTournament()->getCompetition()->getFields();
         $row = 1;
         foreach( $fields as $field ) {
-            $row = $this->drawField( $field, $row );
+            $this->drewbreak = false;
+            $row = $this->drawField($field, $row);
         }
         for( $columnNr = 1 ; $columnNr <= Planning::NR_OF_COLUMNS ; $columnNr++ ) {
             $this->getColumnDimensionByColumn($columnNr)->setAutoSize(true);
@@ -49,7 +50,10 @@ class PerField extends PlanningWorksheet
             $row =  $this->drawSubHeaderHelper( $row, $subHeader );
 
             foreach( $games as $game ) {
-                $row = $this->drawGame( $game, $row, false );
+                if ($this->drawBreakBeforeGame($game)) {
+                    $row = $this->drawBreak($roundNumber, $row);
+                }
+                $row = $this->drawGame($game, $row, false);
             }
         }
 

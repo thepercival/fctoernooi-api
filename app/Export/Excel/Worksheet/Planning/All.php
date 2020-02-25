@@ -43,6 +43,9 @@ class All extends PlanningWorksheet
             $row = $this->drawGamesHeader($roundNumber, $row);
         }
         foreach ($games as $game) {
+            if ($this->drawBreakBeforeGame($game)) {
+                $row = $this->drawBreak($roundNumber, $row);
+            }
             $row = $this->drawGame($game, $row);
         }
 

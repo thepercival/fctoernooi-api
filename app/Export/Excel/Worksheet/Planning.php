@@ -10,6 +10,7 @@ namespace App\Export\Excel\Worksheet;
 
 use App\Export\Excel\Spreadsheet;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
+use League\Period\Period;
 use Voetbal\Round;
 use Voetbal\Game;
 use Voetbal\Round\Number as RoundNumber;
@@ -22,6 +23,15 @@ abstract class Planning extends FCToernooiWorksheet
      * @var SportScoreConfigService
      */
     protected $sportScoreConfigService;
+    /**
+     * @var bool
+     */
+    protected $drewbreak;
+
+    /**
+     * @var Period
+     */
+    protected $tournamentBreak;
 
     use GamesTrait;
 
@@ -35,16 +45,26 @@ abstract class Planning extends FCToernooiWorksheet
 
     const NR_OF_COLUMNS = 7;
 
-    public function __construct( Spreadsheet $parent, string $title, int $index )
+    public function __construct(Spreadsheet $parent, string $title, int $index)
     {
         parent::__construct($parent, $title);
         $parent->addSheet($this, $index);
         $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->drewbreak = false;
+        $this->tournamentBreak = $parent->getTournament()->getBreak();
         $this->setCustomHeader();
     }
 
-
-
+    public function drawBreakBeforeGame(Game $game): bool
+    {
+        if ($this->tournamentBreak === null) {
+            return false;
+        }
+        if ($this->drewbreak === true) {
+            return false;
+        }
+        return $game->getStartDateTime()->getTimestamp() === $this->tournamentBreak->getEndDate()->getTimestamp();
+    }
 
     /**
      * add winnerslosers if roundnumber is 2 and has sibling
