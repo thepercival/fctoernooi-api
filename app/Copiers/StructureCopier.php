@@ -18,6 +18,7 @@ use Voetbal\Planning\Config\Service as PlanningConfigService;
 use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 use Voetbal\Competitor;
 use Voetbal\Association;
+use Voetbal\Structure\PostCreateService;
 
 class StructureCopier
 {
@@ -64,7 +65,12 @@ class StructureCopier
         }
 
         $rootRound = $this->copyRound($firstRoundNumber, $structure->getRootRound());
-        return new Structure($firstRoundNumber, $rootRound);
+        $newStructure = new Structure($firstRoundNumber, $rootRound);
+        $newStructure->setStructureNumbers();
+
+        $postCreateService = new PostCreateService($newStructure);
+        $postCreateService->create();
+        return $newStructure;
     }
 
     protected function copyRound( RoundNumber $roundNumber, Round $round, QualifyGroup $parentQualifyGroup = null ): Round {
