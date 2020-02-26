@@ -30,7 +30,7 @@ class Planning extends ToernooiPdfPage
     protected $drewbreak;
 
     /**
-     * @var Period
+     * @var Period|null
      */
     protected $tournamentBreak;
 
@@ -42,34 +42,18 @@ class Planning extends ToernooiPdfPage
      * @var string
      */
     protected $title;
-    /*protected $maxPoulesPerLine;
-    protected $placeWidthStructure;
-    protected $pouleMarginStructure;
-    */protected $rowHeight;
 
-    public function __construct( $param1 )
+    protected $rowHeight;
+
+    public function __construct($param1)
     {
         parent::__construct($param1);
         $this->drewbreak = false;
         $this->setLineWidth(0.5);
         $this->sportScoreConfigService = new SportScoreConfigService();
-        /*$this->maxPoulesPerLine = 3;
-        $this->placeWidthStructure = 30;
-        $this->pouleMarginStructure = 10;*/
-/*
-        <colgroup>
-        <col *ngIf="aRoundNeedsRanking(roundsByNumber)">
-        <col *ngIf="!aRoundNeedsRanking(roundsByNumber)">
-        <col *ngIf="planningService.canCalculateStartDateTime(roundNumber)">
-        <col>
-        <col class="width-25">
-        <col>
-        <col class="width-25">
-        <col *ngIf="hasReferees()" class="d-none d-sm-table-cell">
-      </colgroup>*/
     }
 
-    public function setTournamentBreak(Period $break)
+    public function setTournamentBreak(Period $break = null)
     {
         $this->tournamentBreak = $break;
     }
