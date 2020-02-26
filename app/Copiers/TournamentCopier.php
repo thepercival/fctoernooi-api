@@ -45,7 +45,6 @@ class TournamentCopier
 
         $leagueSer = $competition->getLeague();
         $league = new League( $association, $leagueSer->getName() );
-        $league->setSportDep( 'voetbal' ); // DEPRECATED
 
         $season = $this->seasonRepos->findOneBy( array('name' => '9999' ) );
 
