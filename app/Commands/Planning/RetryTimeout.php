@@ -9,11 +9,11 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Voetbal\Planning as PlanningBase;
+use Voetbal\Planning\Input;
+use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning;
-use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Resource\RefereePlaceService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
@@ -48,12 +48,22 @@ class RetryTimeout extends PlanningCommand
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
 
         try {
-            // $planning = $this->planningRepos->find( 641 );
+            if ($this->planningRepos->isProcessing(Planning::STATE_PROCESSING)) {
+                $this->logger->info("still processing..");
+                return 0;
+            }
+
             $planning = $this->planningRepos->getTimeout();
+            // $planning = $this->planningRepos->find( 61241 );
             if ($planning === null) {
                 $this->logger->info("   all plannings(also timeout) are tried");
                 return 0;
             }
+
+            $planning->setState(Planning::STATE_PROCESSING);
+            $this->planningRepos->save($planning);
+            $this->logger->info('   update state => STATE_PROCESSING');
+
 //            if( array_key_exists(1, $argv) ) {
 //                $planning = $this->planningRepos->find( (int) $argv[1] );
 //            }
@@ -108,12 +118,12 @@ class RetryTimeout extends PlanningCommand
         );
     }
 
-    protected function getWorsePlanning(PlanningBase $planning): ?PlanningBase
+    protected function getWorsePlanning(Planning $planning): ?Planning
     {
         $range = $planning->getNrOfBatchGames();
 
         foreach ($planning->getInput()->getPlannings() as $planningIt) {
-            if ($planningIt->getState() === PlanningBase::STATE_TIMEOUT
+            if ($planningIt->getState() === Planning::STATE_TIMEOUT
                 && $planningIt->getMinNrOfBatchGames() === $range->min
                 && $planningIt->getMaxNrOfBatchGames() === $range->max
                 && $planningIt->getMaxNrOfGamesInARow() > $planning->getMaxNrOfGamesInARow()) {
