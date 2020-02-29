@@ -39,7 +39,6 @@ class BackupSponsorImages extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-backup-sponsorimages');
-        $this->initMailer($this->logger);
         $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
                 'images.sponsors.pathpostfix'
             );
@@ -71,9 +70,6 @@ class BackupSponsorImages extends Command
             }
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
-            }
         }
         return 0;
     }

@@ -41,7 +41,6 @@ class UpdateSitemap extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-update-sitemap');
-        $this->initMailer($this->logger);
         try {
             $url = $this->config->getString('www.wwwurl');
             $distPath = $this->config->getString('www.wwwurl-localpath');
@@ -60,9 +59,6 @@ class UpdateSitemap extends Command
             chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error creating sitemap", $e->getMessage());
-            }
         }
         return 0;
     }

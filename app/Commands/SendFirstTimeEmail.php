@@ -63,16 +63,12 @@ class SendFirstTimeEmail extends Command
                     continue;
                 }
 
-                $tournament = reset($tournaments);
                 $this->sendMail($user, reset($tournaments));
                 $user->setHelpSent(true);
                 $this->userRepos->save($user);
             }
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error sending firsttime-mail", $e->getMessage());
-            }
         }
 
         return 0;
@@ -104,5 +100,16 @@ EOT;
                 "www.wwwurl"
             ) . $tournament->getId() . "<br><br>";
         $this->mailer->sendToAdmin($subject, $prepend . $body);
+    }
+
+    protected function initMailer(LoggerInterface $logger)
+    {
+        $emailSettings = $this->config->getArray('email');
+        $this->mailer = new Mailer(
+            $logger,
+            $emailSettings['from'],
+            $emailSettings['fromname'],
+            $emailSettings['admin']
+        );
     }
 }

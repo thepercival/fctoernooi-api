@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Monolog\Handler\NativeMailerHandler;
 use Psr\Container\ContainerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -53,16 +54,16 @@ class Command extends SymCommand
         $path = $logToFile ? ($loggerSettings['path'] . $name . '.log') : 'php://stdout';
         $handler = new StreamHandler($path, $loggerSettings['level']);
         $this->logger->pushHandler($handler);
-    }
 
-    protected function initMailer(LoggerInterface $logger)
-    {
-        $emailSettings = $this->config->getArray('email');
-        $this->mailer = new Mailer(
-            $logger,
-            $emailSettings['from'],
-            $emailSettings['fromname'],
-            $emailSettings['admin']
-        );
+        if ($this->config->getString('environment') === 'production') {
+            $emailSettings = $this->config->getArray('email');
+            $this->logger->pushHandler(
+                new NativeMailerHandler(
+                    $emailSettings['admin'],
+                    $this->getName() . " : error",
+                    $emailSettings['from']
+                )
+            );
+        }
     }
 }

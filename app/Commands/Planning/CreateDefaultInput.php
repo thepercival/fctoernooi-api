@@ -50,7 +50,6 @@ class CreateDefaultInput extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-planning-create-default-input');
-        $this->initMailer($this->logger);
         return $this->createPlanningInputs();
     }
 

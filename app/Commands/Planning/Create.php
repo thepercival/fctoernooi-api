@@ -55,7 +55,6 @@ class Create extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-planning-create');
-        $this->initMailer($this->logger);
 
         try {
             if ($this->planningInputRepos->isProcessing(PlanningInput::STATE_TRYING_PLANNINGS)) {
@@ -86,9 +85,6 @@ class Create extends PlanningCommand
             $this->logger->info($nrUpdated . " structure(s)-planning updated");
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error creating planning", $e->getMessage());
-            }
         }
         return 0;
     }

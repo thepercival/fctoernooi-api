@@ -44,7 +44,6 @@ class RetryTimeout extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-retry-timeout-planning');
-        $this->initMailer($this->logger);
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
 
         try {
@@ -71,6 +70,7 @@ class RetryTimeout extends PlanningCommand
             if ($planning->getState() !== Planning::STATE_SUCCESS) {
                 return 0;
             }
+
             if ($planning->getInput()->getSelfReferee()) {
                 $this->updateSelfReferee($planning->getInput());
             }
@@ -96,9 +96,6 @@ class RetryTimeout extends PlanningCommand
             }
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            if ($this->config->getString('environment') === 'production') {
-                $this->mailer->sendToAdmin("error creating timeout planning", $e->getMessage());
-            }
         }
         return 0;
     }
