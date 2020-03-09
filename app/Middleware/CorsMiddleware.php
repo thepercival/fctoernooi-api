@@ -33,9 +33,6 @@ final class CorsMiddleware implements MiddlewareInterface
         $methods = $routingResults->getAllowedMethods();
         // $requestHeaders = $request->getHeaderLine('Access-Control-Request-Headers');
 
-        if( $request->getMethod() === 'OPTIONS' && $request->hasHeader('Accept') === false ) {
-            $request = $request->withHeader('Accept', '*/*');
-        }
         $response = $handler->handle($request);
 
         return $response
