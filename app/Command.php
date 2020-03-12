@@ -41,10 +41,7 @@ class Command extends SymCommand
 
     protected function initLogger(InputInterface $input, string $name)
     {
-        $logToFile = $input->hasOption('logtofile') ? filter_var(
-            $input->getOption('logtofile'),
-            FILTER_VALIDATE_BOOLEAN
-        ) : false;
+        $logToFile = $input->getOption('logtofile');
         $loggerSettings = $this->config->getArray('logger');
 
         $this->logger = new Logger($name);
