@@ -27,8 +27,8 @@ class Structure extends FCToernooiWorksheet
 
     public function __construct( Spreadsheet $parent = null )
     {
-        parent::__construct( $parent, 'structuur' );
-        $parent->addSheet($this, Spreadsheet::INDEX_STRUCTURE );
+        parent::__construct($parent, 'opzet');
+        $parent->addSheet($this, Spreadsheet::INDEX_STRUCTURE);
         $this->setWidthColumns();
         $this->setCustomHeader();
     }
@@ -47,17 +47,14 @@ class Structure extends FCToernooiWorksheet
 
     public function draw()
     {
-        // $this->setHeaderFooter()
-//        $nY = $this->drawHeader( "indeling & structuur" );
-
         $rooRound = $this->getParent()->getStructure()->getRootRound();
 
         $row = 1;
         $column = 1;
         $maxNrOfCells = $this->getMaxNrOfColumns();
 
-        $row = $this->drawSubHeaderHelper( $row, "Structuur" );
-        $this->drawRoundStructure( $rooRound, $row, $column, $maxNrOfCells );
+        $row = $this->drawSubHeaderHelper($row, "Opzet");
+        $this->drawRoundStructure($rooRound, $row, $column, $maxNrOfCells);
     }
 
     protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {

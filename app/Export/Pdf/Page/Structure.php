@@ -42,8 +42,8 @@ class Structure extends ToernooiPdfPage
     public function draw()
     {
         $rooRound = $this->getParent()->getStructure()->getRootRound();
-        $nY = $this->drawHeader( "indeling & structuur" );
-        $nY = $this->drawGrouping( $rooRound, $nY );
+        $nY = $this->drawHeader("opzet & indeling");
+        $nY = $this->drawGrouping($rooRound, $nY);
 
         $this->drawRoundStructure( $rooRound, $nY );
     }
@@ -143,8 +143,8 @@ class Structure extends ToernooiPdfPage
 
     protected function drawRoundStructure( Round $round, $nY )
     {
-        $nY = $this->drawSubHeader( "Structuur", $nY );
-        $this->drawRoundStructureHelper( $round, $nY, $this->getPageMargin(), $this->getDisplayWidth() );
+        $nY = $this->drawSubHeader("Opzet", $nY);
+        $this->drawRoundStructureHelper($round, $nY, $this->getPageMargin(), $this->getDisplayWidth());
     }
 
     protected function drawRoundStructureHelper( Round $round, $nY, $nX, $width )

@@ -52,9 +52,6 @@ class Indeling extends FCToernooiWorksheet
 
     public function draw()
     {
-        // $this->setHeaderFooter()
-//        $nY = $this->drawHeader( "indeling & structuur" );
-
         $rooRound = $this->getParent()->getStructure()->getRootRound();
 
         $row = 1;

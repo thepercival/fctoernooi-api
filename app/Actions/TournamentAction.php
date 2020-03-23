@@ -419,7 +419,7 @@ class TournamentAction extends Action
         if( $exportConfig->hasOnly(TournamentConfig::GAMENOTES) ) {
             return "wedstrijdbrieven";
         } elseif( $exportConfig->hasOnly(TournamentConfig::STRUCTURE) ) {
-            return "structuur-en-indeling";
+            return "opzet-en-indeling";
         } elseif( $exportConfig->hasOnly(TournamentConfig::RULES) ) {
             return "reglementen";
         } elseif( $exportConfig->hasOnly(TournamentConfig::GAMESPERPOULE) ) {
@@ -438,7 +438,7 @@ class TournamentAction extends Action
 
     protected function sendEmailOldStructure(Tournament $tournament)
     {
-        $subject = 'omzetten structuur fctoernooi';
+        $subject = 'omzetten opzet fctoernooi';
         $url = $this->config->getString("www.wwwurl") . $tournament->getId();
         $body = <<<EOT
 <p>$url</p>
