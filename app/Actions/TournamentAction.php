@@ -386,7 +386,7 @@ class TournamentAction extends Action
             ->withHeader(
                 'Content-Type',
                 'application/pdf;charset=utf-8'
-            )/*->withHeader('Content-Length', strlen( $vtData ))*/ ;
+            )->withHeader('Content-Length', strlen($vtData));
     }
 
     protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url)
