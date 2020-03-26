@@ -10,8 +10,8 @@ FCToernooi\Tournament:
       type: Voetbal\Competition
     breakStartDateTime:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
-    breakDuration:
-      type: integer
+    breakEndDateTime:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
     public:
       type: boolean
     roles:

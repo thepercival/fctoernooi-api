@@ -250,6 +250,7 @@ class TournamentAction extends Action
 
             $user = $request->getAttribute("user");
 
+            /** @var \stdClass $copyData */
             $copyData = $this->getFormData( $request );
             if( property_exists( $copyData, "startdatetime" ) === false ) {
                 throw new \Exception( "er is geen nieuwe startdatum-tijd opgegeven");
@@ -386,7 +387,8 @@ class TournamentAction extends Action
             ->withHeader(
                 'Content-Type',
                 'application/pdf;charset=utf-8'
-            )->withHeader('Content-Length', strlen($vtData));
+            )
+            ->withHeader('Content-Length', '' . strlen($vtData));
     }
 
     protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url)

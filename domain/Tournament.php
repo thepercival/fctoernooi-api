@@ -18,47 +18,38 @@ class Tournament
      * @var int
      */
     private $id;
-
     /**
      * @var Competition
      */
     private $competition;
-
     /**
      * @var \DateTimeImmutable
      */
     private $breakStartDateTime;
-
+    /**
+     * @var \DateTimeImmutable
+     */
+    private $breakEndDateTime;
     /**
      * @var int
      */
-    private $breakDuration;
-
+    private $breakDurationDep;
     /**
      * @var bool
      */
     private $public;
-
     /**
      * @var ArrayCollection
      */
     private $roles;
-
     /**
      * @var ArrayCollection
      */
     private $sponsors;
-
-    /**
-     * @var bool
-     */
-    protected $printed; // @TODO move to exported
-
     /**
      * @var integer
      */
     protected $exported;
-
     /**
      * @var bool
      */
@@ -72,7 +63,6 @@ class Tournament
         $this->competition = $competition;
         $this->roles = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
-        $this->breakDuration = 0;
         $this->updated = true;
     }
 
@@ -127,29 +117,27 @@ class Tournament
     }
 
     /**
-     * @return int
+     * @return \DateTimeImmutable|null
      */
-    public function getBreakDuration()
+    public function getBreakEndDateTime(): ?\DateTimeImmutable
     {
-        return $this->breakDuration;
+        return $this->breakEndDateTime;
     }
 
     /**
-     * @param int $breakDuration
+     * @param \DateTimeImmutable $datetime
      */
-    public function setBreakDuration( int $breakDuration )
+    public function setBreakEndDateTime(\DateTimeImmutable $datetime = null)
     {
-        $this->breakDuration = $breakDuration;
+        $this->breakEndDateTime = $datetime;
     }
-
 
     public function getBreak(): ?Period
     {
-        if( $this->getBreakStartDateTime() === null ) {
+        if ($this->getBreakStartDateTime() === null || $this->getBreakEndDateTime() === null) {
             return null;
         }
-        $endDate = $this->getBreakStartDateTime()->modify("+".$this->getBreakDuration()." minutes");
-        return new Period( $this->getBreakStartDateTime(), $endDate );
+        return new Period($this->getBreakStartDateTime(), $this->getBreakEndDateTime());
     }
 
     /**
@@ -157,11 +145,8 @@ class Tournament
      */
     public function setBreak( Period $period = null )
     {
-        $breakStartDateTime = $period !== null ? $period->getStartDate() : null;
-        $durationInSeconds = $period !== null ? $period->getTimestampInterval() : 0;
-        $breakDuration = $period !== null ? ((int)($durationInSeconds / 60)) : 0;
-        $this->setBreakStartDateTime($breakStartDateTime);
-        $this->setBreakDuration($breakDuration);
+        $this->setBreakStartDateTime($period !== null ? $period->getStartDate() : null);
+        $this->setBreakEndDateTime($period !== null ? $period->getEndDate() : null);
     }
 
     /**

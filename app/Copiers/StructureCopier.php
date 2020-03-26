@@ -122,7 +122,7 @@ class StructureCopier
     {
         $foundSports = $competition->getSports()->filter(
             function ($sportIt) use ($sport) {
-                return $sportIt->getId() === $sport->getId();
+                return $sportIt->getName() === $sport->getName();
             }
         );
         if ($foundSports->count() !== 1) {

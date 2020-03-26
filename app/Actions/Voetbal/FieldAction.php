@@ -66,7 +66,7 @@ final class FieldAction extends Action
             if( !$fieldsWithSameName->isEmpty() ) {
                 throw new \Exception("het veldnummer \"".$field->getNumber()."\" of de veldnaam \"".$field->getName()."\" bestaat al", E_ERROR );
             }
-            $sport = $this->sportRepos->find($field->getSportIdSer());
+            $sport = $this->sportRepos->findOneBy(["name" => $field->getSport()->getName()]);
             if ( $sport === null ) {
                 throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
             }
@@ -105,7 +105,7 @@ final class FieldAction extends Action
                 throw new \Exception("het veld \"".$fieldSer->getName()."\" bestaat al", E_ERROR );
             }
 
-            $sport = $this->sportRepos->find($fieldSer->getSportIdSer());
+            $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
             if ( $sport === null ) {
                 throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
             }

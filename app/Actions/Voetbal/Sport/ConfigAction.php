@@ -59,7 +59,7 @@ final class ConfigAction extends Action
             /** @var \Voetbal\Sport\Config $sportConfig */
             $sportConfig = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Sport\Config', 'json');
 
-            $sport = $this->sportRepos->find( $sportConfig->getSportIdSer() );
+            $sport = $this->sportRepos->findOneBy(["name" => $sportConfig->getSport()->getName()]);
             if ( $sport === null ) {
                 throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
             }
@@ -95,7 +95,7 @@ final class ConfigAction extends Action
             /** @var \Voetbal\Sport\Config|false $sportConfigSer */
             $sportConfigSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Sport\Config', 'json');
 
-            $sport = $this->sportRepos->find( $sportConfigSer->getSportIdSer() );
+            $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
             if ( $sport === null ) {
                 throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
             }

@@ -4,13 +4,14 @@
     <id name="id" type="integer" column="id">
       <generator strategy="AUTO"/>
     </id>
-    <field name="breakStartDateTime" column="breakStartDateTime" type="datetime_immutable" nullable="true" unique="false"/>
-    <field name="breakDuration" column="breakDuration" type="smallint" nullable="false" unique="false">
+    <field name="breakStartDateTime" column="breakStartDateTime" type="datetime_immutable" nullable="true"
+           unique="false"/>
+    <field name="breakEndDateTime" column="breakEndDateTime" type="datetime_immutable" nullable="true" unique="false"/>
+    <field name="breakDurationDep" column="breakDuration" type="smallint" nullable="true" unique="false">
       <options>
         <option name="default">0</option>
       </options>
     </field>
-    <field name="printed" column="printed" type="boolean" nullable="true" unique="false"/>
     <field name="exported" column="exported" type="smallint" nullable="true" unique="false"/>
     <field name="public" column="public" type="boolean" nullable="true" unique="false"/>
     <field name="updated" column="updated" type="boolean" nullable="true" unique="false"/>

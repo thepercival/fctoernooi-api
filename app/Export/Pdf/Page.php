@@ -13,6 +13,9 @@ namespace App\Export\Pdf;
  */
 abstract class Page extends \Zend_Pdf_Page
 {
+    /**
+     * @var Document
+     */
     protected $m_oParent;
     protected $m_oTextColor;
     protected $m_oFillColor;
@@ -38,12 +41,12 @@ abstract class Page extends \Zend_Pdf_Page
     public abstract function getHeaderHeight();
     public abstract function getPageMargin();
 
-    public function getParent()
+    public function getParent(): Document
     {
         return $this->m_oParent;
     }
 
-    public function putParent( $oParent )
+    public function putParent(Document $oParent)
     {
         $this->m_oParent = $oParent;
     }
@@ -170,17 +173,21 @@ abstract class Page extends \Zend_Pdf_Page
                 $this->setLineColor ( $arrLineColors["r"] );
                 $this->drawLine( $nXPos + $nWidth, $nYPos, $nXPos + $nWidth, $nYPos - $nHeight ); // downwards
             }
-        }
-        else
-        {
-            $this->setLineColor ( $this->getFillColor() );
-            $this->drawRectangle( $nXPos, $nYPos - $nHeight, $nXPos + $nWidth, $nYPos, $nStyle );
+        } else {
+            $this->setLineColor($this->getFillColor());
+            $this->drawRectangle($nXPos, $nYPos - $nHeight, $nXPos + $nWidth, $nYPos, $nStyle);
         }
 
         $nFontSize = $this->getFontSize();
-        $nTextY = (int)($nYPos - ( ( ( $nHeight / 2 ) + ( $nFontSize / 2 ) ) - 1.5 ));
+        $nTextY = (int)($nYPos - ((($nHeight / 2) + ($nFontSize / 2)) - 1.5));
 
-        $nRetVal = $this->drawString( $sText, $nXPos, $nTextY, $nWidth, $nAlign, $degrees );
+        $maxLength = $nWidth;
+        $stringXPos = $nXPos;
+        if ($degrees > 45) {
+            $maxLength = $nHeight;
+            $stringXPos -= ($nHeight - $nWidth) / 2;
+        }
+        $nRetVal = $this->drawString($sText, $stringXPos, $nTextY, $maxLength, $nAlign, $degrees);
 
         return $nXPos + $nWidth;
     }

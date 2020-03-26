@@ -19,6 +19,7 @@ use App\Export\Pdf\Page\PoulePivotTables as PagePoules;
 use App\Export\Pdf\Page\Planning as PagePlanning;
 use App\Export\TournamentConfig;
 use App\Export\Document as ExportDocument;
+use App\Exceptions\PdfOutOfBoundsException;
 
 class Document extends \Zend_Pdf
 {
@@ -94,8 +95,11 @@ class Document extends \Zend_Pdf
     protected function fillContent()
     {
         if( $this->config->getStructure() ) {
-            $page = $this->createPageStructure();
-            $page->draw();
+//            $page = $this->createPageGrouping();
+//            $page->draw();
+
+            2ronde moet een regel lager beginnen!!dit treedt op bij a4 niet bij landscape
+            $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4);
         }
         if( $this->config->getPoulePivotTables() ) {
             list( $page, $nY ) = $this->createPagePoulePivotTables();
@@ -236,24 +240,46 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function createPageStructure()
+    protected function createPageGrouping()
     {
-        $page = new Page\Structure( \Zend_Pdf_Page::SIZE_A4 );
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
+        $page = new Page\Grouping(\Zend_Pdf_Page::SIZE_A4);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createPagePlanning( string $title )
+    /**
+     * kijk eerst als het op een a4 past:
+     *  eerst portret daarna landscape
+     *  daarna gewoon zo groot mogelijk
+     *
+     * @throws \Zend_Pdf_Exception
+     */
+    protected function createAndDrawPageStructure($pageLayout, $enableOutOfBoundsException = true)
+    {
+        $page = new Page\Structure($pageLayout, $enableOutOfBoundsException);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
+        try {
+            $page->draw();
+            $this->pages[] = $page;
+        } catch (PdfOutOfBoundsException $e) {
+            if ($pageLayout === \Zend_Pdf_Page::SIZE_A4) {
+                $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4_LANDSCAPE, false);
+            }
+        }
+    }
+
+    protected function createPagePlanning(string $title)
     {
         $selfRefereesAssigned = $this->areSelfRefereesAssigned();
         $page = new PagePlanning($selfRefereesAssigned ? \Zend_Pdf_Page::SIZE_A4_LANDSCAPE : \Zend_Pdf_Page::SIZE_A4);
         $page->setTournamentBreak($this->tournament->getBreak());
         $page->setSelfRefereesAssigned($selfRefereesAssigned);
         $page->setRefereesAssigned($this->areRefereesAssigned());
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
         $this->pages[] = $page;
         $page->setTitle($title);
         $nY = $page->drawHeader( $title );

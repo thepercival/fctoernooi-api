@@ -56,14 +56,14 @@ class TournamentCopier
         $sportConfigService = new SportConfigService();
         $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $newCompetition, $sportConfigService ) {
             foreach( $sportConfigsSer as $sportConfigSer ) {
-                $sport = $this->sportRepos->find( $sportConfigSer->getSportIdSer() );
-                $sportConfigService->copy( $sportConfigSer, $newCompetition, $sport );
+                $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
+                $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
             }
             foreach( $fieldsSer as $fieldSer ) {
                 $field = new Field( $newCompetition, $fieldSer->getNumber() );
-                $field->setName( $fieldSer->getName() );
-                $sport = $this->sportRepos->find( $fieldSer->getSportIdSer() );
-                $field->setSport( $sport );
+                $field->setName($fieldSer->getName());
+                $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
+                $field->setSport($sport);
             }
             foreach( $refereesSer as $refereeSer ) {
                 $referee = new Referee( $newCompetition, $refereeSer->getRank() );
@@ -78,9 +78,8 @@ class TournamentCopier
         $newTournament = new TournamentBase( $newCompetition );
         $newTournament->getCompetition()->setStartDateTime( $newStartDateTime );
         if( $tournament->getBreakStartDateTime() !== null ) {
-            $diff = $tournament->getBreakStartDateTime()->diff( $tournament->getCompetition()->getStartDateTime() );
-            $newTournament->setBreakStartDateTime( $newStartDateTime->add( $diff ) );
-            $newTournament->setBreakDuration( $tournament->getBreakDuration() );
+            $newTournament->setBreakStartDateTime(clone $tournament->getBreakStartDateTime());
+            $newTournament->setBreakEndDateTime(clone $tournament->getBreakEndDateTime());
         }
         $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
         $newTournament->setPublic( $public );

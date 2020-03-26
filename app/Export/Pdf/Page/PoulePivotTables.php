@@ -32,16 +32,18 @@ class PoulePivotTables extends ToernooiPdfPage
     protected $placeWidthStructure;
     protected $pouleMarginStructure;
     */protected $rowHeight;
+    protected $placesFontSize;
 
     public function __construct( $param1 )
     {
         parent::__construct( $param1 );
         $this->setLineWidth( 0.5 );
         $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
-        $this->versusColumnsWidth = $this->getDisplayWidth() * 0.60;
+        $this->versusColumnsWidth = $this->getDisplayWidth() * 0.62;
         $this->pointsColumnWidth = $this->getDisplayWidth() * 0.08;
-        $this->rankColumnWidth = $this->getDisplayWidth() * 0.07;
+        $this->rankColumnWidth = $this->getDisplayWidth() * 0.05;
         $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->placesFontSize = [];
         /*$this->maxPoulesPerLine = 3;
         $this->placeWidthStructure = 30;
         $this->pouleMarginStructure = 10;*/
@@ -119,10 +121,24 @@ class PoulePivotTables extends ToernooiPdfPage
 
         $nVersus = 0;
         foreach( $poule->getPlaces() as $place ) {
-            $nX = $this->drawCell($this->getParent()->getNameService()->getPlaceFromName($place, true), $nX, $nY, $versusColumnWidth,
-                $height, ToernooiPdfPage::ALIGNCENTER, 'black', $degrees);
+            $placeName = $place->getNumber() . ". " . $this->getParent()->getNameService()->getPlaceFromName(
+                    $place,
+                    true
+                );
+            $this->setFont($this->getParent()->getFont(), $this->getPlaceFontHeight($placeName));
+            $nX = $this->drawCell(
+                $placeName,
+                $nX,
+                $nY,
+                $versusColumnWidth,
+                $height,
+                ToernooiPdfPage::ALIGNCENTER,
+                'black',
+                $degrees
+            );
             $nVersus++;
         }
+        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
         // draw pointsrectangle
         $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
 
@@ -151,14 +167,34 @@ class PoulePivotTables extends ToernooiPdfPage
 
         foreach( $poule->getPlaces() as $place ) {
             $nX = $this->getPageMargin();
-            $nX = $this->drawCell( $this->getParent()->getNameService()->getPlaceFromName( $place, true ), $nX, $nY, $this->nameColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNLEFT, 'black' );
-            $placeGames = $poule->getGames()->filter( function( Game $game ) use ($place) {
-                return $game->isParticipating( $place );
-            })->toArray();
+            // placename
+            {
+                $placeName = $place->getNumber() . ". " . $this->getParent()->getNameService()->getPlaceFromName(
+                        $place,
+                        true
+                    );
+                $this->setFont($this->getParent()->getFont(), $this->getPlaceFontHeight($placeName));
+                $nX = $this->drawCell(
+                    $placeName,
+                    $nX,
+                    $nY,
+                    $this->nameColumnWidth,
+                    $nRowHeight,
+                    ToernooiPdfPage::ALIGNLEFT,
+                    'black'
+                );
+                $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+            }
+
+            $placeGames = $poule->getGames()->filter(
+                function (Game $game) use ($place) {
+                    return $game->isParticipating($place);
+                }
+            )->toArray();
             // draw versus
-            for( $placeNr = 1 ; $placeNr <= $nrOfPlaces ; $placeNr++ ) {
-                if( $poule->getPlace($placeNr) === $place ) {
-                    $this->setFillColor( new \Zend_Pdf_Color_Html( "lightgrey" ) );
+            for ($placeNr = 1; $placeNr <= $nrOfPlaces; $placeNr++) {
+                if ($poule->getPlace($placeNr) === $place) {
+                    $this->setFillColor(new \Zend_Pdf_Color_Html("lightgrey"));
                 }
                 $score = '';
                 if( $pouleState !== State::Created ) {
@@ -241,13 +277,27 @@ class PoulePivotTables extends ToernooiPdfPage
         return 45;
     }
 
-    public function getVersusHeight( $versusColumnWidth, int $degrees ): float {
-        if( $degrees === 0 ) {
+    public function getVersusHeight($versusColumnWidth, int $degrees): float
+    {
+        if ($degrees === 0) {
             return $this->getRowHeight();
         }
-        if( $degrees === 90 ) {
+        if ($degrees === 90) {
             return $versusColumnWidth * 2;
         }
-        return (tan(deg2rad($degrees)) * $versusColumnWidth );
+        return (tan(deg2rad($degrees)) * $versusColumnWidth);
+    }
+
+    protected function getPlaceFontHeight(string $placeName): int
+    {
+        if (array_key_exists($placeName, $this->placesFontSize)) {
+            return $this->placesFontSize[$placeName];
+        }
+        $fontHeight = $this->getParent()->getFontHeight();
+        if ($this->getTextWidth($placeName) > $this->nameColumnWidth) {
+            $fontHeight -= 2;
+        }
+        $this->placesFontSize[$placeName] = $fontHeight;
+        return $fontHeight;
     }
 }

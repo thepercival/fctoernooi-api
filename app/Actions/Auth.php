@@ -50,12 +50,13 @@ final class Auth extends Action
 	public function register( Request $request, Response $response, $args): Response
 	{
 		try{
-            $registerData = $this->getFormData( $request );
-		    if( property_exists( $registerData, "emailaddress" ) === false ) {
-                throw new \Exception( "geen emailadres ingevoerd");
+            /** @var \stdClass $registerData */
+            $registerData = $this->getFormData($request);
+            if (property_exists($registerData, "emailaddress") === false) {
+                throw new \Exception("geen emailadres ingevoerd");
             }
-            if( property_exists($registerData, "password" ) === false ) {
-                throw new \Exception( "geen wachtwoord ingevoerd");
+            if (property_exists($registerData, "password") === false) {
+                throw new \Exception("geen wachtwoord ingevoerd");
             }
             $emailAddress = $registerData->emailaddress;
             $password = $registerData->password;
@@ -84,6 +85,7 @@ final class Auth extends Action
     public function login( Request $request, Response $response, $args): Response
 	{
        try{
+           /** @var \stdClass $authData */
            $authData = $this->getFormData( $request );
            if( !property_exists( $authData, "emailaddress") || strlen($authData->emailaddress) === 0 ) {
                throw new \Exception( "het emailadres is niet opgegeven");
@@ -123,6 +125,7 @@ final class Auth extends Action
     public function passwordreset( Request $request, Response $response, $args ): Response
     {
         try{
+            /** @var \stdClass $paswordResetData */
             $paswordResetData = $this->getFormData( $request );
             if( property_exists($paswordResetData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
@@ -143,6 +146,7 @@ final class Auth extends Action
     public function passwordchange( Request $request, Response $response, $args ): Response
     {
         try{
+            /** @var \stdClass $paswordChangeData */
             $paswordChangeData = $this->getFormData( $request );
             if( property_exists($paswordChangeData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
