@@ -64,7 +64,6 @@ class Structure extends ToernooiPdfPage
         $roundName = $this->getParent()->getNameService()->getRoundName($round);
         $this->drawCell($roundName, $nX, $nY, $width, self::RowHeight, ToernooiPdfPage::ALIGNCENTER, $arrLineColors);
         $nY -= self::RowHeight;
-        // $nY -= $this->pouleMarginStructure;
 
         if ($round->getPoules()->count() === 1 && $round->getPoules()->first()->getPlaces()->count() < 3) {
             return;
@@ -94,6 +93,15 @@ class Structure extends ToernooiPdfPage
         return (int)floor($pouleWidth / self::PlaceWidth);
     }
 
+    protected function getNrOfPlaceColumns(Poule $poule, int $maxNrOfPlaceColumnsPerPoule): int
+    {
+        $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
+        if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
+            $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;
+        }
+        return $nrOfPlaceColumnsPerPoule;
+    }
+
     protected function drawPoules(array $poules, $nX, $nY, $width)
     {
         $maxNrOfPlaceColumnsPerPoule = $this->getMaxNrOfPlaceColumnsPerPoule(count($poules), $width);
@@ -105,23 +113,17 @@ class Structure extends ToernooiPdfPage
         while (count($poules) > 0) {
             $poulesForLine = $this->reduceForLine($poules, $maxNrOfPlaceColumnsPerPoule, $width);
             $nX = $this->getXForCentered($poulesForLine, $width, $nXStart, $maxNrOfPlaceColumnsPerPoule);
-            $nYNew = $nY;
             foreach ($poulesForLine as $poule) {
-                $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
-                if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
-                    $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;
-                }
+                $nrOfPlaceColumnsPerPoule = $this->getNrOfPlaceColumns($poule, $maxNrOfPlaceColumnsPerPoule);
                 $pouleWidth = $nrOfPlaceColumnsPerPoule * self::PlaceWidth;
-                $nYEnd = $this->drawPoule($poule, $nX, $nY, $nrOfPlaceColumnsPerPoule);
-                if ($nYEnd < $nYNew) {
-                    $nYNew = $nYEnd;
-                }
+                $this->drawPoule($poule, $nX, $nY, $nrOfPlaceColumnsPerPoule);
                 $nX += $pouleWidth + self::PouleMargin;
             }
-            $nY = $nYNew - self::PouleMargin;
+            $nY -= ($this->getMaxHeight($poulesForLine, $maxNrOfPlaceColumnsPerPoule) + self::PouleMargin);
         }
-        return $nY + self::PouleMargin;
+        return $nY;
     }
+
 
     protected function reduceForLine(array &$poules, int $maxNrOfPlaceColumnsPerPoule, $width): array
     {
@@ -130,10 +132,7 @@ class Structure extends ToernooiPdfPage
         while (count($poules) > 0) {
             $poule = array_shift($poules);
             $poulesForLine[] = $poule;
-            $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
-            if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
-                $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;
-            }
+            $nrOfPlaceColumnsPerPoule = $this->getNrOfPlaceColumns($poule, $maxNrOfPlaceColumnsPerPoule);
             $pouleWidth = $nrOfPlaceColumnsPerPoule * self::PlaceWidth;
 
             $nX += $pouleWidth + self::PouleMargin;
@@ -144,10 +143,10 @@ class Structure extends ToernooiPdfPage
         return $poulesForLine;
     }
 
-    protected function drawPoule(Poule $poule, $nX, $nY, int $nrOfPlaceColumnsPerPoule)
+    protected function drawPoule(Poule $poule, $nX, $nY, int $nrOfPlaceColumns)
     {
-        $pouleWidth = $nrOfPlaceColumnsPerPoule * self::PlaceWidth;
-        $pouleName = $this->getParent()->getNameService()->getPouleName($poule, false);
+        $pouleWidth = $nrOfPlaceColumns * self::PlaceWidth;
+        $pouleName = $this->getParent()->getNameService()->getPouleName($poule, $nrOfPlaceColumns > 1);
         $this->drawCell(
             $pouleName,
             $nX,
@@ -177,14 +176,13 @@ class Structure extends ToernooiPdfPage
                 ToernooiPdfPage::ALIGNCENTER,
                 "black"
             );
-            if (($place->getNumber() % $nrOfPlaceColumnsPerPoule) === 0) { // to next line
+            if (($place->getNumber() % $nrOfPlaceColumns) === 0) { // to next line
                 $nX = $nXStart;
                 $nY -= self::RowHeight;
             } else {
                 $nX += self::PlaceWidth;
             }
         }
-        return $nY - self::RowHeight;
     }
 
     protected function getXForCentered(array $poulesForLine, $width, $nX, $maxNrOfPlaceColumnsPerPoule)
@@ -194,13 +192,23 @@ class Structure extends ToernooiPdfPage
             if ($widthPoules > 0) {
                 $widthPoules += self::PouleMargin;
             }
-            $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
-            if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
-                $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;
-            }
+            $nrOfPlaceColumnsPerPoule = $this->getNrOfPlaceColumns($poule, $maxNrOfPlaceColumnsPerPoule);
             $widthPoule = $nrOfPlaceColumnsPerPoule * self::PlaceWidth;
             $widthPoules += $widthPoule;
         }
-        return $nX + ( ( $width - $widthPoules ) / 2 );
+        return $nX + (($width - $widthPoules) / 2);
+    }
+
+    protected function getMaxHeight(array $poulesForLine, $maxNrOfPlaceColumnsPerPoule)
+    {
+        $maxHeight = 0;
+        foreach ($poulesForLine as $poule) {
+            $nrOfPlaceColumnsPerPoule = $this->getNrOfPlaceColumns($poule, $maxNrOfPlaceColumnsPerPoule);
+            $heightPoule = (int)ceil($poule->getPlaces()->count() / $nrOfPlaceColumnsPerPoule);
+            if ($heightPoule > $maxHeight) {
+                $maxHeight = $heightPoule;
+            }
+        }
+        return (1 + $maxHeight) * self::RowHeight;
     }
 }

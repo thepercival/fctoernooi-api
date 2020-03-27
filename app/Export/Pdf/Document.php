@@ -95,10 +95,9 @@ class Document extends \Zend_Pdf
     protected function fillContent()
     {
         if( $this->config->getStructure() ) {
-//            $page = $this->createPageGrouping();
-//            $page->draw();
+            $page = $this->createPageGrouping();
+            $page->draw();
 
-            2ronde moet een regel lager beginnen!!dit treedt op bij a4 niet bij landscape
             $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4);
         }
         if( $this->config->getPoulePivotTables() ) {
@@ -250,10 +249,6 @@ class Document extends \Zend_Pdf
     }
 
     /**
-     * kijk eerst als het op een a4 past:
-     *  eerst portret daarna landscape
-     *  daarna gewoon zo groot mogelijk
-     *
      * @throws \Zend_Pdf_Exception
      */
     protected function createAndDrawPageStructure($pageLayout, $enableOutOfBoundsException = true)

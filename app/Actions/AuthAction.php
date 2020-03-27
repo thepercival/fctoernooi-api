@@ -20,12 +20,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Tuupola\Base62;
 
-final class Auth extends Action
+final class AuthAction extends Action
 {
     /**
      * @var AuthService
      */
-	private $authService;
+    private $authService;
     /**
      * @var UserRepository
      */

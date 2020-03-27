@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TournamentAction;
 use App\Actions\Tournament\ShellAction;
-use App\Actions\Auth as AuthAction;
+use App\Actions\AuthAction;
 use App\Actions\SponsorAction;
 use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
