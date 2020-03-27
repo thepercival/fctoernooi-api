@@ -102,7 +102,7 @@ class Gamenotes extends FCToernooiWorksheet
             $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );
             // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
-            if( $planningConfig->hasExtension() === true ) {
+            if ($planningConfig->getExtension()) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
             // tijdstip
@@ -159,7 +159,7 @@ class Gamenotes extends FCToernooiWorksheet
 
         $dots = '...............';
 
-        $maxNrOfScoreLines = self::MAXNROFSCORELINES - ($planningConfig->hasExtension() ? 1 : 0);
+        $maxNrOfScoreLines = self::MAXNROFSCORELINES - ($planningConfig->getExtension() ? 1 : 0);
         $inputDescr = $this->getInputScoreConfigDescription($firstScoreConfig, $planningConfig->getEnableTime());
         if ($firstScoreConfig !== $calculateScoreConfig) {
             $nrOfScoreLines = $this->getNrOfScoreLines($calculateScoreConfig->getMaximum());
@@ -217,10 +217,10 @@ class Gamenotes extends FCToernooiWorksheet
 
         $row += 2;
 
-        if( $planningConfig->hasExtension() ) {
+        if ($planningConfig->getExtension()) {
             $cell = $this->getCellByColumnAndRow(1, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $cell->setValue( 'na verleng.' );
+            $cell->setValue('na verleng.');
 
             $cell = $this->getCellByColumnAndRow(2, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);

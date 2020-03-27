@@ -73,8 +73,9 @@ final class ConfigAction extends Action
             $newSportConfig->setWinPoints( $sportConfig->getWinPoints() );
             $newSportConfig->setDrawPoints( $sportConfig->getDrawPoints() );
             $newSportConfig->setWinPointsExt( $sportConfig->getWinPointsExt() );
-            $newSportConfig->setDrawPointsExt( $sportConfig->getDrawPointsExt() );
-            $newSportConfig->setPointsCalculation( $sportConfig->getPointsCalculation() );
+            $newSportConfig->setDrawPointsExt($sportConfig->getDrawPointsExt());
+            $newSportConfig->setLosePointsExt($sportConfig->getLosePointsExt());
+            $newSportConfig->setPointsCalculation($sportConfig->getPointsCalculation());
             $newSportConfig->setNrOfGamePlaces( $sportConfig->getNrOfGamePlaces() );
             $this->sportConfigRepos->customAdd($newSportConfig, $structure->getFirstRoundNumber());
 
@@ -106,8 +107,9 @@ final class ConfigAction extends Action
             $sportConfig->setWinPoints( $sportConfigSer->getWinPoints() );
             $sportConfig->setDrawPoints( $sportConfigSer->getDrawPoints() );
             $sportConfig->setWinPointsExt( $sportConfigSer->getWinPointsExt() );
-            $sportConfig->setDrawPointsExt( $sportConfigSer->getDrawPointsExt() );
-            $sportConfig->setPointsCalculation( $sportConfigSer->getPointsCalculation() );
+            $sportConfig->setDrawPointsExt($sportConfigSer->getDrawPointsExt());
+            $sportConfig->setLosePointsExt($sportConfigSer->getLosePointsExt());
+            $sportConfig->setPointsCalculation($sportConfigSer->getPointsCalculation());
             $sportConfig->setNrOfGamePlaces( $sportConfigSer->getNrOfGamePlaces() );
             $this->sportConfigRepos->save($sportConfig);
 

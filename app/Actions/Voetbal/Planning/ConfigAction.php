@@ -59,7 +59,8 @@ final class ConfigAction extends Action
             }
 
             $planningConfig = new PlanningConfig($roundNumber);
-            $planningConfig->setNrOfHeadtohead($planningConfigSer->getNrOfHeadtohead());
+
+            $planningConfig->setExtension($planningConfigSer->getExtension());
             $planningConfig->setEnableTime($planningConfigSer->getEnableTime());
             $planningConfig->setMinutesPerGame($planningConfigSer->getMinutesPerGame());
             $planningConfig->setMinutesPerGameExt($planningConfigSer->getMinutesPerGameExt());
@@ -67,6 +68,7 @@ final class ConfigAction extends Action
             $planningConfig->setMinutesAfter($planningConfigSer->getMinutesAfter());
             $planningConfig->setSelfReferee($planningConfigSer->getSelfReferee());
             $planningConfig->setTeamup($planningConfigSer->getTeamup());
+            $planningConfig->setNrOfHeadtohead($planningConfigSer->getNrOfHeadtohead());
 
             $this->planningConfigRepos->save($planningConfig);
 
@@ -98,6 +100,7 @@ final class ConfigAction extends Action
             }
 
             $planningConfig->setNrOfHeadtohead($planningConfigSer->getNrOfHeadtohead());
+            $planningConfig->setExtension($planningConfigSer->getExtension());
             $planningConfig->setEnableTime($planningConfigSer->getEnableTime());
             $planningConfig->setMinutesPerGame($planningConfigSer->getMinutesPerGame());
             $planningConfig->setMinutesPerGameExt($planningConfigSer->getMinutesPerGameExt());
