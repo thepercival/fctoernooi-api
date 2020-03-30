@@ -19,6 +19,7 @@ use \Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Tuupola\Base62;
+use FCToernooi\Auth\Item as AuthItem;
 
 final class AuthAction extends Action
 {
@@ -42,9 +43,15 @@ final class AuthAction extends Action
 		$this->serializer = $serializer;
 	}
 
-    public function validateToken( Request $request, Response $response, $args ): Response
+    public function extendToken(Request $request, Response $response, $args): Response
     {
-        return $response->withStatus(200);
+        try {
+            $user = $request->getAttribute("user");
+            $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
+            return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
     }
 
 	public function register( Request $request, Response $response, $args): Response
@@ -61,22 +68,14 @@ final class AuthAction extends Action
             $emailAddress = $registerData->emailaddress;
             $password = $registerData->password;
 
-			$user = $this->authService->register( $emailAddress, $password );
-			if ($user === null or !($user instanceof User)) {
-				throw new \Exception( "de nieuwe gebruiker kan niet worden geretourneerd");
+            $user = $this->authService->register($emailAddress, $password);
+            if ($user === null or !($user instanceof User)) {
+                throw new \Exception("de nieuwe gebruiker kan niet worden geretourneerd");
             }
 
-            $data = [
-                "token" => $this->authService->getToken( $user),
-                "user" => [
-                    "id" => $user->getId(),
-                    "emailaddress" => $user->getEmailaddress()
-                ]
-            ];
-
-            $json = $this->serializer->serialize( $data, 'json' );
-            return $this->respondWithJson($response, $json);
-		}
+            $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
+            return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
+        }
 		catch( \Exception $e ) {
             return new ErrorResponse($e->getMessage(), 422);
         }
@@ -102,21 +101,17 @@ final class AuthAction extends Action
                array( 'emailaddress' => $emailaddress )
            );
 
-           if (!$user or !password_verify( $user->getSalt() . $authData->password, $user->getPassword() ) ) {
-               throw new \Exception( "ongeldige emailadres en wachtwoord combinatie");
+           if (!$user or !password_verify($user->getSalt() . $authData->password, $user->getPassword())) {
+               throw new \Exception("ongeldige emailadres en wachtwoord combinatie");
            }
 
            /*if ( !$user->getActive() ) {
 		    throw new \Exception( "activeer eerst je account met behulp van de link in je ontvangen email", E_ERROR );
 		    }*/
 
-           $data = [
-               "token" => $this->authService->getToken( $user ),
-               "userid" => $user->getId()
-           ];
-
-           return $this->respondWithJson( $response, $this->serializer->serialize( $data, 'json') );
-		}
+           $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
+           return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
+       }
 		catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
 		}
@@ -154,22 +149,17 @@ final class AuthAction extends Action
             if( property_exists($paswordChangeData, "password" ) === false ) {
                 throw new \Exception( "geen wachtwoord ingevoerd");
             }
-            if( property_exists($paswordChangeData, "code" ) === false ) {
-                throw new \Exception( "geen code ingevoerd");
+            if (property_exists($paswordChangeData, "code") === false) {
+                throw new \Exception("geen code ingevoerd");
             }
             $emailAddress = $paswordChangeData->emailaddress;
             $password = $paswordChangeData->password;
-            $code = (string) $paswordChangeData->code;
+            $code = (string)$paswordChangeData->code;
 
-            $user = $this->authService->changePassword( $emailAddress, $password, $code );
+            $user = $this->authService->changePassword($emailAddress, $password, $code);
 
-            $data = [
-                "token" => $this->authService->getToken( $user),
-                "userid" => $user->getId()
-            ];
-
-            $json = $this->serializer->serialize( $data, 'json' );
-            return $this->respondWithJson($response, $json);
+            $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
+            return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
         }
         catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);

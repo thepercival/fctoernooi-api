@@ -55,8 +55,8 @@ return function (App $app) {
     });
 
     $app->group('/auth', function ( Group $group ) {
-        $group->options('/validatetoken', AuthAction::class . ':options');
-        $group->post('/validatetoken', AuthAction::class . ':validateToken');
+        $group->options('/extendtoken', AuthAction::class . ':options');
+        $group->post('/extendtoken', AuthAction::class . ':extendToken');
     });
 
     // admin module

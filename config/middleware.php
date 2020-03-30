@@ -54,12 +54,12 @@ return function (App $app) {
                            )
                        ],
                        "error" => function (Response $response, $arguments) {
-                return new UnauthorizedResponse($arguments["message"]);
-            },
-            "before" => function ( Request $request, $arguments) {
-                $token = new AuthToken( $arguments["decoded"] );
-                return $request->withAttribute("token", $token);
-            }
+                           return new UnauthorizedResponse($arguments["message"]);
+                       },
+                       "before" => function (Request $request, $arguments) {
+                           $token = new AuthToken($arguments["decoded"]);
+                           return $request->withAttribute("token", $token);
+                       }
                    ]
                )
     );

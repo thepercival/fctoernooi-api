@@ -181,12 +181,13 @@ EOT;
         return true;
     }
 
-    public function getToken( User $user)
+    public function createToken(User $user)
     {
         $jti = (new Base62)->encode(random_bytes(16));
 
-        $now = new \DateTime();
-        $future = new \DateTime("now +3 months");
+        $now = new \DateTimeImmutable();
+        // $future = $now->modify("+3 months");
+        $future = $now->modify("+10 seconds");
 
         $payload = [
             "iat" => $now->getTimeStamp(),

@@ -1,0 +1,10 @@
+FCToernooi\Auth\Item:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    token:
+      type: string
+    userId:
+      type: int
