@@ -133,10 +133,10 @@ final class FieldAction extends Action
             $this->fieldRepos->remove($field);
 
             $fieldNumber = 1;
-            foreach ($competition->getFields() as $field) {
-                $field->setNumber($fieldNumber++);
+            foreach ($competition->getFields() as $fieldIt) {
+                $fieldIt->setNumber($fieldNumber++);
+                $this->fieldRepos->save($fieldIt);
             }
-            $this->fieldRepos->save($field);
 
             return $response->withStatus(200);
         }
