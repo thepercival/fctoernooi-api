@@ -50,7 +50,7 @@ class Repository extends \Voetbal\Repository
                 $refereeRole->setValue(Role::REFEREE);
                 $this->_em->persist( $refereeRole );
             }
-            $rolesRet = $tournament->getRoles()->toArray();
+            $rolesRet = array_values($tournament->getRoles()->toArray());
 
             $this->_em->flush();
             $conn->commit();
