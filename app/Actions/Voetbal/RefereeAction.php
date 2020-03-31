@@ -144,8 +144,8 @@ final class RefereeAction extends Action
             $rank = 1;
             foreach ($competition->getReferees() as $referee) {
                 $referee->setRank($rank++);
+                $this->refereeRepos->save($referee);
             }
-            $this->refereeRepos->save($referee);
 
             return $response->withStatus(200);
         }
