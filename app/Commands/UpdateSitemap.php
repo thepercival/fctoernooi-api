@@ -2,14 +2,12 @@
 
 namespace App\Commands;
 
+use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use App\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 use Selective\Config\Configuration;
-use App\Mailer;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 
 class UpdateSitemap extends Command
@@ -46,11 +44,15 @@ class UpdateSitemap extends Command
             $distPath = $this->config->getString('www.wwwurl-localpath');
 
             $content = $url . PHP_EOL;
-            $content .= $url . "user/register/" . PHP_EOL;
-            $content .= $url . "user/login/" . PHP_EOL;
+            $content .= $url . "user/register" . PHP_EOL;
+            $content .= $url . "user/login" . PHP_EOL;
 
             $tournaments = $this->tournamentRepos->findAll();
+            /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
+                if ($tournament->getPublic() === false) {
+                    continue;
+                }
                 $content .= $url . $tournament->getId() . PHP_EOL;
             }
             file_put_contents($distPath . "sitemap.txt", $content);

@@ -220,7 +220,7 @@ class PoulePivotTables extends FCToernooiWorksheet
         if ($game->getState() !== State::Finished) {
             return $score;
         }
-        $finalScore = $this->sportScoreConfigService->getFinal($game);
+        $finalScore = $this->sportScoreConfigService->getFinalScore($game);
         if ($finalScore === null) {
             return $score;
         }

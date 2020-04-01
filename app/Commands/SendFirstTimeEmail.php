@@ -82,7 +82,7 @@ class SendFirstTimeEmail extends Command
 <p>Hallo,</p>
 <p>            
 Als beheerder van <a href="$url">$url</a> zag ik dat je een toernooi hebt aangemaakt op onze website. 
-Mocht je vragen hebben of dan horen we dat graag. Beantwoord dan gewoon deze email of bel me.        
+Mocht je vragen hebben dan horen we dat graag. Beantwoord dan deze email of bel me.        
 </p>
 <p>            
 Veel plezier met het gebruik van onze website! De handleiding kun je <a href="https://drive.google.com/open?id=1HLwhbH4YXEbV7osGmFUt24gk_zxGjnVilTG0MpkkPUI">hier</a> vinden.
@@ -91,15 +91,18 @@ Veel plezier met het gebruik van onze website! De handleiding kun je <a href="ht
 met vriendelijke groet,
 <br>
 Coen Dunnink<br>
-06-14363514
+06-14363514<br>
+FCToernooi
 </p>
 EOT;
         $this->mailer->send($subject, $body, $user->getEmailaddress());
 
+        $adminSubject = $subject . " (" . $tournament->getCompetition()->getFirstSportConfig()->getSport()->getName(
+            ) . ")";
         $prepend = "email: " . $user->getEmailaddress() . "<br><br>link: " . $this->config->getString(
                 "www.wwwurl"
             ) . $tournament->getId() . "<br><br>";
-        $this->mailer->sendToAdmin($subject, $prepend . $body);
+        $this->mailer->sendToAdmin($adminSubject, $prepend . $body);
     }
 
     protected function initMailer(LoggerInterface $logger)
