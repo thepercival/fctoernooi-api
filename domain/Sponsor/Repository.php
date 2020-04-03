@@ -17,7 +17,7 @@ use FCToernooi\Tournament;
  */
 class Repository extends \Voetbal\Repository
 {
-    const MAXNROFSPONSORSPERSCREEN = 9;
+    const MAXNROFSPONSORSPERSCREEN = 4;
 
     public function find($id, $lockMode = null, $lockVersion = null): ?Sponsor
     {

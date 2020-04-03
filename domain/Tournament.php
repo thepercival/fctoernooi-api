@@ -8,6 +8,7 @@
 
 namespace FCToernooi;
 
+use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
 use Voetbal\Competition;
 use League\Period\Period;
@@ -23,17 +24,13 @@ class Tournament
      */
     private $competition;
     /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     private $breakStartDateTime;
     /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     private $breakEndDateTime;
-    /**
-     * @var int
-     */
-    private $breakDurationDep;
     /**
      * @var bool
      */
@@ -43,9 +40,13 @@ class Tournament
      */
     private $roles;
     /**
-     * @var ArrayCollection
+     * @var ArrayCollection|Sponsor[]
      */
     private $sponsors;
+    /**
+     * @var ArrayCollection|LockerRoom[]
+     */
+    private $lockerRooms;
     /**
      * @var integer
      */
@@ -63,6 +64,7 @@ class Tournament
         $this->competition = $competition;
         $this->roles = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
+        $this->lockerRooms = new ArrayCollection();
         $this->updated = true;
     }
 
@@ -101,33 +103,33 @@ class Tournament
     }
 
     /**
-     * @return \DateTimeImmutable|null
+     * @return DateTimeImmutable|null
      */
-    public function getBreakStartDateTime(): ?\DateTimeImmutable
+    public function getBreakStartDateTime(): ?DateTimeImmutable
     {
         return $this->breakStartDateTime;
     }
 
     /**
-     * @param \DateTimeImmutable $datetime
+     * @param DateTimeImmutable $datetime
      */
-    public function setBreakStartDateTime( \DateTimeImmutable $datetime = null )
+    public function setBreakStartDateTime(DateTimeImmutable $datetime = null)
     {
         $this->breakStartDateTime = $datetime;
     }
 
     /**
-     * @return \DateTimeImmutable|null
+     * @return DateTimeImmutable|null
      */
-    public function getBreakEndDateTime(): ?\DateTimeImmutable
+    public function getBreakEndDateTime(): ?DateTimeImmutable
     {
         return $this->breakEndDateTime;
     }
 
     /**
-     * @param \DateTimeImmutable $datetime
+     * @param DateTimeImmutable $datetime
      */
-    public function setBreakEndDateTime(\DateTimeImmutable $datetime = null)
+    public function setBreakEndDateTime(DateTimeImmutable $datetime = null)
     {
         $this->breakEndDateTime = $datetime;
     }
@@ -182,9 +184,9 @@ class Tournament
     }
 
     public function hasRole( User $user, int $roleValue ) {
-        return ( count(array_filter( $this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $roleValue ) {
-            return ( $roleIt->getUser() === $user && (( $roleIt->getValue() & $roleValue ) === $roleIt->getValue() ) );
-        }, ARRAY_FILTER_USE_BOTH)) > 0);
+        return ( count(array_filter($this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $roleValue ) {
+                return ( $roleIt->getUser() === $user && (( $roleIt->getValue() & $roleValue ) === $roleIt->getValue() ) );
+            }, ARRAY_FILTER_USE_BOTH)) > 0);
     }
 
     /**
@@ -198,9 +200,25 @@ class Tournament
     /**
      * @param ArrayCollection $sponsors
      */
-    public function setSponsors( ArrayCollection $sponsors)
+    public function setSponsors(ArrayCollection $sponsors)
     {
         $this->sponsors = $sponsors;
+    }
+
+    /**
+     * @return LockerRoom[] | ArrayCollection
+     */
+    public function getLockerRooms()
+    {
+        return $this->lockerRooms;
+    }
+
+    /**
+     * @param ArrayCollection $lockerRooms
+     */
+    public function setLockerRooms(ArrayCollection $lockerRooms)
+    {
+        $this->lockerRooms = $lockerRooms;
     }
 
     /**
@@ -222,7 +240,7 @@ class Tournament
     public function getReferee( string $emailaddress )
     {
         $referees = $this->getCompetition()->getReferees();
-        foreach( $referees as $referee ) {
+        foreach($referees as $referee ) {
             if( $referee->getEmailaddress() === $emailaddress ) {
                 return $referee;
             }

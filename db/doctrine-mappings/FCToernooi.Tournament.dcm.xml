@@ -7,11 +7,6 @@
     <field name="breakStartDateTime" column="breakStartDateTime" type="datetime_immutable" nullable="true"
            unique="false"/>
     <field name="breakEndDateTime" column="breakEndDateTime" type="datetime_immutable" nullable="true" unique="false"/>
-    <field name="breakDurationDep" column="breakDuration" type="smallint" nullable="true" unique="false">
-      <options>
-        <option name="default">0</option>
-      </options>
-    </field>
     <field name="exported" column="exported" type="smallint" nullable="true" unique="false"/>
     <field name="public" column="public" type="boolean" nullable="true" unique="false"/>
     <field name="updated" column="updated" type="boolean" nullable="true" unique="false"/>
@@ -25,18 +20,24 @@
     </many-to-one>
     <one-to-many field="roles" target-entity="FCToernooi\Role" mapped-by="tournament" >
       <cascade>
-        <cascade-persist/>
-        <cascade-remove/>
+          <cascade-persist/>
+          <cascade-remove/>
       </cascade>
     </one-to-many>
-    <one-to-many field="sponsors" target-entity="FCToernooi\Sponsor" mapped-by="tournament" >
-      <cascade>
-        <cascade-persist/>
-        <cascade-remove/>
-      </cascade>
-    </one-to-many>
-    <unique-constraints>
-      <unique-constraint columns="competitionid" name="main_u_idx" />
-    </unique-constraints>
+      <one-to-many field="sponsors" target-entity="FCToernooi\Sponsor" mapped-by="tournament">
+          <cascade>
+              <cascade-persist/>
+              <cascade-remove/>
+          </cascade>
+      </one-to-many>
+      <one-to-many field="lockerRooms" target-entity="FCToernooi\LockerRoom" mapped-by="tournament">
+          <cascade>
+              <cascade-persist/>
+              <cascade-remove/>
+          </cascade>
+      </one-to-many>
+      <unique-constraints>
+          <unique-constraint columns="competitionid" name="main_u_idx"/>
+      </unique-constraints>
   </entity>
 </doctrine-mapping>

@@ -6,6 +6,7 @@ use App\Actions\TournamentAction;
 use App\Actions\Tournament\ShellAction;
 use App\Actions\AuthAction;
 use App\Actions\SponsorAction;
+use App\Actions\LockerRoomAction;
 use App\Actions\Voetbal\StructureAction;
 use App\Actions\Voetbal\PlanningAction;
 use App\Actions\Voetbal\Planning\ConfigAction as PlanningConfigAction;
@@ -91,6 +92,8 @@ return function (App $app) {
             $group->get('userrefereeid', TournamentAction::class . ':getUserRefereeId');
             $group->options('exportgeneratehash', TournamentAction::class . ':options');
             $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
+            $group->options('lockerrooms', TournamentAction::class . ':options');
+            $group->post('lockerrooms', TournamentAction::class . ':saveLockerRooms');
             $group->options('copy', TournamentAction::class . ':options');
             $group->post('copy', TournamentAction::class . ':copy');
 

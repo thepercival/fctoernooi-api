@@ -13,6 +13,8 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\User;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Sponsor;
+use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
+use FCToernooi\LockerRoom;
 
 use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
 use Voetbal\Planning\Config as PlanningConfig;
@@ -65,6 +67,10 @@ return [
     SponsorRepository::class => function (ContainerInterface $container) {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SponsorRepository($entityManager, $entityManager->getClassMetaData(Sponsor::class));
+    },
+    LockerRoomRepository::class => function (ContainerInterface $container) {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new LockerRoomRepository($entityManager, $entityManager->getClassMetaData(LockerRoom::class));
     },
 
     SportRepository::class => function (ContainerInterface $container) {

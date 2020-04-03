@@ -7,10 +7,13 @@ use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\TournamentConfig;
 use App\Response\ErrorResponse;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
 use FCToernooi\Role;
 use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\Tournament as Tournament;
+use FCToernooi\Tournament;
 use FCToernooi\Tournament\Service as TournamentService;
+use FCToernooi\LockerRoom;
 use FCToernooi\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -20,8 +23,10 @@ use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
+use stdClass;
 use Voetbal\Competitor\Service as CompetitorService;
 use Voetbal\Structure\Repository as StructureRepository;
+use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
 use App\Copiers\StructureCopier;
@@ -47,6 +52,10 @@ class TournamentAction extends Action
      */
     protected $structureRepos;
     /**
+     * @var LockerRoomRepistory
+     */
+    protected $lockerRoomRepos;
+    /**
      * @var PlanningCreator
      */
     protected $planningCreator;
@@ -66,6 +75,7 @@ class TournamentAction extends Action
         TournamentCopier $tournamentCopier,
         RoleRepository $roleRepos,
         StructureRepository $structureRepos,
+        LockerRoomRepistory $lockerRoomRepos,
         PlanningCreator $planningCreator,
         Mailer $mailer,
         Configuration $config
@@ -75,6 +85,7 @@ class TournamentAction extends Action
         $this->tournamentCopier = $tournamentCopier;
         $this->roleRepos = $roleRepos;
         $this->structureRepos = $structureRepos;
+        $this->lockerRoomRepos = $lockerRoomRepos;
         $this->planningCreator = $planningCreator;
         $this->mailer = $mailer;
         $this->config = $config;
@@ -94,7 +105,7 @@ class TournamentAction extends Action
     {
         $user = $request->getAttribute( "user" );
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute( "tournament" );
             $json = $this->serializer->serialize( $tournament, 'json', $this->getSerializationContext($tournament, $user) );
             return $this->respondWithJson($response, $json);
@@ -129,7 +140,7 @@ class TournamentAction extends Action
     public function getUserRefereeId( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
             $user = $request->getAttribute("user");
 
@@ -152,7 +163,7 @@ class TournamentAction extends Action
     public function syncRefereeRoles( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
             $roles = $this->roleRepos->syncRefereeRoles( $tournament );
 
@@ -167,7 +178,7 @@ class TournamentAction extends Action
     public function sendRequestOldStructure( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $this->sendEmailOldStructure( $tournament );
@@ -202,9 +213,9 @@ class TournamentAction extends Action
     public function edit( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournamentSer */
+            /** @var Tournament $tournamentSer */
             $tournamentSer = $this->serializer->deserialize( $this->getRawData() , 'FCToernooi\Tournament', 'json');
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $user = $request->getAttribute("user");
@@ -229,7 +240,7 @@ class TournamentAction extends Action
     public function remove( Request $request, Response $response, $args ): Response
     {
         try{
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
             $this->tournamentRepos->remove( $tournament );
             return $response->withStatus(200);
@@ -245,12 +256,12 @@ class TournamentAction extends Action
         $conn = $em->getConnection();
         $conn->beginTransaction();
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $user = $request->getAttribute("user");
 
-            /** @var \stdClass $copyData */
+            /** @var stdClass $copyData */
             $copyData = $this->getFormData( $request );
             if( property_exists( $copyData, "startdatetime" ) === false ) {
                 throw new \Exception( "er is geen nieuwe startdatum-tijd opgegeven");
@@ -262,7 +273,7 @@ class TournamentAction extends Action
 //                throw new \Exception("er kan voor deze competitie geen indeling worden aangemaakt, omdat deze al bestaan", E_ERROR);
 //            }
 
-            $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime );
+            $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
 
             $newTournament = $this->tournamentCopier->copy( $tournament, $startDateTime, $user );
             $this->tournamentRepos->customPersist($newTournament, true);
@@ -313,7 +324,7 @@ class TournamentAction extends Action
     public function export(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $queryParams = $request->getQueryParams();
@@ -428,14 +439,35 @@ class TournamentAction extends Action
             return "wedstrijden-per-poule";
         } elseif( $exportConfig->hasOnly(TournamentConfig::GAMESPERFIELD) ) {
             return "wedstrijden-per-veld";
-        } elseif( $exportConfig->hasOnly(TournamentConfig::PLANNING) ) {
+        } elseif ($exportConfig->hasOnly(TournamentConfig::PLANNING)) {
             return "wedstrijdschema";
-        } elseif( $exportConfig->hasOnly(TournamentConfig::PIVOTTABLES) ) {
+        } elseif ($exportConfig->hasOnly(TournamentConfig::PIVOTTABLES)) {
             return "poule-draaitabellen";
-        } elseif( $exportConfig->hasOnly(TournamentConfig::QRCODE) ) {
+        } elseif ($exportConfig->hasOnly(TournamentConfig::QRCODE)) {
             return "qrcode-en-link";
         }
         return "toernooi";
+    }
+
+    public function saveLockerRooms(Request $request, Response $response, $args): Response
+    {
+        try {
+            /** @var ArrayCollection|LockerRoom[] $lockerRoomsSer */
+            $lockerRoomsSer = $this->serializer->deserialize(
+                $this->getRawData(),
+                'ArrayCollection<FCToernooi\LockerRoom>',
+                'json'
+            );
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $this->lockerRoomRepos->update($tournament, $lockerRoomsSer);
+
+            $json = $this->serializer->serialize($tournament->getLockerRooms(), 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
     }
 
     protected function sendEmailOldStructure(Tournament $tournament)

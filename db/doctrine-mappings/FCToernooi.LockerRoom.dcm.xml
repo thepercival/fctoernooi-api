@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="FCToernooi\LockerRoom" table="lockerrooms" repository-class="FCToernooi\LockerRoom\Repository">
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+        <field name="name" column="name" type="string" length="6" nullable="false" unique="false"/>
+        <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="lockerRooms">
+            <join-columns>
+                <join-column name="tournamentid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+            </join-columns>
+        </many-to-one>
+        <many-to-many field="competitors" target-entity="Voetbal\Competitor">
+            <join-table name="lockerRooms_competitors">
+                <join-columns>
+                    <join-column name="lockerRoom_id" referenced-column-name="id"/>
+                </join-columns>
+                <inverse-join-columns>
+                    <join-column name="competitor_id" referenced-column-name="id"/>
+                </inverse-join-columns>
+            </join-table>
+        </many-to-many>
+    </entity>
+</doctrine-mapping>

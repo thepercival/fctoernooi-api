@@ -19,6 +19,8 @@ FCToernooi\Tournament:
       groups: [roles]
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>
+    lockerRooms:
+      type: ArrayCollection<FCToernooi\LockerRoom>
     updated:
       type: boolean
       access_type: property

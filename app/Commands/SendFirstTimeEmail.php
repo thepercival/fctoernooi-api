@@ -102,6 +102,7 @@ EOT;
         $prepend = "email: " . $user->getEmailaddress() . "<br><br>link: " . $this->config->getString(
                 "www.wwwurl"
             ) . $tournament->getId() . "<br><br>";
+        $prepend .= "publiek: " . ($tournament->getPublic() ? "ja" : "nee") . "<br><br>";
         $this->mailer->sendToAdmin($adminSubject, $prepend . $body);
     }
 
