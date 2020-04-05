@@ -5,17 +5,18 @@ namespace App\Commands;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\User;
+use Voetbal\Structure;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
-use App\Settings\Www as WwwSettings;
 use App\Mailer;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\User\Repository as UserRepository;
+use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Structure\Service as StructureService;
 
 class SendFirstTimeEmail extends Command
 {
@@ -23,6 +24,10 @@ class SendFirstTimeEmail extends Command
      * @var TournamentRepository
      */
     protected $tournamentRepos;
+    /**
+     * @var StructureRepository
+     */
+    protected $structureRepos;
     /**
      * @var UserRepository
      */
@@ -32,6 +37,7 @@ class SendFirstTimeEmail extends Command
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->userRepos = $container->get(UserRepository::class);
+        $this->structureRepos = $container->get(StructureRepository::class);
         parent::__construct($container->get(Configuration::class));
     }
 
@@ -103,7 +109,35 @@ EOT;
                 "www.wwwurl"
             ) . $tournament->getId() . "<br><br>";
         $prepend .= "publiek: " . ($tournament->getPublic() ? "ja" : "nee") . "<br><br>";
+
+        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
+        if ($structure instanceof Structure) {
+            $prepend .= "structuur gewijzigd: " . ($this->hasChanged($structure) ? "ja" : "nee") . "<br><br>";
+            $nrOfCompetitors = count($structure->getFirstRoundNumber()->getCompetitors());
+            $prepend .= "aantal deelnemers: " . $nrOfCompetitors . "<br><br>";
+        } else {
+            $prepend .= "structuur gewijzigd: geen geldige structuur" . "<br><br>";
+        }
+
         $this->mailer->sendToAdmin($adminSubject, $prepend . $body);
+    }
+
+    protected function hasChanged(Structure $structure): bool
+    {
+        $firstRoundNumber = $structure->getFirstRoundNumber();
+        if ($firstRoundNumber->hasNext()) {
+            return true;
+        }
+        $rootRound = $structure->getRootRound();
+        if ($rootRound->getPoules()->count() !== 1) {
+            return true;
+        }
+        $poule = $rootRound->getPoule(1);
+        if ($poule === null || $poule->getPlaces()->count() !== StructureService::DEFAULTNROFPLACES) {
+            return true;
+        }
+
+        return true;
     }
 
     protected function initMailer(LoggerInterface $logger)

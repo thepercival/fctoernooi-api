@@ -9,6 +9,7 @@
 namespace FCToernooi;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Voetbal\Competitor;
 
 class LockerRoom
@@ -30,7 +31,7 @@ class LockerRoom
      */
     private $competitors;
     /**
-     * @var array|int[]
+     * @var Collection|int[]
      */
     private $competitorIds;
 
@@ -119,7 +120,7 @@ class LockerRoom
     }
 
     /**
-     * @return array|ArrayCollection|int[]
+     * @return Collection|int[]
      */
     public function getCompetitorIds()
     {
@@ -134,9 +135,9 @@ class LockerRoom
     }
 
     /**
-     * @param ArrayCollection | int[] $competitorIds
+     * @param Collection | int[] $competitorIds
      */
-    public function setCompetitorIds(ArrayCollection $competitorIds)
+    public function setCompetitorIds(Collection $competitorIds)
     {
         $this->competitorIds = $competitorIds;
     }

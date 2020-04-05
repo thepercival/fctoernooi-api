@@ -137,5 +137,4 @@ class Repository extends \Voetbal\Repository
         $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
         return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
     }
-
 }

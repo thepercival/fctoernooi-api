@@ -10,6 +10,7 @@ use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
 use App\Commands\SendFirstTimeEmail;
+use App\Commands\Validator;
 
 return [
     "app:create-default-planning-input" => function (ContainerInterface $container) {
@@ -29,5 +30,8 @@ return [
     },
     "app:send-firsttime-email" => function (ContainerInterface $container) {
         return new SendFirstTimeEmail($container);
+    },
+    "app:validate" => function (ContainerInterface $container) {
+        return new Validator($container);
     }
 ];
