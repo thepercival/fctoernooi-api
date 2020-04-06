@@ -31,6 +31,7 @@ use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
 use App\Copiers\StructureCopier;
 use Voetbal\Round\Number\PlanningCreator;
+use Voetbal\Competitor\Repository as CompetitorRepository;
 use Selective\Config\Configuration;
 
 class TournamentAction extends Action
@@ -56,6 +57,10 @@ class TournamentAction extends Action
      */
     protected $lockerRoomRepos;
     /**
+     * @var CompetitorRepository
+     */
+    protected $competitorRepos;
+    /**
      * @var PlanningCreator
      */
     protected $planningCreator;
@@ -76,6 +81,7 @@ class TournamentAction extends Action
         RoleRepository $roleRepos,
         StructureRepository $structureRepos,
         LockerRoomRepistory $lockerRoomRepos,
+        CompetitorRepository $competitorRepos,
         PlanningCreator $planningCreator,
         Mailer $mailer,
         Configuration $config
@@ -86,6 +92,7 @@ class TournamentAction extends Action
         $this->roleRepos = $roleRepos;
         $this->structureRepos = $structureRepos;
         $this->lockerRoomRepos = $lockerRoomRepos;
+        $this->competitorRepos = $competitorRepos;
         $this->planningCreator = $planningCreator;
         $this->mailer = $mailer;
         $this->config = $config;
@@ -239,10 +246,15 @@ class TournamentAction extends Action
 
     public function remove( Request $request, Response $response, $args ): Response
     {
-        try{
+        try {
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
-            $this->tournamentRepos->remove( $tournament );
+            $association = $tournament->getCompetition()->getLeague()->getAssociation();
+
+            $this->tournamentRepos->remove($tournament);
+
+            $this->competitorRepos->removeUnused($association);
+
             return $response->withStatus(200);
         }
         catch( \Exception $e ){

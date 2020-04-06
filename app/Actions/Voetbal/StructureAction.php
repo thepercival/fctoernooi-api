@@ -13,6 +13,7 @@ use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Competitor\Repository as CompetitorRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
@@ -23,15 +24,20 @@ final class StructureAction extends Action
      * @var StructureRepository
      */
     protected $structureRepos;
+    /**
+     * @var CompetitorRepository
+     */
+    protected $competitorRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        StructureRepository $structureRepos
-    )
-    {
-        parent::__construct($logger,$serializer);
+        StructureRepository $structureRepos,
+        CompetitorRepository $competitorRepos
+    ) {
+        parent::__construct($logger, $serializer);
         $this->structureRepos = $structureRepos;
+        $this->competitorRepos = $competitorRepos;
     }
 
     public function fetchOne( Request $request, Response $response, $args ): Response
@@ -57,12 +63,14 @@ final class StructureAction extends Action
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
-            $competitors = $structure ? $structure->getFirstRoundNumber()->getCompetitors() : [];
-            $structureCopier = new StructureCopier($competition, $competitors);
+            $existingCompetitors = $structure ? $structure->getFirstRoundNumber()->getCompetitors() : [];
+            $structureCopier = new StructureCopier($competition, $existingCompetitors);
             $newStructure = $structureCopier->copy($structureSer);
 
             $roundNumberAsValue = 1;
             $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
+
+            $this->competitorRepos->removeUnused($competition->getLeague()->getAssociation());
 
             $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);

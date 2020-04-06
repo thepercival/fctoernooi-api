@@ -137,7 +137,7 @@ EOT;
             return true;
         }
 
-        return true;
+        return false;
     }
 
     protected function initMailer(LoggerInterface $logger)
