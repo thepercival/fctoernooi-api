@@ -17,8 +17,12 @@ class QRService
     {
     }
 
-    public function getPngPath( Tournament $tournament, string $qrCodeText, int $imgWidth )
+    public function writeToPng(Tournament $tournament, string $qrCodeText, int $imgWidth): string
     {
+        $path = $this->getDirectory() . DIRECTORY_SEPARATOR . $tournament->getId() . '-' . $imgWidth . '.png';
+        if (file_exists($path)) {
+            return $path;
+        }
         // Create a basic QR code
         $qrCode = new QrCode($qrCodeText);
         $qrCode->setSize($imgWidth);
@@ -40,8 +44,32 @@ class QRService
         // echo $qrCode->writeString();
 
         // Save it to a file
-        $path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'qrcode'.$tournament->getId().'.png';
-        $qrCode->writeFile( $path );
+
+        $qrCode->writeFile($path);
         return $path;
+    }
+
+    public function writeToJpg(Tournament $tournament, string $qrCodeText, int $imgWidth): string
+    {
+        $path = $this->getDirectory() . DIRECTORY_SEPARATOR . $tournament->getId() . '-' . $imgWidth . '.jpg';
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        $pngPath = $this->writeToPng($tournament, $qrCodeText, $imgWidth);
+
+        $image = imagecreatefrompng($pngPath);
+        imagejpeg($image, $path);
+        imagedestroy($image);
+        return $path;
+    }
+
+    protected function getDirectory()
+    {
+        $dirname = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fctoernooiqrcode";
+        if (!file_exists($dirname)) {
+            mkdir($dirname, 0777);
+        }
+        return $dirname;
     }
 }

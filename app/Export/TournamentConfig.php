@@ -12,6 +12,7 @@ class TournamentConfig
     CONST PLANNING = 32;
     CONST PIVOTTABLES = 64;
     CONST QRCODE = 128;
+    CONST LOCKERROOMS = 256;
 
     /**
      * @var int
@@ -26,7 +27,8 @@ class TournamentConfig
         bool $gamesperfield = false,
         bool $planning = false,
         bool $poulePivotTables = false,
-        bool $qrcode = false
+        bool $qrcode = false,
+        bool $lockerRooms = false
     )
     {
         $this->value = $gamenotes ? static::GAMENOTES : 0;
@@ -37,6 +39,7 @@ class TournamentConfig
         $this->value += $planning ? static::PLANNING : 0;
         $this->value += $poulePivotTables ? static::PIVOTTABLES : 0;
         $this->value += $qrcode ? static::QRCODE : 0;
+        $this->value += $lockerRooms ? static::LOCKERROOMS : 0;
     }
 
     /**
@@ -100,7 +103,15 @@ class TournamentConfig
      */
     public function getQRCode()
     {
-        return ( $this->value & static::QRCODE ) === static::QRCODE;
+        return ($this->value & static::QRCODE) === static::QRCODE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLockerRooms()
+    {
+        return ($this->value & static::LOCKERROOMS) === static::LOCKERROOMS;
     }
 
     /**
@@ -114,7 +125,7 @@ class TournamentConfig
     /**
      * @return bool
      */
-    public function hasOnly( int $option )
+    public function hasOnly(int $option)
     {
         return $this->value === $option;
     }

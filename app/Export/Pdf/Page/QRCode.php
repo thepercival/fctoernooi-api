@@ -14,16 +14,22 @@ use FCToernooi\QRService;
 class QRCode extends ToernooiPdfPage
 {
     protected $rowHeight;
+    /**
+     * @var QRService
+     */
     protected $qrService;
 
-    public function __construct( $param1 )
+    public function __construct($param1)
     {
-        parent::__construct( $param1 );
-        $this->setLineWidth( 0.5 );
+        parent::__construct($param1);
+        $this->setLineWidth(0.5);
         $this->qrService = new QRService();
     }
 
-    public function getPageMargin(){ return 20; }
+    public function getPageMargin()
+    {
+        return 20;
+    }
     public function getHeaderHeight(){ return 0; }
 
     protected function getRowHeight() {
@@ -35,16 +41,16 @@ class QRCode extends ToernooiPdfPage
 
     public function draw()
     {
-        $nY = $this->drawHeader( "qrcode" );
+        $nY = $this->drawHeader("qrcode");
 
         $url = $this->getParent()->getUrl() . $this->getParent()->getTournament()->getId();
 
-        $nY = $this->drawSubHeader( $url, $nY );
+        $nY = $this->drawSubHeader($url, $nY);
 
         $imgWidth = 300;
-        $qrPngPath = $this->qrService->getPngPath( $this->getParent()->getTournament(), $url, $imgWidth );
-        $img = \Zend_Pdf_Resource_ImageFactory::factory( $qrPngPath );
-        $xLeft = $this->getPageMargin() + ( $this->getDisplayWidth() / 2 ) - ( $imgWidth / 2 );
-        $this->drawImage( $img, $xLeft, $nY - $imgWidth, $xLeft + $imgWidth, $nY );
+        $qrPath = $this->qrService->writeToJpg($this->getParent()->getTournament(), $url, $imgWidth);
+        $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
+        $xLeft = $this->getPageMargin() + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
+        $this->drawImage($img, $xLeft, $nY - $imgWidth, $xLeft + $imgWidth, $nY);
     }
 }

@@ -391,7 +391,8 @@ class TournamentAction extends Action
             $getParam("gamesperfield"),
             $getParam("planning"),
             $getParam("poulepivottables"),
-            $getParam("qrcode")
+            $getParam("qrcode"),
+            $getParam("lockerrooms")
         );
         if ($exportConfig->allOptionsOff()) {
             throw new \Exception("kies minimaal 1 exportoptie", E_ERROR);

@@ -9,7 +9,7 @@
 namespace App\Export\Pdf;
 
 use FCToernooi\Tournament;
-use Voetbal\State;
+use FCToernooi\LockerRoom;
 use Voetbal\Structure;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Game;
@@ -114,15 +114,24 @@ class Document extends \Zend_Pdf
         if( $this->config->getGamenotes() ) {
             $this->drawGamenotes();
         }
-        if( $this->config->getGamesperpoule() ) {
-            $this->drawPlanningPerPoule( $this->structure->getFirstRoundNumber() );
+        if ($this->config->getGamesperpoule()) {
+            $this->drawPlanningPerPoule($this->structure->getFirstRoundNumber());
         }
-        if( $this->config->getGamesperfield() ) {
-            $this->drawPlanningPerField( $this->structure->getFirstRoundNumber() );
+        if ($this->config->getGamesperfield()) {
+            $this->drawPlanningPerField($this->structure->getFirstRoundNumber());
         }
-        if( $this->config->getQRCode() ) {
+        if ($this->config->getQRCode()) {
             $page = $this->createPageQRCode();
             $page->draw();
+        }
+        if ($this->config->getLockerRooms()) {
+            $page = $this->createPageLockerRooms();
+            $page->draw();
+
+            foreach ($this->getTournament()->getLockerRooms() as $lockerRoom) {
+                $page = $this->createPageLockerRoom($lockerRoom);
+                $page->draw();
+            }
         }
     }
 
@@ -302,22 +311,43 @@ class Document extends \Zend_Pdf
 
     protected function createPageQRCode()
     {
-        $page = new Page\QRCode( \Zend_Pdf_Page::SIZE_A4 );
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
+        $page = new Page\QRCode(\Zend_Pdf_Page::SIZE_A4);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    public function hasTextWidth( string $key ) {
-        return array_key_exists( $key, $this->widthText );
+    protected function createPageLockerRooms()
+    {
+        $page = new Page\LockerRooms(\Zend_Pdf_Page::SIZE_A4);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
+        $this->pages[] = $page;
+        return $page;
     }
 
-    public function getTextWidth( string $key) {
+    protected function createPageLockerRoom(LockerRoom $lockerRoom)
+    {
+        $page = new Page\LockerRoom(\Zend_Pdf_Page::SIZE_A4, $lockerRoom);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    public function hasTextWidth(string $key)
+    {
+        return array_key_exists($key, $this->widthText);
+    }
+
+    public function getTextWidth(string $key)
+    {
         return $this->widthText[$key];
     }
 
-    public function setTextWidth( string $key, $value ) {
+    public function setTextWidth(string $key, $value)
+    {
         $this->widthText[$key] = $value;
         return $value;
     }
