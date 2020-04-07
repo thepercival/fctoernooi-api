@@ -287,22 +287,27 @@ class TournamentAction extends Action
 
             $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
 
-            $newTournament = $this->tournamentCopier->copy( $tournament, $startDateTime, $user );
+            $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
             $this->tournamentRepos->customPersist($newTournament, true);
 
-            $structure = $this->structureRepos->getStructure( $competition );
+            $structure = $this->structureRepos->getStructure($competition);
             $competitorService = new CompetitorService();
-            $newCompetitors = $competitorService->createCompetitorsFromRound( $structure->getRootRound(), $newTournament->getCompetition()->getLeague()->getAssociation() );
-            foreach( $newCompetitors as $newCompetitor ) {
+            $newCompetitors = $competitorService->createCompetitorsFromRound($structure->getRootRound(),
+                                                                             $newTournament->getCompetition(
+                                                                             )->getLeague()->getAssociation()
+            );
+            foreach ($newCompetitors as $newCompetitor) {
                 $em->persist($newCompetitor);
             }
+
+            $this->tournamentCopier->copyLockerRooms($tournament, $newTournament, $newCompetitors);
 
             // $structureService = new StructureService( new TournamentStructureOptions() );
             $structureCopier = new StructureCopier($newTournament->getCompetition(), $newCompetitors);
             $newStructure = $structureCopier->copy($structure);
             $this->structureRepos->add($newStructure);
 
-            $this->planningCreator->create( $newStructure->getFirstRoundNumber(), $newTournament->getBreak() );
+            $this->planningCreator->create($newStructure->getFirstRoundNumber(), $newTournament->getBreak());
 
             $conn->commit();
 
