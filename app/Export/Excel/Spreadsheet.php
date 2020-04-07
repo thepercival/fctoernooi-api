@@ -16,6 +16,7 @@ use App\Export\Excel\Worksheet\Planning\PerField as PlanningPerFieldSheet;
 use App\Export\Excel\Worksheet\PoulePivotTables as PoulePivotTablesSheet;
 use App\Export\Excel\Worksheet\Gamenotes as GamenotesSheet;
 use App\Export\Excel\Worksheet\QRCode as QRCodeSheet;
+use App\Export\Excel\Worksheet\LockerRooms as LockerRoomsSheet;
 
 class Spreadsheet extends SpreadsheetBase
 {
@@ -29,6 +30,7 @@ class Spreadsheet extends SpreadsheetBase
     const INDEX_PLANNING_PER_FIELD = 5;
     const INDEX_POULEPIVOTTABLES = 6;
     const INDEX_QRCODE = 7;
+    const INDEX_LOCKERROOMS = 8;
 
     public function __construct(
         Tournament $tournament,
@@ -83,13 +85,17 @@ class Spreadsheet extends SpreadsheetBase
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if( $this->config->getPoulePivotTables() ) {
+        if ($this->config->getPoulePivotTables()) {
             $poulePivotTablesSheet = new PoulePivotTablesSheet($this);
             $poulePivotTablesSheet->draw();
         }
-        if( $this->config->getQRCode() ) {
+        if ($this->config->getQRCode()) {
             $qrcodeSheet = new QRCodeSheet($this);
             $qrcodeSheet->draw();
+        }
+        if ($this->config->getLockerRooms()) {
+            $lockerRoomsSheet = new LockerRoomsSheet($this);
+            $lockerRoomsSheet->draw();
         }
         $this->setActiveSheetIndex(0);
     }
