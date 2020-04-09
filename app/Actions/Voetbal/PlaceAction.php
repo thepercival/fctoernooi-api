@@ -78,7 +78,9 @@ final class PlaceAction extends Action
 
             $this->placeRepos->save($place);
 
-            $this->competitorRepos->removeUnused($competition->getLeague()->getAssociation());
+            if ($place->getCompetitor() === null) {
+                $this->competitorRepos->removeUnused($competition->getLeague()->getAssociation());
+            }
 
             $json = $this->serializer->serialize($place, 'json');
             return $this->respondWithJson($response, $json);
