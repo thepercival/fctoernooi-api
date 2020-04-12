@@ -18,6 +18,7 @@ use FCToernooi\Auth\Service as AuthService;
 use \Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use stdClass;
 use Tuupola\Base62;
 use FCToernooi\Auth\Item as AuthItem;
 
@@ -57,7 +58,7 @@ final class AuthAction extends Action
 	public function register( Request $request, Response $response, $args): Response
 	{
 		try{
-            /** @var \stdClass $registerData */
+            /** @var stdClass $registerData */
             $registerData = $this->getFormData($request);
             if (property_exists($registerData, "emailaddress") === false) {
                 throw new \Exception("geen emailadres ingevoerd");
@@ -84,7 +85,7 @@ final class AuthAction extends Action
     public function login( Request $request, Response $response, $args): Response
 	{
        try{
-           /** @var \stdClass $authData */
+           /** @var stdClass $authData */
            $authData = $this->getFormData( $request );
            if( !property_exists( $authData, "emailaddress") || strlen($authData->emailaddress) === 0 ) {
                throw new \Exception( "het emailadres is niet opgegeven");
@@ -120,7 +121,7 @@ final class AuthAction extends Action
     public function passwordreset( Request $request, Response $response, $args ): Response
     {
         try{
-            /** @var \stdClass $paswordResetData */
+            /** @var stdClass $paswordResetData */
             $paswordResetData = $this->getFormData( $request );
             if( property_exists($paswordResetData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");
@@ -141,7 +142,7 @@ final class AuthAction extends Action
     public function passwordchange( Request $request, Response $response, $args ): Response
     {
         try{
-            /** @var \stdClass $paswordChangeData */
+            /** @var stdClass $paswordChangeData */
             $paswordChangeData = $this->getFormData( $request );
             if( property_exists($paswordChangeData, "emailaddress" ) === false ) {
                 throw new \Exception( "geen emailadres ingevoerd");

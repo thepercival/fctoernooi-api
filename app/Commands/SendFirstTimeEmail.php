@@ -107,16 +107,17 @@ EOT;
             ) . ")";
         $prepend = "email: " . $user->getEmailaddress() . "<br><br>link: " . $this->config->getString(
                 "www.wwwurl"
-            ) . $tournament->getId() . "<br><br>";
-        $prepend .= "publiek: " . ($tournament->getPublic() ? "ja" : "nee") . "<br><br>";
-
+            ) . $tournament->getId() . "<br>";
+        $prepend .= "publiek: " . ($tournament->getPublic() ? "ja" : "nee") . "<br>";
+        $prepend .= "start: " . ($tournament->getCompetition()->getStartDateTime()->format("Y-m-d")) . "<br>";
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
         if ($structure instanceof Structure) {
-            $prepend .= "structuur gewijzigd: " . ($this->hasChanged($structure) ? "ja" : "nee") . "<br><br>";
+            $prepend .= "structuur poules->plekken: " . count($structure->getFirstRoundNumber()->getPoules()) . "->";
+            $prepend .= $structure->getFirstRoundNumber()->getNrOfPlaces() . "<br>";
             $nrOfCompetitors = count($structure->getFirstRoundNumber()->getCompetitors());
-            $prepend .= "aantal deelnemers: " . $nrOfCompetitors . "<br><br>";
+            $prepend .= "aantal deelnemers: " . $nrOfCompetitors . "<br>";
         } else {
-            $prepend .= "structuur gewijzigd: geen geldige structuur" . "<br><br>";
+            $prepend .= "structuur gewijzigd: geen geldige structuur" . "<br>";
         }
 
         $this->mailer->sendToAdmin($adminSubject, $prepend . $body);
