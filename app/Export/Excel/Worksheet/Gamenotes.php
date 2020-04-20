@@ -36,10 +36,10 @@ class Gamenotes extends FCToernooiWorksheet
      */
     protected $translationService;
 
-    public function __construct( Spreadsheet $parent = null )
+    public function __construct(Spreadsheet $parent = null)
     {
-        parent::__construct( $parent, 'wedstrijdbriefjes' );
-        $parent->addSheet($this, Spreadsheet::INDEX_GAMENOTES );
+        parent::__construct($parent, 'wedstrijdbriefjes');
+        $parent->addSheet($this, Spreadsheet::INDEX_GAMENOTES);
         $this->setWidthColumns();
         $this->setCustomHeader();
         $this->sportScoreConfigService = new SportScoreConfigService();
@@ -48,29 +48,31 @@ class Gamenotes extends FCToernooiWorksheet
 
     protected function setWidthColumns()
     {
-        $this->getColumnDimensionByColumn( 1 )->setWidth(10);
-        $this->getColumnDimensionByColumn( 2 )->setWidth(28);
-        $this->getColumnDimensionByColumn( 3 )->setWidth(4);
-        $this->getColumnDimensionByColumn( 4 )->setWidth(14);
-        $this->getColumnDimensionByColumn( 5 )->setWidth(14);
+        $this->getColumnDimensionByColumn(1)->setWidth(10);
+        $this->getColumnDimensionByColumn(2)->setWidth(28);
+        $this->getColumnDimensionByColumn(3)->setWidth(4);
+        $this->getColumnDimensionByColumn(4)->setWidth(14);
+        $this->getColumnDimensionByColumn(5)->setWidth(14);
     }
 
-    protected function getMaxNrOfColumns(): int {
+    protected function getMaxNrOfColumns(): int
+    {
         return 4;
     }
 
-    public function draw() {
+    public function draw()
+    {
         $row = 1;
-        $games = $this->getParent()->getScheduledGames( $this->getParent()->getStructure()->getRootRound() );
-        foreach( $games as $game ) {
-            $row = $this->drawGame( $game, $row );
+        $games = $this->getParent()->getScheduledGames($this->getParent()->getStructure()->getRootRound());
+        foreach ($games as $game) {
+            $row = $this->drawGame($game, $row);
         }
     }
 
-    public function drawGame( Game $game, int $row ): int
+    public function drawGame(Game $game, int $row): int
     {
-        $range = $this->range( 1, $row, 5, $row );
-        $this->border( $this->getStyle($range), 'top' );
+        $range = $this->range(1, $row, 5, $row);
+        $this->border($this->getStyle($range), 'top');
 
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
@@ -80,41 +82,47 @@ class Gamenotes extends FCToernooiWorksheet
         $nameService = $this->getParent()->getNameService();
 
         // ronde
-        $row = $this->drawGameRow( $row, "ronde", $nameService->getRoundNumberName($roundNumber) );
+        $row = $this->drawGameRow($row, "ronde", $nameService->getRoundNumberName($roundNumber));
 
         // poule
-        $row = $this->drawGameRow( $row, $bNeedsRanking ? "poule" : "wedstrijd", $nameService->getPouleName($game->getPoule(), false) );
+        $row = $this->drawGameRow(
+            $row,
+            $bNeedsRanking ? "poule" : "wedstrijd",
+            $nameService->getPouleName($game->getPoule(), false)
+        );
 
         // plekken
-        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), false, !$planningConfig->getTeamup() );
-        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), false, !$planningConfig->getTeamup() );
-        $row = $this->drawGameRow( $row, "plekken", $home . " - " . $away );
+        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), false, !$planningConfig->getTeamup());
+        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), false, !$planningConfig->getTeamup());
+        $row = $this->drawGameRow($row, "plekken", $home . " - " . $away);
 
         // speelronde
-        if( $bNeedsRanking ) {
-            $row = $this->drawGameRow( $row, "speelronde", "" . $game->getRound()->getNumber()->getNumber() );
+        if ($bNeedsRanking) {
+            $row = $this->drawGameRow($row, "speelronde", "" . $game->getRound()->getNumber()->getNumber());
         }
 
 
-        if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
+        if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
             setlocale(LC_ALL, 'nl_NL.UTF-8'); //
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );
+            $dateTime = strtolower(
+                $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp())
+            );
             // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
             if ($planningConfig->getExtension()) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
             // tijdstip
-            $row = $this->drawGameRow( $row, "tijdstip", $dateTime );
+            $row = $this->drawGameRow($row, "tijdstip", $dateTime);
 
             // duur
-            $row = $this->drawGameRow( $row, "duur", $duration );
+            $row = $this->drawGameRow($row, "duur", $duration);
         }
 
         // field
         $fieldDescription = $game->getField()->getName();
-        if( $roundNumber->getCompetition()->hasMultipleSportConfigs() ) {
+        if ($roundNumber->getCompetition()->hasMultipleSportConfigs()) {
             $fieldDescription .= " - " . $game->getField()->getSport()->getName();
         }
         $row = $this->drawGameRow($row, "veld", $fieldDescription);
@@ -141,13 +149,13 @@ class Gamenotes extends FCToernooiWorksheet
             $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
             $cell = $this->getCellByColumnAndRow(2, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $cell->setValue( $home );
+            $cell->setValue($home);
 
             $cell = $this->getCellByColumnAndRow(3, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->setValue("-");
 
-            $away = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
+            $away = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
             $cell = $this->getCellByColumnAndRow(4, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $cell->setValue($away);
@@ -239,14 +247,14 @@ class Gamenotes extends FCToernooiWorksheet
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             $cell->setValue($name);
         }
-        return $this->getStartRow( $row );
+        return $this->getStartRow($row);
     }
 
-    public function drawGameRow( int $row, string $description, string $value, int $align = null ): int
+    public function drawGameRow(int $row, string $description, string $value, int $align = null): int
     {
         $cell = $this->getCellByColumnAndRow(2, $row);
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $cell->setValue( $description );
+        $cell->setValue($description);
 
         $cell = $this->getCellByColumnAndRow(3, $row);
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -308,16 +316,18 @@ class Gamenotes extends FCToernooiWorksheet
         return (($scoreConfigMax * 2) - 1);
     }
 
-    protected function getStartRow( int $row ): int {
+    protected function getStartRow(int $row): int
+    {
         $middle = $this->getMiddle();
-        $rest = ( $row % WorksheetBase::HEIGHT_IN_CELLS );
-        if( $rest < $middle ) {
+        $rest = ($row % WorksheetBase::HEIGHT_IN_CELLS);
+        if ($rest < $middle) {
             return ($row - $rest) + $middle;
         }
         return ($row - $rest) + WorksheetBase::HEIGHT_IN_CELLS + 1;
     }
 
-    protected function getMiddle(): int {
-        return (int)(( WorksheetBase::HEIGHT_IN_CELLS + ( WorksheetBase::HEIGHT_IN_CELLS % 2 ) ) / 2);
+    protected function getMiddle(): int
+    {
+        return (int)((WorksheetBase::HEIGHT_IN_CELLS + (WorksheetBase::HEIGHT_IN_CELLS % 2)) / 2);
     }
 }

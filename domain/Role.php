@@ -40,10 +40,10 @@ class Role
     const REFEREE = 16;
     const ALL = 31;
 
-    public function __construct( Tournament $tournament, User $user )
+    public function __construct(Tournament $tournament, User $user)
     {
         $this->tournament = $tournament;
-        $this->tournament->getRoles()->add( $this );
+        $this->tournament->getRoles()->add($this);
         $this->user = $user;
     }
 
@@ -60,7 +60,7 @@ class Role
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -84,7 +84,7 @@ class Role
     /**
      * @param User $user
      */
-    public function setUser( User $user )
+    public function setUser(User $user)
     {
         $this->user = $user;
     }
@@ -100,10 +100,10 @@ class Role
     /**
      * @param int $value
      */
-    public function setValue( int $value )
+    public function setValue(int $value)
     {
-        if ( ( $value & static::ALL ) !== $value ){
-            throw new \InvalidArgumentException( "de rol heeft een onjuiste waarde", E_ERROR );
+        if (($value & static::ALL) !== $value) {
+            throw new \InvalidArgumentException("de rol heeft een onjuiste waarde", E_ERROR);
         }
         $this->value = $value;
     }

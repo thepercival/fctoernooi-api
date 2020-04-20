@@ -26,28 +26,28 @@ class Indeling extends FCToernooiWorksheet
     const NR_OF_COLUMNS = 8;
     const BORDER_COLOR = 'black';
 
-    public function __construct( Spreadsheet $parent = null )
+    public function __construct(Spreadsheet $parent = null)
     {
-        parent::__construct( $parent, 'indeling' );
-        $parent->addSheet($this, Spreadsheet::INDEX_INDELING );
+        parent::__construct($parent, 'indeling');
+        $parent->addSheet($this, Spreadsheet::INDEX_INDELING);
         $this->setWidthColumns();
         $this->setCustomHeader();
     }
 
     protected function setWidthColumns()
     {
-        $this->getColumnDimensionByColumn( 1 )->setWidth(Indeling::WIDTH_NR_IN_CELLS);
-        $this->getColumnDimensionByColumn( 2 )->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
+        $this->getColumnDimensionByColumn(1)->setWidth(Indeling::WIDTH_NR_IN_CELLS);
+        $this->getColumnDimensionByColumn(2)->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
 
-        $this->getColumnDimensionByColumn( 3 )->setWidth(Indeling::WIDTH_MARGIN_IN_CELLS);
+        $this->getColumnDimensionByColumn(3)->setWidth(Indeling::WIDTH_MARGIN_IN_CELLS);
 
-        $this->getColumnDimensionByColumn( 4 )->setWidth(Indeling::WIDTH_NR_IN_CELLS);
-        $this->getColumnDimensionByColumn( 5 )->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
+        $this->getColumnDimensionByColumn(4)->setWidth(Indeling::WIDTH_NR_IN_CELLS);
+        $this->getColumnDimensionByColumn(5)->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
 
-        $this->getColumnDimensionByColumn( 6 )->setWidth(Indeling::WIDTH_MARGIN_IN_CELLS);
+        $this->getColumnDimensionByColumn(6)->setWidth(Indeling::WIDTH_MARGIN_IN_CELLS);
 
-        $this->getColumnDimensionByColumn( 7 )->setWidth(Indeling::WIDTH_NR_IN_CELLS);
-        $this->getColumnDimensionByColumn( 8 )->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
+        $this->getColumnDimensionByColumn(7)->setWidth(Indeling::WIDTH_NR_IN_CELLS);
+        $this->getColumnDimensionByColumn(8)->setWidth(Indeling::WIDTH_NAME_IN_CELLS);
     }
 
     public function draw()
@@ -55,41 +55,41 @@ class Indeling extends FCToernooiWorksheet
         $rooRound = $this->getParent()->getStructure()->getRootRound();
 
         $row = 1;
-        $row = $this->drawSubHeaderHelper( $row, "Indeling" );
-        $row = $this->drawGrouping( $rooRound, $row  );
+        $row = $this->drawSubHeaderHelper($row, "Indeling");
+        $row = $this->drawGrouping($rooRound, $row);
     }
 
-    protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
-        if( $colStart === null ) {
+    protected function drawSubHeaderHelper(int $rowStart, string $title, int $colStart = null, int $colEnd = null): int
+    {
+        if ($colStart === null) {
             $colStart = 1;
         }
-        if( $colEnd === null ) {
+        if ($colEnd === null) {
             $colEnd = Indeling::NR_OF_COLUMNS;
         }
-        return parent::drawSubHeader( $rowStart, $title, $colStart, $colEnd );
+        return parent::drawSubHeader($rowStart, $title, $colStart, $colEnd);
     }
 
-    public function drawGrouping( Round $rootRound, int $rowStart ): int
+    public function drawGrouping(Round $rootRound, int $rowStart): int
     {
         $row = $rowStart;
         $nrOnRow = 0;
-        foreach( $rootRound->getPoules() as $poule ) {
+        foreach ($rootRound->getPoules() as $poule) {
+            $columnStart = ($nrOnRow * Indeling::NR_OF_POULES_PER_LINE) + 1;
+            $this->mergeCells($this->range($columnStart, $row, $columnStart + 1, $row));
 
-            $columnStart = ( $nrOnRow * Indeling::NR_OF_POULES_PER_LINE ) + 1;
-            $this->mergeCells($this->range(  $columnStart, $row, $columnStart + 1, $row) );
-
-            $nrOnRow = ($poule->getNumber() % Indeling::NR_OF_POULES_PER_LINE );
+            $nrOnRow = ($poule->getNumber() % Indeling::NR_OF_POULES_PER_LINE);
 
             $cellPouleName = $this->getCellByColumnAndRow($columnStart, $row);
-            $cellPouleName->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-            $cellPouleName->setValue( $this->getParent()->getNameService()->getPouleName( $poule, true ) );
+            $cellPouleName->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cellPouleName->setValue($this->getParent()->getNameService()->getPouleName($poule, true));
 
             // drawPlaces
-            foreach( $poule->getPlaces() as $place ) {
-                $this->getCellByColumnAndRow($columnStart, $row + $place->getNumber() )->setValue( $place->getNumber() );
-                if ( $place->getCompetitor() !== null ) {
-                    $name = $this->getParent()->getNameService()->getPlaceName( $place, true );
-                    $this->getCellByColumnAndRow($columnStart + 1, $row + $place->getNumber() )->setValue( $name );
+            foreach ($poule->getPlaces() as $place) {
+                $this->getCellByColumnAndRow($columnStart, $row + $place->getNumber())->setValue($place->getNumber());
+                if ($place->getCompetitor() !== null) {
+                    $name = $this->getParent()->getNameService()->getPlaceName($place, true);
+                    $this->getCellByColumnAndRow($columnStart + 1, $row + $place->getNumber())->setValue($name);
                 }
             }
 
@@ -105,7 +105,7 @@ class Indeling extends FCToernooiWorksheet
                     ],
                 ],
             ];
-            $range = $this->range( $columnStart, $row, $columnStart + 1, $row + $poule->getPlaces()->count() );
+            $range = $this->range($columnStart, $row, $columnStart + 1, $row + $poule->getPlaces()->count());
             $this->getStyle($range)->applyFromArray($styleArray);
 
             $styleArray = [
@@ -116,15 +116,15 @@ class Indeling extends FCToernooiWorksheet
                     ],
                 ],
             ];
-            $range = $this->range( $columnStart, $row, $columnStart, $row );
+            $range = $this->range($columnStart, $row, $columnStart, $row);
             $this->getStyle($range)->applyFromArray($styleArray);
 
-            if( $nrOnRow === 0 ) {
+            if ($nrOnRow === 0) {
                 $row += 2 + $poule->getPlaces()->count();
             }
         }
 
-        if( $nrOnRow === 0 ) {
+        if ($nrOnRow === 0) {
             return $row;
         }
         return $row + 2 + $rootRound->getPoule(1)->getPlaces()->count();

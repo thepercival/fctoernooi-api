@@ -24,24 +24,27 @@ class Repository extends \Voetbal\Repository
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function checkNrOfSponsors( Tournament $tournament, int $newScreenNr, Sponsor $sponsor = null ) {
+    public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, Sponsor $sponsor = null)
+    {
         $max = static::MAXNROFSPONSORSPERSCREEN;
-        if( $sponsor === null || $sponsor->getScreenNr() !== $newScreenNr ) {
+        if ($sponsor === null || $sponsor->getScreenNr() !== $newScreenNr) {
             $max--;
         }
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb
             ->select('count(s.id)')
-            ->from( Sponsor::class, 's')
-        ;
+            ->from(Sponsor::class, 's');
 
         $qb = $qb->where('s.tournament = :tournament')->andWhere('s.screenNr = :screenNr');
         $qb = $qb->setParameter('tournament', $tournament);
         $qb = $qb->setParameter('screenNr', $newScreenNr);
 
         $nrOfSponsorsPresent = $qb->getQuery()->getSingleScalarResult();
-        if( $nrOfSponsorsPresent >= $max ) {
-            throw new \Exception("er kan geen sponsor aan schermnummer ".$newScreenNr." meer worden toegevoegd, het maximum van ".static::MAXNROFSPONSORSPERSCREEN." is bereikt", E_ERROR );
+        if ($nrOfSponsorsPresent >= $max) {
+            throw new \Exception(
+                "er kan geen sponsor aan schermnummer " . $newScreenNr . " meer worden toegevoegd, het maximum van " . static::MAXNROFSPONSORSPERSCREEN . " is bereikt",
+                E_ERROR
+            );
         }
     }
 }

@@ -59,7 +59,7 @@ class Tournament
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
 
-    public function __construct( Competition $competition )
+    public function __construct(Competition $competition)
     {
         $this->competition = $competition;
         $this->roles = new ArrayCollection();
@@ -81,7 +81,7 @@ class Tournament
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -97,7 +97,7 @@ class Tournament
     /**
      * @param Competition $competition
      */
-    public function setCompetition( Competition $competition )
+    public function setCompetition(Competition $competition)
     {
         $this->competition = $competition;
     }
@@ -145,7 +145,7 @@ class Tournament
     /**
      * @param Period|null $period
      */
-    public function setBreak( Period $period = null )
+    public function setBreak(Period $period = null)
     {
         $this->setBreakStartDateTime($period !== null ? $period->getStartDate() : null);
         $this->setBreakEndDateTime($period !== null ? $period->getEndDate() : null);
@@ -162,7 +162,7 @@ class Tournament
     /**
      * @param bool $public
      */
-    public function setPublic( bool $public )
+    public function setPublic(bool $public)
     {
         $this->public = $public;
     }
@@ -178,15 +178,23 @@ class Tournament
     /**
      * @param ArrayCollection $roles
      */
-    public function setRoles( ArrayCollection $roles)
+    public function setRoles(ArrayCollection $roles)
     {
         $this->roles = $roles;
     }
 
-    public function hasRole( User $user, int $roleValue ) {
-        return ( count(array_filter($this->getRoles()->toArray(), function ( $roleIt, $roleId ) use ( $user, $roleValue ) {
-                return ( $roleIt->getUser() === $user && (( $roleIt->getValue() & $roleValue ) === $roleIt->getValue() ) );
-            }, ARRAY_FILTER_USE_BOTH)) > 0);
+    public function hasRole(User $user, int $roleValue)
+    {
+        return (count(
+                array_filter(
+                    $this->getRoles()->toArray(),
+                    function ($roleIt, $roleId) use ($user, $roleValue) {
+                        return ($roleIt->getUser() === $user && (($roleIt->getValue(
+                                    ) & $roleValue) === $roleIt->getValue()));
+                    },
+                    ARRAY_FILTER_USE_BOTH
+                )
+            ) > 0);
     }
 
     /**
@@ -237,11 +245,11 @@ class Tournament
         $this->exported = $exported;
     }
 
-    public function getReferee( string $emailaddress )
+    public function getReferee(string $emailaddress)
     {
         $referees = $this->getCompetition()->getReferees();
-        foreach($referees as $referee ) {
-            if( $referee->getEmailaddress() === $emailaddress ) {
+        foreach ($referees as $referee) {
+            if ($referee->getEmailaddress() === $emailaddress) {
                 return $referee;
             }
         }

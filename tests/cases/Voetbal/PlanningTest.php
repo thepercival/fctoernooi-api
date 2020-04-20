@@ -24,7 +24,6 @@ use Voetbal\Planning\Validator as PlanningValidator;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Qualify\Group as QualifyGroup;
 
-
 class PlanningTest extends \PHPUnit\Framework\TestCase
 {
     public function testAll()

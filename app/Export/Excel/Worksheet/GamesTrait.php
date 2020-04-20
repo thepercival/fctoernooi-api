@@ -8,7 +8,6 @@
 
 namespace App\Export\Excel\Worksheet;
 
-
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Voetbal\Game;
 use Voetbal\Round\Number as RoundNumber;
@@ -21,50 +20,53 @@ trait GamesTrait
     protected $selfRefereesAssigned;
     protected $refereesAssigned;
 
-    protected function drawSubHeaderHelper( int $rowStart, string $title, int $colStart = null, int $colEnd = null ): int  {
-        if( $colStart === null ) {
+    protected function drawSubHeaderHelper(int $rowStart, string $title, int $colStart = null, int $colEnd = null): int
+    {
+        if ($colStart === null) {
             $colStart = 1;
         }
-        if( $colEnd === null ) {
+        if ($colEnd === null) {
             $colEnd = Planning::NR_OF_COLUMNS;
         }
-        return parent::drawSubHeader( $rowStart, $title, $colStart, $colEnd );
+        return parent::drawSubHeader($rowStart, $title, $colStart, $colEnd);
     }
 
-    public function setSelfRefereesAssigned( bool $selfRefereesAssigned) {
+    public function setSelfRefereesAssigned(bool $selfRefereesAssigned)
+    {
         $this->selfRefereesAssigned = $selfRefereesAssigned;
     }
 
-    public function setRefereesAssigned( bool $refereesAssigned) {
+    public function setRefereesAssigned(bool $refereesAssigned)
+    {
         $this->refereesAssigned = $refereesAssigned;
     }
 
-    public function drawGamesHeader( RoundNumber $roundNumber, int $row ): int {
+    public function drawGamesHeader(RoundNumber $roundNumber, int $row): int
+    {
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_POULE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue($roundNumber->needsRanking() ? "p." : "vs");
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_POULE, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( $roundNumber->needsRanking() ? "p." : "vs" );
-
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_START, $row);
-        if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
-            $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-            $cell->setValue( $this->getParent()->gamesOnSameDay( $roundNumber ) ? "tijd" : "datum tijd" );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_START, $row);
+        if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
+            $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $cell->setValue($this->getParent()->gamesOnSameDay($roundNumber) ? "tijd" : "datum tijd");
         }
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_FIELD, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( "v." );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_FIELD, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue("v.");
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_HOME, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_RIGHT );
-        $cell->setValue( "thuis" );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_HOME, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $cell->setValue("thuis");
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_SCORE, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( "score" );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_SCORE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue("score");
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_AWAY, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_LEFT );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_AWAY, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $cell->setValue("uit");
 
         if ($this->refereesAssigned || $this->selfRefereesAssigned) {
@@ -98,42 +100,42 @@ trait GamesTrait
     public function drawGame(Game $game, int $row, bool $striped = true): int
     {
         if (($game->getBatchNr() % 2) === 0 && $striped === true) {
-            $range = $this->range( Planning::COLUMN_POULE, $row, Planning::NR_OF_COLUMNS, $row);
-            $this->fill( $this->getStyle($range), 'EEEEEE');
+            $range = $this->range(Planning::COLUMN_POULE, $row, Planning::NR_OF_COLUMNS, $row);
+            $this->fill($this->getStyle($range), 'EEEEEE');
         }
 
         $pouleName = $this->getParent()->getNameService()->getPouleName($game->getPoule(), false);
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_POULE, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( $pouleName );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_POULE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue($pouleName);
 
 //        $nX = $this->getPageMargin();
 //        $nRowHeight = $this->getRowHeight();
         $roundNumber = $game->getRound()->getNumber();
 //
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_START, $row);
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_START, $row);
         if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->setValue($this->getDateTime($roundNumber, $game->getStartDateTime()));
         }
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_FIELD, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( $game->getField()->getName() );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_FIELD, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue($game->getField()->getName());
 
-        $home = $this->getParent()->getNameService()->getPlacesFromName( $game->getPlaces( Game::HOME ), true, true );
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_HOME, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_RIGHT );
-        $cell->setValue( $home );
+        $home = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_HOME, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $cell->setValue($home);
 
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_SCORE, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_CENTER );
-        $cell->setValue( $this->getScore($game) );
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_SCORE, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $cell->setValue($this->getScore($game));
 
-        $away = $this->getParent()->getNameService()->getPlacesFromName( $game->getPlaces( Game::AWAY ), true, true );
-        $cell = $this->getCellByColumnAndRow( Planning::COLUMN_AWAY, $row);
-        $cell->getStyle()->getAlignment()->setHorizontal( Alignment::HORIZONTAL_LEFT );
-        $cell->setValue( $away );
+        $away = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(Game::AWAY), true, true);
+        $cell = $this->getCellByColumnAndRow(Planning::COLUMN_AWAY, $row);
+        $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $cell->setValue($away);
 
         $cell = $this->getCellByColumnAndRow(Planning::COLUMN_REFEREE, $row);
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);

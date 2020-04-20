@@ -12,8 +12,8 @@ class StructureOptions extends VoetbalStructureOptions
     {
         parent::__construct(
             new VoetbalRange(1, 16),
-            new VoetbalRange( 2, 40),
-            new VoetbalRange( 2, 12)
+            new VoetbalRange(2, 40),
+            new VoetbalRange(2, 12)
         );
     }
 }

@@ -29,32 +29,30 @@ final class CompetitorAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         CompetitorRepository $competitorRepos
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->competitorRepos = $competitorRepos;
     }
 
-    public function add( Request $request, Response $response, $args ): Response
+    public function add(Request $request, Response $response, $args): Response
     {
         try {
             /** @var Competitor $competitor */
-            $competitor = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Competitor', 'json');
+            $competitor = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
             /** @var \Voetbal\Association $association */
             $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
 
-            $newCompetitor = new Competitor( $association, $competitor->getName() );
+            $newCompetitor = new Competitor($association, $competitor->getName());
             $newCompetitor->setAbbreviation($competitor->getAbbreviation());
             $newCompetitor->setRegistered($competitor->getRegistered());
             $newCompetitor->setImageUrl($competitor->getImageUrl());
             $newCompetitor->setInfo($competitor->getInfo());
 
-            $this->competitorRepos->save( $newCompetitor );
+            $this->competitorRepos->save($newCompetitor);
 
-            $json = $this->serializer->serialize( $newCompetitor, 'json');
+            $json = $this->serializer->serialize($newCompetitor, 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -63,7 +61,7 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var \Voetbal\Competitor $competitorSer */
-            $competitorSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Competitor', 'json');
+            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
             /** @var \Voetbal\Association $association */
             $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
 
@@ -76,14 +74,14 @@ final class CompetitorAction extends Action
             $competitor->setInfo($competitorSer->getInfo());
             $this->competitorRepos->save($competitor);
 
-            $json = $this->serializer->serialize( $competitor, 'json');
+            $json = $this->serializer->serialize($competitor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    protected function getCompetitorFromInput(int $id, Association $association ): Competitor
+    protected function getCompetitorFromInput(int $id, Association $association): Competitor
     {
         $competitor = $this->competitorRepos->find($id);
         if ($competitor === null) {

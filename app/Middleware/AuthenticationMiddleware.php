@@ -84,7 +84,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    protected function getUser( AuthToken $token ): ?User
+    protected function getUser(AuthToken $token): ?User
     {
         if ($token->getUserId() === null) {
             return null;
@@ -113,7 +113,7 @@ class AuthenticationMiddleware implements MiddlewareInterface
         return $method === "GET" || $isAuthorized();
     }
 
-        // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
+    // for $resourceType === 'structures' ->add/edit need to check in the action if round->competition === competitionSend
 //        if ($resourceType === 'competitors') {
 //            return $this->competitorActionAuthorized($user, $method, $queryParams);
 //        } elseif ($resourceType === 'places') {
@@ -131,19 +131,19 @@ class AuthenticationMiddleware implements MiddlewareInterface
 //        return false;
 
 
-    protected function isAuthorizedForGame(User $user, Tournament $tournament, int $gameId ): bool
+    protected function isAuthorizedForGame(User $user, Tournament $tournament, int $gameId): bool
     {
-        if ($tournament->hasRole($user, Role::GAMERESULTADMIN + Role::ADMIN )) {
+        if ($tournament->hasRole($user, Role::GAMERESULTADMIN + Role::ADMIN)) {
             return true;
         }
         if (!$tournament->hasRole($user, Role::REFEREE)) {
             return false;
         }
-        $game = $this->gameRepos->find( $gameId );
-        if ($game === null || $game->getReferee() === null ) {
+        $game = $this->gameRepos->find($gameId);
+        if ($game === null || $game->getReferee() === null) {
             return false;
         }
-        if( $game->getReferee()->getEmailaddress() === $user->getEmailaddress() ) {
+        if ($game->getReferee()->getEmailaddress() === $user->getEmailaddress()) {
             return true;
         }
         return false;

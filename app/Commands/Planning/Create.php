@@ -36,7 +36,6 @@ class Create extends PlanningCommand
         parent::__construct($container);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-
     }
 
     protected function configure()

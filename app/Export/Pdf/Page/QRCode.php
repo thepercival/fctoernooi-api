@@ -30,10 +30,15 @@ class QRCode extends ToernooiPdfPage
     {
         return 20;
     }
-    public function getHeaderHeight(){ return 0; }
 
-    protected function getRowHeight() {
-        if( $this->rowHeight === null ) {
+    public function getHeaderHeight()
+    {
+        return 0;
+    }
+
+    protected function getRowHeight()
+    {
+        if ($this->rowHeight === null) {
             $this->rowHeight = 18;
         }
         return $this->rowHeight;

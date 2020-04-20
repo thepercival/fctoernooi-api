@@ -36,18 +36,19 @@ return function (App $app) {
     $app->add(AuthenticationMiddleware::class);
     $app->add(TournamentMiddleware::class);
 
-    $app->add( new JwtAuthentication(
-                   [
-                       "secret" => $config->getString('auth.jwtsecret'),
-                       "logger" => $container->get(LoggerInterface::class),
-                       "rules" => [
-                           new JwtAuthentication\RequestPathRule(
-                               [
-                                   "path" => "/",
-                                   "ignore" => ["/public"]
-                               ]
-                           ),
-                           new JwtAuthentication\RequestMethodRule(
+    $app->add(
+        new JwtAuthentication(
+            [
+                "secret" => $config->getString('auth.jwtsecret'),
+                "logger" => $container->get(LoggerInterface::class),
+                "rules" => [
+                    new JwtAuthentication\RequestPathRule(
+                        [
+                            "path" => "/",
+                            "ignore" => ["/public"]
+                        ]
+                    ),
+                    new JwtAuthentication\RequestMethodRule(
                                [
                                    "ignore" => ["OPTIONS"]
                                ]
@@ -61,7 +62,7 @@ return function (App $app) {
                            return $request->withAttribute("token", $token);
                        }
                    ]
-               )
+        )
     );
 
     $app->add(VersionMiddleware::class);
@@ -83,17 +84,14 @@ return function (App $app) {
         HttpNotFoundException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
             return new ErrorResponse($exception->getMessage(), 404);
-        });
+        }
+    );
 
     // Set the Not Allowed Handler
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
         function (Request $request, Throwable $exception, bool $displayErrorDetails) {
             return new ErrorResponse($exception->getMessage(), 405);
-        });
+        }
+    );
 };
-
-
-
-
-

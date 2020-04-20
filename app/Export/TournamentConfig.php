@@ -4,15 +4,15 @@ namespace App\Export;
 
 class TournamentConfig
 {
-    CONST GAMENOTES = 1;
-    CONST STRUCTURE = 2;
-    CONST RULES = 4;
-    CONST GAMESPERPOULE = 8;
-    CONST GAMESPERFIELD = 16;
-    CONST PLANNING = 32;
-    CONST PIVOTTABLES = 64;
-    CONST QRCODE = 128;
-    CONST LOCKERROOMS = 256;
+    const GAMENOTES = 1;
+    const STRUCTURE = 2;
+    const RULES = 4;
+    const GAMESPERPOULE = 8;
+    const GAMESPERFIELD = 16;
+    const PLANNING = 32;
+    const PIVOTTABLES = 64;
+    const QRCODE = 128;
+    const LOCKERROOMS = 256;
 
     /**
      * @var int
@@ -29,8 +29,7 @@ class TournamentConfig
         bool $poulePivotTables = false,
         bool $qrcode = false,
         bool $lockerRooms = false
-    )
-    {
+    ) {
         $this->value = $gamenotes ? static::GAMENOTES : 0;
         $this->value += $structure ? static::STRUCTURE : 0;
         $this->value += $rules ? static::RULES : 0;
@@ -47,7 +46,7 @@ class TournamentConfig
      */
     public function getGamenotes()
     {
-        return ( $this->value & static::GAMENOTES ) === static::GAMENOTES;
+        return ($this->value & static::GAMENOTES) === static::GAMENOTES;
     }
 
     /**
@@ -55,7 +54,7 @@ class TournamentConfig
      */
     public function getStructure()
     {
-        return ( $this->value & static::STRUCTURE ) === static::STRUCTURE;
+        return ($this->value & static::STRUCTURE) === static::STRUCTURE;
     }
 
     /**
@@ -63,7 +62,7 @@ class TournamentConfig
      */
     public function getRules()
     {
-        return ( $this->value & static::RULES ) === static::RULES;
+        return ($this->value & static::RULES) === static::RULES;
     }
 
     /**
@@ -71,7 +70,7 @@ class TournamentConfig
      */
     public function getGamesperpoule()
     {
-        return ( $this->value & static::GAMESPERPOULE ) === static::GAMESPERPOULE;
+        return ($this->value & static::GAMESPERPOULE) === static::GAMESPERPOULE;
     }
 
     /**
@@ -79,7 +78,7 @@ class TournamentConfig
      */
     public function getGamesperfield()
     {
-        return ( $this->value & static::GAMESPERFIELD ) === static::GAMESPERFIELD;
+        return ($this->value & static::GAMESPERFIELD) === static::GAMESPERFIELD;
     }
 
     /**
@@ -87,7 +86,7 @@ class TournamentConfig
      */
     public function getPlanning()
     {
-        return ( $this->value & static::PLANNING ) === static::PLANNING;
+        return ($this->value & static::PLANNING) === static::PLANNING;
     }
 
     /**
@@ -95,7 +94,7 @@ class TournamentConfig
      */
     public function getPoulePivotTables()
     {
-        return ( $this->value & static::PIVOTTABLES ) === static::PIVOTTABLES;
+        return ($this->value & static::PIVOTTABLES) === static::PIVOTTABLES;
     }
 
     /**

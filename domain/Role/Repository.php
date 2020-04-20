@@ -19,7 +19,7 @@ use FCToernooi\User\Repository as UserRepository;
  */
 class Repository extends \Voetbal\Repository
 {
-    public function syncRefereeRoles( Tournament $tournament ): array
+    public function syncRefereeRoles(Tournament $tournament): array
     {
         $conn = $this->_em->getConnection();
         $conn->beginTransaction();
@@ -27,9 +27,9 @@ class Repository extends \Voetbal\Repository
             // remove referee roles
             {
                 $params = ['value' => Role::REFEREE, 'tournament' => $tournament];
-                $refereeRoles = $this->findBy( $params );
-                foreach( $refereeRoles as $refereeRole ) {
-                    $this->_em->remove( $refereeRole );
+                $refereeRoles = $this->findBy($params);
+                foreach ($refereeRoles as $refereeRole) {
+                    $this->_em->remove($refereeRole);
                 }
             }
             $this->_em->flush();
@@ -37,18 +37,18 @@ class Repository extends \Voetbal\Repository
             // add referee roles
             $userRepos = new UserRepository($this->_em, $this->_em->getClassMetaData(User::class));
             $referees = $tournament->getCompetition()->getReferees();
-            foreach( $referees as $referee ) {
-                if( strlen( $referee->getEmailaddress() ) === 0 ) {
+            foreach ($referees as $referee) {
+                if (strlen($referee->getEmailaddress()) === 0) {
                     continue;
                 }
                 /** @var \FCToernooi\User|null $user */
-                $user = $userRepos->findOneBy( ['emailaddress' => $referee->getEmailaddress()] );
-                if( $user === null ) {
+                $user = $userRepos->findOneBy(['emailaddress' => $referee->getEmailaddress()]);
+                if ($user === null) {
                     continue;
                 }
-                $refereeRole = new Role( $tournament, $user);
+                $refereeRole = new Role($tournament, $user);
                 $refereeRole->setValue(Role::REFEREE);
-                $this->_em->persist( $refereeRole );
+                $this->_em->persist($refereeRole);
             }
             $rolesRet = array_values($tournament->getRoles()->toArray());
 

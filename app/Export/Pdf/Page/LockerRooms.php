@@ -12,7 +12,6 @@ use App\Exceptions\PdfOutOfBoundsException;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\LockerRoom;
 
-
 class LockerRooms extends ToernooiPdfPage
 {
     protected $rowHeight;

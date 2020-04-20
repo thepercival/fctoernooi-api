@@ -36,14 +36,14 @@ class Repository extends \Voetbal\Repository
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function customPersist( Tournament $tournament, bool $flush )
+    public function customPersist(Tournament $tournament, bool $flush)
     {
-        $leagueRepos = new LeagueRepository($this->_em,$this->_em->getClassMetaData(League::class));
+        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
         $leagueRepos->save($tournament->getCompetition()->getLeague());
-        $competitionRepos = new CompetitionRepository($this->_em,$this->_em->getClassMetaData(Competition::class));
+        $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetaData(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
         $this->_em->persist($tournament);
-        if( $flush ) {
+        if ($flush) {
             $this->_em->flush();
         }
     }
@@ -52,19 +52,19 @@ class Repository extends \Voetbal\Repository
         string $name = null,
         \DateTimeImmutable $startDateTime = null,
         \DateTimeImmutable $endDateTime = null,
-        bool $public = null)
-    {
+        bool $public = null
+    ) {
         $query = $this->createQueryBuilder('t')
-            ->join("t.competition","c")
-            ->join("c.league","l");
+            ->join("t.competition", "c")
+            ->join("c.league", "l");
 
-        if( $startDateTime !== null ) {
+        if ($startDateTime !== null) {
             $query = $query->where('c.startDateTime >= :startDateTime');
             $query = $query->setParameter('startDateTime', $startDateTime);
         }
 
-        if( $endDateTime !== null ) {
-            if( $startDateTime !== null ) {
+        if ($endDateTime !== null) {
+            if ($startDateTime !== null) {
                 $query = $query->andWhere('c.startDateTime <= :endDateTime');
             } else {
                 $query = $query->where('c.startDateTime <= :endDateTime');
@@ -72,17 +72,17 @@ class Repository extends \Voetbal\Repository
             $query = $query->setParameter('endDateTime', $endDateTime);
         }
 
-        if( $name !== null ) {
-            if( $startDateTime !== null || $endDateTime !== null ) {
+        if ($name !== null) {
+            if ($startDateTime !== null || $endDateTime !== null) {
                 $query = $query->andWhere("l.name like :name");
             } else {
                 $query = $query->where('l.name like :name');
             }
-            $query = $query->setParameter('name', '%'.$name.'%');
+            $query = $query->setParameter('name', '%' . $name . '%');
         }
 
-        if( $public !== null ) {
-            if( $startDateTime !== null || $endDateTime !== null || $name !== null ) {
+        if ($public !== null) {
+            if ($startDateTime !== null || $endDateTime !== null || $name !== null) {
                 $query = $query->andWhere("t.public = :public");
             } else {
                 $query = $query->where('t.public = :public');
@@ -93,15 +93,14 @@ class Repository extends \Voetbal\Repository
         return $query->getQuery()->getResult();
     }
 
-    public function findByPermissions( User $user, int $roleValues )
+    public function findByPermissions(User $user, int $roleValues)
     {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb
             ->distinct()
             ->select('t')
-            ->from( Tournament::class, 't')
-            ->join( Role::class, 'r', Expr\Join::WITH, 't.id = r.tournament')
-        ;
+            ->from(Tournament::class, 't')
+            ->join(Role::class, 'r', Expr\Join::WITH, 't.id = r.tournament');
 
         $qb = $qb->where('r.user = :user')->andWhere('BIT_AND(r.value, :rolevalues) = r.value');
         $qb = $qb->setParameter('user', $user);
@@ -110,17 +109,17 @@ class Repository extends \Voetbal\Repository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByEmailaddress( $emailladdress )
+    public function findByEmailaddress($emailladdress)
     {
-        if( strlen( $emailladdress ) === 0 ) {
+        if (strlen($emailladdress) === 0) {
             return [];
         }
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb
             ->select('t')
-            ->from( Tournament::class, 't')
-            ->join( Competition::class, 'c', Expr\Join::WITH, 'c.id = t.competition')
-            ->join( Referee::class, 'ref', Expr\Join::WITH, 'c.id = ref.competition')
+            ->from(Tournament::class, 't')
+            ->join(Competition::class, 'c', Expr\Join::WITH, 'c.id = t.competition')
+            ->join(Referee::class, 'ref', Expr\Join::WITH, 'c.id = ref.competition')
         ;
 
         $qb = $qb
@@ -132,9 +131,9 @@ class Repository extends \Voetbal\Repository
         return $qb->getQuery()->getResult();
     }
 
-    public function remove( $tournament )
+    public function remove($tournament)
     {
         $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
-        return $leagueRepos->remove( $tournament->getCompetition()->getLeague() );
+        return $leagueRepos->remove($tournament->getCompetition()->getLeague());
     }
 }

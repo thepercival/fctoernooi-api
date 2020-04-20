@@ -20,26 +20,27 @@ use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class All extends PlanningWorksheet
 {
-    public function __construct( Spreadsheet $parent )
+    public function __construct(Spreadsheet $parent)
     {
-        parent::__construct( $parent, 'planning', Spreadsheet::INDEX_PLANNING );
+        parent::__construct($parent, 'planning', Spreadsheet::INDEX_PLANNING);
     }
 
-    public function draw() {
+    public function draw()
+    {
         $firstRoundNumber = $this->getParent()->getStructure()->getFirstRoundNumber();
         $row = 1;
-        $this->drawRoundNumber( $firstRoundNumber, $row );
-        for( $columnNr = 1 ; $columnNr <= Planning::NR_OF_COLUMNS ; $columnNr++ ) {
+        $this->drawRoundNumber($firstRoundNumber, $row);
+        for ($columnNr = 1; $columnNr <= Planning::NR_OF_COLUMNS; $columnNr++) {
             $this->getColumnDimensionByColumn($columnNr)->setAutoSize(true);
         }
     }
 
-    protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
-
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-        $row =  $this->drawSubHeaderHelper( $row, $subHeader );
-        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
-        if( count($games) > 0 ) {
+    protected function drawRoundNumber(RoundNumber $roundNumber, int $row)
+    {
+        $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $row = $this->drawSubHeaderHelper($row, $subHeader);
+        $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
+        if (count($games) > 0) {
             $row = $this->drawGamesHeader($roundNumber, $row);
         }
         foreach ($games as $game) {
@@ -49,8 +50,8 @@ class All extends PlanningWorksheet
             $row = $this->drawGame($game, $row);
         }
 
-        if( $roundNumber->hasNext() ) {
-            $this->drawRoundNumber( $roundNumber->getNext(), $row + 2 );
+        if ($roundNumber->hasNext()) {
+            $this->drawRoundNumber($roundNumber->getNext(), $row + 2);
         }
     }
 }

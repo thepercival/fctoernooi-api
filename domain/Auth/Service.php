@@ -22,10 +22,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Service
 {
-	/**
-	 * @var UserRepository
-	 */
-	protected $userRepos;
+    /**
+     * @var UserRepository
+     */
+    protected $userRepos;
     /**
      * @var RoleRepository
      */
@@ -71,69 +71,72 @@ class Service
      * @return User|null
      * @throws \Doctrine\DBAL\ConnectionException
      */
-	public function register( $emailaddress, $password, $name = null ): ?User
-	{
-        if ( strlen( $password ) < User::MIN_LENGTH_PASSWORD or strlen( $password ) > User::MAX_LENGTH_PASSWORD ){
-            throw new \InvalidArgumentException( "het wachtwoord moet minimaal ".User::MIN_LENGTH_PASSWORD." karakters bevatten en mag maximaal ".User::MAX_LENGTH_PASSWORD." karakters bevatten", E_ERROR );
+    public function register($emailaddress, $password, $name = null): ?User
+    {
+        if (strlen($password) < User::MIN_LENGTH_PASSWORD or strlen($password) > User::MAX_LENGTH_PASSWORD) {
+            throw new \InvalidArgumentException(
+                "het wachtwoord moet minimaal " . User::MIN_LENGTH_PASSWORD . " karakters bevatten en mag maximaal " . User::MAX_LENGTH_PASSWORD . " karakters bevatten",
+                E_ERROR
+            );
         }
-		$userTmp = $this->userRepos->findOneBy( array('emailaddress' => $emailaddress ) );
-		if ( $userTmp ) {
-			throw new \Exception("het emailadres is al in gebruik",E_ERROR);
-		}
-		if ( $name !== null ) {
-            $userTmp = $this->userRepos->findOneBy( array('name' => $name ) );
-            if ( $userTmp ) {
-                throw new \Exception("de gebruikersnaam is al in gebruik",E_ERROR);
+        $userTmp = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
+        if ($userTmp) {
+            throw new \Exception("het emailadres is al in gebruik", E_ERROR);
+        }
+        if ($name !== null) {
+            $userTmp = $this->userRepos->findOneBy(array('name' => $name));
+            if ($userTmp) {
+                throw new \Exception("de gebruikersnaam is al in gebruik", E_ERROR);
             }
         }
 
         $user = new User($emailaddress);
-        $user->setSalt( bin2hex(random_bytes(15) ) );
-        $user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
+        $user->setSalt(bin2hex(random_bytes(15)));
+        $user->setPassword(password_hash($user->getSalt() . $password, PASSWORD_DEFAULT));
 
         $conn = $this->userRepos->getEM()->getConnection();
         $conn->beginTransaction();
         $savedUser = null;
         try {
             $savedUser = $this->userRepos->save($user);
-            $roles = $this->syncRefereeRolesForUser( $user );
-            $this->sendRegisterEmail( $emailaddress, $roles );
+            $roles = $this->syncRefereeRolesForUser($user);
+            $this->sendRegisterEmail($emailaddress, $roles);
             $conn->commit();
         } catch (\Exception $e) {
             $conn->rollback();
             throw $e;
         }
-		return $savedUser;
-	}
+        return $savedUser;
+    }
 
-    public function syncRefereeRolesForUser( User $user ): array
+    public function syncRefereeRolesForUser(User $user): array
     {
         $rolesRet = [];
         $em = $this->roleRepos->getEM();
 
         // remove referee roles
         {
-            $params = ['value' => Role::REFEREE, 'user' => $user ];
-            $refereeRoles = $this->roleRepos->findBy( $params );
-            foreach( $refereeRoles as $refereeRole ) {
-                $em->remove( $refereeRole );
+            $params = ['value' => Role::REFEREE, 'user' => $user];
+            $refereeRoles = $this->roleRepos->findBy($params);
+            foreach ($refereeRoles as $refereeRole) {
+                $em->remove($refereeRole);
             }
         }
         $em->flush();
 
         // add referee roles
-        $tournaments = $this->tournamentRepos->findByEmailaddress( $user->getEmailaddress() );
-        foreach( $tournaments as $tournament ) {
-            $refereeRole = new Role( $tournament, $user);
+        $tournaments = $this->tournamentRepos->findByEmailaddress($user->getEmailaddress());
+        foreach ($tournaments as $tournament) {
+            $refereeRole = new Role($tournament, $user);
             $refereeRole->setValue(Role::REFEREE);
-            $em->persist( $refereeRole );
+            $em->persist($refereeRole);
             $rolesRet[] = $refereeRole;
         }
         $em->flush();
         return $rolesRet;
     }
 
-	protected function sendRegisterEmail( $emailAddress, array $roles )
+    protected function sendRegisterEmail($emailAddress, array $roles)
     {
         $subject = 'welkom bij FCToernooi';
         $bodyBegin = <<<EOT
@@ -159,7 +162,7 @@ EOT;
         $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
 
-    public function sendPasswordCode( $emailAddress )
+    public function sendPasswordCode($emailAddress)
     {
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if (!$user) {
@@ -199,7 +202,7 @@ EOT;
         return JWT::encode($payload, $this->config->getString("auth.jwtsecret"));
     }
 
-    protected function mailPasswordCode( User $user )
+    protected function mailPasswordCode(User $user)
     {
         $subject = 'wachtwoord herstellen';
         $forgetpasswordToken = $user->getForgetpasswordToken();
@@ -221,24 +224,24 @@ EOT;
         $this->mailer->send($subject, $body, $user->getEmailaddress());
     }
 
-    public function changePassword( $emailAddress, $password, $code )
+    public function changePassword($emailAddress, $password, $code)
     {
-        $user = $this->userRepos->findOneBy( array( 'emailaddress' => $emailAddress ) );
+        $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if (!$user) {
-            throw new \Exception( "het wachtwoord kan niet gewijzigd worden");
+            throw new \Exception("het wachtwoord kan niet gewijzigd worden");
         }
         // check code and deadline
-        if ($user->getForgetpasswordToken() !== $code ) {
-            throw new \Exception( "het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt");
+        if ($user->getForgetpasswordToken() !== $code) {
+            throw new \Exception("het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt");
         }
         $now = new \DateTimeImmutable();
-        if ( $now > $user->getForgetpasswordDeadline() ) {
-            throw new \Exception( "het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
+        if ($now > $user->getForgetpasswordDeadline()) {
+            throw new \Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
         }
 
         // set password
-        $user->setPassword( password_hash( $user->getSalt() . $password, PASSWORD_DEFAULT) );
-        $user->setForgetpassword( null );
+        $user->setPassword(password_hash($user->getSalt() . $password, PASSWORD_DEFAULT));
+        $user->setForgetpassword(null);
         return $this->userRepos->save($user);
     }
 }

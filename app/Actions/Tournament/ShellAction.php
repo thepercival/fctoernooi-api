@@ -43,7 +43,7 @@ final class ShellAction extends Action
         AuthService $authService,
         EntityManager $em
     ) {
-        parent::__construct($logger,$serializer);
+        parent::__construct($logger, $serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->authService = $authService;
         $this->serializer = $serializer;

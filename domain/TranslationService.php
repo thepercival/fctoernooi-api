@@ -12,20 +12,45 @@ use Voetbal\Sport\Custom as SportCustom;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;
 use Voetbal\Sport;
 
-class TranslationService {
-
+class TranslationService
+{
     const language = 'nl';
 
-    public function getSportName( string $language, int $customId): string {
+    public function getSportName(string $language, int $customId): string
+    {
         switch ($customId) {
-            case SportCustom::Badminton: { return 'badminton'; }
-            case SportCustom::Basketball: { return 'basketbal'; }
-            case SportCustom::Darts: { return 'darten'; }
-            case SportCustom::ESports: { return 'e-sporten'; }
-            case SportCustom::Hockey: { return 'hockey'; }
-            case SportCustom::Korfball: { return 'korfbal'; }
-            case SportCustom::Chess: { return 'schaken'; }
-            case SportCustom::Squash: { return 'squash'; }
+            case SportCustom::Badminton:
+            {
+                return 'badminton';
+            }
+            case SportCustom::Basketball:
+            {
+                return 'basketbal';
+            }
+            case SportCustom::Darts:
+            {
+                return 'darten';
+            }
+            case SportCustom::ESports:
+            {
+                return 'e-sporten';
+            }
+            case SportCustom::Hockey:
+            {
+                return 'hockey';
+            }
+            case SportCustom::Korfball:
+            {
+                return 'korfbal';
+            }
+            case SportCustom::Chess:
+            {
+                return 'schaken';
+            }
+            case SportCustom::Squash:
+            {
+                return 'squash';
+            }
             case SportCustom::TableTennis:
             {
                 return 'tafeltennis';

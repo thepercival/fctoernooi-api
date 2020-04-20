@@ -31,41 +31,53 @@ class Gamenotes extends ToernooiPdfPage
     protected $gameOne;
     protected $gameTwo;
 
-    public function __construct( $param1, Game $gameA = null, Game $gameB = null )
+    public function __construct($param1, Game $gameA = null, Game $gameB = null)
     {
-        parent::__construct( $param1 );
-        $this->setLineWidth( 0.5 );
+        parent::__construct($param1);
+        $this->setLineWidth(0.5);
         $this->gameOne = $gameA;
         $this->gameTwo = $gameB;
         $this->sportScoreConfigService = new SportScoreConfigService();
         $this->translationService = new TranslationService();
     }
 
-    public function getPageMargin(){ return 20; }
-    public function getHeaderHeight(){ return 0; }
+    public function getPageMargin()
+    {
+        return 20;
+    }
+
+    public function getHeaderHeight()
+    {
+        return 0;
+    }
 
     public function draw()
     {
-        $nY = $this->drawHeader( "wedstrijdbriefje" );
-        $this->drawGame( $this->gameOne, $nY );
+        $nY = $this->drawHeader("wedstrijdbriefje");
+        $this->drawGame($this->gameOne, $nY);
 
-        $this->setLineColor(new \Zend_Pdf_Color_Html( "black" ));
-        $this->setLineDashingPattern(array(10,10));
-        $this->drawLine($this->getPageMargin(), $this->getHeight() / 2, $this->getWidth() - $this->getPageMargin(), $this->getHeight() / 2);
+        $this->setLineColor(new \Zend_Pdf_Color_Html("black"));
+        $this->setLineDashingPattern(array(10, 10));
+        $this->drawLine(
+            $this->getPageMargin(),
+            $this->getHeight() / 2,
+            $this->getWidth() - $this->getPageMargin(),
+            $this->getHeight() / 2
+        );
         $this->setLineDashingPattern(\Zend_Pdf_Page::LINE_DASHING_SOLID);
-        if( $this->gameTwo !== null ) {
-            $nY = $this->drawHeader( "wedstrijdbriefje", ( $this->getHeight() / 2 ) - $this->getPageMargin() );
+        if ($this->gameTwo !== null) {
+            $nY = $this->drawHeader("wedstrijdbriefje", ($this->getHeight() / 2) - $this->getPageMargin());
             $this->drawGame($this->gameTwo, $nY);
         }
     }
 
-    public function drawGame( Game $game, $nOffSetY )
+    public function drawGame(Game $game, $nOffSetY)
     {
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
+        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
         $nY = $nOffSetY;
 
         $nFirstBorder = $this->getWidth() / 6;
-        $nSecondBorder = $nFirstBorder + ( ( $this->getWidth() - ( $nFirstBorder + $this->getPageMargin() ) ) / 2 );
+        $nSecondBorder = $nFirstBorder + (($this->getWidth() - ($nFirstBorder + $this->getPageMargin())) / 2);
         $nMargin = 15;
         $nRowHeight = 20;
 
@@ -75,69 +87,113 @@ class Gamenotes extends ToernooiPdfPage
         $bNeedsRanking = $game->getPoule()->needsRanking();
         $nWidth = $this->getWidth() - ($this->getPageMargin() + $nX);
         $nWidthResult = $nWidth / 2;
-        $nX2 = $nSecondBorder + ( $nMargin * 0.5 );
+        $nX2 = $nSecondBorder + ($nMargin * 0.5);
 
         $nameService = $this->getParent()->getNameService();
-        $roundNumberName = $nameService->getRoundNumberName( $roundNumber );
-        $this->drawCell( "ronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $this->drawCell( $roundNumberName, $nX2, $nY, $nWidthResult, $nRowHeight );
+        $roundNumberName = $nameService->getRoundNumberName($roundNumber);
+        $this->drawCell("ronde", $nX, $nY, $nWidthResult - ($nMargin * 0.5), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT);
+        $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+        $this->drawCell($roundNumberName, $nX2, $nY, $nWidthResult, $nRowHeight);
         $nY -= $nRowHeight;
 
         $sGame = $nameService->getPouleName($game->getPoule(), false);
         $sGmeDescription = $bNeedsRanking ? "poule" : "wedstrijd";
-        $this->drawCell( $sGmeDescription, $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $this->drawCell( $sGame, $nX2, $nY, $nWidthResult, $nRowHeight );
+        $this->drawCell(
+            $sGmeDescription,
+            $nX,
+            $nY,
+            $nWidthResult - ($nMargin * 0.5),
+            $nRowHeight,
+            ToernooiPdfPage::ALIGNRIGHT
+        );
+        $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+        $this->drawCell($sGame, $nX2, $nY, $nWidthResult, $nRowHeight);
         $nY -= $nRowHeight;
 
-        $this->drawCell( 'plekken', $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-        $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-        $home = $nameService->getPlacesFromName( $game->getPlaces( Game::HOME ), false, !$planningConfig->getTeamup() );
-        $away = $nameService->getPlacesFromName( $game->getPlaces( Game::AWAY ), false, !$planningConfig->getTeamup() );
-        $this->drawCell( $home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight );
+        $this->drawCell(
+            'plekken',
+            $nX,
+            $nY,
+            $nWidthResult - ($nMargin * 0.5),
+            $nRowHeight,
+            ToernooiPdfPage::ALIGNRIGHT
+        );
+        $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), false, !$planningConfig->getTeamup());
+        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), false, !$planningConfig->getTeamup());
+        $this->drawCell($home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight);
         $nY -= $nRowHeight;
 
-        if( $bNeedsRanking ) {
-            $this->drawCell( "speelronde", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $game->getRound()->getNumber()->getNumber(), $nX2, $nY, $nWidthResult, $nRowHeight );
+        if ($bNeedsRanking) {
+            $this->drawCell(
+                "speelronde",
+                $nX,
+                $nY,
+                $nWidthResult - ($nMargin * 0.5),
+                $nRowHeight,
+                ToernooiPdfPage::ALIGNRIGHT
+            );
+            $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+            $this->drawCell($game->getRound()->getNumber()->getNumber(), $nX2, $nY, $nWidthResult, $nRowHeight);
             $nY -= $nRowHeight;
         }
 
-        if( $roundNumber->getValidPlanningConfig()->getEnableTime() ) {
+        if ($roundNumber->getValidPlanningConfig()->getEnableTime()) {
             setlocale(LC_ALL, 'nl_NL.UTF-8'); //
             $localDateTime = $game->getStartDateTime()->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
-            $dateTime = strtolower( $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp() ) );
+            $dateTime = strtolower(
+                $localDateTime->format("H:i") . "     " . strftime("%a %d %b %Y", $localDateTime->getTimestamp())
+            );
             // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
             if ($planningConfig->getExtension()) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
 
-            $this->drawCell( "tijdstip", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $dateTime, $nX2, $nY, $nWidthResult, $nRowHeight );
+            $this->drawCell(
+                "tijdstip",
+                $nX,
+                $nY,
+                $nWidthResult - ($nMargin * 0.5),
+                $nRowHeight,
+                ToernooiPdfPage::ALIGNRIGHT
+            );
+            $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+            $this->drawCell($dateTime, $nX2, $nY, $nWidthResult, $nRowHeight);
             $nY -= $nRowHeight;
 
-            $this->drawCell( "duur", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
-            $this->drawCell( $duration, $nX2, $nY, $nWidthResult, $nRowHeight );
+            $this->drawCell(
+                "duur",
+                $nX,
+                $nY,
+                $nWidthResult - ($nMargin * 0.5),
+                $nRowHeight,
+                ToernooiPdfPage::ALIGNRIGHT
+            );
+            $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
+            $this->drawCell($duration, $nX2, $nY, $nWidthResult, $nRowHeight);
             $nY -= $nRowHeight;
         }
 
         {
-            $this->drawCell( "veld", $nX, $nY, $nWidthResult - ( $nMargin * 0.5 ), $nRowHeight, ToernooiPdfPage::ALIGNRIGHT );
-            $this->drawCell( ':', $nSecondBorder, $nY, $nMargin, $nRowHeight );
+            $this->drawCell(
+                "veld",
+                $nX,
+                $nY,
+                $nWidthResult - ($nMargin * 0.5),
+                $nRowHeight,
+                ToernooiPdfPage::ALIGNRIGHT
+            );
+            $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
             $fieldDescription = $game->getField()->getName();
-            if( $roundNumber->getCompetition()->hasMultipleSportConfigs() ) {
+            if ($roundNumber->getCompetition()->hasMultipleSportConfigs()) {
                 $fieldDescription .= " - " . $game->getField()->getSport()->getName();
             }
-            $this->drawCell( $fieldDescription, $nX2, $nY, $nWidthResult, $nRowHeight );
+            $this->drawCell($fieldDescription, $nX2, $nY, $nWidthResult, $nRowHeight);
             $nY -= $nRowHeight;
         }
 
-        if( $game->getReferee() !== null ) {
+        if ($game->getReferee() !== null) {
             $this->drawCell(
                 "scheidsrechter",
                 $nX,

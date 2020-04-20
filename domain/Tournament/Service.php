@@ -17,7 +17,6 @@ class Service
 {
     public function __construct()
     {
-
     }
 
     /**
@@ -27,13 +26,13 @@ class Service
      * @return Tournament
      * @throws \Exception
      */
-    public function changeBasics( Tournament $tournament, \DateTimeImmutable $dateTime, Period $period = null)
+    public function changeBasics(Tournament $tournament, \DateTimeImmutable $dateTime, Period $period = null)
     {
         $competitionService = new CompetitionService();
         $competition = $tournament->getCompetition();
-        $competitionService->changeStartDateTime( $competition, $dateTime );
+        $competitionService->changeStartDateTime($competition, $dateTime);
 
-        $tournament->setBreak( $period );
+        $tournament->setBreak($period);
 
         return $tournament;
     }

@@ -27,26 +27,26 @@ class Service
      * @param int $roleValues
      * @throws \Exception
      */
-    public function create( Tournament $tournament, User $user, int $roleValues )
+    public function create(Tournament $tournament, User $user, int $roleValues)
     {
         // get roles
         // $rolesRet = new ArrayCollection();
 
         //try {
 
-            // flush roles
-            // $this->flushRoles( $tournament, $user );
+        // flush roles
+        // $this->flushRoles( $tournament, $user );
 
-            // save roles
-            for($roleValue = 1 ; $roleValue < Role::ALL ; $roleValue *= 2 ){
-                if ( ( $roleValue & $roleValues ) !== $roleValue ){
-                    continue;
-                }
-                $role = new Role( $tournament, $user );
-                $role->setValue( $roleValue );
-                // $this->repos->save($role);
-                // $rolesRet->add($role);
+        // save roles
+        for ($roleValue = 1; $roleValue < Role::ALL; $roleValue *= 2) {
+            if (($roleValue & $roleValues) !== $roleValue) {
+                continue;
             }
+            $role = new Role($tournament, $user);
+            $role->setValue($roleValue);
+            // $this->repos->save($role);
+            // $rolesRet->add($role);
+        }
 //        }
 //        catch( \Exception $e ){
 //            throw new \Exception(urlencode($e->getMessage()), E_ERROR );

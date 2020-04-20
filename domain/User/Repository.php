@@ -22,13 +22,11 @@ class Repository extends \Voetbal\Repository
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function findRefereeUsersByTournament( Tournament $tournament )
+    public function findRefereeUsersByTournament(Tournament $tournament)
     {
-
     }
 
-    public function findRefereeUsersByUser( User $user )
+    public function findRefereeUsersByUser(User $user)
     {
-
     }
 }

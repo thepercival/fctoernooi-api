@@ -43,8 +43,7 @@ class Document extends \Zend_Pdf
         Structure $structure,
         TournamentConfig $config,
         string $url
-    )
-    {
+    ) {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
@@ -58,14 +57,15 @@ class Document extends \Zend_Pdf
         return 14;
     }
 
-    public function getFontHeightSubHeader() {
+    public function getFontHeightSubHeader()
+    {
         return 16;
     }
 
-    public function render( $newSegmentOnly = false, $outputStream = null )
+    public function render($newSegmentOnly = false, $outputStream = null)
     {
         $this->fillContent();
-        return parent::render( $newSegmentOnly, $outputStream );
+        return parent::render($newSegmentOnly, $outputStream);
     }
 
 //    protected function createNewPage( $nPageWidth, $nPageHeight )
@@ -79,39 +79,40 @@ class Document extends \Zend_Pdf
 //    }
 //
 
-    public static function getFont( $bBold = false, $bItalic = false )
+    public static function getFont($bBold = false, $bItalic = false)
     {
         $sFontDir = __DIR__ . "/../../../fonts/";
-        if ( $bBold === false and $bItalic === false )
-            return \Zend_Pdf_Font::fontWithPath( $sFontDir . "times.ttf" );
-        if ( $bBold === true and $bItalic === false )
-            return \Zend_Pdf_Font::fontWithPath( $sFontDir . "timesbd.ttf" );
-        else if ( $bBold === false and $bItalic === true )
-            return \Zend_Pdf_Font::fontWithPath( $sFontDir . "timesi.ttf" );
-        else if ( $bBold === true and $bItalic === true )
-            return \Zend_Pdf_Font::fontWithPath( $sFontDir . "timesbi.ttf" );
+        if ($bBold === false and $bItalic === false) {
+            return \Zend_Pdf_Font::fontWithPath($sFontDir . "times.ttf");
+        }
+        if ($bBold === true and $bItalic === false) {
+            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesbd.ttf");
+        } elseif ($bBold === false and $bItalic === true) {
+            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesi.ttf");
+        } elseif ($bBold === true and $bItalic === true) {
+            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesbi.ttf");
+        }
     }
 
     protected function fillContent()
     {
-        if( $this->config->getStructure() ) {
+        if ($this->config->getStructure()) {
             $page = $this->createPageGrouping();
             $page->draw();
 
             $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4);
         }
-        if( $this->config->getPoulePivotTables() ) {
-            list( $page, $nY ) = $this->createPagePoulePivotTables();
-            $this->drawPoulePivotTables( $this->structure->getFirstRoundNumber(), $page, $nY );
+        if ($this->config->getPoulePivotTables()) {
+            list($page, $nY) = $this->createPagePoulePivotTables();
+            $this->drawPoulePivotTables($this->structure->getFirstRoundNumber(), $page, $nY);
         }
-        if( $this->config->getPlanning() ) {
-            list( $page, $nY ) = $this->createPagePlanning("wedstrijden");
-            $this->drawPlanning( $this->structure->getFirstRoundNumber(), $page, $nY );
+        if ($this->config->getPlanning()) {
+            list($page, $nY) = $this->createPagePlanning("wedstrijden");
+            $this->drawPlanning($this->structure->getFirstRoundNumber(), $page, $nY);
         }
-        if( $this->config->getRules() ) {
-
+        if ($this->config->getRules()) {
         }
-        if( $this->config->getGamenotes() ) {
+        if ($this->config->getGamenotes()) {
             $this->drawGamenotes();
         }
         if ($this->config->getGamesperpoule()) {
@@ -135,14 +136,14 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function drawPlanning( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanning(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
     {
         $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
         $games = $page->getGames($roundNumber);
-        if( count($games) > 0 ) {
+        if (count($games) > 0) {
             $nY = $page->drawGamesHeader($roundNumber, $nY);
         }
-        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH );
+        $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight();
             $drawBreak = $page->drawBreakBeforeGame($game);
@@ -157,44 +158,48 @@ class Document extends \Zend_Pdf
             $nY = $page->drawGame($game, $nY, true);
         }
 
-        if( $roundNumber->hasNext() ) {
+        if ($roundNumber->hasNext()) {
             $nY -= 20;
-            $this->drawPlanning( $roundNumber->getNext(), $page, $nY );
+            $this->drawPlanning($roundNumber->getNext(), $page, $nY);
         }
     }
 
-    protected function drawPlanningPerPoule( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanningPerPoule(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
     {
         $poules = $roundNumber->getPoules();
-        foreach( $poules as $poule ) {
-            list( $page, $nY ) = $this->createPagePlanning("poule " . $poule->getNumber() );
-            $page->setGameFilter( function( Game $game ) use ($poule) {
-                return $game->getPoule() === $poule;
-            });
-            $this->drawPlanningPerHelper( $roundNumber, $page , $nY );
+        foreach ($poules as $poule) {
+            list($page, $nY) = $this->createPagePlanning("poule " . $poule->getNumber());
+            $page->setGameFilter(
+                function (Game $game) use ($poule) {
+                    return $game->getPoule() === $poule;
+                }
+            );
+            $this->drawPlanningPerHelper($roundNumber, $page, $nY);
         }
     }
 
-    protected function drawPlanningPerField( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanningPerField(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
     {
         $fields = $this->getTournament()->getCompetition()->getFields();
-        foreach( $fields as $field ) {
-            list( $page, $nY ) = $this->createPagePlanning("veld " . $field->getName() );
-            $page->setGameFilter( function( Game $game ) use ($field) {
-                return $game->getField() === $field;
-            });
-            $this->drawPlanningPerHelper( $roundNumber, $page , $nY );
+        foreach ($fields as $field) {
+            list($page, $nY) = $this->createPagePlanning("veld " . $field->getName());
+            $page->setGameFilter(
+                function (Game $game) use ($field) {
+                    return $game->getField() === $field;
+                }
+            );
+            $this->drawPlanningPerHelper($roundNumber, $page, $nY);
         }
     }
 
-    protected function drawPlanningPerHelper( RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null )
+    protected function drawPlanningPerHelper(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
     {
         $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
         $games = $page->getGames($roundNumber);
-        if( count($games) > 0 ) {
+        if (count($games) > 0) {
             $nY = $page->drawGamesHeader($roundNumber, $nY);
         }
-        $games = $roundNumber->getGames( Game::ORDER_BY_BATCH);
+        $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
         foreach ($games as $game) {
             $gameHeight = $page->getGameHeight();
             $drawBreak = $page->drawBreakBeforeGame($game);
@@ -211,40 +216,40 @@ class Document extends \Zend_Pdf
             $nY = $page->drawGame($game, $nY);
         }
 
-        if( $roundNumber->hasNext() ) {
+        if ($roundNumber->hasNext()) {
             $nY -= 20;
-            $this->drawPlanningPerHelper( $roundNumber->getNext(), $page, $nY );
+            $this->drawPlanningPerHelper($roundNumber->getNext(), $page, $nY);
         }
     }
 
     protected function drawGamenotes()
     {
-        $games = $this->getScheduledGames( $this->structure->getRootRound() );
-        while( count( $games ) > 0 ) {
-            $page = $this->createPageGamenotes( array_shift( $games ), array_shift( $games ) );
+        $games = $this->getScheduledGames($this->structure->getRootRound());
+        while (count($games) > 0) {
+            $page = $this->createPageGamenotes(array_shift($games), array_shift($games));
             $page->draw();
         }
     }
 
-    protected function drawPoulePivotTables( RoundNumber $roundNumber, PagePoules $page = null, int $nY = null )
+    protected function drawPoulePivotTables(RoundNumber $roundNumber, PagePoules $page = null, int $nY = null)
     {
-        if( $roundNumber->needsRanking() ) {
+        if ($roundNumber->needsRanking()) {
             $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
             foreach ($roundNumber->getRounds() as $round) {
                 foreach ($round->getPoules() as $poule) {
-                    if( !$poule->needsRanking() ) {
+                    if (!$poule->needsRanking()) {
                         continue;
                     }
                     $pouleHeight = $page->getPouleHeight($poule);
-                    if ($nY - $pouleHeight < $page->getPageMargin() ) {
+                    if ($nY - $pouleHeight < $page->getPageMargin()) {
                         list($page, $nY) = $this->createPagePoulePivotTables();
                     }
                     $nY = $page->draw($poule, $nY);
                 }
             }
         }
-        if( $roundNumber->hasNext() ) {
-            $this->drawPoulePivotTables( $roundNumber->getNext(), $page, $nY );
+        if ($roundNumber->hasNext()) {
+            $this->drawPoulePivotTables($roundNumber->getNext(), $page, $nY);
         }
     }
 
@@ -286,27 +291,27 @@ class Document extends \Zend_Pdf
         $page->putParent($this);
         $this->pages[] = $page;
         $page->setTitle($title);
-        $nY = $page->drawHeader( $title );
+        $nY = $page->drawHeader($title);
         return array( $page, $nY );
     }
 
-    protected function createPageGamenotes( Game $gameA = null, Game $gameB = null)
+    protected function createPageGamenotes(Game $gameA = null, Game $gameB = null)
     {
-        $page = new Page\Gamenotes( \Zend_Pdf_Page::SIZE_A4, $gameA, $gameB );
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
+        $page = new Page\Gamenotes(\Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
     protected function createPagePoulePivotTables()
     {
-        $page = new PagePoules( \Zend_Pdf_Page::SIZE_A4 );
-        $page->setFont( $this->getFont(), $this->getFontHeight() );
-        $page->putParent( $this );
+        $page = new PagePoules(\Zend_Pdf_Page::SIZE_A4);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $page->putParent($this);
         $this->pages[] = $page;
-        $nY = $page->drawHeader( "pouledraaitabel" );
-        return array( $page, $nY );
+        $nY = $page->drawHeader("pouledraaitabel");
+        return array($page, $nY);
     }
 
     protected function createPageQRCode()

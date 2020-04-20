@@ -44,43 +44,46 @@ final class FieldAction extends Action
         FieldRepository $fieldRepos,
         SportRepository $sportRepos,
         CompetitionRepos $competitionRepos
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->fieldRepos = $fieldRepos;
         $this->sportRepos = $sportRepos;
         $this->competitionRepos = $competitionRepos;
     }
 
-    public function add( Request $request, Response $response, $args ): Response
+    public function add(Request $request, Response $response, $args): Response
     {
         try {
             /** @var \Voetbal\Field $field */
-            $field = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Field', 'json');
+            $field = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Field', 'json');
             /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            $fieldsWithSameName = $competition->getFields()->filter( function( $fieldIt ) use ( $field ) {
-                return $fieldIt->getName() === $field->getName() || $fieldIt->getNumber() === $field->getNumber();
-            });
-            if( !$fieldsWithSameName->isEmpty() ) {
-                throw new \Exception("het veldnummer \"".$field->getNumber()."\" of de veldnaam \"".$field->getName()."\" bestaat al", E_ERROR );
+            $fieldsWithSameName = $competition->getFields()->filter(
+                function ($fieldIt) use ($field) {
+                    return $fieldIt->getName() === $field->getName() || $fieldIt->getNumber() === $field->getNumber();
+                }
+            );
+            if (!$fieldsWithSameName->isEmpty()) {
+                throw new \Exception(
+                    "het veldnummer \"" . $field->getNumber() . "\" of de veldnaam \"" . $field->getName(
+                    ) . "\" bestaat al", E_ERROR
+                );
             }
             $sport = $this->sportRepos->findOneBy(["name" => $field->getSport()->getName()]);
-            if ( $sport === null ) {
+            if ($sport === null) {
                 throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
             }
 
-            $newField = new FieldBase( $competition, $field->getNumber() );
-            $newField->setName( $field->getName() );
-            $newField->setSport( $sport );
+            $newField = new FieldBase($competition, $field->getNumber());
+            $newField->setName($field->getName());
+            $newField->setSport($sport);
 
-            $this->fieldRepos->save( $newField );
+            $this->fieldRepos->save($newField);
 
-            $json = $this->serializer->serialize( $newField, 'json');
+            $json = $this->serializer->serialize($newField, 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -93,37 +96,39 @@ final class FieldAction extends Action
 
             $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);
             /** @var \Voetbal\Field|false $fieldSer */
-            $fieldSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Field', 'json');
+            $fieldSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Field', 'json');
             if ($fieldSer === false) {
                 throw new \Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
 
-            $fieldsWithSameName = $competition->getFields()->filter( function( $fieldIt ) use ( $fieldSer, $field ) {
-                return $fieldIt->getName() === $fieldSer->getName() && $field !== $fieldIt;
-            });
-            if( !$fieldsWithSameName->isEmpty() ) {
-                throw new \Exception("het veld \"".$fieldSer->getName()."\" bestaat al", E_ERROR );
+            $fieldsWithSameName = $competition->getFields()->filter(
+                function ($fieldIt) use ($fieldSer, $field) {
+                    return $fieldIt->getName() === $fieldSer->getName() && $field !== $fieldIt;
+                }
+            );
+            if (!$fieldsWithSameName->isEmpty()) {
+                throw new \Exception("het veld \"" . $fieldSer->getName() . "\" bestaat al", E_ERROR);
             }
 
             $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
-            if ( $sport === null ) {
+            if ($sport === null) {
                 throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
             }
-            $field->setName( $fieldSer->getName() );
-            $field->setSport( $sport );
+            $field->setName($fieldSer->getName());
+            $field->setSport($sport);
 
-            $this->fieldRepos->save( $field );
+            $this->fieldRepos->save($field);
 
-            $json = $this->serializer->serialize( $field, 'json');
+            $json = $this->serializer->serialize($field, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    public function remove( Request $request, Response $response, $args ): Response
+    public function remove(Request $request, Response $response, $args): Response
     {
-        try{
+        try {
             /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
@@ -139,13 +144,12 @@ final class FieldAction extends Action
             }
 
             return $response->withStatus(200);
-        }
-        catch( \Exception $e ){
-            return new ErrorResponse( $e->getMessage(), 422);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    protected function getFieldFromInput(int $id, Competition $competition ): Field
+    protected function getFieldFromInput(int $id, Competition $competition): Field
     {
         $field = $this->fieldRepos->find($id);
         if ($field === null) {

@@ -19,10 +19,10 @@ use Tuupola\Base62;
 
 class Settings
 {
-	/**
-	 * @var string
-	 */
-	protected $jwtSecret;
+    /**
+     * @var string
+     */
+    protected $jwtSecret;
     /**
      * @var string
      */
@@ -32,25 +32,28 @@ class Settings
      */
     protected $activationSecret;
 
-	public function __construct(
-	    string $jwtSecret,
+    public function __construct(
+        string $jwtSecret,
         string $jwtAlgorithm,
-        string $activationSecret )
-	{
-		$this->jwtSecret = $jwtSecret;
+        string $activationSecret
+    ) {
+        $this->jwtSecret = $jwtSecret;
         $this->jwtAlgorithm = $jwtAlgorithm;
         $this->activationSecret = $activationSecret;
-	}
-
-	public function getJwtSecret(): string {
-	    return $this->jwtSecret;
     }
 
-    public function getJwtAlgorithm(): string {
+    public function getJwtSecret(): string
+    {
+        return $this->jwtSecret;
+    }
+
+    public function getJwtAlgorithm(): string
+    {
         return $this->jwtAlgorithm;
     }
 
-    public function getActivationSecret(): string {
+    public function getActivationSecret(): string
+    {
         return $this->activationSecret;
     }
 }

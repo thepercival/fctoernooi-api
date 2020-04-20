@@ -26,7 +26,6 @@ class TournamentMiddleware implements MiddlewareInterface
     public function __construct(
         TournamentRepository $tournamentRepos
     ) {
-
         $this->tournamentRepos = $tournamentRepos;
     }
 
@@ -50,6 +49,6 @@ class TournamentMiddleware implements MiddlewareInterface
             return new ForbiddenResponse("er kon geen toernooi worden gevonden voor: " . $args["tournamentId"]);
         }
 
-        return $handler->handle( $request->withAttribute("tournament", $tournament) );
+        return $handler->handle($request->withAttribute("tournament", $tournament));
     }
 }

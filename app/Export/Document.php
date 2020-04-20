@@ -85,20 +85,23 @@ trait Document
                             $games,
                             function (Game $game) {
                                 return $game->getRefereePlace() !== null;
-                    } ) ) > 0 ) {
+                            }
+                        )
+                    ) > 0) {
                     return true;
                 }
             }
-            if( $roundNumber->hasNext() === false ) {
+            if ($roundNumber->hasNext() === false) {
                 return false;
             }
-            return $hasSelfRefereeHelper( $roundNumber->getNext() );
+            return $hasSelfRefereeHelper($roundNumber->getNext());
         };
-        $this->areSelfRefereesAssigned = $hasSelfRefereeHelper( $this->structure->getFirstRoundNumber() );
+        $this->areSelfRefereesAssigned = $hasSelfRefereeHelper($this->structure->getFirstRoundNumber());
         return $this->areSelfRefereesAssigned;
     }
 
-    protected function areRefereesAssigned() {
+    protected function areRefereesAssigned()
+    {
         return $this->tournament->getCompetition()->getReferees()->count() > 0 || $this->areSelfRefereesAssigned();
     }
 
@@ -107,16 +110,17 @@ trait Document
      * @param array $games
      * @return array
      */
-    public function getScheduledGames( Round $round, $games = [] ): array
+    public function getScheduledGames(Round $round, $games = []): array
     {
-        $games = array_merge( $games, $round->getGamesWithState(State::Created));
-        foreach( $round->getChildren() as $childRound ) {
-            $games = $this->getScheduledGames( $childRound, $games);
+        $games = array_merge($games, $round->getGamesWithState(State::Created));
+        foreach ($round->getChildren() as $childRound) {
+            $games = $this->getScheduledGames($childRound, $games);
         }
         return $games;
     }
 
-    public function gamesOnSameDay( RoundNumber $roundNumber ) {
+    public function gamesOnSameDay(RoundNumber $roundNumber)
+    {
         $dateOne = $roundNumber->getFirstStartDateTime();
         $dateTwo = $roundNumber->getLastStartDateTime();
 //        if ($dateOne === null && $dateTwo === null) {
@@ -125,8 +129,9 @@ trait Document
         return $dateOne->format('Y-m-d') === $dateTwo->format('Y-m-d');
     }
 
-    public function getNameService(): NameService {
-        if( $this->nameService === null ) {
+    public function getNameService(): NameService
+    {
+        if ($this->nameService === null) {
             $this->nameService = new NameService();
         }
         return $this->nameService;

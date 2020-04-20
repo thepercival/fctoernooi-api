@@ -114,24 +114,25 @@ class Planning extends ToernooiPdfPage
         return $games;
     }
 
-    protected function getRowHeight() {
-        if( $this->rowHeight === null ) {
+    protected function getRowHeight()
+    {
+        if ($this->rowHeight === null) {
             $this->rowHeight = 18;
         }
         return $this->rowHeight;
     }
 
-    public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
+    public function drawRoundNumberHeader(RoundNumber $roundNumber, $nY)
     {
         $this->setFillColor(new \Zend_Pdf_Color_GrayScale(1));
         $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
+        $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
         $nX = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber);
-        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
-        return $nY - ( 2 * $fontHeightSubHeader );
+        $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $this->drawCell($subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER);
+        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        return $nY - (2 * $fontHeightSubHeader);
     }
 
     /**
@@ -149,8 +150,4 @@ class Planning extends ToernooiPdfPage
 //        }
 //        return $roundName;
 //    }
-
-
-
-
 }

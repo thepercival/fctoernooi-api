@@ -42,47 +42,45 @@ final class ConfigAction extends Action
         SportRepository $sportRepos,
         StructureRepository $structureRepos,
         SportConfigRepository $sportConfigRepos
-    )
-    {
-        parent::__construct($logger,$serializer);
+    ) {
+        parent::__construct($logger, $serializer);
         $this->sportRepos = $sportRepos;
         $this->structureRepos = $structureRepos;
         $this->sportConfigRepos = $sportConfigRepos;
     }
 
-    public function add( Request $request, Response $response, $args ): Response
+    public function add(Request $request, Response $response, $args): Response
     {
         try {
             /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             /** @var \Voetbal\Sport\Config $sportConfig */
-            $sportConfig = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Sport\Config', 'json');
+            $sportConfig = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Sport\Config', 'json');
 
             $sport = $this->sportRepos->findOneBy(["name" => $sportConfig->getSport()->getName()]);
-            if ( $sport === null ) {
+            if ($sport === null) {
                 throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
             }
-            if ( $competition->getSportConfig( $sport ) !== null ) {
+            if ($competition->getSportConfig($sport) !== null) {
                 throw new \Exception("de sport wordt al gebruikt binnen de competitie", E_ERROR);
             }
 
             $sportConfigService = new SportConfigService();
             $structure = $this->structureRepos->getStructure($competition);
-            $newSportConfig = $sportConfigService->createDefault( $sport, $competition, $structure );
-            $newSportConfig->setWinPoints( $sportConfig->getWinPoints() );
-            $newSportConfig->setDrawPoints( $sportConfig->getDrawPoints() );
-            $newSportConfig->setWinPointsExt( $sportConfig->getWinPointsExt() );
+            $newSportConfig = $sportConfigService->createDefault($sport, $competition, $structure);
+            $newSportConfig->setWinPoints($sportConfig->getWinPoints());
+            $newSportConfig->setDrawPoints($sportConfig->getDrawPoints());
+            $newSportConfig->setWinPointsExt($sportConfig->getWinPointsExt());
             $newSportConfig->setDrawPointsExt($sportConfig->getDrawPointsExt());
             $newSportConfig->setLosePointsExt($sportConfig->getLosePointsExt());
             $newSportConfig->setPointsCalculation($sportConfig->getPointsCalculation());
-            $newSportConfig->setNrOfGamePlaces( $sportConfig->getNrOfGamePlaces() );
+            $newSportConfig->setNrOfGamePlaces($sportConfig->getNrOfGamePlaces());
             $this->sportConfigRepos->customAdd($newSportConfig, $structure->getFirstRoundNumber());
 
-            $json = $this->serializer->serialize( $newSportConfig, 'json');
+            $json = $this->serializer->serialize($newSportConfig, 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -94,59 +92,59 @@ final class ConfigAction extends Action
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             /** @var \Voetbal\Sport\Config|false $sportConfigSer */
-            $sportConfigSer = $this->serializer->deserialize( $this->getRawData(), 'Voetbal\Sport\Config', 'json');
+            $sportConfigSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Sport\Config', 'json');
 
             $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
-            if ( $sport === null ) {
+            if ($sport === null) {
                 throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
             }
-            $sportConfig = $competition->getSportConfig( $sport );
-            if( $sportConfig === null ) {
+            $sportConfig = $competition->getSportConfig($sport);
+            if ($sportConfig === null) {
                 throw new \Exception("de sportconfig is niet gevonden bij de competitie", E_ERROR);
             }
-            $sportConfig->setWinPoints( $sportConfigSer->getWinPoints() );
-            $sportConfig->setDrawPoints( $sportConfigSer->getDrawPoints() );
-            $sportConfig->setWinPointsExt( $sportConfigSer->getWinPointsExt() );
+            $sportConfig->setWinPoints($sportConfigSer->getWinPoints());
+            $sportConfig->setDrawPoints($sportConfigSer->getDrawPoints());
+            $sportConfig->setWinPointsExt($sportConfigSer->getWinPointsExt());
             $sportConfig->setDrawPointsExt($sportConfigSer->getDrawPointsExt());
             $sportConfig->setLosePointsExt($sportConfigSer->getLosePointsExt());
             $sportConfig->setPointsCalculation($sportConfigSer->getPointsCalculation());
-            $sportConfig->setNrOfGamePlaces( $sportConfigSer->getNrOfGamePlaces() );
+            $sportConfig->setNrOfGamePlaces($sportConfigSer->getNrOfGamePlaces());
             $this->sportConfigRepos->save($sportConfig);
 
-            $json = $this->serializer->serialize( $sportConfig, 'json');
+            $json = $this->serializer->serialize($sportConfig, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    public function remove( Request $request, Response $response, $args ): Response
+    public function remove(Request $request, Response $response, $args): Response
     {
-        try{
+        try {
             /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $sportConfig = $this->getSportConfigFromInput((int)$args["sportconfigId"], $competition);
 
-            $this->sportConfigRepos->remove( $sportConfig );
+            $this->sportConfigRepos->remove($sportConfig);
 
             return $response->withStatus(200);
-        }
-        catch( \Exception $e ){
-            return new ErrorResponse( $e->getMessage(), 422);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
-    protected function getSportConfigFromInput(int $id, Competition $competition ): SportConfig
+    protected function getSportConfigFromInput(int $id, Competition $competition): SportConfig
     {
         $sportConfig = $this->sportConfigRepos->find($id);
         if ($sportConfig === null) {
             throw new \Exception("de sportconfiguratie kon niet gevonden worden o.b.v. de invoer", E_ERROR);
         }
         if ($sportConfig->getCompetition() !== $competition) {
-            throw new \Exception("de competitie van de sportconfiguratie komt niet overeen met de verstuurde competitie", E_ERROR);
+            throw new \Exception(
+                "de competitie van de sportconfiguratie komt niet overeen met de verstuurde competitie", E_ERROR
+            );
         }
         return $sportConfig;
     }
-
 }

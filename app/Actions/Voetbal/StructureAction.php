@@ -42,18 +42,18 @@ final class StructureAction extends Action
         $this->competitorRepos = $competitorRepos;
     }
 
-    public function fetchOne( Request $request, Response $response, $args ): Response
+    public function fetchOne(Request $request, Response $response, $args): Response
     {
         $competition = $request->getAttribute("tournament")->getCompetition();
 
-        $structure = $this->structureRepos->getStructure( $competition );
+        $structure = $this->structureRepos->getStructure($competition);
         // var_dump($structure); die();
 
-        $json = $this->serializer->serialize( $structure, 'json');
+        $json = $this->serializer->serialize($structure, 'json');
         return $this->respondWithJson($response, $json);
     }
 
-    public function edit( Request $request, Response $response, $args ): Response
+    public function edit(Request $request, Response $response, $args): Response
     {
         try {
             /** @var Structure|false $structureSer */
@@ -76,7 +76,7 @@ final class StructureAction extends Action
 
             $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);
-        } catch( \Exception $e ){
+        } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }

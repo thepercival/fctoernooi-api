@@ -45,7 +45,7 @@ class Shell
      */
     private $public;
 
-    public function __construct( Tournament $tournament, User $user = null )
+    public function __construct(Tournament $tournament, User $user = null)
     {
         $this->tournamentId = $tournament->getId();
         $competition = $tournament->getCompetition();
@@ -54,7 +54,7 @@ class Shell
         )->first()->getSport()->getCustomId();
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
-        $this->hasEditPermissions = ( $user !== null && $tournament->hasRole( $user, Role::ADMIN ) );
+        $this->hasEditPermissions = ($user !== null && $tournament->hasRole($user, Role::ADMIN));
         $this->public = $tournament->getPublic();
     }
 
@@ -87,15 +87,16 @@ class Shell
      * @param array $sports
      * @return int
      */
-    protected function getSportCustomIdBySports( array $sports ): int {
-        if( count($sports) === 1 ) {
+    protected function getSportCustomIdBySports(array $sports): int
+    {
+        if (count($sports) === 1) {
             $sport = $sports[0];
             if ($sport->getCustomId() === null) {
                 return 0;
             }
             return reset($sports)->getCustomId();
         }
-        if( count($sports) > 1 ) {
+        if (count($sports) > 1) {
             return -1;
         }
         return 0;
@@ -132,5 +133,4 @@ class Shell
     {
         return $this->public;
     }
-
 }

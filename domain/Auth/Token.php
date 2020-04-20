@@ -14,9 +14,9 @@ class Token
 {
     protected $decoded;
 
-    public function __construct( array $decoded )
+    public function __construct(array $decoded)
     {
-        $this->populate( $decoded );
+        $this->populate($decoded);
     }
 
     protected function populate($decoded)

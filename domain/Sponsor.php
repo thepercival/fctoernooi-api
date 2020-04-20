@@ -44,10 +44,10 @@ class Sponsor
     const MAX_LENGTH_NAME = 30;
     const MAX_LENGTH_URL = 100;
 
-    public function __construct( Tournament $tournament, $name )
+    public function __construct(Tournament $tournament, $name)
     {
         $this->tournament = $tournament;
-        $this->setName( $name );
+        $this->setName($name);
     }
 
     /**
@@ -61,7 +61,7 @@ class Sponsor
     /**
      * @param Tournament $tournament
      */
-    public function setTournament( Tournament $tournament )
+    public function setTournament(Tournament $tournament)
     {
         $this->tournament = $tournament;
     }
@@ -79,7 +79,7 @@ class Sponsor
     /**
      * @param int $id
      */
-    public function setId( $id )
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -96,10 +96,13 @@ class Sponsor
     /**
      * @param string $name
      */
-    public function setName( $name )
+    public function setName($name)
     {
-        if ( strlen( $name ) < static::MIN_LENGTH_NAME or strlen( $name ) > static::MAX_LENGTH_NAME ){
-            throw new \InvalidArgumentException( "de naam moet minimaal ".static::MIN_LENGTH_NAME." karakters bevatten en mag maximaal ".static::MAX_LENGTH_NAME." karakters bevatten", E_ERROR );
+        if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
+            throw new \InvalidArgumentException(
+                "de naam moet minimaal " . static::MIN_LENGTH_NAME . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_NAME . " karakters bevatten",
+                E_ERROR
+            );
         }
         $this->name = $name;
     }
@@ -115,12 +118,14 @@ class Sponsor
     /**
      * @param string $url
      */
-    public function setUrl( $url )
+    public function setUrl($url)
     {
-        if ( strlen( $url ) > 0 ) {
+        if (strlen($url) > 0) {
             if (strlen($url) > static::MAX_LENGTH_URL) {
-                throw new \InvalidArgumentException("de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",
-                    E_ERROR);
+                throw new \InvalidArgumentException(
+                    "de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",
+                    E_ERROR
+                );
             }
             if (!filter_var($url, FILTER_VALIDATE_URL)) {
                 throw new \InvalidArgumentException("de url " . $url . " is niet valide (begin met https://)", E_ERROR);
@@ -140,12 +145,14 @@ class Sponsor
     /**
      * @param string $url
      */
-    public function setLogoUrl( $url )
+    public function setLogoUrl($url)
     {
-        if ( strlen( $url ) > 0 ) {
+        if (strlen($url) > 0) {
             if (strlen($url) > static::MAX_LENGTH_URL) {
-                throw new \InvalidArgumentException("de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",
-                    E_ERROR);
+                throw new \InvalidArgumentException(
+                    "de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",
+                    E_ERROR
+                );
             }
             if (!filter_var($url, FILTER_VALIDATE_URL)) {
                 throw new \InvalidArgumentException("de url " . $url . " is niet valide (begin met https://)", E_ERROR);
@@ -165,7 +172,7 @@ class Sponsor
     /**
      * @param int $screenNr
      */
-    public function setScreenNr( $screenNr )
+    public function setScreenNr($screenNr)
     {
         $this->screenNr = $screenNr;
     }

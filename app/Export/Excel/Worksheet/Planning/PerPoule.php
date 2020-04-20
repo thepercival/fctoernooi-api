@@ -20,41 +20,43 @@ use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class PerPoule extends PlanningWorksheet
 {
-    public function __construct( Spreadsheet $parent )
+    public function __construct(Spreadsheet $parent)
     {
-        parent::__construct( $parent, 'planning per poule', Spreadsheet::INDEX_PLANNING_PER_POULE );
+        parent::__construct($parent, 'planning per poule', Spreadsheet::INDEX_PLANNING_PER_POULE);
     }
 
-    public function draw() {
+    public function draw()
+    {
         $firstRoundNumber = $this->getParent()->getStructure()->getFirstRoundNumber();
         $row = 1;
-        $this->drawRoundNumber( $firstRoundNumber, $row );
-        for( $columnNr = 1 ; $columnNr <= Planning::NR_OF_COLUMNS ; $columnNr++ ) {
+        $this->drawRoundNumber($firstRoundNumber, $row);
+        for ($columnNr = 1; $columnNr <= Planning::NR_OF_COLUMNS; $columnNr++) {
             $this->getColumnDimensionByColumn($columnNr)->setAutoSize(true);
         }
     }
 
-    protected function drawRoundNumber( RoundNumber $roundNumber, int $row ) {
-
-        foreach( $roundNumber->getRounds() as $round ) {
-            foreach( $round->getPoules() as $poule ) {
+    protected function drawRoundNumber(RoundNumber $roundNumber, int $row)
+    {
+        foreach ($roundNumber->getRounds() as $round) {
+            foreach ($round->getPoules() as $poule) {
                 $this->drewbreak = false;
                 $row = $this->drawPoule($poule, $row);
             }
         }
 
-        if( $roundNumber->hasNext() ) {
-            $this->drawRoundNumber( $roundNumber->getNext(), $row );
+        if ($roundNumber->hasNext()) {
+            $this->drawRoundNumber($roundNumber->getNext(), $row);
         }
     }
 
-    public function drawPoule( Poule $poule, int $row ): int {
+    public function drawPoule(Poule $poule, int $row): int
+    {
         $roundNumber = $poule->getRound()->getNumber();
-        $subHeader = $this->getParent()->getNameService()->getPouleName( $poule, true );
-        $subHeader .= " - " . $this->getParent()->getNameService()->getRoundNumberName( $roundNumber );
-        $row =  $this->drawSubHeaderHelper( $row, $subHeader );
+        $subHeader = $this->getParent()->getNameService()->getPouleName($poule, true);
+        $subHeader .= " - " . $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $row = $this->drawSubHeaderHelper($row, $subHeader);
 
-        foreach( $poule->getGames() as $game ) {
+        foreach ($poule->getGames() as $game) {
             if ($this->drawBreakBeforeGame($game)) {
                 $row = $this->drawBreak($roundNumber, $row);
             }

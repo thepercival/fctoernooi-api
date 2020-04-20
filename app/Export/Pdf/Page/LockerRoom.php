@@ -13,7 +13,6 @@ use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use FCToernooi\QRService;
 
-
 class LockerRoom extends ToernooiPdfPage
 {
     protected $rowHeight;
@@ -157,5 +156,4 @@ class LockerRoom extends ToernooiPdfPage
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $centerRight, $nY - $infoHeight, $centerRight + $infoHeight, $nY);
     }
-
 }

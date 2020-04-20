@@ -50,7 +50,7 @@ final class PlanningAction extends Action
         InputRepository $inputRepos,
         StructureRepository $structureRepos
     ) {
-        parent::__construct($logger,$serializer);
+        parent::__construct($logger, $serializer);
 
         $this->repos = $repos;
         $this->inputRepos = $inputRepos;
@@ -59,7 +59,7 @@ final class PlanningAction extends Action
         $this->deserializeRefereeService = new DeserializeRefereeService();
     }
 
-    public function fetch( Request $request, Response $response, $args ): Response
+    public function fetch(Request $request, Response $response, $args): Response
     {
         list($structure, $roundNumber) = $this->getFromRequest($request, $args);
         $json = $this->serializer->serialize($structure, 'json');
@@ -70,7 +70,7 @@ final class PlanningAction extends Action
      * do game remove and add for multiple games
      *
      */
-    public function create( Request $request, Response $response, $args ): Response
+    public function create(Request $request, Response $response, $args): Response
     {
         /** @var \FCToernooi\Tournament $tournament */
         $tournament = $request->getAttribute("tournament");
@@ -94,7 +94,7 @@ final class PlanningAction extends Action
     /**
      * do game remove and add for multiple games
      */
-    public function reschedule( Request $request, Response $response, $args ): Response
+    public function reschedule(Request $request, Response $response, $args): Response
     {
         /** @var \FCToernooi\Tournament $tournament */
         $tournament = $request->getAttribute("tournament");
@@ -113,14 +113,15 @@ final class PlanningAction extends Action
         }
     }
 
-    protected function getFromRequest( Request $request, $args ): array {
+    protected function getFromRequest(Request $request, $args): array
+    {
         $competition = $request->getAttribute("tournament")->getCompetition();
-        if( array_key_exists("roundnumber", $args ) === false ) {
+        if (array_key_exists("roundnumber", $args) === false) {
             throw new \Exception("geen rondenummer opgegeven", E_ERROR);
         }
         /** @var \Voetbal\Structure $structure */
-        $structure = $this->structureRepos->getStructure( $competition );
-        $roundNumber = $structure->getRoundNumber( $args["roundnumber"] );
+        $structure = $this->structureRepos->getStructure($competition);
+        $roundNumber = $structure->getRoundNumber($args["roundnumber"]);
         return [$structure, $roundNumber];
     }
 }

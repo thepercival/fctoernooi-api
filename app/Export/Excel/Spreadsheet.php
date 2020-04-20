@@ -37,8 +37,7 @@ class Spreadsheet extends SpreadsheetBase
         Structure $structure,
         TournamentConfig $config,
         string $url
-    )
-    {
+    ) {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
@@ -47,12 +46,13 @@ class Spreadsheet extends SpreadsheetBase
         $this->url = $url;
     }
 
-    public function fillContents() {
+    public function fillContents()
+    {
         $this->setMetadata();
 
-        $this->removeSheetByIndex( 0 );
+        $this->removeSheetByIndex(0);
 
-        if( $this->config->getStructure() ) {
+        if ($this->config->getStructure()) {
             $indelingSheet = new IndelingSheet($this);
             $indelingSheet->draw();
 
@@ -60,26 +60,25 @@ class Spreadsheet extends SpreadsheetBase
             $structureSheet->draw();
         }
 
-        if( $this->config->getPlanning() ) {
+        if ($this->config->getPlanning()) {
             $planningSheet = new PlanningAllSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if( $this->config->getRules() ) {
-
+        if ($this->config->getRules()) {
         }
-        if( $this->config->getGamenotes() ) {
+        if ($this->config->getGamenotes()) {
             $gamenotesSheet = new GamenotesSheet($this);
             $gamenotesSheet->draw();
         }
-        if( $this->config->getGamesperpoule() ) {
+        if ($this->config->getGamesperpoule()) {
             $planningSheet = new PlanningPerPouleSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if( $this->config->getGamesperfield() ) {
+        if ($this->config->getGamesperfield()) {
             $planningSheet = new PlanningPerFieldSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
@@ -100,7 +99,8 @@ class Spreadsheet extends SpreadsheetBase
         $this->setActiveSheetIndex(0);
     }
 
-    protected function setMetadata() {
+    protected function setMetadata()
+    {
         $this->getProperties()
             ->setCreator("FCToernooi")
             ->setLastModifiedBy("Coen Dunnink")

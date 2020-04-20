@@ -46,52 +46,59 @@ class TournamentCopier
     }
 
 
-    public function copy( Tournament $tournament, \DateTimeImmutable $newStartDateTime, User $user ): Tournament
+    public function copy(Tournament $tournament, \DateTimeImmutable $newStartDateTime, User $user): Tournament
     {
         $competition = $tournament->getCompetition();
 
-        $association = $this->createAssociationFromUserIdAndDateTime($user->getId() );
+        $association = $this->createAssociationFromUserIdAndDateTime($user->getId());
 
         $leagueSer = $competition->getLeague();
-        $league = new League($association, $leagueSer->getName() );
+        $league = new League($association, $leagueSer->getName());
 
-        $season = $this->seasonRepos->findOneBy( array('name' => '9999' ) );
+        $season = $this->seasonRepos->findOneBy(array('name' => '9999'));
 
         $ruleSet = $competition->getRuleSet();
         $competitionService = new CompetitionService();
-        $newCompetition = $competitionService->create($league, $season, $ruleSet, $competition->getStartDateTime() );
+        $newCompetition = $competitionService->create($league, $season, $ruleSet, $competition->getStartDateTime());
 
         // add serialized fields and referees to source-competition
         $sportConfigService = new SportConfigService();
-        $createFieldsAndReferees = function($sportConfigsSer, $fieldsSer, $refereesSer) use( $newCompetition, $sportConfigService ) {
-            foreach($sportConfigsSer as $sportConfigSer ) {
+        $createFieldsAndReferees = function ($sportConfigsSer, $fieldsSer, $refereesSer) use (
+            $newCompetition,
+            $sportConfigService
+        ) {
+            foreach ($sportConfigsSer as $sportConfigSer) {
                 $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
                 $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
             }
-            foreach($fieldsSer as $fieldSer ) {
-                $field = new Field( $newCompetition, $fieldSer->getNumber() );
+            foreach ($fieldsSer as $fieldSer) {
+                $field = new Field($newCompetition, $fieldSer->getNumber());
                 $field->setName($fieldSer->getName());
                 $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
                 $field->setSport($sport);
             }
-            foreach($refereesSer as $refereeSer ) {
-                $referee = new Referee( $newCompetition, $refereeSer->getRank() );
-                $referee->setInitials( $refereeSer->getInitials() );
-                $referee->setName( $refereeSer->getName() );
-                $referee->setEmailaddress( $refereeSer->getEmailaddress() );
-                $referee->setInfo( $refereeSer->getInfo() );
+            foreach ($refereesSer as $refereeSer) {
+                $referee = new Referee($newCompetition, $refereeSer->getRank());
+                $referee->setInitials($refereeSer->getInitials());
+                $referee->setName($refereeSer->getName());
+                $referee->setEmailaddress($refereeSer->getEmailaddress());
+                $referee->setInfo($refereeSer->getInfo());
             }
         };
-        $createFieldsAndReferees( $competition->getSportConfigs(), $competition->getFields(), $competition->getReferees() );
+        $createFieldsAndReferees(
+            $competition->getSportConfigs(),
+            $competition->getFields(),
+            $competition->getReferees()
+        );
 
-        $newTournament = new TournamentBase($newCompetition );
-        $newTournament->getCompetition()->setStartDateTime($newStartDateTime );
-        if( $tournament->getBreakStartDateTime() !== null ) {
+        $newTournament = new TournamentBase($newCompetition);
+        $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
+        if ($tournament->getBreakStartDateTime() !== null) {
             $newTournament->setBreakStartDateTime(clone $tournament->getBreakStartDateTime());
             $newTournament->setBreakEndDateTime(clone $tournament->getBreakEndDateTime());
         }
         $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
-        $newTournament->setPublic($public );
+        $newTournament->setPublic($public);
 
         $roleService = new RoleService();
         $roleService->create($newTournament, $user, Role::ALL);

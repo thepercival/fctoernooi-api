@@ -34,10 +34,10 @@ class PoulePivotTables extends ToernooiPdfPage
     */protected $rowHeight;
     protected $placesFontSize;
 
-    public function __construct( $param1 )
+    public function __construct($param1)
     {
-        parent::__construct( $param1 );
-        $this->setLineWidth( 0.5 );
+        parent::__construct($param1);
+        $this->setLineWidth(0.5);
         $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
         $this->versusColumnsWidth = $this->getDisplayWidth() * 0.62;
         $this->pointsColumnWidth = $this->getDisplayWidth() * 0.08;
@@ -49,26 +49,34 @@ class PoulePivotTables extends ToernooiPdfPage
         $this->pouleMarginStructure = 10;*/
     }
 
-    public function getPageMargin(){ return 20; }
-    public function getHeaderHeight(){ return 0; }
+    public function getPageMargin()
+    {
+        return 20;
+    }
 
-    protected function getRowHeight() {
-        if( $this->rowHeight === null ) {
+    public function getHeaderHeight()
+    {
+        return 0;
+    }
+
+    protected function getRowHeight()
+    {
+        if ($this->rowHeight === null) {
             $this->rowHeight = 18;
         }
         return $this->rowHeight;
     }
 
-    public function drawRoundNumberHeader( RoundNumber $roundNumber, $nY )
+    public function drawRoundNumberHeader(RoundNumber $roundNumber, $nY)
     {
         $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont( $this->getParent()->getFont( true ), $this->getParent()->getFontHeightSubHeader() );
+        $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
         $nX = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName( $roundNumber);
-        $this->drawCell( $subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER );
-        $this->setFont( $this->getParent()->getFont(), $this->getParent()->getFontHeight() );
-        return $nY - ( 2 * $fontHeightSubHeader );
+        $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $this->drawCell($subHeader, $nX, $nY, $displayWidth, $fontHeightSubHeader, ToernooiPdfPage::ALIGNCENTER);
+        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        return $nY - (2 * $fontHeightSubHeader);
     }
 
     /**
@@ -76,14 +84,14 @@ class PoulePivotTables extends ToernooiPdfPage
      *
      * @param Poule $poule
      */
-    public function getPouleHeight( Poule $poule )
+    public function getPouleHeight(Poule $poule)
     {
         $nrOfPlaces = $poule->getPlaces()->count();
 
         // header row
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
-        $degrees = $this->getDegrees( $nrOfPlaces );
-        $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
+        $degrees = $this->getDegrees($nrOfPlaces);
+        $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         // places
         $height += $this->getRowHeight() * $nrOfPlaces;
@@ -109,18 +117,26 @@ class PoulePivotTables extends ToernooiPdfPage
         }
     }*/
 
-    public function drawPouleHeader( Poule $poule, $nY )
+    public function drawPouleHeader(Poule $poule, $nY)
     {
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
-        $degrees = $this->getDegrees( $nrOfPlaces );
-        $height = $this->getVersusHeight( $versusColumnWidth, $degrees );
+        $degrees = $this->getDegrees($nrOfPlaces);
+        $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         $nX = $this->getPageMargin();
-        $nX = $this->drawCell( $this->getParent()->getNameService()->getPouleName( $poule, true ), $nX, $nY, $this->nameColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
+        $nX = $this->drawCell(
+            $this->getParent()->getNameService()->getPouleName($poule, true),
+            $nX,
+            $nY,
+            $this->nameColumnWidth,
+            $height,
+            ToernooiPdfPage::ALIGNCENTER,
+            'black'
+        );
 
         $nVersus = 0;
-        foreach( $poule->getPlaces() as $place ) {
+        foreach ($poule->getPlaces() as $place) {
             $placeName = $place->getNumber() . ". " . $this->getParent()->getNameService()->getPlaceFromName(
                     $place,
                     true
@@ -140,32 +156,40 @@ class PoulePivotTables extends ToernooiPdfPage
         }
         $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
         // draw pointsrectangle
-        $nX = $this->drawCell( "punten", $nX, $nY, $this->pointsColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
+        $nX = $this->drawCell(
+            "punten",
+            $nX,
+            $nY,
+            $this->pointsColumnWidth,
+            $height,
+            ToernooiPdfPage::ALIGNCENTER,
+            'black'
+        );
 
         // draw rankrectangle
-        $this->drawCell( "plek", $nX, $nY, $this->rankColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black' );
+        $this->drawCell("plek", $nX, $nY, $this->rankColumnWidth, $height, ToernooiPdfPage::ALIGNCENTER, 'black');
 
         return $nY - $height;
     }
 
-    public function draw( Poule $poule, $nY )
+    public function draw(Poule $poule, $nY)
     {
         // draw first row
-        $nY = $this->drawPouleHeader( $poule, $nY );
+        $nY = $this->drawPouleHeader($poule, $nY);
 
         $pouleState = $poule->getState();
         $competition = $this->getParent()->getTournament()->getCompetition();
         $rankingItems = null;
-        if( $pouleState === State::Finished ) {
-            $rankingService = new RankingService($poule->getRound(), $competition->getRuleSet() );
-            $rankingItems = $rankingService->getItemsForPoule( $poule );
+        if ($pouleState === State::Finished) {
+            $rankingService = new RankingService($poule->getRound(), $competition->getRuleSet());
+            $rankingItems = $rankingService->getItemsForPoule($poule);
         }
 
         $nRowHeight = $this->getRowHeight();
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
 
-        foreach( $poule->getPlaces() as $place ) {
+        foreach ($poule->getPlaces() as $place) {
             $nX = $this->getPageMargin();
             // placename
             {
@@ -197,62 +221,89 @@ class PoulePivotTables extends ToernooiPdfPage
                     $this->setFillColor(new \Zend_Pdf_Color_Html("lightgrey"));
                 }
                 $score = '';
-                if( $pouleState !== State::Created ) {
-                    $score = $this->getScore( $place, $poule->getPlace($placeNr), $placeGames );
+                if ($pouleState !== State::Created) {
+                    $score = $this->getScore($place, $poule->getPlace($placeNr), $placeGames);
                 }
-                $nX = $this->drawCell( $score, $nX, $nY, $versusColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNCENTER, 'black' );
-                if( $poule->getPlace($placeNr) === $place ) {
-                    $this->setFillColor( new \Zend_Pdf_Color_Html( "white" ) );
+                $nX = $this->drawCell(
+                    $score,
+                    $nX,
+                    $nY,
+                    $versusColumnWidth,
+                    $nRowHeight,
+                    ToernooiPdfPage::ALIGNCENTER,
+                    'black'
+                );
+                if ($poule->getPlace($placeNr) === $place) {
+                    $this->setFillColor(new \Zend_Pdf_Color_Html("white"));
                 }
             }
 
             $rankingItem = null;
-            if( $rankingItems !== null ) {
-                $arrFoundRankingItems = array_filter( $rankingItems, function( $rankingItem ) use ($place ) {
-                    return $rankingItem->getPlace() === $place;
-                });
-                $rankingItem = reset( $arrFoundRankingItems );
+            if ($rankingItems !== null) {
+                $arrFoundRankingItems = array_filter(
+                    $rankingItems,
+                    function ($rankingItem) use ($place) {
+                        return $rankingItem->getPlace() === $place;
+                    }
+                );
+                $rankingItem = reset($arrFoundRankingItems);
             }
 
             // draw pointsrectangle
             $points = '';
-            if( $rankingItem !== null ) {
+            if ($rankingItem !== null) {
                 $points = '' . $rankingItem->getUnranked()->getPoints();
             }
-            $nX = $this->drawCell( $points, $nX, $nY, $this->pointsColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
+            $nX = $this->drawCell(
+                $points,
+                $nX,
+                $nY,
+                $this->pointsColumnWidth,
+                $nRowHeight,
+                ToernooiPdfPage::ALIGNRIGHT,
+                'black'
+            );
 
             // draw rankrectangle
             $rank = '';
-            if( $rankingItem !== null ) {
+            if ($rankingItem !== null) {
                 $rank = '' . $rankingItem->getUniqueRank();
             }
-            $this->drawCell( $rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black' );
+            $this->drawCell($rank, $nX, $nY, $this->rankColumnWidth, $nRowHeight, ToernooiPdfPage::ALIGNRIGHT, 'black');
 
             $nY -= $nRowHeight;
         }
         return $nY - $nRowHeight;
     }
 
-    protected function getScore( Place $homePlace, Place $awayPlace, array $placeGames): string {
-        $foundHomeGames = array_filter( $placeGames, function( $game ) use ($homePlace, $awayPlace) {
-            return $game->isParticipating( $awayPlace, Game::AWAY ) && $game->isParticipating( $homePlace, Game::HOME );
-        });
-        if( count($foundHomeGames) > 1 ) {
+    protected function getScore(Place $homePlace, Place $awayPlace, array $placeGames): string
+    {
+        $foundHomeGames = array_filter(
+            $placeGames,
+            function ($game) use ($homePlace, $awayPlace) {
+                return $game->isParticipating($awayPlace, Game::AWAY) && $game->isParticipating($homePlace, Game::HOME);
+            }
+        );
+        if (count($foundHomeGames) > 1) {
             return '';
         }
-        if( count($foundHomeGames) === 1 ) {
-            return $this->getGameScore( reset($foundHomeGames), false );
+        if (count($foundHomeGames) === 1) {
+            return $this->getGameScore(reset($foundHomeGames), false);
         }
-        $foundAwayGames = array_filter( $placeGames, function( $game ) use ($homePlace, $awayPlace) {
-            return $game->isParticipating( $homePlace, Game::AWAY ) && $game->isParticipating( $awayPlace, Game::HOME );
-        });
-        if( count($foundAwayGames) !== 1 ) {
+        $foundAwayGames = array_filter(
+            $placeGames,
+            function ($game) use ($homePlace, $awayPlace) {
+                return $game->isParticipating($homePlace, Game::AWAY) && $game->isParticipating($awayPlace, Game::HOME);
+            }
+        );
+        if (count($foundAwayGames) !== 1) {
             return '';
         }
-        return $this->getGameScore( reset($foundAwayGames), true );
+        return $this->getGameScore(reset($foundAwayGames), true);
     }
 
-    protected function getGameScore(Game $game, bool $reverse): string {
+    protected function getGameScore(Game $game, bool $reverse): string
+    {
         $score = ' - ';
         if ($game->getState() !== State::Finished) {
             return $score;
@@ -261,17 +312,18 @@ class PoulePivotTables extends ToernooiPdfPage
         if ($finalScore === null) {
             return $score;
         }
-        if( $reverse === true ) {
+        if ($reverse === true) {
             return $finalScore->getAway() . $score . $finalScore->getHome();
         }
         return $finalScore->getHome() . $score . $finalScore->getAway();
     }
 
-    public function getDegrees( int $nrOfPlaces ): int {
-        if( $nrOfPlaces <= 3 ) {
+    public function getDegrees(int $nrOfPlaces): int
+    {
+        if ($nrOfPlaces <= 3) {
             return 0;
         }
-        if( $nrOfPlaces >= 6 ) {
+        if ($nrOfPlaces >= 6) {
             return 90;
         }
         return 45;
