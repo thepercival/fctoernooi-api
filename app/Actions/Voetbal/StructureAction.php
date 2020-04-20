@@ -8,6 +8,8 @@
 
 namespace App\Actions\Voetbal;
 
+use Voetbal\Competition;
+use Voetbal\Structure;
 use Voetbal\Structure\Copier as StructureCopier;
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
@@ -54,12 +56,12 @@ final class StructureAction extends Action
     public function edit( Request $request, Response $response, $args ): Response
     {
         try {
-            /** @var \Voetbal\Structure|false $structureSer */
+            /** @var Structure|false $structureSer */
             $structureSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Structure', 'json');
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
@@ -74,8 +76,7 @@ final class StructureAction extends Action
 
             $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);
-        }
-        catch( \Exception $e ){
+        } catch( \Exception $e ){
             return new ErrorResponse($e->getMessage(), 422);
         }
     }

@@ -72,7 +72,7 @@ class Validator extends Command
             }
             $this->structureValidator->checkValidity($competition);
         } catch (\Exception $e) {
-            throw new Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
+            throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }
     }
 }

@@ -29,7 +29,7 @@ use Voetbal\Structure\Repository as StructureRepository;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
-use App\Copiers\StructureCopier;
+use Voetbal\Structure\Copier as StructureCopier;
 use Voetbal\Round\Number\PlanningCreator;
 use Voetbal\Competitor\Repository as CompetitorRepository;
 use Selective\Config\Configuration;
@@ -473,7 +473,7 @@ class TournamentAction extends Action
             /** @var ArrayCollection|LockerRoom[] $lockerRoomsSer */
             $lockerRoomsSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'ArrayCollection<FCToernooi\LockerRoom>',
+                'Doctrine\Common\Collections\ArrayCollection',
                 'json'
             );
             /** @var Tournament $tournament */

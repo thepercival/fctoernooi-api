@@ -66,22 +66,5 @@ abstract class Planning extends FCToernooiWorksheet
         return $game->getStartDateTime()->getTimestamp() === $this->tournamentBreak->getEndDate()->getTimestamp();
     }
 
-    /**
-     * add winnerslosers if roundnumber is 2 and has sibling
-     *
-     * @param Round $round
-     * @param NameService $nameService
-     * @return string
-     */
-//    protected function getRoundNameStructure( Round $round, NameService $nameService ): string
-//    {
-//        $roundName = $nameService->getRoundName( $round );
-//        if( $round->getNumber() === 2 and $round->getOpposingRound() !== null ) {
-//            $roundName .= ' - ' . $nameService->getWinnersLosersDescription($round->getWinnersOrlosers()) . 's';
-//        }
-//        return $roundName;
-//    }
-
     abstract public function draw();
-
 }
