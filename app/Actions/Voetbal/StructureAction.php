@@ -8,7 +8,7 @@
 
 namespace App\Actions\Voetbal;
 
-use App\Copiers\StructureCopier;
+use Voetbal\Structure\Copier as StructureCopier;
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
