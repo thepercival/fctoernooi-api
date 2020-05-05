@@ -211,7 +211,7 @@ class PoulePivotTables extends ToernooiPdfPage
             }
 
             $placeGames = $poule->getGames()->filter(
-                function (Game $game) use ($place) {
+                function (Game $game) use ($place): bool {
                     return $game->isParticipating($place);
                 }
             )->toArray();
@@ -242,7 +242,7 @@ class PoulePivotTables extends ToernooiPdfPage
             if ($rankingItems !== null) {
                 $arrFoundRankingItems = array_filter(
                     $rankingItems,
-                    function ($rankingItem) use ($place) {
+                    function ($rankingItem) use ($place): bool {
                         return $rankingItem->getPlace() === $place;
                     }
                 );
@@ -280,7 +280,7 @@ class PoulePivotTables extends ToernooiPdfPage
     {
         $foundHomeGames = array_filter(
             $placeGames,
-            function ($game) use ($homePlace, $awayPlace) {
+            function ($game) use ($homePlace, $awayPlace): bool {
                 return $game->isParticipating($awayPlace, Game::AWAY) && $game->isParticipating($homePlace, Game::HOME);
             }
         );
@@ -292,7 +292,7 @@ class PoulePivotTables extends ToernooiPdfPage
         }
         $foundAwayGames = array_filter(
             $placeGames,
-            function ($game) use ($homePlace, $awayPlace) {
+            function ($game) use ($homePlace, $awayPlace): bool {
                 return $game->isParticipating($homePlace, Game::AWAY) && $game->isParticipating($awayPlace, Game::HOME);
             }
         );

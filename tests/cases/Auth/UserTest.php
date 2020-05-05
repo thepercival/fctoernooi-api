@@ -15,7 +15,7 @@ class UserTest extends \PHPUnit\Framework\TestCase
     public function testEmailaddress()
     {
         $user = new User("cdk@gmail.com");
-        $this->assertSame("cdk@gmail.com", $user->getEmailaddress());
+        self::assertSame("cdk@gmail.com", $user->getEmailaddress());
     }
 
     public function testCreateNameMin()

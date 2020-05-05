@@ -193,8 +193,8 @@ EOT;
         // $future = $now->modify("+10 seconds");
 
         $payload = [
-            "iat" => $now->getTimeStamp(),
-            "exp" => $future->getTimeStamp(),
+            "iat" => $now->getTimestamp(),
+            "exp" => $future->getTimestamp(),
             "jti" => $jti,
             "sub" => $user->getId(),
         ];

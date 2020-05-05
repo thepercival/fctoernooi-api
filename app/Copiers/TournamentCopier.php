@@ -66,7 +66,7 @@ class TournamentCopier
         $createFieldsAndReferees = function ($sportConfigsSer, $fieldsSer, $refereesSer) use (
             $newCompetition,
             $sportConfigService
-        ) {
+        ): void {
             foreach ($sportConfigsSer as $sportConfigSer) {
                 $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
                 $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
@@ -124,7 +124,7 @@ class TournamentCopier
             foreach ($sourceLockerRoom->getCompetitors() as $sourceCompetitor) {
                 $newCompetitorsFound = array_filter(
                     $newCompetitors,
-                    function ($newCompetitorIt) use ($sourceCompetitor) {
+                    function ($newCompetitorIt) use ($sourceCompetitor): bool {
                         return $newCompetitorIt->getName() === $sourceCompetitor->getName();
                     }
                 );

@@ -65,7 +65,7 @@ final class StructureAction extends Action
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
-            $existingCompetitors = $structure ? $structure->getFirstRoundNumber()->getCompetitors() : [];
+            $existingCompetitors = $structure !== null ? $structure->getFirstRoundNumber()->getCompetitors() : [];
             $structureCopier = new StructureCopier($competition, $existingCompetitors);
             $newStructure = $structureCopier->copy($structureSer);
 

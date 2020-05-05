@@ -68,18 +68,7 @@ class Document extends \Zend_Pdf
         return parent::render($newSegmentOnly, $outputStream);
     }
 
-//    protected function createNewPage( $nPageWidth, $nPageHeight )
-//    {
-//        $oPage = new SuperElf_Pdf_Page_PoolTotal( $nPageWidth, $nPageHeight );
-//        $oFont = SuperElf_Pdf_Factory::getFont();
-//        $oPage->setFont( $oFont, $this->getFontHeightPoolUsers() );
-//        $oPage->putParent( $this );
-//        $this->pages[] = $oPage;
-//        return $oPage;
-//    }
-//
-
-    public static function getFont($bBold = false, $bItalic = false)
+    public function getFont($bBold = false, $bItalic = false)
     {
         $sFontDir = __DIR__ . "/../../../fonts/";
         if ($bBold === false and $bItalic === false) {
@@ -170,7 +159,7 @@ class Document extends \Zend_Pdf
         foreach ($poules as $poule) {
             list($page, $nY) = $this->createPagePlanning("poule " . $poule->getNumber());
             $page->setGameFilter(
-                function (Game $game) use ($poule) {
+                function (Game $game) use ($poule): bool {
                     return $game->getPoule() === $poule;
                 }
             );
@@ -184,7 +173,7 @@ class Document extends \Zend_Pdf
         foreach ($fields as $field) {
             list($page, $nY) = $this->createPagePlanning("veld " . $field->getName());
             $page->setGameFilter(
-                function (Game $game) use ($field) {
+                function (Game $game) use ($field): bool {
                     return $game->getField() === $field;
                 }
             );

@@ -78,32 +78,32 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
             if ($hasEnoughTotalNrOfGames === false) {
                 $this->consolePlanning($bestPlanning);
             }
-            $this->assertTrue($hasEnoughTotalNrOfGames, "the planning has not enough games");
+            self::assertTrue($hasEnoughTotalNrOfGames, "the planning has not enough games");
 
 
             $placeOneTimePerGame = $validator->placeOneTimePerGame();
             if ($placeOneTimePerGame === false) {
                 $this->consolePlanning($bestPlanning);
             }
-            $this->assertTrue($placeOneTimePerGame, "a place is assigned more than one in a game");
+            self::assertTrue($placeOneTimePerGame, "a place is assigned more than one in a game");
 
             $allPlacesSameNrOfGames = $validator->allPlacesSameNrOfGames();
             if ($allPlacesSameNrOfGames === false) {
                 $this->consolePlanning($bestPlanning);
             }
-            $this->assertTrue($allPlacesSameNrOfGames, "not all places within poule have same number of games");
+            self::assertTrue($allPlacesSameNrOfGames, "not all places within poule have same number of games");
 
             $gamesInARow = $validator->gamesInARow();
             if ($gamesInARow === false) {
                 $this->consolePlanning($bestPlanning);
             }
-            $this->assertTrue($gamesInARow, "more than allowed nrofmaxgamesinarow");
+            self::assertTrue($gamesInARow, "more than allowed nrofmaxgamesinarow");
 
             $validResourcesPerBatch = $validator->validResourcesPerBatch();
             if ($validResourcesPerBatch === false) {
                 $this->consolePlanning($bestPlanning);
             }
-            $this->assertTrue($validResourcesPerBatch, "more resources per batch than allowed");
+            self::assertTrue($validResourcesPerBatch, "more resources per batch than allowed");
         }
     }
 
@@ -120,7 +120,7 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
     protected function inputToString(Input $planningInput): string
     {
         $sports = array_map(
-            function (array $sportConfig) {
+            function (array $sportConfig): string {
                 return '' . $sportConfig["nrOfFields"];
             },
             $planningInput->getSportConfig()

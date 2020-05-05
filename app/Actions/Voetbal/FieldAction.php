@@ -60,7 +60,7 @@ final class FieldAction extends Action
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $fieldsWithSameName = $competition->getFields()->filter(
-                function ($fieldIt) use ($field) {
+                function ($fieldIt) use ($field): bool {
                     return $fieldIt->getName() === $field->getName() || $fieldIt->getNumber() === $field->getNumber();
                 }
             );
@@ -102,7 +102,7 @@ final class FieldAction extends Action
             }
 
             $fieldsWithSameName = $competition->getFields()->filter(
-                function ($fieldIt) use ($fieldSer, $field) {
+                function ($fieldIt) use ($fieldSer, $field): bool {
                     return $fieldIt->getName() === $fieldSer->getName() && $field !== $fieldIt;
                 }
             );

@@ -38,9 +38,9 @@ class Repository extends \Voetbal\Repository
 
     public function customPersist(Tournament $tournament, bool $flush)
     {
-        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
+        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
         $leagueRepos->save($tournament->getCompetition()->getLeague());
-        $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetaData(Competition::class));
+        $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetadata(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
         $this->_em->persist($tournament);
         if ($flush) {
@@ -133,7 +133,7 @@ class Repository extends \Voetbal\Repository
 
     public function remove($tournament)
     {
-        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetaData(League::class));
+        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
         return $leagueRepos->remove($tournament->getCompetition()->getLeague());
     }
 }

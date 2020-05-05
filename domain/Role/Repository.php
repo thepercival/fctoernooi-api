@@ -35,7 +35,7 @@ class Repository extends \Voetbal\Repository
             $this->_em->flush();
 
             // add referee roles
-            $userRepos = new UserRepository($this->_em, $this->_em->getClassMetaData(User::class));
+            $userRepos = new UserRepository($this->_em, $this->_em->getClassMetadata(User::class));
             $referees = $tournament->getCompetition()->getReferees();
             foreach ($referees as $referee) {
                 if (strlen($referee->getEmailaddress()) === 0) {

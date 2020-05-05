@@ -23,13 +23,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
-return function (App $app) {
+return function (App $app): void {
     $app->group(
         '/public',
-        function (Group $group) {
+        function (Group $group): void {
             $group->group(
                 '/auth',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('/register', AuthAction::class . ':options');
                     $group->post('/register', AuthAction::class . ':register');
                     $group->options('/login', AuthAction::class . ':options');
@@ -42,18 +42,18 @@ return function (App $app) {
             );
             $group->group(
                 '/tournaments/',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('{tournamentId}', TournamentAction::class . ':options');
                     $group->get('{tournamentId}', TournamentAction::class . ':fetchOnePublic');
 
                     $group->group(
                         '{tournamentId}/',
-                        function (Group $group) {
+                        function (Group $group): void {
                             $group->options('structure', StructureAction::class . ':options');
                             $group->get('structure', StructureAction::class . ':fetchOne');
                             $group->options('export', TournamentAction::class . ':options');
                             $group->get('export', TournamentAction::class . ':export')->setName('tournament-export');
-                }
+                        }
             );
         }
         );
@@ -63,7 +63,7 @@ return function (App $app) {
 
     $app->group(
         '/auth',
-        function (Group $group) {
+        function (Group $group): void {
             $group->options('/extendtoken', AuthAction::class . ':options');
             $group->post('/extendtoken', AuthAction::class . ':extendToken');
         }
@@ -84,7 +84,7 @@ return function (App $app) {
 
     $app->group(
         '/tournaments',
-        function (Group $group) {
+        function (Group $group): void {
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne');
             $group->options('', TournamentAction::class . ':options');
@@ -96,7 +96,7 @@ return function (App $app) {
 
             $group->group(
                 '/{tournamentId}/',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('syncrefereeroles', TournamentAction::class . ':options');
                     $group->post('syncrefereeroles', TournamentAction::class . ':syncRefereeRoles');
                     $group->options('sendrequestoldstructure', TournamentAction::class . ':options');
@@ -112,7 +112,7 @@ return function (App $app) {
 
             $group->group(
                 'sponsors',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('', SponsorAction::class . ':options');
                     $group->get('', SponsorAction::class . ':fetch');
                     $group->get('/{sponsorId}', SponsorAction::class . ':fetchOne');
@@ -134,7 +134,7 @@ return function (App $app) {
 
                     $group->group(
                         'fields',
-                        function (Group $group) {
+                        function (Group $group): void {
                             $group->options('', FieldAction::class . ':options');
                             $group->post('', FieldAction::class . ':add');
                             $group->options('/{fieldId}', FieldAction::class . ':options');
@@ -145,7 +145,7 @@ return function (App $app) {
 
                     $group->group(
                         'referees',
-                        function (Group $group) {
+                        function (Group $group): void {
                             $group->options('', RefereeAction::class . ':options');
                             $group->post('', RefereeAction::class . ':add');
                             $group->options('/{refereeId}', RefereeAction::class . ':options');
@@ -156,7 +156,7 @@ return function (App $app) {
 
                     $group->group(
                         'sportconfigs',
-                        function (Group $group) {
+                        function (Group $group): void {
                             $group->options('', SportConfigAction::class . ':options');
                             $group->post('', SportConfigAction::class . ':add');
                             $group->options('/{sportconfigId}', SportConfigAction::class . ':options');
@@ -167,7 +167,7 @@ return function (App $app) {
 
                     $group->group(
                         'competitors',
-                        function (Group $group) {
+                        function (Group $group): void {
                             $group->options('', CompetitorAction::class . ':options');
                             $group->post('', CompetitorAction::class . ':add');
                             $group->options('/{competitorId}', CompetitorAction::class . ':options');
@@ -177,17 +177,17 @@ return function (App $app) {
 
                     $group->group(
                         'sportscoreconfigs',
-                        function (Group $group) {
-                    $group->options('', SportScoreConfigAction::class . ':options');
-                    $group->post('', SportScoreConfigAction::class . ':add');
-                    $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
-                    $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
-                }
+                        function (Group $group): void {
+                            $group->options('', SportScoreConfigAction::class . ':options');
+                            $group->post('', SportScoreConfigAction::class . ':add');
+                            $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
+                            $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
+                        }
             );
 
             $group->group(
                 'places',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('/{placeId}', PlaceAction::class . ':options');
                     $group->put('/{placeId}', PlaceAction::class . ':edit');
                 }
@@ -195,7 +195,7 @@ return function (App $app) {
 
             $group->group(
                 'games',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('/{gameId}', GameAction::class . ':options');
                     $group->put('/{gameId}', GameAction::class . ':edit');
                 }
@@ -203,7 +203,7 @@ return function (App $app) {
 
             $group->group(
                 'planning/{roundnumber}',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('', PlanningAction::class . ':options');
                     $group->get('', PlanningAction::class . ':fetch');
                     $group->options('/create', PlanningAction::class . ':options');
@@ -215,7 +215,7 @@ return function (App $app) {
 
             $group->group(
                 'planningconfigs/{roundnumber}',
-                function (Group $group) {
+                function (Group $group): void {
                     $group->options('', PlanningConfigAction::class . ':options');
                     $group->post('', PlanningConfigAction::class . ':add');
                     $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');

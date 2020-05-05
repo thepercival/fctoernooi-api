@@ -83,7 +83,7 @@ trait Document
                 if (count(
                         array_filter(
                             $games,
-                            function (Game $game) {
+                            function (Game $game): bool {
                                 return $game->getRefereePlace() !== null;
                             }
                         )

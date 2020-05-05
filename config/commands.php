@@ -13,25 +13,25 @@ use App\Commands\SendFirstTimeEmail;
 use App\Commands\Validator;
 
 return [
-    "app:create-default-planning-input" => function (ContainerInterface $container) {
+    "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
         return new PlanningCreateDefaultInput($container);
     },
-    "app:create-planning" => function (ContainerInterface $container) {
+    "app:create-planning" => function (ContainerInterface $container): PlanningCreate {
         return new PlanningCreate($container);
     },
-    "app:retry-timeout-planning" => function (ContainerInterface $container) {
+    "app:retry-timeout-planning" => function (ContainerInterface $container): PlanningRetryTimeout {
         return new PlanningRetryTimeout($container);
     },
-    "app:update-sitemap" => function (ContainerInterface $container) {
+    "app:update-sitemap" => function (ContainerInterface $container): UpdateSitemap {
         return new UpdateSitemap($container);
     },
-    "app:backup-sponsorimages" => function (ContainerInterface $container) {
+    "app:backup-sponsorimages" => function (ContainerInterface $container): BackupSponsorImages {
         return new BackupSponsorImages($container);
     },
-    "app:send-firsttime-email" => function (ContainerInterface $container) {
+    "app:send-firsttime-email" => function (ContainerInterface $container): SendFirstTimeEmail {
         return new SendFirstTimeEmail($container);
     },
-    "app:validate" => function (ContainerInterface $container) {
+    "app:validate" => function (ContainerInterface $container): Validator {
         return new Validator($container);
     }
 ];

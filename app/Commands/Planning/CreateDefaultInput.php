@@ -90,7 +90,7 @@ class CreateDefaultInput extends Command
     protected function inputToString(Input $planningInput): string
     {
         $sports = array_map(
-            function (array $sportConfig) {
+            function (array $sportConfig): string {
                 return '' . $sportConfig["nrOfFields"];
             },
             $planningInput->getSportConfig()

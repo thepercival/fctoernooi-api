@@ -328,6 +328,6 @@ class Gamenotes extends FCToernooiWorksheet
 
     protected function getMiddle(): int
     {
-        return (int)((WorksheetBase::HEIGHT_IN_CELLS + (WorksheetBase::HEIGHT_IN_CELLS % 2)) / 2);
+        return (WorksheetBase::HEIGHT_IN_CELLS + (WorksheetBase::HEIGHT_IN_CELLS % 2)) / 2;
     }
 }

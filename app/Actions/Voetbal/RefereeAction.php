@@ -70,7 +70,7 @@ final class RefereeAction extends Action
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $refereesWithSameInitials = $competition->getReferees()->filter(
-                function ($refereeIt) use ($referee) {
+                function ($refereeIt) use ($referee): bool {
                     return $refereeIt->getInitials() === $referee->getInitials();
                 }
             );
@@ -119,7 +119,7 @@ final class RefereeAction extends Action
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
             $refereesWithSameInitials = $competition->getReferees()->filter(
-                function ($refereeIt) use ($refereeSer, $referee) {
+                function ($refereeIt) use ($refereeSer, $referee): bool {
                     return $refereeIt->getInitials() === $refereeSer->getInitials() && $referee !== $refereeIt;
                 }
             );

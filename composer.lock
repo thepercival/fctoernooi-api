@@ -1,20 +1,20 @@
 {
-    "_readme": [
-        "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
-        "This file is @generated automatically"
-    ],
-    "content-hash": "06ed8f15e95226e891727befc8ee3c59",
-    "packages": [
-        {
-            "name": "bacon/bacon-qr-code",
-            "version": "2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Bacon/BaconQrCode.git",
-                "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0"
-            },
-            "dist": {
+  "_readme": [
+    "This file locks the dependencies of your project to a known state",
+    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+    "This file is @generated automatically"
+  ],
+  "content-hash": "f8f411293be73f44f255158d57693682",
+  "packages": [
+    {
+      "name": "bacon/bacon-qr-code",
+      "version": "2.0.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/Bacon/BaconQrCode.git",
+        "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0"
+      },
+      "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/Bacon/BaconQrCode/zipball/eaac909da3ccc32b748a65b127acd8918f58d9b0",
                 "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0",
@@ -6362,24 +6362,75 @@
                     "PHPStan\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Doctrine extensions for PHPStan",
-            "time": "2020-03-13T13:03:08+00:00"
+          "notification-url": "https://packagist.org/downloads/",
+          "license": [
+            "MIT"
+          ],
+          "description": "Doctrine extensions for PHPStan",
+          "time": "2020-03-13T13:03:08+00:00"
         },
-        {
-            "name": "phpunit/php-code-coverage",
-            "version": "7.0.10",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "f1884187926fbb755a9aaf0b3836ad3165b478bf"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f1884187926fbb755a9aaf0b3836ad3165b478bf",
+      {
+        "name": "phpstan/phpstan-strict-rules",
+        "version": "0.12.2",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/phpstan/phpstan-strict-rules.git",
+          "reference": "a670a59aff7cf96f75d21b974860ada10e25b2ee"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/phpstan/phpstan-strict-rules/zipball/a670a59aff7cf96f75d21b974860ada10e25b2ee",
+          "reference": "a670a59aff7cf96f75d21b974860ada10e25b2ee",
+          "shasum": ""
+        },
+        "require": {
+          "php": "~7.1",
+          "phpstan/phpstan": "^0.12.6"
+        },
+        "require-dev": {
+          "consistence/coding-standard": "^3.0.1",
+          "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
+          "ergebnis/composer-normalize": "^2.0.2",
+          "jakub-onderka/php-parallel-lint": "^1.0",
+          "phing/phing": "^2.16.0",
+          "phpstan/phpstan-phpunit": "^0.12",
+          "phpunit/phpunit": "^7.0",
+          "slevomat/coding-standard": "^4.5.2"
+        },
+        "type": "phpstan-extension",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "0.12-dev"
+          },
+          "phpstan": {
+            "includes": [
+              "rules.neon"
+            ]
+          }
+        },
+        "autoload": {
+          "psr-4": {
+            "PHPStan\\": "src/"
+          }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+          "MIT"
+        ],
+        "description": "Extra strict and opinionated rules for PHPStan",
+        "time": "2020-01-20T13:08:52+00:00"
+      },
+      {
+        "name": "phpunit/php-code-coverage",
+        "version": "7.0.10",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
+          "reference": "f1884187926fbb755a9aaf0b3836ad3165b478bf"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f1884187926fbb755a9aaf0b3836ad3165b478bf",
                 "reference": "f1884187926fbb755a9aaf0b3836ad3165b478bf",
                 "shasum": ""
             },

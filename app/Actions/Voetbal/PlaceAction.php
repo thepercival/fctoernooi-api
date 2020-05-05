@@ -71,7 +71,7 @@ final class PlaceAction extends Action
             if ($place->getPoule() !== $poule) {
                 throw new \Exception("de poule van de pouleplek komt niet overeen met de verstuurde poule", E_ERROR);
             }
-            $competitor = $placeSer->getCompetitor() ? $this->competitorRepos->find(
+            $competitor = $placeSer->getCompetitor() !== null ? $this->competitorRepos->find(
                 $placeSer->getCompetitor()->getId()
             ) : null;
             $place->setCompetitor($competitor);

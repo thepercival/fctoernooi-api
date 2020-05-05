@@ -188,7 +188,7 @@ class Tournament
         return (count(
                 array_filter(
                     $this->getRoles()->toArray(),
-                    function ($roleIt, $roleId) use ($user, $roleValue) {
+                    function ($roleIt, $roleId) use ($user, $roleValue): bool {
                         return ($roleIt->getUser() === $user && (($roleIt->getValue(
                                     ) & $roleValue) === $roleIt->getValue()));
                     },

@@ -12,14 +12,13 @@ use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\User;
-use \Firebase\JWT\JWT;
+use Psr\Log\LoggerInterface;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Auth\Service as AuthService;
 use \Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use stdClass;
-use Tuupola\Base62;
 use FCToernooi\Auth\Item as AuthItem;
 
 final class AuthAction extends Action
@@ -32,16 +31,14 @@ final class AuthAction extends Action
      * @var UserRepository
      */
     private $userRepository;
-    /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
 
     public function __construct(
+        LoggerInterface $logger,
         AuthService $authService,
         UserRepository $userRepository,
         SerializerInterface $serializer
     ) {
+        parent::__construct($logger, $serializer);
         $this->authService = $authService;
         $this->userRepository = $userRepository;
         $this->serializer = $serializer;
@@ -73,7 +70,7 @@ final class AuthAction extends Action
             $password = $registerData->password;
 
             $user = $this->authService->register($emailAddress, $password);
-            if ($user === null or !($user instanceof User)) {
+            if ($user === null) {
                 throw new \Exception("de nieuwe gebruiker kan niet worden geretourneerd");
             }
 

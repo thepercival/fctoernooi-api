@@ -45,13 +45,13 @@ class Repository extends \Voetbal\Repository
             // add
             $structureRepos = new StructureRepository($this->_em);
             $structure = $structureRepos->getStructure($tournament->getCompetition());
-            $competitors = $structure ? $structure->getFirstRoundNumber()->getCompetitors() : [];
+            $competitors = $structure !== null ? $structure->getFirstRoundNumber()->getCompetitors() : [];
             foreach ($newLockerRooms as $newLockerRoom) {
                 $realNewLockerRoom = new LockerRoom($tournament, $newLockerRoom->getName());
                 foreach ($newLockerRoom->getCompetitorIds() as $competitorId) {
                     $foundCompetitors = array_filter(
                         $competitors,
-                        function (Competitor $competitorIt) use ($competitorId) {
+                        function (Competitor $competitorIt) use ($competitorId): bool {
                             return $competitorId === $competitorIt->getId();
                         }
                     );

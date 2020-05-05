@@ -52,99 +52,99 @@ use Voetbal\Game\Score\Repository as GameScoreRepository;
 use Voetbal\Game\Score as GameScore;
 
 return [
-    TournamentRepository::class => function (ContainerInterface $container) {
+    TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new TournamentRepository($entityManager, $entityManager->getClassMetaData(Tournament::class));
     },
-    RoleRepository::class => function (ContainerInterface $container) {
+    RoleRepository::class => function (ContainerInterface $container): RoleRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new RoleRepository($entityManager, $entityManager->getClassMetaData(Role::class));
     },
-    UserRepository::class => function (ContainerInterface $container) {
+    UserRepository::class => function (ContainerInterface $container): UserRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new UserRepository($entityManager, $entityManager->getClassMetaData(User::class));
     },
-    SponsorRepository::class => function (ContainerInterface $container) {
+    SponsorRepository::class => function (ContainerInterface $container): SponsorRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SponsorRepository($entityManager, $entityManager->getClassMetaData(Sponsor::class));
     },
-    LockerRoomRepository::class => function (ContainerInterface $container) {
+    LockerRoomRepository::class => function (ContainerInterface $container): LockerRoomRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new LockerRoomRepository($entityManager, $entityManager->getClassMetaData(LockerRoom::class));
     },
 
-    SportRepository::class => function (ContainerInterface $container) {
+    SportRepository::class => function (ContainerInterface $container): SportRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportRepository($entityManager, $entityManager->getClassMetaData(Sport::class));
     },
-    SeasonRepository::class => function (ContainerInterface $container) {
+    SeasonRepository::class => function (ContainerInterface $container): SeasonRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SeasonRepository($entityManager, $entityManager->getClassMetaData(Season::class));
     },
-    LeagueRepository::class => function (ContainerInterface $container) {
+    LeagueRepository::class => function (ContainerInterface $container): LeagueRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new LeagueRepository($entityManager, $entityManager->getClassMetaData(League::class));
     },
-    CompetitionRepository::class => function (ContainerInterface $container) {
+    CompetitionRepository::class => function (ContainerInterface $container): CompetitionRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new CompetitionRepository($entityManager, $entityManager->getClassMetaData(Competition::class));
     },
 
-    StructureRepository::class => function (ContainerInterface $container) {
+    StructureRepository::class => function (ContainerInterface $container): StructureRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new StructureRepository($entityManager);
     },
-    PlanningRepository::class => function (ContainerInterface $container) {
+    PlanningRepository::class => function (ContainerInterface $container): PlanningRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlanningRepository($entityManager, $entityManager->getClassMetaData(Planning::class));
     },
-    PlanningInputRepository::class => function (ContainerInterface $container) {
+    PlanningInputRepository::class => function (ContainerInterface $container): PlanningInputRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlanningInputRepository(
             $entityManager,
             $entityManager->getClassMetaData(PlanningInput::class)
         );
     },
-    GameRepository::class => function (ContainerInterface $container) {
+    GameRepository::class => function (ContainerInterface $container): GameRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameRepository($entityManager, $entityManager->getClassMetaData(Game::class));
     },
-    GameScoreRepository::class => function (ContainerInterface $container) {
+    GameScoreRepository::class => function (ContainerInterface $container): GameScoreRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new GameScoreRepository($entityManager, $entityManager->getClassMetaData(GameScore::class));
     },
-    FieldRepository::class => function (ContainerInterface $container) {
+    FieldRepository::class => function (ContainerInterface $container): FieldRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new FieldRepository($entityManager, $entityManager->getClassMetaData(Field::class));
     },
-    RefereeRepository::class => function (ContainerInterface $container) {
+    RefereeRepository::class => function (ContainerInterface $container): RefereeRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new RefereeRepository($entityManager, $entityManager->getClassMetaData(Referee::class));
     },
-    SportConfigRepository::class => function (ContainerInterface $container) {
+    SportConfigRepository::class => function (ContainerInterface $container): SportConfigRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportConfigRepository($entityManager, $entityManager->getClassMetaData(SportConfig::class));
     },
-    CompetitorRepository::class => function (ContainerInterface $container) {
+    CompetitorRepository::class => function (ContainerInterface $container): CompetitorRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new CompetitorRepository($entityManager, $entityManager->getClassMetaData(Competitor::class));
     },
-    SportScoreConfigRepository::class => function (ContainerInterface $container) {
+    SportScoreConfigRepository::class => function (ContainerInterface $container): SportScoreConfigRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportScoreConfigRepository(
             $entityManager,
             $entityManager->getClassMetaData(SportScoreConfig::class)
         );
     },
-    PouleRepository::class => function (ContainerInterface $container) {
+    PouleRepository::class => function (ContainerInterface $container): PouleRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PouleRepository($entityManager, $entityManager->getClassMetaData(Poule::class));
     },
-    PlaceRepository::class => function (ContainerInterface $container) {
+    PlaceRepository::class => function (ContainerInterface $container): PlaceRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlaceRepository($entityManager, $entityManager->getClassMetaData(Place::class));
     },
-    PlanningConfigRepository::class => function (ContainerInterface $container) {
+    PlanningConfigRepository::class => function (ContainerInterface $container): PlanningConfigRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new PlanningConfigRepository($entityManager, $entityManager->getClassMetaData(PlanningConfig::class));
     },

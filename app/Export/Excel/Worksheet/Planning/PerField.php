@@ -70,7 +70,7 @@ class PerField extends PlanningWorksheet
     {
         return array_filter(
             $roundNumber->getGames(Game::ORDER_BY_BATCH),
-            function (Game $game) use ($field) {
+            function (Game $game) use ($field): bool {
                 return $game->getField() === $field;
             }
         );
