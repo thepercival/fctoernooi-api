@@ -57,8 +57,8 @@ class UpdateSitemap extends Command
             }
             file_put_contents($distPath . "sitemap.txt", $content);
             // chmod ( $distPath . "sitemap.txt", 744 );
-            chown($distPath . "sitemap.txt", "coen");
-            chgrp($distPath . "sitemap.txt", "coen");
+//            chown($distPath . "sitemap.txt", "coen");
+//            chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
