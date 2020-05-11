@@ -71,7 +71,7 @@ return [
     'images' => [
         'sponsors' => [
             'pathpostfix' => 'images/sponsors/',
-            'backuppath' => '/var/www/backup/fctoernooi/',
+            'backuppath' => '/var/sponsorbackups/',
         ]
     ],
 ];
