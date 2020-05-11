@@ -70,7 +70,7 @@ return [
     ],
     'images' => [
         'sponsors' => [
-            'pathpostfix' => 'images/',
+            'pathpostfix' => 'images/sponsors/',
             'backuppath' => '/var/sponsorbackups/',
         ]
     ],
