@@ -54,6 +54,7 @@ final class PlaceAction extends Action
         try {
             /** @var \Voetbal\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
+            $association = $competition->getLeague()->getAssociation();
 
             $queryParams = $request->getQueryParams();
             $pouleId = 0;
@@ -71,8 +72,8 @@ final class PlaceAction extends Action
             if ($place->getPoule() !== $poule) {
                 throw new \Exception("de poule van de pouleplek komt niet overeen met de verstuurde poule", E_ERROR);
             }
-            $competitor = $placeSer->getCompetitor() !== null ? $this->competitorRepos->find(
-                $placeSer->getCompetitor()->getId()
+            $competitor = $placeSer->getCompetitor() !== null ? $this->competitorRepos->findOneBy(
+                ["association" => $association, "name" => $placeSer->getCompetitor()->getName()]
             ) : null;
             $place->setCompetitor($competitor);
 
