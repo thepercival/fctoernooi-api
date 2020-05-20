@@ -35,7 +35,8 @@
     "symfony/console": "^5.0",
     "zf1s/zend-pdf": "^1.13",
     "selective/config": "^0.1.1",
-    "ext-gd": "*"
+    "ext-gd": "*",
+    "slim/psr7": "^1.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.2",
