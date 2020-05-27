@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Copiers;
 
 use FCToernooi\LockerRoom;
+use FCToernooi\Role;
 use Voetbal\Association;
 use Voetbal\Competitor;
 use Voetbal\Sport\Repository as SportRepository;
@@ -18,7 +19,7 @@ use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Tournament;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 
 class TournamentCopier
 {
@@ -100,8 +101,9 @@ class TournamentCopier
         $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
         $newTournament->setPublic($public);
 
-        $roleService = new RoleService();
-        $roleService->create($newTournament, $user, Role::ALL);
+        foreach ($tournament->getUsers() as $tournamentUser) {
+            $tmp = new TournamentUser($newTournament, $tournamentUser->getUser(), $tournamentUser->getRoles());
+        }
 
         return $newTournament;
     }

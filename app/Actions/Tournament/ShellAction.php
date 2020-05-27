@@ -14,7 +14,7 @@ use App\Response\ErrorResponse;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use FCToernooi\Auth\Service as AuthService;
 use App\Actions\Action;
@@ -52,16 +52,7 @@ final class ShellAction extends Action
 
     public function fetchPublic(Request $request, Response $response, $args): Response
     {
-        return $this->fetchPublicHelper($request, $response, $request->getAttribute("user"));
-    }
-
-//    public function fetch( Request $request, Response $response, $args ): Response
-//    {
-//        return $this->fetchPublicHelper( $request, $response, $request->getAttribute("user") );
-//    }
-
-    protected function fetchPublicHelper(Request $request, Response $response, User $user = null): Response
-    {
+        $user = $request->getAttribute("user");
         try {
             $queryParams = $request->getQueryParams();
 
@@ -100,29 +91,25 @@ final class ShellAction extends Action
         }
     }
 
-
-    public function fetchMine(Request $request, Response $response, $args): Response
+    public function fetchWithRole(Request $request, Response $response, $args): Response
     {
         try {
-            $shells = $this->getMyShells($request->getAttribute("user"));
+            $queryParams = $request->getQueryParams();
+            $roles = 0;
+            if (array_key_exists("roles", $queryParams) && strlen($queryParams["roles"]) > 0) {
+                $roles = (int)$queryParams["roles"];
+            }
+
+            $shells = [];
+            $user = $request->getAttribute("user");
+            $tournamentsByRole = $this->tournamentRepos->findByRoles($user, $roles);
+            foreach ($tournamentsByRole as $tournament) {
+                $shells[] = new Shell($tournament, $user);
+            }
             $json = $this->serializer->serialize($shells, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
-    }
-
-    /**
-     * @param User $user
-     * @return array|Shell[]
-     */
-    public function getMyShells(User $user): array
-    {
-        $shells = [];
-        $tournamentsByRole = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
-        foreach ($tournamentsByRole as $tournament) {
-            $shells[] = new Shell($tournament, $user);
-        }
-        return $shells;
     }
 }

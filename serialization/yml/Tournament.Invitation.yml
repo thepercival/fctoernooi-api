@@ -1,4 +1,4 @@
-FCToernooi\Role:
+FCToernooi\Tournament\Invitation:
   exclusion_policy: ALL
   exclude: false
   access_type: public_method
@@ -6,7 +6,7 @@ FCToernooi\Role:
   properties:
     id:
       type: integer
-    user:
-      type: FCToernooi\User
-    value:
+    emailaddress:
+      type: string
+    roles:
       type: integer

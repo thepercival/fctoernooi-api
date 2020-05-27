@@ -10,7 +10,7 @@ namespace FCToernooi\Tournament;
 
 use FCToernooi\Tournament;
 use FCToernooi\User;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
 use Voetbal\League;
 use Voetbal\Referee;
@@ -93,23 +93,21 @@ class Repository extends \Voetbal\Repository
         return $query->getQuery()->getResult();
     }
 
-    public function findByPermissions(User $user, int $roleValues)
+    public function findByRoles(User $user, int $roles)
     {
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb = $qb
-            ->distinct()
-            ->select('t')
-            ->from(Tournament::class, 't')
-            ->join(Role::class, 'r', Expr\Join::WITH, 't.id = r.tournament');
+        $qb = $this->createQueryBuilder('t')
+            // ->select('t')
+            // ->from(Tournament::class, 't')
+            ->join(TournamentUser::class, 'tu', Expr\Join::WITH, 't.id = tu.tournament');
 
-        $qb = $qb->where('r.user = :user')->andWhere('BIT_AND(r.value, :rolevalues) = r.value');
+        $qb = $qb->where('tu.user = :user')->andWhere('BIT_AND(tu.roles, :roles) = tu.roles');
         $qb = $qb->setParameter('user', $user);
-        $qb = $qb->setParameter('rolevalues', $roleValues);
+        $qb = $qb->setParameter('roles', $roles);
 
         return $qb->getQuery()->getResult();
     }
 
-    public function findByEmailaddress($emailladdress)
+    /*public function findByEmailaddress($emailladdress)
     {
         if (strlen($emailladdress) === 0) {
             return [];
@@ -129,7 +127,7 @@ class Repository extends \Voetbal\Repository
         $qb = $qb->setParameter('emailaddress', $emailladdress);
 
         return $qb->getQuery()->getResult();
-    }
+    }*/
 
     public function remove($tournament)
     {

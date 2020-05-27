@@ -11,14 +11,13 @@ namespace FCToernooi\Auth;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
+use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Firebase\JWT\JWT;
 use Selective\Config\Configuration;
 use Tuupola\Base62;
 use App\Mailer;
-use Psr\Http\Message\ServerRequestInterface as Request;
 
 class Service
 {
@@ -27,13 +26,17 @@ class Service
      */
     protected $userRepos;
     /**
-     * @var RoleRepository
+     * @var TournamentUserRepository
      */
-    protected $roleRepos;
+    protected $tournamentUserRepos;
     /**
      * @var TournamentRepository
      */
     protected $tournamentRepos;
+    /**
+     * @var TournamentInvitationRepository
+     */
+    protected $tournamentInvitationRepos;
     /**
      * @var Configuration
      */
@@ -43,23 +46,18 @@ class Service
      */
     protected $mailer;
 
-    /**
-     * Service constructor.
-     * @param UserRepository $userRepos
-     * @param RoleRepository $roleRepos
-     * @param TournamentRepository $tournamentRepos
-     * @param Configuration $config
-     */
     public function __construct(
         UserRepository $userRepos,
-        RoleRepository $roleRepos,
+        TournamentUserRepository $tournamentUserRepos,
         TournamentRepository $tournamentRepos,
+        TournamentInvitationRepository $tournamentInvitationRepos,
         Configuration $config,
         Mailer $mailer
     ) {
         $this->userRepos = $userRepos;
-        $this->roleRepos = $roleRepos;
+        $this->tournamentUserRepos = $tournamentUserRepos;
         $this->tournamentRepos = $tournamentRepos;
+        $this->tournamentInvitationRepos = $tournamentInvitationRepos;
         $this->config = $config;
         $this->mailer = $mailer;
     }
@@ -99,41 +97,15 @@ class Service
         $savedUser = null;
         try {
             $savedUser = $this->userRepos->save($user);
-            $roles = $this->syncRefereeRolesForUser($user);
-            $this->sendRegisterEmail($emailaddress, $roles);
+            $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
+            $tournamentUsers = $this->tournamentUserRepos->processInvitations($invitations);
+            $this->sendRegisterEmail($emailaddress, $tournamentUsers);
             $conn->commit();
         } catch (\Exception $e) {
             $conn->rollback();
             throw $e;
         }
         return $savedUser;
-    }
-
-    public function syncRefereeRolesForUser(User $user): array
-    {
-        $rolesRet = [];
-        $em = $this->roleRepos->getEM();
-
-        // remove referee roles
-        {
-            $params = ['value' => Role::REFEREE, 'user' => $user];
-            $refereeRoles = $this->roleRepos->findBy($params);
-            foreach ($refereeRoles as $refereeRole) {
-                $em->remove($refereeRole);
-            }
-        }
-        $em->flush();
-
-        // add referee roles
-        $tournaments = $this->tournamentRepos->findByEmailaddress($user->getEmailaddress());
-        foreach ($tournaments as $tournament) {
-            $refereeRole = new Role($tournament, $user);
-            $refereeRole->setValue(Role::REFEREE);
-            $em->persist($refereeRole);
-            $rolesRet[] = $refereeRole;
-        }
-        $em->flush();
-        return $rolesRet;
     }
 
     protected function sendRegisterEmail($emailAddress, array $roles)

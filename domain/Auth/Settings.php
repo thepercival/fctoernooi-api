@@ -12,7 +12,7 @@ use Doctrine\DBAL\Connection;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Firebase\JWT\JWT;
 use Tuupola\Base62;

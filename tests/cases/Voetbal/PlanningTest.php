@@ -53,13 +53,13 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
         while ($planningInputIt = $planningInputIterator->increment()) {
             // $this->logger->info( $this->inputToString( $planningInput ) );
 
-            //            if(  $planningInput->getNrOfPlaces() === 20 && $planningInput->getNrOfPoules() === 2
-            //                && $planningInput->getNrOfFields() === 2
-            //                && $planningInput->getNrOfReferees() === 0
-            //                && $planningInput->getTeamup() === false  && $planningInput->getSelfReferee() === true
-            //                && $planningInput->getNrOfHeadtohead() === 2 ) {
-            //                $x = 2;
-
+//            if( !($planningInputIt->getNrOfPlaces() === 8 && $planningInputIt->getNrOfPoules() === 1
+//                && $planningInputIt->getNrOfFields() === 1
+//                && $planningInputIt->getNrOfReferees() === 0
+//                && $planningInputIt->getTeamup() === true  && $planningInputIt->getSelfReferee() === false
+//                && $planningInputIt->getNrOfHeadtohead() === 1 ) ) {
+//                continue;
+//            }
             $planningInput = $planningInputRepos->getFromInput($planningInputIt);
 
             // $this->assertNotEquals( $planningInput, null );

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\TournamentAction;
 use App\Actions\Tournament\ShellAction;
+use App\Actions\TournamentUserAction;
+use App\Actions\Tournament\InvitationAction;
 use App\Actions\AuthAction;
 use App\Actions\SponsorAction;
 use App\Actions\LockerRoomAction;
@@ -97,8 +99,6 @@ return function (App $app): void {
             $group->group(
                 '/{tournamentId}/',
                 function (Group $group): void {
-                    $group->options('syncrefereeroles', TournamentAction::class . ':options');
-                    $group->post('syncrefereeroles', TournamentAction::class . ':syncRefereeRoles');
                     $group->options('sendrequestoldstructure', TournamentAction::class . ':options');
                     $group->post('sendrequestoldstructure', TournamentAction::class . ':sendRequestOldStructure');
                     $group->options('userrefereeid', TournamentAction::class . ':options');
@@ -107,30 +107,30 @@ return function (App $app): void {
                     $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
                     $group->options('lockerrooms', TournamentAction::class . ':options');
                     $group->post('lockerrooms', TournamentAction::class . ':saveLockerRooms');
-            $group->options('copy', TournamentAction::class . ':options');
-            $group->post('copy', TournamentAction::class . ':copy');
+                    $group->options('copy', TournamentAction::class . ':options');
+                    $group->post('copy', TournamentAction::class . ':copy');
 
-            $group->group(
-                'sponsors',
-                function (Group $group): void {
-                    $group->options('', SponsorAction::class . ':options');
-                    $group->get('', SponsorAction::class . ':fetch');
-                    $group->get('/{sponsorId}', SponsorAction::class . ':fetchOne');
-                    $group->post('', SponsorAction::class . ':add');
-                    $group->options('/{sponsorId}', SponsorAction::class . ':options');
-                    $group->put('/{sponsorId}', SponsorAction::class . ':edit');
-                    $group->delete('/{sponsorId}', SponsorAction::class . ':remove');
-                    $group->options('/{sponsorId}/upload', SponsorAction::class . ':options');
-                    $group->post(
-                        '/{sponsorId}/upload',
-                        SponsorAction::class . ':upload'
-                    );         // POSTMAN NOT FINISHED
-                }
-            );
+                    $group->group(
+                        'sponsors',
+                        function (Group $group): void {
+                            $group->options('', SponsorAction::class . ':options');
+                            $group->get('', SponsorAction::class . ':fetch');
+                            $group->get('/{sponsorId}', SponsorAction::class . ':fetchOne');
+                            $group->post('', SponsorAction::class . ':add');
+                            $group->options('/{sponsorId}', SponsorAction::class . ':options');
+                            $group->put('/{sponsorId}', SponsorAction::class . ':edit');
+                            $group->delete('/{sponsorId}', SponsorAction::class . ':remove');
+                            $group->options('/{sponsorId}/upload', SponsorAction::class . ':options');
+                            $group->post(
+                                '/{sponsorId}/upload',
+                                SponsorAction::class . ':upload'
+                            );         // POSTMAN NOT FINISHED
+                        }
+                    );
 
-            $group->options('structure', StructureAction::class . ':options');
-            $group->get('structure', StructureAction::class . ':fetchOne');
-            $group->put('structure', StructureAction::class . ':edit');
+                    $group->options('structure', StructureAction::class . ':options');
+                    $group->get('structure', StructureAction::class . ':fetchOne');
+                    $group->put('structure', StructureAction::class . ':edit');
 
                     $group->group(
                         'fields',
@@ -183,52 +183,75 @@ return function (App $app): void {
                             $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
                             $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
                         }
-            );
+                    );
 
-            $group->group(
-                'places',
-                function (Group $group): void {
-                    $group->options('/{placeId}', PlaceAction::class . ':options');
-                    $group->put('/{placeId}', PlaceAction::class . ':edit');
-                }
-            );
+                    $group->group(
+                        'places',
+                        function (Group $group): void {
+                            $group->options('/{placeId}', PlaceAction::class . ':options');
+                            $group->put('/{placeId}', PlaceAction::class . ':edit');
+                        }
+                    );
 
-            $group->group(
-                'games',
-                function (Group $group): void {
-                    $group->options('/{gameId}', GameAction::class . ':options');
-                    $group->put('/{gameId}', GameAction::class . ':edit');
-                }
-            );
+                    $group->group(
+                        'games',
+                        function (Group $group): void {
+                            $group->options('/{gameId}', GameAction::class . ':options');
+                            $group->put('/{gameId}', GameAction::class . ':edit');
+                        }
+                    );
 
-            $group->group(
-                'planning/{roundnumber}',
-                function (Group $group): void {
-                    $group->options('', PlanningAction::class . ':options');
-                    $group->get('', PlanningAction::class . ':fetch');
-                    $group->options('/create', PlanningAction::class . ':options');
-                    $group->post('/create', PlanningAction::class . ':create');
-                    $group->options('/reschedule', PlanningAction::class . ':options');
-                    $group->post('/reschedule', PlanningAction::class . ':reschedule');
-                }
-            );
+                    $group->group(
+                        'planning/{roundnumber}',
+                        function (Group $group): void {
+                            $group->options('', PlanningAction::class . ':options');
+                            $group->get('', PlanningAction::class . ':fetch');
+                            $group->options('/create', PlanningAction::class . ':options');
+                            $group->post('/create', PlanningAction::class . ':create');
+                            $group->options('/reschedule', PlanningAction::class . ':options');
+                            $group->post('/reschedule', PlanningAction::class . ':reschedule');
+                        }
+                    );
 
-            $group->group(
-                'planningconfigs/{roundnumber}',
-                function (Group $group): void {
-                    $group->options('', PlanningConfigAction::class . ':options');
-                    $group->post('', PlanningConfigAction::class . ':add');
-                    $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
-                    $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
+                    $group->group(
+                        'planningconfigs/{roundnumber}',
+                        function (Group $group): void {
+                            $group->options('', PlanningConfigAction::class . ':options');
+                            $group->post('', PlanningConfigAction::class . ':add');
+                            $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
+                            $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
+                        }
+                    );
+
+                    $group->group(
+                        'users',
+                        function (Group $group): void {
+                            $group->options('', TournamentUserAction::class . ':options');
+                            $group->post('', TournamentUserAction::class . ':add');
+                            $group->options('/{tournamentuserId}', TournamentUserAction::class . ':options');
+                            $group->put('/{tournamentuserId}', TournamentUserAction::class . ':edit');
+                            $group->delete('/{tournamentuserId}', TournamentUserAction::class . ':remove');
+                        }
+                    );
+
+                    $group->group(
+                        'invitations',
+                        function (Group $group): void {
+                            $group->options('', InvitationAction::class . ':options');
+                            $group->get('', InvitationAction::class . ':fetch');
+                            $group->post('', InvitationAction::class . ':add');
+                            $group->options('/{invitationId}', InvitationAction::class . ':options');
+                            $group->put('/{invitationId}', InvitationAction::class . ':edit');
+                            $group->delete('/{invitationId}', InvitationAction::class . ':remove');
+                        }
+                    );
                 }
             );
         }
-        );
-    }
     );
 
-    $app->options('/myshells', ShellAction::class . ':options');
-    $app->get('/myshells', ShellAction::class . ':fetchMine');
+    $app->options('/shellswithrole', ShellAction::class . ':options');
+    $app->get('/shellswithrole', ShellAction::class . ':fetchWithRole');
     $app->options('/shells', ShellAction::class . ':options');
     $app->get('/shells', ShellAction::class . ':fetchPublic');
 

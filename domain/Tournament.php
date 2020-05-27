@@ -38,7 +38,7 @@ class Tournament
     /**
      * @var ArrayCollection
      */
-    private $roles;
+    private $users;
     /**
      * @var ArrayCollection|Sponsor[]
      */
@@ -62,7 +62,7 @@ class Tournament
     public function __construct(Competition $competition)
     {
         $this->competition = $competition;
-        $this->roles = new ArrayCollection();
+        $this->users = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
         $this->updated = true;
@@ -168,33 +168,30 @@ class Tournament
     }
 
     /**
-     * @return Role[] | ArrayCollection
+     * @return TournamentUser[] | ArrayCollection
      */
-    public function getRoles()
+    public function getUsers()
     {
-        return $this->roles;
+        return $this->users;
     }
 
     /**
-     * @param ArrayCollection $roles
+     * @param ArrayCollection $users
      */
-    public function setRoles(ArrayCollection $roles)
+    public function setUsers(ArrayCollection $users)
     {
-        $this->roles = $roles;
+        $this->users = $users;
     }
 
-    public function hasRole(User $user, int $roleValue)
+    public function getUser(User $user): ?TournamentUser
     {
-        return (count(
-                array_filter(
-                    $this->getRoles()->toArray(),
-                    function ($roleIt, $roleId) use ($user, $roleValue): bool {
-                        return ($roleIt->getUser() === $user && (($roleIt->getValue(
-                                    ) & $roleValue) === $roleIt->getValue()));
-                    },
-                    ARRAY_FILTER_USE_BOTH
-                )
-            ) > 0);
+        $filteredUsers = $this->getUsers()->filter(
+            function (TournamentUser $tournamentUser) use ($user) : bool {
+                return $user === $tournamentUser->getUser();
+            }
+        );
+        $user = $filteredUsers->first();
+        return $user ? $user : null;
     }
 
     /**

@@ -10,10 +10,10 @@ use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use FCToernooi\Role;
-use FCToernooi\Role\Repository as RoleRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\LockerRoom;
+use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -45,10 +45,6 @@ class TournamentAction extends Action
      */
     protected $tournamentCopier;
     /**
-     * @var RoleRepository
-     */
-    protected $roleRepos;
-    /**
      * @var StructureRepository
      */
     protected $structureRepos;
@@ -78,7 +74,6 @@ class TournamentAction extends Action
         SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
         TournamentCopier $tournamentCopier,
-        RoleRepository $roleRepos,
         StructureRepository $structureRepos,
         LockerRoomRepistory $lockerRoomRepos,
         CompetitorRepository $competitorRepos,
@@ -89,7 +84,6 @@ class TournamentAction extends Action
         parent::__construct($logger, $serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->tournamentCopier = $tournamentCopier;
-        $this->roleRepos = $roleRepos;
         $this->structureRepos = $structureRepos;
         $this->lockerRoomRepos = $lockerRoomRepos;
         $this->competitorRepos = $competitorRepos;
@@ -138,12 +132,15 @@ class TournamentAction extends Action
     protected function getSerializationContext(Tournament $tournament, User $user = null)
     {
         $serGroups = ['Default'];
-
-        if ($user !== null && $tournament->hasRole($user, Role::ADMIN)) {
-            $serGroups[] = 'privacy';
-        }
-        if ($user !== null && $tournament->hasRole($user, Role::ALL)) {
-            $serGroups[] = 'roles';
+        $tournamentUser = $tournament->getUser($user);
+        if ($tournamentUser !== null) {
+            $serGroups[] = 'users';
+            if ($tournamentUser->hasRoles(Role::ADMIN)) {
+                $serGroups[] = 'privacy';
+            }
+            if ($tournamentUser->hasRoles(Role::ROLEADMIN)) {
+                $serGroups[] = 'roleadmin';
+            }
         }
         return SerializationContext::create()->setGroups($serGroups);
     }
@@ -164,20 +161,6 @@ class TournamentAction extends Action
             }
 
             $json = $this->serializer->serialize($refereeId, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
-        }
-    }
-
-    public function syncRefereeRoles(Request $request, Response $response, $args): Response
-    {
-        try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-            $roles = $this->roleRepos->syncRefereeRoles($tournament);
-
-            $json = $this->serializer->serialize($roles, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
@@ -205,11 +188,16 @@ class TournamentAction extends Action
             $user = $request->getAttribute("user");
 
             $deserializationContext = $this->getDeserializationContext($user);
+            /** @var Tournament $tournamentSer */
             $tournamentSer = $this->serializer->deserialize(
                 $this->getRawData(),
                 'FCToernooi\Tournament',
                 'json',
                 $deserializationContext
+            );
+            $tournamentSer->getUsers()->clear();
+            $tournamentSer->getUsers()->add(
+                new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN)
             );
 
             $tournament = $this->tournamentCopier->copy(
@@ -465,7 +453,7 @@ class TournamentAction extends Action
         } elseif ($exportConfig->hasOnly(TournamentConfig::GAMESPERFIELD)) {
             return "wedstrijden-per-veld";
         } elseif ($exportConfig->hasOnly(TournamentConfig::PLANNING)) {
-            return "wedstrijdschema";
+            return "wedstrijdplanning";
         } elseif ($exportConfig->hasOnly(TournamentConfig::PIVOTTABLES)) {
             return "poule-draaitabellen";
         } elseif ($exportConfig->hasOnly(TournamentConfig::QRCODE)) {

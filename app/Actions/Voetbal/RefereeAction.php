@@ -10,11 +10,14 @@ namespace App\Actions\Voetbal;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Referee as RefereeBase;
 use Voetbal\Referee\Repository as RefereeRepository;
+use FCToernooi\Auth\SyncService as AuthSyncService;
+use FCToernooi\Role;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use Voetbal\Sport\Repository as SportRepository;
@@ -38,18 +41,24 @@ final class RefereeAction extends Action
      * @var CompetitionRepos
      */
     protected $competitionRepos;
+    /**
+     * @var AuthSyncService
+     */
+    protected $authSyncService;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         RefereeRepository $refereeRepos,
         SportRepository $sportRepos,
-        CompetitionRepos $competitionRepos
+        CompetitionRepos $competitionRepos,
+        AuthSyncService $authSyncService
     ) {
         parent::__construct($logger, $serializer);
         $this->refereeRepos = $refereeRepos;
         $this->sportRepos = $sportRepos;
         $this->competitionRepos = $competitionRepos;
+        $this->authSyncService = $authSyncService;
     }
 
     public function add(Request $request, Response $response, $args): Response
@@ -66,8 +75,10 @@ final class RefereeAction extends Action
                 'json',
                 $deserializationContext
             );
-            /** @var \Voetbal\Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $refereesWithSameInitials = $competition->getReferees()->filter(
                 function ($refereeIt) use ($referee): bool {
@@ -88,6 +99,7 @@ final class RefereeAction extends Action
             $newReferee->setInfo($referee->getInfo());
 
             $this->refereeRepos->save($newReferee);
+            $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress());
 
             $serializationContext = SerializationContext::create();
             $serializationContext->setGroups($serGroups);
@@ -113,8 +125,11 @@ final class RefereeAction extends Action
                 'json',
                 $deserializationContext
             );
-            /** @var \Voetbal\Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
@@ -133,10 +148,15 @@ final class RefereeAction extends Action
             $referee->setRank($refereeSer->getRank());
             $referee->setInitials($refereeSer->getInitials());
             $referee->setName($refereeSer->getName());
+            $emailaddressOld = $referee->getEmailaddress();
             $referee->setEmailaddress($refereeSer->getEmailaddress());
             $referee->setInfo($refereeSer->getInfo());
 
             $this->refereeRepos->save($referee);
+            if ($emailaddressOld !== $referee->getEmailaddress()) {
+                $this->authSyncService->remove($tournament, Role::REFEREE, $emailaddressOld);
+                $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress());
+            }
 
             $serializationContext = SerializationContext::create();
             $serializationContext->setGroups($serGroups);
@@ -151,13 +171,16 @@ final class RefereeAction extends Action
     public function remove(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
             $competition->getReferees()->removeElement($referee);
             $this->refereeRepos->remove($referee);
+            $this->authSyncService->remove($tournament, Role::REFEREE, $referee->getEmailaddress());
 
             $rank = 1;
             foreach ($competition->getReferees() as $refereeIt) {

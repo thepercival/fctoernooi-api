@@ -8,9 +8,9 @@
 
 namespace FCToernooi\Tournament;
 
+use DateTimeImmutable;
 use Voetbal\Sport;
 use FCToernooi\Tournament;
-use FCToernooi\Role;
 use FCToernooi\User;
 
 class Shell
@@ -19,27 +19,22 @@ class Shell
      * @var int
      */
     private $tournamentId;
-
     /**
      * @var int
      */
     private $sportCustomId;
-
     /**
      * @var string
      */
     private $name;
-
     /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     private $startDateTime;
-
     /**
-     * @var bool
+     * @var int
      */
-    private $hasEditPermissions;
-
+    private $roles;
     /**
      * @var bool
      */
@@ -50,41 +45,35 @@ class Shell
         $this->tournamentId = $tournament->getId();
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
-        $this->sportCustomId = $competition->getSportConfigs()->count() > 1 ? 0 : $competition->getSportConfigs(
-        )->first()->getSport()->getCustomId();
+        $this->sportCustomId = 0;
+        if ($competition->getSportConfigs()->count() === 1) {
+            $this->sportCustomId = $competition->getFirstSportConfig()->getSport()->getCustomId();
+        }
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
-        $this->hasEditPermissions = ($user !== null && $tournament->hasRole($user, Role::ADMIN));
+
+        $this->roles = 0;
+        if ($user !== null) {
+            $tournamentUser = $tournament->getUser($user);
+            if ($tournamentUser !== null) {
+                $this->roles = $tournamentUser->getRoles();
+            }
+        }
         $this->public = $tournament->getPublic();
     }
 
-    /**
-     * Get tournamentId
-     *
-     * @return int
-     */
-    public function getTournamentId()
+    public function getTournamentId(): int
     {
         return $this->tournamentId;
     }
 
-    /**
-     * @return int
-     */
-    public function getSportCustomId()
+    public function getSportCustomId(): int
     {
         return $this->sportCustomId;
     }
 
     /**
-     * @param int $sportCustomId
-     */
-//    protected function setSportCustomId( int $sportCustomId ) {
-//        $this->sportCustomId = $sportCustomId;
-//    }
-
-    /**
-     * @param array $sports
+     * @param array|Sport[] $sports
      * @return int
      */
     protected function getSportCustomIdBySports(array $sports): int
@@ -102,34 +91,22 @@ class Shell
         return 0;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return \DateTimeImmutable
-     */
-    public function getStartDateTime()
+    public function getStartDateTime(): DateTimeImmutable
     {
         return $this->startDateTime;
     }
 
-    /**
-     * @return boolean
-     */
-    public function getHasEditPermissions()
+    public function getRoles(): int
     {
-        return $this->hasEditPermissions;
+        return $this->roles;
     }
 
-    /**
-     * @return boolean
-     */
-    public function getPublic()
+    public function getPublic(): bool
     {
         return $this->public;
     }

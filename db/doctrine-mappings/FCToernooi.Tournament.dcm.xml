@@ -18,11 +18,11 @@
         <join-column name="competitionid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
       </join-columns>
     </many-to-one>
-    <one-to-many field="roles" target-entity="FCToernooi\Role" mapped-by="tournament" >
-      <cascade>
-          <cascade-persist/>
-          <cascade-remove/>
-      </cascade>
+    <one-to-many field="users" target-entity="FCToernooi\TournamentUser" mapped-by="tournament">
+        <cascade>
+            <cascade-persist/>
+            <cascade-remove/>
+        </cascade>
     </one-to-many>
       <one-to-many field="sponsors" target-entity="FCToernooi\Sponsor" mapped-by="tournament">
           <cascade>

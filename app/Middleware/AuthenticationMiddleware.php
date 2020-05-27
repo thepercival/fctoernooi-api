@@ -8,6 +8,7 @@
 
 namespace App\Middleware;
 
+use FCToernooi\Role;
 use Slim\Routing\RouteContext;
 use FCToernooi\Tournament;
 use FCToernooi\User\Repository as UserRepository;
@@ -17,7 +18,7 @@ use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\Auth\Token as AuthToken;
 use FCToernooi\User;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -98,11 +99,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
         $routingResults = $routeContext->getRoutingResults();
         $args = $routingResults->getRouteArguments();
 
-        $isAuthorized = function () use ($tournament, $user, $args) {
+        $isAuthorized = function () use ($tournament, $user, $args): bool {
             if (array_key_exists("gameId", $args)) {
                 return $this->isAuthorizedForGame($user, $tournament, (int)$args["gameId"]);
             }
-            return $tournament->hasRole($user, Role::ADMIN);
+            $tournamentUser = $tournament->getUser($user);
+            return $tournamentUser !== null and $tournamentUser->hasRoles(Role::ADMIN);
         };
         if (!$tournament->getPublic()) {
             if ($routeContext->getRoute()->getName() === "tournament-export") { // export is check by hash
@@ -133,11 +135,12 @@ class AuthenticationMiddleware implements MiddlewareInterface
 
     protected function isAuthorizedForGame(User $user, Tournament $tournament, int $gameId): bool
     {
-        if ($tournament->hasRole($user, Role::GAMERESULTADMIN + Role::ADMIN)) {
-            return true;
-        }
-        if (!$tournament->hasRole($user, Role::REFEREE)) {
+        $tournamentUser = $tournament->getUser($user);
+        if ($tournamentUser === null) {
             return false;
+        }
+        if ($tournamentUser->hasARole(Role::GAMERESULTADMIN + Role::REFEREE)) {
+            return true;
         }
         $game = $this->gameRepos->find($gameId);
         if ($game === null || $game->getReferee() === null) {

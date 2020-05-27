@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use FCToernooi\Role;
+use FCToernooi\TournamentUser;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 use Voetbal\Structure;
@@ -64,7 +65,7 @@ class SendFirstTimeEmail extends Command
                 if ($user->getHelpSent() === true) {
                     continue;
                 }
-                $tournaments = $this->tournamentRepos->findByPermissions($user, Role::ADMIN);
+                $tournaments = $this->tournamentRepos->findByRoles($user, Role::ADMIN);
                 if (count($tournaments) === 0) {
                     continue;
                 }

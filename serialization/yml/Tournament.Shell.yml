@@ -16,8 +16,8 @@ FCToernooi\Tournament\Shell:
     startDateTime: # competition
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
       read_only: true
-    hasEditPermissions:
-      type: boolean
+    roles:
+      type: integer
       read_only: true
     public:
       type: boolean

@@ -14,9 +14,9 @@ FCToernooi\Tournament:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
     public:
       type: boolean
-    roles:
-      type: ArrayCollection<FCToernooi\Role>
-      groups: [roles]
+    users:
+      type: ArrayCollection<FCToernooi\TournamentUser>
+      groups: [users]
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>
     lockerRooms:

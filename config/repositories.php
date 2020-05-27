@@ -7,8 +7,10 @@ use Psr\Container\ContainerInterface;
 
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament;
-use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\Role;
+use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
+use FCToernooi\TournamentUser;
+use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
+use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\User;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
@@ -56,9 +58,16 @@ return [
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new TournamentRepository($entityManager, $entityManager->getClassMetaData(Tournament::class));
     },
-    RoleRepository::class => function (ContainerInterface $container): RoleRepository {
+    TournamentUserRepository::class => function (ContainerInterface $container): TournamentUserRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
-        return new RoleRepository($entityManager, $entityManager->getClassMetaData(Role::class));
+        return new TournamentUserRepository($entityManager, $entityManager->getClassMetaData(TournamentUser::class));
+    },
+    TournamentInvitationRepository::class => function (ContainerInterface $container): TournamentInvitationRepository {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new TournamentInvitationRepository(
+            $entityManager,
+            $entityManager->getClassMetaData(TournamentInvitation::class)
+        );
     },
     UserRepository::class => function (ContainerInterface $container): UserRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
