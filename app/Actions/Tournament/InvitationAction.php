@@ -71,7 +71,7 @@ final class InvitationAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            /** @var TournamentInvitation $invitation */
+            /** @var TournamentInvitation $invitationSer */
             $invitationSer = $this->serializer->deserialize(
                 $this->getRawData(),
                 'FCToernooi\Tournament\Invitation',

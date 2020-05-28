@@ -80,17 +80,8 @@ final class RefereeAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $refereesWithSameInitials = $competition->getReferees()->filter(
-                function ($refereeIt) use ($referee): bool {
-                    return $refereeIt->getInitials() === $referee->getInitials();
-                }
-            );
-            if (!$refereesWithSameInitials->isEmpty()) {
-                throw new \Exception(
-                    "de scheidsrechter met de initialen " . $referee->getInitials() . " bestaat al",
-                    E_ERROR
-                );
-            }
+            $this->checkInitialsAvailability($competition, $referee->getInitials(), $referee);
+            $this->checkEmailaddressAvailability($competition, $referee->getEmailaddress(), $referee);
 
             $newReferee = new RefereeBase($competition, $referee->getRank());
             $newReferee->setInitials($referee->getInitials());
@@ -133,17 +124,8 @@ final class RefereeAction extends Action
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
-            $refereesWithSameInitials = $competition->getReferees()->filter(
-                function ($refereeIt) use ($refereeSer, $referee): bool {
-                    return $refereeIt->getInitials() === $refereeSer->getInitials() && $referee !== $refereeIt;
-                }
-            );
-            if (!$refereesWithSameInitials->isEmpty()) {
-                throw new \Exception(
-                    "de scheidsrechter met de initialen " . $refereeSer->getInitials() . " bestaat al",
-                    E_ERROR
-                );
-            }
+            $this->checkInitialsAvailability($competition, $refereeSer->getInitials(), $referee);
+            $this->checkEmailaddressAvailability($competition, $refereeSer->getEmailaddress(), $referee);
 
             $referee->setRank($refereeSer->getRank());
             $referee->setInitials($refereeSer->getInitials());
@@ -165,6 +147,42 @@ final class RefereeAction extends Action
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
+        }
+    }
+
+    protected function checkInitialsAvailability(
+        Competition $competition,
+        string $initials,
+        Referee $refereeToCheck = null
+    ) {
+        $nonUniqueReferees = $competition->getReferees()->filter(
+            function ($refereeIt) use ($initials, $refereeToCheck): bool {
+                return $refereeIt->getInitials() === $initials && $refereeToCheck !== $refereeIt;
+            }
+        );
+        if (!$nonUniqueReferees->isEmpty()) {
+            throw new \Exception(
+                "de scheidsrechter met de initialen " . $initials . " bestaat al",
+                E_ERROR
+            );
+        }
+    }
+
+    protected function checkEmailaddressAvailability(
+        Competition $competition,
+        string $emailaddress,
+        Referee $refereeToCheck = null
+    ) {
+        $nonUniqueReferees = $competition->getReferees()->filter(
+            function ($refereeIt) use ($emailaddress, $refereeToCheck): bool {
+                return $refereeIt->getEmailaddress() === $emailaddress && $refereeToCheck !== $refereeIt;
+            }
+        );
+        if (!$nonUniqueReferees->isEmpty()) {
+            throw new \Exception(
+                "de scheidsrechter met het emailadres " . $emailaddress . " bestaat al",
+                E_ERROR
+            );
         }
     }
 

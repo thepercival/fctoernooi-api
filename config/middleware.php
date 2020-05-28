@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use App\Middleware\VersionMiddleware;
-use App\Middleware\AuthenticationMiddleware;
+use App\Middleware\TournamentUserMiddleware;
 use App\Middleware\TournamentMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -32,9 +32,6 @@ return function (App $app) {
             return $response; // ->withoutHeader('X-Powered-By');
         }
     );
-
-    $app->add(AuthenticationMiddleware::class);
-    $app->add(TournamentMiddleware::class);
 
     $app->add(
         new JwtAuthentication(

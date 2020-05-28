@@ -139,5 +139,5 @@ return [
             $authSettings['jwtalgorithm'],
             $authSettings['activationsecret']
         );
-    },
+    }
 ];

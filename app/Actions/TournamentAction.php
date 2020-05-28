@@ -132,14 +132,16 @@ class TournamentAction extends Action
     protected function getSerializationContext(Tournament $tournament, User $user = null)
     {
         $serGroups = ['Default'];
-        $tournamentUser = $tournament->getUser($user);
-        if ($tournamentUser !== null) {
-            $serGroups[] = 'users';
-            if ($tournamentUser->hasRoles(Role::ADMIN)) {
-                $serGroups[] = 'privacy';
-            }
-            if ($tournamentUser->hasRoles(Role::ROLEADMIN)) {
-                $serGroups[] = 'roleadmin';
+        if ($user !== null) {
+            $tournamentUser = $tournament->getUser($user);
+            if ($tournamentUser !== null) {
+                $serGroups[] = 'users';
+                if ($tournamentUser->hasRoles(Role::ADMIN)) {
+                    $serGroups[] = 'privacy';
+                }
+                if ($tournamentUser->hasRoles(Role::ROLEADMIN)) {
+                    $serGroups[] = 'roleadmin';
+                }
             }
         }
         return SerializationContext::create()->setGroups($serGroups);

@@ -19,7 +19,7 @@ class VersionMiddleware implements Middleware
         if ($request->getMethod() === "OPTIONS") {
             return $handler->handle($request);
         }
-        $apiVersion = $request->getHeaderLine('HTTP_X_API_VERSION');
+        $apiVersion = $request->getHeaderLine('X-Api-Version');
         if ($apiVersion !== "21") {
             // public/tournaments/:id/export
             if (substr($request->getUri()->getPath(), -(strlen("/export"))) !== "/export") {
