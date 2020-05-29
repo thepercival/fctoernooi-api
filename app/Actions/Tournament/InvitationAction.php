@@ -85,7 +85,6 @@ final class InvitationAction extends Action
                 $invitationSer->getEmailaddress()
             );
 
-            // @TODO SEND EMAIL
 
             $json = $this->serializer->serialize($authorization, 'json');
             return $this->respondWithJson($response, $json);

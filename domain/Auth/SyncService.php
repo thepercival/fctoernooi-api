@@ -8,6 +8,7 @@
 
 namespace FCToernooi\Auth;
 
+use App\Mailer;
 use DateTimeImmutable;
 use FCToernooi\Role;
 use FCToernooi\TournamentUser;
@@ -32,15 +33,21 @@ class SyncService
      * @var TournamentInvitationRepository
      */
     private $tournamentInvitationRepos;
+    /**
+     * @var Mailer
+     */
+    protected $mailer;
 
     public function __construct(
         UserRepository $userRepos,
         TournamentUserRepository $tournamentUserRepos,
-        TournamentInvitationRepository $tournamentInvitationRepos
+        TournamentInvitationRepository $tournamentInvitationRepos,
+        Mailer $mailer
     ) {
         $this->userRepos = $userRepos;
         $this->tournamentUserRepos = $tournamentUserRepos;
         $this->tournamentInvitationRepos = $tournamentInvitationRepos;
+        $this->mailer = $mailer;
     }
 
     public function add(Tournament $tournament, int $roles, string $emailaddress = null)
@@ -53,25 +60,34 @@ class SyncService
 
         if ($user !== null) {
             $tournamentUser = $tournament->getUser($user);
-            if ($tournamentUser !== null) {
-                $tournamentUser->setRoles($tournamentUser->getRoles() & $roles);
-            } else {
+            $newUser = $tournamentUser === null;
+            if ($newUser) {
                 $tournamentUser = new TournamentUser($tournament, $user, $roles);
+            } else {
+                $tournamentUser->setRoles($tournamentUser->getRoles() & $roles);
             }
             $this->tournamentUserRepos->save($tournamentUser);
+            if ($newUser) {
+                $this->sendEmailTournamentUser($tournamentUser);
+            }
             return $tournamentUser;
         }
 
         $invitation = $this->tournamentInvitationRepos->findOneBy(
             ["tournament" => $tournament, "emailaddress" => $emailaddress]
         );
-        if ($invitation !== null) {
-            $invitation->setRoles($invitation->getRoles() & $roles);
-        } else {
+        $newInvitation = $invitation === null;
+        if ($newInvitation) {
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
+        } else {
+            $invitation->setRoles($invitation->getRoles() & $roles);
         }
-        return $this->tournamentInvitationRepos->save($invitation);
+        $this->tournamentInvitationRepos->save($invitation);
+        if ($newInvitation) {
+            $this->sendEmailTournamentInvitation($invitation);
+        }
+        return $invitation;
     }
 
     public function remove(Tournament $tournament, int $roles, string $emailaddress = null)
@@ -113,5 +129,57 @@ class SyncService
                 $this->tournamentInvitationRepos->save($invitation);
             }
         }
+    }
+
+    protected function sendEmailToNewUser($emailAddress, array $roles)
+    {
+        $subject = 'welkom bij FCToernooi';
+        $bodyBegin = <<<EOT
+<p>Hallo,</p>
+<p>Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi.</p>
+EOT;
+
+        $bodyMiddle = '';
+        if (count($roles) > 0) {
+            $bodyMiddle = '<p>Je staat geregistreerd als scheidsrechter voor de volgende toernooien:<ul>';
+//            foreach ($roles as $role) {
+//                $bodyMiddle .= '<li><a href="' . $this->config->getString("www.wwwurl") . $role->getTournament()->getId(
+//                    ) . '">' . $role->getTournament()->getCompetition()->getLeague()->getName() . '</a></li>';
+//            }
+            $bodyMiddle .= '</ul></p>';
+        }
+        $bodyEnd = <<<EOT
+<p>
+Mocht je vragen/opmerkingen/klachten/suggesties/etc hebben ga dan naar <a href="https://github.com/thepercival/fctoernooi/issues">https://github.com/thepercival/fctoernooi/issues</a>
+</p>        
+<p>met vriendelijke groet,<br/>FCToernooi</p>
+EOT;
+        $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
+    }
+
+    protected function sendEmailTournamentInvitation(TournamentInvitation $invitation)
+    {
+        $subject = 'welkom bij FCToernooi';
+        $bodyBegin = <<<EOT
+<p>Hallo,</p>
+<p>Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi.</p>
+EOT;
+
+        $bodyMiddle = '';
+        if (count($roles) > 0) {
+            $bodyMiddle = '<p>Je staat geregistreerd als scheidsrechter voor de volgende toernooien:<ul>';
+//            foreach ($roles as $role) {
+//                $bodyMiddle .= '<li><a href="' . $this->config->getString("www.wwwurl") . $role->getTournament()->getId(
+//                    ) . '">' . $role->getTournament()->getCompetition()->getLeague()->getName() . '</a></li>';
+//            }
+            $bodyMiddle .= '</ul></p>';
+        }
+        $bodyEnd = <<<EOT
+<p>
+Mocht je vragen/opmerkingen/klachten/suggesties/etc hebben ga dan naar <a href="https://github.com/thepercival/fctoernooi/issues">https://github.com/thepercival/fctoernooi/issues</a>
+</p>        
+<p>met vriendelijke groet,<br/>FCToernooi</p>
+EOT;
+        $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
 }

@@ -126,8 +126,8 @@ return function (App $app): void {
                     $group->group(
                         'referees',
                         function (Group $group): void {
-                            $group->options('', RefereeAction::class . ':options');
-                            $group->post('', RefereeAction::class . ':add');
+                            $group->options('/invite/{invite}', RefereeAction::class . ':options');
+                            $group->post('/invite/{invite}', RefereeAction::class . ':add');
                             $group->options('/{refereeId}', RefereeAction::class . ':options');
                             $group->put('/{refereeId}', RefereeAction::class . ':edit');
                             $group->delete('/{refereeId}', RefereeAction::class . ':remove');
@@ -239,8 +239,6 @@ return function (App $app): void {
                     $group->group(
                         'users',
                         function (Group $group): void {
-                            $group->options('', TournamentUserAction::class . ':options');
-                            $group->post('', TournamentUserAction::class . ':add');
                             $group->options('/{tournamentUserId}', TournamentUserAction::class . ':options');
                             $group->put('/{tournamentUserId}', TournamentUserAction::class . ':edit');
                             $group->delete('/{tournamentUserId}', TournamentUserAction::class . ':remove');
