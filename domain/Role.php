@@ -17,6 +17,14 @@ class Role
         } else {
             if ($role === self::GAMERESULTADMIN) {
                 return 'beheerder uitslagen';
+            } else {
+                if ($role === self::ROLEADMIN) {
+                    return 'beheerder rollen';
+                } else {
+                    if ($role === self::REFEREE) {
+                        return 'scheidsrchter';
+                    }
+                }
             }
         }
         return 'onbekend';

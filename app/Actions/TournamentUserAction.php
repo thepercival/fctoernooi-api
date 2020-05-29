@@ -55,11 +55,6 @@ final class TournamentUserAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            /** @var User $user */
-            $user = $request->getAttribute("user");
-
-            // @TODO user moet role admin zijn
-
             /** @var TournamentUser $tournamentUserSer */
             $tournamentUserSer = $this->serializer->deserialize(
                 $this->getRawData(),
@@ -70,6 +65,12 @@ final class TournamentUserAction extends Action
             $tournamentUser = $this->tournamentUserRepos->find((int)$args['tournamentUserId']);
             if ($tournamentUser === null) {
                 throw new \Exception("geen gebruiker met het opgegeven id gevonden", E_ERROR);
+            }
+            if ($tournamentUser->getTournament() !== $tournament) {
+                throw new \Exception(
+                    "je hebt geen rechten om een gebruiker van een ander toernooi aan te passen",
+                    E_ERROR
+                );
             }
             $tournamentUser->setRoles($tournamentUserSer->getRoles());
             $this->tournamentUserRepos->save($tournamentUser);
@@ -89,10 +90,13 @@ final class TournamentUserAction extends Action
 
             $tournamentUser = $this->tournamentUserRepos->find((int)$args['tournamentUserId']);
             if ($tournamentUser === null) {
-                throw new \Exception("geen tournamentUser met het opgegeven id gevonden", E_ERROR);
+                throw new \Exception("geen gebruiker met het opgegeven id gevonden", E_ERROR);
             }
             if ($tournamentUser->getTournament() !== $tournament) {
-                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de tournamentUser");
+                throw new \Exception(
+                    "je hebt geen rechten om een gebruiker van een ander toernooi te verwijderen",
+                    E_ERROR
+                );
             }
 
             $this->tournamentUserRepos->remove($tournamentUser);

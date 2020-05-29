@@ -21,6 +21,7 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use App\Actions\Action;
 use Psr\Log\LoggerInterface;
+use FCToernooi\Auth\SyncService;
 
 final class InvitationAction extends Action
 {
@@ -33,22 +34,22 @@ final class InvitationAction extends Action
      */
     private $invitationRepos;
     /**
-     * @var EntityManager
+     * @var SyncService
      */
-    protected $em;
+    private $syncService;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         TournamentRepository $tournamentRepos,
         TournamentInvitationRepository $invitationRepos,
-        EntityManager $em
+        SyncService $syncService
     ) {
         parent::__construct($logger, $serializer);
         $this->tournamentRepos = $tournamentRepos;
         $this->invitationRepos = $invitationRepos;
         $this->serializer = $serializer;
-        $this->em = $em;
+        $this->syncService = $syncService;
     }
 
     public function fetch(Request $request, Response $response, $args): Response
@@ -78,28 +79,45 @@ final class InvitationAction extends Action
                 'json'
             );
 
-            $tournamentUser = $this->findTournamentUserByEmailaddress($tournament, $invitationSer->getEmailaddress());
-            if ($tournamentUser !== null) {
-                throw new Exception("dit emailadres heeft al een gebruiker voor dit toernooi", E_ERROR);
-            }
-
-            $invitation = $this->invitationRepos->findOneBy(
-                [
-                    "tournament" => $tournament,
-                    "emailaddress" => $invitationSer->getEmailaddress()
-                ]
+            $authorization = $this->syncService->add(
+                $tournament,
+                $invitationSer->getRoles(),
+                $invitationSer->getEmailaddress()
             );
-            if ($invitation !== null) {
-                $invitation->setRoles($invitationSer->getRoles());
-            } else {
-                $invitation = new TournamentInvitation(
-                    $tournament,
-                    $invitationSer->getEmailaddress(),
-                    $invitationSer->getRoles()
+
+            // @TODO SEND EMAIL
+
+            $json = $this->serializer->serialize($authorization, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
+    }
+
+    public function edit(Request $request, Response $response, $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            /** @var TournamentInvitation $invitationSer */
+            $invitationSer = $this->serializer->deserialize(
+                $this->getRawData(),
+                'FCToernooi\Tournament\Invitation',
+                'json'
+            );
+            $invitation = $this->invitationRepos->find((int)$args['invitationId']);
+            if ($invitation === null) {
+                throw new \Exception("geen uitnodiging met het opgegeven id gevonden", E_ERROR);
+            }
+            if ($invitation->getTournament() !== $tournament) {
+                throw new \Exception(
+                    "je hebt geen rechten om een uitnodiging van een ander toernooi aan te passen",
+                    E_ERROR
                 );
             }
+            $invitation->setRoles($invitationSer->getRoles());
             $this->invitationRepos->save($invitation);
-            // @TODO SEND EMAIL
 
             $json = $this->serializer->serialize($invitation, 'json');
             return $this->respondWithJson($response, $json);
@@ -108,13 +126,28 @@ final class InvitationAction extends Action
         }
     }
 
-    protected function findTournamentUserByEmailaddress(Tournament $tournament, string $emailaddress): ?TournamentUser
+    public function remove(Request $request, Response $response, $args): Response
     {
-        foreach ($tournament->getUsers() as $tournamentUser) {
-            if ($tournamentUser->getUser()->getEmailaddress() === $emailaddress) {
-                return $tournamentUser;
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $invitation = $this->invitationRepos->find((int)$args['invitationId']);
+            if ($invitation === null) {
+                throw new \Exception("geen uitnodiging met het opgegeven id gevonden", E_ERROR);
             }
+            if ($invitation->getTournament() !== $tournament) {
+                throw new \Exception(
+                    "je hebt geen rechten om een uitnodiging van een ander toernooi te verwijderen",
+                    E_ERROR
+                );
+            }
+
+            $this->invitationRepos->remove($invitation);
+
+            return $response->withStatus(200);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
         }
-        return null;
     }
 }

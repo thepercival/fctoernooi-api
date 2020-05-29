@@ -59,7 +59,7 @@ class SyncService
                 $tournamentUser = new TournamentUser($tournament, $user, $roles);
             }
             $this->tournamentUserRepos->save($tournamentUser);
-            return;
+            return $tournamentUser;
         }
 
         $invitation = $this->tournamentInvitationRepos->findOneBy(
@@ -71,7 +71,7 @@ class SyncService
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
         }
-        $this->tournamentInvitationRepos->save($invitation);
+        return $this->tournamentInvitationRepos->save($invitation);
     }
 
     public function remove(Tournament $tournament, int $roles, string $emailaddress = null)

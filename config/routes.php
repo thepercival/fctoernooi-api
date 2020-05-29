@@ -241,9 +241,9 @@ return function (App $app): void {
                         function (Group $group): void {
                             $group->options('', TournamentUserAction::class . ':options');
                             $group->post('', TournamentUserAction::class . ':add');
-                            $group->options('/{tournamentuserId}', TournamentUserAction::class . ':options');
-                            $group->put('/{tournamentuserId}', TournamentUserAction::class . ':edit');
-                            $group->delete('/{tournamentuserId}', TournamentUserAction::class . ':remove');
+                            $group->options('/{tournamentUserId}', TournamentUserAction::class . ':options');
+                            $group->put('/{tournamentUserId}', TournamentUserAction::class . ':edit');
+                            $group->delete('/{tournamentUserId}', TournamentUserAction::class . ':remove');
                         }
                     )->add(TournamentRoleAdminMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
