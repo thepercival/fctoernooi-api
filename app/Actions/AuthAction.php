@@ -66,7 +66,7 @@ final class AuthAction extends Action
             if (property_exists($registerData, "password") === false) {
                 throw new \Exception("geen wachtwoord ingevoerd");
             }
-            $emailAddress = $registerData->emailaddress;
+            $emailAddress = strtolower(trim($registerData->emailaddress));
             $password = $registerData->password;
 
             $user = $this->authService->register($emailAddress, $password);
@@ -93,6 +93,7 @@ final class AuthAction extends Action
             if ($emailaddress === false) {
                 throw new \Exception("het emailadres \"" . $authData->emailaddress . "\" is onjuist");
             }
+            $emailAddress = strtolower(trim($emailaddress));
             if (!property_exists($authData, "password") || strlen($authData->password) === 0) {
                 throw new \Exception("het wachtwoord is niet opgegeven");
             }
@@ -124,7 +125,7 @@ final class AuthAction extends Action
             if (property_exists($paswordResetData, "emailaddress") === false) {
                 throw new \Exception("geen emailadres ingevoerd");
             }
-            $emailAddress = $paswordResetData->emailaddress;
+            $emailAddress = strtolower(trim($paswordResetData->emailaddress));
 
             $retVal = $this->authService->sendPasswordCode($emailAddress);
 
@@ -150,7 +151,7 @@ final class AuthAction extends Action
             if (property_exists($paswordChangeData, "code") === false) {
                 throw new \Exception("geen code ingevoerd");
             }
-            $emailAddress = $paswordChangeData->emailaddress;
+            $emailAddress = $emailAddress = strtolower(trim($paswordChangeData->emailaddress));
             $password = $paswordChangeData->password;
             $code = (string)$paswordChangeData->code;
 

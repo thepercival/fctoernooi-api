@@ -82,9 +82,9 @@ final class InvitationAction extends Action
             $authorization = $this->syncService->add(
                 $tournament,
                 $invitationSer->getRoles(),
-                $invitationSer->getEmailaddress()
+                $invitationSer->getEmailaddress(),
+                true
             );
-
 
             $json = $this->serializer->serialize($authorization, 'json');
             return $this->respondWithJson($response, $json);

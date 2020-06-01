@@ -91,11 +91,11 @@ final class RefereeAction extends Action
 
             $this->refereeRepos->save($newReferee);
 
-            $invite = false;
+            $sendMail = false;
             if (array_key_exists("invite", $args)) {
-                $invite = filter_var($args["invite"], FILTER_VALIDATE_BOOLEAN);
+                $sendMail = filter_var($args["invite"], FILTER_VALIDATE_BOOLEAN);
             }
-            $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress());
+            $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress(), $sendMail);
 
             $serializationContext = SerializationContext::create();
             $serializationContext->setGroups($serGroups);

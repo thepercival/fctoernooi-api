@@ -28,9 +28,6 @@ return [
     "app:backup-sponsorimages" => function (ContainerInterface $container): BackupSponsorImages {
         return new BackupSponsorImages($container);
     },
-    "app:send-firsttime-email" => function (ContainerInterface $container): SendFirstTimeEmail {
-        return new SendFirstTimeEmail($container);
-    },
     "app:validate" => function (ContainerInterface $container): Validator {
         return new Validator($container);
     }

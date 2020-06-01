@@ -8,6 +8,7 @@
 
 namespace App;
 
+use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Log\LoggerInterface;
 
 final class Mailer
@@ -28,36 +29,85 @@ final class Mailer
      * @var string
      */
     protected $adminEmailaddress;
+    /**
+     * @var array
+     */
+    protected $smtpConfig;
 
     public function __construct(
         LoggerInterface $logger,
         string $fromEmailaddress,
         string $fromName,
-        string $adminEmailaddress
+        string $adminEmailaddress,
+        array $smtpConfig = null
     ) {
         $this->logger = $logger;
         $this->fromEmailaddress = $fromEmailaddress;
         $this->fromName = $fromName;
         $this->adminEmailaddress = $adminEmailaddress;
-    }
-
-    public function send(string $subject, string $body, string $toEmailaddress)
-    {
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
-        $headers .= "From: " . $this->fromName . " <" . $this->fromEmailaddress . ">" . "\r\n";
-        $headers .= "X-Mailer: PHP/" . phpversion();
-        $params = "-r " . $this->fromEmailaddress;
-
-        if (!mail($toEmailaddress, $subject, $body, $headers, $params)) {
-            $this->logger->error('Mailer Error for ' . $toEmailaddress);
-        } else {
-            $this->logger->info('mail semd to  "' . $toEmailaddress . '" with subject "' . $subject . '"');
-        }
+        $this->smtpConfig = $smtpConfig;
     }
 
     public function sendToAdmin(string $subject, string $body)
     {
         $this->send($subject, $body, $this->adminEmailaddress);
+    }
+
+    public function send(string $subject, string $body, string $toEmailaddress)
+    {
+        $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp();
+        // $mailer->'MIME-Version' = '1.0';
+        $mailer->ContentType = PHPMailer::CONTENT_TYPE_TEXT_HTML;
+        $mailer->CharSet = PHPMailer::CHARSET_UTF8;
+        $mailer->From = $this->fromEmailaddress;
+        $mailer->FromName = $this->fromName;
+        $mailer->addAddress($toEmailaddress);
+        $mailer->addReplyTo($this->fromEmailaddress);
+        $mailer->Subject = $subject;
+        $mailer->Body = $this->getStyle() . $body;
+        if (!$mailer->send()) {
+            $this->logger->error('Mailer Error for ' . $toEmailaddress);
+        } else {
+            $this->logger->info('mail send to  "' . $toEmailaddress . '" with subject "' . $subject . '"');
+        }
+    }
+
+    protected function sendInitMail(): PHPMailer
+    {
+        $mail = new PHPMailer();
+        $mail->isSendmail();
+        return $mail;
+    }
+
+    protected function sendInitSmtp(): PHPMailer
+    {
+        $mail = new PHPMailer();
+        $mail->isSMTP();
+        $mail->Host = $this->smtpConfig["smtp_host"];
+        $mail->Port = $this->smtpConfig["smtp_port"];
+        $mail->SMTPAuth = true;
+        $mail->Username = $this->smtpConfig["smtp_user"];
+        $mail->Password = $this->smtpConfig["smtp_pass"];
+        return $mail;
+    }
+
+    protected function getStyle(): string
+    {
+        return <<<EOT
+<style>
+table, th, td {
+  border-collapse: collapse;
+  border: 1px solid black;
+  padding: 0.5rem;
+  border: 0;  
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+th {
+  background-color: #3E3F3A;
+  color: white;
+}
+</style>
+EOT;
     }
 }

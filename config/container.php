@@ -125,11 +125,13 @@ return [
     },
     Mailer::class => function (ContainerInterface $container): Mailer {
         $config = $container->get(Configuration::class);
+        $smtpForDev = $config->getString("environment") === "development" ? $config->getArray("email.mailtrap") : null;
         return new Mailer(
             $container->get(LoggerInterface::class),
             $config->getString('email.from'),
             $config->getString('email.fromname'),
             $config->getString('email.admin'),
+            $smtpForDev
         );
     },
     AuthSettings::class => function (ContainerInterface $container): AuthSettings {

@@ -66,7 +66,13 @@ return [
     'email' => [
         'from' => "info@fctoernooi.nl",
         'fromname' => "FCToernooi",
-        'admin' => "fctoernooi2018@gmail.com"
+        'admin' => "fctoernooi2018@gmail.com",
+        'mailtrap' => [
+            'smtp_host' => 'smtp.mailtrap.io',
+            'smtp_port' => 2525,
+            'smtp_user' => getenv('MAILTRAP_USER'),
+            'smtp_pass' => getenv('MAILTRAP_PASSWORD')
+        ]
     ],
     'images' => [
         'sponsors' => [

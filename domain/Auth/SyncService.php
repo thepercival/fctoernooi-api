@@ -57,7 +57,7 @@ class SyncService
         $this->config = $config;
     }
 
-    public function add(Tournament $tournament, int $roles, string $emailaddress = null)
+    public function add(Tournament $tournament, int $roles, string $emailaddress = null, bool $sendMail = false)
     {
         if (strlen($emailaddress) === 0) {
             return;
@@ -74,7 +74,7 @@ class SyncService
                 $tournamentUser->setRoles($tournamentUser->getRoles() & $roles);
             }
             $this->tournamentUserRepos->save($tournamentUser);
-            if ($newUser) {
+            if ($sendMail && $newUser) {
                 $this->sendEmailTournamentUser($tournamentUser);
             }
             return $tournamentUser;
@@ -91,7 +91,7 @@ class SyncService
             $invitation->setRoles($invitation->getRoles() & $roles);
         }
         $this->tournamentInvitationRepos->save($invitation);
-        if ($newInvitation) {
+        if ($sendMail && $newInvitation) {
             $this->sendEmailTournamentInvitation($invitation);
         }
         return $invitation;
@@ -110,14 +110,13 @@ class SyncService
             if ($tournamentUser === null) {
                 return;
             }
-            if ($tournamentUser->getRoles() === Role::REFEREE) {
+            $rolesToRemove = $tournamentUser->getRoles() & $roles;
+            if ($tournamentUser->getRoles() === $rolesToRemove) {
                 $tournament->getUsers()->removeElement($tournamentUser);
                 $this->tournamentUserRepos->remove($tournamentUser);
             } else {
-                if ($tournamentUser->getRoles() > Role::REFEREE) {
-                    $tournamentUser->setRoles($tournamentUser->getRoles() - Role::REFEREE);
-                    $this->tournamentUserRepos->save($tournamentUser);
-                }
+                $tournamentUser->setRoles($tournamentUser->getRoles() - $rolesToRemove);
+                $this->tournamentUserRepos->save($tournamentUser);
             }
             return;
         }
@@ -128,14 +127,33 @@ class SyncService
         if ($invitation === null) {
             return;
         }
-        if ($invitation->getRoles() === Role::REFEREE) {
+        $rolesToRemove = $invitation->getRoles() & $roles;
+        if ($invitation->getRoles() === $rolesToRemove) {
             $this->tournamentInvitationRepos->remove($invitation);
         } else {
-            if ($invitation->getRoles() > Role::REFEREE) {
-                $invitation->setRoles($invitation->getRoles() - Role::REFEREE);
-                $this->tournamentInvitationRepos->save($invitation);
-            }
+            $invitation->setRoles($invitation->getRoles() - $rolesToRemove);
+            $this->tournamentInvitationRepos->save($invitation);
         }
+    }
+
+    /**
+     * @param User $user
+     * @param array | TournamentInvitation[] $invitations
+     * @return array | TournamentUser[]
+     */
+    public function processInvitations(User $user, array $invitations): array
+    {
+        $tournamentUsers = [];
+        while (count($invitations) > 0) {
+            $invitation = array_shift($invitations);
+            $this->tournamentInvitationRepos->remove($invitation);
+            $tournamentUsers[] = $this->tournamentUserRepos->save(
+                new TournamentUser(
+                    $invitation->getTournament(), $user, $invitation->getRoles()
+                )
+            );
+        }
+        return $tournamentUsers;
     }
 
     protected function sendEmailTournamentUser(TournamentUser $tournamentUser)

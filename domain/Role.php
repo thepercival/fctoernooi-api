@@ -22,7 +22,7 @@ class Role
                     return 'beheerder rollen';
                 } else {
                     if ($role === self::REFEREE) {
-                        return 'scheidsrchter';
+                        return 'scheidsrechter';
                     }
                 }
             }
