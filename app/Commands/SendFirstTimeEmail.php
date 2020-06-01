@@ -81,6 +81,10 @@ class SendFirstTimeEmail extends Command
         return 0;
     }
 
+    // verwijder email na eerste keer en na registreren
+    // voeg createddatetime to aan tournament!!!
+    /// zo kun je rapportages maken, obv hiervan!!!!
+
     protected function sendMail(User $user, Tournament $tournament)
     {
         $subject = $tournament->getCompetition()->getLeague()->getName();

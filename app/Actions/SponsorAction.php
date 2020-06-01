@@ -20,6 +20,7 @@ use JMS\Serializer\SerializerInterface;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Sponsor;
+use FCToernooi\Tournament;
 
 final class SponsorAction extends Action
 {
@@ -54,7 +55,7 @@ final class SponsorAction extends Action
     public function fetch(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
             $json = $this->serializer->serialize($tournament->getSponsors(), 'json');
             return $this->respondWithJson($response, $json);
@@ -66,7 +67,7 @@ final class SponsorAction extends Action
     public function fetchOne(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $sponsor = $this->sponsorRepos->find((int)$args['sponsorId']);
@@ -86,11 +87,11 @@ final class SponsorAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            /** @var \FCToernooi\Sponsor $sponsor */
-            $sponsor = $this->serializer->deserialize($this->getRawData(), 'FCToernooi\Sponsor', 'json');
+            /** @var Sponsor $sponsor */
+            $sponsor = $this->serializer->deserialize($this->getRawData(), Sponsor::class, 'json');
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsor->getScreenNr());
 
@@ -110,11 +111,11 @@ final class SponsorAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            /** @var \FCToernooi\Sponsor $sponsorSer */
-            $sponsorSer = $this->serializer->deserialize($this->getRawData(), 'FCToernooi\Sponsor', 'json');
+            /** @var Sponsor $sponsorSer */
+            $sponsorSer = $this->serializer->deserialize($this->getRawData(), Sponsor::class, 'json');
 
             $sponsor = $this->sponsorRepos->find((int)$args['sponsorId']);
             if ($sponsor === null) {
@@ -142,7 +143,7 @@ final class SponsorAction extends Action
     public function remove(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $sponsor = $this->sponsorRepos->find((int)$args['sponsorId']);
@@ -164,7 +165,7 @@ final class SponsorAction extends Action
     public function upload(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $sponsor = $this->sponsorRepos->find((int)$args['sponsorId']);

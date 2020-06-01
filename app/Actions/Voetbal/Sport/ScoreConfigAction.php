@@ -54,15 +54,11 @@ final class ScoreConfigAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            /** @var \Voetbal\Sport\ScoreConfig $sportScoreConfigSer */
-            $sportScoreConfigSer = $this->serializer->deserialize(
-                $this->getRawData(),
-                'Voetbal\Sport\ScoreConfig',
-                'json'
-            );
+            /** @var SportScoreConfig $sportScoreConfigSer */
+            $sportScoreConfigSer = $this->serializer->deserialize($this->getRawData(), SportScoreConfig::class, 'json');
 
             $queryParams = $request->getQueryParams();
 
@@ -109,7 +105,7 @@ final class ScoreConfigAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition); // to init next/previous
@@ -128,14 +124,14 @@ final class ScoreConfigAction extends Action
                 throw new \Exception("het rondenummer kan niet gevonden worden", E_ERROR);
             }
 
-            /** @var \Voetbal\Sport\ScoreConfig $sportScoreConfigSer */
+            /** @var SportScoreConfig $sportScoreConfigSer */
             $sportScoreConfigSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'Voetbal\Sport\ScoreConfig',
+                SportScoreConfig::class,
                 'json'
             );
 
-            /** @var \Voetbal\Sport\ScoreConfig|null $sportScoreConfig */
+            /** @var SportScoreConfig|null $sportScoreConfig */
             $sportScoreConfig = $this->sportScoreConfigRepos->find((int)$args['sportscoreconfigId']);
             if ($sportScoreConfig === null) {
                 throw new \Exception("er zijn geen score-instellingen gevonden om te wijzigen", E_ERROR);

@@ -50,9 +50,9 @@ final class Mailer
         $params = "-r " . $this->fromEmailaddress;
 
         if (!mail($toEmailaddress, $subject, $body, $headers, $params)) {
-            // $app->flash("error", "We're having trouble with our mail servers at the moment.  Please try again later, or contact us directly by phone.");
             $this->logger->error('Mailer Error for ' . $toEmailaddress);
-            // $app->halt(500);
+        } else {
+            $this->logger->info('mail semd to  "' . $toEmailaddress . '" with subject "' . $subject . '"');
         }
     }
 

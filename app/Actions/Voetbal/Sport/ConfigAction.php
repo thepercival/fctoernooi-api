@@ -52,11 +52,11 @@ final class ConfigAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            /** @var \Voetbal\Sport\Config $sportConfig */
-            $sportConfig = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Sport\Config', 'json');
+            /** @var SportConfig $sportConfig */
+            $sportConfig = $this->serializer->deserialize($this->getRawData(), SportConfig::class, 'json');
 
             $sport = $this->sportRepos->findOneBy(["name" => $sportConfig->getSport()->getName()]);
             if ($sport === null) {
@@ -88,11 +88,11 @@ final class ConfigAction extends Action
     public function edit($request, $response, $args)
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            /** @var \Voetbal\Sport\Config|false $sportConfigSer */
-            $sportConfigSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Sport\Config', 'json');
+            /** @var SportConfig|false $sportConfigSer */
+            $sportConfigSer = $this->serializer->deserialize($this->getRawData(), SportConfig::class, 'json');
 
             $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
             if ($sport === null) {
@@ -121,7 +121,7 @@ final class ConfigAction extends Action
     public function remove(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $sportConfig = $this->getSportConfigFromInput((int)$args["sportconfigId"], $competition);

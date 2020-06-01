@@ -54,9 +54,9 @@ final class FieldAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Field $field */
-            $field = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Field', 'json');
-            /** @var \Voetbal\Competition $competition */
+            /** @var Field $field */
+            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $fieldsWithSameName = $competition->getFields()->filter(
@@ -91,12 +91,12 @@ final class FieldAction extends Action
     public function edit($request, $response, $args)
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);
-            /** @var \Voetbal\Field|false $fieldSer */
-            $fieldSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Field', 'json');
+            /** @var Field|false $fieldSer */
+            $fieldSer = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
             if ($fieldSer === false) {
                 throw new \Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
@@ -129,7 +129,7 @@ final class FieldAction extends Action
     public function remove(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);

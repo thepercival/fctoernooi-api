@@ -68,10 +68,10 @@ final class RefereeAction extends Action
             $deserializationContext = DeserializationContext::create();
             $deserializationContext->setGroups($serGroups);
 
-            /** @var \Voetbal\Referee $referee */
+            /** @var Referee $referee */
             $referee = $this->serializer->deserialize(
                 $this->getRawData(),
-                'Voetbal\Referee',
+                Referee::class,
                 'json',
                 $deserializationContext
             );
@@ -114,10 +114,10 @@ final class RefereeAction extends Action
             $deserializationContext = DeserializationContext::create();
             $deserializationContext->setGroups($serGroups);
 
-            /** @var \Voetbal\Referee $refereeSer */
+            /** @var Referee $refereeSer */
             $refereeSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'Voetbal\Referee',
+                Referee::class,
                 'json',
                 $deserializationContext
             );

@@ -47,8 +47,8 @@ final class SportAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Sport $sport */
-            $sport = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Sport', 'json');
+            /** @var Sport $sport */
+            $sport = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json');
 
             // check if name exists, else create sport
             $newSport = $this->sportRepos->findOneBy(["name" => $sport->getName()]);

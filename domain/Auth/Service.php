@@ -92,19 +92,19 @@ class Service
         $user->setSalt(bin2hex(random_bytes(15)));
         $user->setPassword(password_hash($user->getSalt() . $password, PASSWORD_DEFAULT));
 
-        $conn = $this->userRepos->getEM()->getConnection();
-        $conn->beginTransaction();
+        // $conn = $this->userRepos->getEM()->getConnection();
+        // $conn->beginTransaction();
         $savedUser = null;
-        try {
-            $savedUser = $this->userRepos->save($user);
-            $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
-            $tournamentUsers = $this->tournamentUserRepos->processInvitations($invitations);
-            $this->sendRegisterEmail($emailaddress, $tournamentUsers);
-            $conn->commit();
-        } catch (\Exception $e) {
-            $conn->rollback();
-            throw $e;
-        }
+        // try {
+        $savedUser = $this->userRepos->save($user);
+        // $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
+        // $tournamentUsers = $this->tournamentUserRepos->processInvitations($invitations);
+        // $this->sendRegisterEmail($emailaddress, $tournamentUsers);
+        // $conn->commit();
+        // } catch (\Exception $e) {
+        // $conn->rollback();
+        // throw $e;
+        // }
         return $savedUser;
     }
 

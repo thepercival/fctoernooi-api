@@ -193,20 +193,20 @@ class TournamentAction extends Action
             /** @var Tournament $tournamentSer */
             $tournamentSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'FCToernooi\Tournament',
+                Tournament::class,
                 'json',
                 $deserializationContext
             );
-            $tournamentSer->getUsers()->clear();
-            $tournamentSer->getUsers()->add(
-                new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN)
-            );
+
+            $tournamentSer->setUsers(new ArrayCollection());
+            $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
 
             $tournament = $this->tournamentCopier->copy(
                 $tournamentSer,
                 $tournamentSer->getCompetition()->getStartDateTime(),
                 $user
             );
+            $tournament->setCreatedDateTime(new DateTimeImmutable());
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
@@ -220,7 +220,7 @@ class TournamentAction extends Action
     {
         try {
             /** @var Tournament $tournamentSer */
-            $tournamentSer = $this->serializer->deserialize($this->getRawData(), 'FCToernooi\Tournament', 'json');
+            $tournamentSer = $this->serializer->deserialize($this->getRawData(), Tournament::class, 'json');
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
@@ -285,6 +285,7 @@ class TournamentAction extends Action
             $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
 
             $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
+            $newTournament->setCreatedDateTime(new DateTimeImmutable());
             $this->tournamentRepos->customPersist($newTournament, true);
 
             $structure = $this->structureRepos->getStructure($competition);
@@ -462,27 +463,6 @@ class TournamentAction extends Action
             return "qrcode-en-link";
         }
         return "toernooi";
-    }
-
-    public function saveLockerRooms(Request $request, Response $response, $args): Response
-    {
-        try {
-            /** @var ArrayCollection|LockerRoom[] $lockerRoomsSer */
-            $lockerRoomsSer = $this->serializer->deserialize(
-                $this->getRawData(),
-                'Doctrine\Common\Collections\ArrayCollection<FCToernooi\LockerRoom>',
-                'json'
-            );
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
-            $this->lockerRoomRepos->update($tournament, $lockerRoomsSer);
-
-            $json = $this->serializer->serialize($tournament->getLockerRooms(), 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
-        }
     }
 
     protected function sendEmailOldStructure(Tournament $tournament)

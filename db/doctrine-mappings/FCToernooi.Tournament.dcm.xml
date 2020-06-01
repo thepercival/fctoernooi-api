@@ -4,6 +4,7 @@
     <id name="id" type="integer" column="id">
       <generator strategy="AUTO"/>
     </id>
+     <field name="createdDateTime" column="createdDateTime" type="datetime_immutable" nullable="true" unique="false"/>
     <field name="breakStartDateTime" column="breakStartDateTime" type="datetime_immutable" nullable="true"
            unique="false"/>
     <field name="breakEndDateTime" column="breakEndDateTime" type="datetime_immutable" nullable="true" unique="false"/>

@@ -55,6 +55,10 @@ class Tournament
      * @var bool
      */
     protected $updated; // DEP, false = old struct
+    /**
+     * @var DateTimeImmutable
+     */
+    private $createdDateTime;
 
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
@@ -251,5 +255,15 @@ class Tournament
             }
         }
         return null;
+    }
+
+    public function getCreatedDateTime(): ?DateTimeImmutable
+    {
+        return $this->createdDateTime;
+    }
+
+    public function setCreatedDateTime(DateTimeImmutable $createdDateTime)
+    {
+        $this->createdDateTime = $createdDateTime;
     }
 }

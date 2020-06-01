@@ -15,6 +15,7 @@ use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Voetbal\Planning\Config as PlanningConfig;
+use Voetbal\Competition;
 use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
 use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Structure\Repository as StructureRepository;
@@ -44,10 +45,10 @@ final class ConfigAction extends Action
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
-            /** @var \Voetbal\Planning\Config $planningConfigSer */
-            $planningConfigSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Planning\Config', 'json');
+            /** @var PlanningConfig $planningConfigSer */
+            $planningConfigSer = $this->serializer->deserialize($this->getRawData(), PlanningConfig::class, 'json');
 
             $structure = $this->structureRepos->getStructure($competition);
             $roundNumber = $structure->getRoundNumber((int)$args["roundnumber"]);
@@ -84,7 +85,7 @@ final class ConfigAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
             $structure = $this->structureRepos->getStructure($competition); // to init next/previous
             $roundNumber = $structure->getRoundNumber((int)$args["roundnumber"]);
@@ -92,8 +93,8 @@ final class ConfigAction extends Action
                 throw new \Exception("het rondenummer kan niet gevonden worden", E_ERROR);
             }
 
-            /** @var \Voetbal\Planning\Config $planningConfigSer */
-            $planningConfigSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Planning\Config', 'json');
+            /** @var PlanningConfig $planningConfigSer */
+            $planningConfigSer = $this->serializer->deserialize($this->getRawData(), PlanningConfig::class, 'json');
             $planningConfig = $roundNumber->getPlanningConfig();
             if ($planningConfig === null) {
                 throw new \Exception("er zijn geen plannings-instellingen gevonden om te wijzigen", E_ERROR);

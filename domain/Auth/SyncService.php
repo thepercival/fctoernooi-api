@@ -18,6 +18,7 @@ use FCToernooi\Tournament;
 use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
+use Selective\Config\Configuration;
 
 class SyncService
 {
@@ -37,17 +38,23 @@ class SyncService
      * @var Mailer
      */
     protected $mailer;
+    /**
+     * @var Configuration
+     */
+    protected $config;
 
     public function __construct(
         UserRepository $userRepos,
         TournamentUserRepository $tournamentUserRepos,
         TournamentInvitationRepository $tournamentInvitationRepos,
-        Mailer $mailer
+        Mailer $mailer,
+        Configuration $config
     ) {
         $this->userRepos = $userRepos;
         $this->tournamentUserRepos = $tournamentUserRepos;
         $this->tournamentInvitationRepos = $tournamentInvitationRepos;
         $this->mailer = $mailer;
+        $this->config = $config;
     }
 
     public function add(Tournament $tournament, int $roles, string $emailaddress = null)
@@ -131,55 +138,56 @@ class SyncService
         }
     }
 
-    protected function sendEmailToNewUser($emailAddress, array $roles)
+    protected function sendEmailTournamentUser(TournamentUser $tournamentUser)
     {
-        $subject = 'welkom bij FCToernooi';
-        $bodyBegin = <<<EOT
-<p>Hallo,</p>
-<p>Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi.</p>
-EOT;
-
-        $bodyMiddle = '';
-        if (count($roles) > 0) {
-            $bodyMiddle = '<p>Je staat geregistreerd als scheidsrechter voor de volgende toernooien:<ul>';
-//            foreach ($roles as $role) {
-//                $bodyMiddle .= '<li><a href="' . $this->config->getString("www.wwwurl") . $role->getTournament()->getId(
-//                    ) . '">' . $role->getTournament()->getCompetition()->getLeague()->getName() . '</a></li>';
-//            }
-            $bodyMiddle .= '</ul></p>';
-        }
-        $bodyEnd = <<<EOT
-<p>
-Mocht je vragen/opmerkingen/klachten/suggesties/etc hebben ga dan naar <a href="https://github.com/thepercival/fctoernooi/issues">https://github.com/thepercival/fctoernooi/issues</a>
-</p>        
-<p>met vriendelijke groet,<br/>FCToernooi</p>
-EOT;
-        $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
+        $url = $this->config->getString('www.wwwurl');
+        $tournamentName = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
+        $suffix = "<p>Wanneer je <a href=\"" . $url . "user/login\">inlogt</a> op " . $url . " staat toernooi \"" . $tournamentName . "\"  bij je toernooien. </a></p>";
+        $this->sendEmailForAuthorization(
+            $tournamentUser->getUser()->getEmailaddress(),
+            $tournamentName,
+            $tournamentUser->getRoles(),
+            $suffix
+        );
     }
 
     protected function sendEmailTournamentInvitation(TournamentInvitation $invitation)
     {
-        $subject = 'welkom bij FCToernooi';
-        $bodyBegin = <<<EOT
-<p>Hallo,</p>
-<p>Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi.</p>
-EOT;
+        $url = $this->config->getString('www.wwwurl');
+        $tournamentName = $invitation->getTournament()->getCompetition()->getLeague()->getName();
+        $suffix = "<p>Wanneer je je <a href=\"" . $url . "user/register\">registreert</a> op " . $url . " staat toernooi \"" . $tournamentName . "\"  bij je toernooien. </a></p>";
+        $this->sendEmailForAuthorization(
+            $invitation->getEmailaddress(),
+            $tournamentName,
+            $invitation->getRoles(),
+            $suffix
+        );
+    }
 
-        $bodyMiddle = '';
-        if (count($roles) > 0) {
-            $bodyMiddle = '<p>Je staat geregistreerd als scheidsrechter voor de volgende toernooien:<ul>';
-//            foreach ($roles as $role) {
-//                $bodyMiddle .= '<li><a href="' . $this->config->getString("www.wwwurl") . $role->getTournament()->getId(
-//                    ) . '">' . $role->getTournament()->getCompetition()->getLeague()->getName() . '</a></li>';
-//            }
-            $bodyMiddle .= '</ul></p>';
+    protected function sendEmailForAuthorization(
+        string $emailadress,
+        string $tournamentName,
+        int $roles,
+        string $suffix
+    ) {
+        $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
+        $url = $this->config->getString('www.wwwurl');
+
+        $body = "<p>Hallo,</p>" .
+            "<p>Je bent uitgenodigd op " . $url . " voor toernooi \"" . $tournamentName . "\" door de beheerder van dit toernooi.<br/>" .
+            "Je hebt de volgende rollen gekregen:</p>" .
+            $this->getRoleDefinitions($roles) .
+            $suffix .
+            "<p>met vriendelijke groet,<br/>FCToernooi</p>";
+        $this->mailer->send($subject, $body, $emailadress);
+    }
+
+    protected function getRoleDefinitions(int $roles): string
+    {
+        $retVal = "<table>";
+        foreach (Role::getDefinitions($roles) as $definition) {
+            $retVal .= "<tr><td>" . $definition["name"] . "</td><td>" . $definition["description"] . "</td></tr>";
         }
-        $bodyEnd = <<<EOT
-<p>
-Mocht je vragen/opmerkingen/klachten/suggesties/etc hebben ga dan naar <a href="https://github.com/thepercival/fctoernooi/issues">https://github.com/thepercival/fctoernooi/issues</a>
-</p>        
-<p>met vriendelijke groet,<br/>FCToernooi</p>
-EOT;
-        $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
+        return $retVal . "</table>";
     }
 }

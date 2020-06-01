@@ -7,6 +7,8 @@
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>
         </id>
+        <field name="createdDateTime" column="createdDateTime" type="datetime_immutable" nullable="false"
+               unique="false"/>
         <field name="emailaddress" column="emailaddress" type="string" length="100" nullable="false" unique="false"/>
         <field name="roles" column="roles" type="integer" nullable="false" unique="false"/>
         <many-to-one field="tournament" target-entity="FCToernooi\Tournament">

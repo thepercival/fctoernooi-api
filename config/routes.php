@@ -83,8 +83,7 @@ return function (App $app): void {
         '/tournaments',
         function (Group $group): void {
             $group->options('', TournamentAction::class . ':options');
-            $group->post('', TournamentAction::class . ':add')
-                ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
+            $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
                 ->add(TournamentPublicMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
@@ -92,8 +91,6 @@ return function (App $app): void {
                 ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
             $group->delete('/{tournamentId}', TournamentAction::class . ':remove')
                 ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
-
-            // in frontend refereeid alleeen ophalen als er een tournamentuser is!!!
 
             $group->group(
                 '/{tournamentId}/',
@@ -237,6 +234,25 @@ return function (App $app): void {
                     );;
 
                     $group->group(
+                        'lockerrooms',
+                        function (Group $group): void {
+                            $group->options('', LockerRoomAction::class . ':options');
+                            $group->post('', LockerRoomAction::class . ':add');
+                            $group->options('/{lockerRoomId}', LockerRoomAction::class . ':options');
+                            $group->put('/{lockerRoomId}', LockerRoomAction::class . ':edit');
+                            $group->delete('/{lockerRoomId}', LockerRoomAction::class . ':remove');
+
+                            $group->options('/{lockerRoomId}/synccompetitors', LockerRoomAction::class . ':options');
+                            $group->post(
+                                '/{lockerRoomId}/synccompetitors',
+                                LockerRoomAction::class . ':syncCompetitors'
+                            );
+                        }
+                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
                         'users',
                         function (Group $group): void {
                             $group->options('/{tournamentUserId}', TournamentUserAction::class . ':options');
@@ -282,8 +298,6 @@ return function (App $app): void {
                             );
                             $group->options('exportgeneratehash', TournamentAction::class . ':options');
                             $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
-                            $group->options('lockerrooms', TournamentAction::class . ':options');
-                            $group->post('lockerrooms', TournamentAction::class . ':saveLockerRooms');
                             $group->options('copy', TournamentAction::class . ':options');
                             $group->post('copy', TournamentAction::class . ':copy');
                         }

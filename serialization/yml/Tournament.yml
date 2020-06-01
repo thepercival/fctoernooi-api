@@ -17,6 +17,7 @@ FCToernooi\Tournament:
     users:
       type: ArrayCollection<FCToernooi\TournamentUser>
       groups: [users]
+      read_only: true
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>
     lockerRooms:

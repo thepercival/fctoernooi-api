@@ -20,6 +20,7 @@ use Voetbal\Poule\Repository as PouleRepository;
 use App\Actions\Action;
 use Voetbal\Competition;
 use Voetbal\Game\Service as GameService;
+use Voetbal\Game;
 
 final class GameAction extends Action
 {
@@ -62,8 +63,8 @@ final class GameAction extends Action
             }
             $poule = $this->getPouleFromInput($pouleId, $competition);
 
-            /** @var \Voetbal\Game $gameSer */
-            $gameSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Game', 'json');
+            /** @var Game $gameSer */
+            $gameSer = $this->serializer->deserialize($this->getRawData(), Game::class, 'json');
 
             $game = $this->gameRepos->find((int)$args["gameId"]);
             if ($game === null) {

@@ -38,8 +38,8 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var Competitor $competitor */
-            $competitor = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
-            /** @var \Voetbal\Association $association */
+            $competitor = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
+            /** @var Association $association */
             $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
 
             $newCompetitor = new Competitor($association, $competitor->getName());
@@ -60,9 +60,9 @@ final class CompetitorAction extends Action
     public function edit($request, $response, $args)
     {
         try {
-            /** @var \Voetbal\Competitor $competitorSer */
-            $competitorSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Competitor', 'json');
-            /** @var \Voetbal\Association $association */
+            /** @var Competitor $competitorSer */
+            $competitorSer = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
+            /** @var Association $association */
             $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
 
             $competitor = $this->getCompetitorFromInput((int)$args["competitorId"], $association);

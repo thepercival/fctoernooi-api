@@ -57,7 +57,7 @@ final class StructureAction extends Action
     {
         try {
             /** @var Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Structure', 'json');
+            $structureSer = $this->serializer->deserialize($this->getRawData(), Structure::class, 'json');
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }

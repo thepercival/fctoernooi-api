@@ -75,7 +75,7 @@ final class InvitationAction extends Action
             /** @var TournamentInvitation $invitationSer */
             $invitationSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'FCToernooi\Tournament\Invitation',
+                TournamentInvitation::class,
                 'json'
             );
 
@@ -102,7 +102,7 @@ final class InvitationAction extends Action
             /** @var TournamentInvitation $invitationSer */
             $invitationSer = $this->serializer->deserialize(
                 $this->getRawData(),
-                'FCToernooi\Tournament\Invitation',
+                TournamentInvitation::class,
                 'json'
             );
             $invitation = $this->invitationRepos->find((int)$args['invitationId']);

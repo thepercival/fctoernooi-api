@@ -52,7 +52,7 @@ final class PlaceAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
             $association = $competition->getLeague()->getAssociation();
 
@@ -62,8 +62,8 @@ final class PlaceAction extends Action
                 $pouleId = (int)$queryParams["pouleId"];
             }
             $poule = $this->getPouleFromInput($pouleId, $competition);
-            /** @var \Voetbal\Place $placeSer */
-            $placeSer = $this->serializer->deserialize($this->getRawData(), 'Voetbal\Place', 'json');
+            /** @var Place $placeSer */
+            $placeSer = $this->serializer->deserialize($this->getRawData(), Place::class, 'json');
 
             $place = $this->placeRepos->find((int)$args["placeId"]);
             if ($place === null) {

@@ -27,48 +27,40 @@ class Repository extends \Voetbal\Repository
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function update(Tournament $tournament, ArrayCollection $newLockerRooms): array
+    public function updateCompetitors(LockerRoom $lockerRoom, ArrayCollection $newCompetitors)
     {
         $conn = $this->_em->getConnection();
         $conn->beginTransaction();
         try {
             // remove
-            {
-                $lockerRooms = $tournament->getLockerRooms();
-                foreach ($lockerRooms as $lockerRoom) {
-                    $this->_em->remove($lockerRoom);
-                }
-                $lockerRooms->clear();
+            while ($lockerRoom->getCompetitors()->count() > 0) {
+                $lockerRoom->getCompetitors()->removeElement($lockerRoom->getCompetitors()->first());
             }
+            // $lockerRoom->getCompetitors()->clear();
             $this->_em->flush();
 
             // add
             $structureRepos = new StructureRepository($this->_em);
-            $structure = $structureRepos->getStructure($tournament->getCompetition());
+            $structure = $structureRepos->getStructure($lockerRoom->getTournament()->getCompetition());
             $competitors = $structure !== null ? $structure->getFirstRoundNumber()->getCompetitors() : [];
-            foreach ($newLockerRooms as $newLockerRoom) {
-                $realNewLockerRoom = new LockerRoom($tournament, $newLockerRoom->getName());
-                foreach ($newLockerRoom->getCompetitorIds() as $competitorId) {
-                    $foundCompetitors = array_filter(
-                        $competitors,
-                        function (Competitor $competitorIt) use ($competitorId): bool {
-                            return $competitorId === $competitorIt->getId();
-                        }
-                    );
-                    $competitor = reset($foundCompetitors);
-                    if (!$competitor) {
-                        continue;
+
+            foreach ($newCompetitors as $newCompetitor) {
+                $foundCompetitors = array_filter(
+                    $competitors,
+                    function (Competitor $competitorIt) use ($newCompetitor): bool {
+                        return $newCompetitor->getName() === $competitorIt->getName();
                     }
-                    $realNewLockerRoom->getCompetitors()->add($competitor);
+                );
+                $competitor = reset($foundCompetitors);
+                if (!$competitor) {
+                    continue;
                 }
-                // $refereeRole->setValue(Role::REFEREE);
-                $this->_em->persist($realNewLockerRoom);
+                $lockerRoom->getCompetitors()->add($competitor);
             }
-            $lockerRoomsRet = array_values($tournament->getLockerRooms()->toArray());
+            $this->_em->persist($lockerRoom);
 
             $this->_em->flush();
             $conn->commit();
-            return $lockerRoomsRet;
         } catch (\Exception $e) {
             $conn->rollBack();
             throw $e;
