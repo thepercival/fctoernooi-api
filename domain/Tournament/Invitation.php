@@ -12,6 +12,7 @@ namespace FCToernooi\Tournament;
 use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
+use FCToernooi\User;
 
 // use \Doctrine\Common\Collections\ArrayCollection;
 
@@ -75,6 +76,16 @@ class Invitation
 
     public function setEmailaddress(string $emailaddress)
     {
+        if (strlen($emailaddress) < User::MIN_LENGTH_EMAIL or strlen($emailaddress) > User::MAX_LENGTH_EMAIL) {
+            throw new \InvalidArgumentException(
+                "het emailadres moet minimaal " . User::MIN_LENGTH_EMAIL . " karakters bevatten en mag maximaal " . User::MAX_LENGTH_EMAIL . " karakters bevatten",
+                E_ERROR
+            );
+        }
+
+        if (!filter_var($emailaddress, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException("het emailadres " . $emailaddress . " is niet valide", E_ERROR);
+        }
         $this->emailaddress = $emailaddress;
     }
 

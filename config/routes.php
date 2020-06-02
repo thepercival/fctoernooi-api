@@ -7,6 +7,7 @@ use App\Actions\Tournament\ShellAction;
 use App\Actions\TournamentUserAction;
 use App\Actions\Tournament\InvitationAction;
 use App\Actions\AuthAction;
+use App\Actions\UserAction;
 use App\Actions\SponsorAction;
 use App\Actions\LockerRoomAction;
 use App\Actions\Voetbal\StructureAction;
@@ -70,12 +71,23 @@ return function (App $app): void {
         }
     );
 
-    // user
     $app->group(
         '/auth',
         function (Group $group): void {
             $group->options('/extendtoken', AuthAction::class . ':options');
             $group->post('/extendtoken', AuthAction::class . ':extendToken');
+            $group->options('/profile/{userId}', AuthAction::class . ':options');
+            $group->put('/profile/{userId}', AuthAction::class . ':profile');
+        }
+    )->add(UserMiddleware::class);
+
+    $app->group(
+        '/users/{userId}',
+        function (Group $group): void {
+            $group->options('', UserAction::class . ':options');
+            $group->get('', UserAction::class . ':fetchOne');
+            $group->put('', UserAction::class . ':edit');
+            $group->delete('', UserAction::class . ':remove');
         }
     )->add(UserMiddleware::class);
 

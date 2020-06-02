@@ -80,8 +80,8 @@ final class RefereeAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $this->checkInitialsAvailability($competition, $referee->getInitials(), $referee);
-            $this->checkEmailaddressAvailability($competition, $referee->getEmailaddress(), $referee);
+            $this->checkInitialsAvailability($competition, $referee->getInitials());
+            $this->checkEmailaddressAvailability($competition, $referee->getEmailaddress());
 
             $newReferee = new RefereeBase($competition, $referee->getRank());
             $newReferee->setInitials($referee->getInitials());
@@ -175,9 +175,12 @@ final class RefereeAction extends Action
 
     protected function checkEmailaddressAvailability(
         Competition $competition,
-        string $emailaddress,
+        string $emailaddress = null,
         Referee $refereeToCheck = null
     ) {
+        if ($emailaddress === null) {
+            return;
+        }
         $nonUniqueReferees = $competition->getReferees()->filter(
             function ($refereeIt) use ($emailaddress, $refereeToCheck): bool {
                 return $refereeIt->getEmailaddress() === $emailaddress && $refereeToCheck !== $refereeIt;

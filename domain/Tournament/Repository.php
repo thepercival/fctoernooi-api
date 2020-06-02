@@ -96,38 +96,14 @@ class Repository extends \Voetbal\Repository
     public function findByRoles(User $user, int $roles)
     {
         $qb = $this->createQueryBuilder('t')
-            // ->select('t')
-            // ->from(Tournament::class, 't')
             ->join(TournamentUser::class, 'tu', Expr\Join::WITH, 't.id = tu.tournament');
 
-        $qb = $qb->where('tu.user = :user')->andWhere('BIT_AND(tu.roles, :roles) = tu.roles');
+        $qb = $qb->where('tu.user = :user')->andWhere('BIT_AND(tu.roles, :roles) > 0');
         $qb = $qb->setParameter('user', $user);
         $qb = $qb->setParameter('roles', $roles);
 
         return $qb->getQuery()->getResult();
     }
-
-    /*public function findByEmailaddress($emailladdress)
-    {
-        if (strlen($emailladdress) === 0) {
-            return [];
-        }
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb = $qb
-            ->select('t')
-            ->from(Tournament::class, 't')
-            ->join(Competition::class, 'c', Expr\Join::WITH, 'c.id = t.competition')
-            ->join(Referee::class, 'ref', Expr\Join::WITH, 'c.id = ref.competition')
-        ;
-
-        $qb = $qb
-            ->distinct()
-            ->where('ref.emailaddress = :emailaddress');
-
-        $qb = $qb->setParameter('emailaddress', $emailladdress);
-
-        return $qb->getQuery()->getResult();
-    }*/
 
     public function remove($tournament)
     {

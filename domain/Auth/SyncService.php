@@ -71,7 +71,7 @@ class SyncService
             if ($newUser) {
                 $tournamentUser = new TournamentUser($tournament, $user, $roles);
             } else {
-                $tournamentUser->setRoles($tournamentUser->getRoles() & $roles);
+                $tournamentUser->setRoles($tournamentUser->getRoles() | $roles);
             }
             $this->tournamentUserRepos->save($tournamentUser);
             if ($sendMail && $newUser) {
@@ -88,7 +88,7 @@ class SyncService
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
         } else {
-            $invitation->setRoles($invitation->getRoles() & $roles);
+            $invitation->setRoles($invitation->getRoles() | $roles);
         }
         $this->tournamentInvitationRepos->save($invitation);
         if ($sendMail && $newInvitation) {
@@ -154,6 +154,29 @@ class SyncService
             );
         }
         return $tournamentUsers;
+    }
+
+    /**
+     * @param User $user
+     * @return array|TournamentInvitation[]
+     */
+    public function revertTournamentUsers(User $user): array
+    {
+        $invitations = [];
+        $tournamentUsers = $this->tournamentUserRepos->findBy(["user" => $user]);
+        while (count($tournamentUsers) > 0) {
+            $tournamentUser = array_shift($tournamentUsers);
+            $tournamentUser->getTournament()->getUsers()->removeElement($tournamentUser);
+            $this->tournamentUserRepos->remove($tournamentUser);
+            $invitation = new TournamentInvitation(
+                $tournamentUser->getTournament(),
+                $tournamentUser->getUser()->getEmailaddress(),
+                $tournamentUser->getRoles()
+            );
+            $invitation->setCreatedDateTime(new DateTimeImmutable());
+            $invitations[] = $this->tournamentInvitationRepos->save($invitation);
+        }
+        return $invitations;
     }
 
     protected function sendEmailTournamentUser(TournamentUser $tournamentUser)

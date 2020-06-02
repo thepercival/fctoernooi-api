@@ -47,6 +47,7 @@ final class AuthAction extends Action
     public function extendToken(Request $request, Response $response, $args): Response
     {
         try {
+            /** @var User $user */
             $user = $request->getAttribute("user");
             $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
@@ -163,72 +164,4 @@ final class AuthAction extends Action
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
-
-    /*
-        public function edit( Request $request, Response $response, $args ): Response
-        {
-            $sErrorMessage = null;
-            try{
-                $user = $this->userResource->put( $args['id'], array(
-                        "name"=> $request->getParam('name'),
-                        "email" => $request->getParam('email') )
-                );
-                if (!$user)
-                    throw new \Exception( "de gewijzigde gebruiker kan niet worden geretouneerd");
-
-                return $response->withJSON($user);
-            }
-            catch( \Exception $e ){
-                $sErrorMessage = $e->getMessage();
-            }
-            return $response->withStatus(404)->write(rawurlencode( $sErrorMessage ) );
-        }
-
-        public function remove( Request $request, Response $response, $args ): Response
-        {
-            $sErrorMessage = null;
-            try{
-                $user = $this->userResource->delete( $args['id'] );
-                return $response;
-            }
-            catch( \Exception $e ){
-                $sErrorMessage = $e->getMessage();
-            }
-            return $response->withStatus(404)->write('de gebruiker is niet verwijdered : ' . $sErrorMessage );
-        }
-
-        protected function sentEmailActivation( $user )
-        {
-            $activatehash = hash ( "sha256", $user["email"] . $this->settings["auth"]["activationsecret"] );
-            // echo $activatehash;
-
-            $sMessage =
-                "<div style=\"font-size:20px;\">FC Toernooi</div>"."<br>".
-                "<br>".
-                "Hallo ".$user["name"].","."<br>"."<br>".
-                "Bedankt voor het registreren bij FC Toernooi.<br>"."<br>".
-                'Klik op <a href="'.$this->settings["www"]["url"].'activate?activationkey='.$activatehash.'&email='.rawurlencode( $user["email"] ).'">deze link</a> om je emailadres te bevestigen en je account te activeren.<br>'."<br>".
-                'Wensen, klachten of vragen kunt u met de <a href="https://github.com/thepercival/fctoernooi/issues">deze link</a> bewerkstellingen.<br>'."<br>".
-                "Veel plezier met het gebruiken van FC Toernooi<br>"."<br>".
-                "groeten van FC Toernooi"
-            ;
-
-            $mail = new \PHPMailer;
-            $mail->isSMTP();
-            $mail->Host = $this->settings["email"]["smtpserver"];
-            $mail->setFrom( $this->settings["email"]["from"], $this->settings["email"]["fromname"] );
-            $mail->addAddress( $user["email"] );
-            $mail->addReplyTo( $this->settings["email"]["from"], $this->settings["email"]["fromname"] );
-            $mail->isHTML(true);
-            $mail->Subject = "FC Toernooi registratiegegevens";
-            $mail->Body    = $sMessage;
-            if(!$mail->send()) {
-                throw new \Exception("de activatie email kan niet worden verzonden");
-            }
-        }
-
-        protected function forgetEmailForgetPassword()
-        {
-
-        }*/
 }
