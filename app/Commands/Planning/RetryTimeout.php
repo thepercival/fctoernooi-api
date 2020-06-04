@@ -2,20 +2,31 @@
 
 namespace App\Commands\Planning;
 
+use App\Mailer;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning;
+use Voetbal\Planning as PlanningBase;
+use Voetbal\Planning\Output as PlanningOutput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
 
 class RetryTimeout extends PlanningCommand
 {
+    /**
+     * @var Mailer
+     */
+    protected $mailer;
+
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
+        $this->mailer = $container->get(Mailer::class);
     }
 
     protected function configure()
@@ -37,19 +48,20 @@ class RetryTimeout extends PlanningCommand
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
 
         try {
-            if ($this->planningRepos->isProcessing(Planning::STATE_PROCESSING)) {
+            if ($this->planningRepos->isProcessing(PlanningBase::STATE_PROCESSING)) {
                 $this->logger->info("still processing..");
                 return 0;
             }
 
             $planning = $this->planningRepos->getTimeout();
+
             // $planning = $this->planningRepos->find( 61241 );
             if ($planning === null) {
                 $this->logger->info("   all plannings(also timeout) are tried");
                 return 0;
             }
 
-            $planning->setState(Planning::STATE_PROCESSING);
+            $planning->setState(PlanningBase::STATE_PROCESSING);
             $this->planningRepos->save($planning);
             $this->logger->info('   update state => STATE_PROCESSING');
 
@@ -57,9 +69,10 @@ class RetryTimeout extends PlanningCommand
 //                $planning = $this->planningRepos->find( (int) $argv[1] );
 //            }
             $planningSeeker->processTimeout($planning);
-            if ($planning->getState() !== Planning::STATE_SUCCESS) {
+            if ($planning->getState() !== PlanningBase::STATE_SUCCESS) {
                 return 0;
             }
+            $this->sendMailWithSuccessPlanning($planning);
 
             if ($planning->getInput()->getSelfReferee()) {
                 $this->updateSelfReferee($planning->getInput());
@@ -90,7 +103,7 @@ class RetryTimeout extends PlanningCommand
         return 0;
     }
 
-    protected function removeWorseTimeout(Planning $planning)
+    protected function removeWorseTimeout(PlanningBase $planning)
     {
         $worsePlanning = $this->getWorsePlanning($planning);
         if ($worsePlanning === null) {
@@ -105,12 +118,12 @@ class RetryTimeout extends PlanningCommand
         );
     }
 
-    protected function getWorsePlanning(Planning $planning): ?Planning
+    protected function getWorsePlanning(PlanningBase $planning): ?PlanningBase
     {
         $range = $planning->getNrOfBatchGames();
 
         foreach ($planning->getInput()->getPlannings() as $planningIt) {
-            if ($planningIt->getState() === Planning::STATE_TIMEOUT
+            if ($planningIt->getState() === PlanningBase::STATE_TIMEOUT
                 && $planningIt->getMinNrOfBatchGames() === $range->min
                 && $planningIt->getMaxNrOfBatchGames() === $range->max
                 && $planningIt->getMaxNrOfGamesInARow() > $planning->getMaxNrOfGamesInARow()) {
@@ -118,5 +131,26 @@ class RetryTimeout extends PlanningCommand
             }
         }
         return null;
+    }
+
+    protected function sendMailWithSuccessPlanning(PlanningBase $planning)
+    {
+        $stream = fopen('php://memory', 'r+');
+        $loggerPlanningOutput = new Logger('succesfull-retry-planning-output-logger');
+        $loggerPlanningOutput->pushProcessor(new UidProcessor());
+        $handler = new StreamHandler($stream, Logger::INFO);
+        $loggerPlanningOutput->pushHandler($handler);
+
+        $planningOutput = new PlanningOutput($loggerPlanningOutput);
+
+        $loggerPlanningOutput->info($planningOutput->planningToString($planning, true));
+        $planningOutput->outputBatch($planning->getFirstBatch(), "succesful retry planning");
+
+        rewind($stream);
+        $this->mailer->sendToAdmin(
+            'timeout-planning successful',
+            stream_get_contents($stream/*$handler->getStream()*/),
+            true
+        );
     }
 }

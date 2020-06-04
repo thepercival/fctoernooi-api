@@ -114,7 +114,7 @@ class PlanningTest extends \PHPUnit\Framework\TestCase
         $logger->pushHandler($handler);
         $logger->info($this->inputToString($planning->getInput()));
         $output = new Output($logger);
-        $output->consoleBatch($planning->getFirstBatch(), "allPlacesSameNrOfGames");
+        $output->outputBatch($planning->getFirstBatch(), "allPlacesSameNrOfGames");
     }
 
     protected function inputToString(Input $planningInput): string

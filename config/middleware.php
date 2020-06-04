@@ -29,7 +29,7 @@ return function (App $app) {
         function (Request $request, RequestHandler $handler): Response {
             $response = $handler->handle($request);
             header_remove("X-Powered-By");
-            return $response; // ->withoutHeader('X-Powered-By');
+            return $response; // ->withoutHeader("X-Powered-By");
         }
     );
 

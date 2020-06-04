@@ -48,12 +48,12 @@ final class Mailer
         $this->smtpConfig = $smtpConfig;
     }
 
-    public function sendToAdmin(string $subject, string $body)
+    public function sendToAdmin(string $subject, string $body, $text = null)
     {
-        $this->send($subject, $body, $this->adminEmailaddress);
+        $this->send($subject, $body, $this->adminEmailaddress, $text);
     }
 
-    public function send(string $subject, string $body, string $toEmailaddress)
+    public function send(string $subject, string $body, string $toEmailaddress, $text = null)
     {
         $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp();
         // $mailer->'MIME-Version' = '1.0';
@@ -64,7 +64,13 @@ final class Mailer
         $mailer->addAddress($toEmailaddress);
         $mailer->addReplyTo($this->fromEmailaddress);
         $mailer->Subject = $subject;
-        $mailer->Body = $this->getStyle() . $body;
+        if ($text === true) {
+            $mailer->isHTML(false);
+            $mailer->Body = $body;
+        } else {
+            $mailer->Body = $this->getStyle() . $body;
+        }
+
         if (!$mailer->send()) {
             $this->logger->error('Mailer Error for ' . $toEmailaddress);
         } else {

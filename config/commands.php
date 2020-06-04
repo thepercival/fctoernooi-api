@@ -9,7 +9,6 @@ use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
-use App\Commands\SendFirstTimeEmail;
 use App\Commands\Validator;
 
 return [
