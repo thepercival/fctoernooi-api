@@ -18,7 +18,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
-class TournamentPublicMiddleware implements MiddlewareInterface
+class TournamentNotPublicMiddleware implements MiddlewareInterface
 {
     public function __construct()
     {
@@ -30,16 +30,23 @@ class TournamentPublicMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        /** @var User $user */
-        $user = $request->getAttribute('user');
-
         /** @var Tournament $tournament */
         $tournament = $request->getAttribute("tournament");
 
-        $tournamentUser = $tournament->getUser($user);
-        if ($tournamentUser === null && !$tournament->getPublic()) {
+        if ($tournament->getPublic()) {
+            return $handler->handle($request);
+        }
+
+        /** @var User $user */
+        $user = $request->getAttribute('user');
+        if ($user === null) {
             return new ForbiddenResponse("je hebt geen rechten voor deze aanvraag");
         }
-        return $handler->handle($request);
+
+        $tournamentUser = $tournament->getUser($user);
+        if ($tournamentUser !== null && $tournamentUser->getRoles() > 0) {
+            return $handler->handle($request);
+        }
+        return new ForbiddenResponse("je hebt geen rollen voor deze aanvraag");
     }
 }

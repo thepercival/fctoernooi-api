@@ -22,7 +22,7 @@ use App\Actions\Voetbal\CompetitorAction;
 use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
 use App\Actions\Voetbal\Sport\ScoreConfigAction as SportScoreConfigAction;
 use App\Middleware\Authorization\TournamentGameAdminMiddleware;
-use App\Middleware\TournamentPublicMiddleware;
+use App\Middleware\TournamentNotPublicMiddleware;
 use App\Middleware\UserMiddleware;
 use App\Middleware\Authorization\TournamentAdminMiddleware;
 use App\Middleware\Authorization\TournamentRoleAdminMiddleware;
@@ -98,7 +98,9 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(TournamentPublicMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
+                ->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                    TournamentMiddleware::class
+                );
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
                 ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
             $group->delete('/{tournamentId}', TournamentAction::class . ':remove')
@@ -110,7 +112,7 @@ return function (App $app): void {
                     $group->options('structure', StructureAction::class . ':options');
                     // user
                     $group->get('structure', StructureAction::class . ':fetchOne')
-                        ->add(TournamentPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                        ->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );
                     // admin
@@ -295,7 +297,7 @@ return function (App $app): void {
                             $group->options('', TournamentAction::class . ':options');
                             $group->get('', TournamentAction::class . ':getUserRefereeId');
                         }
-                    )->add(TournamentPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
