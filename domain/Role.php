@@ -13,13 +13,13 @@ class Role
     public static function getName(int $role): string
     {
         if ($role === self::ADMIN) {
-            return 'beheerder algemeen';
+            return 'algemeen-beheerder';
         } else {
             if ($role === self::GAMERESULTADMIN) {
-                return 'beheerder uitslagen';
+                return 'uitslagen-invoerder';
             } else {
                 if ($role === self::ROLEADMIN) {
-                    return 'beheerder rollen';
+                    return 'rollen-beheerder';
                 } else {
                     if ($role === self::REFEREE) {
                         return 'scheidsrechter';
@@ -48,13 +48,13 @@ class Role
         if (($roles & Role::GAMERESULTADMIN) === Role::GAMERESULTADMIN) {
             $definitions[] = [
                 "name" => Role::getName(Role::GAMERESULTADMIN),
-                "description" => 'kan de scores van alle wedstrijden aanpassen'
+                "description" => 'kan de uitslagen van alle wedstrijden aanpassen'
             ];
         }
         if (($roles & Role::REFEREE) === Role::REFEREE) {
             $definitions[] = [
                 "name" => Role::getName(Role::REFEREE),
-                "description" => 'kan de scores van eigen wedstrijden aanpassen'
+                "description" => 'kan de uitslagen van eigen wedstrijden aanpassen'
             ];
         }
         return $definitions;

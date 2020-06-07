@@ -50,7 +50,7 @@ class QRCode extends FCToernooiWorksheet
         $row = $this->drawSubHeader($row, $url, 2, 2);
 
         $imgWidth = 300;
-        $qrPath = $this->qrService->writeToJpg($this->getParent()->getTournament(), $url, $imgWidth);
+        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $imgWidth);
 
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
         $drawing->setName('toernooi qrcode');

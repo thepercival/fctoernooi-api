@@ -21,14 +21,17 @@ use App\Actions\Voetbal\RefereeAction;
 use App\Actions\Voetbal\CompetitorAction;
 use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
 use App\Actions\Voetbal\Sport\ScoreConfigAction as SportScoreConfigAction;
-use App\Middleware\Authorization\TournamentGameAdminMiddleware;
-use App\Middleware\TournamentNotPublicMiddleware;
+use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
-use App\Middleware\Authorization\TournamentAdminMiddleware;
-use App\Middleware\Authorization\TournamentRoleAdminMiddleware;
+use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
+use App\Middleware\Authorization\Tournament\UserMiddleware as TournamentUserAuthMiddleware;
+use App\Middleware\Authorization\Tournament\Admin\AdminMiddleware as TournamentAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\Admin\RoleAdminMiddleware as TournamentRoleAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\Admin\GameAdminMiddleware as TournamentGameAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\PublicMiddleware as TournamentPublicAuthMiddleware;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-use App\Middleware\TournamentMiddleware;
+
 
 return function (App $app): void {
     $app->group(
@@ -64,7 +67,7 @@ return function (App $app): void {
                         }
                     );
                 }
-            )->add(TournamentMiddleware::class);
+            )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
 
             $group->options('/shells', ShellAction::class . ':options');
             $group->get('/shells', ShellAction::class . ':fetchPublic');
@@ -79,7 +82,7 @@ return function (App $app): void {
             $group->options('/profile/{userId}', AuthAction::class . ':options');
             $group->put('/profile/{userId}', AuthAction::class . ':profile');
         }
-    )->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
 
     $app->group(
         '/users/{userId}',
@@ -89,7 +92,7 @@ return function (App $app): void {
             $group->put('', UserAction::class . ':edit');
             $group->delete('', UserAction::class . ':remove');
         }
-    )->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
 
     $app->group(
         '/tournaments',
@@ -98,13 +101,17 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                ->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
                     TournamentMiddleware::class
                 );
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
-                ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
+                ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                    TournamentMiddleware::class
+                );
             $group->delete('/{tournamentId}', TournamentAction::class . ':remove')
-                ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(TournamentMiddleware::class);
+                ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                    TournamentMiddleware::class
+                );
 
             $group->group(
                 '/{tournamentId}/',
@@ -112,12 +119,12 @@ return function (App $app): void {
                     $group->options('structure', StructureAction::class . ':options');
                     // user
                     $group->get('structure', StructureAction::class . ':fetchOne')
-                        ->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                        ->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );
                     // admin
                     $group->put('structure', StructureAction::class . ':edit')
-                        ->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                        ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );
 
@@ -130,7 +137,7 @@ return function (App $app): void {
                             $group->put('/{fieldId}', FieldAction::class . ':edit');
                             $group->delete('/{fieldId}', FieldAction::class . ':remove');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -143,7 +150,7 @@ return function (App $app): void {
                             $group->put('/{refereeId}', RefereeAction::class . ':edit');
                             $group->delete('/{refereeId}', RefereeAction::class . ':remove');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -156,7 +163,7 @@ return function (App $app): void {
                             $group->put('/{sportconfigId}', SportConfigAction::class . ':edit');
                             $group->delete('/{sportconfigId}', SportConfigAction::class . ':remove');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -168,7 +175,7 @@ return function (App $app): void {
                             $group->options('/{competitorId}', CompetitorAction::class . ':options');
                             $group->put('/{competitorId}', CompetitorAction::class . ':edit');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -180,7 +187,7 @@ return function (App $app): void {
                             $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
                             $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -190,7 +197,7 @@ return function (App $app): void {
                             $group->options('/{placeId}', PlaceAction::class . ':options');
                             $group->put('/{placeId}', PlaceAction::class . ':edit');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -200,7 +207,7 @@ return function (App $app): void {
                             $group->options('/{gameId}', GameAction::class . ':options');
                             $group->put('/{gameId}', GameAction::class . ':edit');
                         }
-                    )->add(TournamentGameAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentGameAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );;
 
@@ -214,7 +221,7 @@ return function (App $app): void {
                             $group->options('/reschedule', PlanningAction::class . ':options');
                             $group->post('/reschedule', PlanningAction::class . ':reschedule');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -226,7 +233,7 @@ return function (App $app): void {
                             $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
                             $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -243,7 +250,7 @@ return function (App $app): void {
                             $group->options('/{sponsorId}/upload', SponsorAction::class . ':options');
                             $group->post('/{sponsorId}/upload', SponsorAction::class . ':upload');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );;
 
@@ -262,7 +269,7 @@ return function (App $app): void {
                                 LockerRoomAction::class . ':syncCompetitors'
                             );
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -273,7 +280,7 @@ return function (App $app): void {
                             $group->put('/{tournamentUserId}', TournamentUserAction::class . ':edit');
                             $group->delete('/{tournamentUserId}', TournamentUserAction::class . ':remove');
                         }
-                    )->add(TournamentRoleAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -287,7 +294,7 @@ return function (App $app): void {
                             $group->put('/{invitationId}', InvitationAction::class . ':edit');
                             $group->delete('/{invitationId}', InvitationAction::class . ':remove');
                         }
-                    )->add(TournamentRoleAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -297,7 +304,7 @@ return function (App $app): void {
                             $group->options('', TournamentAction::class . ':options');
                             $group->get('', TournamentAction::class . ':getUserRefereeId');
                         }
-                    )->add(TournamentNotPublicMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
@@ -315,7 +322,7 @@ return function (App $app): void {
                             $group->options('copy', TournamentAction::class . ':options');
                             $group->post('copy', TournamentAction::class . ':copy');
                         }
-                    )->add(TournamentAdminMiddleware::class)->add(UserMiddleware::class)->add(
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
                 }
@@ -336,5 +343,5 @@ return function (App $app): void {
             $group->options('/sports', SportAction::class . ':options');
             $group->post('/sports', SportAction::class . ':add');
         }
-    )->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
 };

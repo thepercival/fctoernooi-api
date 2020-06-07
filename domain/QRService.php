@@ -8,28 +8,85 @@
 
 namespace FCToernooi;
 
+use App\TmpService;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
+use Voetbal\Game;
 
 class QRService
 {
+    /**
+     * @var TmpService
+     */
+    protected $tmpService;
+
     public function __construct()
     {
+        $this->tmpService = new TmpService();
     }
 
-    public function writeToPng(Tournament $tournament, string $qrCodeText, int $imgWidth): string
+    public function writeTournamentToJpg(Tournament $tournament, string $qrCodeText, int $imgWidthPts): string
     {
-        $path = $this->getDirectory() . DIRECTORY_SEPARATOR . $tournament->getId() . '-' . $imgWidth . '.png';
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts);
+        $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
+        return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
+    }
+
+    public function writeGameToJpg(Tournament $tournament, Game $game, string $qrCodeText, int $imgWidthPts): string
+    {
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $game);
+        $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
+        return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
+    }
+
+    public function convertPointsToPixels(float $pdfPoints): int
+    {
+        $dpi = 96;
+        $inch = $this->convertPdfPointsToInches($pdfPoints);
+        $dots = $inch * $dpi;
+        return (int)$dots;
+    }
+
+    public function convertPdfPointsToInches(float $pdfPoints): float
+    {
+        // 210 x 297 mm
+        // a4 zend 595 x 842
+        $mm = $pdfPoints * 210 / 595;
+        $mmPerInch = 25.4;
+        return $mm / $mmPerInch;
+    }
+
+    protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, Game $game = null): string
+    {
+        $path = $this->tmpService->getPath(["qrcode"]);
+        $path .= "tournament-" . $tournament->getId();
+        if ($game !== null) {
+            $path .= "-game-" . $game->getId();
+        }
+        return $path . "-width-" . $imgWidth;
+    }
+
+    protected function writeToJpg(string $pathWithoutExtension, string $qrCodeText, int $imgWidthPx): string
+    {
+        $this->writeToPng($pathWithoutExtension . ".png", $qrCodeText, $imgWidthPx);
+        $image = imagecreatefrompng($pathWithoutExtension . ".png");
+        imagejpeg($image, $pathWithoutExtension . ".jpg");
+        imagedestroy($image);
+        return $pathWithoutExtension . ".jpg";
+    }
+
+    protected function writeToPng(string $path, string $qrCodeText, int $imgWidthPx)
+    {
         if (file_exists($path)) {
-            return $path;
+            return;
         }
         // Create a basic QR code
         $qrCode = new QrCode($qrCodeText);
-        $qrCode->setSize($imgWidth);
+        $qrCode->setSize($imgWidthPx);
 
         // Set advanced options
         $qrCode->setWriterByName('png');
-        // $qrCode->setMargin(10);
+        $qrCode->setMargin(0);
         $qrCode->setEncoding('UTF-8');
         $qrCode->setErrorCorrectionLevel(new ErrorCorrectionLevel(ErrorCorrectionLevel::HIGH));
         //$qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
@@ -43,33 +100,6 @@ class QRService
         // header('Content-Type: '.$qrCode->getContentType());
         // echo $qrCode->writeString();
 
-        // Save it to a file
-
         $qrCode->writeFile($path);
-        return $path;
-    }
-
-    public function writeToJpg(Tournament $tournament, string $qrCodeText, int $imgWidth): string
-    {
-        $path = $this->getDirectory() . DIRECTORY_SEPARATOR . $tournament->getId() . '-' . $imgWidth . '.jpg';
-        if (file_exists($path)) {
-            return $path;
-        }
-
-        $pngPath = $this->writeToPng($tournament, $qrCodeText, $imgWidth);
-
-        $image = imagecreatefrompng($pngPath);
-        imagejpeg($image, $path);
-        imagedestroy($image);
-        return $path;
-    }
-
-    protected function getDirectory()
-    {
-        $dirname = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fctoernooiqrcode";
-        if (!file_exists($dirname)) {
-            mkdir($dirname, 0777);
-        }
-        return $dirname;
     }
 }

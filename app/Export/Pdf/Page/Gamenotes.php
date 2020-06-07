@@ -9,6 +9,7 @@
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use FCToernooi\QRService;
 use Voetbal\Game;
 use Voetbal\NameService;
 use Voetbal\Sport\ScoreConfig as SportScoreConfig;
@@ -27,8 +28,21 @@ class Gamenotes extends ToernooiPdfPage
      * @var TranslationService
      */
     protected $translationService;
-
+    /**
+     * @var QRService
+     */
+    protected $qrService;
+    /**
+     * @var string
+     */
+    protected $qrCodeUrlPrefix;
+    /**
+     * @var Game
+     */
     protected $gameOne;
+    /**
+     * @var Game
+     */
     protected $gameTwo;
 
     public function __construct($param1, Game $gameA = null, Game $gameB = null)
@@ -39,6 +53,7 @@ class Gamenotes extends ToernooiPdfPage
         $this->gameTwo = $gameB;
         $this->sportScoreConfigService = new SportScoreConfigService();
         $this->translationService = new TranslationService();
+        $this->qrService = new QRService();
     }
 
     public function getPageMargin()
@@ -49,6 +64,15 @@ class Gamenotes extends ToernooiPdfPage
     public function getHeaderHeight()
     {
         return 0;
+    }
+
+    protected function getQrCodeUrlPrefix()
+    {
+        if ($this->qrCodeUrlPrefix === null) {
+            $this->qrCodeUrlPrefix = $this->getParent()->getUrl() . "admin/game/" . $this->getParent()->getTournament(
+                )->getId() . "/";
+        }
+        return $this->qrCodeUrlPrefix;
     }
 
     public function draw()
@@ -88,6 +112,13 @@ class Gamenotes extends ToernooiPdfPage
         $nWidth = $this->getWidth() - ($this->getPageMargin() + $nX);
         $nWidthResult = $nWidth / 2;
         $nX2 = $nSecondBorder + ($nMargin * 0.5);
+
+        // qr-code
+        $url = $this->getQrCodeUrlPrefix() . $game->getId();
+        $imgSize = $nFirstBorder - $this->getPageMargin();
+        $qrPath = $this->qrService->writeGameToJpg($this->getParent()->getTournament(), $game, $url, (int)$imgSize);
+        $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
+        $this->drawImage($img, $this->getPageMargin(), $nY - $imgSize, $this->getPageMargin() + $imgSize, $nY);
 
         $nameService = $this->getParent()->getNameService();
         $roundNumberName = $nameService->getRoundNumberName($roundNumber);
@@ -240,7 +271,6 @@ class Gamenotes extends ToernooiPdfPage
 
         // 2x font thuis - uit
         $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
-
         $this->drawCell(
             'wedstrijd',
             $this->getPageMargin(),

@@ -53,7 +53,7 @@ class QRCode extends ToernooiPdfPage
         $nY = $this->drawSubHeader($url, $nY);
 
         $imgWidth = 300;
-        $qrPath = $this->qrService->writeToJpg($this->getParent()->getTournament(), $url, $imgWidth);
+        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $imgWidth);
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $xLeft = $this->getPageMargin() + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
         $this->drawImage($img, $xLeft, $nY - $imgWidth, $xLeft + $imgWidth, $nY);

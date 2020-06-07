@@ -8,6 +8,7 @@
 
 namespace App\Middleware;
 
+use Exception;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
@@ -19,37 +20,24 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 abstract class AuthorizationMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var int
-     */
-    private $roles;
-
-    public function __construct(int $roles)
-    {
-        $this->roles = $roles;
-    }
-
     public function process(Request $request, RequestHandler $handler): Response
     {
         if ($request->getMethod() === "OPTIONS") {
             return $handler->handle($request);
         }
-
-        /** @var User $user */
-        $user = $request->getAttribute('user');
-
-        /** @var Tournament $tournament */
-        $tournament = $request->getAttribute("tournament");
-
-        $tournamentUser = $tournament->getUser($user);
-        if ($tournamentUser === null || !$this->isAuthorized($tournamentUser, $request)) {
-            return new ForbiddenResponse("je hebt geen rechten voor deze aanvraag");
+        try {
+            $this->isAuthorized($request, $request->getAttribute('user'), $request->getAttribute('tournament'));
+        } catch (Exception $e) {
+            return new ForbiddenResponse($e->getMessage());
         }
         return $handler->handle($request);
     }
 
-    protected function isAuthorized(TournamentUser $tournamentUser, Request $request): bool
-    {
-        return $tournamentUser->hasRoles($this->roles);
-    }
+    /**
+     * @param Request $request
+     * @param User|null $user
+     * @param Tournament|null $tournament
+     * @throws Exception
+     */
+    abstract protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null);
 }

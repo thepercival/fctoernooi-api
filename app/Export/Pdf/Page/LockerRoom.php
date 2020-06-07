@@ -152,7 +152,7 @@ class LockerRoom extends ToernooiPdfPage
         $centerRight = $center + ($this->getPageMargin() / 2);
 
         $nY = $this->getPageMargin() + $infoHeight;
-        $qrPath = $this->qrService->writeToJpg($this->getParent()->getTournament(), $url, $infoHeight);
+        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $infoHeight);
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $centerRight, $nY - $infoHeight, $centerRight + $infoHeight, $nY);
     }

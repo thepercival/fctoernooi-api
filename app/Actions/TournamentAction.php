@@ -7,6 +7,7 @@ use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\TournamentConfig;
 use App\Response\ErrorResponse;
+use App\TmpService;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use FCToernooi\Role;
@@ -90,11 +91,6 @@ class TournamentAction extends Action
         $this->planningCreator = $planningCreator;
         $this->mailer = $mailer;
         $this->config = $config;
-    }
-
-    public function fetchOnePublic(Request $request, Response $response, $args): Response
-    {
-        return $this->fetchOneHelper($request, $response, $args);
     }
 
     public function fetchOne(Request $request, Response $response, $args): Response
@@ -427,7 +423,8 @@ class TournamentAction extends Action
 
         $excelWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
 
-        $excelFileName = sys_get_temp_dir() . '/toernooi-' . $tournament->getId() . '.xlsx';
+        $tmpService = new TmpService();
+        $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . $tournament->getId() . '.xlsx');
         $excelWriter->save($excelFileName);
 
         // For Excel2007 and above .xlsx files
