@@ -52,22 +52,21 @@ return function (App $app): void {
             );
             // tournament
             $group->group(
-                '/tournaments/',
+                '/tournaments/{tournamentId}',
                 function (Group $group): void {
-                    $group->options('{tournamentId}', TournamentAction::class . ':options');
-                    $group->get('{tournamentId}', TournamentAction::class . ':fetchOne');
+                    $group->options('', TournamentAction::class . ':options');
+                    $group->get('', TournamentAction::class . ':fetchOne')
+                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
 
-                    $group->group(
-                        '{tournamentId}/',
-                        function (Group $group): void {
-                            $group->options('structure', StructureAction::class . ':options');
-                            $group->get('structure', StructureAction::class . ':fetchOne');
-                            $group->options('export', TournamentAction::class . ':options');
-                            $group->get('export', TournamentAction::class . ':export')->setName('tournament-export');
-                        }
-                    );
+                    $group->options('/structure', StructureAction::class . ':options');
+                    $group->get('/structure', StructureAction::class . ':fetchOne')
+                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
+
+                    $group->options('/export', TournamentAction::class . ':options');
+                    $group->get('/export', TournamentAction::class . ':export')->setName('tournament-export')
+                        ->add(TournamentMiddleware::class);
                 }
-            )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
+            );
 
             $group->options('/shells', ShellAction::class . ':options');
             $group->get('/shells', ShellAction::class . ':fetchPublic');
@@ -101,8 +100,7 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(UserMiddleware::class)->add(
-                    TournamentMiddleware::class
+                ->add(UserMiddleware::class)->add(TournamentMiddleware::class
                 );
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
                 ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
@@ -119,8 +117,7 @@ return function (App $app): void {
                     $group->options('structure', StructureAction::class . ':options');
                     // user
                     $group->get('structure', StructureAction::class . ':fetchOne')
-                        ->add(UserMiddleware::class)->add(
-                            TournamentMiddleware::class
+                        ->add(UserMiddleware::class)->add(TournamentMiddleware::class
                         );
                     // admin
                     $group->put('structure', StructureAction::class . ':edit')

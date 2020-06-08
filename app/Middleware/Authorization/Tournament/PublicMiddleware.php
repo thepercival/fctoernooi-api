@@ -12,7 +12,6 @@ use FCToernooi\Tournament;
 use FCToernooi\User;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Middleware\AuthorizationMiddleware;
-use FCToernooi\TournamentUser;
 
 class PublicMiddleware extends AuthorizationMiddleware
 {
