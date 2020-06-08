@@ -55,7 +55,7 @@ return function (App $app): void {
                 '/tournaments/',
                 function (Group $group): void {
                     $group->options('{tournamentId}', TournamentAction::class . ':options');
-                    $group->get('{tournamentId}', TournamentAction::class . ':fetchOnePublic');
+                    $group->get('{tournamentId}', TournamentAction::class . ':fetchOne');
 
                     $group->group(
                         '{tournamentId}/',
@@ -101,7 +101,7 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                ->add(UserMiddleware::class)->add(
                     TournamentMiddleware::class
                 );
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
@@ -119,7 +119,7 @@ return function (App $app): void {
                     $group->options('structure', StructureAction::class . ':options');
                     // user
                     $group->get('structure', StructureAction::class . ':fetchOne')
-                        ->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        ->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );
                     // admin

@@ -39,11 +39,11 @@ class UserMiddleware implements MiddlewareInterface
         /** @var AuthToken|null $token */
         $token = $request->getAttribute('token');
         if ($token === null || !$token->isPopulated()) {
-            return new ForbiddenResponse("de token is niet gevonden of gevuld");
+            return $handler->handle($request);
         }
         $user = $this->getUser($token);
         if ($user === null) {
-            return new ForbiddenResponse("de ingelogde gebruikers kon niet gevonden worden o.b.v. de token");
+            return $handler->handle($request);
         }
         return $handler->handle($request->withAttribute("user", $user));
     }
