@@ -15,12 +15,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
 use Voetbal\Game\Score\Repository as GameScoreRepository;
 use Voetbal\Game\Repository as GameRepository;
+use Voetbal\Place\Repository as PlaceRepository;
+use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Place;
 use Voetbal\Poule;
 use Voetbal\Poule\Repository as PouleRepository;
 use App\Actions\Action;
 use Voetbal\Competition;
 use Voetbal\Game\Service as GameService;
 use Voetbal\Game;
+use Voetbal\State;
+use Voetbal\Qualify\Service as QualifyService;
 
 final class GameAction extends Action
 {
@@ -33,6 +38,14 @@ final class GameAction extends Action
      */
     protected $pouleRepos;
     /**
+     * @var PlaceRepository
+     */
+    protected $placeRepos;
+    /**
+     * @var StructureRepository
+     */
+    protected $structureRepos;
+    /**
      * @var GameScoreRepository
      */
     protected $gameScoreRepos;
@@ -42,11 +55,15 @@ final class GameAction extends Action
         SerializerInterface $serializer,
         GameRepository $gameRepos,
         PouleRepository $pouleRepos,
+        PlaceRepository $placeRepos,
+        StructureRepository $structureRepos,
         GameScoreRepository $gameScoreRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->gameRepos = $gameRepos;
         $this->pouleRepos = $pouleRepos;
+        $this->placeRepos = $placeRepos;
+        $this->structureRepos = $structureRepos;
         $this->gameScoreRepos = $gameScoreRepos;
     }
 
@@ -62,6 +79,7 @@ final class GameAction extends Action
                 $pouleId = (int)$queryParams["pouleId"];
             }
             $poule = $this->getPouleFromInput($pouleId, $competition);
+            $initialPouleState = $poule->getState();
 
             /** @var Game $gameSer */
             $gameSer = $this->serializer->deserialize($this->getRawData(), Game::class, 'json');
@@ -83,6 +101,11 @@ final class GameAction extends Action
 
             $this->gameRepos->save($game);
 
+            $changedPlaces = $this->getChangedQualifyPlaces($competition, $game, $initialPouleState);
+            foreach ($changedPlaces as $changedPlace) {
+                $this->placeRepos->save($changedPlace);
+            }
+
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
@@ -100,5 +123,40 @@ final class GameAction extends Action
             throw new \Exception("de competitie van de poule komt niet overeen met de verstuurde competitie", E_ERROR);
         }
         return $poule;
+    }
+
+    /**
+     * @param Competition $competition
+     * @param Game $game
+     * @param int $originalPouleState
+     * @return array|Place[]
+     */
+    protected function getChangedQualifyPlaces(Competition $competition, Game $game, int $originalPouleState): array
+    {
+        $poule = $game->getPoule();
+
+        if (!$this->shouldQualifiersBeCalculated($poule, $originalPouleState)) {
+            return [];
+        }
+        $structure = $this->structureRepos->getStructure($competition);
+
+        $qualifyService = new QualifyService($poule->getRound(), $competition->getRuleSet());
+        $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
+        return $qualifyService->setQualifiers($pouleToFilter);
+    }
+
+    protected function shouldQualifiersBeCalculated(Poule $poule, int $originalPouleState): bool
+    {
+        return !($originalPouleState !== State::Finished && $poule->getState() !== State::Finished);
+    }
+
+    protected function shouldQualifiersBeCalculatedForRound(Poule $poule): bool
+    {
+        foreach ($poule->getRound()->getQualifyGroups() as $qualifyGroup) {
+            if ($qualifyGroup->getNrOfToPlacesTooMuch() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

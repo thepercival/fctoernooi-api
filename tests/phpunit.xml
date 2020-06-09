@@ -2,6 +2,7 @@
     <testsuites>
         <testsuite name="fctoernooi">
             <directory suffix=".php">./tests/cases</directory>
+            <exclude>./tests/cases/Manual</exclude>
         </testsuite>
     </testsuites>
     <filter>

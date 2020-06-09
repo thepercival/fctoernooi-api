@@ -55,7 +55,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "FCToernooiTest\\": "tests/cases"
+      "FCToernooiTest\\": "tests/cases",
+      "FCToernooiTestManual\\": "tests/cases-manual"
     }
   },
   "scripts": {

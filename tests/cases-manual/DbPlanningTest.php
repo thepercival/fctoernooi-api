@@ -6,7 +6,7 @@
  * Time: 21:27
  */
 
-namespace FCToernooiTest\Voetbal;
+namespace FCToernooiTestManual;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -24,12 +24,12 @@ use Voetbal\Planning\Validator as PlanningValidator;
 use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Qualify\Group as QualifyGroup;
 
-class PlanningTest extends \PHPUnit\Framework\TestCase
+class DbPlanningTest extends \PHPUnit\Framework\TestCase
 {
     public function testAll()
     {
         /** @var ContainerInterface $container */
-        $container = (require __DIR__ . '/../../../config/bootstrap.php')->getContainer();
+        $container = (require __DIR__ . '/../../config/bootstrap.php')->getContainer();
 
         $planningInputRepos = $container->get(PlanningInputRepository::class);
 
