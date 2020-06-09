@@ -5313,16 +5313,16 @@
         },
         {
             "name": "thepercival/voetbal",
-            "version": "v1.04",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "d970a9dea364543e5b0c8cbb770da441a5b4e78c"
+                "reference": "7e273172960b0f6903d282862fc7fcc03a3fc137"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/d970a9dea364543e5b0c8cbb770da441a5b4e78c",
-                "reference": "d970a9dea364543e5b0c8cbb770da441a5b4e78c",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/7e273172960b0f6903d282862fc7fcc03a3fc137",
+                "reference": "7e273172960b0f6903d282862fc7fcc03a3fc137",
                 "shasum": ""
             },
             "require": {
@@ -5332,6 +5332,7 @@
                 "league/period": "^4.9",
                 "monolog/monolog": "^2.0",
                 "php": ">=7.4",
+                "symfony/yaml": "^5.0",
                 "vlucas/phpdotenv": "^4.1"
             },
             "require-dev": {
@@ -5375,7 +5376,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2020-06-08T19:50:37+00:00"
+            "time": "2020-06-09T18:21:01+00:00"
         },
         {
             "name": "tuupola/base62",
@@ -6729,16 +6730,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.26",
+            "version": "0.12.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "f108dabe757a584fafc3baabc0fabf4d45e040f1"
+                "reference": "2abbd3253e38a258137f647f4e5fdbcb13142c3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f108dabe757a584fafc3baabc0fabf4d45e040f1",
-                "reference": "f108dabe757a584fafc3baabc0fabf4d45e040f1",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2abbd3253e38a258137f647f4e5fdbcb13142c3e",
+                "reference": "2abbd3253e38a258137f647f4e5fdbcb13142c3e",
                 "shasum": ""
             },
             "require": {
@@ -6767,7 +6768,7 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-            "time": "2020-06-07T22:01:45+00:00"
+            "time": "2020-06-08T21:28:12+00:00"
         },
         {
             "name": "phpstan/phpstan-doctrine",
