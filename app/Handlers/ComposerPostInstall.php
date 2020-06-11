@@ -24,12 +24,16 @@ class ComposerPostInstall
         if (is_dir($serializer)) {
             static::rrmdir($serializer);
             mkdir($serializer);
+            chmod($serializer, 775);
+            chgrp($serializer, 'www-data');
         }
 
         $serializer .= 'metadata/';
         if (is_dir($serializer)) {
             static::rrmdir($serializer);
             mkdir($serializer);
+            chmod($serializer, 775);
+            chgrp($serializer, 'www-data');
         }
     }
 
