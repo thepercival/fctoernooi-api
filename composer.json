@@ -70,7 +70,8 @@
     "cs-fix": "php-cs-fixer fix .",
     "post-custom-install-cmd": [
       "App\\Handlers\\ComposerPostInstall::execute",
-      "composer run doctrine-update"
+      "composer run doctrine-update",
+      "php vendor/bin/doctrine orm:generate-proxies --quiet"
     ]
   },
   "config": {
