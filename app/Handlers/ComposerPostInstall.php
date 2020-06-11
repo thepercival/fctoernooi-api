@@ -17,24 +17,24 @@ class ComposerPostInstall
         $doctrineProxies = $pathPrefix . 'proxies/';
         if (is_dir($doctrineProxies)) {
             static::rrmdir($doctrineProxies);
-            mkdir($doctrineProxies);
         }
+        mkdir($doctrineProxies);
 
-        $serializer = $pathPrefix . 'serializer/';
+        $serializer = $pathPrefix . 'serializer';
         if (is_dir($serializer)) {
             static::rrmdir($serializer);
-            mkdir($serializer);
-            chmod($serializer, 775);
-            chgrp($serializer, 'www-data');
         }
+        mkdir($serializer);
+        chmod($serializer, 0775);
+        chgrp($serializer, 'www-data');
 
-        $serializer .= 'metadata/';
+        $serializer .= '/metadata';
         if (is_dir($serializer)) {
             static::rrmdir($serializer);
-            mkdir($serializer);
-            chmod($serializer, 775);
-            chgrp($serializer, 'www-data');
         }
+        mkdir($serializer);
+        chmod($serializer, 0775);
+        chgrp($serializer, 'www-data');
     }
 
     public static function rrmdir($src) {
