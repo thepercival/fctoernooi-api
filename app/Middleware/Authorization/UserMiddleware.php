@@ -18,7 +18,7 @@ class UserMiddleware extends AuthorizationMiddleware
     protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null)
     {
         if ($user === null) {
-            throw new \Exception("je moet ingelogd zijn voor dit toernooi");
+            throw new \Exception("je moet ingelogd zijn voor dit toernooi", E_ERROR);
         };
     }
 }

@@ -11,7 +11,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning as PlanningBase;
-use Voetbal\Planning\Output as PlanningOutput;
+use Voetbal\Output\Planning as PlanningOutput;
+use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
@@ -136,15 +137,16 @@ class RetryTimeout extends PlanningCommand
     protected function sendMailWithSuccessPlanning(PlanningBase $planning)
     {
         $stream = fopen('php://memory', 'r+');
-        $loggerPlanningOutput = new Logger('succesfull-retry-planning-output-logger');
-        $loggerPlanningOutput->pushProcessor(new UidProcessor());
+        $loggerOutput = new Logger('succesfull-retry-planning-output-logger');
+        $loggerOutput->pushProcessor(new UidProcessor());
         $handler = new StreamHandler($stream, Logger::INFO);
-        $loggerPlanningOutput->pushHandler($handler);
+        $loggerOutput->pushHandler($handler);
 
-        $planningOutput = new PlanningOutput($loggerPlanningOutput);
+        $planningOutput = new PlanningOutput($loggerOutput);
+        $planningOutput->output($planning, true);
 
-        $loggerPlanningOutput->info($planningOutput->planningToString($planning, true));
-        $planningOutput->outputBatch($planning->getFirstBatch(), "succesful retry planning");
+        $batchOutput = new BatchOutput($loggerOutput);
+        $batchOutput->output($planning->getFirstBatch(), "succesful retry planning");
 
         rewind($stream);
         $this->mailer->sendToAdmin(

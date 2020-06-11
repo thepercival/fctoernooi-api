@@ -16,7 +16,7 @@ use Voetbal\Planning;
 use Voetbal\Planning\Input;
 use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Output;
+use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Range as VoetbalRange;
 use Voetbal\Referee;
 use Voetbal\Structure\Options as StructureOptions;
@@ -113,8 +113,8 @@ class DbPlanningTest extends \PHPUnit\Framework\TestCase
         $handler = new StreamHandler('php://stdout', Logger::INFO);
         $logger->pushHandler($handler);
         $logger->info($this->inputToString($planning->getInput()));
-        $output = new Output($logger);
-        $output->outputBatch($planning->getFirstBatch(), "allPlacesSameNrOfGames");
+        $output = new BatchOutput($logger);
+        $output->output($planning->getFirstBatch(), "allPlacesSameNrOfGames");
     }
 
     protected function inputToString(Input $planningInput): string

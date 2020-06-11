@@ -21,7 +21,7 @@ class AdminMiddleware extends AuthorizationTournamentAdminMiddleware
     protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser)
     {
         if ($tournamentUser->hasRoles(Role::ADMIN) === false) {
-            throw new \Exception("je bent geen " . Role::getName(Role::ADMIN) . " voor dit toernooi");
+            throw new \Exception("je bent geen " . Role::getName(Role::ADMIN) . " voor dit toernooi", E_ERROR);
         };
     }
 }
