@@ -40,7 +40,7 @@ class Repository extends \Voetbal\Repository
         $qb = $qb->setParameter('screenNr', $newScreenNr);
 
         $nrOfSponsorsPresent = $qb->getQuery()->getSingleScalarResult();
-        if ($nrOfSponsorsPresent >= $max) {
+        if ($nrOfSponsorsPresent > $max) {
             throw new \Exception(
                 "er kan geen sponsor aan schermnummer " . $newScreenNr . " meer worden toegevoegd, het maximum van " . static::MAXNROFSPONSORSPERSCREEN . " is bereikt",
                 E_ERROR

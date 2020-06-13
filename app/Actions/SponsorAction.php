@@ -10,7 +10,7 @@ namespace App\Actions;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use Selective\Config\Configuration;
+use App\ImageService;
 use Slim\Factory\ServerRequestCreatorFactory;
 use \Suin\ImageResizer\ImageResizer;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -33,23 +33,21 @@ final class SponsorAction extends Action
      */
     private $tournamentRepos;
     /**
-     * @var Configuration
+     * @var ImageService
      */
-    protected $config;
-
-    const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+    protected $imageService;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         SponsorRepository $sponsorRepos,
         TournamentRepository $tournamentRepos,
-        Configuration $config
+        ImageService $imageService
     ) {
         parent::__construct($logger, $serializer);
         $this->sponsorRepos = $sponsorRepos;
         $this->tournamentRepos = $tournamentRepos;
-        $this->config = $config;
+        $this->imageService = $imageService;
     }
 
     public function fetch(Request $request, Response $response, $args): Response
@@ -181,51 +179,7 @@ final class SponsorAction extends Action
                 throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
             }
 
-            // $contents = json_decode(file_get_contents('php://input'), true);
-
-            /** @var \Psr\Http\Message\UploadedFileInterface $logostream */
-            $logostream = $uploadedFiles["logostream"];
-            $extension = null;
-            if ($logostream->getClientMediaType() === "image/jpeg") {
-                $extension = "jpg";
-            } else {
-                if ($logostream->getClientMediaType() === "image/png") {
-                    $extension = "png";
-                } else {
-                    if ($logostream->getClientMediaType() === "image/gif") {
-                        $extension = "gif";
-                    } else {
-                        throw new \Exception("alleen jpg en png zijn toegestaan", E_ERROR);
-                    }
-                }
-            }
-
-            $localPath = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
-                    'images.sponsors.pathpostfix'
-                );
-            $urlPath = $this->config->getString('www.apiurl') . $this->config->getString('images.sponsors.pathpostfix');
-
-            $logoUrl = $urlPath . $sponsor->getId() . '.' . $extension;
-
-            $newImagePath = $localPath . $sponsor->getId() . '.' . $extension;
-
-            $logostream->moveTo($newImagePath);
-
-            $source_properties = getimagesize($newImagePath);
-            $image_type = $source_properties[2];
-            if ($image_type == IMAGETYPE_JPEG) {
-                $image_resource_id = imagecreatefromjpeg($newImagePath);
-                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagejpeg($target_layer, $newImagePath);
-            } elseif ($image_type == IMAGETYPE_GIF) {
-                $image_resource_id = imagecreatefromgif($newImagePath);
-                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagegif($target_layer, $newImagePath);
-            } elseif ($image_type == IMAGETYPE_PNG) {
-                $image_resource_id = imagecreatefrompng($newImagePath);
-                $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagepng($target_layer, $newImagePath);
-            }
+            $logoUrl = $this->imageService->process((string)$sponsor->getId(), $uploadedFiles["logostream"]);
 
             $sponsor->setLogoUrl($logoUrl);
             $this->sponsorRepos->save($sponsor);
@@ -237,43 +191,5 @@ final class SponsorAction extends Action
         }
     }
 
-    private function fn_resize($image_resource_id, $width, $height)
-    {
-        $target_height = 200;
-        if ($height === $target_height) {
-            return $image_resource_id;
-        }
-        $thressHold = SponsorAction::LOGO_ASPECTRATIO_THRESHOLD;
-        $aspectRatio = $width / $height;
 
-        $target_width = $width - (($height - $target_height) * $aspectRatio);
-        if ($target_width < ($target_height * (1 - $thressHold))) {
-            $target_width = $target_height * (1 - $thressHold);
-        } elseif ($target_width > ($target_height * (1 + $thressHold))) {
-            $target_width = $target_height * (1 + $thressHold);
-        }
-        return $this->fn_resize_helper($image_resource_id, $width, $height, $target_width, 200);
-        /*else if( $height < $target_height ) { // make image larger
-            $target_width = $width - (( $height - $target_height ) * $aspectRatio );
-            $new_image_resource_id = fn_resize_helper($image_resource_id,$width,$height,$target_width,200)
-        }*/
-    }
-
-    private function fn_resize_helper($image_resource_id, $width, $height, $target_width, $target_height)
-    {
-        $target_layer = imagecreatetruecolor($target_width, $target_height);
-        imagecopyresampled(
-            $target_layer,
-            $image_resource_id,
-            0,
-            0,
-            0,
-            0,
-            $target_width,
-            $target_height,
-            $width,
-            $height
-        );
-        return $target_layer;
-    }
 }
