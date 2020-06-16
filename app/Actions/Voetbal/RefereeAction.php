@@ -13,6 +13,7 @@ use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Voetbal\Availability\Checker as AvailabilityChecker;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Referee as RefereeBase;
 use Voetbal\Referee\Repository as RefereeRepository;
@@ -26,6 +27,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
 use Voetbal\Referee;
 use Voetbal\Competition;
+use Voetbal\Priority\Service as PriorityService;
 
 final class RefereeAction extends Action
 {
@@ -80,10 +82,11 @@ final class RefereeAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $this->checkInitialsAvailability($competition, $referee->getInitials());
-            $this->checkEmailaddressAvailability($competition, $referee->getEmailaddress());
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkRefereeEmailaddress($competition, $referee->getInitials());
+            $availabilityChecker->checkRefereeInitials($competition, $referee->getInitials());
 
-            $newReferee = new RefereeBase($competition, $referee->getRank());
+            $newReferee = new RefereeBase($competition);
             $newReferee->setInitials($referee->getInitials());
             $newReferee->setName($referee->getName());
             $newReferee->setEmailaddress($referee->getEmailaddress());
@@ -129,10 +132,12 @@ final class RefereeAction extends Action
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
-            $this->checkInitialsAvailability($competition, $refereeSer->getInitials(), $referee);
-            $this->checkEmailaddressAvailability($competition, $refereeSer->getEmailaddress(), $referee);
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkRefereeEmailaddress($competition, $refereeSer->getInitials(), $referee);
+            $availabilityChecker->checkRefereeInitials($competition, $refereeSer->getEmailaddress(), $referee);
+            $availabilityChecker->checkRefereePriority($competition, $refereeSer->getPriority(), $referee);
 
-            $referee->setRank($refereeSer->getRank());
+            $referee->setPriority($refereeSer->getPriority());
             $referee->setInitials($refereeSer->getInitials());
             $referee->setName($refereeSer->getName());
             $emailaddressOld = $referee->getEmailaddress();
@@ -140,6 +145,13 @@ final class RefereeAction extends Action
             $referee->setInfo($refereeSer->getInfo());
 
             $this->refereeRepos->save($referee);
+
+//            $priorityService = new PriorityService( $competition->getReferees() );
+//            $changedReferees = $priorityService->getChanged();
+//            foreach( $changedReferees as $changedReferee) {
+//                $this->refereeRepos->save($changedReferee);
+//            }
+
             if ($emailaddressOld !== $referee->getEmailaddress()) {
                 $this->authSyncService->remove($tournament, Role::REFEREE, $emailaddressOld);
                 // $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress());
@@ -155,42 +167,25 @@ final class RefereeAction extends Action
         }
     }
 
-    protected function checkInitialsAvailability(
-        Competition $competition,
-        string $initials,
-        Referee $refereeToCheck = null
-    ) {
-        $nonUniqueReferees = $competition->getReferees()->filter(
-            function ($refereeIt) use ($initials, $refereeToCheck): bool {
-                return $refereeIt->getInitials() === $initials && $refereeToCheck !== $refereeIt;
-            }
-        );
-        if (!$nonUniqueReferees->isEmpty()) {
-            throw new \Exception(
-                "de scheidsrechter met de initialen " . $initials . " bestaat al",
-                E_ERROR
-            );
-        }
-    }
+    public function priorityUp($request, $response, $args)
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
-    protected function checkEmailaddressAvailability(
-        Competition $competition,
-        string $emailaddress = null,
-        Referee $refereeToCheck = null
-    ) {
-        if ($emailaddress === null) {
-            return;
-        }
-        $nonUniqueReferees = $competition->getReferees()->filter(
-            function ($refereeIt) use ($emailaddress, $refereeToCheck): bool {
-                return $refereeIt->getEmailaddress() === $emailaddress && $refereeToCheck !== $refereeIt;
+            $competition = $tournament->getCompetition();
+
+            $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
+
+            $priorityService = new PriorityService($competition->getReferees()->toArray());
+            $changedReferees = $priorityService->upgrade($referee);
+            foreach ($changedReferees as $changedReferee) {
+                $this->refereeRepos->save($changedReferee);
             }
-        );
-        if (!$nonUniqueReferees->isEmpty()) {
-            throw new \Exception(
-                "de scheidsrechter met het emailadres " . $emailaddress . " bestaat al",
-                E_ERROR
-            );
+
+            return $response->withStatus(200);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
         }
     }
 
@@ -208,10 +203,10 @@ final class RefereeAction extends Action
             $this->refereeRepos->remove($referee);
             $this->authSyncService->remove($tournament, Role::REFEREE, $referee->getEmailaddress());
 
-            $rank = 1;
-            foreach ($competition->getReferees() as $refereeIt) {
-                $refereeIt->setRank($rank++);
-                $this->refereeRepos->save($refereeIt);
+            $priorityService = new PriorityService($competition->getReferees()->toArray());
+            $changedReferees = $priorityService->validate();
+            foreach ($changedReferees as $changedReferee) {
+                $this->refereeRepos->save($changedReferee);
             }
 
             return $response->withStatus(200);

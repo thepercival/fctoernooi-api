@@ -10,13 +10,15 @@ namespace App\Actions\Voetbal;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Voetbal\Availability\Checker as AvailabilityChecker;
 use Voetbal\Competition\Repository as CompetitionRepos;
 use Voetbal\Field as FieldBase;
 use Voetbal\Field\Repository as FieldRepository;
-use Voetbal\Referee as RefereeBase;
-use Voetbal\Sport\Repository as SportRepository;
+use Voetbal\Priority\Service as PriorityService;
+use Voetbal\Sport\Config\Repository as SportConfigRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
@@ -30,9 +32,9 @@ final class FieldAction extends Action
      */
     protected $fieldRepos;
     /**
-     * @var SportRepository
+     * @var SportConfigRepository
      */
-    protected $sportRepos;
+    protected $sportConfigRepos;
     /**
      * @var CompetitionRepos
      */
@@ -42,42 +44,31 @@ final class FieldAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         FieldRepository $fieldRepos,
-        SportRepository $sportRepos,
+        SportConfigRepository $sportConfigRepos,
         CompetitionRepos $competitionRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->fieldRepos = $fieldRepos;
-        $this->sportRepos = $sportRepos;
+        $this->sportConfigRepos = $sportConfigRepos;
         $this->competitionRepos = $competitionRepos;
     }
 
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var Field $field */
-            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
             /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            $fieldsWithSameName = $competition->getFields()->filter(
-                function ($fieldIt) use ($field): bool {
-                    return $fieldIt->getName() === $field->getName() || $fieldIt->getNumber() === $field->getNumber();
-                }
-            );
-            if (!$fieldsWithSameName->isEmpty()) {
-                throw new \Exception(
-                    "het veldnummer \"" . $field->getNumber() . "\" of de veldnaam \"" . $field->getName(
-                    ) . "\" bestaat al", E_ERROR
-                );
-            }
-            $sport = $this->sportRepos->findOneBy(["name" => $field->getSport()->getName()]);
-            if ($sport === null) {
-                throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
+            $sportConfig = $this->sportConfigRepos->find((int)$args['sportconfigId']);
+            if ($sportConfig === null || $sportConfig->getCompetition() !== $competition) {
+                throw new \Exception("de sport-configuratie is onjuist", E_ERROR);
             }
 
-            $newField = new FieldBase($competition, $field->getNumber());
+            /** @var Field $field */
+            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
+
+            $newField = new FieldBase($sportConfig);
             $newField->setName($field->getName());
-            $newField->setSport($sport);
 
             $this->fieldRepos->save($newField);
 
@@ -94,33 +85,60 @@ final class FieldAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);
+            $sportConfig = $this->sportConfigRepos->find((int)$args['sportconfigId']);
+            if ($sportConfig === null || $sportConfig->getCompetition() !== $competition) {
+                throw new \Exception("de sport-configuratie is onjuist", E_ERROR);
+            }
+
+            $field = $this->fieldRepos->find((int)$args["fieldId"]);
+            if ($field === null || $field->getSportConfig() !== $sportConfig) {
+                throw new \Exception("het veld en de sport-configuratie zijn een onjuiste combinatie", E_ERROR);
+            }
+
             /** @var Field|false $fieldSer */
             $fieldSer = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
             if ($fieldSer === false) {
                 throw new \Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
 
-            $fieldsWithSameName = $competition->getFields()->filter(
-                function ($fieldIt) use ($fieldSer, $field): bool {
-                    return $fieldIt->getName() === $fieldSer->getName() && $field !== $fieldIt;
-                }
-            );
-            if (!$fieldsWithSameName->isEmpty()) {
-                throw new \Exception("het veld \"" . $fieldSer->getName() . "\" bestaat al", E_ERROR);
-            }
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkFieldPriority($competition, $fieldSer->getPriority(), $field);
 
-            $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
-            if ($sport === null) {
-                throw new \Exception("de sport kan niet gevonden worden", E_ERROR);
-            }
             $field->setName($fieldSer->getName());
-            $field->setSport($sport);
-
             $this->fieldRepos->save($field);
 
             $json = $this->serializer->serialize($field, 'json');
             return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 422);
+        }
+    }
+
+    public function priorityUp($request, $response, $args)
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
+
+            $sportConfig = $this->sportConfigRepos->find((int)$args['sportconfigId']);
+            if ($sportConfig === null || $sportConfig->getCompetition() !== $competition) {
+                throw new \Exception("de sport-configuratie is onjuist", E_ERROR);
+            }
+
+            $field = $this->fieldRepos->find((int)$args["fieldId"]);
+            if ($field === null || $field->getSportConfig() !== $sportConfig) {
+                throw new \Exception("het veld en de sport-configuratie zijn een onjuiste combinatie", E_ERROR);
+            }
+
+            $priorityService = new PriorityService($sportConfig->getFields()->toArray());
+            $changedFields = $priorityService->upgrade($field);
+            foreach ($changedFields as $changedField) {
+                $this->fieldRepos->save($changedField);
+            }
+
+            return $response->withStatus(200);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
@@ -132,32 +150,28 @@ final class FieldAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            $field = $this->getFieldFromInput((int)$args["fieldId"], $competition);
+            $sportConfig = $this->sportConfigRepos->find((int)$args['sportconfigId']);
+            if ($sportConfig === null || $sportConfig->getCompetition() !== $competition) {
+                throw new \Exception("de sport-configuratie is onjuist", E_ERROR);
+            }
 
-            $competition->getFields()->removeElement($field);
+            $field = $this->fieldRepos->find((int)$args["fieldId"]);
+            if ($field === null || $field->getSportConfig() !== $sportConfig) {
+                throw new \Exception("het veld en de sport-configuratie zijn een onjuiste combinatie", E_ERROR);
+            }
+
+            $sportConfig->getFields()->removeElement($field);
             $this->fieldRepos->remove($field);
 
-            $fieldNumber = 1;
-            foreach ($competition->getFields() as $fieldIt) {
-                $fieldIt->setNumber($fieldNumber++);
-                $this->fieldRepos->save($fieldIt);
+            $priorityService = new PriorityService($sportConfig->getFields()->toArray());
+            $changedFields = $priorityService->upgrade($field);
+            foreach ($changedFields as $changedField) {
+                $this->fieldRepos->save($changedField);
             }
 
             return $response->withStatus(200);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
-    }
-
-    protected function getFieldFromInput(int $id, Competition $competition): Field
-    {
-        $field = $this->fieldRepos->find($id);
-        if ($field === null) {
-            throw new \Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
-        }
-        if ($field->getCompetition() !== $competition) {
-            throw new \Exception("de competitie van het veld komt niet overeen met de verstuurde competitie", E_ERROR);
-        }
-        return $field;
     }
 }

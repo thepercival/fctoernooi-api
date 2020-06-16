@@ -7,6 +7,7 @@ use FCToernooi\LockerRoom;
 use FCToernooi\Role;
 use Voetbal\Association;
 use Voetbal\Competitor;
+use Voetbal\Sport;
 use Voetbal\Sport\Repository as SportRepository;
 use Voetbal\Season\Repository as SeasonRepository;
 use Voetbal\League;
@@ -64,22 +65,24 @@ class TournamentCopier
 
         // add serialized fields and referees to source-competition
         $sportConfigService = new SportConfigService();
-        $createFieldsAndReferees = function ($sportConfigsSer, $fieldsSer, $refereesSer) use (
+        $createFieldsAndReferees = function ($sportConfigsSer, $refereesSer) use (
             $newCompetition,
             $sportConfigService
         ): void {
             foreach ($sportConfigsSer as $sportConfigSer) {
+                /** @var Sport $sport */
                 $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
-                $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
+                $sportConfig = $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
+                /** @var Field $fieldSer */
+                foreach ($sportConfigSer->getFields() as $fieldSer) {
+                    $field = new Field($sportConfig, $fieldSer->getPriority());
+                    $field->setName($fieldSer->getName());
+                }
             }
-            foreach ($fieldsSer as $fieldSer) {
-                $field = new Field($newCompetition, $fieldSer->getNumber());
-                $field->setName($fieldSer->getName());
-                $sport = $this->sportRepos->findOneBy(["name" => $fieldSer->getSport()->getName()]);
-                $field->setSport($sport);
-            }
+
+            /** @var Referee $refereeSer */
             foreach ($refereesSer as $refereeSer) {
-                $referee = new Referee($newCompetition, $refereeSer->getRank());
+                $referee = new Referee($newCompetition, $refereeSer->getPriority());
                 $referee->setInitials($refereeSer->getInitials());
                 $referee->setName($refereeSer->getName());
                 $referee->setEmailaddress($refereeSer->getEmailaddress());
@@ -88,7 +91,6 @@ class TournamentCopier
         };
         $createFieldsAndReferees(
             $competition->getSportConfigs(),
-            $competition->getFields(),
             $competition->getReferees()
         );
 

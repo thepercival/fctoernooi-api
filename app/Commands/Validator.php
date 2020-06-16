@@ -67,7 +67,7 @@ class Validator extends Command
     {
         try {
             $competition = $tournament->getCompetition();
-            if ($competition->getFields()->count() === 0) {
+            if (count($competition->getFields()) === 0) {
                 throw new \Exception("het toernooi moet minimaal 1 veld bevatten", E_ERROR);
             }
             $this->structureValidator->checkValidity($competition);

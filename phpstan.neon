@@ -1,0 +1,5 @@
+parameters:
+    inferPrivatePropertyTypeFromConstructor:
+        true
+#    scanDirectories:
+#        - vendor/thepercival/voetbal/domain
