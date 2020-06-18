@@ -24,6 +24,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
 use Voetbal\Field;
 use Voetbal\Competition;
+use Voetbal\Sport\Config as SportConfig;
 
 final class FieldAction extends Action
 {
@@ -85,6 +86,7 @@ final class FieldAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
+            /** @var SportConfig|null $sportConfig */
             $sportConfig = $this->sportConfigRepos->find((int)$args['sportconfigId']);
             if ($sportConfig === null || $sportConfig->getCompetition() !== $competition) {
                 throw new \Exception("de sport-configuratie is onjuist", E_ERROR);
@@ -102,7 +104,7 @@ final class FieldAction extends Action
             }
 
             $availabilityChecker = new AvailabilityChecker();
-            $availabilityChecker->checkFieldPriority($competition, $fieldSer->getPriority(), $field);
+            $availabilityChecker->checkFieldPriority($sportConfig, $fieldSer->getPriority(), $field);
 
             $field->setName($fieldSer->getName());
             $this->fieldRepos->save($field);

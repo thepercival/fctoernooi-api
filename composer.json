@@ -64,6 +64,9 @@
     "test": [
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
+    "test-dbplannings": [
+      "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases-manual/"
+    ],
     "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",

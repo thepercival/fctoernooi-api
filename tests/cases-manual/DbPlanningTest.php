@@ -93,7 +93,7 @@ class DbPlanningTest extends \PHPUnit\Framework\TestCase
             }
             self::assertTrue($allPlacesSameNrOfGames, "not all places within poule have same number of games");
 
-            $gamesInARow = $validator->gamesInARow();
+            $gamesInARow = $validator->checkGamesInARow();
             if ($gamesInARow === false) {
                 $this->consolePlanning($bestPlanning);
             }
