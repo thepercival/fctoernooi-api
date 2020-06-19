@@ -115,7 +115,9 @@ class Gamenotes extends ToernooiPdfPage
 
         // qr-code
         $url = $this->getQrCodeUrlPrefix() . $game->getId();
+
         $imgSize = $nFirstBorder - $this->getPageMargin();
+        $imgSize *= 1.2;
         $qrPath = $this->qrService->writeGameToJpg($this->getParent()->getTournament(), $game, $url, (int)$imgSize);
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $this->getPageMargin(), $nY - $imgSize, $this->getPageMargin() + $imgSize, $nY);
