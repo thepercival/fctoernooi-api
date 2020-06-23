@@ -2,14 +2,17 @@
 
 namespace App\Commands;
 
-use _HumbugBox09702017065e\Nette\Neon\Exception;
+use App\Mailer;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use Voetbal\Structure;
+use Voetbal\Structure\Repository;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Structure\Validator as StructureValidator;
 
@@ -20,6 +23,10 @@ class Validator extends Command
      */
     protected $tournamentRepos;
     /**
+     * @var StructureRepository
+     */
+    protected $structureRepos;
+    /**
      * @var StructureValidator
      */
     protected $structureValidator;
@@ -27,7 +34,8 @@ class Validator extends Command
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->structureValidator = new StructureValidator($container->get(StructureRepository::class));
+        $this->structureRepos = $container->get(StructureRepository::class);
+        $this->structureValidator = new StructureValidator();
         parent::__construct($container->get(Configuration::class));
     }
 
@@ -42,13 +50,20 @@ class Validator extends Command
             // the "--help" option
             ->setHelp('validates the tournaments');
         parent::configure();
+
+        $this->addArgument('tournamentId', null, InputArgument::OPTIONAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-tournament-validator');
         try {
-            $tournaments = $this->tournamentRepos->findBy(["updated" => true]);
+            $this->logger->info('aan het valideren..');
+            $filter = ["updated" => true];
+            if ($input->getArgument("tournamentId") > 0) {
+                $filter = ["id" => (int)$input->getArgument("tournamentId")];
+            }
+            $tournaments = $this->tournamentRepos->findBy($filter);
             /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
                 try {
@@ -57,6 +72,7 @@ class Validator extends Command
                     $this->logger->error($e->getMessage());
                 }
             }
+            $this->logger->info('alle toernooien gevalideerd');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
@@ -70,7 +86,8 @@ class Validator extends Command
             if (count($competition->getFields()) === 0) {
                 throw new \Exception("het toernooi moet minimaal 1 veld bevatten", E_ERROR);
             }
-            $this->structureValidator->checkValidity($competition);
+            $structure = $this->structureRepos->getStructure($competition);
+            $this->structureValidator->checkValidity($competition, $structure);
         } catch (\Exception $e) {
             throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }

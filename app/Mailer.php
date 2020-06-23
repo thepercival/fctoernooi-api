@@ -48,12 +48,12 @@ final class Mailer
         $this->smtpConfig = $smtpConfig;
     }
 
-    public function sendToAdmin(string $subject, string $body, $text = null)
+    public function sendToAdmin(string $subject, string $body, bool $text = null)
     {
         $this->send($subject, $body, $this->adminEmailaddress, $text);
     }
 
-    public function send(string $subject, string $body, string $toEmailaddress, $text = null)
+    public function send(string $subject, string $body, string $toEmailaddress, bool $text = null)
     {
         $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp();
         // $mailer->'MIME-Version' = '1.0';

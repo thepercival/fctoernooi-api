@@ -2,10 +2,13 @@
 
 namespace App\Commands\Planning;
 
+use App\Mailer;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Game as GameBase;
+use Voetbal\Output\Planning as PlanningOutput;
+use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Planning as PlanningBase;
 use Voetbal\Planning\Output;
 use Voetbal\Structure\Repository as StructureRepository;
@@ -16,7 +19,9 @@ use Voetbal\Planning\Seeker as PlanningSeeker;
 use Voetbal\Planning\Service as PlanningService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Voetbal\Round\Number\PlanningCreator;
+use Voetbal\Competition\Repository as CompetitionRepository;
 use Voetbal\Round\Number as RoundNumber;
+use Voetbal\Structure\Validator as StructureValidator;
 use App\Commands\Planning as PlanningCommand;
 
 class Create extends PlanningCommand
@@ -29,13 +34,22 @@ class Create extends PlanningCommand
      * @var TournamentRepository
      */
     protected $tournamentRepos;
-
+    /**
+     * @var CompetitionRepository
+     */
+    protected $competitionRepos;
+    /**
+     * @var Mailer
+     */
+    protected $mailer;
 
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
+        $this->mailer = $container->get(Mailer::class);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
+        $this->competitionRepos = $container->get(CompetitionRepository::class);
     }
 
     protected function configure()
@@ -57,21 +71,27 @@ class Create extends PlanningCommand
 
         try {
             if ($this->planningInputRepos->isProcessing(PlanningInput::STATE_TRYING_PLANNINGS)) {
+                $this->checkMoreThanTwoCompetitionsWithoutPlanning();
                 $this->logger->info("still processing..");
                 return 0;
             }
             $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
-            // $planningInput = $this->planningInputRepos->find( 10660 );
+            // $planningInput = $this->planningInputRepos->find( 25163 );
             if ($planningInput === null) {
                 $this->logger->info("nothing to process");
                 return 0;
             }
-            $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
-            $planningSeeker->process($planningInput);
 
-            if ($planningInput->getSelfReferee()) {
-                $this->updateSelfReferee($planningInput);
-            }
+            $em = $this->planningInputRepos->getEM();
+            $conn = $em->getConnection();
+            $conn->beginTransaction();
+            try {
+                $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+                $planningSeeker->process($planningInput);
+
+                if ($planningInput->getSelfReferee()) {
+                    $this->updateSelfReferee($planningInput);
+                }
 
 //            $planningService = new PlanningService();
 //            $planning = $planningService->getBestPlanning($planningInput);
@@ -80,8 +100,15 @@ class Create extends PlanningCommand
 //            $planningOutput->consoleGames($sortedGames);
 
 
-            $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
-            $this->logger->info($nrUpdated . " structure(s)-planning updated");
+                $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
+                $this->logger->info($nrUpdated . " structure(s)-planning updated");
+
+                $em->flush();
+                $conn->commit();
+            } catch (\Exception $e) {
+                $conn->rollBack();
+                throw $e;
+            }
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
@@ -92,10 +119,17 @@ class Create extends PlanningCommand
     {
         $nrUpdated = 0;
         $structures = $this->structureRepos->getStructures(["hasPlanning" => false]);
+        $structureValidator = new StructureValidator();
         foreach ($structures as $structure) {
-            if ($this->addPlanningToRoundNumber($structure->getFirstRoundNumber(), $planningInput) === true) {
-                $nrUpdated++;
-            };
+            $competition = $structure->getFirstRoundNumber()->getCompetition();
+            try {
+                $structureValidator->checkValidity($competition, $structure);
+                if ($this->addPlanningToRoundNumber($structure->getFirstRoundNumber(), $planningInput) === true) {
+                    $nrUpdated++;
+                };
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage());
+            }
         }
         return $nrUpdated;
     }
@@ -119,5 +153,12 @@ class Create extends PlanningCommand
         $planningCreator = new PlanningCreator($this->planningInputRepos, $this->planningRepos);
         $planningCreator->create($roundNumber, $tournament->getBreak());
         return true;
+    }
+
+    protected function checkMoreThanTwoCompetitionsWithoutPlanning()
+    {
+        if ($this->competitionRepos->findNrWithoutPlanning() >= 2) {
+            $this->mailer->sendToAdmin('more than two competitions without planning', 'check it out');
+        }
     }
 }

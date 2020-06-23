@@ -73,45 +73,23 @@ class DbPlanningTest extends \PHPUnit\Framework\TestCase
                 continue;
             }
 
-            $validator = new PlanningValidator($bestPlanning);
-            $hasEnoughTotalNrOfGames = $validator->hasEnoughTotalNrOfGames();
-            if ($hasEnoughTotalNrOfGames === false) {
-                $this->consolePlanning($bestPlanning);
-            }
-            self::assertTrue($hasEnoughTotalNrOfGames, "the planning has not enough games");
+            $validator = new PlanningValidator();
 
-
-            $placeOneTimePerGame = $validator->placeOneTimePerGame();
-            if ($placeOneTimePerGame === false) {
-                $this->consolePlanning($bestPlanning);
+            try {
+                $validator->validate($bestPlanning);
+            } catch (Exception $e) {
+                self::assertTrue(false, $e->getMessage());
+                $this->consolePlanning($e->getMessage(), $bestPlanning);
             }
-            self::assertTrue($placeOneTimePerGame, "a place is assigned more than one in a game");
-
-            $allPlacesSameNrOfGames = $validator->allPlacesSameNrOfGames();
-            if ($allPlacesSameNrOfGames === false) {
-                $this->consolePlanning($bestPlanning);
-            }
-            self::assertTrue($allPlacesSameNrOfGames, "not all places within poule have same number of games");
-
-            $gamesInARow = $validator->checkGamesInARow();
-            if ($gamesInARow === false) {
-                $this->consolePlanning($bestPlanning);
-            }
-            self::assertTrue($gamesInARow, "more than allowed nrofmaxgamesinarow");
-
-            $validResourcesPerBatch = $validator->validResourcesPerBatch();
-            if ($validResourcesPerBatch === false) {
-                $this->consolePlanning($bestPlanning);
-            }
-            self::assertTrue($validResourcesPerBatch, "more resources per batch than allowed");
         }
     }
 
-    protected function consolePlanning(Planning $planning)
+    protected function consolePlanning(string $text, Planning $planning)
     {
         $logger = new Logger('planning-create');
         $handler = new StreamHandler('php://stdout', Logger::INFO);
         $logger->pushHandler($handler);
+        $logger->info($text);
         $logger->info($this->inputToString($planning->getInput()));
         $output = new BatchOutput($logger);
         $output->output($planning->getFirstBatch(), "allPlacesSameNrOfGames");
