@@ -20,7 +20,7 @@ class VersionMiddleware implements Middleware
             return $handler->handle($request);
         }
         $apiVersion = $request->getHeaderLine('X-Api-Version');
-        if ($apiVersion !== "22") {
+        if ($apiVersion !== "23") {
             // public/tournaments/:id/export
             if (substr($request->getUri()->getPath(), -(strlen("/export"))) !== "/export") {
                 return new ErrorResponse("de app/website moet vernieuwd worden, ververs de pagina", 418);
