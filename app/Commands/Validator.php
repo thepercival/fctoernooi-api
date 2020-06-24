@@ -15,6 +15,7 @@ use Voetbal\Structure;
 use Voetbal\Structure\Repository;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Structure\Validator as StructureValidator;
+use Voetbal\Round\Number\GamesValidator;
 
 class Validator extends Command
 {
@@ -30,12 +31,17 @@ class Validator extends Command
      * @var StructureValidator
      */
     protected $structureValidator;
+    /**
+     * @var GamesValidator
+     */
+    protected $gamesValidator;
 
     public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->structureValidator = new StructureValidator();
+        $this->gamesValidator = new GamesValidator();
         parent::__construct($container->get(Configuration::class));
     }
 
@@ -51,7 +57,7 @@ class Validator extends Command
             ->setHelp('validates the tournaments');
         parent::configure();
 
-        $this->addArgument('tournamentId', null, InputArgument::OPTIONAL);
+        $this->addArgument('tournamentId', InputArgument::OPTIONAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -60,7 +66,7 @@ class Validator extends Command
         try {
             $this->logger->info('aan het valideren..');
             $filter = ["updated" => true];
-            if ($input->getArgument("tournamentId") > 0) {
+            if (((int)$input->getArgument("tournamentId")) > 0) {
                 $filter = ["id" => (int)$input->getArgument("tournamentId")];
             }
             $tournaments = $this->tournamentRepos->findBy($filter);
@@ -88,6 +94,9 @@ class Validator extends Command
             }
             $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure);
+
+            // needs to be turned on eventually
+            // $this->gamesValidator->validateStructure($structure, $competition->getReferees()->count());
         } catch (\Exception $e) {
             throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }

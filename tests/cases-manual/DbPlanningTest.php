@@ -8,6 +8,7 @@
 
 namespace FCToernooiTestManual;
 
+use \Exception;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Voetbal\NameService;

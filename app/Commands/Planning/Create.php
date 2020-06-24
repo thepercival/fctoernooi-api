@@ -10,7 +10,6 @@ use Voetbal\Game as GameBase;
 use Voetbal\Output\Planning as PlanningOutput;
 use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Planning as PlanningBase;
-use Voetbal\Planning\Output;
 use Voetbal\Structure\Repository as StructureRepository;
 
 use Voetbal\Planning\Input as PlanningInput;
@@ -141,7 +140,10 @@ class Create extends PlanningCommand
         }
         $inputService = new PlanningInputService();
         $planningService = new PlanningService();
-        if (!$inputService->areEqual($inputService->get($roundNumber), $planningInput)) {
+        if (!$inputService->areEqual(
+            $inputService->get($roundNumber, $planningInput->getNrOfReferees()),
+            $planningInput
+        )) {
             return false;
         }
         $planning = $planningService->getBestPlanning($planningInput);

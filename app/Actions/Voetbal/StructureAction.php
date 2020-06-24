@@ -19,6 +19,7 @@ use Voetbal\Competitor\Repository as CompetitorRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
+use Voetbal\Structure\Validator as StructureValidator;
 
 final class StructureAction extends Action
 {
@@ -73,6 +74,9 @@ final class StructureAction extends Action
             $structureCopier = new StructureCopier($competition, $existingCompetitors);
             $newStructure = $structureCopier->copy($structureSer);
 
+            $structureValidator = new StructureValidator();
+            $structureValidator->checkValidity($competition, $newStructure);
+
             $roundNumberAsValue = 1;
             $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
 
@@ -84,4 +88,5 @@ final class StructureAction extends Action
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
+
 }

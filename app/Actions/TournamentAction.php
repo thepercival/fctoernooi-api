@@ -34,6 +34,7 @@ use Voetbal\Structure\Copier as StructureCopier;
 use Voetbal\Round\Number\PlanningCreator;
 use Voetbal\Competitor\Repository as CompetitorRepository;
 use Selective\Config\Configuration;
+use Voetbal\Structure\Validator as StructureValidator;
 
 class TournamentAction extends Action
 {
@@ -299,6 +300,10 @@ class TournamentAction extends Action
             // $structureService = new StructureService( new TournamentStructureOptions() );
             $structureCopier = new StructureCopier($newTournament->getCompetition(), $newCompetitors);
             $newStructure = $structureCopier->copy($structure);
+
+            $structureValidator = new StructureValidator();
+            $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure);
+
             $this->structureRepos->add($newStructure);
 
             $this->planningCreator->create($newStructure->getFirstRoundNumber(), $newTournament->getBreak());
