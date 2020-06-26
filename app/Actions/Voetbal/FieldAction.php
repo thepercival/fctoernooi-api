@@ -68,6 +68,9 @@ final class FieldAction extends Action
             /** @var Field $field */
             $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
 
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkFieldName($competition, $field->getName());
+
             $newField = new FieldBase($sportConfig);
             $newField->setName($field->getName());
 
@@ -105,6 +108,7 @@ final class FieldAction extends Action
 
             $availabilityChecker = new AvailabilityChecker();
             $availabilityChecker->checkFieldPriority($sportConfig, $fieldSer->getPriority(), $field);
+            $availabilityChecker->checkFieldName($competition, $fieldSer->getName(), $field);
 
             $field->setName($fieldSer->getName());
             $this->fieldRepos->save($field);

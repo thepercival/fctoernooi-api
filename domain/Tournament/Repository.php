@@ -8,6 +8,7 @@
 
 namespace FCToernooi\Tournament;
 
+use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 use FCToernooi\TournamentUser;
@@ -50,9 +51,11 @@ class Repository extends \Voetbal\Repository
 
     public function findByFilter(
         string $name = null,
-        \DateTimeImmutable $startDateTime = null,
-        \DateTimeImmutable $endDateTime = null,
-        bool $public = null
+        DateTimeImmutable $startDateTime = null,
+        DateTimeImmutable $endDateTime = null,
+        bool $public = null,
+        DateTimeImmutable $startDateTimeCreated = null,
+        DateTimeImmutable $endDateTimeCreated = null
     ) {
         $query = $this->createQueryBuilder('t')
             ->join("t.competition", "c")
@@ -64,12 +67,18 @@ class Repository extends \Voetbal\Repository
         }
 
         if ($endDateTime !== null) {
-            if ($startDateTime !== null) {
-                $query = $query->andWhere('c.startDateTime <= :endDateTime');
-            } else {
-                $query = $query->where('c.startDateTime <= :endDateTime');
-            }
+            $query = $query->andWhere('c.startDateTime <= :endDateTime');
             $query = $query->setParameter('endDateTime', $endDateTime);
+        }
+
+        if ($startDateTimeCreated !== null) {
+            $query = $query->where('t.createdDateTime >= :startDateTimeCreated');
+            $query = $query->setParameter('startDateTimeCreated', $startDateTimeCreated);
+        }
+
+        if ($endDateTimeCreated !== null) {
+            $query = $query->andWhere('t.createdDateTime <= :endDateTimeCreated');
+            $query = $query->setParameter('endDateTimeCreated', $endDateTimeCreated);
         }
 
         if ($name !== null) {

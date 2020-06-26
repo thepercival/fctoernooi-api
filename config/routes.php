@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TournamentAction;
+use App\Actions\ReportAction;
 use App\Actions\Tournament\ShellAction;
 use App\Actions\TournamentUserAction;
 use App\Actions\Tournament\InvitationAction;
@@ -29,14 +30,17 @@ use App\Middleware\Authorization\Tournament\Admin\AdminMiddleware as TournamentA
 use App\Middleware\Authorization\Tournament\Admin\RoleAdminMiddleware as TournamentRoleAdminAuthMiddleware;
 use App\Middleware\Authorization\Tournament\Admin\GameAdminMiddleware as TournamentGameAdminAuthMiddleware;
 use App\Middleware\Authorization\Tournament\PublicMiddleware as TournamentPublicAuthMiddleware;
+use App\Middleware\VersionMiddleware;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
+use Slim\Views\TwigMiddleware;
+use Slim\Views\Twig as TwigView;
 
 
 return function (App $app): void {
     $app->group(
         '/public',
-        function (Group $group): void {
+        function (Group $group) use ($app): void {
             $group->group(
                 '/auth',
                 function (Group $group): void {
@@ -49,18 +53,23 @@ return function (App $app): void {
                     $group->options('/passwordchange', AuthAction::class . ':options');
                     $group->post('/passwordchange', AuthAction::class . ':passwordchange');
                 }
-            );
+            )->add(VersionMiddleware::class);
+
             // tournament
             $group->group(
                 '/tournaments/{tournamentId}',
                 function (Group $group): void {
                     $group->options('', TournamentAction::class . ':options');
                     $group->get('', TournamentAction::class . ':fetchOne')
-                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
+                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
+                            VersionMiddleware::class
+                        );
 
                     $group->options('/structure', StructureAction::class . ':options');
                     $group->get('/structure', StructureAction::class . ':fetchOne')
-                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class);
+                        ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
+                            VersionMiddleware::class
+                        );
 
                     $group->options('/export', TournamentAction::class . ':options');
                     $group->get('/export', TournamentAction::class . ':export')->setName('tournament-export')
@@ -69,7 +78,11 @@ return function (App $app): void {
             );
 
             $group->options('/shells', ShellAction::class . ':options');
-            $group->get('/shells', ShellAction::class . ':fetchPublic');
+            $group->get('/shells', ShellAction::class . ':fetchPublic')->add(VersionMiddleware::class);
+
+            $group->get('/usagereport', ReportAction::class . ':usage')->add(
+                TwigMiddleware::createFromContainer($app, TwigView::class)
+            );
         }
     );
 
@@ -81,7 +94,7 @@ return function (App $app): void {
             $group->options('/profile/{userId}', AuthAction::class . ':options');
             $group->put('/profile/{userId}', AuthAction::class . ':profile');
         }
-    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 
     $app->group(
         '/users/{userId}',
@@ -91,7 +104,7 @@ return function (App $app): void {
             $group->put('', UserAction::class . ':edit');
             $group->delete('', UserAction::class . ':remove');
         }
-    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 
     $app->group(
         '/tournaments',
@@ -329,7 +342,7 @@ return function (App $app): void {
                 }
             );
         }
-    );
+    )->add(VersionMiddleware::class);
 
     $app->group(
         '',
@@ -344,5 +357,5 @@ return function (App $app): void {
             $group->options('/sports', SportAction::class . ':options');
             $group->post('/sports', SportAction::class . ':add');
         }
-    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class);
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 };

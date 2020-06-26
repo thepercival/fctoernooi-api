@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords"
+          content="toernooi,organiseren,opzetten,schema,opzet,poule,sport,gratis,simpel,live,scorebord,automatisch,wedstrijdplanning,kwalificatie,wedstrijden">
+    <meta name="description"
+          content="met FCToernooi kun je volledig gratis toernooien opzetten of organiseren van klein tot groot voor allerlei sporten. Opzet met meerdere ronden, automatische wedstrijdplanning en kwalificatie en live scorebord.">
+    <title>FCToernooi, volledig gratis toernooien opzetten of organiseren</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://fctoernooi.nl/assets/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#3e3e3e">
+    <meta name="theme-color" content="#3e3e3e">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+<body>
+<h1>toernooien</h1>
+
+<div class="card">
+    <div class="card-header">
+        toernooien({{ amount }}) met aanmaakdatum tot een week terug
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>naam</th>
+                <th class="border-outline-success" title="poules/plekken 1ste ronde">plekken (poules)</th>
+                <th>aantal ronden</th>
+                <th>deel nemers</th>
+                <th>scheids rechters</th>
+                {#                    <th>sport aangepast</th>#}
+                {#                    <th>plannings instellingen aangepast</th>#}
+                <th>kleedkamers</th>
+                {#                    <th>sponsors</th>#}
+                <th>geprint</th>
+                <th title="ingevoerd percentage scores">scores</th>
+                {#                    <th>andere score of planning instellingen bij verschillende ronden</th>#}
+                <th>aangemaakt</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tournamentHelper in tournaments %}
+                <tr>
+                    {% if tournamentHelper.publicUrl %}
+                        <td><a target="_blank" rel="noopener"
+                               href="{{ tournamentHelper.publicUrl }}">{{ tournamentHelper.name }}</td>
+                    {% else %}
+                        <td>{{ tournamentHelper.name }}</td>
+                    {% endif %}
+                    {% if tournamentHelper.validateMessage %}
+                        <td title="{{ tournamentHelper.validateMessage }}"
+                            class="bg-danger">{{ tournamentHelper.firstRoundStructure }}</td>
+                    {% else %}
+                        <td class="bg-success">{{ tournamentHelper.firstRoundStructure }}</td>
+                    {% endif %}
+                    <td>{{ tournamentHelper.nrOfRoundNumbers }}</td>
+                    <td>{{ tournamentHelper.competitorUsage }}</td>
+                    <td>{{ tournamentHelper.refereeUsage }}</td>
+                    <td>{{ tournamentHelper.lockerRoomUsage }}</td>
+                    <td>{{ tournamentHelper.exported }}</td>
+                    {% if tournamentHelper.validatePlanningMessage %}
+                        <td title="{{ tournamentHelper.validatePlanningMessage }}"
+                            class="bg-danger">{{ tournamentHelper.scoresUsage }}</td>
+                    {% else %}
+                        <td class="bg-success">{{ tournamentHelper.scoresUsage }}</td>
+                    {% endif %}
+                    <td>{{ tournamentHelper.createdDateTime }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

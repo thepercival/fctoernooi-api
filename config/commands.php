@@ -11,6 +11,7 @@ use App\Commands\Listing as ListingCommand;
 use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
 use App\Commands\Validator;
+use App\Commands\Planning\Validator as PlanningValidator;
 
 $commands = [
     "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
@@ -30,6 +31,9 @@ $commands = [
     },
     "app:validate" => function (ContainerInterface $container): Validator {
         return new Validator($container);
+    },
+    "app:validate-planning" => function (ContainerInterface $container): PlanningValidator {
+        return new PlanningValidator($container);
     }
 ];
 

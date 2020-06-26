@@ -104,6 +104,11 @@ final class GameAction extends Action
             $changedPlaces = $this->getChangedQualifyPlaces($competition, $game, $initialPouleState);
             foreach ($changedPlaces as $changedPlace) {
                 $this->placeRepos->save($changedPlace);
+                foreach ($changedPlace->getGames() as $gameIt) {
+                    $gameIt->setState(State::Created);
+                    $this->gameRepos->save($gameIt);
+                    $this->gameScoreRepos->removeScores($gameIt);
+                }
             }
 
             $json = $this->serializer->serialize($game, 'json');

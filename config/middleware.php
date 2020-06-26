@@ -62,8 +62,6 @@ return function (App $app) {
         )
     );
 
-    $app->add(VersionMiddleware::class);
-
     $app->add((new Middlewares\ContentType(['html', 'json']))->errorResponse());
     $app->add((new Middlewares\ContentType())->charsets(['UTF-8'])->errorResponse());
     $app->add((new Middlewares\ContentEncoding(['gzip', 'deflate'])));

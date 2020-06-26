@@ -153,11 +153,7 @@ class PoulePivotTables extends FCToernooiWorksheet
             $cell = $this->getCellByColumnAndRow($column++, $row);
             $cell->setValue($placeName);
 
-            $placeGames = $poule->getGames()->filter(
-                function (Game $game) use ($place): bool {
-                    return $game->isParticipating($place);
-                }
-            )->toArray();
+            $placeGames = $place->getGames()->toArray();
             // draw versus
             for ($placeNr = 1; $placeNr <= $nrOfPlaces; $placeNr++) {
                 $cell = $this->getCellByColumnAndRow($column++, $row);

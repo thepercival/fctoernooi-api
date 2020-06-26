@@ -13,6 +13,8 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 
+use Slim\Views\Twig as TwigView;
+
 use App\Mailer;
 use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
 use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
@@ -41,6 +43,13 @@ return [
             }
         }
         return $app;
+    },
+    TwigView::class => function (ContainerInterface $container): TwigView {
+        $cache = [];
+        if ($container->get(Configuration::class)->getString("environment") === "production") {
+            $cache['cache'] = __DIR__ . '/../cache';
+        }
+        return TwigView::create(__DIR__ . '/../templates', $cache);
     },
     LoggerInterface::class => function (ContainerInterface $container): LoggerInterface {
         $config = $container->get(Configuration::class);
