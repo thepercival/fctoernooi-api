@@ -43,9 +43,9 @@ class User
     private $forgetpassword;
 
     /**
-     * @var boolean
+     * @var bool
      */
-    private $helpSent;
+    private $validated;
 
     const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
     const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
@@ -53,11 +53,10 @@ class User
     const MAX_LENGTH_PASSWORD = 50;
     const MIN_LENGTH_NAME = 3;
     const MAX_LENGTH_NAME = 15;
-    const MAX_LENGTH_HASH = 256;
 
     public function __construct($emailaddress)
     {
-        $this->helpSent = false;
+        $this->validated = false;
         $this->setEmailaddress($emailaddress);
     }
 
@@ -226,19 +225,13 @@ class User
         return new \DateTimeImmutable($arrForgetPassword[1]);
     }
 
-    /**
-     * @return boolean
-     */
-    public function getHelpSent()
+    public function getValidated(): bool
     {
-        return $this->helpSent;
+        return $this->validated;
     }
 
-    /**
-     * @param boolean $helpSent
-     */
-    public function setHelpSent($helpSent)
+    public function setValidated(bool $validated)
     {
-        $this->helpSent = $helpSent;
+        $this->validated = $validated;
     }
 }

@@ -102,8 +102,8 @@ class ReportAction extends Action
         $tournamentHelpers = [];
         foreach ($this->getTournaments($request) as $tournament) {
             $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-            $publicUrl = $tournament->getPublic() ? $this->config->getString("www.wwwurl") . $tournament->getId(
-                ) : null;
+            $publicUrl = $tournament->getPublic() ? ($this->config->getString("www.wwwurl") . $tournament->getId(
+                )) : '';
             $tournamentHelpers[] = new TournamentReportHelper($tournament, $structure, $publicUrl);
         }
         return $tournamentHelpers;

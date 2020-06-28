@@ -316,6 +316,7 @@ trait GamesTrait
         if ($finalScore === null) {
             return $score;
         }
-        return $finalScore->getHome() . $score . $finalScore->getAway();
+        $extension = $game->getFinalPhase() === Game::PHASE_EXTRATIME ? '*' : '';
+        return $finalScore->getHome() . $score . $finalScore->getAway() . $extension;
     }
 }

@@ -9,6 +9,6 @@
     <field name="password" column="password" type="string" length="256" nullable="false" unique="false"/>
     <field name="name" column="name" type="string" length="15" nullable="true" unique="true"/>
     <field name="forgetpassword" column="forgetpassword" type="string" length="17" nullable="true" unique="false"/>
-    <field name="helpSent" column="helpSent" type="boolean" nullable="true" unique="false"/>
+    <field name="validated" column="validated" type="boolean" nullable="false" unique="false"/>
   </entity>
 </doctrine-mapping>
