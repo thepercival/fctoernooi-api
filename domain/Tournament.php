@@ -231,7 +231,7 @@ class Tournament
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getExported()
     {
@@ -239,7 +239,7 @@ class Tournament
     }
 
     /**
-     * @param integer $exported
+     * @param int $exported
      */
     public function setExported($exported)
     {

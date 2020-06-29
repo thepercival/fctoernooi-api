@@ -92,13 +92,6 @@ class Create extends PlanningCommand
                     $this->updateSelfReferee($planningInput);
                 }
 
-//            $planningService = new PlanningService();
-//            $planning = $planningService->getBestPlanning($planningInput);
-//            $sortedGames = $planning->getGames(GameBase::ORDER_BY_BATCH);
-//            $planningOutput = new \Voetbal\Planning\Output($this->logger);
-//            $planningOutput->consoleGames($sortedGames);
-
-
                 $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
                 $this->logger->info($nrUpdated . " structure(s)-planning updated");
 

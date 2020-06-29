@@ -17,7 +17,6 @@
     "php": "^7.3",
     "ext-gd": "*",
     "doctrine/orm": "^2.7",
-    "doctrine/persistence": "^1.3",
     "endroid/qr-code": "^3.7",
     "jms/serializer": "^3.7",
     "middlewares/negotiation": "^2.0",
@@ -56,17 +55,13 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "FCToernooiTest\\": "tests/cases",
-      "FCToernooiTestManual\\": "tests/cases-manual"
+      "FCToernooiTest\\": "tests/cases"
     }
   },
   "scripts": {
     "start": "php -S localhost:2998 -t public/",
     "test": [
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
-    ],
-    "test-dbplannings": [
-      "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases-manual/"
     ],
     "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",

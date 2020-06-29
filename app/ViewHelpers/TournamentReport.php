@@ -21,7 +21,7 @@ class TournamentReport
      */
     public $firstRoundStructure;
     /**
-     * @var string
+     * @var int
      */
     public $nrOfRoundNumbers;
     /**
@@ -56,6 +56,10 @@ class TournamentReport
      * @var string
      */
     public $createdDateTime;
+    /**
+     * @var string
+     */
+    public $publicUrl;
 
     public function __construct(Tournament $tournament, Structure $structure, string $publicUrl = null)
     {
@@ -74,7 +78,7 @@ class TournamentReport
             $nrOflockerRoomCompetitors += $lockerRoom->getCompetitors()->count();
         }
         $this->lockerRoomUsage = $nrOflockerRoomCompetitors . '(' . $tournament->getLockerRooms()->count() . ')';
-        $this->exported = $tournament->getExported() ? 'ja' : 'nee';
+        $this->exported = $tournament->getExported() > 0 ? 'ja' : 'nee';
         $nrOfGames = 0;
         $nrOfScores = 0;
         $this->getScoresUsage($firstRoundNumber, $nrOfGames, $nrOfScores);

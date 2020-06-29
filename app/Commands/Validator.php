@@ -11,11 +11,19 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use Voetbal\Planning\Input\Service as PlanningInputService;
+use Voetbal\Planning\Service as PlanningService;
 use Voetbal\Structure;
+use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Structure\Repository;
 use Voetbal\Structure\Repository as StructureRepository;
+use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Structure\Validator as StructureValidator;
 use Voetbal\Round\Number\GamesValidator;
+use Voetbal\Output\Planning\Batch as BatchOutput;
+use Voetbal\Output\Planning as PlanningOutput;
+use Voetbal\Output\Game as GameOutput;
+use Voetbal\Game;
 
 class Validator extends Command
 {
@@ -32,6 +40,10 @@ class Validator extends Command
      */
     protected $structureValidator;
     /**
+     * @var PlanningInputRepository
+     */
+    protected $planningInputRepos;
+    /**
      * @var GamesValidator
      */
     protected $gamesValidator;
@@ -40,8 +52,10 @@ class Validator extends Command
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->structureRepos = $container->get(StructureRepository::class);
+        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
+
         parent::__construct($container->get(Configuration::class));
     }
 
@@ -94,11 +108,51 @@ class Validator extends Command
             }
             $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure);
-
-            // needs to be turned on eventually
-            // $this->gamesValidator->validateStructure($structure, $competition->getReferees()->count());
+            // $this->validateGames($structure->getFirstRoundNumber(), $competition->getReferees()->count());
         } catch (\Exception $e) {
             throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }
+    }
+
+    protected function validateGames(RoundNumber $roundNumber, int $nrOfReferees)
+    {
+        try {
+            $this->gamesValidator->validate($roundNumber, $nrOfReferees);
+            if ($roundNumber->hasNext()) {
+                $this->validateGames($roundNumber->getNext(), $nrOfReferees);
+            }
+        } catch (\Exception $e) {
+            $this->showPlanning($roundNumber, $nrOfReferees);
+            throw new \Exception($e->getMessage(), E_ERROR);
+        }
+    }
+
+    protected function showPlanning(RoundNumber $roundNumber, int $nrOfReferees)
+    {
+        $gameOutput = new GameOutput($this->logger);
+        foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
+            $gameOutput->output($game);
+        }
+        return;
+
+
+        $planningOutput = new PlanningOutput($this->logger);
+
+        $inputService = new PlanningInputService();
+        $planningService = new PlanningService();
+        $planningInput = $this->planningInputRepos->getFromInput(
+            $inputService->get($roundNumber, $nrOfReferees)
+        );
+        if ($planningInput === null) {
+            $this->logger->info('no planninginput');
+            return;
+        }
+
+        $bestPlanning = $planningService->getBestPlanning($planningInput);
+        if ($bestPlanning === null) {
+            $planningOutput->outputPlanningInput($planningInput, 'no best planning for');
+            return;
+        }
+        $planningOutput->outputWithGames($bestPlanning, true);
     }
 }

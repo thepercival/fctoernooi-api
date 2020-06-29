@@ -43,19 +43,28 @@ class Listing extends Command
             ->setHelp('list the commands');
 
         parent::configure();
+
+        $this->addArgument('commandName', InputArgument::OPTIONAL, 'command-name');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        foreach( $this->commandKeys as $commandKey ) {
+        $commandFilter = null;
+        if (strlen($input->getArgument('commandName')) > 0) {
+            $commandFilter = $input->getArgument('commandName');
+        }
 
+        foreach ($this->commandKeys as $commandKey) {
+            if ($commandFilter !== null && $commandKey !== $commandFilter) {
+                continue;
+            }
             /** @var Command $command */
             $command = $this->container->get($commandKey);
             echo $commandKey . " (" . $command->getDescription() . ")" . PHP_EOL;
-            foreach( $command->getDefinition()->getArguments() as $argument ) {
+            foreach ($command->getDefinition()->getArguments() as $argument) {
                 echo "  " . $argument->getName() . " (" . $argument->getDescription() . ")" . PHP_EOL;
             }
-            foreach( $command->getDefinition()->getOptions() as $option ) {
+            foreach ($command->getDefinition()->getOptions() as $option) {
                 echo " --" . $option->getName() . " (" . $option->getDescription() . ")" . PHP_EOL;
             }
             echo PHP_EOL;
