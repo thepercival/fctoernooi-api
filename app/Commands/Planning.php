@@ -47,7 +47,9 @@ class Planning extends Command
 
         $firstBatch = $planning->getFirstBatch();
         $refereePlaceService = new RefereePlaceService($planning);
-        $refereePlaceService->assign($firstBatch);
+        if (!$refereePlaceService->assign($firstBatch)) {
+            $this->logger->info("refereeplaces could not be equally assigned");
+        }
 
         $planning->setState(PlanningBase::STATE_SUCCESS);
         $this->planningRepos->save($planning);

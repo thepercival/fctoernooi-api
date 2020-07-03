@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "2102ae578c58648eef75608a3730ee67",
+  "content-hash": "bbf7859446cc2f68d6fc2c79d3381721",
   "packages": [
     {
       "name": "bacon/bacon-qr-code",
@@ -15,16 +15,16 @@
         "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0"
       },
       "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Bacon/BaconQrCode/zipball/eaac909da3ccc32b748a65b127acd8918f58d9b0",
-                "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0",
-                "shasum": ""
-            },
-            "require": {
-                "dasprid/enum": "^1.0",
-                "ext-iconv": "*",
-                "php": "^7.1"
-            },
+        "type": "zip",
+        "url": "https://api.github.com/repos/Bacon/BaconQrCode/zipball/eaac909da3ccc32b748a65b127acd8918f58d9b0",
+        "reference": "eaac909da3ccc32b748a65b127acd8918f58d9b0",
+        "shasum": ""
+      },
+      "require": {
+        "dasprid/enum": "^1.0",
+        "ext-iconv": "*",
+        "php": "^7.1"
+      },
             "require-dev": {
                 "phly/keep-a-changelog": "^1.4",
                 "phpunit/phpunit": "^6.4",
@@ -358,15 +358,15 @@
                     "email": "schmittjoh@gmail.com"
                 }
             ],
-            "description": "PHP Doctrine Collections library that adds additional functionality on top of PHP arrays.",
-            "homepage": "https://www.doctrine-project.org/projects/collections.html",
-            "keywords": [
-                "array",
-                "collections",
-                "iterators",
-                "php"
-            ],
-            "time": "2020-05-25T19:24:35+00:00"
+          "description": "PHP Doctrine Collections library that adds additional functionality on top of PHP arrays.",
+          "homepage": "https://www.doctrine-project.org/projects/collections.html",
+          "keywords": [
+            "array",
+            "collections",
+            "iterators",
+            "php"
+          ],
+          "time": "2020-05-25T19:24:35+00:00"
         },
     {
       "name": "doctrine/common",
@@ -382,16 +382,16 @@
         "reference": "a3c6479858989e242a2465972b4f7a8642baf0d4",
         "shasum": ""
       },
-            "require": {
-              "doctrine/persistence": "^2.0",
-              "php": "^7.1 || ^8.0"
-            },
-            "require-dev": {
-                "doctrine/coding-standard": "^1.0",
-                "phpstan/phpstan": "^0.11",
-                "phpstan/phpstan-phpunit": "^0.11",
-                "phpunit/phpunit": "^7.0",
-                "squizlabs/php_codesniffer": "^3.0",
+      "require": {
+        "doctrine/persistence": "^2.0",
+        "php": "^7.1 || ^8.0"
+      },
+      "require-dev": {
+        "doctrine/coding-standard": "^1.0",
+        "phpstan/phpstan": "^0.11",
+        "phpstan/phpstan-phpunit": "^0.11",
+        "phpunit/phpunit": "^7.0",
+        "squizlabs/php_codesniffer": "^3.0",
                 "symfony/phpunit-bridge": "^4.0.5"
             },
             "type": "library",
@@ -890,13 +890,13 @@
                     "email": "ocramius@gmail.com"
                 }
             ],
-            "description": "Object-Relational-Mapper for PHP",
-            "homepage": "https://www.doctrine-project.org/projects/orm.html",
-            "keywords": [
-                "database",
-                "orm"
-            ],
-            "time": "2020-05-26T16:03:49+00:00"
+          "description": "Object-Relational-Mapper for PHP",
+          "homepage": "https://www.doctrine-project.org/projects/orm.html",
+          "keywords": [
+            "database",
+            "orm"
+          ],
+          "time": "2020-05-26T16:03:49+00:00"
         },
     {
       "name": "doctrine/persistence",
@@ -912,16 +912,16 @@
         "reference": "1dee036f22cd5dc0bc12132f1d1c38415907be55",
         "shasum": ""
       },
-            "require": {
-                "doctrine/annotations": "^1.0",
-                "doctrine/cache": "^1.0",
-                "doctrine/collections": "^1.0",
-                "doctrine/event-manager": "^1.0",
-                "doctrine/reflection": "^1.2",
-                "php": "^7.1"
-            },
-            "conflict": {
-                "doctrine/common": "<2.10@dev"
+      "require": {
+        "doctrine/annotations": "^1.0",
+        "doctrine/cache": "^1.0",
+        "doctrine/collections": "^1.0",
+        "doctrine/event-manager": "^1.0",
+        "doctrine/reflection": "^1.2",
+        "php": "^7.1"
+      },
+      "conflict": {
+        "doctrine/common": "<2.10@dev"
             },
             "require-dev": {
               "doctrine/coding-standard": "^6.0",
@@ -1114,26 +1114,178 @@
             "description": "Endroid QR Code",
             "homepage": "https://github.com/endroid/qr-code",
             "keywords": [
-                "bundle",
-                "code",
-                "endroid",
-                "php",
-                "qr",
-                "qrcode"
+              "bundle",
+              "code",
+              "endroid",
+              "php",
+              "qr",
+              "qrcode"
             ],
-            "time": "2020-06-19T08:57:37+00:00"
+          "time": "2020-06-19T08:57:37+00:00"
         },
-        {
-            "name": "fig/http-message-util",
-            "version": "1.1.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/http-message-util.git",
-                "reference": "3242caa9da7221a304b8f84eb9eaddae0a7cf422"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message-util/zipball/3242caa9da7221a304b8f84eb9eaddae0a7cf422",
+    {
+      "name": "enqueue/amqp-lib",
+      "version": "0.10.1",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-enqueue/amqp-lib.git",
+        "reference": "849c88dce0843557d75797c96344bdfd7feb2088"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-enqueue/amqp-lib/zipball/849c88dce0843557d75797c96344bdfd7feb2088",
+        "reference": "849c88dce0843557d75797c96344bdfd7feb2088",
+        "shasum": ""
+      },
+      "require": {
+        "enqueue/amqp-tools": "^0.10",
+        "php": "^7.1.3",
+        "php-amqplib/php-amqplib": "^2.10",
+        "queue-interop/amqp-interop": "^0.8",
+        "queue-interop/queue-interop": "^0.8"
+      },
+      "require-dev": {
+        "enqueue/null": "0.10.x-dev",
+        "enqueue/test": "0.10.x-dev",
+        "phpunit/phpunit": "~7.5",
+        "queue-interop/queue-spec": "^0.6"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "0.10.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Enqueue\\AmqpLib\\": ""
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "description": "Message Queue Amqp Transport",
+      "homepage": "https://enqueue.forma-pro.com/",
+      "keywords": [
+        "AMQP",
+        "messaging",
+        "queue"
+      ],
+      "time": "2020-01-26T23:45:10+00:00"
+    },
+    {
+      "name": "enqueue/amqp-tools",
+      "version": "0.10.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-enqueue/amqp-tools.git",
+        "reference": "e41d56966fdd1c7681d342e431e65bccb1962a9e"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-enqueue/amqp-tools/zipball/e41d56966fdd1c7681d342e431e65bccb1962a9e",
+        "reference": "e41d56966fdd1c7681d342e431e65bccb1962a9e",
+        "shasum": ""
+      },
+      "require": {
+        "enqueue/dsn": "^0.10",
+        "php": "^7.1.3",
+        "queue-interop/amqp-interop": "^0.8",
+        "queue-interop/queue-interop": "^0.8"
+      },
+      "require-dev": {
+        "enqueue/null": "0.10.x-dev",
+        "enqueue/test": "0.10.x-dev",
+        "phpunit/phpunit": "~7.5"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "0.10.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Enqueue\\AmqpTools\\": ""
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "description": "Message Queue Amqp Tools",
+      "homepage": "https://enqueue.forma-pro.com/",
+      "keywords": [
+        "AMQP",
+        "messaging",
+        "queue"
+      ],
+      "time": "2019-12-19T07:01:09+00:00"
+    },
+    {
+      "name": "enqueue/dsn",
+      "version": "0.10.1",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-enqueue/dsn.git",
+        "reference": "e503546bacc0f2e8d45590b089683140ecf91cd3"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-enqueue/dsn/zipball/e503546bacc0f2e8d45590b089683140ecf91cd3",
+        "reference": "e503546bacc0f2e8d45590b089683140ecf91cd3",
+        "shasum": ""
+      },
+      "require": {
+        "php": "^7.1.3"
+      },
+      "require-dev": {
+        "phpunit/phpunit": "~7.5"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "0.10.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Enqueue\\Dsn\\": ""
+        },
+        "exclude-from-classmap": [
+          "/Tests/"
+        ]
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "description": "Parse DSN",
+      "homepage": "https://enqueue.forma-pro.com/",
+      "keywords": [
+        "dsn",
+        "parse"
+      ],
+      "time": "2020-01-26T23:45:10+00:00"
+    },
+    {
+      "name": "fig/http-message-util",
+      "version": "1.1.4",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-fig/http-message-util.git",
+        "reference": "3242caa9da7221a304b8f84eb9eaddae0a7cf422"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-fig/http-message-util/zipball/3242caa9da7221a304b8f84eb9eaddae0a7cf422",
                 "reference": "3242caa9da7221a304b8f84eb9eaddae0a7cf422",
                 "shasum": ""
             },
@@ -1463,14 +1615,14 @@
                     "email": "goetas@gmail.com"
                 }
             ],
-            "description": "Class/method/property metadata management in PHP",
-            "keywords": [
-                "annotations",
-                "metadata",
-                "xml",
-                "yaml"
-            ],
-            "time": "2020-06-06T16:52:59+00:00"
+          "description": "Class/method/property metadata management in PHP",
+          "keywords": [
+            "annotations",
+            "metadata",
+            "xml",
+            "yaml"
+          ],
+          "time": "2020-06-06T16:52:59+00:00"
         },
     {
       "name": "jms/serializer",
@@ -1486,32 +1638,32 @@
         "reference": "13ead2c318da7965eafda9348bc70eadc872baac",
         "shasum": ""
       },
-            "require": {
-              "doctrine/annotations": "^1.0",
-              "doctrine/instantiator": "^1.0.3",
-              "doctrine/lexer": "^1.1",
-              "jms/metadata": "^2.0",
-              "php": "^7.2"
-            },
-            "require-dev": {
-              "doctrine/coding-standard": "^5.0",
-              "doctrine/orm": "~2.1",
-              "doctrine/persistence": "^1.3.3|^2.0|^3.0",
-              "doctrine/phpcr-odm": "^1.3|^2.0",
-              "ext-pdo_sqlite": "*",
-              "jackalope/jackalope-doctrine-dbal": "^1.1.5",
-              "ocramius/proxy-manager": "^1.0|^2.0",
-              "phpunit/phpunit": "^8.0||^9.0",
-              "psr/container": "^1.0",
-              "symfony/dependency-injection": "^3.0|^4.0|^5.0",
-              "symfony/expression-language": "^3.0|^4.0|^5.0",
-              "symfony/filesystem": "^3.0|^4.0|^5.0",
-              "symfony/form": "^3.0|^4.0|^5.0",
-                "symfony/translation": "^3.0|^4.0|^5.0",
-                "symfony/validator": "^3.1.9|^4.0|^5.0",
-                "symfony/yaml": "^3.3|^4.0|^5.0",
-              "twig/twig": "~1.34|~2.4|^3.0"
-            },
+      "require": {
+        "doctrine/annotations": "^1.0",
+        "doctrine/instantiator": "^1.0.3",
+        "doctrine/lexer": "^1.1",
+        "jms/metadata": "^2.0",
+        "php": "^7.2"
+      },
+      "require-dev": {
+        "doctrine/coding-standard": "^5.0",
+        "doctrine/orm": "~2.1",
+        "doctrine/persistence": "^1.3.3|^2.0|^3.0",
+        "doctrine/phpcr-odm": "^1.3|^2.0",
+        "ext-pdo_sqlite": "*",
+        "jackalope/jackalope-doctrine-dbal": "^1.1.5",
+        "ocramius/proxy-manager": "^1.0|^2.0",
+        "phpunit/phpunit": "^8.0||^9.0",
+        "psr/container": "^1.0",
+        "symfony/dependency-injection": "^3.0|^4.0|^5.0",
+        "symfony/expression-language": "^3.0|^4.0|^5.0",
+        "symfony/filesystem": "^3.0|^4.0|^5.0",
+        "symfony/form": "^3.0|^4.0|^5.0",
+        "symfony/translation": "^3.0|^4.0|^5.0",
+        "symfony/validator": "^3.1.9|^4.0|^5.0",
+        "symfony/yaml": "^3.3|^4.0|^5.0",
+        "twig/twig": "~1.34|~2.4|^3.0"
+      },
             "suggest": {
                 "doctrine/cache": "Required if you like to use cache functionality.",
                 "doctrine/collections": "Required if you like to use doctrine collection types as ArrayCollection.",
@@ -2288,26 +2440,103 @@
             "description": "A library that can be used to serialize closures (anonymous functions) and arbitrary objects.",
             "homepage": "https://opis.io/closure",
             "keywords": [
-                "anonymous functions",
-                "closure",
-                "function",
-                "serializable",
-                "serialization",
-                "serialize"
+              "anonymous functions",
+              "closure",
+              "function",
+              "serializable",
+              "serialization",
+              "serialize"
             ],
-            "time": "2020-06-17T14:59:55+00:00"
+          "time": "2020-06-17T14:59:55+00:00"
+        },
+    {
+      "name": "php-amqplib/php-amqplib",
+      "version": "v2.11.3",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-amqplib/php-amqplib.git",
+        "reference": "6353c5d2d3021a301914bc6566e695c99cfeb742"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-amqplib/php-amqplib/zipball/6353c5d2d3021a301914bc6566e695c99cfeb742",
+        "reference": "6353c5d2d3021a301914bc6566e695c99cfeb742",
+        "shasum": ""
+      },
+      "require": {
+        "ext-mbstring": "*",
+        "ext-sockets": "*",
+        "php": ">=5.6.3",
+        "phpseclib/phpseclib": "^2.0.0"
+      },
+      "conflict": {
+        "php": "7.4.0 - 7.4.1"
+      },
+      "replace": {
+        "videlalvaro/php-amqplib": "self.version"
+      },
+      "require-dev": {
+        "ext-curl": "*",
+        "nategood/httpful": "^0.2.20",
+        "phpunit/phpunit": "^5.7|^6.5|^7.0",
+        "squizlabs/php_codesniffer": "^2.5"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "2.11-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "PhpAmqpLib\\": "PhpAmqpLib/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "LGPL-2.1-or-later"
+      ],
+      "authors": [
+        {
+          "name": "Alvaro Videla",
+          "role": "Original Maintainer"
         },
         {
-            "name": "php-di/invoker",
-            "version": "2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/PHP-DI/Invoker.git",
-                "reference": "540c27c86f663e20fe39a24cd72fa76cdb21d41a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/540c27c86f663e20fe39a24cd72fa76cdb21d41a",
+          "name": "Raúl Araya",
+          "email": "nubeiro@gmail.com",
+          "role": "Maintainer"
+        },
+        {
+          "name": "Luke Bakken",
+          "email": "luke@bakken.io",
+          "role": "Maintainer"
+        },
+        {
+          "name": "Ramūnas Dronga",
+          "email": "github@ramuno.lt",
+          "role": "Maintainer"
+        }
+      ],
+      "description": "Formerly videlalvaro/php-amqplib.  This library is a pure PHP implementation of the AMQP protocol. It's been tested against RabbitMQ.",
+      "homepage": "https://github.com/php-amqplib/php-amqplib/",
+      "keywords": [
+        "message",
+        "queue",
+        "rabbitmq"
+      ],
+      "time": "2020-05-13T13:56:11+00:00"
+    },
+    {
+      "name": "php-di/invoker",
+      "version": "2.0.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/PHP-DI/Invoker.git",
+        "reference": "540c27c86f663e20fe39a24cd72fa76cdb21d41a"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/540c27c86f663e20fe39a24cd72fa76cdb21d41a",
                 "reference": "540c27c86f663e20fe39a24cd72fa76cdb21d41a",
                 "shasum": ""
             },
@@ -2641,26 +2870,118 @@
                     "email": "graham@alt-three.com"
                 }
             ],
-            "description": "Option Type for PHP",
-            "keywords": [
-                "language",
-                "option",
-                "php",
-                "type"
-            ],
-            "time": "2020-06-07T10:40:07+00:00"
+          "description": "Option Type for PHP",
+          "keywords": [
+            "language",
+            "option",
+            "php",
+            "type"
+          ],
+          "time": "2020-06-07T10:40:07+00:00"
+        },
+    {
+      "name": "phpseclib/phpseclib",
+      "version": "2.0.27",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/phpseclib/phpseclib.git",
+        "reference": "34620af4df7d1988d8f0d7e91f6c8a3bf931d8dc"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/34620af4df7d1988d8f0d7e91f6c8a3bf931d8dc",
+        "reference": "34620af4df7d1988d8f0d7e91f6c8a3bf931d8dc",
+        "shasum": ""
+      },
+      "require": {
+        "php": ">=5.3.3"
+      },
+      "require-dev": {
+        "phing/phing": "~2.7",
+        "phpunit/phpunit": "^4.8.35|^5.7|^6.0",
+        "sami/sami": "~2.0",
+        "squizlabs/php_codesniffer": "~2.0"
+      },
+      "suggest": {
+        "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
+        "ext-libsodium": "SSH2/SFTP can make use of some algorithms provided by the libsodium-php extension.",
+        "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
+        "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
+      },
+      "type": "library",
+      "autoload": {
+        "files": [
+          "phpseclib/bootstrap.php"
+        ],
+        "psr-4": {
+          "phpseclib\\": "phpseclib/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Jim Wigginton",
+          "email": "terrafrost@php.net",
+          "role": "Lead Developer"
         },
         {
-            "name": "psr/container",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/container.git",
-                "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
+          "name": "Patrick Monnerat",
+          "email": "pm@datasphere.ch",
+          "role": "Developer"
+        },
+        {
+          "name": "Andreas Fischer",
+          "email": "bantu@phpbb.com",
+          "role": "Developer"
+        },
+        {
+          "name": "Hans-Jürgen Petrich",
+          "email": "petrich@tronic-media.com",
+          "role": "Developer"
+        },
+        {
+          "name": "Graham Campbell",
+          "email": "graham@alt-three.com",
+          "role": "Developer"
+        }
+      ],
+      "description": "PHP Secure Communications Library - Pure-PHP implementations of RSA, AES, SSH2, SFTP, X.509 etc.",
+      "homepage": "http://phpseclib.sourceforge.net",
+      "keywords": [
+        "BigInteger",
+        "aes",
+        "asn.1",
+        "asn1",
+        "blowfish",
+        "crypto",
+        "cryptography",
+        "encryption",
+        "rsa",
+        "security",
+        "sftp",
+        "signature",
+        "signing",
+        "ssh",
+        "twofish",
+        "x.509",
+        "x509"
+      ],
+      "time": "2020-04-04T23:17:33+00:00"
+    },
+    {
+      "name": "psr/container",
+      "version": "1.0.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/php-fig/container.git",
+        "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/php-fig/container/zipball/b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
                 "reference": "b7ce3b176482dbbc1245ebf52b181af44c2cf55f",
                 "shasum": ""
             },
@@ -2993,26 +3314,111 @@
                 }
             ],
             "description": "Common interfaces for simple caching",
-            "keywords": [
-                "cache",
-                "caching",
-                "psr",
-                "psr-16",
-                "simple-cache"
-            ],
-            "time": "2017-10-23T01:57:42+00:00"
+          "keywords": [
+            "cache",
+            "caching",
+            "psr",
+            "psr-16",
+            "simple-cache"
+          ],
+          "time": "2017-10-23T01:57:42+00:00"
         },
-        {
-            "name": "ralouphie/getallheaders",
-            "version": "3.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ralouphie/getallheaders.git",
-                "reference": "120b605dfeb996808c31b6477290a714d356e822"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ralouphie/getallheaders/zipball/120b605dfeb996808c31b6477290a714d356e822",
+    {
+      "name": "queue-interop/amqp-interop",
+      "version": "0.8.1",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/queue-interop/amqp-interop.git",
+        "reference": "2029c3b3b9f10cc1c0a219650f66ab68fcfe656d"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/queue-interop/amqp-interop/zipball/2029c3b3b9f10cc1c0a219650f66ab68fcfe656d",
+        "reference": "2029c3b3b9f10cc1c0a219650f66ab68fcfe656d",
+        "shasum": ""
+      },
+      "require": {
+        "php": "^7.1.3",
+        "queue-interop/queue-interop": "^0.7|^0.8"
+      },
+      "require-dev": {
+        "phpunit/phpunit": "~5.4.0"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "0.8.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Interop\\Amqp\\": "src/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "time": "2018-12-13T13:42:47+00:00"
+    },
+    {
+      "name": "queue-interop/queue-interop",
+      "version": "0.8.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/queue-interop/queue-interop.git",
+        "reference": "b43af85f635439fa2c9a6d8fd486489da4869741"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/queue-interop/queue-interop/zipball/b43af85f635439fa2c9a6d8fd486489da4869741",
+        "reference": "b43af85f635439fa2c9a6d8fd486489da4869741",
+        "shasum": ""
+      },
+      "require": {
+        "php": "^7.1.3"
+      },
+      "require-dev": {
+        "phpunit/phpunit": "^5.5",
+        "queue-interop/queue-spec": "^0.6@dev"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-master": "0.7-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Interop\\Queue\\": "src/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "description": "Promoting the interoperability of MQs objects. Based on Java JMS",
+      "homepage": "https://github.com/queue-interop/queue-interop",
+      "keywords": [
+        "MQ",
+        "jms",
+        "message queue",
+        "messaging",
+        "queue"
+      ],
+      "time": "2018-11-22T17:53:21+00:00"
+    },
+    {
+      "name": "ralouphie/getallheaders",
+      "version": "3.0.3",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/ralouphie/getallheaders.git",
+        "reference": "120b605dfeb996808c31b6477290a714d356e822"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/ralouphie/getallheaders/zipball/120b605dfeb996808c31b6477290a714d356e822",
                 "reference": "120b605dfeb996808c31b6477290a714d356e822",
                 "shasum": ""
             },
@@ -4437,14 +4843,14 @@
                     "name": "Fabien Potencier",
                     "email": "fabien@symfony.com"
                 },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
+              {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+              }
             ],
-            "description": "Symfony Yaml Component",
-            "homepage": "https://symfony.com",
-            "time": "2020-05-20T17:43:50+00:00"
+          "description": "Symfony Yaml Component",
+          "homepage": "https://symfony.com",
+          "time": "2020-05-20T17:43:50+00:00"
         },
     {
       "name": "thepercival/voetbal",
@@ -4460,16 +4866,16 @@
         "reference": "394b2348027ec493681ffa910c8f0309009113c8",
         "shasum": ""
       },
-            "require": {
-                "doctrine/orm": "^2.7",
-                "guzzlehttp/guzzle": "^6.5",
-                "jms/serializer": "^3.4",
-                "league/period": "^4.9",
-                "monolog/monolog": "^2.0",
-                "php": ">=7.4",
-                "symfony/yaml": "^5.0",
-                "vlucas/phpdotenv": "^4.1"
-            },
+      "require": {
+        "doctrine/orm": "^2.7",
+        "guzzlehttp/guzzle": "^6.5",
+        "jms/serializer": "^3.4",
+        "league/period": "^4.9",
+        "monolog/monolog": "^2.0",
+        "php": ">=7.4",
+        "symfony/yaml": "^5.0",
+        "vlucas/phpdotenv": "^4.1"
+      },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^2.16",
                 "phpstan/extension-installer": "^1.0",
@@ -5322,15 +5728,15 @@
             "authors": [
                 {
                     "name": "John Stevenson",
-                    "email": "john-stevenson@blueyonder.co.uk"
+                  "email": "john-stevenson@blueyonder.co.uk"
                 }
             ],
-            "description": "Restarts a process without Xdebug.",
-            "keywords": [
-                "Xdebug",
-                "performance"
-            ],
-            "time": "2020-06-04T11:16:35+00:00"
+          "description": "Restarts a process without Xdebug.",
+          "keywords": [
+            "Xdebug",
+            "performance"
+          ],
+          "time": "2020-06-04T11:16:35+00:00"
         },
       {
         "name": "friendsofphp/php-cs-fixer",
@@ -5346,16 +5752,16 @@
           "reference": "1023c3458137ab052f6ff1e09621a721bfdeca13",
           "shasum": ""
         },
-            "require": {
-                "composer/semver": "^1.4",
-                "composer/xdebug-handler": "^1.2",
-                "doctrine/annotations": "^1.2",
-                "ext-json": "*",
-                "ext-tokenizer": "*",
-                "php": "^5.6 || ^7.0",
-                "php-cs-fixer/diff": "^1.3",
-                "symfony/console": "^3.4.17 || ^4.1.6 || ^5.0",
-                "symfony/event-dispatcher": "^3.0 || ^4.0 || ^5.0",
+        "require": {
+          "composer/semver": "^1.4",
+          "composer/xdebug-handler": "^1.2",
+          "doctrine/annotations": "^1.2",
+          "ext-json": "*",
+          "ext-tokenizer": "*",
+          "php": "^5.6 || ^7.0",
+          "php-cs-fixer/diff": "^1.3",
+          "symfony/console": "^3.4.17 || ^4.1.6 || ^5.0",
+          "symfony/event-dispatcher": "^3.0 || ^4.0 || ^5.0",
                 "symfony/filesystem": "^3.0 || ^4.0 || ^5.0",
                 "symfony/finder": "^3.0 || ^4.0 || ^5.0",
                 "symfony/options-resolver": "^3.0 || ^4.0 || ^5.0",
@@ -5413,16 +5819,16 @@
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                  "email": "fabien@symfony.com"
                 },
-                {
-                    "name": "Dariusz Rumiński",
-                    "email": "dariusz.ruminski@gmail.com"
-                }
+              {
+                "name": "Dariusz Rumiński",
+                "email": "dariusz.ruminski@gmail.com"
+              }
             ],
-            "description": "A tool to automatically fix PHP code style",
+        "description": "A tool to automatically fix PHP code style",
         "time": "2020-06-27T23:57:46+00:00"
-        },
+      },
       {
         "name": "myclabs/deep-copy",
         "version": "1.10.1",
@@ -5437,16 +5843,16 @@
           "reference": "969b211f9a51aa1f6c01d1d2aef56d3bd91598e5",
           "shasum": ""
         },
-            "require": {
-              "php": "^7.1 || ^8.0"
-            },
-            "replace": {
-                "myclabs/deep-copy": "self.version"
-            },
-            "require-dev": {
-                "doctrine/collections": "^1.0",
-                "doctrine/common": "^2.6",
-                "phpunit/phpunit": "^7.1"
+        "require": {
+          "php": "^7.1 || ^8.0"
+        },
+        "replace": {
+          "myclabs/deep-copy": "self.version"
+        },
+        "require-dev": {
+          "doctrine/collections": "^1.0",
+          "doctrine/common": "^2.6",
+          "phpunit/phpunit": "^7.1"
             },
             "type": "library",
             "autoload": {
@@ -5659,15 +6065,15 @@
                     "email": "sebastian@phpunit.de"
                 },
                 {
-                    "name": "SpacePossum"
+                  "name": "SpacePossum"
                 }
             ],
-            "description": "sebastian/diff v2 backport support for PHP5.6",
-            "homepage": "https://github.com/PHP-CS-Fixer",
-            "keywords": [
-                "diff"
-            ],
-            "time": "2018-02-15T16:58:55+00:00"
+          "description": "sebastian/diff v2 backport support for PHP5.6",
+          "homepage": "https://github.com/PHP-CS-Fixer",
+          "keywords": [
+            "diff"
+          ],
+          "time": "2018-02-15T16:58:55+00:00"
         },
       {
         "name": "phpdocumentor/reflection-common",
@@ -5683,16 +6089,16 @@
           "reference": "1d01c49d4ed62f25aa84a747ad35d5a16924662b",
           "shasum": ""
         },
-            "require": {
-              "php": "^7.2 || ^8.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                  "dev-2.x": "2.x-dev"
-                }
-            },
-            "autoload": {
+        "require": {
+          "php": "^7.2 || ^8.0"
+        },
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-2.x": "2.x-dev"
+          }
+        },
+        "autoload": {
                 "psr-4": {
                     "phpDocumentor\\Reflection\\": "src/"
                 }
@@ -5761,15 +6167,15 @@
             "authors": [
                 {
                     "name": "Mike van Riel",
-                    "email": "me@mikevanriel.com"
+                  "email": "me@mikevanriel.com"
                 },
-                {
-                    "name": "Jaap van Otterdijk",
-                    "email": "account@ijaap.nl"
-                }
+              {
+                "name": "Jaap van Otterdijk",
+                "email": "account@ijaap.nl"
+              }
             ],
-            "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
-            "time": "2020-02-22T12:28:44+00:00"
+          "description": "With this component, a library can provide support for annotations via DocBlocks or otherwise retrieve information that is embedded in a DocBlock.",
+          "time": "2020-02-22T12:28:44+00:00"
         },
       {
         "name": "phpdocumentor/type-resolver",
@@ -5785,16 +6191,16 @@
           "reference": "e878a14a65245fbe78f8080eba03b47c3b705651",
           "shasum": ""
         },
-            "require": {
-              "php": "^7.2 || ^8.0",
-              "phpdocumentor/reflection-common": "^2.0"
-            },
-            "require-dev": {
-              "ext-tokenizer": "*"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
+        "require": {
+          "php": "^7.2 || ^8.0",
+          "phpdocumentor/reflection-common": "^2.0"
+        },
+        "require-dev": {
+          "ext-tokenizer": "*"
+        },
+        "type": "library",
+        "extra": {
+          "branch-alias": {
                     "dev-1.x": "1.x-dev"
                 }
             },

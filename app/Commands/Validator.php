@@ -136,23 +136,23 @@ class Validator extends Command
         return;
 
 
-        $planningOutput = new PlanningOutput($this->logger);
-
-        $inputService = new PlanningInputService();
-        $planningService = new PlanningService();
-        $planningInput = $this->planningInputRepos->getFromInput(
-            $inputService->get($roundNumber, $nrOfReferees)
-        );
-        if ($planningInput === null) {
-            $this->logger->info('no planninginput');
-            return;
-        }
-
-        $bestPlanning = $planningService->getBestPlanning($planningInput);
-        if ($bestPlanning === null) {
-            $planningOutput->outputPlanningInput($planningInput, 'no best planning for');
-            return;
-        }
-        $planningOutput->outputWithGames($bestPlanning, true);
+//        $planningOutput = new PlanningOutput($this->logger);
+//
+//        $inputService = new PlanningInputService();
+//        $planningService = new PlanningService();
+//        $planningInput = $this->planningInputRepos->getFromInput(
+//            $inputService->get($roundNumber, $nrOfReferees)
+//        );
+//        if ($planningInput === null) {
+//            $this->logger->info('no planninginput');
+//            return;
+//        }
+//
+//        $bestPlanning = $planningService->getBestPlanning($planningInput);
+//        if ($bestPlanning === null) {
+//            $planningOutput->outputPlanningInput($planningInput, 'no best planning for');
+//            return;
+//        }
+//        $planningOutput->outputWithGames($bestPlanning, true);
     }
 }

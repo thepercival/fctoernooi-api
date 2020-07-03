@@ -8,6 +8,7 @@
 
 namespace App\Actions\Voetbal;
 
+use App\QueueService;
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
@@ -17,7 +18,9 @@ use JMS\Serializer\Serializer;
 use League\Period\Period;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Repository as PlanningRepository;
+use Voetbal\Round\Number as RoundNumber;
 use Voetbal\Structure\Repository as StructureRepository;
 use Voetbal\Planning\ScheduleService;
 use Voetbal\Planning\Input\Repository as InputRepository;
@@ -76,11 +79,12 @@ final class PlanningAction extends Action
         $tournament = $request->getAttribute("tournament");
 
         try {
-            list($structure, $roundNumber) = $this->getFromRequest($request, $args);
+            list($structure, $startRoundNumber) = $this->getFromRequest($request, $args);
+
+            $this->removePlanningCreateAndQueueNonExistingInput($startRoundNumber);
 
             $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->inputRepos, $this->repos);
-
-            $roundNumberPlanningCreator->create($roundNumber, $tournament->getBreak());
+            $roundNumberPlanningCreator->addFrom($startRoundNumber, $tournament->getBreak());
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
@@ -89,7 +93,26 @@ final class PlanningAction extends Action
         }
     }
 
+    protected function removePlanningCreateAndQueueNonExistingInput(RoundNumber $roundNumber)
+    {
+        $inputService = new PlanningInputService();
+        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
+        $planningInput = $inputService->get($roundNumber, $nrOfReferees);
 
+        $this->repos->removeRoundNumber($roundNumber);
+
+        $planningInputFromDb = $this->inputRepos->getFromInput($planningInput);
+        if ($planningInputFromDb === null) {
+            $this->inputRepos->save($planningInput);
+
+            $queueService = new QueueService();
+            $queueService->send($roundNumber->getCompetition(), $roundNumber->getNumber());
+            // if fails stop all executions
+        }
+        if ($roundNumber->hasNext()) {
+            $this->removePlanningCreateAndQueueNonExistingInput($roundNumber->getNext());
+        }
+    }
 
     /**
      * do game remove and add for multiple games

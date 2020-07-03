@@ -6,10 +6,11 @@ use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Planning\Input;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-
+use FCToernooi\Tournament\StructureOptions as TournamentStructureOptions;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
 use Voetbal\Range as VoetbalRange;
@@ -45,24 +46,20 @@ class CreateDefaultInput extends Command
             // the "--help" option
             ->setHelp('Creates the default planning-inputs');
         parent::configure();
+
+        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '6-6');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-planning-create-default-input');
-        return $this->createPlanningInputs();
+        return $this->createPlanningInputs($input);
     }
 
-    protected function createPlanningInputs(): int
+    protected function createPlanningInputs(InputInterface $input): int
     {
-        $structureOptions = new StructureOptions(
-            new VoetbalRange(1, 10), // poules
-            new VoetbalRange(2, 20), // places
-            new VoetbalRange(2, 10)
-        );
-
         $planningInputIterator = new PlanningInputIterator(
-            $structureOptions,
+            $this->getStructureOptions($input),
             new VoetbalRange(1, 1), // sports
             new VoetbalRange(1, 10),// fields
             new VoetbalRange(0, 10),// referees
@@ -85,6 +82,22 @@ class CreateDefaultInput extends Command
             }
         }
         return 0;
+    }
+
+    protected function getStructureOptions(InputInterface $input): StructureOptions
+    {
+        $tournamentStructureOptions = new TournamentStructureOptions();
+        $pouleRange = $tournamentStructureOptions->getPouleRange();
+        $placeRange = $tournamentStructureOptions->getPlaceRange();
+        if (strlen($input->getOption("placesRange")) > 0) {
+            $minMax = explode('-', $input->getOption('placesRange'));
+            $placeRange = new VoetbalRange((int)$minMax[0], (int)$minMax[1]);
+        }
+        return new StructureOptions(
+            $pouleRange,
+            $placeRange,
+            $tournamentStructureOptions->getPlacesPerPouleRange()
+        );
     }
 
     protected function inputToString(Input $planningInput): string

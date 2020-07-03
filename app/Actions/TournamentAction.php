@@ -306,7 +306,7 @@ class TournamentAction extends Action
 
             $this->structureRepos->add($newStructure);
 
-            $this->planningCreator->create($newStructure->getFirstRoundNumber(), $newTournament->getBreak());
+            $this->planningCreator->addFrom($newStructure->getFirstRoundNumber(), $newTournament->getBreak());
 
             $conn->commit();
 

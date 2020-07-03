@@ -3,10 +3,14 @@
 namespace App\Commands\Planning;
 
 use App\Mailer;
+use App\QueueService;
+use Interop\Queue\Consumer;
+use Interop\Queue\Message;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\Game as GameBase;
+use Voetbal\Competition;
 use Voetbal\Output\Planning as PlanningOutput;
 use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Planning as PlanningBase;
@@ -62,6 +66,8 @@ class Create extends PlanningCommand
             // the "--help" option
             ->setHelp('Creates the plannings from the inputs');
         parent::configure();
+
+        $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -69,91 +75,128 @@ class Create extends PlanningCommand
         $this->initLogger($input, 'cron-planning-create');
 
         try {
-            if ($this->planningInputRepos->isProcessing(PlanningInput::STATE_TRYING_PLANNINGS)) {
-                $this->checkMoreThanTwoCompetitionsWithoutPlanning();
-                $this->logger->info("still processing..");
-                return 0;
-            }
-            $planningInput = $this->planningInputRepos->getFirstUnsuccessful();
-            // $planningInput = $this->planningInputRepos->find( 25163 );
-            if ($planningInput === null) {
-                $this->logger->info("nothing to process");
-                return 0;
-            }
+            $receiver = function (Message $message, Consumer $consumer): void {
+                // process message
 
-            $em = $this->planningInputRepos->getEM();
-            $conn = $em->getConnection();
-            $conn->beginTransaction();
-            try {
-                $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
-                $planningSeeker->process($planningInput);
-
-                if ($planningInput->getSelfReferee()) {
-                    $this->updateSelfReferee($planningInput);
+                try {
+                    $content = json_decode($message->getBody());
+                    $competition = $this->competitionRepos->find((int)$content->competitionId);
+                    if ($competition === null) {
+                        throw new \Exception("competition is not found, tournament maybe deleted already", E_ERROR);
+                    }
+                    $this->processPlanning($competition, (int)$content->roundNumber);
+                    $consumer->acknowledge($message);
+                } catch (\Exception $e) {
+                    $this->logger->error($e->getMessage());
+                    $consumer->reject($message);
                 }
+            };
 
-                $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
-                $this->logger->info($nrUpdated . " structure(s)-planning updated");
-
-                $em->flush();
-                $conn->commit();
-            } catch (\Exception $e) {
-                $conn->rollBack();
-                throw $e;
-            }
+            $queue = new QueueService();
+            $timeoutInSeconds = 295;
+            $queue->receive($receiver, $timeoutInSeconds);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
         return 0;
     }
 
-    protected function addPlannigsToRoundNumbers(PlanningInput $planningInput): int
+    protected function processPlanning(Competition $competition, int $roundNumberAsValue)
     {
-        $nrUpdated = 0;
-        $structures = $this->structureRepos->getStructures(["hasPlanning" => false]);
-        $structureValidator = new StructureValidator();
-        foreach ($structures as $structure) {
-            $competition = $structure->getFirstRoundNumber()->getCompetition();
-            try {
-                $structureValidator->checkValidity($competition, $structure);
-                if ($this->addPlanningToRoundNumber($structure->getFirstRoundNumber(), $planningInput) === true) {
-                    $nrUpdated++;
-                };
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
-            }
+        $this->logger->info("competitionid: " . $competition->getId() . " => " . $roundNumberAsValue . "(rn)");
+
+        $roundNumber = $this->getFreshRoundNumber($competition, $roundNumberAsValue);
+        $planningInputService = new PlanningInputService();
+        $nrOfReferees = $competition->getReferees()->count();
+        $planningInput = $planningInputService->get($roundNumber, $nrOfReferees);
+        $this->planningInputRepos->getEM()->flush();
+//        $em = $this->planningInputRepos->getEM();
+//        $conn = $em->getConnection();
+//        $conn->beginTransaction();
+
+        $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker->process($planningInput);
+        if ($planningInput->getSelfReferee()) {
+            $this->updateSelfReferee($planningInput);
         }
-        return $nrUpdated;
+
+        $planningService = new PlanningBase\Service();
+        $bestPlanning = $planningService->getBestPlanning($planningInput);
+        if ($bestPlanning === null) {
+            throw new \Exception(
+                "best planning not found for roundnumber " . $roundNumberAsValue . " and competitionid " . $competition->getId(
+                ), E_ERROR
+            );
+        }
+        $freshRoundNumber = $this->getFreshRoundNumber($roundNumber->getCompetition(), $roundNumber->getNumber());
+        $this->connectPlanningInputWithRoundNumber($freshRoundNumber, $bestPlanning);
+
+//            $planningOutput = new PlanningOutput($this->logger);
+//            $planningOutput->outputWithGames($bestPlanning, false);
+//            $planningOutput->outputWithTotals($bestPlanning, false);
+
+//                $nrUpdated = $this->addPlannigsToRoundNumbers($planningInput);
+//                $this->logger->info($nrUpdated . " structure(s)-planning updated");
+
+//            $em->flush();
+//            $conn->commit();
+//        } catch (\Exception $e) {
+//            $conn->rollBack();
+//            throw $e;
+//        }
+        $this->planningInputRepos->getEM()->flush();
     }
 
-    protected function addPlanningToRoundNumber(RoundNumber $roundNumber, PlanningInput $planningInput): bool
+//    protected function connectPlanningInputWithRoundNumber(PlanningInput $planningInput, RoundNumber $roundNumber)
+//    {
+//        $roundNumber
+//
+//        try {
+//            $structureValidator->checkValidity($competition, $structure);
+//            if ($this->addPlanningToRoundNumber($structure->getFirstRoundNumber(), $planningInput) === true) {
+//                $nrUpdated++;
+//            };
+//        } catch (\Exception $e) {
+//            $this->logger->error($e->getMessage());
+//        }
+//    }
+
+    protected function connectPlanningInputWithRoundNumber(RoundNumber $roundNumber, PlanningBase $bestPlanning): bool
     {
+        $planningInput = $bestPlanning->getInput();
         if ($roundNumber->getHasPlanning()) {
-            return $this->addPlanningToRoundNumber($roundNumber->getNext(), $planningInput);
+            if ($roundNumber->hasNext()) {
+                return $this->connectPlanningInputWithRoundNumber($roundNumber->getNext(), $bestPlanning);
+            }
+            return true;
         }
         $inputService = new PlanningInputService();
-        $planningService = new PlanningService();
         if (!$inputService->areEqual(
-            $inputService->get($roundNumber, $planningInput->getNrOfReferees()),
+            $inputService->get($roundNumber, $roundNumber->getCompetition()->getReferees()->count()),
             $planningInput
         )) {
-            return false;
-        }
-        $planning = $planningService->getBestPlanning($planningInput);
-        if ($planning === null) {
             return false;
         }
 
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $planningCreator = new PlanningCreator($this->planningInputRepos, $this->planningRepos);
-        $planningCreator->create($roundNumber, $tournament->getBreak());
+        $planningCreator->addFrom($roundNumber, $tournament->getBreak());
         return true;
     }
 
-    protected function checkMoreThanTwoCompetitionsWithoutPlanning()
+    protected function getFreshRoundNumber(Competition $competition, int $roundNumberAsValue): RoundNumber
     {
-        if ($this->competitionRepos->findNrWithoutPlanning() >= 2) {
-            $this->mailer->sendToAdmin('more than two competitions without planning', 'check it out');
+        $this->competitionRepos->getEM()->clear();
+        $structure = $this->structureRepos->getStructure($competition);
+        if ($structure === null) {
+            throw new \Exception("structure not found for competitionid " . $competition->getId(), E_ERROR);
         }
+        $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
+        if ($roundNumber === null) {
+            throw new \Exception(
+                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . $competition->getId(), E_ERROR
+            );
+        }
+        return $roundNumber;
     }
 }
