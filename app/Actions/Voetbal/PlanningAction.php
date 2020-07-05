@@ -81,36 +81,14 @@ final class PlanningAction extends Action
         try {
             list($structure, $startRoundNumber) = $this->getFromRequest($request, $args);
 
-            $this->removePlanningCreateAndQueueNonExistingInput($startRoundNumber);
-
             $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->inputRepos, $this->repos);
-            $roundNumberPlanningCreator->addFrom($startRoundNumber, $tournament->getBreak());
+            $roundNumberPlanningCreator->removeFrom($startRoundNumber);
+            $roundNumberPlanningCreator->addFrom(new QueueService(), $startRoundNumber, $tournament->getBreak());
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
-        }
-    }
-
-    protected function removePlanningCreateAndQueueNonExistingInput(RoundNumber $roundNumber)
-    {
-        $inputService = new PlanningInputService();
-        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
-        $planningInput = $inputService->get($roundNumber, $nrOfReferees);
-
-        $this->repos->removeRoundNumber($roundNumber);
-
-        $planningInputFromDb = $this->inputRepos->getFromInput($planningInput);
-        if ($planningInputFromDb === null) {
-            $this->inputRepos->save($planningInput);
-
-            $queueService = new QueueService();
-            $queueService->send($roundNumber->getCompetition(), $roundNumber->getNumber());
-            // if fails stop all executions
-        }
-        if ($roundNumber->hasNext()) {
-            $this->removePlanningCreateAndQueueNonExistingInput($roundNumber->getNext());
         }
     }
 

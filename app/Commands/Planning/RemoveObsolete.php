@@ -58,15 +58,8 @@ class RemoveObsolete extends PlanningCommand
         $this->initLogger($input, 'cron-planning-remove-obsolete');
         $planningService = new PlanningBase\Service();
         try {
-            // maak een functie die alleen inputs ophaalt met:
-            // 1 state = PlanningInput::STATE_ALL_PLANNINGS_TRIED
-            // 2 meer dan 1 planning
-            // 3 alleen planningen met state failed or success
-            $planningInputs = $this->planningInputRepos->findBy(["state" => PlanningInput::STATE_ALL_PLANNINGS_TRIED]);
+            $planningInputs = $this->planningInputRepos->findWithObsoletePlannings();
             foreach ($planningInputs as $planningInput) {
-                if (!$this->allPlanningsFinished($planningInput)) {
-                    continue;
-                }
                 $bestPlanning = $planningService->getBestPlanning($planningInput);
                 foreach ($planningInput->getPlannings() as $planning) {
                     if ($bestPlanning === $planning) {
@@ -79,16 +72,5 @@ class RemoveObsolete extends PlanningCommand
             $this->logger->error($e->getMessage());
         }
         return 0;
-    }
-
-    protected function allPlanningsFinished(PlanningInput $planningInput): bool
-    {
-        foreach ($planningInput->getPlannings() as $planning) {
-            if ($planning->getState() !== PlanningBase::STATE_FAILED
-                && $planning->getState() !== PlanningBase::STATE_SUCCESS) {
-                return false;
-            }
-        }
-        return true;
     }
 }

@@ -146,7 +146,7 @@ class RetryTimeout extends PlanningCommand
         $planningOutput->output($planning, true);
 
         $batchOutput = new BatchOutput($loggerOutput);
-        $batchOutput->output($planning->getFirstBatch(), "succesful retry planning");
+        $batchOutput->output($planning->createFirstBatch(), "succesful retry planning");
 
         rewind($stream);
         $this->mailer->sendToAdmin(

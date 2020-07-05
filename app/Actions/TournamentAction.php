@@ -6,6 +6,7 @@ namespace App\Actions;
 use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\TournamentConfig;
+use App\QueueService;
 use App\Response\ErrorResponse;
 use App\TmpService;
 use DateTimeImmutable;
@@ -306,7 +307,11 @@ class TournamentAction extends Action
 
             $this->structureRepos->add($newStructure);
 
-            $this->planningCreator->addFrom($newStructure->getFirstRoundNumber(), $newTournament->getBreak());
+            $this->planningCreator->addFrom(
+                new QueueService(),
+                $newStructure->getFirstRoundNumber(),
+                $newTournament->getBreak()
+            );
 
             $conn->commit();
 

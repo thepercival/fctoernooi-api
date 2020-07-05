@@ -9,7 +9,7 @@ use Selective\Config\Configuration;
 use Voetbal\Planning as PlanningBase;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Resource\RefereePlaceService;
+use Voetbal\Planning\Resource\RefereePlace\Service as RefereePlaceService;
 
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning\Service as PlanningService;
@@ -45,7 +45,7 @@ class Planning extends Command
         $planning->setState(PlanningBase::STATE_UPDATING_SELFREFEE);
         $this->planningRepos->save($planning);
 
-        $firstBatch = $planning->getFirstBatch();
+        $firstBatch = $planning->createFirstBatch();
         $refereePlaceService = new RefereePlaceService($planning);
         if (!$refereePlaceService->assign($firstBatch)) {
             $this->logger->info("refereeplaces could not be equally assigned");

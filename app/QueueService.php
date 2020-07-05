@@ -7,6 +7,8 @@ use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\Impl\AmqpBind;
 use Voetbal\Competition;
+use Voetbal\Planning\Service\Create as CreatePlanningService;
+use Voetbal\Planning\Input as PlanningInput;
 use Interop\Queue\Message;
 use Interop\Queue\Consumer;
 
@@ -18,14 +20,13 @@ use Interop\Queue\Consumer;
  * Class QueueService
  * @package App
  */
-class QueueService
+class QueueService implements CreatePlanningService
 {
-    public function send(Competition $competition, int $startRoundNumber)
-    {
-        //            $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-//            $channel = $connection->channel();
-        // rabbit@laptop-cdk
-
+    public function sendCreatePlannings(
+        PlanningInput $input,
+        Competition $competition = null,
+        int $startRoundNumber = null
+    ) {
         $context = $this->getContext();
 
         $topic = $context->createTopic('amq.direct');
@@ -39,11 +40,14 @@ class QueueService
 
         $context->bind(new AmqpBind($topic, $queue));
 
-        $content = [
-            "competitionId" => $competition->getId(),
-            "name" => $competition->getLeague()->getName(),
-            "roundNumber" => $startRoundNumber
-        ];
+        $content = ["inputId" => $input->getId()];
+        if ($competition !== null) {
+            $content["competitionId"] = $competition->getId();
+            $content["name"] = $competition->getLeague()->getName();
+        }
+        if ($startRoundNumber !== null) {
+            $content["roundNumber"] = $startRoundNumber;
+        }
 
         $message = $context->createMessage(json_encode($content));
         $context->createProducer()->send($queue, $message);
@@ -63,7 +67,7 @@ class QueueService
 
     protected function getContext(): AmqpContext
     {
-        $factory = new AmqpConnectionFactory(
+        /*$factory = new AmqpConnectionFactory(
             [
                 'host' => 'localhost',
                 'port' => 5672,
@@ -72,8 +76,7 @@ class QueueService
                 'pass' => 'guest',
                 'persisted' => false,
             ]
-        );
-
+        );*/
         $factory = new AmqpConnectionFactory();
         return $factory->createContext();
     }

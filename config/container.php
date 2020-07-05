@@ -82,7 +82,7 @@ return [
         );
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($doctrineMetaConfig['entity_path']);
         $doctrineConfig->setMetadataDriverImpl($driver);
-        $em = Doctrine\ORM\EntityManager::create($config['connection'], $doctrineConfig);
+        $em = EntityManager::create($config['connection'], $doctrineConfig);
         // $em->getConnection()->setAutoCommit(false);
         return $em;
     },
