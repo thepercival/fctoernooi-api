@@ -5,6 +5,7 @@ namespace App;
 use Enqueue\AmqpLib\AmqpConnectionFactory;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 use Voetbal\Competition;
 use Voetbal\Planning\Service\Create as CreatePlanningService;
@@ -22,6 +23,24 @@ use Interop\Queue\Consumer;
  */
 class QueueService implements CreatePlanningService
 {
+    /**
+     * @var array
+     */
+    protected $options;
+    /**
+     * @var string
+     */
+    protected $queueSuffix;
+
+    public function __construct(array $options)
+    {
+        if (array_key_exists("queueSuffix", $options)) {
+            $this->queueSuffix = $options["queueSuffix"];
+            unset($options["queueSuffix"]);
+        }
+        $this->options = $options;
+    }
+
     public function sendCreatePlannings(
         PlanningInput $input,
         Competition $competition = null,
@@ -29,16 +48,16 @@ class QueueService implements CreatePlanningService
     ) {
         $context = $this->getContext();
 
-        $topic = $context->createTopic('amq.direct');
+        $exchange = $context->createTopic('amq.direct');
         // $topic->setType(AmqpTopic::TYPE_DIRECT);
-        // $topic->addFlag(AmqpTopic::TYPE_FANOUT);
+        $exchange->addFlag(AmqpTopic::FLAG_DURABLE);
 ////$topic->setArguments(['alternate-exchange' => 'foo']);
 
-        $queue = $context->createQueue('process-planning-queue');
-        $queue->addFlag(AmqpQueue::FLAG_DURABLE);
+
+        $queue = $this->getQueue();
         $context->declareQueue($queue);
 
-        $context->bind(new AmqpBind($topic, $queue));
+        $context->bind(new AmqpBind($exchange, $queue));
 
         $content = ["inputId" => $input->getId()];
         if ($competition !== null) {
@@ -56,8 +75,7 @@ class QueueService implements CreatePlanningService
     public function receive(callable $callable, int $timeoutInSeconds)
     {
         $context = $this->getContext();
-        $queue = $context->createQueue('process-planning-queue');
-        $consumer = $context->createConsumer($queue);
+        $consumer = $context->createConsumer($this->getQueue());
 
         $subscriptionConsumer = $context->createSubscriptionConsumer();
         $subscriptionConsumer->subscribe($consumer, $callable);
@@ -67,17 +85,14 @@ class QueueService implements CreatePlanningService
 
     protected function getContext(): AmqpContext
     {
-        /*$factory = new AmqpConnectionFactory(
-            [
-                'host' => 'localhost',
-                'port' => 5672,
-                'vhost' => '/',
-                'user' => 'guest',
-                'pass' => 'guest',
-                'persisted' => false,
-            ]
-        );*/
-        $factory = new AmqpConnectionFactory();
+        $factory = new AmqpConnectionFactory($this->options);
         return $factory->createContext();
+    }
+
+    protected function getQueue(): AmqpQueue
+    {
+        $queue = $this->getContext()->createQueue('process-planning-queue-' . $this->queueSuffix);
+        $queue->addFlag(AmqpQueue::FLAG_DURABLE);
+        return $queue;
     }
 }

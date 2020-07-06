@@ -83,25 +83,25 @@ class Create extends PlanningCommand
         $this->logger->info('starting command app:planning-create');
 
         try {
+            $queueService = new QueueService($this->config->getArray('queue'));
             if (strlen($input->getArgument('inputId')) > 0) {
                 $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
-                $this->processPlanning($planningInput);
+                $this->processPlanning($queueService, $planningInput);
                 $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' created');
                 return 0;
             }
 
-            $queue = new QueueService();
             $timeoutInSeconds = 295;
-            $queue->receive($this->getReceiver(), $timeoutInSeconds);
+            $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
         return 0;
     }
 
-    protected function getReceiver(): callable
+    protected function getReceiver(QueueService $queueService): callable
     {
-        return function (Message $message, Consumer $consumer): void {
+        return function (Message $message, Consumer $consumer) use ($queueService) : void {
             // process message
             try {
                 $content = json_decode($message->getBody());
@@ -115,7 +115,7 @@ class Create extends PlanningCommand
                 }
                 $planningInput = $this->planningInputRepos->find((int)$content->inputId);
 
-                $this->processPlanning($planningInput, $competition, $roundNumberAsValue);
+                $this->processPlanning($queueService, $planningInput, $competition, $roundNumberAsValue);
                 $consumer->acknowledge($message);
             } catch (\Exception $e) {
                 $this->logger->error($e->getMessage());
@@ -125,6 +125,7 @@ class Create extends PlanningCommand
     }
 
     protected function processPlanning(
+        QueueService $queueService,
         PlanningInput $planningInput,
         Competition $competition = null,
         int $roundNumberAsValue = null
@@ -165,7 +166,7 @@ class Create extends PlanningCommand
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->planningInputRepos, $this->planningRepos);
-        $roundNumberPlanningCreator->addFrom(new QueueService(), $roundNumber, $tournament->getBreak());
+        $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
     }
 
     protected function getRoundNumber(Competition $competition, int $roundNumberAsValue): RoundNumber

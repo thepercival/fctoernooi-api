@@ -80,4 +80,13 @@ return [
             'backuppath' => '/var/sponsorbackups/',
         ]
     ],
+    'queue' => [
+        'host' => 'localhost',
+        'port' => 5672,
+        'vhost' => '/',
+        'user' => 'guest',
+        'pass' => 'guest',
+        'persisted' => false,
+        'queueSuffix' => getenv('QUEUE_NAME_SUFFIX')
+    ]
 ];

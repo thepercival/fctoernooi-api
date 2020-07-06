@@ -308,7 +308,7 @@ class TournamentAction extends Action
             $this->structureRepos->add($newStructure);
 
             $this->planningCreator->addFrom(
-                new QueueService(),
+                new QueueService($this->config->getArray('queue')),
                 $newStructure->getFirstRoundNumber(),
                 $newTournament->getBreak()
             );

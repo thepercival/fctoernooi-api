@@ -18,6 +18,7 @@ use JMS\Serializer\Serializer;
 use League\Period\Period;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Selective\Config\Configuration;
 use Voetbal\Planning\Input\Service as PlanningInputService;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Round\Number as RoundNumber;
@@ -45,13 +46,18 @@ final class PlanningAction extends Action
      * @var DeserializeRefereeService
      */
     protected $deserializeRefereeService;
+    /**
+     * @var Configuration
+     */
+    protected $config;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         PlanningRepository $repos,
         InputRepository $inputRepos,
-        StructureRepository $structureRepos
+        StructureRepository $structureRepos,
+        Configuration $config
     ) {
         parent::__construct($logger, $serializer);
 
@@ -60,6 +66,7 @@ final class PlanningAction extends Action
         $this->structureRepos = $structureRepos;
         $this->serializer = $serializer;
         $this->deserializeRefereeService = new DeserializeRefereeService();
+        $this->config = $config;
     }
 
     public function fetch(Request $request, Response $response, $args): Response
@@ -83,7 +90,8 @@ final class PlanningAction extends Action
 
             $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->inputRepos, $this->repos);
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
-            $roundNumberPlanningCreator->addFrom(new QueueService(), $startRoundNumber, $tournament->getBreak());
+            $queueService = new QueueService($this->config->getArray('queue'));
+            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak());
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);

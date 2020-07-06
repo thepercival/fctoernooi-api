@@ -140,7 +140,7 @@ class Validator extends Command
             $this->logger->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
-        $queueService = new QueueService();
+        $queueService = new QueueService($this->config->getArray('queue'));
         $planningService = new PlanningService();
         $bestPlanning = $planningService->getBestPlanning($planningInput);
         if ($bestPlanning === null) {
