@@ -145,7 +145,6 @@ class Create extends PlanningCommand
         if ($planningInput->getSelfReferee()) {
             $this->updateSelfReferee($planningInput);
         }
-        // sleep(10);
 
         $planningService = new PlanningBase\Service();
         $bestPlanning = $planningService->getBestPlanning($planningInput);
@@ -162,8 +161,9 @@ class Create extends PlanningCommand
             return;
         }
 
-        // $this->entityManager->refresh($roundNumber);
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
+        $this->entityManager->refresh($roundNumber);
+        // $this->logger->info("roundnumber has planning: " . $roundNumber->getHasPlanning() );
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->planningInputRepos, $this->planningRepos);
         $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());

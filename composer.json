@@ -16,6 +16,7 @@
   "require": {
     "php": "^7.3",
     "ext-gd": "*",
+    "ext-gmp": "*",
     "doctrine/orm": "^2.7",
     "endroid/qr-code": "^3.7",
     "jms/serializer": "^3.7",

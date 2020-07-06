@@ -37,6 +37,7 @@ class Command extends SymCommand
     protected function configure()
     {
         $this->addOption('logtofile', null, InputArgument::OPTIONAL, 'logtofile?');
+        $this->addOption('loglevel', null, InputArgument::OPTIONAL, '100');
     }
 
     protected function initLogger(InputInterface $input, string $name)
@@ -46,13 +47,18 @@ class Command extends SymCommand
             FILTER_VALIDATE_BOOLEAN
         ) : false;
         $loggerSettings = $this->config->getArray('logger');
+        $logLevel = $loggerSettings['level'];
+        if (strlen($input->getOption('loglevel')) > 0) {
+            $logLevel = filter_var($input->getOption('loglevel'), FILTER_VALIDATE_INT);
+        }
+
 
         $this->logger = new Logger($name);
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
 
         $path = $logToFile ? ($loggerSettings['path'] . $name . '.log') : 'php://stdout';
-        $handler = new StreamHandler($path, $loggerSettings['level']);
+        $handler = new StreamHandler($path, $logLevel);
         $this->logger->pushHandler($handler);
 
         if ($this->config->getString('environment') === 'production') {
