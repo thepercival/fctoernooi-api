@@ -75,19 +75,17 @@ class CreateDefaultInput extends Command
             );
         }
         $queueService = new QueueService($this->config->getArray('queue'));
-
+        $showNrOfPlaces = [];
         while ($planningInput = $planningInputIterator->increment()) {
-            $this->logger->info($this->inputToString($planningInput));
-//            if(  $planningInput->getNrOfPlaces() === 20 && $planningInput->getNrOfPoules() === 2
-//                && $planningInput->getNrOfFields() === 2
-//                && $planningInput->getNrOfReferees() === 0
-//                && $planningInput->getTeamup() === false  && $planningInput->getSelfReferee() === true
-//                && $planningInput->getNrOfHeadtohead() === 2 ) {
-//                $x = 2;
-//            }
+
+            if (array_key_exists($planningInput->getNrOfPlaces(), $showNrOfPlaces) === false) {
+                $this->logger->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
+                $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
+            }
 
             if ($this->planningInputRepos->getFromInput($planningInput) === null) {
                 $this->planningInputRepos->save($planningInput);
+                $this->logger->info($this->inputToString($planningInput));
                 $this->logger->info("created");
                 if ($sendCreatePlanningMessage) {
                     $queueService->sendCreatePlannings($planningInput);
