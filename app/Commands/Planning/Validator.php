@@ -73,13 +73,13 @@ class Validator extends Command
             ->setHelp('validates the plannings');
         parent::configure();
 
-        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '6-6');
-        $this->addOption('structure', null, InputOption::VALUE_OPTIONAL, '3|2|2|');
-        $this->addOption('sportConfig', null, InputOption::VALUE_OPTIONAL, '2|2');
-        $this->addOption('nrOfReferees', null, InputOption::VALUE_OPTIONAL, '0');
-        $this->addOption('nrOfHeadtohead', null, InputOption::VALUE_OPTIONAL, '1');
-        $this->addOption('teamup', null, InputOption::VALUE_OPTIONAL, 'false');
-        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, 'false');
+//        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '6-6');
+//        $this->addOption('structure', null, InputOption::VALUE_OPTIONAL, '3|2|2|');
+//        $this->addOption('sportConfig', null, InputOption::VALUE_OPTIONAL, '2|2');
+//        $this->addOption('nrOfReferees', null, InputOption::VALUE_OPTIONAL, '0');
+//        $this->addOption('nrOfHeadtohead', null, InputOption::VALUE_OPTIONAL, '1');
+//        $this->addOption('teamup', null, InputOption::VALUE_OPTIONAL, 'false');
+//        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, 'false');
         $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_OPTIONAL, 'false|true');
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
 

@@ -78,7 +78,7 @@ trait Document
             return $this->areSelfRefereesAssigned;
         };
         $hasSelfRefereeHelper = function (RoundNumber $roundNumber) use (&$hasSelfRefereeHelper): bool {
-            if ($roundNumber->getValidPlanningConfig()->getSelfReferee()) {
+            if ($roundNumber->getValidPlanningConfig()->selfRefereeEnabled()) {
                 $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
                 if (count(
                         array_filter(

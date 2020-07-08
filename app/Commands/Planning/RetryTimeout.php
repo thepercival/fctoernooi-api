@@ -75,7 +75,7 @@ class RetryTimeout extends PlanningCommand
             }
             $this->sendMailWithSuccessPlanning($planning);
 
-            if ($planning->getInput()->getSelfReferee()) {
+            if ($planning->getInput()->selfRefereeEnabled()) {
                 $this->updateSelfReferee($planning->getInput());
             }
             $this->removeWorseTimeout($planning);

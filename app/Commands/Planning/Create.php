@@ -103,6 +103,7 @@ class Create extends PlanningCommand
     {
         return function (Message $message, Consumer $consumer) use ($queueService) : void {
             // process message
+            $this->logger->info('------ EXECUTING ------');
             try {
                 $content = json_decode($message->getBody());
                 $competition = null;
@@ -142,7 +143,7 @@ class Create extends PlanningCommand
 
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         $planningSeeker->process($planningInput);
-        if ($planningInput->getSelfReferee()) {
+        if ($planningInput->selfRefereeEnabled()) {
             $this->updateSelfReferee($planningInput);
         }
 
@@ -154,18 +155,23 @@ class Create extends PlanningCommand
                 ), E_ERROR
             );
         }
-        $planningOutput = new PlanningOutput($this->logger);
-        // $planningOutput->outputWithGames($bestPlanning, false);
-        $planningOutput->outputWithTotals($bestPlanning, false);
+//        $planningOutput = new PlanningOutput($this->logger);
+//        $planningOutput->outputWithGames($bestPlanning, false);
+//        $planningOutput->outputWithTotals($bestPlanning, false);
         if ($competition === null or $roundNumberAsValue === null) {
             return;
         }
 
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
-        $this->entityManager->refresh($roundNumber);
+        $this->refreshRoundNumber($roundNumber);
+
         // $this->logger->info("roundnumber has planning: " . $roundNumber->getHasPlanning() );
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
-        $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->planningInputRepos, $this->planningRepos);
+        $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
+            $this->planningInputRepos,
+            $this->planningRepos,
+            $this->logger
+        );
         $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
     }
 
@@ -182,5 +188,13 @@ class Create extends PlanningCommand
             );
         }
         return $roundNumber;
+    }
+
+    protected function refreshRoundNumber(RoundNumber $roundNumber)
+    {
+        $this->entityManager->refresh($roundNumber);
+        if ($roundNumber->hasNext()) {
+            $this->refreshRoundNumber($roundNumber->getNext());
+        }
     }
 }

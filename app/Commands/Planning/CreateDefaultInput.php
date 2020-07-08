@@ -2,6 +2,7 @@
 
 namespace App\Commands\Planning;
 
+use App\QueueService;
 use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
@@ -48,6 +49,7 @@ class CreateDefaultInput extends Command
         parent::configure();
 
         $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '6-6');
+        $this->addOption('sendCreatePlanningMessage', null, InputOption::VALUE_OPTIONAL, 'true');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -65,10 +67,17 @@ class CreateDefaultInput extends Command
             new VoetbalRange(0, 10),// referees
             new VoetbalRange(1, 2),// headtohead
         );
+        $sendCreatePlanningMessage = false;
+        if (strlen($input->getOption("sendCreatePlanningMessage")) > 0) {
+            $sendCreatePlanningMessage = filter_var(
+                $input->getOption("sendCreatePlanningMessage"),
+                FILTER_VALIDATE_BOOL
+            );
+        }
+        $queueService = new QueueService($this->config->getArray('queue'));
 
         while ($planningInput = $planningInputIterator->increment()) {
             $this->logger->info($this->inputToString($planningInput));
-
 //            if(  $planningInput->getNrOfPlaces() === 20 && $planningInput->getNrOfPoules() === 2
 //                && $planningInput->getNrOfFields() === 2
 //                && $planningInput->getNrOfReferees() === 0
@@ -79,6 +88,10 @@ class CreateDefaultInput extends Command
 
             if ($this->planningInputRepos->getFromInput($planningInput) === null) {
                 $this->planningInputRepos->save($planningInput);
+                $this->logger->info("created");
+                if ($sendCreatePlanningMessage) {
+                    $queueService->sendCreatePlannings($planningInput);
+                }
             }
         }
         return 0;
@@ -112,7 +125,7 @@ class CreateDefaultInput extends Command
             . ', sports [' . implode(',', $sports) . ']'
             . ', referees ' . $planningInput->getNrOfReferees()
             . ', teamup ' . ($planningInput->getTeamup() ? '1' : '0')
-            . ', selfRef ' . ($planningInput->getSelfReferee() ? '1' : '0')
+            . ', selfRef ' . $planningInput->getSelfReferee()
             . ', nrOfH2h ' . $planningInput->getNrOfHeadtohead();
     }
 
