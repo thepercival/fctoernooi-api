@@ -4862,16 +4862,16 @@
         },
         {
             "name": "thepercival/voetbal",
-            "version": "v1.0.16",
+            "version": "v1.0.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "bb46bab6d75c0e0c80a3107e224907fd57010197"
+                "reference": "d17591375e1aa882bc1abf733bcebddbab053635"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/bb46bab6d75c0e0c80a3107e224907fd57010197",
-                "reference": "bb46bab6d75c0e0c80a3107e224907fd57010197",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/d17591375e1aa882bc1abf733bcebddbab053635",
+                "reference": "d17591375e1aa882bc1abf733bcebddbab053635",
                 "shasum": ""
             },
             "require": {
@@ -4925,7 +4925,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2020-07-09T15:54:21+00:00"
+            "time": "2020-07-09T18:30:19+00:00"
         },
         {
             "name": "tuupola/base62",
