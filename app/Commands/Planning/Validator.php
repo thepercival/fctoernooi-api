@@ -73,7 +73,7 @@ class Validator extends Command
             ->setHelp('validates the plannings');
         parent::configure();
 
-//        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '6-6');
+        $this->addOption('structureConfig', null, InputOption::VALUE_OPTIONAL, '6,6');
 //        $this->addOption('structure', null, InputOption::VALUE_OPTIONAL, '3|2|2|');
 //        $this->addOption('sportConfig', null, InputOption::VALUE_OPTIONAL, '2|2');
 //        $this->addOption('nrOfReferees', null, InputOption::VALUE_OPTIONAL, '0');
@@ -102,6 +102,13 @@ class Validator extends Command
         if (strlen($input->getOption('maxNrOfInputs')) > 0) {
             $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
         }
+        $structureConfig = null;
+        if (strlen($input->getOption('structureConfig')) > 0) {
+            $structureConfig = explode(",", $input->getOption('structureConfig'));
+            if ($structureConfig === false) {
+                $structureConfig = null;
+            }
+        }
 
 //        list($sportConfigRange, $fieldsRange) = $this->getSportConfigsRanges($input);
 //        $planningInputIterator = new PlanningInputIterator(
@@ -113,7 +120,7 @@ class Validator extends Command
 //        );
 
         $this->logger->info('aan het valideren..');
-        $planningInputs = $this->planningInputRepos->findNotValidated($maxNrOfInputs);
+        $planningInputs = $this->planningInputRepos->findNotValidated($maxNrOfInputs, $structureConfig);
         foreach ($planningInputs as $planningInput) {
             // $this->logger->info( $this->inputToString( $planningInput ) );
             try {
@@ -149,6 +156,7 @@ class Validator extends Command
         }
 
         if ($bestPlanning->getValidity() === PlanningValidator::VALID) {
+            // $planningOutput->outputWithGames($bestPlanning, true);
             return;
         }
 
@@ -160,10 +168,12 @@ class Validator extends Command
             foreach ($validations as $validation) {
                 $this->logger->error($validation);
             }
-            // $planningOutput->outputWithGames($bestPlanning, true);
-            $planningOutput->outputWithTotals($bestPlanning, true);
             if ($this->exitAtFirstInvalid) {
+                $planningOutput->outputWithGames($bestPlanning, true);
+                $planningOutput->outputWithTotals($bestPlanning, true);
                 throw new Exception("exits at first error", E_ERROR);
+            } else {
+                $planningOutput->outputWithTotals($bestPlanning, true);
             }
         }
         $bestPlanning->setValidity($validity);
@@ -176,32 +186,29 @@ class Validator extends Command
         }
     }
 
-//    protected function getStructureOptions(InputInterface $input): StructureOptions
-//    {
-//        $tournamentStructureOptions = new Tournament\StructureOptions();
-//        $pouleRange = $tournamentStructureOptions->getPouleRange();
-//        $placeRange = $tournamentStructureOptions->getPlaceRange();
-//        if (strlen($input->getOption("placesRange")) > 0) {
-//            $minMax = explode('-', $input->getOption('placesRange'));
-//            $placeRange = new VoetbalRange((int)$minMax[0], (int)$minMax[1]);
-//        } else {
-//            if (strlen($input->getOption("structure")) > 0) {
-//                $poules = explode('|', $input->getOption('structure'));
-//                $nrOfPoules = count($poules);
-//                $nrOfPlaces = 0;
-//                foreach ($poules as $nrOfPlacesIt) {
-//                    $nrOfPlaces += $nrOfPlacesIt;
-//                }
-//                $pouleRange = new VoetbalRange($nrOfPoules, $nrOfPoules);
-//                $placeRange = new VoetbalRange($nrOfPlaces, $nrOfPlaces);
-//            }
-//        }
-//        return new StructureOptions(
-//            $pouleRange,
-//            $placeRange,
-//            $tournamentStructureOptions->getPlacesPerPouleRange()
-//        );
-//    }
+    protected function getStructureOptions(InputInterface $input): StructureOptions
+    {
+        $tournamentStructureOptions = new Tournament\StructureOptions();
+
+        $pouleRange = $tournamentStructureOptions->getPouleRange();
+        $placeRange = $tournamentStructureOptions->getPlaceRange();
+
+        if (strlen($input->getOption("structure")) > 0) {
+            $poules = explode('|', $input->getOption('structure'));
+            $nrOfPoules = count($poules);
+            $nrOfPlaces = 0;
+            foreach ($poules as $nrOfPlacesIt) {
+                $nrOfPlaces += $nrOfPlacesIt;
+            }
+            $pouleRange = new VoetbalRange($nrOfPoules, $nrOfPoules);
+            $placeRange = new VoetbalRange($nrOfPlaces, $nrOfPlaces);
+        }
+        return new StructureOptions(
+            $pouleRange,
+            $placeRange,
+            $tournamentStructureOptions->getPlacesPerPouleRange()
+        );
+    }
 //
 //    /**
 //     * @param InputInterface $input

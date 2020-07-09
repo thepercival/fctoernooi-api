@@ -86,6 +86,10 @@ class Create extends PlanningCommand
             $queueService = new QueueService($this->config->getArray('queue'));
             if (strlen($input->getArgument('inputId')) > 0) {
                 $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+                if ($planningInput === null) {
+                    $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' not found');
+                    return 0;
+                }
                 $this->processPlanning($queueService, $planningInput);
                 $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' created');
                 return 0;
