@@ -172,14 +172,12 @@ class Create extends PlanningCommand
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
         $this->refreshRoundNumber($roundNumber);
 
-        // $this->logger->info("roundnumber has planning: " . $roundNumber->getHasPlanning() );
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
             $this->planningInputRepos,
             $this->planningRepos,
             $this->logger
         );
-        $nrOfFields = $competition->getFields();
         $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
     }
 
