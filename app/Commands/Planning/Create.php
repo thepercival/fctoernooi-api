@@ -119,8 +119,11 @@ class Create extends PlanningCommand
                     $roundNumberAsValue = (int)$content->roundNumber;
                 }
                 $planningInput = $this->planningInputRepos->find((int)$content->inputId);
-
-                $this->processPlanning($queueService, $planningInput, $competition, $roundNumberAsValue);
+                if ($planningInput !== null) {
+                    $this->processPlanning($queueService, $planningInput, $competition, $roundNumberAsValue);
+                } else {
+                    $this->logger->info('planningInput ' . $content->inputId . ' not found');
+                }
                 $consumer->acknowledge($message);
             } catch (\Exception $e) {
                 $this->logger->error($e->getMessage());
@@ -165,7 +168,7 @@ class Create extends PlanningCommand
         if ($competition === null or $roundNumberAsValue === null) {
             return;
         }
-
+        $this->entityManager->refresh($competition);
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
         $this->refreshRoundNumber($roundNumber);
 
@@ -176,6 +179,7 @@ class Create extends PlanningCommand
             $this->planningRepos,
             $this->logger
         );
+        $nrOfFields = $competition->getFields();
         $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
     }
 
