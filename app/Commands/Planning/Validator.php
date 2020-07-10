@@ -102,22 +102,7 @@ class Validator extends Command
         if (strlen($input->getOption('maxNrOfInputs')) > 0) {
             $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
         }
-        $structureConfig = null;
-        if (strlen($input->getOption('structureConfig')) > 0) {
-            $structureConfig = explode(",", $input->getOption('structureConfig'));
-            if ($structureConfig === false) {
-                $structureConfig = null;
-            }
-        }
-
-//        list($sportConfigRange, $fieldsRange) = $this->getSportConfigsRanges($input);
-//        $planningInputIterator = new PlanningInputIterator(
-//            $this->getStructureOptions($input),
-//            $sportConfigRange,
-//            $fieldsRange,
-//            $this->getRefereesRange($input),
-//            $this->getNrOfHeadtoheadRange($input)
-//        );
+        $structureConfig = $this->getStructureConfig($input);
 
         $this->logger->info('aan het valideren..');
         $planningInputs = $this->planningInputRepos->findNotValidated($maxNrOfInputs, $structureConfig);
@@ -166,7 +151,7 @@ class Validator extends Command
         $validations = $validator->getValidityDescriptions($validity);
         if (count($validations) > 0) {
             foreach ($validations as $validation) {
-                $this->logger->error($validation);
+                $this->logger->error($validation . "(inputid " . $planningInput->getId() . ")");
             }
             if ($this->exitAtFirstInvalid) {
                 $planningOutput->outputWithGames($bestPlanning, true);
@@ -186,81 +171,22 @@ class Validator extends Command
         }
     }
 
-    protected function getStructureOptions(InputInterface $input): StructureOptions
+    /**
+     * @param InputInterface $input
+     * @return array|int[]|null
+     */
+    protected function getStructureConfig(InputInterface $input): ?array
     {
-        $tournamentStructureOptions = new Tournament\StructureOptions();
-
-        $pouleRange = $tournamentStructureOptions->getPouleRange();
-        $placeRange = $tournamentStructureOptions->getPlaceRange();
-
-        if (strlen($input->getOption("structure")) > 0) {
-            $poules = explode('|', $input->getOption('structure'));
-            $nrOfPoules = count($poules);
-            $nrOfPlaces = 0;
-            foreach ($poules as $nrOfPlacesIt) {
-                $nrOfPlaces += $nrOfPlacesIt;
+        $structureConfig = null;
+        if (strlen($input->getOption('structureConfig')) > 0) {
+            $structureConfigParam = explode(",", $input->getOption('structureConfig'));
+            if ($structureConfigParam != false) {
+                $structureConfig = [];
+                foreach ($structureConfigParam as $nrOfPlaces) {
+                    $structureConfig[] = (int)$nrOfPlaces;
+                }
             }
-            $pouleRange = new VoetbalRange($nrOfPoules, $nrOfPoules);
-            $placeRange = new VoetbalRange($nrOfPlaces, $nrOfPlaces);
         }
-        return new StructureOptions(
-            $pouleRange,
-            $placeRange,
-            $tournamentStructureOptions->getPlacesPerPouleRange()
-        );
+        return $structureConfig;
     }
-//
-//    /**
-//     * @param InputInterface $input
-//     * @return array|VoetbalRange[]
-//     */
-//    protected function getSportConfigsRanges(InputInterface $input): array
-//    {
-//        $nrOfSportConfigsStart = 1;
-//        $nrOfSportConfigsEnd = 1;
-//        $nrOfFieldsStart = 1;
-//        $nrOfFieldsEnd = 10;
-//        if (strlen($input->getOption("sportConfig")) > 0) {
-//            $sportConfigs = explode('|', $input->getOption('sportConfig'));
-//            $nrOfSportConfigs = count($sportConfigs);
-//            $nrOfSportConfigsStart = $nrOfSportConfigs;
-//            $nrOfSportConfigsEnd = $nrOfSportConfigs;
-//            $nrOfFields = 0;
-//            foreach ($sportConfigs as $nrOfFieldsIt) {
-//                $nrOfFields += $nrOfFieldsIt;
-//            }
-//            $nrOfFieldsStart = $nrOfFields;
-//            $nrOfFieldsEnd = $nrOfFields;
-//        }
-//        return array(
-//            new VoetbalRange($nrOfSportConfigsStart, $nrOfSportConfigsEnd),
-//            new VoetbalRange($nrOfFieldsStart, $nrOfFieldsEnd)
-//        );
-//    }
-//
-//    /**
-//     * @param InputInterface $input
-//     * @return VoetbalRange
-//     */
-//    protected function getRefereesRange(InputInterface $input): VoetbalRange
-//    {
-//        if (strlen($input->getOption("nrOfReferees")) > 0) {
-//            $nrOfReferees = filter_var($input->getOption('nrOfReferees'), FILTER_VALIDATE_INT);
-//            return new VoetbalRange($nrOfReferees, $nrOfReferees);
-//        }
-//        return new VoetbalRange(0, 10);
-//    }
-//
-//    /**
-//     * @param InputInterface $input
-//     * @return VoetbalRange
-//     */
-//    protected function getNrOfHeadtoheadRange(InputInterface $input): VoetbalRange
-//    {
-//        if (strlen($input->getOption("nrOfHeadtohead")) > 0) {
-//            $nrOfHeadtohead = filter_var($input->getOption('nrOfHeadtohead'), FILTER_VALIDATE_INT);
-//            return new VoetbalRange($nrOfHeadtohead, $nrOfHeadtohead);
-//        }
-//        return new VoetbalRange(1, 2);
-//    }
 }
