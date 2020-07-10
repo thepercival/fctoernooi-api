@@ -7,6 +7,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Planning\Input as PlanningInput;
@@ -41,6 +42,8 @@ class RetryTimeout extends PlanningCommand
             // the "--help" option
             ->setHelp('Retries the timeout-plannings');
         parent::configure();
+
+        $this->addArgument('planningId', InputArgument::OPTIONAL, 'planning-id');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -54,11 +57,15 @@ class RetryTimeout extends PlanningCommand
                 return 0;
             }
 
-            $planning = $this->planningRepos->getTimeout();
+            $planning = null;
+            if (strlen($input->getArgument('planningId')) > 0) {
+                $planning = $this->planningRepos->find((int)$input->getArgument('planningId'));
+            } else {
+                $planning = $this->planningRepos->getTimeout();
+            }
 
-            // $planning = $this->planningRepos->find( 61241 );
             if ($planning === null) {
-                $this->logger->info("   all plannings(also timeout) are tried");
+                $this->logger->info("no timedout-planning found to retry");
                 return 0;
             }
 
