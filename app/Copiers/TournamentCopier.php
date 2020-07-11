@@ -97,8 +97,10 @@ class TournamentCopier
         $newTournament = new TournamentBase($newCompetition);
         $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
         if ($tournament->getBreakStartDateTime() !== null) {
-            $newTournament->setBreakStartDateTime(clone $tournament->getBreakStartDateTime());
-            $newTournament->setBreakEndDateTime(clone $tournament->getBreakEndDateTime());
+            $diffStart = $tournament->getCompetition()->getStartDateTime()->diff($tournament->getBreakStartDateTime());
+            $newTournament->setBreakStartDateTime($newStartDateTime->add($diffStart));
+            $diffEnd = $tournament->getCompetition()->getStartDateTime()->diff($tournament->getBreakEndDateTime());
+            $newTournament->setBreakEndDateTime($newStartDateTime->add($diffEnd));
         }
         $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
         $newTournament->setPublic($public);
