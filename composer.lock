@@ -1061,19 +1061,19 @@
             "time": "2020-03-27T11:06:43+00:00"
         },
         {
-            "name": "endroid/qr-code",
-            "version": "3.8.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/endroid/qr-code.git",
-                "reference": "1616778c697238b16e1b7592ea824bafcf7d108c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/endroid/qr-code/zipball/1616778c697238b16e1b7592ea824bafcf7d108c",
-                "reference": "1616778c697238b16e1b7592ea824bafcf7d108c",
-                "shasum": ""
-            },
+          "name": "endroid/qr-code",
+          "version": "3.9.1",
+          "source": {
+            "type": "git",
+            "url": "https://github.com/endroid/qr-code.git",
+            "reference": "8605e2c958ed568788da4e16bd8a9502e32f375f"
+          },
+          "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/endroid/qr-code/zipball/8605e2c958ed568788da4e16bd8a9502e32f375f",
+            "reference": "8605e2c958ed568788da4e16bd8a9502e32f375f",
+            "shasum": ""
+          },
             "require": {
                 "bacon/bacon-qr-code": "^2.0",
                 "ext-gd": "*",
@@ -1084,11 +1084,13 @@
                 "symfony/property-access": "^3.4||^4.4||^5.0"
             },
             "require-dev": {
-                "endroid/quality": "dev-master"
+              "endroid/quality": "dev-master",
+              "setasign/fpdf": "^1.8"
             },
             "suggest": {
-                "roave/security-advisories": "Avoids installation of package versions with vulnerabilities",
-                "symfony/security-checker": "Checks your composer.lock for vulnerabilities"
+              "roave/security-advisories": "Avoids installation of package versions with vulnerabilities",
+              "setasign/fpdf": "Required to use the FPDF writer.",
+              "symfony/security-checker": "Checks your composer.lock for vulnerabilities"
             },
             "type": "library",
             "extra": {
@@ -1121,7 +1123,7 @@
                 "qr",
                 "qrcode"
             ],
-            "time": "2020-06-19T08:57:37+00:00"
+          "time": "2020-07-10T10:16:06+00:00"
         },
         {
             "name": "enqueue/amqp-lib",
@@ -4860,20 +4862,20 @@
             "homepage": "https://symfony.com",
             "time": "2020-05-20T17:43:50+00:00"
         },
-        {
-            "name": "thepercival/voetbal",
-            "version": "v1.0.18",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thepercival/voetbal.git",
-                "reference": "0e9e5faedea27f93cfe0619ebfea9e4ce85d98f1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/0e9e5faedea27f93cfe0619ebfea9e4ce85d98f1",
-                "reference": "0e9e5faedea27f93cfe0619ebfea9e4ce85d98f1",
-                "shasum": ""
-            },
+      {
+        "name": "thepercival/voetbal",
+        "version": "v1.0.19",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/thepercival/voetbal.git",
+          "reference": "6de4cde3b14f2ec6d1b952c23f588be35b969874"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/thepercival/voetbal/zipball/6de4cde3b14f2ec6d1b952c23f588be35b969874",
+          "reference": "6de4cde3b14f2ec6d1b952c23f588be35b969874",
+          "shasum": ""
+        },
             "require": {
                 "doctrine/orm": "^2.7",
                 "guzzlehttp/guzzle": "^6.5",
@@ -4925,7 +4927,7 @@
                 "Voetbal",
                 "football"
             ],
-            "time": "2020-07-09T21:14:33+00:00"
+        "time": "2020-07-11T18:17:32+00:00"
         },
         {
             "name": "tuupola/base62",

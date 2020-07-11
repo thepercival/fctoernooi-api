@@ -9,6 +9,7 @@ use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voetbal\Planning\Input as PlanningInput;
 use Voetbal\Planning as PlanningBase;
@@ -44,6 +45,7 @@ class RetryTimeout extends PlanningCommand
         parent::configure();
 
         $this->addArgument('planningId', InputArgument::OPTIONAL, 'planning-id');
+        $this->addOption('structureConfig', null, InputOption::VALUE_OPTIONAL, '6,6');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -61,7 +63,8 @@ class RetryTimeout extends PlanningCommand
             if (strlen($input->getArgument('planningId')) > 0) {
                 $planning = $this->planningRepos->find((int)$input->getArgument('planningId'));
             } else {
-                $planning = $this->planningRepos->getTimeout();
+                $structureConfig = $this->getStructureConfig($input);
+                $planning = $this->planningRepos->getTimeout($structureConfig);
             }
 
             if ($planning === null) {
@@ -161,5 +164,24 @@ class RetryTimeout extends PlanningCommand
             stream_get_contents($stream/*$handler->getStream()*/),
             true
         );
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return array|int[]|null
+     */
+    protected function getStructureConfig(InputInterface $input): ?array
+    {
+        $structureConfig = null;
+        if (strlen($input->getOption('structureConfig')) > 0) {
+            $structureConfigParam = explode(",", $input->getOption('structureConfig'));
+            if ($structureConfigParam != false) {
+                $structureConfig = [];
+                foreach ($structureConfigParam as $nrOfPlaces) {
+                    $structureConfig[] = (int)$nrOfPlaces;
+                }
+            }
+        }
+        return $structureConfig;
     }
 }
