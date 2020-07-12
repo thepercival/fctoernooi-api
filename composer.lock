@@ -1074,19 +1074,19 @@
             "reference": "8605e2c958ed568788da4e16bd8a9502e32f375f",
             "shasum": ""
           },
-            "require": {
-                "bacon/bacon-qr-code": "^2.0",
-                "ext-gd": "*",
-                "khanamiryan/qrcode-detector-decoder": "^1.0.2",
-                "myclabs/php-enum": "^1.5",
-                "php": ">=7.2",
-                "symfony/options-resolver": "^3.4||^4.4||^5.0",
-                "symfony/property-access": "^3.4||^4.4||^5.0"
-            },
-            "require-dev": {
-              "endroid/quality": "dev-master",
-              "setasign/fpdf": "^1.8"
-            },
+          "require": {
+            "bacon/bacon-qr-code": "^2.0",
+            "ext-gd": "*",
+            "khanamiryan/qrcode-detector-decoder": "^1.0.2",
+            "myclabs/php-enum": "^1.5",
+            "php": ">=7.2",
+            "symfony/options-resolver": "^3.4||^4.4||^5.0",
+            "symfony/property-access": "^3.4||^4.4||^5.0"
+          },
+          "require-dev": {
+            "endroid/quality": "dev-master",
+            "setasign/fpdf": "^1.8"
+          },
             "suggest": {
               "roave/security-advisories": "Avoids installation of package versions with vulnerabilities",
               "setasign/fpdf": "Required to use the FPDF writer.",
@@ -4853,39 +4853,39 @@
                     "name": "Fabien Potencier",
                     "email": "fabien@symfony.com"
                 },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
+              {
+                "name": "Symfony Community",
+                "homepage": "https://symfony.com/contributors"
+              }
             ],
-            "description": "Symfony Yaml Component",
-            "homepage": "https://symfony.com",
-            "time": "2020-05-20T17:43:50+00:00"
+          "description": "Symfony Yaml Component",
+          "homepage": "https://symfony.com",
+          "time": "2020-05-20T17:43:50+00:00"
         },
       {
         "name": "thepercival/voetbal",
-        "version": "v1.0.19",
+        "version": "v1.0.20",
         "source": {
           "type": "git",
           "url": "https://github.com/thepercival/voetbal.git",
-          "reference": "6de4cde3b14f2ec6d1b952c23f588be35b969874"
+          "reference": "d9cdab726976d64d3863d7130625f12ee8860656"
         },
         "dist": {
           "type": "zip",
-          "url": "https://api.github.com/repos/thepercival/voetbal/zipball/6de4cde3b14f2ec6d1b952c23f588be35b969874",
-          "reference": "6de4cde3b14f2ec6d1b952c23f588be35b969874",
+          "url": "https://api.github.com/repos/thepercival/voetbal/zipball/d9cdab726976d64d3863d7130625f12ee8860656",
+          "reference": "d9cdab726976d64d3863d7130625f12ee8860656",
           "shasum": ""
         },
-            "require": {
-                "doctrine/orm": "^2.7",
-                "guzzlehttp/guzzle": "^6.5",
-                "jms/serializer": "^3.4",
-                "league/period": "^4.9",
-                "monolog/monolog": "^2.0",
-                "php": ">=7.4",
-                "symfony/yaml": "^5.0",
-                "vlucas/phpdotenv": "^4.1"
-            },
+        "require": {
+          "doctrine/orm": "^2.7",
+          "guzzlehttp/guzzle": "^6.5",
+          "jms/serializer": "^3.4",
+          "league/period": "^4.9",
+          "monolog/monolog": "^2.0",
+          "php": ">=7.4",
+          "symfony/yaml": "^5.0",
+          "vlucas/phpdotenv": "^4.1"
+        },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^2.16",
                 "phpstan/extension-installer": "^1.0",
@@ -4927,7 +4927,7 @@
                 "Voetbal",
                 "football"
             ],
-        "time": "2020-07-11T18:17:32+00:00"
+        "time": "2020-07-12T08:48:30+00:00"
         },
         {
             "name": "tuupola/base62",
