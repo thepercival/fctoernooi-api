@@ -79,7 +79,7 @@ class Validator extends Command
 //        $this->addOption('nrOfReferees', null, InputOption::VALUE_OPTIONAL, '0');
 //        $this->addOption('nrOfHeadtohead', null, InputOption::VALUE_OPTIONAL, '1');
 //        $this->addOption('teamup', null, InputOption::VALUE_OPTIONAL, 'false');
-//        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, 'false');
+        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, '0,1 or 2');
         $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_OPTIONAL, 'false|true');
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
 
@@ -103,9 +103,9 @@ class Validator extends Command
             $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
         }
         $structureConfig = $this->getStructureConfig($input);
-
+        $selfReferee = $this->getSelfReferee($input);
         $this->logger->info('aan het valideren..');
-        $planningInputs = $this->planningInputRepos->findNotValidated($maxNrOfInputs, $structureConfig);
+        $planningInputs = $this->planningInputRepos->findNotValidated($maxNrOfInputs, $structureConfig, $selfReferee);
         foreach ($planningInputs as $planningInput) {
             // $this->logger->info( $this->inputToString( $planningInput ) );
             try {
@@ -158,6 +158,7 @@ class Validator extends Command
                 $planningOutput->outputWithTotals($bestPlanning, true);
                 throw new Exception("exits at first error", E_ERROR);
             } else {
+                $planningOutput->outputWithGames($bestPlanning, true);
                 $planningOutput->outputWithTotals($bestPlanning, true);
             }
         }
@@ -188,5 +189,21 @@ class Validator extends Command
             }
         }
         return $structureConfig;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return int|null
+     */
+    protected function getSelfReferee(InputInterface $input): ?int
+    {
+        $selfReferee = null;
+        if (strlen($input->getOption('selfReferee')) > 0 && ctype_digit($input->getOption('selfReferee')) ) {
+            $selfReferee = (int) $input->getOption('selfReferee');
+            if ($selfReferee !== PlanningInput::SELFREFEREE_OTHERPOULES && $selfReferee !== PlanningInput::SELFREFEREE_SAMEPOULE ) {
+                $selfReferee = PlanningInput::SELFREFEREE_DISABLED;
+            }
+        }
+        return $selfReferee;
     }
 }

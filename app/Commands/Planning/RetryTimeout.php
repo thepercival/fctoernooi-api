@@ -64,7 +64,8 @@ class RetryTimeout extends PlanningCommand
                 $planning = $this->planningRepos->find((int)$input->getArgument('planningId'));
             } else {
                 $structureConfig = $this->getStructureConfig($input);
-                $planning = $this->planningRepos->getTimeout($structureConfig);
+                $maxTimeOutSeconds = PlanningBase::DEFAULT_TIMEOUTSECONDS * pow( PlanningBase::TIMEOUT_MULTIPLIER, 2 );
+                $planning = $this->planningRepos->getTimeout($maxTimeOutSeconds, $structureConfig);
             }
 
             if ($planning === null) {
