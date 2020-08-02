@@ -90,6 +90,7 @@ class TournamentReport
             $this->validateMessage = $e->getMessage();
         }
         $gamesValidator = new GamesValidator();
+        $gamesValidator->setBlockedPeriod($tournament->getBreak());
         try {
             $gamesValidator->validateStructure($structure, $nrOfReferees);
         } catch (Exception $e) {

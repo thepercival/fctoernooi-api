@@ -108,7 +108,8 @@ class Validator extends Command
             }
             $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure);
-            // $this->validateGames($structure->getFirstRoundNumber(), $competition->getReferees()->count());
+            $this->gamesValidator->setBlockedPeriod($tournament->getBreak());
+            $this->validateGames($structure->getFirstRoundNumber(), $competition->getReferees()->count());
         } catch (\Exception $e) {
             throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }
@@ -122,7 +123,8 @@ class Validator extends Command
                 $this->validateGames($roundNumber->getNext(), $nrOfReferees);
             }
         } catch (\Exception $e) {
-            $this->showPlanning($roundNumber, $nrOfReferees);
+            $this->logger->info("invalid roundnumber " . $roundNumber->getId());
+            // $this->showPlanning($roundNumber, $nrOfReferees);
             throw new \Exception($e->getMessage(), E_ERROR);
         }
     }
