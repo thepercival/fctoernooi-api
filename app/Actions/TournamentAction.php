@@ -225,9 +225,15 @@ class TournamentAction extends Action
             $user = $request->getAttribute("user");
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
+            $ruleSet = $tournamentSer->getCompetition()->getRuleSet();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
             $tournamentService = new TournamentService();
-            $tournament = $tournamentService->changeBasics($tournament, $dateTime, $tournamentSer->getBreak());
+            $tournament = $tournamentService->changeBasics(
+                $tournament,
+                $dateTime,
+                $ruleSet,
+                $tournamentSer->getBreak()
+            );
             $tournament->setPublic($tournamentSer->getPublic());
             $tournament->getCompetition()->getLeague()->setName($name);
             $this->tournamentRepos->customPersist($tournament, true);
