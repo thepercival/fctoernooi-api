@@ -5,6 +5,7 @@ namespace App\Commands\Planning;
 use App\Mailer;
 use App\QueueService;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
 use Psr\Container\ContainerInterface;
@@ -170,7 +171,7 @@ class Create extends PlanningCommand
         }
         $this->entityManager->refresh($competition);
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
-        $this->refreshRoundNumber($roundNumber);
+        $this->refreshDb($competition, $roundNumber);
 
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
@@ -178,7 +179,14 @@ class Create extends PlanningCommand
             $this->planningRepos,
             $this->logger
         );
-        $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
+        try {
+            $this->entityManager->getConnection()->beginTransaction();
+            $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
+            $this->entityManager->getConnection()->commit();
+        } catch (Exception $e) {
+            $this->entityManager->getConnection()->rollBack();
+            throw $e;
+        }
     }
 
     protected function getRoundNumber(Competition $competition, int $roundNumberAsValue): RoundNumber
@@ -196,11 +204,16 @@ class Create extends PlanningCommand
         return $roundNumber;
     }
 
-    protected function refreshRoundNumber(RoundNumber $roundNumber)
+    protected function refreshDb(Competition $competition, RoundNumber $roundNumber)
     {
-        $this->entityManager->refresh($roundNumber);
-        if ($roundNumber->hasNext()) {
-            $this->refreshRoundNumber($roundNumber->getNext());
-        }
+        $this->entityManager->refresh($competition);
+
+        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
+            $this->entityManager->refresh($roundNumberParam);
+            if ($roundNumberParam->hasNext()) {
+                $refreshDbRoundNumber($roundNumberParam->getNext());
+            }
+        };
+        $refreshDbRoundNumber($roundNumber);
     }
 }
