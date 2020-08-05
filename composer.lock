@@ -540,21 +540,21 @@
             "time": "2020-04-20T17:19:26+00:00"
         },
         {
-          "name": "doctrine/event-manager",
-          "version": "1.1.1",
-          "source": {
-            "type": "git",
-            "url": "https://github.com/doctrine/event-manager.git",
-            "reference": "41370af6a30faa9dc0368c4a6814d596e81aba7f"
-          },
-          "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/doctrine/event-manager/zipball/41370af6a30faa9dc0368c4a6814d596e81aba7f",
-            "reference": "41370af6a30faa9dc0368c4a6814d596e81aba7f",
-            "shasum": ""
-          },
+            "name": "doctrine/event-manager",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/doctrine/event-manager.git",
+                "reference": "41370af6a30faa9dc0368c4a6814d596e81aba7f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/doctrine/event-manager/zipball/41370af6a30faa9dc0368c4a6814d596e81aba7f",
+                "reference": "41370af6a30faa9dc0368c4a6814d596e81aba7f",
+                "shasum": ""
+            },
             "require": {
-              "php": "^7.1 || ^8.0"
+                "php": "^7.1 || ^8.0"
             },
             "conflict": {
                 "doctrine/common": "<2.9@dev"
@@ -613,7 +613,7 @@
                 "event system",
                 "events"
             ],
-          "time": "2020-05-29T18:28:51+00:00"
+            "time": "2020-05-29T18:28:51+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -4054,19 +4054,19 @@
             ],
             "time": "2020-07-12T12:58:00+00:00"
         },
-      {
-        "name": "symfony/polyfill-ctype",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-ctype.git",
-          "reference": "1c302646f6efc070cd46856e600e5e0684d6b454"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/1c302646f6efc070cd46856e600e5e0684d6b454",
-          "reference": "1c302646f6efc070cd46856e600e5e0684d6b454",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/1c302646f6efc070cd46856e600e5e0684d6b454",
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4116,19 +4116,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-intl-grapheme",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
-          "reference": "b740103edbdcc39602239ee8860f0f45a8eb9aa5"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/b740103edbdcc39602239ee8860f0f45a8eb9aa5",
-          "reference": "b740103edbdcc39602239ee8860f0f45a8eb9aa5",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-intl-grapheme",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
+                "reference": "b740103edbdcc39602239ee8860f0f45a8eb9aa5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/b740103edbdcc39602239ee8860f0f45a8eb9aa5",
+                "reference": "b740103edbdcc39602239ee8860f0f45a8eb9aa5",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4180,20 +4180,20 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-intl-idn",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-intl-idn.git",
-          "reference": "5dcab1bc7146cf8c1beaa4502a3d9be344334251"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/5dcab1bc7146cf8c1beaa4502a3d9be344334251",
-          "reference": "5dcab1bc7146cf8c1beaa4502a3d9be344334251",
-          "shasum": ""
-        },
+        {
+            "name": "symfony/polyfill-intl-idn",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-intl-idn.git",
+                "reference": "5dcab1bc7146cf8c1beaa4502a3d9be344334251"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/5dcab1bc7146cf8c1beaa4502a3d9be344334251",
+                "reference": "5dcab1bc7146cf8c1beaa4502a3d9be344334251",
+                "shasum": ""
+            },
             "require": {
                 "php": ">=5.3.3",
                 "symfony/polyfill-intl-normalizer": "^1.10",
@@ -4249,21 +4249,21 @@
                 "portable",
                 "shim"
             ],
-        "time": "2020-08-04T06:02:08+00:00"
+            "time": "2020-08-04T06:02:08+00:00"
         },
-      {
-        "name": "symfony/polyfill-intl-normalizer",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-          "reference": "37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e",
-          "reference": "37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-intl-normalizer",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
+                "reference": "37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e",
+                "reference": "37078a8dd4a2a1e9ab0231af7c6cb671b2ed5a7e",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4318,19 +4318,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-mbstring",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-mbstring.git",
-          "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/a6977d63bf9a0ad4c65cd352709e230876f9904a",
-          "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-mbstring.git",
+                "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/a6977d63bf9a0ad4c65cd352709e230876f9904a",
+                "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4381,19 +4381,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-php70",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-php70.git",
-          "reference": "0dd93f2c578bdc9c72697eaa5f1dd25644e618d3"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-php70/zipball/0dd93f2c578bdc9c72697eaa5f1dd25644e618d3",
-          "reference": "0dd93f2c578bdc9c72697eaa5f1dd25644e618d3",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-php70",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php70.git",
+                "reference": "0dd93f2c578bdc9c72697eaa5f1dd25644e618d3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php70/zipball/0dd93f2c578bdc9c72697eaa5f1dd25644e618d3",
+                "reference": "0dd93f2c578bdc9c72697eaa5f1dd25644e618d3",
+                "shasum": ""
             },
             "require": {
                 "paragonie/random_compat": "~1.0|~2.0|~9.99",
@@ -4444,19 +4444,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-php72",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-php72.git",
-          "reference": "639447d008615574653fb3bc60d1986d7172eaae"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/639447d008615574653fb3bc60d1986d7172eaae",
-          "reference": "639447d008615574653fb3bc60d1986d7172eaae",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-php72",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php72.git",
+                "reference": "639447d008615574653fb3bc60d1986d7172eaae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php72/zipball/639447d008615574653fb3bc60d1986d7172eaae",
+                "reference": "639447d008615574653fb3bc60d1986d7172eaae",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4503,19 +4503,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-php73",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-php73.git",
-          "reference": "fffa1a52a023e782cdcc221d781fe1ec8f87fcca"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-php73/zipball/fffa1a52a023e782cdcc221d781fe1ec8f87fcca",
-          "reference": "fffa1a52a023e782cdcc221d781fe1ec8f87fcca",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-php73",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php73.git",
+                "reference": "fffa1a52a023e782cdcc221d781fe1ec8f87fcca"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php73/zipball/fffa1a52a023e782cdcc221d781fe1ec8f87fcca",
+                "reference": "fffa1a52a023e782cdcc221d781fe1ec8f87fcca",
+                "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
@@ -4565,19 +4565,19 @@
             ],
             "time": "2020-07-14T12:35:20+00:00"
         },
-      {
-        "name": "symfony/polyfill-php80",
-        "version": "v1.18.1",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/symfony/polyfill-php80.git",
-          "reference": "d87d5766cbf48d72388a9f6b85f280c8ad51f981"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/d87d5766cbf48d72388a9f6b85f280c8ad51f981",
-          "reference": "d87d5766cbf48d72388a9f6b85f280c8ad51f981",
-          "shasum": ""
+        {
+            "name": "symfony/polyfill-php80",
+            "version": "v1.18.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php80.git",
+                "reference": "d87d5766cbf48d72388a9f6b85f280c8ad51f981"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/d87d5766cbf48d72388a9f6b85f280c8ad51f981",
+                "reference": "d87d5766cbf48d72388a9f6b85f280c8ad51f981",
+                "shasum": ""
             },
             "require": {
                 "php": ">=7.0.8"
@@ -4972,20 +4972,20 @@
             "homepage": "https://symfony.com",
             "time": "2020-05-20T17:43:50+00:00"
         },
-      {
-        "name": "thepercival/voetbal",
-        "version": "v1.0.22",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/thepercival/voetbal.git",
-          "reference": "c3c08a7d2759d2208c94bd1995afcef1d428cf86"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/thepercival/voetbal/zipball/c3c08a7d2759d2208c94bd1995afcef1d428cf86",
-          "reference": "c3c08a7d2759d2208c94bd1995afcef1d428cf86",
-          "shasum": ""
-        },
+        {
+            "name": "thepercival/voetbal",
+            "version": "v1.0.23",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thepercival/voetbal.git",
+                "reference": "1381032bead2b50580e95be003eecf03b72ffa2c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thepercival/voetbal/zipball/1381032bead2b50580e95be003eecf03b72ffa2c",
+                "reference": "1381032bead2b50580e95be003eecf03b72ffa2c",
+                "shasum": ""
+            },
             "require": {
                 "doctrine/orm": "^2.7",
                 "guzzlehttp/guzzle": "^6.5",
@@ -5037,7 +5037,7 @@
                 "Voetbal",
                 "football"
             ],
-        "time": "2020-08-02T20:29:28+00:00"
+            "time": "2020-08-05T07:43:03+00:00"
         },
         {
             "name": "tuupola/base62",
@@ -6404,20 +6404,20 @@
             "description": "Composer plugin for automatic installation of PHPStan extensions",
             "time": "2020-03-31T16:00:42+00:00"
         },
-      {
-        "name": "phpstan/phpstan",
-        "version": "0.12.35",
-        "source": {
-          "type": "git",
-          "url": "https://github.com/phpstan/phpstan.git",
-          "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df"
-        },
-        "dist": {
-          "type": "zip",
-          "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5230eb31d546e4df7aa725894d17436cb8afd5df",
-          "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df",
-          "shasum": ""
-        },
+        {
+            "name": "phpstan/phpstan",
+            "version": "0.12.35",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpstan.git",
+                "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/5230eb31d546e4df7aa725894d17436cb8afd5df",
+                "reference": "5230eb31d546e4df7aa725894d17436cb8afd5df",
+                "shasum": ""
+            },
             "require": {
                 "php": "^7.1|^8.0"
             },
@@ -6444,7 +6444,7 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-        "time": "2020-08-04T09:48:39+00:00"
+            "time": "2020-08-04T09:48:39+00:00"
         },
         {
             "name": "phpstan/phpstan-doctrine",

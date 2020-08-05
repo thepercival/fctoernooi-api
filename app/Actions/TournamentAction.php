@@ -304,7 +304,6 @@ class TournamentAction extends Action
 
             $this->tournamentCopier->copyLockerRooms($tournament, $newTournament, $newCompetitors);
 
-            // $structureService = new StructureService( new TournamentStructureOptions() );
             $structureCopier = new StructureCopier($newTournament->getCompetition(), $newCompetitors);
             $newStructure = $structureCopier->copy($structure);
 

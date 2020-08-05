@@ -56,6 +56,10 @@ class UpdateSitemap extends Command
                 $content .= $url . $tournament->getId() . PHP_EOL;
             }
             file_put_contents($distPath . "sitemap.txt", $content);
+
+            $robotsContent = "Sitemap: " . $url . "sitemap.txt";
+            file_put_contents($distPath . "robots.txt", $robotsContent);
+
             // chmod ( $distPath . "sitemap.txt", 744 );
 //            chown($distPath . "sitemap.txt", "coen");
 //            chgrp($distPath . "sitemap.txt", "coen");

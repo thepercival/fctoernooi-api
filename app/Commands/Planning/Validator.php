@@ -4,10 +4,6 @@ namespace App\Commands\Planning;
 
 use App\QueueService;
 use \Exception;
-use App\Mailer;
-use FCToernooi\Tournament;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use App\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,15 +14,10 @@ use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Voetbal\Output\Planning\Batch as BatchOutput;
 use Voetbal\Output\Planning as PlanningOutput;
-use Voetbal\Planning;
 use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
 use Voetbal\Planning\Input\Repository as PlanningInputRepository;
 use Voetbal\Planning\Repository as PlanningRepository;
 use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Range as VoetbalRange;
-use Voetbal\Structure;
-use Voetbal\Structure\Options as StructureOptions;
 use Voetbal\Planning\Validator as PlanningValidator;
 
 class Validator extends Command
