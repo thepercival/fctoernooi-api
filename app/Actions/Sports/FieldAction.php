@@ -6,25 +6,25 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Availability\Checker as AvailabilityChecker;
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\Field as FieldBase;
-use Voetbal\Field\Repository as FieldRepository;
-use Voetbal\Priority\Service as PriorityService;
-use Voetbal\Sport\Config\Repository as SportConfigRepository;
+use Sports\Availability\Checker as AvailabilityChecker;
+use Sports\Competition\Repository as CompetitionRepos;
+use Sports\Field as FieldBase;
+use Sports\Field\Repository as FieldRepository;
+use Sports\Priority\Service as PriorityService;
+use Sports\Sport\Config\Repository as SportConfigRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Field;
-use Voetbal\Competition;
-use Voetbal\Sport\Config as SportConfig;
+use Sports\Field;
+use Sports\Competition;
+use Sports\Sport\Config as SportConfig;
 
 final class FieldAction extends Action
 {

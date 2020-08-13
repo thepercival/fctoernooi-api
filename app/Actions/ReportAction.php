@@ -13,11 +13,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Log\LoggerInterface;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Structure\Repository as StructureRepository;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
-use Voetbal\Competitor\Repository as CompetitorRepository;
 use Selective\Config\Configuration;
 use Slim\Views\Twig as TwigView;
 
@@ -40,10 +39,6 @@ class ReportAction extends Action
      */
     protected $lockerRoomRepos;
     /**
-     * @var CompetitorRepository
-     */
-    protected $competitorRepos;
-    /**
      * @var TwigView
      */
     protected $view;
@@ -61,7 +56,6 @@ class ReportAction extends Action
         TournamentCopier $tournamentCopier,
         StructureRepository $structureRepos,
         LockerRoomRepistory $lockerRoomRepos,
-        CompetitorRepository $competitorRepos,
         TwigView $view,
         Configuration $config
     ) {
@@ -70,7 +64,6 @@ class ReportAction extends Action
         $this->tournamentCopier = $tournamentCopier;
         $this->structureRepos = $structureRepos;
         $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->competitorRepos = $competitorRepos;
         $this->view = $view;
         $this->config = $config;
     }

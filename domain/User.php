@@ -8,7 +8,7 @@
 
 namespace FCToernooi;
 
-use Voetbal\Referee;
+use Sports\Referee;
 
 class User
 {

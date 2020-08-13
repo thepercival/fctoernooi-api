@@ -1,22 +1,17 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 14-11-17
- * Time: 14:02
- */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
+use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Competitor\Repository as CompetitorRepository;
+use FCToernooi\Competitor\Repository as CompetitorRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Competitor;
-use Voetbal\Association;
+use FCToernooi\Competitor;
+use Sports\Availability\Checker as AvailabilityChecker;
 
 final class CompetitorAction extends Action
 {
@@ -39,13 +34,20 @@ final class CompetitorAction extends Action
         try {
             /** @var Competitor $competitor */
             $competitor = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
-            /** @var Association $association */
-            $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
 
-            $newCompetitor = new Competitor($association, $competitor->getName());
-            $newCompetitor->setAbbreviation($competitor->getAbbreviation());
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkCompetitorName($tournament->getCompetitors()->toArray(), $competitor->getName());
+            $availabilityChecker->checkCompetitorPlaceLocation($tournament->getCompetitors()->toArray(), $competitor );
+
+            $newCompetitor = new Competitor(
+                $tournament,
+                $competitor->getPouleNr(),
+                $competitor->getPlaceNr(),
+                $competitor->getName()
+            );
             $newCompetitor->setRegistered($competitor->getRegistered());
-            $newCompetitor->setImageUrl($competitor->getImageUrl());
             $newCompetitor->setInfo($competitor->getInfo());
 
             $this->competitorRepos->save($newCompetitor);
@@ -62,15 +64,18 @@ final class CompetitorAction extends Action
         try {
             /** @var Competitor $competitorSer */
             $competitorSer = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
-            /** @var Association $association */
-            $association = $request->getAttribute("tournament")->getCompetition()->getLeague()->getAssociation();
 
-            $competitor = $this->getCompetitorFromInput((int)$args["competitorId"], $association);
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competitor = $this->getCompetitorFromInput((int)$args["competitorId"], $tournament);
+
+            $availabilityChecker = new AvailabilityChecker();
+            $availabilityChecker->checkCompetitorName($tournament->getCompetitors()->toArray(), $competitor->getName(), $competitor);
+            $availabilityChecker->checkCompetitorPlaceLocation($tournament->getCompetitors()->toArray(), $competitor, $competitor );
 
             $competitor->setName($competitorSer->getName());
-            $competitor->setAbbreviation($competitorSer->getAbbreviation());
             $competitor->setRegistered($competitorSer->getRegistered());
-            $competitor->setImageUrl($competitorSer->getImageUrl());
             $competitor->setInfo($competitorSer->getInfo());
             $this->competitorRepos->save($competitor);
 
@@ -81,14 +86,14 @@ final class CompetitorAction extends Action
         }
     }
 
-    protected function getCompetitorFromInput(int $id, Association $association): Competitor
+    protected function getCompetitorFromInput(int $id, Tournament $tournament): Competitor
     {
         $competitor = $this->competitorRepos->find($id);
         if ($competitor === null) {
             throw new \Exception("de deelnemer kon niet gevonden worden o.b.v. de invoer", E_ERROR);
         }
-        if ($competitor->getAssociation() !== $association) {
-            throw new \Exception("de bond van de deelnemer komt niet overeen met de verstuurde bond", E_ERROR);
+        if ($competitor->getTournament() !== $tournament) {
+            throw new \Exception("de deelnemer is van een ander toernooi", E_ERROR);
         }
         return $competitor;
     }

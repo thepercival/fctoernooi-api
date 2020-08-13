@@ -10,9 +10,9 @@ namespace App\Export\Excel\Worksheet;
 
 use App\Export\Excel\Spreadsheet;
 use FCToernooi\QRService;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\NameService;
+use Sports\Round;
+use Sports\Poule;
+use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;

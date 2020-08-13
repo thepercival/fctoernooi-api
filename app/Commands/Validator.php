@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Mailer;
+use Sports\Place\Location\Map as PlaceLocationMap;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
@@ -11,19 +12,19 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use Voetbal\Planning\Input\Service as PlanningInputService;
-use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Structure;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Structure\Repository;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Structure\Validator as StructureValidator;
-use Voetbal\Round\Number\GamesValidator;
-use Voetbal\Output\Planning\Batch as BatchOutput;
-use Voetbal\Output\Planning as PlanningOutput;
-use Voetbal\Output\Game as GameOutput;
-use Voetbal\Game;
+use SportsPlanning\Input\Service as PlanningInputService;
+use SportsPlanning\Service as PlanningService;
+use Sports\Structure;
+use Sports\Round\Number as RoundNumber;
+use Sports\Structure\Repository;
+use Sports\Structure\Repository as StructureRepository;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use Sports\Structure\Validator as StructureValidator;
+use Sports\Round\Number\GamesValidator;
+use Sports\Output\Planning\Batch as BatchOutput;
+use Sports\Output\Planning as PlanningOutput;
+use Sports\Output\Game as GameOutput;
+use Sports\Game;
 
 class Validator extends Command
 {
@@ -109,29 +110,29 @@ class Validator extends Command
             $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure);
             $this->gamesValidator->setBlockedPeriod($tournament->getBreak());
-            $this->validateGames($structure->getFirstRoundNumber(), $competition->getReferees()->count());
+            $this->validateGames($tournament, $structure->getFirstRoundNumber(), $competition->getReferees()->count());
         } catch (\Exception $e) {
             throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
         }
     }
 
-    protected function validateGames(RoundNumber $roundNumber, int $nrOfReferees)
+    protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees)
     {
         try {
             $this->gamesValidator->validate($roundNumber, $nrOfReferees);
             if ($roundNumber->hasNext()) {
-                $this->validateGames($roundNumber->getNext(), $nrOfReferees);
+                $this->validateGames($tournament, $roundNumber->getNext(), $nrOfReferees);
             }
         } catch (\Exception $e) {
             $this->logger->info("invalid roundnumber " . $roundNumber->getId());
-            // $this->showPlanning($roundNumber, $nrOfReferees);
+            // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
             throw new \Exception($e->getMessage(), E_ERROR);
         }
     }
 
-    protected function showPlanning(RoundNumber $roundNumber, int $nrOfReferees)
+    protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees)
     {
-        $gameOutput = new GameOutput($this->logger);
+        $gameOutput = new GameOutput(new PlaceLocationMap($tournament->getCompetitors()->toArray()), $this->logger);
         foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
             $gameOutput->output($game);
         }

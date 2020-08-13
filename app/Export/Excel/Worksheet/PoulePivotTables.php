@@ -10,18 +10,18 @@ namespace App\Export\Excel\Worksheet;
 
 use App\Export\Excel\Spreadsheet;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Game;
-use Voetbal\Place;
-use Voetbal\Ranking\Service as RankingService;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\NameService;
+use Sports\Game;
+use Sports\Place;
+use Sports\Ranking\Service as RankingService;
+use Sports\Round;
+use Sports\Poule;
+use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
-use Voetbal\State;
+use Sports\Round\Number as RoundNumber;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\State;
 
 class PoulePivotTables extends FCToernooiWorksheet
 {

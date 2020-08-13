@@ -10,11 +10,11 @@ namespace App\Export\Pdf;
 
 use FCToernooi\Tournament;
 use FCToernooi\LockerRoom;
-use Voetbal\Structure;
-use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Game;
-use Voetbal\Round;
-use Voetbal\Round\Number as RoundNumber;
+use Sports\Structure;
+use SportsPlanning\Service as PlanningService;
+use Sports\Game;
+use Sports\Round;
+use Sports\Round\Number as RoundNumber;
 use App\Export\Pdf\Page\PoulePivotTables as PagePoules;
 use App\Export\Pdf\Page\Planning as PagePlanning;
 use App\Export\TournamentConfig;

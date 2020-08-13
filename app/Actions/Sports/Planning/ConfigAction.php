@@ -6,7 +6,7 @@
  * Time: 14:04
  */
 
-namespace App\Actions\Voetbal\Planning;
+namespace App\Actions\Sports\Planning;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
@@ -14,11 +14,11 @@ use JMS\Serializer\SerializerInterface;
 use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Voetbal\Planning\Config as PlanningConfig;
-use Voetbal\Competition;
-use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Planning\Config as PlanningConfig;
+use Sports\Competition;
+use Sports\Planning\Config\Repository as PlanningConfigRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Structure\Repository as StructureRepository;
 
 final class ConfigAction extends Action
 {

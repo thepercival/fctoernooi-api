@@ -6,16 +6,16 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Sport\Repository as SportRepository;
+use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Sport;
+use Sports\Sport;
 
 final class SportAction extends Action
 {

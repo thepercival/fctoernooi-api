@@ -4,10 +4,10 @@ namespace App\ViewHelpers;
 
 use \Exception;
 use FCToernooi\Tournament;
-use Voetbal\Structure;
-use Voetbal\Structure\Validator as StructureValidator;
-use Voetbal\Round\Number\GamesValidator;
-use Voetbal\Round\Number as RoundNumber;
+use Sports\Structure;
+use Sports\Structure\Validator as StructureValidator;
+use Sports\Round\Number\GamesValidator;
+use Sports\Round\Number as RoundNumber;
 
 class TournamentReport
 {
@@ -70,7 +70,7 @@ class TournamentReport
         $this->publicUrl = $publicUrl;
         $this->firstRoundStructure = $nrOfPlaces . '(' . count($firstRoundNumber->getPoules()) . ')';;
         $this->nrOfRoundNumbers = count($structure->getRoundNumbers());
-        $this->competitorUsage = count($firstRoundNumber->getCompetitors()) . '/' . $nrOfPlaces;
+        $this->competitorUsage = count($tournament->getCompetitors()) . '/' . $nrOfPlaces;
         $nrOfReferees = $competition->getReferees()->count();
         $this->refereeUsage = '' . $nrOfReferees;
         $nrOflockerRoomCompetitors = 0;

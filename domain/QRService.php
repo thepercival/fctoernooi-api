@@ -11,7 +11,7 @@ namespace FCToernooi;
 use App\TmpService;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
-use Voetbal\Game;
+use Sports\Game;
 
 class QRService
 {

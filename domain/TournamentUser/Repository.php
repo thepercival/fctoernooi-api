@@ -8,6 +8,6 @@
 
 namespace FCToernooi\TournamentUser;
 
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
 }

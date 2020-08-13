@@ -6,7 +6,7 @@
  * Time: 14:04
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\QueueService;
 use App\Response\ErrorResponse;
@@ -19,14 +19,15 @@ use League\Period\Period;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
-use Voetbal\Planning\Input\Service as PlanningInputService;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Planning\ScheduleService;
-use Voetbal\Planning\Input\Repository as InputRepository;
-use App\Actions\Voetbal\Deserialize\RefereeService as DeserializeRefereeService;
-use Voetbal\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
+use SportsPlanning\Input\Service as PlanningInputService;
+use SportsPlanning\Repository as PlanningRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Structure\Repository as StructureRepository;
+use Sports\Planning\ScheduleService;
+use SportsPlanning\Input\Repository as InputRepository;
+use App\Actions\Sports\Deserialize\RefereeService as DeserializeRefereeService;
+use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
@@ -43,6 +44,10 @@ final class PlanningAction extends Action
      */
     protected $structureRepos;
     /**
+     * @var RoundNumberRepository
+     */
+    protected $roundNumberRepos;
+    /**
      * @var DeserializeRefereeService
      */
     protected $deserializeRefereeService;
@@ -57,6 +62,7 @@ final class PlanningAction extends Action
         PlanningRepository $repos,
         InputRepository $inputRepos,
         StructureRepository $structureRepos,
+        RoundNumberRepository $roundNumberRepos,
         Configuration $config
     ) {
         parent::__construct($logger, $serializer);
@@ -64,6 +70,7 @@ final class PlanningAction extends Action
         $this->repos = $repos;
         $this->inputRepos = $inputRepos;
         $this->structureRepos = $structureRepos;
+        $this->roundNumberRepos = $roundNumberRepos;
         $this->serializer = $serializer;
         $this->deserializeRefereeService = new DeserializeRefereeService();
         $this->config = $config;
@@ -88,7 +95,11 @@ final class PlanningAction extends Action
         try {
             list($structure, $startRoundNumber) = $this->getFromRequest($request, $args);
 
-            $roundNumberPlanningCreator = new RoundNumberPlanningCreator($this->inputRepos, $this->repos);
+            $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
+                $this->inputRepos,
+                $this->repos,
+                $this->roundNumberRepos
+            );
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
             $queueService = new QueueService($this->config->getArray('queue'));
             $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak());
@@ -110,10 +121,10 @@ final class PlanningAction extends Action
 
         try {
             list($structure, $roundNumber) = $this->getFromRequest($request, $args);
-            $scheduleService = new ScheduleService($tournament->getBreak());
-            $dates = $scheduleService->rescheduleGames($roundNumber);
+            $scheduler = new RoundNumber\PlanningScheduler($tournament->getBreak());
+            $dates = $scheduler->rescheduleGames($roundNumber);
 
-            $this->repos->saveRoundNumber($roundNumber);
+            $this->roundNumberRepos->savePlanning($roundNumber);
 
             $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
@@ -128,7 +139,6 @@ final class PlanningAction extends Action
         if (array_key_exists("roundnumber", $args) === false) {
             throw new \Exception("geen rondenummer opgegeven", E_ERROR);
         }
-        /** @var \Voetbal\Structure $structure */
         $structure = $this->structureRepos->getStructure($competition);
         $roundNumber = $structure->getRoundNumber($args["roundnumber"]);
         return [$structure, $roundNumber];

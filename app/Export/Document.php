@@ -3,14 +3,15 @@
 namespace App\Export;
 
 use FCToernooi\Tournament;
-use Voetbal\Game;
-use Voetbal\NameService;
-use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Poule;
-use Voetbal\Round;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\State;
-use Voetbal\Structure;
+use Sports\Place\Location\Map as PlaceLocationMap;
+use Sports\Game;
+use Sports\NameService;
+use SportsPlanning\Service as PlanningService;
+use Sports\Poule;
+use Sports\Round;
+use Sports\Round\Number as RoundNumber;
+use Sports\State;
+use Sports\Structure;
 
 trait Document
 {
@@ -38,6 +39,10 @@ trait Document
      * @var NameService
      */
     protected $nameService;
+    /**
+     * @var PlaceLocationMap
+     */
+    protected $placeLocationMap;
     /**
      * @var string
      */
@@ -132,10 +137,20 @@ trait Document
     public function getNameService(): NameService
     {
         if ($this->nameService === null) {
-            $this->nameService = new NameService();
+            $this->nameService = new NameService( $this->getPlaceLocationMap() );
         }
         return $this->nameService;
     }
+
+    public function getPlaceLocationMap(): PlaceLocationMap
+    {
+        if ($this->placeLocationMap === null) {
+            $this->placeLocationMap = new PlaceLocationMap( $this->tournament->getCompetitors()->toArray() );
+        }
+        return $this->placeLocationMap;
+    }
+
+
 
     // public function getPouleName( Poule $poule )
     //    return $nameService->getPouleName( $poule, true );

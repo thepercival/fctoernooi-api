@@ -3,8 +3,8 @@
 
 namespace FCToernooi\Tournament;
 
-use Voetbal\Range as VoetbalRange;
-use Voetbal\Place\Range as PlaceRange;
+use SportsHelpers\Range;
+use Sports\Place\Range as PlaceRange;
 
 class StructureRanges
 {
@@ -15,8 +15,8 @@ class StructureRanges
 
     public function __construct()
     {
-        $this->placeRanges[] = new PlaceRange(2, 40, new VoetbalRange(2, 12));
-        $this->placeRanges[] = new PlaceRange(41, 128, new VoetbalRange(2, 8));
+        $this->placeRanges[] = new PlaceRange(2, 40, new Range(2, 12));
+        $this->placeRanges[] = new PlaceRange(41, 128, new Range(2, 8));
     }
 
     public function getFirstPlaceRange(): PlaceRange

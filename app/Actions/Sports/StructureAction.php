@@ -1,25 +1,20 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 14-11-17
- * Time: 14:02
- */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
-use Voetbal\Competition;
-use Voetbal\Structure;
-use Voetbal\Structure\Copier as StructureCopier;
+use FCToernooi\Tournament;
+use Sports\Competition;
+use Sports\Structure;
+use Sports\Structure\Copier as StructureCopier;
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Competitor\Repository as CompetitorRepository;
+use Sports\Structure\Repository as StructureRepository;
+use FCToernooi\Competitor\Repository as CompetitorRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Structure\Validator as StructureValidator;
+use Sports\Structure\Validator as StructureValidator;
 
 final class StructureAction extends Action
 {
@@ -66,12 +61,13 @@ final class StructureAction extends Action
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
-            /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
-            $existingCompetitors = $structure !== null ? $structure->getFirstRoundNumber()->getCompetitors() : [];
-            $structureCopier = new StructureCopier($competition, $existingCompetitors);
+            $structureCopier = new StructureCopier($competition);
             $newStructure = $structureCopier->copy($structureSer);
 
             $structureValidator = new StructureValidator();
@@ -80,7 +76,7 @@ final class StructureAction extends Action
             $roundNumberAsValue = 1;
             $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
 
-            $this->competitorRepos->removeUnused($competition->getLeague()->getAssociation());
+            $this->competitorRepos->syncCompetitors($tournament, $newStructure->getRootRound() );
 
             $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);

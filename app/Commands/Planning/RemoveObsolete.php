@@ -7,10 +7,11 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\Planning as PlanningBase;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Planning\Input as PlanningInput;
+use Sports\Planning as PlanningBase;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Service as PlanningService;
+use SportsPlanning\Input as PlanningInput;
 use App\Commands\Planning as PlanningCommand;
 
 class RemoveObsolete extends PlanningCommand
@@ -56,7 +57,7 @@ class RemoveObsolete extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-planning-remove-obsolete');
-        $planningService = new PlanningBase\Service();
+        $planningService = new PlanningService();
         try {
             $planningInputs = $this->planningInputRepos->findWithObsoletePlannings();
             foreach ($planningInputs as $planningInput) {

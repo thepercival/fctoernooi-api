@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 22-5-18
- * Time: 12:14
- */
 
 namespace FCToernooi;
 
@@ -44,26 +38,10 @@ class Sponsor
     const MAX_LENGTH_NAME = 30;
     const MAX_LENGTH_URL = 100;
 
-    public function __construct(Tournament $tournament, $name)
+    public function __construct(Tournament $tournament, string $name)
     {
         $this->tournament = $tournament;
         $this->setName($name);
-    }
-
-    /**
-     * @return Tournament
-     */
-    public function getTournament()
-    {
-        return $this->tournament;
-    }
-
-    /**
-     * @param Tournament $tournament
-     */
-    public function setTournament(Tournament $tournament)
-    {
-        $this->tournament = $tournament;
     }
 
     /**
@@ -84,6 +62,15 @@ class Sponsor
         $this->id = $id;
     }
 
+    public function getTournament(): Tournament
+    {
+        return $this->tournament;
+    }
+
+    public function setTournament(Tournament $tournament)
+    {
+        $this->tournament = $tournament;
+    }
 
     /**
      * @return string

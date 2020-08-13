@@ -8,9 +8,9 @@
 
 namespace FCToernooi;
 
-use Voetbal\Sport\Custom as SportCustom;
-use Voetbal\Sport\ScoreConfig as SportScoreConfig;
-use Voetbal\Sport;
+use Sports\Sport\Custom as SportCustom;
+use Sports\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Sport;
 
 class TranslationService
 {

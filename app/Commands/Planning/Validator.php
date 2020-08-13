@@ -12,13 +12,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use Voetbal\Output\Planning\Batch as BatchOutput;
-use Voetbal\Output\Planning as PlanningOutput;
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Planning\Service as PlanningService;
-use Voetbal\Planning\Validator as PlanningValidator;
+use SportsPlanning\Output\Batch as BatchOutput;
+use SportsPlanning\Output as PlanningOutput;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Service as PlanningService;
+use SportsPlanning\Validator as PlanningValidator;
 
 class Validator extends Command
 {

@@ -11,7 +11,7 @@ namespace App\Middleware\Authorization\Tournament\Admin;
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
 use FCToernooi\Role;
 use FCToernooi\TournamentUser;
-use Voetbal\Game\Repository as GameRepository;
+use Sports\Game\Repository as GameRepository;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteContext;
 

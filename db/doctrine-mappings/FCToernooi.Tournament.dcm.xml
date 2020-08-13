@@ -11,7 +11,7 @@
     <field name="exported" column="exported" type="smallint" nullable="true" unique="false"/>
     <field name="public" column="public" type="boolean" nullable="true" unique="false"/>
     <field name="updated" column="updated" type="boolean" nullable="true" unique="false"/>
-    <many-to-one field="competition" target-entity="Voetbal\Competition">
+    <many-to-one field="competition" target-entity="Sports\Competition">
       <cascade>
         <cascade-remove/>
       </cascade>
@@ -26,6 +26,12 @@
         </cascade>
     </one-to-many>
       <one-to-many field="sponsors" target-entity="FCToernooi\Sponsor" mapped-by="tournament">
+          <cascade>
+              <cascade-persist/>
+              <cascade-remove/>
+          </cascade>
+      </one-to-many>
+      <one-to-many field="competitors" target-entity="FCToernooi\Competitor" mapped-by="tournament">
           <cascade>
               <cascade-persist/>
               <cascade-remove/>

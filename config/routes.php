@@ -11,17 +11,16 @@ use App\Actions\AuthAction;
 use App\Actions\UserAction;
 use App\Actions\SponsorAction;
 use App\Actions\LockerRoomAction;
-use App\Actions\Voetbal\StructureAction;
-use App\Actions\Voetbal\PlanningAction;
-use App\Actions\Voetbal\Planning\ConfigAction as PlanningConfigAction;
-use App\Actions\Voetbal\SportAction;
-use App\Actions\Voetbal\FieldAction;
-use App\Actions\Voetbal\PlaceAction;
-use App\Actions\Voetbal\GameAction;
-use App\Actions\Voetbal\RefereeAction;
-use App\Actions\Voetbal\CompetitorAction;
-use App\Actions\Voetbal\Sport\ConfigAction as SportConfigAction;
-use App\Actions\Voetbal\Sport\ScoreConfigAction as SportScoreConfigAction;
+use App\Actions\Sports\StructureAction;
+use App\Actions\Sports\PlanningAction;
+use App\Actions\Sports\Planning\ConfigAction as PlanningConfigAction;
+use App\Actions\Sports\SportAction;
+use App\Actions\Sports\FieldAction;
+use App\Actions\Sports\GameAction;
+use App\Actions\Sports\RefereeAction;
+use App\Actions\Sports\CompetitorAction;
+use App\Actions\Sports\Sport\ConfigAction as SportConfigAction;
+use App\Actions\Sports\Sport\ScoreConfigAction as SportScoreConfigAction;
 use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
 use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
@@ -200,16 +199,6 @@ return function (App $app): void {
                             $group->post('', SportScoreConfigAction::class . ':add');
                             $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
                             $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
-                        }
-                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
-
-                    $group->group(
-                        'places',
-                        function (Group $group): void {
-                            $group->options('/{placeId}', PlaceAction::class . ':options');
-                            $group->put('/{placeId}', PlaceAction::class . ':edit');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class

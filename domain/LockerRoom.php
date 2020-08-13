@@ -10,7 +10,7 @@ namespace FCToernooi;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Voetbal\Competitor;
+use FCToernooi\Competitor;
 
 class LockerRoom
 {

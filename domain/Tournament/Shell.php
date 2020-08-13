@@ -9,7 +9,7 @@
 namespace FCToernooi\Tournament;
 
 use DateTimeImmutable;
-use Voetbal\Sport;
+use Sports\Sport;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 

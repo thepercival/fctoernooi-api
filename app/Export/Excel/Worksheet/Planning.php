@@ -11,11 +11,11 @@ namespace App\Export\Excel\Worksheet;
 use App\Export\Excel\Spreadsheet;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use League\Period\Period;
-use Voetbal\Round;
-use Voetbal\Game;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\NameService;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Round;
+use Sports\Game;
+use Sports\Round\Number as RoundNumber;
+use Sports\NameService;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 abstract class Planning extends FCToernooiWorksheet
 {

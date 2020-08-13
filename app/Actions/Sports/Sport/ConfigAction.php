@@ -6,20 +6,20 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal\Sport;
+namespace App\Actions\Sports\Sport;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Sport\Config\Repository as SportConfigRepository;
-use Voetbal\Sport\Config\Service as SportConfigService;
-use Voetbal\Sport\Repository as SportRepository;
+use Sports\Structure\Repository as StructureRepository;
+use Sports\Sport\Config\Repository as SportConfigRepository;
+use Sports\Sport\Config\Service as SportConfigService;
+use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Competition;
-use Voetbal\Sport\Config as SportConfig;
+use Sports\Competition;
+use Sports\Sport\Config as SportConfig;
 
 final class ConfigAction extends Action
 {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -26,16 +27,14 @@ use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use stdClass;
-use Voetbal\Competitor\Service as CompetitorService;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Structure\Repository as StructureRepository;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
-use Voetbal\Structure\Copier as StructureCopier;
-use Voetbal\Round\Number\PlanningCreator;
-use Voetbal\Competitor\Repository as CompetitorRepository;
+use Sports\Structure\Copier as StructureCopier;
+use Sports\Round\Number\PlanningCreator;
 use Selective\Config\Configuration;
-use Voetbal\Structure\Validator as StructureValidator;
+use Sports\Structure\Validator as StructureValidator;
 
 class TournamentAction extends Action
 {
@@ -56,10 +55,6 @@ class TournamentAction extends Action
      */
     protected $lockerRoomRepos;
     /**
-     * @var CompetitorRepository
-     */
-    protected $competitorRepos;
-    /**
      * @var PlanningCreator
      */
     protected $planningCreator;
@@ -79,7 +74,6 @@ class TournamentAction extends Action
         TournamentCopier $tournamentCopier,
         StructureRepository $structureRepos,
         LockerRoomRepistory $lockerRoomRepos,
-        CompetitorRepository $competitorRepos,
         PlanningCreator $planningCreator,
         Mailer $mailer,
         Configuration $config
@@ -89,7 +83,6 @@ class TournamentAction extends Action
         $this->tournamentCopier = $tournamentCopier;
         $this->structureRepos = $structureRepos;
         $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->competitorRepos = $competitorRepos;
         $this->planningCreator = $planningCreator;
         $this->mailer = $mailer;
         $this->config = $config;
@@ -251,11 +244,8 @@ class TournamentAction extends Action
         try {
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
-            $association = $tournament->getCompetition()->getLeague()->getAssociation();
 
             $this->tournamentRepos->remove($tournament);
-
-            $this->competitorRepos->removeUnused($association);
 
             return $response->withStatus(200);
         } catch (\Exception $e) {
@@ -293,18 +283,8 @@ class TournamentAction extends Action
             $this->tournamentRepos->customPersist($newTournament, true);
 
             $structure = $this->structureRepos->getStructure($competition);
-            $competitorService = new CompetitorService();
-            $newCompetitors = $competitorService->createCompetitorsFromRound(
-                $structure->getRootRound(),
-                $newTournament->getCompetition()->getLeague()->getAssociation()
-            );
-            foreach ($newCompetitors as $newCompetitor) {
-                $em->persist($newCompetitor);
-            }
 
-            $this->tournamentCopier->copyLockerRooms($tournament, $newTournament, $newCompetitors);
-
-            $structureCopier = new StructureCopier($newTournament->getCompetition(), $newCompetitors);
+            $structureCopier = new StructureCopier($newTournament->getCompetition() );
             $newStructure = $structureCopier->copy($structure);
 
             $structureValidator = new StructureValidator();

@@ -8,9 +8,9 @@
 
 namespace FCToernooi\Tournament;
 
-use Voetbal\Association;
+use Sports\Association;
 use FCToernooi\Tournament;
-use Voetbal\Competition\Service as CompetitionService;
+use Sports\Competition\Service as CompetitionService;
 use League\Period\Period;
 
 class Service

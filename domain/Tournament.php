@@ -10,7 +10,7 @@ namespace FCToernooi;
 
 use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
-use Voetbal\Competition;
+use Sports\Competition;
 use League\Period\Period;
 
 class Tournament
@@ -44,6 +44,10 @@ class Tournament
      */
     private $sponsors;
     /**
+     * @var ArrayCollection|Competitor[]
+     */
+    private $competitors;
+    /**
      * @var ArrayCollection|LockerRoom[]
      */
     private $lockerRooms;
@@ -68,6 +72,7 @@ class Tournament
         $this->competition = $competition;
         $this->users = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
+        $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
         $this->updated = true;
     }
@@ -212,6 +217,22 @@ class Tournament
     public function setSponsors(ArrayCollection $sponsors)
     {
         $this->sponsors = $sponsors;
+    }
+
+    /**
+     * @return Competitor[] | ArrayCollection
+     */
+    public function getCompetitors()
+    {
+        return $this->competitors;
+    }
+
+    /**
+     * @param ArrayCollection | Competitor[] $competitors
+     */
+    public function setCompetitors(ArrayCollection $competitors)
+    {
+        $this->competitors = $competitors;
     }
 
     /**

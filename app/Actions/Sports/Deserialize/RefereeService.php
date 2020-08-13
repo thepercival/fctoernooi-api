@@ -6,10 +6,10 @@
  * Time: 16:00
  */
 
-namespace App\Actions\Voetbal\Deserialize;
+namespace App\Actions\Sports\Deserialize;
 
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Place;
+use Sports\Round\Number as RoundNumber;
+use Sports\Place;
 
 class RefereeService
 {

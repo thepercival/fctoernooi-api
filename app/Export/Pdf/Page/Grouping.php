@@ -9,9 +9,9 @@
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\NameService;
+use Sports\Round;
+use Sports\Poule;
+use Sports\NameService;
 
 class Grouping extends ToernooiPdfPage
 {

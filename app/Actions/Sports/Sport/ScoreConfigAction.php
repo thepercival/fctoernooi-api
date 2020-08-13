@@ -6,22 +6,22 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal\Sport;
+namespace App\Actions\Sports\Sport;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Sport;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
-use Voetbal\Sport\Repository as SportRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Sport;
+use Sports\Structure\Repository as StructureRepository;
+use Sports\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Competition;
-use Voetbal\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Competition;
+use Sports\Sport\ScoreConfig as SportScoreConfig;
 
 final class ScoreConfigAction extends Action
 {
@@ -80,7 +80,7 @@ final class ScoreConfigAction extends Action
                 throw new \Exception("er zijn al score-instellingen aanwezig", E_ERROR);
             }
 
-            $sportScoreConfig = new \Voetbal\Sport\ScoreConfig($sport, $roundNumber, null);
+            $sportScoreConfig = new \Sports\Sport\ScoreConfig($sport, $roundNumber, null);
             $sportScoreConfig->setDirection(SportScoreConfig::UPWARDS);
             $sportScoreConfig->setMaximum($sportScoreConfigSer->getMaximum());
             $sportScoreConfig->setEnabled($sportScoreConfigSer->getEnabled());

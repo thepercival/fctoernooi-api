@@ -13,16 +13,16 @@ use App\Export\Excel\Worksheet as WorksheetBase;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\TranslationService;
 use PhpOffice\PhpSpreadsheet\Style\Style;
-use Voetbal\Game;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\NameService;
+use Sports\Game;
+use Sports\Round;
+use Sports\Poule;
+use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Sport\ScoreConfig as SportScoreConfig;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Round\Number as RoundNumber;
+use Sports\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class Gamenotes extends FCToernooiWorksheet
 {

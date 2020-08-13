@@ -15,7 +15,7 @@ use FCToernooi\Tournament;
  * Class Repository
  * @package FCToernooi\Sponsor
  */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     const MAXNROFSPONSORSPERSCREEN = 4;
 

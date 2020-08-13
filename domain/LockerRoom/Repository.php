@@ -1,26 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 22-5-18
- * Time: 12:14
- */
 
 namespace FCToernooi\LockerRoom;
 
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use \Doctrine\Common\Collections\ArrayCollection;
-use FCToernooi\Tournament;
-use Voetbal\Competitor;
-use Voetbal\Structure;
-use Voetbal\Structure\Repository as StructureRepository;
+use FCToernooi\Competitor;
 
-/**
- * Class Repository
- * @package FCToernooi\Sponsor
- */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     public function find($id, $lockMode = null, $lockVersion = null): ?LockerRoomBase
     {
@@ -39,14 +26,11 @@ class Repository extends \Voetbal\Repository
             // $lockerRoom->getCompetitors()->clear();
             $this->_em->flush();
 
-            // add
-            $structureRepos = new StructureRepository($this->_em);
-            $structure = $structureRepos->getStructure($lockerRoom->getTournament()->getCompetition());
-            $competitors = $structure !== null ? $structure->getFirstRoundNumber()->getCompetitors() : [];
+            $competitors = $lockerRoom->getTournament()->getCompetitors();
 
             foreach ($newCompetitors as $newCompetitor) {
                 $foundCompetitors = array_filter(
-                    $competitors,
+                    $competitors->toArray(),
                     function (Competitor $competitorIt) use ($newCompetitor): bool {
                         return $newCompetitor->getName() === $competitorIt->getName();
                     }

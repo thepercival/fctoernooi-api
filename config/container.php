@@ -16,12 +16,12 @@ use Psr\Log\LoggerInterface;
 use Slim\Views\Twig as TwigView;
 
 use App\Mailer;
-use Voetbal\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
-use Voetbal\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
-use Voetbal\SerializationHandler\Structure as StructureSerializationHandler;
+use Sports\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
+use Sports\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
+use Sports\SerializationHandler\Structure as StructureSerializationHandler;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use Voetbal\SerializationHandler\Round as RoundSerializationHandler;
+use Sports\SerializationHandler\Round as RoundSerializationHandler;
 use Selective\Config\Configuration;
 use Slim\App;
 use Slim\Factory\AppFactory;

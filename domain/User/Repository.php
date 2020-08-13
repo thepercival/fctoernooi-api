@@ -15,7 +15,7 @@ use FCToernooi\Tournament;
  * Class Repository
  * @package FCToernooi\User
  */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     public function find($id, $lockMode = null, $lockVersion = null): ?User
     {

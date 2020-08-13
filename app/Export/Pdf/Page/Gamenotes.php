@@ -10,10 +10,10 @@ namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
-use Voetbal\Game;
-use Voetbal\NameService;
-use Voetbal\Sport\ScoreConfig as SportScoreConfig;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Game;
+use Sports\NameService;
+use Sports\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 use FCToernooi\TranslationService;
 
 class Gamenotes extends ToernooiPdfPage

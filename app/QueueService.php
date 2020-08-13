@@ -7,9 +7,9 @@ use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
-use Voetbal\Competition;
-use Voetbal\Planning\Service\Create as CreatePlanningService;
-use Voetbal\Planning\Input as PlanningInput;
+use Sports\Competition;
+use Sports\Round\Number\PlanningCreator\Event as PlanningCreatorEvent;
+use SportsPlanning\Input as PlanningInput;
 use Interop\Queue\Message;
 use Interop\Queue\Consumer;
 
@@ -21,7 +21,7 @@ use Interop\Queue\Consumer;
  * Class QueueService
  * @package App
  */
-class QueueService implements CreatePlanningService
+class QueueService implements PlanningCreatorEvent
 {
     /**
      * @var array

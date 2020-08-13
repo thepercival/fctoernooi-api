@@ -15,43 +15,45 @@ use FCToernooi\User\Repository as UserRepository;
 use FCToernooi\User;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Sponsor;
+use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\Competitor;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\LockerRoom;
 
-use Voetbal\Planning\Config\Repository as PlanningConfigRepository;
-use Voetbal\Planning\Config as PlanningConfig;
-use Voetbal\Sport\Repository as SportRepository;
-use Voetbal\Sport;
-use Voetbal\Season\Repository as SeasonRepository;
-use Voetbal\Season;
-use Voetbal\League\Repository as LeagueRepository;
-use Voetbal\League;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Competition;
+use Sports\Planning\Config\Repository as PlanningConfigRepository;
+use Sports\Planning\Config as PlanningConfig;
+use Sports\Sport\Repository as SportRepository;
+use Sports\Sport;
+use Sports\Season\Repository as SeasonRepository;
+use Sports\Season;
+use Sports\League\Repository as LeagueRepository;
+use Sports\League;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\Competition;
 
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Planning;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Game;
-use Voetbal\Field\Repository as FieldRepository;
-use Voetbal\Field;
-use Voetbal\Referee\Repository as RefereeRepository;
-use Voetbal\Referee;
-use Voetbal\Sport\Config\Repository as SportConfigRepository;
-use Voetbal\Sport\Config as SportConfig;
-use Voetbal\Competitor\Repository as CompetitorRepository;
-use Voetbal\Competitor;
-use Voetbal\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
-use Voetbal\Sport\ScoreConfig as SportScoreConfig;
-use Voetbal\Place\Repository as PlaceRepository;
-use Voetbal\Place;
-use Voetbal\Poule\Repository as PouleRepository;
-use Voetbal\Poule;
-use Voetbal\Game\Score\Repository as GameScoreRepository;
-use Voetbal\Game\Score as GameScore;
+use Sports\Structure\Repository as StructureRepository;
+use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Planning;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Input as PlanningInput;
+use Sports\Game\Repository as GameRepository;
+use Sports\Game;
+use Sports\Field\Repository as FieldRepository;
+use Sports\Field;
+use Sports\Referee\Repository as RefereeRepository;
+use Sports\Referee;
+use Sports\Sport\Config\Repository as SportConfigRepository;
+use Sports\Sport\Config as SportConfig;
+use Sports\Sport\ScoreConfig\Repository as SportScoreConfigRepository;
+use Sports\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Place\Repository as PlaceRepository;
+use Sports\Place;
+use Sports\Poule\Repository as PouleRepository;
+use Sports\Poule;
+use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Game\Score\Repository as GameScoreRepository;
+use Sports\Game\Score as GameScore;
 
 return [
     TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
@@ -76,6 +78,10 @@ return [
     SponsorRepository::class => function (ContainerInterface $container): SponsorRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SponsorRepository($entityManager, $entityManager->getClassMetaData(Sponsor::class));
+    },
+    CompetitorRepository::class => function (ContainerInterface $container): CompetitorRepository {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new CompetitorRepository($entityManager, $entityManager->getClassMetaData(Competitor::class));
     },
     LockerRoomRepository::class => function (ContainerInterface $container): LockerRoomRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
@@ -134,16 +140,16 @@ return [
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportConfigRepository($entityManager, $entityManager->getClassMetaData(SportConfig::class));
     },
-    CompetitorRepository::class => function (ContainerInterface $container): CompetitorRepository {
-        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
-        return new CompetitorRepository($entityManager, $entityManager->getClassMetaData(Competitor::class));
-    },
     SportScoreConfigRepository::class => function (ContainerInterface $container): SportScoreConfigRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
         return new SportScoreConfigRepository(
             $entityManager,
             $entityManager->getClassMetaData(SportScoreConfig::class)
         );
+    },
+    RoundNumberRepository::class => function (ContainerInterface $container): RoundNumberRepository {
+        $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);
+        return new RoundNumberRepository($entityManager, $entityManager->getClassMetaData(RoundNumber::class));
     },
     PouleRepository::class => function (ContainerInterface $container): PouleRepository {
         $entityManager = $container->get(\Doctrine\ORM\EntityManager::class);

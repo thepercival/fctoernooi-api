@@ -6,13 +6,13 @@ use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 
-use Voetbal\Planning as PlanningBase;
-use Voetbal\Planning\Repository as PlanningRepository;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
-use Voetbal\Planning\Resource\RefereePlace\Service as RefereePlaceService;
+use SportsPlanning\Planning as PlanningBase;
+use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Resource\RefereePlace\Service as RefereePlaceService;
 
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning\Service as PlanningService;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Service as PlanningService;
 
 class Planning extends Command
 {

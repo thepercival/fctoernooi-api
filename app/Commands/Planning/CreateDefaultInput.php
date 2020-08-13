@@ -9,13 +9,14 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\Planning\Input;
-use Voetbal\Planning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Input;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
 use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
-use Voetbal\Planning\Input\Service as PlanningInputService;
-use Voetbal\Planning\Input\Iterator as PlanningInputIterator;
-use Voetbal\Range as VoetbalRange;
-use Voetbal\Place\Range as PlaceRange;
+use SportsPlanning\Input\Service as PlanningInputService;
+use Sports\Planning\Input\Iterator as PlanningInputIterator;
+use SportsHelpers\Range;
+use SportsHelpers\SportConfig as SportConfigHelper;
+use Sports\Place\Range as PlaceRange;
 
 class CreateDefaultInput extends Command
 {
@@ -61,14 +62,14 @@ class CreateDefaultInput extends Command
     protected function createPlanningInputs(InputInterface $input): int
     {
         $tournamentStructureRanges = new TournamentStructureRanges();
-        $pouleRange = new VoetbalRange(1, 16);
+        $pouleRange = new Range(1, 16);
         $planningInputIterator = new PlanningInputIterator(
             $this->getPlaceRange($input, $tournamentStructureRanges),
             $pouleRange,
-            new VoetbalRange(1, 1), // sports
-            new VoetbalRange(1, 10),// fields
-            new VoetbalRange(0, 10),// referees
-            new VoetbalRange(1, 2),// headtohead
+            new Range(1, 1), // sports
+            new Range(1, 10),// fields
+            new Range(0, 10),// referees
+            new Range(1, 2),// headtohead
         );
         $sendCreatePlanningMessage = false;
         if (strlen($input->getOption("sendCreatePlanningMessage")) > 0) {
@@ -114,10 +115,10 @@ class CreateDefaultInput extends Command
     protected function inputToString(Input $planningInput): string
     {
         $sports = array_map(
-            function (array $sportConfig): string {
-                return '' . $sportConfig["nrOfFields"];
+            function (SportConfigHelper $sportConfigHelper): string {
+                return '' . $sportConfigHelper->getNrOfFields();
             },
-            $planningInput->getSportConfig()
+            $planningInput->getSportConfigHelpers()
         );
         return 'structure [' . implode('|', $planningInput->getStructureConfig()) . ']'
             . ', sports [' . implode(',', $sports) . ']'

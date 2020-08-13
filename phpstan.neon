@@ -2,4 +2,4 @@ parameters:
     inferPrivatePropertyTypeFromConstructor:
         true
 #    scanDirectories:
-#        - vendor/thepercival/voetbal/domain
+#        - vendor/thepercival/php-sports/domain

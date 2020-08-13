@@ -11,12 +11,12 @@ namespace App\Export\Excel\Worksheet\Planning;
 use App\Export\Excel\Spreadsheet;
 use App\Export\Excel\Worksheet\Planning;
 use App\Export\Excel\Worksheet\Planning as PlanningWorksheet;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\Game;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Field;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Round;
+use Sports\Poule;
+use Sports\Game;
+use Sports\Round\Number as RoundNumber;
+use Sports\Field;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class PerField extends PlanningWorksheet
 {

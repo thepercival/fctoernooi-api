@@ -12,22 +12,22 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\Competition;
-use Voetbal\Output\Planning as PlanningOutput;
-use Voetbal\Output\Planning\Batch as BatchOutput;
-use Voetbal\Planning as PlanningBase;
-use Voetbal\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
-use Voetbal\Structure\Repository as StructureRepository;
+use Sports\Competition;
+use SportsPlanning\Output as PlanningOutput;
+use SportsPlanning\Output\Batch as BatchOutput;
+use Sports\Planning as PlanningBase;
+use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
+use Sports\Structure\Repository as StructureRepository;
 
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning\Input\Service as PlanningInputService;
-use Voetbal\Planning\Seeker as PlanningSeeker;
-use Voetbal\Planning\Service as PlanningService;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Input\Service as PlanningInputService;
+use SportsPlanning\Seeker as PlanningSeeker;
+use SportsPlanning\Service as PlanningService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use Voetbal\Round\Number\PlanningCreator;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Structure\Validator as StructureValidator;
+use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Structure\Validator as StructureValidator;
 use App\Commands\Planning as PlanningCommand;
 
 class Create extends PlanningCommand
@@ -36,6 +36,10 @@ class Create extends PlanningCommand
      * @var StructureRepository
      */
     protected $structureRepos;
+    /**
+     * @var RoundNumberRepository
+     */
+    protected $roundNumberRepos;
     /**
      * @var TournamentRepository
      */
@@ -58,6 +62,7 @@ class Create extends PlanningCommand
         parent::__construct($container);
         $this->mailer = $container->get(Mailer::class);
         $this->structureRepos = $container->get(StructureRepository::class);
+        $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->competitionRepos = $container->get(CompetitionRepository::class);
         $this->entityManager = $container->get(EntityManager::class);
@@ -141,11 +146,11 @@ class Create extends PlanningCommand
     ) {
         $planningOutput = new PlanningOutput($this->logger);
         if ($planningInput->getState() === PlanningInput::STATE_TRYING_PLANNINGS) {
-            $planningOutput->outputPlanningInput($planningInput, null, 'still processing ...');
+            $planningOutput->outputInput($planningInput, null, 'still processing ...');
             return;
         }
         if ($planningInput->getState() === PlanningInput::STATE_UPDATING_BESTPLANNING_SELFREFEE) {
-            $planningOutput->outputPlanningInput($planningInput, null, 'still processing selfreferee ...');
+            $planningOutput->outputInput($planningInput, null, 'still processing selfreferee ...');
             return;
         }
 
@@ -155,7 +160,7 @@ class Create extends PlanningCommand
             $this->updateSelfReferee($planningInput);
         }
 
-        $planningService = new PlanningBase\Service();
+        $planningService = new PlanningService();
         $bestPlanning = $planningService->getBestPlanning($planningInput);
         if ($bestPlanning === null) {
             throw new \Exception(
@@ -177,6 +182,7 @@ class Create extends PlanningCommand
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
             $this->planningInputRepos,
             $this->planningRepos,
+            $this->roundNumberRepos,
             $this->logger
         );
         try {

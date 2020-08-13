@@ -9,10 +9,10 @@
 namespace App\Export\Excel\Worksheet;
 
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use Voetbal\Game;
-use Voetbal\Round\Number as RoundNumber;
+use Sports\Game;
+use Sports\Round\Number as RoundNumber;
 use App\Export\Pdf\Page;
-use Voetbal\State;
+use Sports\State;
 
 trait GamesTrait
 {

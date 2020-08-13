@@ -7,7 +7,7 @@ FCToernooi\Tournament:
     id:
       type: integer
     competition:
-      type: Voetbal\Competition
+      type: Sports\Competition
     breakStartDateTime:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
     breakEndDateTime:
@@ -20,8 +20,10 @@ FCToernooi\Tournament:
       read_only: true
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>
+    competitors:
+      type: ArrayCollection<FCToernooi\Competitor>
     lockerRooms:
-      type: ArrayCollection<FCToernooi\LockerRoom>
+      type: ArrayCollection<Sports\LockerRoom>
     updated:
       type: boolean
       access_type: property

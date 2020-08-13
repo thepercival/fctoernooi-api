@@ -19,9 +19,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use Voetbal\Competitor;
-use Voetbal\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 
 final class LockerRoomAction extends Action
@@ -30,10 +29,6 @@ final class LockerRoomAction extends Action
      * @var LockerRoomRepository
      */
     private $lockerRoomRepos;
-    /**
-     * @var CompetitorRepository
-     */
-    private $competitorRepos;
     /**
      * @var TournamentRepository
      */
@@ -47,13 +42,11 @@ final class LockerRoomAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         LockerRoomRepository $lockerRoomRepos,
-        CompetitorRepository $competitorRepos,
         TournamentRepository $tournamentRepos,
         Configuration $config
     ) {
         parent::__construct($logger, $serializer);
         $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->competitorRepos = $competitorRepos;
         $this->tournamentRepos = $tournamentRepos;
         $this->config = $config;
     }

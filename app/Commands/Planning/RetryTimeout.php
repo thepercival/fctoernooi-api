@@ -11,12 +11,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Voetbal\Planning\Input as PlanningInput;
-use Voetbal\Planning as PlanningBase;
-use Voetbal\Output\Planning as PlanningOutput;
-use Voetbal\Output\Planning\Batch as BatchOutput;
-use Voetbal\Planning\Input\Service as PlanningInputService;
-use Voetbal\Planning\Seeker as PlanningSeeker;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Planning as PlanningBase;
+use SportsPlanning\Output as PlanningOutput;
+use SportsPlanning\Output\Batch as BatchOutput;
+use SportsPlanning\Input\Service as PlanningInputService;
+use SportsPlanning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
 
 class RetryTimeout extends PlanningCommand

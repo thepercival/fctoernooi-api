@@ -10,11 +10,11 @@ namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use League\Period\Period;
-use Voetbal\Game;
-use Voetbal\Round;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\NameService;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Game;
+use Sports\Round;
+use Sports\Round\Number as RoundNumber;
+use Sports\NameService;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class Planning extends ToernooiPdfPage
 {

@@ -13,19 +13,19 @@ use FCToernooi\Tournament;
 use FCToernooi\User;
 use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
-use Voetbal\League;
-use Voetbal\Referee;
-use Voetbal\Competition;
-use Voetbal\Competition\Repository as CompetitionRepository;
-use Voetbal\League\Repository as LeagueRepository;
+use Sports\League;
+use Sports\Referee;
+use Sports\Competition;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\League\Repository as LeagueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Repository
- * @package Voetbal\Competition
+ * @package Sports\Competition
  */
-class Repository extends \Voetbal\Repository
+class Repository extends \Sports\Repository
 {
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {

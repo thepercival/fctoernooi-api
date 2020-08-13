@@ -10,9 +10,11 @@ namespace App\Export\Excel\Worksheet;
 
 use App\Export\Excel\Spreadsheet;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Voetbal\Round;
-use Voetbal\Poule;
-use Voetbal\NameService;
+use FCToernooi\Participant;
+use Sports\Place\Location as PlaceLocation;
+use Sports\Round;
+use Sports\Poule;
+use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -72,6 +74,7 @@ class Indeling extends FCToernooiWorksheet
 
     public function drawGrouping(Round $rootRound, int $rowStart): int
     {
+        $placeLocationMap = $this->getParent()->getPlaceLocationMap();
         $row = $rowStart;
         $nrOnRow = 0;
         foreach ($rootRound->getPoules() as $poule) {
@@ -87,8 +90,9 @@ class Indeling extends FCToernooiWorksheet
             // drawPlaces
             foreach ($poule->getPlaces() as $place) {
                 $this->getCellByColumnAndRow($columnStart, $row + $place->getNumber())->setValue($place->getNumber());
-                if ($place->getCompetitor() !== null) {
-                    $name = $this->getParent()->getNameService()->getPlaceName($place, true);
+                $competitor = $placeLocationMap->getCompetitor($place);
+                if ($competitor !== null) {
+                    $name = $competitor->getName();
                     $this->getCellByColumnAndRow($columnStart + 1, $row + $place->getNumber())->setValue($name);
                 }
             }

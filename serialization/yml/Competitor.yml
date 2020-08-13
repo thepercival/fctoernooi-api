@@ -1,0 +1,18 @@
+FCToernooi\Competitor:
+  exclusion_policy: ALL
+  exclude: false
+  access_type: public_method
+
+  properties:
+    id:
+      read_only: true
+    name:
+      type: string
+    pouleNr:
+      type: integer
+    placeNr:
+      type: integer
+    registered:
+      type: boolean
+    info:
+      type: string

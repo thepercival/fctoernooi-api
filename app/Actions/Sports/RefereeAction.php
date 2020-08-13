@@ -6,28 +6,28 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Availability\Checker as AvailabilityChecker;
-use Voetbal\Competition\Repository as CompetitionRepos;
-use Voetbal\Referee as RefereeBase;
-use Voetbal\Referee\Repository as RefereeRepository;
+use Sports\Availability\Checker as AvailabilityChecker;
+use Sports\Competition\Repository as CompetitionRepos;
+use Sports\Referee as RefereeBase;
+use Sports\Referee\Repository as RefereeRepository;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
-use Voetbal\Sport\Repository as SportRepository;
+use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Voetbal\Referee;
-use Voetbal\Competition;
-use Voetbal\Priority\Service as PriorityService;
+use Sports\Referee;
+use Sports\Competition;
+use Sports\Priority\Service as PriorityService;
 
 final class RefereeAction extends Action
 {

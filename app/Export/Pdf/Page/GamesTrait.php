@@ -9,11 +9,11 @@
 namespace App\Export\Pdf\Page;
 
 use App\Export\Excel\Worksheet\Planning;
-use Voetbal\Game;
-use Voetbal\Round\Number as RoundNumber;
+use Sports\Game;
+use Sports\Round\Number as RoundNumber;
 use App\Export\Pdf\Page;
-use Voetbal\State;
-use Voetbal\NameService;
+use Sports\State;
+use Sports\NameService;
 
 trait GamesTrait
 {

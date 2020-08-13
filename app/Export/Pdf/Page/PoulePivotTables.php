@@ -9,14 +9,14 @@
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Voetbal\NameService;
-use Voetbal\Poule;
-use Voetbal\Place;
-use Voetbal\Game;
-use Voetbal\State;
-use Voetbal\Round\Number as RoundNumber;
-use Voetbal\Ranking\Service as RankingService;
-use Voetbal\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\NameService;
+use Sports\Poule;
+use Sports\Place;
+use Sports\Game;
+use Sports\State;
+use Sports\Round\Number as RoundNumber;
+use Sports\Ranking\Service as RankingService;
+use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
 
 class PoulePivotTables extends ToernooiPdfPage
 {

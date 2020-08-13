@@ -6,26 +6,26 @@
  * Time: 14:02
  */
 
-namespace App\Actions\Voetbal;
+namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
-use Voetbal\Game\Score\Repository as GameScoreRepository;
-use Voetbal\Game\Repository as GameRepository;
-use Voetbal\Place\Repository as PlaceRepository;
-use Voetbal\Structure\Repository as StructureRepository;
-use Voetbal\Place;
-use Voetbal\Poule;
-use Voetbal\Poule\Repository as PouleRepository;
+use Sports\Game\Score\Repository as GameScoreRepository;
+use Sports\Game\Repository as GameRepository;
+use Sports\Place\Repository as PlaceRepository;
+use Sports\Structure\Repository as StructureRepository;
+use Sports\Place;
+use Sports\Poule;
+use Sports\Poule\Repository as PouleRepository;
 use App\Actions\Action;
-use Voetbal\Competition;
-use Voetbal\Game\Service as GameService;
-use Voetbal\Game;
-use Voetbal\State;
-use Voetbal\Qualify\Service as QualifyService;
+use Sports\Competition;
+use Sports\Game\Service as GameService;
+use Sports\Game;
+use Sports\State;
+use Sports\Qualify\Service as QualifyService;
 
 final class GameAction extends Action
 {
@@ -70,7 +70,7 @@ final class GameAction extends Action
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Voetbal\Competition $competition */
+            /** @var \Sports\Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $queryParams = $request->getQueryParams();
