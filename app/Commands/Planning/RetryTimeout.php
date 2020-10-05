@@ -71,11 +71,9 @@ class RetryTimeout extends PlanningCommand
             $oldBestPlanning = $planningInput->getBestPlanning();
             $planningSeeker->process( $planningInput );
             if( $oldBestPlanning !== $planningInput->getBestPlanning() ) {
+                $this->updatePolynomials( $planningInput );
                 $this->sendMailWithSuccessfullTimedoutPlanning($planningInput);
             }
-
-            $this->updatePolynomials( $planningInput );
-
             $this->setStatusToFinishedProcessingTimedout();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
@@ -138,21 +136,14 @@ class RetryTimeout extends PlanningCommand
 
     protected function updatePolynomials(PlanningInput $planningInput) {
         $inputGCDService = new PlanningInputGCDService();
-
+        $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         for ($polynomial = 2; $polynomial <= 8; $polynomial++) {
             $polynomialInputTmp = $inputGCDService->getPolynomial($planningInput, $polynomial);
             $polynomialInput = $this->planningInputRepos->getFromInput($polynomialInputTmp);
             if ($polynomialInput === null) {
                 continue;
             }
-
-            $plannings = $polynomialInput->getPlannings();
-            while ($plannings->count() > 0) {
-                $removePlanning = $plannings->first();
-                $plannings->removeElement($removePlanning);
-                $this->planningRepos->remove($removePlanning);
-            }
-            $this->planningInputRepos->save($polynomialInput);
+            $planningSeeker->process($polynomialInput);
         }
     }
 
