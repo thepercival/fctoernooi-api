@@ -90,11 +90,18 @@ class Structure extends ToernooiPdfPage
     {
         $pouleMarginsWidth = ($nrOfPoules - 1) * self::PouleMargin;
         $pouleWidth = ($width - $pouleMarginsWidth) / $nrOfPoules;
-        return (int)floor($pouleWidth / self::PlaceWidth);
+        $maxNrOfPlaceColumnsPerPoule = (int)floor($pouleWidth / self::PlaceWidth);
+        if( $maxNrOfPlaceColumnsPerPoule === 0 ) {
+            $maxNrOfPlaceColumnsPerPoule = 1;
+        }
+        return $maxNrOfPlaceColumnsPerPoule;
     }
 
     protected function getNrOfPlaceColumns(Poule $poule, int $maxNrOfPlaceColumnsPerPoule): int
     {
+        if ($maxNrOfPlaceColumnsPerPoule === 0) {
+            $trrrr = 1;
+        }
         $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
         if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
             $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;

@@ -2,17 +2,21 @@
 
 namespace App\Commands;
 
+use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 
+use SportsHelpers\Place\Range as PlaceRange;
 use SportsPlanning\Planning as PlanningBase;
-use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Planning\Validator as PlanningValidator;
+use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Resource\RefereePlace\Service as RefereePlaceService;
-
+use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Service as PlanningService;
+use SportsPlanning\Batch\SelfReferee as SelfRefereeBatch;
+use Symfony\Component\Console\Input\InputInterface;
 
 class Planning extends Command
 {
@@ -34,28 +38,45 @@ class Planning extends Command
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function updateSelfReferee(PlanningInput $planningInput)
-    {
-        $planningService = new PlanningService();
-        $planning = $planningService->getBestPlanning($planningInput);
-        if ($planning === null) {
-            throw new \Exception("there should be a best planning", E_ERROR);
+    protected function getPlaceRange(
+        InputInterface $input,
+        TournamentStructureRanges $tournamentStructureRanges
+    ): PlaceRange {
+        $placeRange = $tournamentStructureRanges->getFirstPlaceRange();
+        if (strlen($input->getOption("placesRange")) > 0) {
+            if (strpos($input->getOption("placesRange"), "-") === false ) {
+                throw new \Exception("misformat placesRange-option");
+            }
+            $minMax = explode('-', $input->getOption('placesRange'));
+            $placeRange->min = (int)$minMax[0];
+            $placeRange->max = (int)$minMax[1];
         }
-
-        $planning->setState(PlanningBase::STATE_UPDATING_SELFREFEE);
-        $this->planningRepos->save($planning);
-
-        $firstBatch = $planning->createFirstBatch();
-        $refereePlaceService = new RefereePlaceService($planning);
-        if (!$refereePlaceService->assign($firstBatch)) {
-            $this->logger->info("refereeplaces could not be equally assigned");
-        }
-
-        $planning->setState(PlanningBase::STATE_SUCCESS);
-        $this->planningRepos->save($planning);
-
-        $planningInput->setState(PlanningInput::STATE_ALL_PLANNINGS_TRIED);
-        $this->planningInputRepos->save($planningInput);
-        $this->logger->info('   update state => STATE_ALL_PLANNINGS_TRIED');
+        return $placeRange;
     }
+
+//    protected function updateSelfReferee(PlanningInput $planningInput)
+//    {
+//        $planning = $planningInput->getBestPlanning();
+//        if ($planning === null) {
+//            throw new \Exception("there should be a best planning", E_ERROR);
+//        }
+//
+//        $firstBatch = new SelfRefereeBatch( $planning->createFirstBatch() );
+//        $refereePlaceService = new RefereePlaceService($planning);
+//        if (!$refereePlaceService->assign($firstBatch)) {
+//            $this->logger->info("refereeplaces could not be equally assigned");
+//            $planning->setValidity( PlanningValidator::UNEQUALLY_ASSIGNED_REFEREEPLACES );
+//
+//            $planningOutput = new PlanningOutput($this->logger);
+//            $planningOutput->outputWithGames($planning, false);
+//            $planningOutput->outputWithTotals($planning, false);
+//        }
+//
+//        $planning->setState(PlanningBase::STATE_SUCCESS);
+//        $this->planningRepos->save($planning);
+//
+//        $planningInput->setState(PlanningInput::STATE_ALL_PLANNINGS_TRIED);
+//        $this->planningInputRepos->save($planningInput);
+//        $this->logger->info('   update state => STATE_ALL_PLANNINGS_TRIED');
+//    }
 }

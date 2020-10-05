@@ -12,6 +12,7 @@ use Selective\Config\Configuration;
 use Symfony\Component\Console\Command\Command as SymCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class Command extends SymCommand
 {
@@ -36,28 +37,23 @@ class Command extends SymCommand
 
     protected function configure()
     {
-        $this->addOption('logtofile', null, InputArgument::OPTIONAL, 'logtofile?');
-        $this->addOption('loglevel', null, InputArgument::OPTIONAL, '100');
+        $this->addOption('logtofile', null, InputOption::VALUE_NONE, 'logtofile?');
+        $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '100');
     }
 
     protected function initLogger(InputInterface $input, string $name)
     {
-        $logToFile = $input->hasOption('logtofile') ? filter_var(
-            $input->getOption('logtofile'),
-            FILTER_VALIDATE_BOOLEAN
-        ) : false;
         $loggerSettings = $this->config->getArray('logger');
         $logLevel = $loggerSettings['level'];
         if (strlen($input->getOption('loglevel')) > 0) {
             $logLevel = filter_var($input->getOption('loglevel'), FILTER_VALIDATE_INT);
         }
 
-
         $this->logger = new Logger($name);
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
 
-        $path = $logToFile ? ($loggerSettings['path'] . $name . '.log') : 'php://stdout';
+        $path = $input->getOption('logtofile') ? ($loggerSettings['path'] . $name . '.log') : 'php://stdout';
         $handler = new StreamHandler($path, $logLevel);
         $this->logger->pushHandler($handler);
 

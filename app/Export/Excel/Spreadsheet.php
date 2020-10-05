@@ -5,7 +5,6 @@ namespace App\Export\Excel;
 use App\Export\Document as ExportDocument;
 use App\Export\TournamentConfig;
 use FCToernooi\Tournament;
-use SportsPlanning\Service as PlanningService;
 use Sports\Structure;
 use PhpOffice\PhpSpreadsheet\Spreadsheet as SpreadsheetBase;
 use App\Export\Excel\Worksheet\Structure as StructureSheet;
@@ -41,7 +40,6 @@ class Spreadsheet extends SpreadsheetBase
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->planningService = new PlanningService();
         $this->config = $config;
         $this->url = $url;
     }

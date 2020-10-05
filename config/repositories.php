@@ -32,7 +32,7 @@ use Sports\Competition\Repository as CompetitionRepository;
 use Sports\Competition;
 
 use Sports\Structure\Repository as StructureRepository;
-use SportsPlanning\Repository as PlanningRepository;
+use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Planning;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Input as PlanningInput;

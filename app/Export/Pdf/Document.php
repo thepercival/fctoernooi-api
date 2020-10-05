@@ -11,7 +11,6 @@ namespace App\Export\Pdf;
 use FCToernooi\Tournament;
 use FCToernooi\LockerRoom;
 use Sports\Structure;
-use SportsPlanning\Service as PlanningService;
 use Sports\Game;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
@@ -47,7 +46,6 @@ class Document extends \Zend_Pdf
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->planningService = new PlanningService();
         $this->config = $config;
         $this->url = $url;
     }

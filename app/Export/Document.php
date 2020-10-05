@@ -6,8 +6,6 @@ use FCToernooi\Tournament;
 use Sports\Place\Location\Map as PlaceLocationMap;
 use Sports\Game;
 use Sports\NameService;
-use SportsPlanning\Service as PlanningService;
-use Sports\Poule;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use Sports\State;
@@ -23,10 +21,6 @@ trait Document
      * @var Structure
      */
     protected $structure;
-    /**
-     * @var PlanningService
-     */
-    protected $planningService;
     /**
      * @var TournamentConfig
      */
@@ -54,14 +48,6 @@ trait Document
     public function getStructure()
     {
         return $this->structure;
-    }
-
-    /**
-     * @return PlanningService
-     */
-    public function getPlanningService()
-    {
-        return $this->planningService;
     }
 
     /**

@@ -387,17 +387,16 @@ class Gamenotes extends ToernooiPdfPage
             $this->drawCell($dots, $nX, $nY, $nSecondBorder - $nX, $nRowHeight * $larger, ToernooiPdfPage::ALIGNRIGHT);
             $this->drawCell('-', $nSecondBorder, $nY, $nMargin, $nRowHeight * $larger);
             $this->drawCell($dots, $nX2, $nY, $dotsWidth, $nRowHeight * $larger);
-            if ($firstScoreConfig !== null) {
-                $name = $this->translationService->getScoreNamePlural($firstScoreConfig);
-                $this->drawCell(
-                    $name,
-                    $nX2 + $dotsWidth,
-                    $nY,
-                    $nWidthResult - ($this->getPageMargin() + $dotsWidth),
-                    $nRowHeight * $larger,
-                    ToernooiPdfPage::ALIGNRIGHT
-                );
-            }
+
+            $name = $this->translationService->getScoreNamePlural($firstScoreConfig);
+            $this->drawCell(
+                $name,
+                $nX2 + $dotsWidth,
+                $nY,
+                $nWidthResult - ($this->getPageMargin() + $dotsWidth),
+                $nRowHeight * $larger,
+                ToernooiPdfPage::ALIGNRIGHT
+            );
         }
     }
 

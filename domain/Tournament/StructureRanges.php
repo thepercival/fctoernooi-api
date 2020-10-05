@@ -4,7 +4,7 @@
 namespace FCToernooi\Tournament;
 
 use SportsHelpers\Range;
-use Sports\Place\Range as PlaceRange;
+use SportsHelpers\Place\Range as PlaceRange;
 
 class StructureRanges
 {

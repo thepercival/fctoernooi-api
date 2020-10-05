@@ -3,21 +3,27 @@
 namespace App\Commands\Planning;
 
 use App\Mailer;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
+use SportsHelpers\Place\Range as PlaceRange;
+use SportsHelpers\PouleStructure;
+use SportsHelpers\Range;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning as PlanningBase;
-use SportsPlanning\Output as PlanningOutput;
-use SportsPlanning\Output\Batch as BatchOutput;
-use SportsPlanning\Input\Service as PlanningInputService;
-use SportsPlanning\Seeker as PlanningSeeker;
+use SportsPlanning\Planning\Output as PlanningOutput;
+use SportsPlanning\Batch\Output as BatchOutput;
+use SportsPlanning\Input\GCDService as PlanningInputGCDService;
+use SportsPlanning\Planning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
+use SportsHelpers\PouleStructure\Balanced\Iterator as PouleStructureIterator;
 
 class RetryTimeout extends PlanningCommand
 {
@@ -44,108 +50,113 @@ class RetryTimeout extends PlanningCommand
             ->setHelp('Retries the timeout-plannings');
         parent::configure();
 
-        $this->addArgument('planningId', InputArgument::OPTIONAL, 'planning-id');
-        $this->addOption('structureConfig', null, InputOption::VALUE_OPTIONAL, '6,6');
+        $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
+        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '2-6');
+        $this->addOption('maxTimeoutSeconds', null, InputOption::VALUE_OPTIONAL, '5');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'cron-retry-timeout-planning');
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker->enableTimedout( $this->getMaxTimeoutSeconds( $input ) );
 
         try {
-            if ($this->planningRepos->isProcessing(PlanningBase::STATE_PROCESSING)) {
+            if ( !$this->setStatusToStartProcessingTimedout() ) {
                 $this->logger->info("still processing..");
                 return 0;
             }
 
-            $planning = null;
-            if (strlen($input->getArgument('planningId')) > 0) {
-                $planning = $this->planningRepos->find((int)$input->getArgument('planningId'));
-            } else {
-                $structureConfig = $this->getStructureConfig($input);
-                $maxTimeOutSeconds = PlanningBase::DEFAULT_TIMEOUTSECONDS * pow( PlanningBase::TIMEOUT_MULTIPLIER, 2 );
-                $planning = $this->planningRepos->getTimeout($maxTimeOutSeconds, $structureConfig);
+            $planningInput = $this->getPlanningInputFromInput( $input );
+            $oldBestPlanning = $planningInput->getBestPlanning();
+            $planningSeeker->process( $planningInput );
+            if( $oldBestPlanning !== $planningInput->getBestPlanning() ) {
+                $this->sendMailWithSuccessfullTimedoutPlanning($planningInput);
             }
 
-            if ($planning === null) {
-                $this->logger->info("no timedout-planning found to retry");
-                return 0;
-            }
+            $this->updatePolynomials( $planningInput );
 
-            $planning->setState(PlanningBase::STATE_PROCESSING);
-            $this->planningRepos->save($planning);
-            $this->logger->info('   update state => STATE_PROCESSING');
-
-//            if( array_key_exists(1, $argv) ) {
-//                $planning = $this->planningRepos->find( (int) $argv[1] );
-//            }
-            $planningSeeker->processTimeout($planning);
-            if ($planning->getState() !== PlanningBase::STATE_SUCCESS) {
-                return 0;
-            }
-            $this->sendMailWithSuccessPlanning($planning);
-
-            if ($planning->getInput()->selfRefereeEnabled()) {
-                $this->updateSelfReferee($planning->getInput());
-            }
-            $this->removeWorseTimeout($planning);
-            $inputService = new PlanningInputService();
-            // update planninginputs
-            for ($reverseGCD = 2; $reverseGCD <= 8; $reverseGCD++) {
-                $reverseGCDInputTmp = $inputService->getReverseGCDInput($planning->getInput(), $reverseGCD);
-                $reverseGCDInput = $this->planningInputRepos->getFromInput($reverseGCDInputTmp);
-                if ($reverseGCDInput === null) {
-                    continue;
-                }
-
-                $plannings = $reverseGCDInput->getPlannings();
-                while ($plannings->count() > 0) {
-                    $removePlanning = $plannings->first();
-                    $plannings->removeElement($removePlanning);
-                    $this->planningRepos->remove($removePlanning);
-                }
-
-                $reverseGCDInput->setState(PlanningInput::STATE_CREATED);
-                $this->planningInputRepos->save($reverseGCDInput);
-            }
+            $this->setStatusToFinishedProcessingTimedout();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         }
         return 0;
     }
 
-    protected function removeWorseTimeout(PlanningBase $planning)
-    {
-        $worsePlanning = $this->getWorsePlanning($planning);
-        if ($worsePlanning === null) {
-            return;
+    protected function getPlanningInputFromInput( InputInterface $input ): PlanningInput {
+        if (strlen($input->getArgument('inputId')) > 0) {
+            $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+            if ($planningInput === null) {
+                throw new \Exception(
+                    "no timedout-planninginput found for inputId " . $input->getArgument('inputId'),
+                    E_ERROR
+                );
+            }
+            return $planningInput;
+        }
+        $tournamentStructureRanges = new TournamentStructureRanges();
+        $placesRange = $this->getPlaceRange($input, $tournamentStructureRanges);
+        $maxTimeOutSeconds = $this->getMaxTimeoutSeconds( $input );
+        $planningInput = $this->getTimedoutInput( true, $maxTimeOutSeconds, $placesRange );
+        if ( $planningInput === null) {
+            $planningInput = $this->getTimedoutInput( false, $maxTimeOutSeconds, $placesRange );
         }
 
-        $this->planningRepos->remove($worsePlanning);
-        $range = $worsePlanning->getNrOfBatchGames();
-        $this->logger->info(
-            '   worse timeout removed => batchGames ' . $range->min . '->' . $range->max . ', gamesInARow ' . $worsePlanning->getMaxNrOfGamesInARow(
-            )
-        );
-    }
+        if ( $planningInput === null) {
+            $suffix = "maxTimeoutSeconds: ".$maxTimeOutSeconds;
+            $suffix .= ", placesRange: " . $placesRange->min . "-" . $placesRange->max;
+            throw new \Exception("no timedout-planning found for " . $suffix, E_ERROR );
+        }
+        return $planningInput;
+}
 
-    protected function getWorsePlanning(PlanningBase $planning): ?PlanningBase
-    {
-        $range = $planning->getNrOfBatchGames();
-
-        foreach ($planning->getInput()->getPlannings() as $planningIt) {
-            if ($planningIt->getState() === PlanningBase::STATE_TIMEOUT
-                && $planningIt->getMinNrOfBatchGames() === $range->min
-                && $planningIt->getMaxNrOfBatchGames() === $range->max
-                && $planningIt->getMaxNrOfGamesInARow() > $planning->getMaxNrOfGamesInARow()) {
-                return $planningIt;
+    protected function getTimedoutInput( bool $batchGames, int $maxTimeOutSeconds, PlaceRange $placesRange ): ?PlanningInput {
+        $structureIterator = new PouleStructureIterator( $placesRange, new Range(1, 64) );
+        while( $structureIterator->valid() ) {
+            // echo PHP_EOL . $structureIterator->current()->toString();
+            $planningInput = null;
+            if( $batchGames ) {
+                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds, $structureIterator->current() );
+            } else {
+                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds, $structureIterator->current() );
             }
+            if( $planningInput !== null ) {
+                return $planningInput;
+            }
+            $structureIterator->next();
+
         }
         return null;
     }
 
-    protected function sendMailWithSuccessPlanning(PlanningBase $planning)
+    protected function getMaxTimeoutSeconds( InputInterface $input ): int {
+        if (strlen($input->getOption('maxTimeoutSeconds')) > 0) {
+            return (int) $input->getOption('maxTimeoutSeconds');
+        }
+        return PlanningBase::DEFAULT_TIMEOUTSECONDS * pow( PlanningBase::TIMEOUT_MULTIPLIER, 2 );
+    }
+
+    protected function updatePolynomials(PlanningInput $planningInput) {
+        $inputGCDService = new PlanningInputGCDService();
+
+        for ($polynomial = 2; $polynomial <= 8; $polynomial++) {
+            $polynomialInputTmp = $inputGCDService->getPolynomial($planningInput, $polynomial);
+            $polynomialInput = $this->planningInputRepos->getFromInput($polynomialInputTmp);
+            if ($polynomialInput === null) {
+                continue;
+            }
+
+            $plannings = $polynomialInput->getPlannings();
+            while ($plannings->count() > 0) {
+                $removePlanning = $plannings->first();
+                $plannings->removeElement($removePlanning);
+                $this->planningRepos->remove($removePlanning);
+            }
+            $this->planningInputRepos->save($polynomialInput);
+        }
+    }
+
+    protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput)
     {
         $stream = fopen('php://memory', 'r+');
         $loggerOutput = new Logger('succesfull-retry-planning-output-logger');
@@ -154,10 +165,10 @@ class RetryTimeout extends PlanningCommand
         $loggerOutput->pushHandler($handler);
 
         $planningOutput = new PlanningOutput($loggerOutput);
-        $planningOutput->output($planning, true);
+        $planningOutput->outputInput($planningInput, null, "is succesfull");
 
         $batchOutput = new BatchOutput($loggerOutput);
-        $batchOutput->output($planning->createFirstBatch(), "succesful retry planning");
+        $batchOutput->output($planningInput->getBestPlanning()->createFirstBatch(), "succesful retry planning");
 
         rewind($stream);
         $this->mailer->sendToAdmin(
@@ -169,20 +180,39 @@ class RetryTimeout extends PlanningCommand
 
     /**
      * @param InputInterface $input
-     * @return array|int[]|null
+     * @return PouleStructure|null
      */
-    protected function getStructureConfig(InputInterface $input): ?array
+    protected function getPouleStructure(InputInterface $input): ?PouleStructure
     {
-        $structureConfig = null;
-        if (strlen($input->getOption('structureConfig')) > 0) {
-            $structureConfigParam = explode(",", $input->getOption('structureConfig'));
-            if ($structureConfigParam != false) {
-                $structureConfig = [];
-                foreach ($structureConfigParam as $nrOfPlaces) {
-                    $structureConfig[] = (int)$nrOfPlaces;
+        $pouleStructure = null;
+        if (strlen($input->getOption('pouleStructure')) > 0) {
+            $pouleStructureParam = explode(",", $input->getOption('pouleStructure'));
+            if ($pouleStructureParam != false) {
+                $pouleStructure = [];
+                foreach ($pouleStructureParam as $nrOfPlaces) {
+                    $pouleStructure[] = (int)$nrOfPlaces;
                 }
             }
         }
-        return $structureConfig;
+        return new PouleStructure($pouleStructure);
     }
+
+    protected function setStatusToStartProcessingTimedout(): bool {
+
+        $fileName = $this->getStatusFileName();
+        if( file_exists ( $fileName ) ) {
+            return false;
+        }
+        file_put_contents( $fileName, "processing");
+        return true;
+    }
+
+    protected function setStatusToFinishedProcessingTimedout() {
+        unlink( $this->getStatusFileName() );
+    }
+
+    protected function getStatusFileName(): string {
+        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . "timedout-processing.txt";
+    }
+
 }

@@ -13,16 +13,16 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sports\Competition;
-use SportsPlanning\Output as PlanningOutput;
-use SportsPlanning\Output\Batch as BatchOutput;
+use SportsPlanning\Planning\Output as PlanningOutput;
+use SportsPlanning\Batch\Output as BatchOutput;
 use Sports\Planning as PlanningBase;
 use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 use Sports\Structure\Repository as StructureRepository;
 
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Input\Service as PlanningInputService;
-use SportsPlanning\Seeker as PlanningSeeker;
-use SportsPlanning\Service as PlanningService;
+use SportsPlanning\Planning\Seeker as PlanningSeeker;
+use SportsPlanning\Planning\Service as PlanningService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Competition\Repository as CompetitionRepository;
@@ -96,6 +96,7 @@ class Create extends PlanningCommand
                     $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' not found');
                     return 0;
                 }
+                $this->planningInputRepos->reset($planningInput);
                 $this->processPlanning($queueService, $planningInput);
                 $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' created');
                 return 0;
@@ -126,6 +127,7 @@ class Create extends PlanningCommand
                 }
                 $planningInput = $this->planningInputRepos->find((int)$content->inputId);
                 if ($planningInput !== null) {
+                    $this->planningInputRepos->reset($planningInput);
                     $this->processPlanning($queueService, $planningInput, $competition, $roundNumberAsValue);
                 } else {
                     $this->logger->info('planningInput ' . $content->inputId . ' not found');
@@ -145,35 +147,34 @@ class Create extends PlanningCommand
         int $roundNumberAsValue = null
     ) {
         $planningOutput = new PlanningOutput($this->logger);
-        if ($planningInput->getState() === PlanningInput::STATE_TRYING_PLANNINGS) {
-            $planningOutput->outputInput($planningInput, null, 'still processing ...');
-            return;
-        }
-        if ($planningInput->getState() === PlanningInput::STATE_UPDATING_BESTPLANNING_SELFREFEE) {
-            $planningOutput->outputInput($planningInput, null, 'still processing selfreferee ...');
-            return;
-        }
 
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         $planningSeeker->process($planningInput);
-        if ($planningInput->selfRefereeEnabled()) {
-            $this->updateSelfReferee($planningInput);
+        $bestPlanning = $planningInput->getBestPlanning();
+        if ($bestPlanning === null) {
+            $message = "best planning not found";
+            if ($competition !== null && $roundNumberAsValue !== null) {
+                $message .= " for roundnumber " . $roundNumberAsValue . " and competitionid " . $competition->getId();
+            }
+            throw new \Exception($message, E_ERROR);
         }
 
-        $planningService = new PlanningService();
-        $bestPlanning = $planningService->getBestPlanning($planningInput);
-        if ($bestPlanning === null) {
-            throw new \Exception(
-                "best planning not found for roundnumber " . $roundNumberAsValue . " and competitionid " . $competition->getId(
-                ), E_ERROR
-            );
-        }
 //        $planningOutput = new PlanningOutput($this->logger);
 //        $planningOutput->outputWithGames($bestPlanning, false);
 //        $planningOutput->outputWithTotals($bestPlanning, false);
-        if ($competition === null or $roundNumberAsValue === null) {
-            return;
+
+        if ($competition !== null and $roundNumberAsValue !== null) {
+            $this->updateRoundNumberWithPlanning($queueService, $competition, $roundNumberAsValue);
         }
+    }
+
+    protected function updateRoundNumberWithPlanning(
+        QueueService $queueService,
+        Competition $competition,
+        int $roundNumberAsValue
+    ) {
+        $this->logger->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
+
         $this->entityManager->refresh($competition);
         $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
         $this->refreshDb($competition, $roundNumber);

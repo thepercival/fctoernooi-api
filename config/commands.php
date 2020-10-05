@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
 
-use App\Commands\Planning\CreateDefaultInput as PlanningCreateDefaultInput;
+use App\Commands\Planning\Input\CreateDefaults as PlanningCreateDefaultInput;
 use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Listing as ListingCommand;
@@ -12,7 +12,6 @@ use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
 use App\Commands\Validator;
 use App\Commands\Planning\Validator as PlanningValidator;
-use App\Commands\Planning\RemoveObsolete as PlanningRemoveObsolete;
 
 $commands = [
     "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
@@ -35,9 +34,6 @@ $commands = [
     },
     "app:validate-planning" => function (ContainerInterface $container): PlanningValidator {
         return new PlanningValidator($container);
-    },
-    "app:remove-obsolete-plannings" => function (ContainerInterface $container): PlanningRemoveObsolete {
-        return new PlanningRemoveObsolete($container);
     }
 ];
 

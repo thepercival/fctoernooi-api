@@ -96,7 +96,10 @@ class Grouping extends ToernooiPdfPage
                         ToernooiPdfPage::ALIGNRIGHT,
                         "black"
                     );
-                    $name = $place->getCompetitor() !== null ? $nameService->getPlaceName($place, true) : null;
+                    $name = null;
+                    if( $this->getParent()->getPlaceLocationMap()->getCompetitor( $place ) !== null ) {
+                       $name = $nameService->getPlaceName($place, true);
+                    }
                     $this->drawCell(
                         $name,
                         $nX + $numberWidth,
