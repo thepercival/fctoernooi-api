@@ -5015,16 +5015,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.6",
+            "version": "v1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "c93bb6cfae8a05c303496f0462e5555abbec3ea1"
+                "reference": "3caeb48eb6e3f466b223b2e8471d9768b91de767"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/c93bb6cfae8a05c303496f0462e5555abbec3ea1",
-                "reference": "c93bb6cfae8a05c303496f0462e5555abbec3ea1",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/3caeb48eb6e3f466b223b2e8471d9768b91de767",
+                "reference": "3caeb48eb6e3f466b223b2e8471d9768b91de767",
                 "shasum": ""
             },
             "require": {
@@ -5080,7 +5080,7 @@
                 "football",
                 "sports"
             ],
-            "time": "2020-10-05T13:58:07+00:00"
+            "time": "2020-10-05T17:51:48+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
