@@ -88,23 +88,14 @@ class Validator extends Command
         $resetPlanningInputWhenInvalid = $input->getOption('resetInvalid');
 
         $showNrOfPlaces = [];
-        if (strlen($input->getArgument('inputId')) > 0) {
-            $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
-            $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid);
-            $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' gevalideerd');
-            return 0;
-        }
+
         $this->exitAtFirstInvalid = filter_var($input->getOption("exitAtFirstInvalid"), FILTER_VALIDATE_BOOLEAN);
-        $maxNrOfInputs = 100;
-        if (strlen($input->getOption('maxNrOfInputs')) > 0) {
-            $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
-        }
-        $validateInvalid = $input->getOption("validateInvalid");
+
         $queueService = new QueueService($this->config->getArray('queue'));
-        $pouleStructure = $this->getPouleStructure($input);
-        $selfReferee = $this->getSelfReferee($input);
-        $this->logger->info('aan het valideren..');
-        $planningInputs = $this->planningInputRepos->findNotValidated($validateInvalid, $maxNrOfInputs, $pouleStructure, $selfReferee);
+
+        $this->logger->info('valideren gestart..');
+
+        $planningInputs = $this->getPlanningInputsToValidate( $input );
         foreach ($planningInputs as $planningInput) {
             (new PlanningOutput($this->logger))->outputInput( $planningInput );
             try {
@@ -124,6 +115,28 @@ class Validator extends Command
         }
         $this->logger->info('alle planningen gevalideerd');
         return 0;
+    }
+
+    /**
+     * @return array|PlanningInput[]
+     */
+    protected function getPlanningInputsToValidate( InputInterface $input ): array {
+
+        if (strlen($input->getArgument('inputId')) > 0) {
+            return [ $this->planningInputRepos->find((int)$input->getArgument('inputId')) ];
+        }
+
+        $validateInvalid = $input->getOption("validateInvalid");
+
+        $pouleStructure = $this->getPouleStructure($input);
+        $selfReferee = $this->getSelfReferee($input);
+
+        $maxNrOfInputs = 100;
+        if (strlen($input->getOption('maxNrOfInputs')) > 0) {
+            $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
+        }
+
+        return $this->planningInputRepos->findNotValidated($validateInvalid, $maxNrOfInputs, $pouleStructure, $selfReferee);
     }
 
     protected function validatePlanningInput(PlanningInput $planningInputParam, bool $resetPlanningInputWhenInvalid, array &$showNrOfPlaces = null)

@@ -9,19 +9,16 @@ where t.updated = true;
 CREATE INDEX CDKTMP ON places(competitorid);
 
 -- 23565
-update places p join competitors c on c.id = p.competitorid join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundnumbers rn on rn.id = r.numberid and rn.number = 1 join tournaments t on t.competitionId = rn.competitionId
-set c.placeNr = p.number, c.pouleNr = po.number
-where	t.updated = true;
+update places p join competitors c on c.id = p.competitorid join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundnumbers rn on rn.id = r.numberid and rn.number = 1 join tournaments t on t.competitionId = rn.competitionId set c.placeNr = p.number, c.pouleNr = po.number where t.updated = true;
 
 -- qualified places
-update 	places p join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundnumbers rn on rn.id = r.numberid and rn.number > 1 join competitions c on c.id = rn.competitionid join tournaments t on t.competitionid = c.id
-set 		p.qualifiedPlaceId = (
-    select 	pprev.id
-    from 	places pprev join poules poprev on poprev.id = pprev.pouleid join rounds rprev on rprev.id = poprev.roundid join roundnumbers rnprev on rnprev.id = rprev.numberid
-    where 	rnprev.number = rn.number-1 and pprev.competitorid = p.competitorid
-)
-where	t.updated = true;
+-- update 	places p join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundnumbers rn on rn.id = r.numberid and rn.number > 1 join competitions c on c.id = rn.competitionid join tournaments t on t.competitionid = c.id
+-- set 		p.qualifiedPlaceId = (
+--     select 	pprev.id
+--     from 	places pprev join poules poprev on poprev.id = pprev.pouleid join rounds rprev on rprev.id = poprev.roundid join roundnumbers rnprev on rnprev.id = rprev.numberid
+--     where 	rnprev.number = rn.number-1 and pprev.competitorid = p.competitorid
+-- )
+-- where	t.updated = true;
+update places p join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundnumbers rn on rn.id = r.numberid and rn.number > 1 join competitions c on c.id = rn.competitionid join tournaments t on t.competitionid = c.id set p.qualifiedPlaceId = ( select pprev.id from places pprev join poules poprev on poprev.id = pprev.pouleid join rounds rprev on rprev.id = poprev.roundid join roundnumbers rnprev on rnprev.id = rprev.numberid where rnprev.number = rn.number-1 and pprev.competitorid = p.competitorid ) where t.updated = true;
 
 ALTER TABLE places DROP INDEX CDKTMP;
-
-update planninginputs set new = false;
