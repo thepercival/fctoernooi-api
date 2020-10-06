@@ -111,7 +111,7 @@ class Validator extends Command
                     $queueService->sendCreatePlannings($planningInput);
                 }
             }
-            $this->planningInputRepos->getEM()->clear();
+            // $this->planningInputRepos->getEM()->clear();
         }
         $this->logger->info('alle planningen gevalideerd');
         return 0;
@@ -123,7 +123,11 @@ class Validator extends Command
     protected function getPlanningInputsToValidate( InputInterface $input ): array {
 
         if (strlen($input->getArgument('inputId')) > 0) {
-            return [ $this->planningInputRepos->find((int)$input->getArgument('inputId')) ];
+            $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+            if( $planningInput === null ) {
+                return [];
+            }
+            return [ $planningInput ];
         }
 
         $validateInvalid = $input->getOption("validateInvalid");
