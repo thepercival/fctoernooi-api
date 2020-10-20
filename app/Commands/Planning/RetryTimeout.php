@@ -60,6 +60,7 @@ class RetryTimeout extends PlanningCommand
         $this->initLogger($input, 'cron-retry-timeout-planning');
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         $planningSeeker->enableTimedout( $this->getMaxTimeoutSeconds( $input ) );
+        // $planningSeeker->disableThrowOnTimeout();
 
         try {
             if ( !$this->setStatusToStartProcessingTimedout() ) {
