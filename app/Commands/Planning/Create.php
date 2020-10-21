@@ -149,6 +149,7 @@ class Create extends PlanningCommand
         $planningOutput = new PlanningOutput($this->logger);
 
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker->disableThrowOnTimeout();
         $planningSeeker->process($planningInput);
         $bestPlanning = $planningInput->getBestPlanning();
         if ($bestPlanning === null) {
@@ -176,8 +177,11 @@ class Create extends PlanningCommand
         $this->logger->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
 
         $this->entityManager->refresh($competition);
-        $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
-        $this->refreshDb($competition, $roundNumber);
+        // all roundnumbers should be refreshed, because planningConfig can be gotten from roundnumber above
+        for( $roundNumberValueIt = 1 ;$roundNumberValueIt <= $roundNumberAsValue ; $roundNumberValueIt++ ) {
+            $roundNumber = $this->getRoundNumber($competition, $roundNumberValueIt );
+            $this->refreshDb($competition, $roundNumber);
+        }
 
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
@@ -188,6 +192,9 @@ class Create extends PlanningCommand
         );
         try {
             $this->entityManager->getConnection()->beginTransaction();
+            if( $roundNumber->getNumber() === 2 ){
+                $debug = true;
+            }
             $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
             $this->entityManager->getConnection()->commit();
         } catch (Exception $e) {
@@ -213,14 +220,18 @@ class Create extends PlanningCommand
 
     protected function refreshDb(Competition $competition, RoundNumber $roundNumber)
     {
-        $this->entityManager->refresh($competition);
+        // $this->entityManager->refresh($competition);
 
-        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
-            $this->entityManager->refresh($roundNumberParam);
-            if ($roundNumberParam->hasNext()) {
-                $refreshDbRoundNumber($roundNumberParam->getNext());
+//        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
+            $this->entityManager->refresh($roundNumber/*$roundNumberParam*/);
+            if( $roundNumber->getPlanningConfig() !== null ) {
+                $this->entityManager->refresh($roundNumber->getPlanningConfig());
             }
-        };
-        $refreshDbRoundNumber($roundNumber);
+
+//            if ($roundNumberParam->hasNext()) {
+//                $refreshDbRoundNumber($roundNumberParam->getNext());
+//            }
+//        };
+//        $refreshDbRoundNumber($roundNumber);
     }
 }

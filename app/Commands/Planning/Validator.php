@@ -83,7 +83,7 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'cron-planning-validator');
+        $this->initLogger($input, 'command-planning-validate');
 
         $resetPlanningInputWhenInvalid = $input->getOption('resetInvalid');
 

@@ -503,16 +503,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "2.11.2",
+            "version": "2.11.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "b88a45cbc395e850b2d958dcd7b9d49d09ff23e0"
+                "reference": "fb5d5f2f26babf8dce217b1eb88300c22bb703a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/b88a45cbc395e850b2d958dcd7b9d49d09ff23e0",
-                "reference": "b88a45cbc395e850b2d958dcd7b9d49d09ff23e0",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/fb5d5f2f26babf8dce217b1eb88300c22bb703a4",
+                "reference": "fb5d5f2f26babf8dce217b1eb88300c22bb703a4",
                 "shasum": ""
             },
             "require": {
@@ -592,7 +592,7 @@
                 "sqlserver",
                 "sqlsrv"
             ],
-            "time": "2020-10-19T02:01:37+00:00"
+            "time": "2020-10-20T14:36:48+00:00"
         },
         {
             "name": "doctrine/event-manager",
@@ -5150,16 +5150,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.8",
+            "version": "v1.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "ac53bf137942ca0228c2d542d5bd479b8a12e1db"
+                "reference": "aa9b68f2a99b0e9817384f2b4a0e1bb629129552"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/ac53bf137942ca0228c2d542d5bd479b8a12e1db",
-                "reference": "ac53bf137942ca0228c2d542d5bd479b8a12e1db",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/aa9b68f2a99b0e9817384f2b4a0e1bb629129552",
+                "reference": "aa9b68f2a99b0e9817384f2b4a0e1bb629129552",
                 "shasum": ""
             },
             "require": {
@@ -5208,7 +5208,7 @@
                 "planning",
                 "sport"
             ],
-            "time": "2020-10-20T13:06:50+00:00"
+            "time": "2020-10-21T11:26:58+00:00"
         },
         {
             "name": "tuupola/base62",

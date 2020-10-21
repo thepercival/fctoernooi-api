@@ -57,14 +57,15 @@ class RetryTimeout extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'cron-retry-timeout-planning');
+        $this->initLogger($input, 'command-planning-retry-timeout');
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         $planningSeeker->enableTimedout( $this->getMaxTimeoutSeconds( $input ) );
-        // $planningSeeker->disableThrowOnTimeout();
+
 
         try {
             if ( !$this->setStatusToStartProcessingTimedout() ) {
                 $this->logger->info("still processing..");
+                $this->setStatusToFinishedProcessingTimedout();
                 return 0;
             }
 
@@ -132,7 +133,7 @@ class RetryTimeout extends PlanningCommand
         if (strlen($input->getOption('maxTimeoutSeconds')) > 0) {
             return (int) $input->getOption('maxTimeoutSeconds');
         }
-        return PlanningBase::DEFAULT_TIMEOUTSECONDS * pow( PlanningBase::TIMEOUT_MULTIPLIER, 2 );
+        return PlanningBase::DEFAULT_TIMEOUTSECONDS;
     }
 
     protected function updatePolynomials(PlanningInput $planningInput) {
