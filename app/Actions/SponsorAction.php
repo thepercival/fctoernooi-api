@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 22-5-18
- * Time: 12:23
- */
+
+declare(strict_types=1);
 
 namespace App\Actions;
 

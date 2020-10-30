@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 29-3-18
- * Time: 13:53
- */
 
 declare(strict_types=1);
 

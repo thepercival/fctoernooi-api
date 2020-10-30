@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 10-1-19
- * Time: 11:46
- */
+
+declare(strict_types=1);
 
 namespace App\Actions\Tournament;
 

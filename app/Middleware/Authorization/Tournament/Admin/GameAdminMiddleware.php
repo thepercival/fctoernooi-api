@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 28-3-18
- * Time: 20:31
- */
+
+declare(strict_types=1);
 
 namespace App\Middleware\Authorization\Tournament\Admin;
 

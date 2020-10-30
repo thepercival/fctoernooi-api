@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;

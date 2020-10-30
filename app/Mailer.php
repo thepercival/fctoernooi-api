@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 30-1-17
- * Time: 12:48
- */
+
+declare(strict_types=1);
 
 namespace App;
 

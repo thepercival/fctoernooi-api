@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 9-11-18
- * Time: 19:28
- */
+
+declare(strict_types=1);
 
 namespace App\Export\Excel\Worksheet\Planning;
 

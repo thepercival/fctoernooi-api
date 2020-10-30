@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 10-10-17
- * Time: 12:27
- */
+
+declare(strict_types=1);
 
 namespace FCToernooi\Tournament\Invitation;
 

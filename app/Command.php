@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Monolog\Handler\NativeMailerHandler;
@@ -31,8 +33,8 @@ class Command extends SymCommand
 
     public function __construct(Configuration $config)
     {
-        $this->config = $config;
         parent::__construct();
+        $this->config = $config;
     }
 
     protected function configure()

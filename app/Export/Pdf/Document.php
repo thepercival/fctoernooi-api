@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 2-2-18
- * Time: 15:06
- */
+
+declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
@@ -96,8 +92,6 @@ class Document extends \Zend_Pdf
         if ($this->config->getPlanning()) {
             list($page, $nY) = $this->createPagePlanning("wedstrijden");
             $this->drawPlanning($this->structure->getFirstRoundNumber(), $page, $nY);
-        }
-        if ($this->config->getRules()) {
         }
         if ($this->config->getGamenotes()) {
             $this->drawGamenotes();

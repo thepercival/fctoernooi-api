@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 7-1-19
- * Time: 9:54
- */
+
+declare(strict_types=1);
 
 namespace FCToernooi;
 

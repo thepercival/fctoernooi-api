@@ -1,16 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 2-2-18
- * Time: 14:59
- */
+
+declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
-/**
- * @package ZendExt
- */
 abstract class Page extends \Zend_Pdf_Page
 {
     /**

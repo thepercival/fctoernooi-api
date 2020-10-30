@@ -1,15 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use App\Middleware\VersionMiddleware;
-use App\Middleware\TournamentUserMiddleware;
-use App\Middleware\TournamentMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use App\Response\UnauthorizedResponse;
 use App\Response\ErrorResponse;
-use Gofabian\Negotiation\NegotiationMiddleware;
 use Selective\Config\Configuration;
 use Tuupola\Middleware\JwtAuthentication;
 use App\Middleware\CorsMiddleware;

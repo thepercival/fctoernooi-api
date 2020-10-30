@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 14-11-17
- * Time: 14:04
- */
+
+declare(strict_types=1);
 
 namespace App\Actions\Sports\Planning;
 
@@ -61,15 +57,7 @@ final class ConfigAction extends Action
 
             $planningConfig = new PlanningConfig($roundNumber);
 
-            $planningConfig->setExtension($planningConfigSer->getExtension());
-            $planningConfig->setEnableTime($planningConfigSer->getEnableTime());
-            $planningConfig->setMinutesPerGame($planningConfigSer->getMinutesPerGame());
-            $planningConfig->setMinutesPerGameExt($planningConfigSer->getMinutesPerGameExt());
-            $planningConfig->setMinutesBetweenGames($planningConfigSer->getMinutesBetweenGames());
-            $planningConfig->setMinutesAfter($planningConfigSer->getMinutesAfter());
-            $planningConfig->setSelfReferee($planningConfigSer->getSelfReferee());
-            $planningConfig->setTeamup($planningConfigSer->getTeamup());
-            $planningConfig->setNrOfHeadtohead($planningConfigSer->getNrOfHeadtohead());
+            $this->updateFromSerialised( $planningConfig, $planningConfigSer );
 
             $this->planningConfigRepos->save($planningConfig);
 
@@ -100,15 +88,7 @@ final class ConfigAction extends Action
                 throw new \Exception("er zijn geen plannings-instellingen gevonden om te wijzigen", E_ERROR);
             }
 
-            $planningConfig->setNrOfHeadtohead($planningConfigSer->getNrOfHeadtohead());
-            $planningConfig->setExtension($planningConfigSer->getExtension());
-            $planningConfig->setEnableTime($planningConfigSer->getEnableTime());
-            $planningConfig->setMinutesPerGame($planningConfigSer->getMinutesPerGame());
-            $planningConfig->setMinutesPerGameExt($planningConfigSer->getMinutesPerGameExt());
-            $planningConfig->setMinutesBetweenGames($planningConfigSer->getMinutesBetweenGames());
-            $planningConfig->setMinutesAfter($planningConfigSer->getMinutesAfter());
-            $planningConfig->setSelfReferee($planningConfigSer->getSelfReferee());
-            $planningConfig->setTeamup($planningConfigSer->getTeamup());
+            $this->updateFromSerialised( $planningConfig, $planningConfigSer );
 
             $this->planningConfigRepos->save($planningConfig);
 
@@ -119,6 +99,18 @@ final class ConfigAction extends Action
         } catch (\Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
+    }
+
+    protected function updateFromSerialised( PlanningConfig $config, PlanningConfig $configSerialised ) {
+        $config->setNrOfHeadtohead($configSerialised->getNrOfHeadtohead());
+        $config->setExtension($configSerialised->getExtension());
+        $config->setEnableTime($configSerialised->getEnableTime());
+        $config->setMinutesPerGame($configSerialised->getMinutesPerGame());
+        $config->setMinutesPerGameExt($configSerialised->getMinutesPerGameExt());
+        $config->setMinutesBetweenGames($configSerialised->getMinutesBetweenGames());
+        $config->setMinutesAfter($configSerialised->getMinutesAfter());
+        $config->setSelfReferee($configSerialised->getSelfReferee());
+        $config->setTeamup($configSerialised->getTeamup());
     }
 
     protected function removeNext(RoundNumber $roundNumber)

@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 3-12-18
- * Time: 19:15
- */
+
+declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 

@@ -1,11 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 1-10-17
- * Time: 12:08
- */
 
+declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
@@ -13,8 +8,6 @@ use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
 use FCToernooi\User;
-
-// use \Doctrine\Common\Collections\ArrayCollection;
 
 class Invitation
 {

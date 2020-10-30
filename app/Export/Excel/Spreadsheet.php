@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Export\Excel;
 
 use App\Export\Document as ExportDocument;
@@ -63,8 +65,6 @@ class Spreadsheet extends SpreadsheetBase
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
-        }
-        if ($this->config->getRules()) {
         }
         if ($this->config->getGamenotes()) {
             $gamenotesSheet = new GamenotesSheet($this);

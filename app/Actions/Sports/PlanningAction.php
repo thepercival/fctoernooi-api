@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 14-11-17
- * Time: 14:04
- */
+
+declare(strict_types=1);
 
 namespace App\Actions\Sports;
 

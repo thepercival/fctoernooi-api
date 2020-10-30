@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 28-1-17
- * Time: 21:24
- */
+
+declare(strict_types=1);
 
 namespace FCToernooiTest\Auth;
 

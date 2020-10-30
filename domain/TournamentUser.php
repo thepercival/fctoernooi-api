@@ -1,15 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 1-10-17
- * Time: 12:08
- */
 
+declare(strict_types=1);
 
 namespace FCToernooi;
-
-// use \Doctrine\Common\Collections\ArrayCollection;
 
 class TournamentUser
 {

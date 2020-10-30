@@ -1,10 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 19-2-19
- * Time: 16:00
- */
+
+declare(strict_types=1);
 
 namespace App\Actions\Sports\Deserialize;
 
