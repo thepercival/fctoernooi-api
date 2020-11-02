@@ -47,7 +47,7 @@ class Command extends SymCommand
     {
         $loggerSettings = $this->config->getArray('logger');
         $logLevel = $loggerSettings['level'];
-        if (strlen($input->getOption('loglevel')) > 0) {
+        if ($input->getOption('loglevel') !== null && strlen($input->getOption('loglevel')) > 0) {
             $logLevel = filter_var($input->getOption('loglevel'), FILTER_VALIDATE_INT);
         }
 

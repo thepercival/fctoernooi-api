@@ -86,7 +86,7 @@ class RetryTimeout extends PlanningCommand
     }
 
     protected function getPlanningInputFromInput( InputInterface $input ): PlanningInput {
-        if (strlen($input->getArgument('inputId')) > 0) {
+        if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
             $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
             if ($planningInput === null) {
                 throw new \Exception(
@@ -112,7 +112,17 @@ class RetryTimeout extends PlanningCommand
         return $planningInput;
 }
 
-    protected function getTimedoutInput( bool $batchGames, int $maxTimeOutSeconds, PlaceRange $placesRange ): ?PlanningInput {
+    protected function getTimedoutInput( bool $batchGames, int $maxTimeOutSeconds, PlaceRange $placesRange = null ): ?PlanningInput {
+        if( $placesRange === null ) {
+            $planningInput = null;
+            if( $batchGames ) {
+                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds);
+            } else {
+                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds);
+            }
+            return $planningInput;
+        }
+
         $structureIterator = new PouleStructureIterator( $placesRange, new Range(1, 64) );
         while( $structureIterator->valid() ) {
             // echo PHP_EOL . $structureIterator->current()->toString();
@@ -126,13 +136,13 @@ class RetryTimeout extends PlanningCommand
                 return $planningInput;
             }
             $structureIterator->next();
-
         }
+
         return null;
     }
 
     protected function getMaxTimeoutSeconds( InputInterface $input ): int {
-        if (strlen($input->getOption('maxTimeoutSeconds')) > 0) {
+        if ($input->getOption('maxTimeoutSeconds') !== null && strlen($input->getOption('maxTimeoutSeconds')) > 0) {
             return (int) $input->getOption('maxTimeoutSeconds');
         }
         return PlanningBase::DEFAULT_TIMEOUTSECONDS;
@@ -207,7 +217,7 @@ class RetryTimeout extends PlanningCommand
     }
 
     protected function getStatusFileName(): string {
-        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . "timedout-processing.txt";
+        $loggerSettings = $this->config->getArray('logger');
+        return $loggerSettings['path'] . "timedout-processing.status";
     }
-
 }

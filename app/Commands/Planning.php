@@ -43,16 +43,17 @@ class Planning extends Command
     protected function getPlaceRange(
         InputInterface $input,
         TournamentStructureRanges $tournamentStructureRanges
-    ): PlaceRange {
+    ): ?PlaceRange {
         $placeRange = $tournamentStructureRanges->getFirstPlaceRange();
-        if (strlen($input->getOption("placesRange")) > 0) {
-            if (strpos($input->getOption("placesRange"), "-") === false ) {
-                throw new \Exception("misformat placesRange-option");
-            }
-            $minMax = explode('-', $input->getOption('placesRange'));
-            $placeRange->min = (int)$minMax[0];
-            $placeRange->max = (int)$minMax[1];
+        if ($input->getOption("placesRange") === null || strlen($input->getOption("placesRange")) === 0) {
+            return null;
         }
+        if (strpos($input->getOption("placesRange"), "-") === false ) {
+            throw new \Exception("misformat placesRange-option");
+        }
+        $minMax = explode('-', $input->getOption('placesRange'));
+        $placeRange->min = (int)$minMax[0];
+        $placeRange->max = (int)$minMax[1];
         return $placeRange;
     }
 
