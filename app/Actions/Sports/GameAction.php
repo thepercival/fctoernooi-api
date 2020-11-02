@@ -18,7 +18,7 @@ use Sports\Poule;
 use Sports\Poule\Repository as PouleRepository;
 use App\Actions\Action;
 use Sports\Competition;
-use Sports\Game\Service as GameService;
+use Sports\Game\Score\Creator as GameScoreCreator;
 use Sports\Game;
 use Sports\State;
 use Sports\Qualify\Service as QualifyService;
@@ -92,7 +92,7 @@ final class GameAction extends Action
 
             $game->setState($gameSer->getState());
             $game->setStartDateTime($gameSer->getStartDateTime());
-            $gameService = new GameService();
+            $gameService = new GameScoreCreator();
             $gameService->addScores($game, $gameSer->getScores()->toArray());
 
             $this->gameRepos->save($game);

@@ -181,10 +181,10 @@ class Create extends PlanningCommand
         $this->entityManager->refresh($competition);
         // all roundnumbers should be refreshed, because planningConfig can be gotten from roundnumber above
         for( $roundNumberValueIt = 1 ;$roundNumberValueIt <= $roundNumberAsValue ; $roundNumberValueIt++ ) {
-            $roundNumber = $this->getRoundNumber($competition, $roundNumberValueIt );
-            $this->refreshDb($competition, $roundNumber);
+            $roundNumberIt = $this->getRoundNumber($competition, $roundNumberValueIt );
+            $this->refreshDb($competition, $roundNumberIt);
         }
-
+        $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue );
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
             $this->planningInputRepos,
