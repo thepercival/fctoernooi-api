@@ -4802,16 +4802,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.7",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "3caeb48eb6e3f466b223b2e8471d9768b91de767"
+                "reference": "6fc783ee8760c814cb9ffc058153d84609f01df9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/3caeb48eb6e3f466b223b2e8471d9768b91de767",
-                "reference": "3caeb48eb6e3f466b223b2e8471d9768b91de767",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/6fc783ee8760c814cb9ffc058153d84609f01df9",
+                "reference": "6fc783ee8760c814cb9ffc058153d84609f01df9",
                 "shasum": ""
             },
             "require": {
@@ -4867,7 +4867,7 @@
                 "football",
                 "sports"
             ],
-            "time": "2020-10-05T17:51:48+00:00"
+            "time": "2020-11-03T11:25:32+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -4930,16 +4930,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.9",
+            "version": "v1.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "aa9b68f2a99b0e9817384f2b4a0e1bb629129552"
+                "reference": "3ac4af88d035c1f4a4c77b5ac0fa2cc6da53165c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/aa9b68f2a99b0e9817384f2b4a0e1bb629129552",
-                "reference": "aa9b68f2a99b0e9817384f2b4a0e1bb629129552",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/3ac4af88d035c1f4a4c77b5ac0fa2cc6da53165c",
+                "reference": "3ac4af88d035c1f4a4c77b5ac0fa2cc6da53165c",
                 "shasum": ""
             },
             "require": {
@@ -4988,7 +4988,7 @@
                 "planning",
                 "sport"
             ],
-            "time": "2020-10-21T11:26:58+00:00"
+            "time": "2020-10-29T15:45:25+00:00"
         },
         {
             "name": "tuupola/base62",
