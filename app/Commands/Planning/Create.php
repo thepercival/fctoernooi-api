@@ -151,7 +151,7 @@ class Create extends PlanningCommand
         $planningOutput = new PlanningOutput($this->logger);
 
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
-        $planningSeeker->disableThrowOnTimeout();
+        // $planningSeeker->disableThrowOnTimeout();
         $planningSeeker->process($planningInput);
         $bestPlanning = $planningInput->getBestPlanning();
         if ($bestPlanning === null) {
