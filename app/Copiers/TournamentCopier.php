@@ -3,21 +3,22 @@ declare(strict_types=1);
 
 namespace App\Copiers;
 
+use DateTimeImmutable;
+use Exception;
 use FCToernooi\LockerRoom;
-use FCToernooi\Role;
 use Sports\Association;
 use FCToernooi\Competitor;
 use Sports\Sport;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\Sport\Service as CompetitionSportService;
 use Sports\Sport\Repository as SportRepository;
 use Sports\Season\Repository as SeasonRepository;
 use Sports\League;
 use FCToernooi\User;
 use Sports\Competition\Service as CompetitionService;
-use Sports\Field;
-use Sports\Referee;
-use Sports\Sport\Config\Service as SportConfigService;
+use Sports\Competition\Field;
+use Sports\Competition\Referee;
 use FCToernooi\Tournament as TournamentBase;
-use FCToernooi\Role\Service as RoleService;
 use FCToernooi\Tournament;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\TournamentUser;
@@ -48,7 +49,7 @@ class TournamentCopier
     }
 
 
-    public function copy(Tournament $tournament, \DateTimeImmutable $newStartDateTime, User $user): Tournament
+    public function copy(Tournament $tournament, DateTimeImmutable $newStartDateTime, User $user): Tournament
     {
         $competition = $tournament->getCompetition();
 
@@ -59,28 +60,30 @@ class TournamentCopier
 
         $season = $this->seasonRepos->findOneBy(array('name' => '9999'));
 
-        $ruleSet = $competition->getRuleSet();
+        $ruleSet = $competition->getRankingRuleSet();
         $competitionService = new CompetitionService();
         $newCompetition = $competitionService->create($league, $season, $ruleSet, $competition->getStartDateTime());
 
         // add serialized fields and referees to source-competition
-        $sportConfigService = new SportConfigService();
-        $createFieldsAndReferees = function ($sportConfigsSer, $refereesSer) use (
+        $competitionSportService = new CompetitionSportService();
+        /**
+         * @param array|CompetitionSport[] $competitionSportsSer
+         * @param array|Referee[] $refereesSer
+         */
+        $createFieldsAndReferees = function (array $competitionSportsSer, array $refereesSer) use (
             $newCompetition,
-            $sportConfigService
+            $competitionSportService
         ): void {
-            foreach ($sportConfigsSer as $sportConfigSer) {
+            foreach ($competitionSportsSer as $competitionSportSer) {
                 /** @var Sport $sport */
-                $sport = $this->sportRepos->findOneBy(["name" => $sportConfigSer->getSport()->getName()]);
-                $sportConfig = $sportConfigService->copy($sportConfigSer, $newCompetition, $sport);
+                $sport = $this->sportRepos->findOneBy(["name" => $competitionSportSer->getSport()->getName()]);
+                $newCompetitionSport = $competitionSportService->copy($newCompetition, $sport);
                 /** @var Field $fieldSer */
-                foreach ($sportConfigSer->getFields() as $fieldSer) {
-                    $field = new Field($sportConfig, $fieldSer->getPriority());
+                foreach ($competitionSportSer->getFields() as $fieldSer) {
+                    $field = new Field($newCompetitionSport, $fieldSer->getPriority());
                     $field->setName($fieldSer->getName());
                 }
             }
-
-            /** @var Referee $refereeSer */
             foreach ($refereesSer as $refereeSer) {
                 $referee = new Referee($newCompetition, $refereeSer->getPriority());
                 $referee->setInitials($refereeSer->getInitials());
@@ -90,8 +93,8 @@ class TournamentCopier
             }
         };
         $createFieldsAndReferees(
-            $competition->getSportConfigs(),
-            $competition->getReferees()
+            $competition->getSports()->toArray(),
+            $competition->getReferees()->toArray()
         );
 
         $newTournament = new TournamentBase($newCompetition);
@@ -106,7 +109,7 @@ class TournamentCopier
         $newTournament->setPublic($public);
 
         foreach ($tournament->getUsers() as $tournamentUser) {
-            $tmp = new TournamentUser($newTournament, $tournamentUser->getUser(), $tournamentUser->getRoles());
+            new TournamentUser($newTournament, $tournamentUser->getUser(), $tournamentUser->getRoles());
         }
 
         return $newTournament;
@@ -114,7 +117,7 @@ class TournamentCopier
 
     protected function createAssociationFromUserIdAndDateTime($userId): Association
     {
-        $dateTime = new \DateTimeImmutable();
+        $dateTime = new DateTimeImmutable();
         return new Association($userId . '-' . $dateTime->getTimestamp());
     }
 
@@ -122,6 +125,7 @@ class TournamentCopier
      * @param Tournament $sourceTournament
      * @param Tournament $newTournament
      * @param array|Competitor[] $newCompetitors
+     * @throws Exception
      */
     public function copyLockerRooms(Tournament $sourceTournament, Tournament $newTournament, array $newCompetitors)
     {

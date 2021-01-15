@@ -9,8 +9,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
-use Sports\Game\Score\Repository as GameScoreRepository;
-use Sports\Game\Repository as GameRepository;
+use Sports\Score\Against\Repository as AgainstScoreRepository;
+use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Place\Repository as PlaceRepository;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Place;
@@ -18,15 +18,15 @@ use Sports\Poule;
 use Sports\Poule\Repository as PouleRepository;
 use App\Actions\Action;
 use Sports\Competition;
-use Sports\Game\Score\Creator as GameScoreCreator;
-use Sports\Game;
+use Sports\Score\Creator as GameScoreCreator;
+use Sports\Game\Against as AgainstGame;
 use Sports\State;
 use Sports\Qualify\Service as QualifyService;
 
-final class GameAction extends Action
+final class AgainstGameAction extends Action
 {
     /**
-     * @var GameRepository
+     * @var AgainstGameRepository
      */
     protected $gameRepos;
     /**
@@ -42,31 +42,31 @@ final class GameAction extends Action
      */
     protected $structureRepos;
     /**
-     * @var GameScoreRepository
+     * @var AgainstScoreRepository
      */
-    protected $gameScoreRepos;
+    protected $scoreRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        GameRepository $gameRepos,
+        AgainstGameRepository $gameRepos,
         PouleRepository $pouleRepos,
         PlaceRepository $placeRepos,
         StructureRepository $structureRepos,
-        GameScoreRepository $gameScoreRepos
+        AgainstScoreRepository $scoreRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->gameRepos = $gameRepos;
         $this->pouleRepos = $pouleRepos;
         $this->placeRepos = $placeRepos;
         $this->structureRepos = $structureRepos;
-        $this->gameScoreRepos = $gameScoreRepos;
+        $this->scoreRepos = $scoreRepos;
     }
 
     public function edit(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var \Sports\Competition $competition */
+            /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
             $queryParams = $request->getQueryParams();
@@ -77,8 +77,8 @@ final class GameAction extends Action
             $poule = $this->getPouleFromInput($pouleId, $competition);
             $initialPouleState = $poule->getState();
 
-            /** @var Game $gameSer */
-            $gameSer = $this->serializer->deserialize($this->getRawData(), Game::class, 'json');
+            /** @var AgainstGame $gameSer */
+            $gameSer = $this->serializer->deserialize($this->getRawData(), AgainstGame::class, 'json');
 
             $game = $this->gameRepos->find((int)$args["gameId"]);
             if ($game === null) {
@@ -88,22 +88,22 @@ final class GameAction extends Action
                 throw new \Exception("de poule van de pouleplek komt niet overeen met de verstuurde poule", E_ERROR);
             }
 
-            $this->gameScoreRepos->removeScores($game);
+            $this->scoreRepos->removeScores($game);
 
             $game->setState($gameSer->getState());
             $game->setStartDateTime($gameSer->getStartDateTime());
-            $gameService = new GameScoreCreator();
-            $gameService->addScores($game, $gameSer->getScores()->toArray());
+            $gameScoreCreator = new GameScoreCreator();
+            $gameScoreCreator->addAgainstScores($game, $gameSer->getScores()->toArray());
 
             $this->gameRepos->save($game);
 
-            $changedPlaces = $this->getChangedQualifyPlaces($competition, $game, $initialPouleState);
+            $changedPlaces = $this->getChangedQualifyPlaces($competition, $game->getPoule(), $initialPouleState);
             foreach ($changedPlaces as $changedPlace) {
                 $this->placeRepos->save($changedPlace);
                 foreach ($changedPlace->getGames() as $gameIt) {
                     $gameIt->setState(State::Created);
                     $this->gameRepos->save($gameIt);
-                    $this->gameScoreRepos->removeScores($gameIt);
+                    $this->scoreRepos->removeScores($gameIt);
                 }
             }
 
@@ -128,20 +128,19 @@ final class GameAction extends Action
 
     /**
      * @param Competition $competition
-     * @param Game $game
+     * @param Poule $poule
      * @param int $originalPouleState
      * @return array|Place[]
      */
-    protected function getChangedQualifyPlaces(Competition $competition, Game $game, int $originalPouleState): array
+    protected function getChangedQualifyPlaces(Competition $competition, Poule $poule, int $originalPouleState): array
     {
-        $poule = $game->getPoule();
 
         if (!$this->shouldQualifiersBeCalculated($poule, $originalPouleState)) {
             return [];
         }
         $structure = $this->structureRepos->getStructure($competition);
 
-        $qualifyService = new QualifyService($poule->getRound(), $competition->getRuleSet());
+        $qualifyService = new QualifyService($poule->getRound(), $competition->getRankingRuleSet());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
         return $qualifyService->setQualifiers($pouleToFilter);
     }

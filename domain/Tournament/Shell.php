@@ -42,8 +42,8 @@ class Shell
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
         $this->sportCustomId = 0;
-        if ($competition->getSportConfigs()->count() === 1) {
-            $this->sportCustomId = $competition->getFirstSportConfig()->getSport()->getCustomId();
+        if ($competition->getSports()->count() === 1) {
+            $this->sportCustomId = $competition->getSports()->first()->getSport()->getCustomId();
         }
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();

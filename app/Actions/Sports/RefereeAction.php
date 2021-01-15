@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Exception;
 use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
 use Sports\Competition\Repository as CompetitionRepos;
-use Sports\Referee as RefereeBase;
-use Sports\Referee\Repository as RefereeRepository;
+use Sports\Competition\Referee;
+use Sports\Competition\Referee\Repository as RefereeRepository;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
 use JMS\Serializer\SerializationContext;
@@ -21,7 +21,6 @@ use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
-use Sports\Referee;
 use Sports\Competition;
 use Sports\Priority\Service as PriorityService;
 
@@ -82,7 +81,7 @@ final class RefereeAction extends Action
             $availabilityChecker->checkRefereeEmailaddress($competition, $referee->getInitials());
             $availabilityChecker->checkRefereeInitials($competition, $referee->getInitials());
 
-            $newReferee = new RefereeBase($competition);
+            $newReferee = new Referee($competition);
             $newReferee->setInitials($referee->getInitials());
             $newReferee->setName($referee->getName());
             $newReferee->setEmailaddress($referee->getEmailaddress());
@@ -101,7 +100,7 @@ final class RefereeAction extends Action
 
             $json = $this->serializer->serialize($newReferee, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -158,7 +157,7 @@ final class RefereeAction extends Action
 
             $json = $this->serializer->serialize($referee, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -180,7 +179,7 @@ final class RefereeAction extends Action
             }
 
             return $response->withStatus(200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -206,7 +205,7 @@ final class RefereeAction extends Action
             }
 
             return $response->withStatus(200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
@@ -215,10 +214,10 @@ final class RefereeAction extends Action
     {
         $referee = $this->refereeRepos->find($id);
         if ($referee === null) {
-            throw new \Exception("de scheidsrechter kon niet gevonden worden o.b.v. de invoer", E_ERROR);
+            throw new Exception("de scheidsrechter kon niet gevonden worden o.b.v. de invoer", E_ERROR);
         }
         if ($referee->getCompetition() !== $competition) {
-            throw new \Exception(
+            throw new Exception(
                 "de competitie van de scheidsrechter komt niet overeen met de verstuurde competitie",
                 E_ERROR
             );

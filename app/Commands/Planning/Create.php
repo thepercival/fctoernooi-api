@@ -92,7 +92,7 @@ class Create extends PlanningCommand
 
         try {
             $queueService = new QueueService($this->config->getArray('queue'));
-            if (strlen($input->getArgument('inputId')) > 0) {
+            if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
                 $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
                 if ($planningInput === null) {
                     $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' not found');

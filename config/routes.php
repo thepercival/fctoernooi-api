@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sports\ScoreConfigAction;
 use App\Actions\TournamentAction;
 use App\Actions\ReportAction;
 use App\Actions\Tournament\ShellAction;
@@ -16,11 +17,12 @@ use App\Actions\Sports\PlanningAction;
 use App\Actions\Sports\Planning\ConfigAction as PlanningConfigAction;
 use App\Actions\Sports\SportAction;
 use App\Actions\Sports\FieldAction;
-use App\Actions\Sports\GameAction;
+use App\Actions\Sports\AgainstGameAction;
 use App\Actions\Sports\RefereeAction;
 use App\Actions\Sports\CompetitorAction;
-use App\Actions\Sports\Sport\ConfigAction as SportConfigAction;
-use App\Actions\Sports\Sport\ScoreConfigAction as SportScoreConfigAction;
+use App\Actions\Sports\CompetitionSportAction;
+use App\Actions\Sports\QualifyAgainstConfigAction;
+use App\Actions\Sports\Planning\GameAmountConfigAction;
 use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
 use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
@@ -112,7 +114,8 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(UserMiddleware::class)->add(TournamentMiddleware::class
+                ->add(UserMiddleware::class)->add(
+                    TournamentMiddleware::class
                 );
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
                 ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
@@ -129,7 +132,8 @@ return function (App $app): void {
                     $group->options('structure', StructureAction::class . ':options');
                     // user
                     $group->get('structure', StructureAction::class . ':fetchOne')
-                        ->add(UserMiddleware::class)->add(TournamentMiddleware::class
+                        ->add(UserMiddleware::class)->add(
+                            TournamentMiddleware::class
                         );
                     // admin
                     $group->put('structure', StructureAction::class . ':edit')
@@ -153,16 +157,16 @@ return function (App $app): void {
                     );
 
                     $group->group(
-                        'sportconfigs',
+                        'competitionsports',
                         function (Group $group): void {
-                            $group->options('', SportConfigAction::class . ':options');
-                            $group->post('', SportConfigAction::class . ':add');
-                            $group->options('/{sportconfigId}', SportConfigAction::class . ':options');
-                            $group->put('/{sportconfigId}', SportConfigAction::class . ':edit');
-                            $group->delete('/{sportconfigId}', SportConfigAction::class . ':remove');
+                            $group->options('', CompetitionSportAction::class . ':options');
+                            $group->post('', CompetitionSportAction::class . ':add');
+                            $group->options('/{competitionSportId}', CompetitionSportAction::class . ':options');
+                            $group->put('/{competitionSportId}', CompetitionSportAction::class . ':edit');
+                            $group->delete('/{competitionSportId}', CompetitionSportAction::class . ':remove');
 
                             $group->group(
-                                '/{sportconfigId}/fields',
+                                '/{competitionSportId}/fields',
                                 function (Group $group): void {
                                     $group->options('', FieldAction::class . ':options');
                                     $group->post('', FieldAction::class . ':add');
@@ -193,12 +197,68 @@ return function (App $app): void {
                     );
 
                     $group->group(
-                        'sportscoreconfigs',
+                        'roundnumbers/{roundNumber}',
                         function (Group $group): void {
-                            $group->options('', SportScoreConfigAction::class . ':options');
-                            $group->post('', SportScoreConfigAction::class . ':add');
-                            $group->options('/{sportscoreconfigId}', SportScoreConfigAction::class . ':options');
-                            $group->put('/{sportscoreconfigId}', SportScoreConfigAction::class . ':edit');
+                            $group->group(
+                                '/planningconfigs',
+                                function (Group $group): void {
+                                    $group->options('', PlanningConfigAction::class . ':options');
+                                    $group->post('', PlanningConfigAction::class . ':add');
+                                    $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
+                                    $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
+                                }
+                            );
+
+                            $group->group(
+                                '/competitionsports/{competitionSportId}/gameamountconfigs',
+                                function (Group $group): void {
+                                    $group->options('', GameAmountConfigAction::class . ':options');
+                                    $group->post('', GameAmountConfigAction::class . ':add');
+                                    $group->options(
+                                        '/{gameAmountConfigId}',
+                                        GameAmountConfigAction::class . ':options'
+                                    );
+                                    $group->put('/{gameAmountConfigId}', GameAmountConfigAction::class . ':edit');
+
+                                }
+                            );
+                        }
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'rounds/{roundId}',
+                        function (Group $group): void {
+                            $group->group(
+                                '/competitionsports/{competitionSportId}',
+                                function (Group $group): void {
+                                    $group->group(
+                                        '/scoreconfigs',
+                                        function (Group $group): void {
+                                            $group->options('', ScoreConfigAction::class . ':options');
+                                            $group->post('', ScoreConfigAction::class . ':add');
+                                            $group->options(
+                                                '/{scoreConfigId}',
+                                                ScoreConfigAction::class . ':options'
+                                            );
+                                            $group->put('/{scoreConfigId}', ScoreConfigAction::class . ':edit');
+                                        }
+                                    );
+                                    $group->group(
+                                        '/qualifyagainstconfigs',
+                                        function (Group $group): void {
+                                            $group->options('', QualifyAgainstConfigAction::class . ':options');
+                                            $group->post('', QualifyAgainstConfigAction::class . ':add');
+                                            $group->options(
+                                                '/{qualifyAgainstConfigId}',
+                                                QualifyAgainstConfigAction::class . ':options'
+                                            );
+                                            $group->put('/{qualifyAgainstConfigId}', QualifyAgainstConfigAction::class . ':edit');
+                                        }
+                                    );
+                                }
+                            );
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
@@ -207,12 +267,12 @@ return function (App $app): void {
                     $group->group(
                         'games',
                         function (Group $group): void {
-                            $group->options('/{gameId}', GameAction::class . ':options');
-                            $group->put('/{gameId}', GameAction::class . ':edit');
+                            $group->options('/{gameId}', AgainstGameAction::class . ':options');
+                            $group->put('/{gameId}', AgainstGameAction::class . ':edit');
                         }
                     )->add(TournamentGameAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
-                    );;
+                    );
 
                     $group->group(
                         'planning/{roundnumber}',
@@ -223,18 +283,6 @@ return function (App $app): void {
                             $group->post('/create', PlanningAction::class . ':create');
                             $group->options('/reschedule', PlanningAction::class . ':options');
                             $group->post('/reschedule', PlanningAction::class . ':reschedule');
-                        }
-                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
-
-                    $group->group(
-                        'planningconfigs/{roundnumber}',
-                        function (Group $group): void {
-                            $group->options('', PlanningConfigAction::class . ':options');
-                            $group->post('', PlanningConfigAction::class . ':add');
-                            $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
-                            $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
@@ -255,7 +303,7 @@ return function (App $app): void {
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
-                    );;
+                    );
 
                     $group->group(
                         'lockerrooms',
@@ -314,12 +362,6 @@ return function (App $app): void {
                     $group->group(
                         '',
                         function (Group $group): void {
-                            // admin
-                            $group->options('sendrequestoldstructure', TournamentAction::class . ':options');
-                            $group->post(
-                                'sendrequestoldstructure',
-                                TournamentAction::class . ':sendRequestOldStructure'
-                            );
                             $group->options('exportgeneratehash', TournamentAction::class . ':options');
                             $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
                             $group->options('copy', TournamentAction::class . ':options');

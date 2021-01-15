@@ -124,7 +124,7 @@ class Validator extends Command
      */
     protected function getPlanningInputsToValidate( InputInterface $input ): array {
 
-        if (strlen($input->getArgument('inputId')) > 0) {
+        if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
             $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
             if( $planningInput === null ) {
                 return [];

@@ -1,11 +1,8 @@
 FCToernooi\Tournament:
   exclusion_policy: ALL
   exclude: false
-  access_type: public_method
 
   properties:
-    id:
-      type: integer
     competition:
       type: Sports\Competition
     breakStartDateTime:
@@ -24,6 +21,3 @@ FCToernooi\Tournament:
       type: ArrayCollection<FCToernooi\Competitor>
     lockerRooms:
       type: ArrayCollection<Sports\LockerRoom>
-    updated:
-      type: boolean
-      access_type: property

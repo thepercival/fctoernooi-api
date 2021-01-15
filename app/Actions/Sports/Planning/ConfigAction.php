@@ -102,7 +102,7 @@ final class ConfigAction extends Action
     }
 
     protected function updateFromSerialised( PlanningConfig $config, PlanningConfig $configSerialised ) {
-        $config->setNrOfHeadtohead($configSerialised->getNrOfHeadtohead());
+        $config->setGameMode($configSerialised->getGameMode());
         $config->setExtension($configSerialised->getExtension());
         $config->setEnableTime($configSerialised->getEnableTime());
         $config->setMinutesPerGame($configSerialised->getMinutesPerGame());
@@ -110,7 +110,6 @@ final class ConfigAction extends Action
         $config->setMinutesBetweenGames($configSerialised->getMinutesBetweenGames());
         $config->setMinutesAfter($configSerialised->getMinutesAfter());
         $config->setSelfReferee($configSerialised->getSelfReferee());
-        $config->setTeamup($configSerialised->getTeamup());
     }
 
     protected function removeNext(RoundNumber $roundNumber)

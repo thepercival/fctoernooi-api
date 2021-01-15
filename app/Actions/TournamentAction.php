@@ -112,7 +112,7 @@ class TournamentAction extends Action
 
     protected function getDeserializationContext(User $user = null)
     {
-        $serGroups = ['Default'];
+        $serGroups = ['Default','noReference'];
 
         if ($user !== null) {
             $serGroups[] = 'privacy';
@@ -122,7 +122,7 @@ class TournamentAction extends Action
 
     protected function getSerializationContext(Tournament $tournament, User $user = null)
     {
-        $serGroups = ['Default'];
+        $serGroups = ['Default','noReference'];
         if ($user !== null) {
             $tournamentUser = $tournament->getUser($user);
             if ($tournamentUser !== null) {
@@ -160,20 +160,6 @@ class TournamentAction extends Action
         }
     }
 
-    public function sendRequestOldStructure(Request $request, Response $response, $args): Response
-    {
-        try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
-            $this->sendEmailOldStructure($tournament);
-            $json = $this->serializer->serialize(true, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
-        }
-    }
-
 
     public function add(Request $request, Response $response, $args): Response
     {
@@ -191,7 +177,7 @@ class TournamentAction extends Action
 
             $tournamentSer->setUsers(new ArrayCollection());
             $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
-
+// var_dump($tournamentSer->getCompetition()); die();
             $tournament = $this->tournamentCopier->copy(
                 $tournamentSer,
                 $tournamentSer->getCompetition()->getStartDateTime(),
@@ -218,7 +204,7 @@ class TournamentAction extends Action
             $user = $request->getAttribute("user");
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
-            $ruleSet = $tournamentSer->getCompetition()->getRuleSet();
+            $ruleSet = $tournamentSer->getCompetition()->getRankingRuleSet();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
             $tournamentService = new TournamentService();
             $tournament = $tournamentService->changeBasics(
@@ -457,16 +443,6 @@ class TournamentAction extends Action
         return "toernooi";
     }
 
-    protected function sendEmailOldStructure(Tournament $tournament)
-    {
-        $subject = 'omzetten opzet fctoernooi';
-        $url = $this->config->getString("www.wwwurl") . $tournament->getId();
-        $body = <<<EOT
-<p>$url</p>
-<p>met vriendelijke groet,<br/>FCToernooi</p>
-EOT;
-        $this->mailer->sendToAdmin($subject, $body);
-    }
 
     /*
     protected function sentEmailActivation( $user )

@@ -8,17 +8,11 @@ use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
 use Sports\Competition;
 use League\Period\Period;
+use SportsHelpers\Identifiable;
 
-class Tournament
+class Tournament extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
-    /**
-     * @var Competition
-     */
-    private $competition;
+    private Competition $competition;
     /**
      * @var DateTimeImmutable
      */
@@ -52,10 +46,6 @@ class Tournament
      */
     protected $exported;
     /**
-     * @var bool
-     */
-    protected $updated; // DEP, false = old struct
-    /**
      * @var DateTimeImmutable
      */
     private $createdDateTime;
@@ -70,25 +60,6 @@ class Tournament
         $this->sponsors = new ArrayCollection();
         $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
-        $this->updated = true;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
     }
 
     /**
@@ -99,41 +70,21 @@ class Tournament
         return $this->competition;
     }
 
-    /**
-     * @param Competition $competition
-     */
-    public function setCompetition(Competition $competition)
-    {
-        $this->competition = $competition;
-    }
-
-    /**
-     * @return DateTimeImmutable|null
-     */
     public function getBreakStartDateTime(): ?DateTimeImmutable
     {
         return $this->breakStartDateTime;
     }
 
-    /**
-     * @param DateTimeImmutable $datetime
-     */
     public function setBreakStartDateTime(DateTimeImmutable $datetime = null)
     {
         $this->breakStartDateTime = $datetime;
     }
 
-    /**
-     * @return DateTimeImmutable|null
-     */
     public function getBreakEndDateTime(): ?DateTimeImmutable
     {
         return $this->breakEndDateTime;
     }
 
-    /**
-     * @param DateTimeImmutable $datetime
-     */
     public function setBreakEndDateTime(DateTimeImmutable $datetime = null)
     {
         $this->breakEndDateTime = $datetime;

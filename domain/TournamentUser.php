@@ -4,27 +4,13 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
-class TournamentUser
+use SportsHelpers\Identifiable;
+
+class TournamentUser extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
-
-    /**
-     * @var Tournament
-     */
-    private $tournament;
-
-    /**
-     * @var User
-     */
-    private $user;
-
-    /**
-     * @var int
-     */
-    private $roles;
+    private Tournament $tournament;
+    private User $user;
+    private int $roles;
 
     public function __construct(Tournament $tournament, User $user, int $roles = null)
     {
@@ -35,22 +21,6 @@ class TournamentUser
         $this->roles = $roles;
         $this->tournament->getUsers()->add($this);
         $this->user = $user;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
     }
 
     public function getTournament(): Tournament

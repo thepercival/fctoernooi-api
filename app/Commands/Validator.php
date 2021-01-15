@@ -9,23 +9,19 @@ use Sports\Place\Location\Map as PlaceLocationMap;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
+use SportsHelpers\SportConfig;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use SportsPlanning\Input\Service as PlanningInputService;
-use SportsPlanning\Service as PlanningService;
-use Sports\Structure;
 use Sports\Round\Number as RoundNumber;
-use Sports\Structure\Repository;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Sports\Structure\Validator as StructureValidator;
 use Sports\Round\Number\GamesValidator;
-use Sports\Output\Planning\Batch as BatchOutput;
-use Sports\Output\Planning as PlanningOutput;
-use Sports\Output\Game as GameOutput;
+use Sports\Output\Game\Against as AgainstGameOutput;
+use Sports\Output\Game\Together as TogetherGameOutput;
 use Sports\Game;
 
 class Validator extends Command
@@ -134,7 +130,13 @@ class Validator extends Command
 
     protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees)
     {
-        $gameOutput = new GameOutput(new PlaceLocationMap($tournament->getCompetitors()->toArray()), $this->logger);
+        $map = new PlaceLocationMap($tournament->getCompetitors()->toArray());
+        $gameOutput = null;
+        if( $roundNumber->getValidPlanningConfig()->getGameMode() === SportConfig::GAMEMODE_AGAINST ) {
+            $gameOutput = new AgainstGameOutput($map, $this->logger);
+        } else {
+            $gameOutput = new TogetherGameOutput($map, $this->logger);
+        }
         foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
             $gameOutput->output($game);
         }

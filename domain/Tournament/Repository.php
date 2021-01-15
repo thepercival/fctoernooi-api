@@ -10,7 +10,6 @@ use FCToernooi\User;
 use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
 use Sports\League;
-use Sports\Referee;
 use Sports\Competition;
 use Sports\Competition\Repository as CompetitionRepository;
 use Sports\League\Repository as LeagueRepository;
@@ -31,10 +30,10 @@ class Repository extends \Sports\Repository
 
     public function customPersist(Tournament $tournament, bool $flush)
     {
-        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
-        $leagueRepos->save($tournament->getCompetition()->getLeague());
         $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetadata(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
+        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
+        $leagueRepos->save($tournament->getCompetition()->getLeague());
         $this->_em->persist($tournament);
         if ($flush) {
             $this->_em->flush();
@@ -109,6 +108,6 @@ class Repository extends \Sports\Repository
     public function remove($tournament)
     {
         $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
-        return $leagueRepos->remove($tournament->getCompetition()->getLeague());
+        $leagueRepos->remove($tournament->getCompetition()->getLeague());
     }
 }

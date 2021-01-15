@@ -52,7 +52,7 @@ class Listing extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $commandFilter = null;
-        if (strlen($input->getArgument('commandName')) > 0) {
+        if ($input->getArgument('commandName') !== null && strlen($input->getArgument('commandName')) > 0) {
             $commandFilter = $input->getArgument('commandName');
         }
 

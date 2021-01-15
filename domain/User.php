@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
-use Sports\Referee;
+use Sports\Competition\Referee;
+use SportsHelpers\Identifiable;
 
-class User
+class User extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
-
     /**
      * @var string
      */
@@ -55,25 +51,6 @@ class User
         $this->validated = false;
         $this->setEmailaddress($emailaddress);
     }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
 
     /**
      * @return string

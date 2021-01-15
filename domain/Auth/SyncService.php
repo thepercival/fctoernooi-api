@@ -55,7 +55,7 @@ class SyncService
 
     public function add(Tournament $tournament, int $roles, string $emailaddress = null, bool $sendMail = false)
     {
-        if (strlen($emailaddress) === 0) {
+        if ($emailaddress === null) {
             return;
         }
         /** @var User|null $user */
@@ -95,7 +95,7 @@ class SyncService
 
     public function remove(Tournament $tournament, int $roles, string $emailaddress = null)
     {
-        if (strlen($emailaddress) === 0) {
+        if ($emailaddress === null) {
             return;
         }
         /** @var User|null $user */

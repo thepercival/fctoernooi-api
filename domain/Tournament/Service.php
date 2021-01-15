@@ -32,7 +32,7 @@ class Service
         $competitionService = new CompetitionService();
         $competition = $tournament->getCompetition();
         $competitionService->changeStartDateTime($competition, $dateTime);
-        $competition->setRuleSet($ruleSet);
+        $competition->setRankingRuleSet($ruleSet);
         $tournament->setBreak($period);
 
         return $tournament;

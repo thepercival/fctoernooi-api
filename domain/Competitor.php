@@ -7,13 +7,10 @@ namespace FCToernooi;
 use Sports\Competition;
 use Sports\Competitor\Base;
 use Sports\Competitor as SportsCompetitor;
+use SportsHelpers\Identifiable;
 
-class Competitor implements SportsCompetitor
+class Competitor extends Identifiable implements SportsCompetitor
 {
-    /**
-     * @var int|string
-     */
-    protected $id;
     /**
      * @var string
      */
@@ -33,8 +30,8 @@ class Competitor implements SportsCompetitor
     {
         $this->setTournament($tournament);
         $this->setName($name);
-        $this->setPouleNr( $pouleNr );
-        $this->setPlaceNr( $placeNr );
+        $this->setPouleNr($pouleNr);
+        $this->setPlaceNr($placeNr);
     }
 
     public function getTournament(): Tournament
@@ -42,7 +39,7 @@ class Competitor implements SportsCompetitor
         return $this->tournament;
     }
 
-    public function setTournament(Tournament $tournament)
+    protected function setTournament(Tournament $tournament)
     {
         if ($this->tournament === null and !$tournament->getCompetitors()->contains($this)) {
             $tournament->getCompetitors()->add($this) ;

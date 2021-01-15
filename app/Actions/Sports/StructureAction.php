@@ -63,6 +63,7 @@ final class StructureAction extends Action
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
+
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 

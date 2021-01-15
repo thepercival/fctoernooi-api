@@ -7,21 +7,12 @@ namespace FCToernooi;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use FCToernooi\Competitor;
+use SportsHelpers\Identifiable;
 
-class LockerRoom
+class LockerRoom extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var Tournament
-     */
-    private $tournament;
+    protected string $name;
+    protected Tournament $tournament;
     /**
      * @var ArrayCollection|Competitor[]
      */
@@ -34,7 +25,7 @@ class LockerRoom
     const MIN_LENGTH_NAME = 1;
     const MAX_LENGTH_NAME = 6;
 
-    public function __construct(Tournament $tournament, $name)
+    public function __construct(Tournament $tournament, string $name)
     {
         $this->tournament = $tournament;
         $this->tournament->getLockerRooms()->add($this);
@@ -42,53 +33,17 @@ class LockerRoom
         $this->setName($name);
     }
 
-    /**
-     * @return Tournament
-     */
-    public function getTournament()
+    public function getTournament(): Tournament
     {
         return $this->tournament;
     }
 
-    /**
-     * @param Tournament $tournament
-     */
-    public function setTournament(Tournament $tournament)
-    {
-        $this->tournament = $tournament;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name)
     {
         if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(

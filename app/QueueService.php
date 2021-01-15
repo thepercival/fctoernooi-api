@@ -10,7 +10,7 @@ use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 use Sports\Competition;
-use Sports\Round\Number\PlanningCreator\Event as PlanningCreatorEvent;
+use Sports\Queue\PlanningInput\CreatePlanningsEvent;
 use SportsPlanning\Input as PlanningInput;
 use Interop\Queue\Message;
 use Interop\Queue\Consumer;
@@ -23,7 +23,7 @@ use Interop\Queue\Consumer;
  * Class QueueService
  * @package App
  */
-class QueueService implements PlanningCreatorEvent
+class QueueService implements CreatePlanningsEvent
 {
     /**
      * @var array

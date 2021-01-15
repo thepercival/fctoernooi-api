@@ -16,6 +16,7 @@ return [
     'serializer' => [
         'cache_dir' => __DIR__ . '/../cache/serializer',
         'yml_dir' => [
+            "SportsHelpers" => __DIR__ . '/../vendor/thepercival/php-sports-helpers/serialization/yml',
             "Sports" => __DIR__ . '/../vendor/thepercival/php-sports/serialization/yml',
             "FCToernooi" => __DIR__ . '/../serialization/yml'
         ],
@@ -32,6 +33,7 @@ return [
     'doctrine' => [
         'meta' => [
             'entity_path' => [
+                __DIR__ . '/../vendor/thepercival/php-sports-helpers/db/doctrine-mappings',
                 __DIR__ . '/../vendor/thepercival/php-sports-planning/db/doctrine-mappings',
                 __DIR__ . '/../vendor/thepercival/php-sports/db/doctrine-mappings',
                 __DIR__ . '/../db/doctrine-mappings'

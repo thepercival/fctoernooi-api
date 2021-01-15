@@ -25,7 +25,7 @@ use SportsPlanning\Batch\Output as BatchOutput;
 use SportsPlanning\Input\GCDService as PlanningInputGCDService;
 use SportsPlanning\Planning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
-use SportsHelpers\PouleStructure\Balanced\Iterator as PouleStructureIterator;
+use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
 
 class RetryTimeout extends PlanningCommand
 {

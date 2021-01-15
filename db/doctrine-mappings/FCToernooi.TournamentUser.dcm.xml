@@ -2,9 +2,6 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
   <entity name="FCToernooi\TournamentUser" table="tournamentusers"
           repository-class="FCToernooi\TournamentUser\Repository">
-      <id name="id" type="integer" column="id">
-          <generator strategy="AUTO"/>
-      </id>
       <field name="roles" column="roles" type="integer" nullable="false" unique="false"/>
       <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="users">
           <cascade>

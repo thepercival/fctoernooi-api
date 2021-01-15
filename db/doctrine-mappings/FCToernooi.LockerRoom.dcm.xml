@@ -3,9 +3,6 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="FCToernooi\LockerRoom" table="lockerrooms" repository-class="FCToernooi\LockerRoom\Repository">
-        <id name="id" type="integer" column="id">
-            <generator strategy="AUTO"/>
-        </id>
         <field name="name" column="name" type="string" length="6" nullable="false" unique="false"/>
         <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="lockerRooms">
             <join-columns>

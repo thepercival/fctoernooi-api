@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
-class Sponsor
+use SportsHelpers\Identifiable;
+
+class Sponsor extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
 
     /**
      * @var string
@@ -46,46 +44,17 @@ class Sponsor
         $this->setName($name);
     }
 
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
     public function getTournament(): Tournament
     {
         return $this->tournament;
     }
 
-    public function setTournament(Tournament $tournament)
-    {
-        $this->tournament = $tournament;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name)
     {
         if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(
@@ -124,19 +93,16 @@ class Sponsor
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getLogoUrl()
     {
         return $this->logoUrl;
     }
 
-    /**
-     * @param string $url
-     */
-    public function setLogoUrl($url)
+    public function setLogoUrl(string $url = null )
     {
-        if (strlen($url) > 0) {
+        if ($url !== null) {
             if (strlen($url) > static::MAX_LENGTH_URL) {
                 throw new \InvalidArgumentException(
                     "de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",

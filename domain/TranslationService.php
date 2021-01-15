@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace FCToernooi;
 
 use Sports\Sport\Custom as SportCustom;
-use Sports\Sport\ScoreConfig as SportScoreConfig;
+use Sports\Score\Config as ScoreConfig;
 use Sports\Sport;
 
+/**
+ * Class TranslationService, translates certain sports-terms
+ * @package FCToernooi
+ */
 class TranslationService
 {
-    const language = 'nl';
+    protected const LANGUAGE = 'nl';
 
     public function getSportName(string $language, int $customId): string
     {
@@ -71,15 +75,13 @@ class TranslationService
         return '';
     }
 
-    public function getScoreNameSingular(SportScoreConfig $sportScoreConfig): string
+    public function getScoreNameSingular(ScoreConfig $scoreConfig): string
     {
-        $customId = $sportScoreConfig->getSport()->getCustomId();
-        if ($sportScoreConfig->isFirst()) {
+        $customId = $scoreConfig->getCompetitionSport()->getSport()->getCustomId();
+        if ($scoreConfig->isFirst()) {
             return $this->getFirstScoreNameSingular($customId);
-        } else {
-            if ($sportScoreConfig->isLast()) {
-                return $this->getLastScoreNameSingular($customId);
-            }
+        } elseif ($scoreConfig->isLast()) {
+            return $this->getLastScoreNameSingular($customId);
         }
         return '';
     }
@@ -120,13 +122,13 @@ class TranslationService
         return '';
     }
 
-    public function getScoreNamePlural(SportScoreConfig $sportScoreConfig): string
+    public function getScoreNamePlural(ScoreConfig $scoreConfig): string
     {
-        $customId = $sportScoreConfig->getSport()->getCustomId();
-        if ($sportScoreConfig->isFirst()) {
+        $customId = $scoreConfig->getCompetitionSport()->getSport()->getCustomId();
+        if ($scoreConfig->isFirst()) {
             return $this->getFirstScoreNamePlural($customId);
         } else {
-            if ($sportScoreConfig->isLast()) {
+            if ($scoreConfig->isLast()) {
                 return $this->getLastScoreNamePlural($customId);
             }
         }
@@ -169,14 +171,14 @@ class TranslationService
         return '';
     }
 
-    public function getScoreDirection(string $language, int $direction): string
+    public function getScoreDirection(int $direction): string
     {
         switch ($direction) {
-            case SportScoreConfig::UPWARDS:
+            case ScoreConfig::UPWARDS:
             {
                 return 'naar';
             }
-            case SportScoreConfig::DOWNWARDS:
+            case ScoreConfig::DOWNWARDS:
             {
                 return 'vanaf';
             }
@@ -184,106 +186,52 @@ class TranslationService
         return '';
     }
 
-    public function getFieldNameSingular(string $language, Sport $sport): string
+    public function getFieldNameSingular(Sport $sport): string
     {
         $customId = $sport->getCustomId();
         switch ($customId) {
             case SportCustom::Badminton:
-            {
-                return 'veld';
-            }
-            case SportCustom::Basketball:
-            {
-                return 'veld';
-            }
-            case SportCustom::Darts:
-            {
-                return 'bord';
-            }
-            case SportCustom::ESports:
-            {
-                return 'veld';
-            }
-            case SportCustom::Hockey:
-            {
-                return 'veld';
-            }
-            case SportCustom::Korfball:
-            {
-                return 'veld';
-            }
-            case SportCustom::Chess:
-            {
-                return 'bord';
-            }
-            case SportCustom::Squash:
-            {
-                return 'baan'; }
-            case SportCustom::TableTennis: { return 'tafel'; }
-            case SportCustom::Tennis: { return 'veld'; }
-            case SportCustom::Football:
-            {
-                return 'veld';
-            }
-            case SportCustom::Volleyball:
-            {
-                return 'veld';
-            }
             case SportCustom::Baseball:
-            {
-                return 'veld'; }
+            case SportCustom::Basketball:
+            case SportCustom::ESports:
+            case SportCustom::Hockey:
+            case SportCustom::Korfball:
+            case SportCustom::Volleyball:
+            case SportCustom::Football:
+                return 'veld';
+            case SportCustom::Darts:
+            case SportCustom::Chess:
+                return 'bord';
+            case SportCustom::Squash:
+            case SportCustom::Tennis:
+                return 'baan';
+            case SportCustom::TableTennis:
+                return 'tafel';
         }
         return '';
     }
 
-    public function getFieldNamePlural(string $language, Sport $sport): string
+    public function getFieldNamePlural(Sport $sport): string
     {
         $customId = $sport->getCustomId();
         switch ($customId) {
             case SportCustom::Badminton:
-            {
-                return 'velden';
-            }
-            case SportCustom::Basketball:
-            {
-                return 'velden';
-            }
-            case SportCustom::Darts:
-            {
-                return 'borden';
-            }
-            case SportCustom::ESports:
-            {
-                return 'velden';
-            }
-            case SportCustom::Hockey:
-            {
-                return 'velden';
-            }
-            case SportCustom::Korfball:
-            {
-                return 'velden';
-            }
-            case SportCustom::Chess:
-            {
-                return 'borden';
-            }
-            case SportCustom::Squash:
-            {
-                return 'banen'; }
-            case SportCustom::TableTennis: { return 'tafels'; }
-            case SportCustom::Tennis: { return 'velden'; }
-            case SportCustom::Football:
-            {
-                return 'velden';
-            }
-            case SportCustom::Volleyball:
-            {
-                return 'velden';
-            }
             case SportCustom::Baseball:
-            {
-                return 'velden'; }
+            case SportCustom::Basketball:
+            case SportCustom::ESports:
+            case SportCustom::Hockey:
+            case SportCustom::Korfball:
+            case SportCustom::Volleyball:
+            case SportCustom::Football:
+                return 'velden';
+            case SportCustom::Darts:
+            case SportCustom::Chess:
+                return 'borden';
+            case SportCustom::Squash:
+            case SportCustom::Tennis:
+                return 'banen';
+            case SportCustom::TableTennis:
+                return 'tafels';
         }
         return '';
     }

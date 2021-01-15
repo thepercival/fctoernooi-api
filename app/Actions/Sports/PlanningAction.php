@@ -134,7 +134,7 @@ final class PlanningAction extends Action
             throw new \Exception("geen rondenummer opgegeven", E_ERROR);
         }
         $structure = $this->structureRepos->getStructure($competition);
-        $roundNumber = $structure->getRoundNumber($args["roundnumber"]);
+        $roundNumber = $structure->getRoundNumber((int)$args["roundnumber"]);
         return [$structure, $roundNumber];
     }
 }

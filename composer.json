@@ -14,7 +14,7 @@
     }
   ],
   "require": {
-    "php": "^7.3",
+    "php": "^7.4",
     "ext-gd": "*",
     "ext-gmp": "*",
     "doctrine/orm": "^2.7",
@@ -50,7 +50,8 @@
     "phpstan/phpstan-doctrine": "^0.12",
     "phpstan/extension-installer": "^1.0",
     "phpstan/phpstan-strict-rules": "^0.12.2",
-    "phpunit/phpunit": "^8.2"
+    "phpunit/phpunit": "^9.5",
+    "vimeo/psalm": "^4.3"
   },
   "autoload": {
     "psr-4": {
@@ -68,6 +69,7 @@
     "test": [
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
+    "phpstan": "vendor/bin/phpstan -c phpstan.neon",
     "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
@@ -80,12 +82,5 @@
   },
   "config": {
     "process-timeout": 0
-  },
-  "extra": {
-    "phpstan": {
-      "includes": [
-        "extension.neon"
-      ]
-    }
   }
 }
