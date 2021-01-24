@@ -64,16 +64,19 @@ final class ScoreConfigAction extends Action
             if ($competitionSport === null) {
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }
-            if ($round->getScoreConfig($competitionSport) !== null) {
-                throw new \Exception('er zijn al score-instellingen aanwezig', E_ERROR);
+            $scoreConfig = $round->getScoreConfig($competitionSport);
+            if ($scoreConfig === null) {
+                $scoreConfig = new ScoreConfig($competitionSport, $round, null);
+                // throw new \Exception('er zijn al score-instellingen aanwezig', E_ERROR);
             }
-
-            $scoreConfig = new ScoreConfig($competitionSport, $round, null);
             $scoreConfig->setDirection(ScoreConfig::UPWARDS);
             $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
             $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
             if ($scoreConfigSer->hasNext()) {
-                $nextScoreConfig = new ScoreConfig($competitionSport, $round, $scoreConfig);
+                $nextScoreConfig = $scoreConfig->getNext();
+                if ($nextScoreConfig === null) {
+                    $nextScoreConfig = new ScoreConfig($competitionSport, $round, $scoreConfig);
+                }
                 $nextScoreConfig->setDirection(ScoreConfig::UPWARDS);
                 $nextScoreConfig->setMaximum($scoreConfigSer->getNext()->getMaximum());
                 $nextScoreConfig->setEnabled($scoreConfigSer->getNext()->getEnabled());
@@ -90,60 +93,60 @@ final class ScoreConfigAction extends Action
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
-    {
-        try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
-
-            if (!array_key_exists('roundId', $args) || strlen($args['roundId']) === 0) {
-                throw new \Exception('geen ronde opgegeven', E_ERROR);
-            }
-            $structure = $this->structureRepos->getStructure($competition);
-            $round = $this->getRound($structure, (int)$args["roundId"]);
-
-            /** @var ScoreConfig $scoreConfigSer */
-            $scoreConfigSer = $this->serializer->deserialize(
-                $this->getRawData(),
-                ScoreConfig::class,
-                'json'
-            );
-
-            /** @var ScoreConfig|null $scoreConfig */
-            $scoreConfig = $this->scoreConfigRepos->find((int)$args['sportscoreconfigId']);
-            if ($scoreConfig === null) {
-                throw new \Exception('er zijn geen score-instellingen gevonden om te wijzigen', E_ERROR);
-            }
-
-            $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
-            $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
-            $this->scoreConfigRepos->save($scoreConfig);
-            if ($scoreConfig->hasNext() && $scoreConfigSer->hasNext()) {
-                $nextScoreConfig = $scoreConfig->getNext();
-                $nextScoreConfig->setMaximum($scoreConfigSer->getNext()->getMaximum());
-                $nextScoreConfig->setEnabled($scoreConfigSer->getNext()->getEnabled());
-                $this->scoreConfigRepos->save($nextScoreConfig);
-            }
-
-            $this->removeNext($round, $scoreConfig->getCompetitionSport());
-
-            $json = $this->serializer->serialize($scoreConfig, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
-        }
-    }
+//    public function edit(Request $request, Response $response, $args): Response
+//    {
+//        try {
+//            /** @var Competition $competition */
+//            $competition = $request->getAttribute('tournament')->getCompetition();
+//
+//            if (!array_key_exists('roundId', $args) || strlen($args['roundId']) === 0) {
+//                throw new \Exception('geen ronde opgegeven', E_ERROR);
+//            }
+//            $structure = $this->structureRepos->getStructure($competition);
+//            $round = $this->getRound($structure, (int)$args["roundId"]);
+//
+//            /** @var ScoreConfig $scoreConfigSer */
+//            $scoreConfigSer = $this->serializer->deserialize(
+//                $this->getRawData(),
+//                ScoreConfig::class,
+//                'json'
+//            );
+//
+//            /** @var ScoreConfig|null $scoreConfig */
+//            $scoreConfig = $this->scoreConfigRepos->find((int)$args['sportscoreconfigId']);
+//            if ($scoreConfig === null) {
+//                throw new \Exception('er zijn geen score-instellingen gevonden om te wijzigen', E_ERROR);
+//            }
+//
+//            $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
+//            $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
+//            $this->scoreConfigRepos->save($scoreConfig);
+//            if ($scoreConfig->hasNext() && $scoreConfigSer->hasNext()) {
+//                $nextScoreConfig = $scoreConfig->getNext();
+//                $nextScoreConfig->setMaximum($scoreConfigSer->getNext()->getMaximum());
+//                $nextScoreConfig->setEnabled($scoreConfigSer->getNext()->getEnabled());
+//                $this->scoreConfigRepos->save($nextScoreConfig);
+//            }
+//
+//            $this->removeNext($round, $scoreConfig->getCompetitionSport());
+//
+//            $json = $this->serializer->serialize($scoreConfig, 'json');
+//            return $this->respondWithJson($response, $json);
+//        } catch (\Exception $e) {
+//            return new ErrorResponse($e->getMessage(), 422);
+//        }
+//    }
 
     protected function removeNext(Round $round, CompetitionSport $competitionSport)
     {
-        foreach( $round->getChildren() as $childRound ) {
+        foreach ($round->getChildren() as $childRound) {
             $scoreConfig = $childRound->getScoreConfig($competitionSport);
             if ($scoreConfig === null) {
                 continue;
             }
             $childRound->getScoreConfigs()->removeElement($scoreConfig);
             $this->scoreConfigRepos->remove($scoreConfig);
-            $this->removeNext( $childRound, $competitionSport );
+            $this->removeNext($childRound, $competitionSport);
         }
     }
 

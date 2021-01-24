@@ -20,7 +20,7 @@ class Sponsor extends Identifiable
     private $url;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $logoUrl;
 
@@ -58,7 +58,7 @@ class Sponsor extends Identifiable
     {
         if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(
-                "de naam moet minimaal " . static::MIN_LENGTH_NAME . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_NAME . " karakters bevatten",
+                "de naam moet minimaal " . static::MIN_LENGTH_NAME . ' karakters bevatten en mag maximaal ' . static::MAX_LENGTH_NAME . " karakters bevatten",
                 E_ERROR
             );
         }
@@ -74,11 +74,11 @@ class Sponsor extends Identifiable
     }
 
     /**
-     * @param string $url
+     * @param string|null $url
      */
-    public function setUrl($url)
+    public function setUrl(string $url = null)
     {
-        if (strlen($url) > 0) {
+        if ($url !== null && strlen($url) > 0) {
             if (strlen($url) > static::MAX_LENGTH_URL) {
                 throw new \InvalidArgumentException(
                     "de url mag maximaal " . static::MAX_LENGTH_URL . " karakters bevatten",

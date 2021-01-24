@@ -275,7 +275,7 @@ return function (App $app): void {
                     );
 
                     $group->group(
-                        'planning/{roundnumber}',
+                        'planning/{roundNumber}',
                         function (Group $group): void {
                             $group->options('', PlanningAction::class . ':options');
                             $group->get('', PlanningAction::class . ':fetch');

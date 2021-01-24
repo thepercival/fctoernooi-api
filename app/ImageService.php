@@ -34,8 +34,8 @@ class ImageService
         $extension = $this->getExtensionFromStream($logostream);
 
         $localPath = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
-                'images.sponsors.pathpostfix'
-            );
+            'images.sponsors.pathpostfix'
+        );
 
         $newImagePath = $localPath . $imageName . '.' . $extension;
 
@@ -45,15 +45,15 @@ class ImageService
         $image_type = $source_properties[2];
         if ($image_type == IMAGETYPE_JPEG) {
             $image_resource_id = imagecreatefromjpeg($newImagePath);
-            $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
+            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagejpeg($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_GIF) {
             $image_resource_id = imagecreatefromgif($newImagePath);
-            $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
+            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagegif($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_PNG) {
             $image_resource_id = imagecreatefrompng($newImagePath);
-            $target_layer = $this->fn_resize($image_resource_id, $source_properties[0], $source_properties[1]);
+            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagepng($target_layer, $newImagePath);
         }
         $urlPath = $this->config->getString('www.apiurl') . $this->config->getString('images.sponsors.pathpostfix');
@@ -74,7 +74,7 @@ class ImageService
         throw new \Exception("alleen jpg, png em gif zijn toegestaan", E_ERROR);
     }
 
-    private function fn_resize($image_resource_id, $width, $height)
+    private function resize($image_resource_id, int $width, int $height)
     {
         $target_height = 200;
         if ($height === $target_height) {
@@ -89,14 +89,14 @@ class ImageService
         } elseif ($target_width > ($target_height * (1 + $thressHold))) {
             $target_width = $target_height * (1 + $thressHold);
         }
-        return $this->fn_resize_helper($image_resource_id, $width, $height, $target_width, 200);
+        return $this->resizeHelper($image_resource_id, $width, $height, (int)$target_width, 200);
         /*else if( $height < $target_height ) { // make image larger
             $target_width = $width - (( $height - $target_height ) * $aspectRatio );
-            $new_image_resource_id = fn_resize_helper($image_resource_id,$width,$height,$target_width,200)
+            $new_image_resource_id = $this->>resizeHelper($image_resource_id,$width,$height,$target_width,200)
         }*/
     }
 
-    private function fn_resize_helper($image_resource_id, $width, $height, $target_width, $target_height)
+    private function resizeHelper($image_resource_id, int $width, int $height, int $target_width, int $target_height)
     {
         $target_layer = imagecreatetruecolor($target_width, $target_height);
         imagecopyresampled(

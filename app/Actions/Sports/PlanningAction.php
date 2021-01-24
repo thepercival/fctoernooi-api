@@ -84,7 +84,7 @@ final class PlanningAction extends Action
     public function create(Request $request, Response $response, $args): Response
     {
         /** @var \FCToernooi\Tournament $tournament */
-        $tournament = $request->getAttribute("tournament");
+        $tournament = $request->getAttribute('tournament');
 
         try {
             list($structure, $startRoundNumber) = $this->getFromRequest($request, $args);
@@ -111,7 +111,7 @@ final class PlanningAction extends Action
     public function reschedule(Request $request, Response $response, $args): Response
     {
         /** @var \FCToernooi\Tournament $tournament */
-        $tournament = $request->getAttribute("tournament");
+        $tournament = $request->getAttribute('tournament');
 
         try {
             list($structure, $roundNumber) = $this->getFromRequest($request, $args);
@@ -129,12 +129,15 @@ final class PlanningAction extends Action
 
     protected function getFromRequest(Request $request, $args): array
     {
-        $competition = $request->getAttribute("tournament")->getCompetition();
-        if (array_key_exists("roundnumber", $args) === false) {
-            throw new \Exception("geen rondenummer opgegeven", E_ERROR);
+        $competition = $request->getAttribute('tournament')->getCompetition();
+        if (array_key_exists('roundNumber', $args) === false) {
+            throw new \Exception('geen rondenummer opgegeven', E_ERROR);
         }
         $structure = $this->structureRepos->getStructure($competition);
-        $roundNumber = $structure->getRoundNumber((int)$args["roundnumber"]);
+        if ($structure === null) {
+            throw new \Exception('geen structuur opgegeven', E_ERROR);
+        }
+        $roundNumber = $structure->getRoundNumber((int)$args['roundNumber']);
         return [$structure, $roundNumber];
     }
 }
