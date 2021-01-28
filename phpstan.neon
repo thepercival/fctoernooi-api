@@ -5,8 +5,6 @@ parameters:
         - tests/cases
     inferPrivatePropertyTypeFromConstructor:
         true
-    scanDirectories:
-        - domain
 #    doctrine:
 #        repositoryClass:
 #            \Sports\Repository

@@ -37,7 +37,6 @@ use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 use Slim\Views\TwigMiddleware;
 use Slim\Views\Twig as TwigView;
 
-
 return function (App $app): void {
     $app->group(
         '/public',
@@ -203,9 +202,7 @@ return function (App $app): void {
                                 '/planningconfigs',
                                 function (Group $group): void {
                                     $group->options('', PlanningConfigAction::class . ':options');
-                                    $group->post('', PlanningConfigAction::class . ':add');
-                                    $group->options('/{planningConfigId}', PlanningConfigAction::class . ':options');
-                                    $group->put('/{planningConfigId}', PlanningConfigAction::class . ':edit');
+                                    $group->post('', PlanningConfigAction::class . ':save');
                                 }
                             );
 
@@ -213,13 +210,7 @@ return function (App $app): void {
                                 '/competitionsports/{competitionSportId}/gameamountconfigs',
                                 function (Group $group): void {
                                     $group->options('', GameAmountConfigAction::class . ':options');
-                                    $group->post('', GameAmountConfigAction::class . ':add');
-                                    $group->options(
-                                        '/{gameAmountConfigId}',
-                                        GameAmountConfigAction::class . ':options'
-                                    );
-                                    $group->put('/{gameAmountConfigId}', GameAmountConfigAction::class . ':edit');
-
+                                    $group->post('', GameAmountConfigAction::class . ':save');
                                 }
                             );
                         }
@@ -237,24 +228,14 @@ return function (App $app): void {
                                         '/scoreconfigs',
                                         function (Group $group): void {
                                             $group->options('', ScoreConfigAction::class . ':options');
-                                            $group->post('', ScoreConfigAction::class . ':add');
-                                            $group->options(
-                                                '/{scoreConfigId}',
-                                                ScoreConfigAction::class . ':options'
-                                            );
-                                            $group->put('/{scoreConfigId}', ScoreConfigAction::class . ':edit');
+                                            $group->post('', ScoreConfigAction::class . ':save');
                                         }
                                     );
                                     $group->group(
                                         '/qualifyagainstconfigs',
                                         function (Group $group): void {
                                             $group->options('', QualifyAgainstConfigAction::class . ':options');
-                                            $group->post('', QualifyAgainstConfigAction::class . ':add');
-                                            $group->options(
-                                                '/{qualifyAgainstConfigId}',
-                                                QualifyAgainstConfigAction::class . ':options'
-                                            );
-                                            $group->put('/{qualifyAgainstConfigId}', QualifyAgainstConfigAction::class . ':edit');
+                                            $group->post('', QualifyAgainstConfigAction::class . ':save');
                                         }
                                     );
                                 }

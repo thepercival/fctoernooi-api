@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Sports\Planning;
 
 use App\Response\ErrorResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Round\Number as RoundNumber;
 use Sports\Sport;
 use Sports\Structure\Repository as StructureRepository;
@@ -21,64 +23,53 @@ use Sports\Competition\Sport as CompetitionSport;
 
 final class GameAmountConfigAction extends Action
 {
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var GameAmountConfigRepository
-     */
-    protected $gameAmountConfigRepos;
+    protected CompetitionSportRepository $competiionSportRepos;
+    protected StructureRepository $structureRepos;
+    protected GameAmountConfigRepository $gameAmountConfigRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        SportRepository $sportRepos,
+        CompetitionSportRepository $competiionSportRepos,
         StructureRepository $structureRepos,
         GameAmountConfigRepository $gameAmountConfigRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->sportRepos = $sportRepos;
+        $this->competiionSportRepos = $competiionSportRepos;
         $this->structureRepos = $structureRepos;
         $this->gameAmountConfigRepos = $gameAmountConfigRepos;
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    public function save(Request $request, Response $response, $args): Response
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
             /** @var GameAmountConfig $gameAmountConfigSer */
             $gameAmountConfigSer = $this->serializer->deserialize($this->getRawData(), GameAmountConfig::class, 'json');
 
             $roundNumberAsValue = 0;
-            if (array_key_exists("roundnumber", $args) && strlen($args["roundnumber"]) > 0) {
-                $roundNumberAsValue = (int)$args["roundnumber"];
+            if (array_key_exists('roundNumber', $args) && strlen($args['roundNumber']) > 0) {
+                $roundNumberAsValue = (int)$args['roundNumber'];
             }
             if ($roundNumberAsValue === 0) {
-                throw new \Exception("geen rondenummer opgegeven", E_ERROR);
+                throw new Exception('geen rondenummer opgegeven', E_ERROR);
             }
             $structure = $this->structureRepos->getStructure($competition);
             $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
 
-            $sport = $this->sportRepos->find((int)$args["sportid"]);
-            if ($sport === null) {
+            if (!array_key_exists('competitionSportId', $args) || strlen($args['competitionSportId']) === 0) {
+                throw new \Exception('geen sport opgegeven', E_ERROR);
+            }
+            $competitionSport = $this->competiionSportRepos->find((int)$args['competitionSportId']);
+            if ($competitionSport === null) {
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }
-            $competitionSport = $competition->getSport($sport);
-            if ($competitionSport === null) {
-                throw new \Exception("de sport kon niet gevonden worden", E_ERROR);
+            $gameAmountConfig = $roundNumber->getGameAmountConfig($competitionSport);
+            if ( $gameAmountConfig === null) {
+                $gameAmountConfig = new GameAmountConfig($competitionSport, $roundNumber, $gameAmountConfigSer->getAmount());
             }
-            if ($roundNumber->getGameAmountConfig($competitionSport) !== null) {
-                throw new \Exception("er zijn al wedstrijdaantal-instellingen aanwezig", E_ERROR);
-            }
-
-            $gameAmountConfig = new GameAmountConfig($competitionSport, $roundNumber, $gameAmountConfigSer->getAmount());
 
             $this->gameAmountConfigRepos->save($gameAmountConfig);
 
@@ -86,52 +77,7 @@ final class GameAmountConfigAction extends Action
 
             $json = $this->serializer->serialize($gameAmountConfig, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
-        }
-    }
-
-    public function edit(Request $request, Response $response, $args): Response
-    {
-        try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
-
-            $structure = $this->structureRepos->getStructure($competition); // to init next/previous
-
-            $roundNumberAsValue = 0;
-            if (array_key_exists("roundnumber", $args) && strlen($args["roundnumber"]) > 0) {
-                $roundNumberAsValue = (int)$args["roundnumber"];
-            }
-            if ($roundNumberAsValue === 0) {
-                throw new \Exception("geen rondenummer opgegeven", E_ERROR);
-            }
-
-            $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
-            if ($roundNumber === null) {
-                throw new \Exception("het rondenummer kan niet gevonden worden", E_ERROR);
-            }
-
-            /** @var GameAmountConfig $gameAmountConfigSer */
-            $gameAmountConfigSer = $this->serializer->deserialize(
-                $this->getRawData(),
-                GameAmountConfig::class,
-                'json'
-            );
-
-            /** @var GameAmountConfig|null $gameAmountConfig */
-            $gameAmountConfig = $this->gameAmountConfigRepos->find((int)$args['gameAmountConfigId']);
-            if ($gameAmountConfig === null) {
-                throw new \Exception("er zijn geen wedstrijdaantal-instellingen gevonden om te wijzigen", E_ERROR);
-            }
-
-            $gameAmountConfig->setAmount($gameAmountConfigSer->getAmount());
-
-            $this->removeNext($roundNumber, $gameAmountConfig->getCompetitionSport());
-
-            $json = $this->serializer->serialize($gameAmountConfig, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
         }
     }

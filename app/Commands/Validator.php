@@ -23,6 +23,7 @@ use Sports\Round\Number\GamesValidator;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
 use Sports\Game;
+use SportsHelpers\GameMode;
 
 class Validator extends Command
 {
@@ -132,7 +133,7 @@ class Validator extends Command
     {
         $map = new PlaceLocationMap($tournament->getCompetitors()->toArray());
         $gameOutput = null;
-        if( $roundNumber->getValidPlanningConfig()->getGameMode() === SportConfig::GAMEMODE_AGAINST ) {
+        if( $roundNumber->getValidPlanningConfig()->getGameMode() === GameMode::AGAINST ) {
             $gameOutput = new AgainstGameOutput($map, $this->logger);
         } else {
             $gameOutput = new TogetherGameOutput($map, $this->logger);

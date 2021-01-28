@@ -20,8 +20,6 @@ use FCToernooi\Competitor;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\LockerRoom;
 
-use Sports\Planning\Config\Repository as PlanningConfigRepository;
-use Sports\Planning\Config as PlanningConfig;
 use Sports\Sport\Repository as SportRepository;
 use Sports\Sport;
 use Sports\Season\Repository as SeasonRepository;
@@ -50,12 +48,18 @@ use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Score\Config\Repository as ScoreConfigRepository;
 use Sports\Score\Config as ScoreConfig;
+use Sports\Qualify\AgainstConfig\Repository as QualifyAgainstConfigRepository;
+use Sports\Qualify\AgainstConfig as QualifyAgainstConfig;
 use Sports\Place\Repository as PlaceRepository;
 use Sports\Place;
 use Sports\Poule\Repository as PouleRepository;
 use Sports\Poule;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Round\Number as RoundNumber;
+use Sports\Planning\Config\Repository as PlanningConfigRepository;
+use Sports\Planning\Config as PlanningConfig;
+use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
+use Sports\Planning\GameAmountConfig;
 
 return [
     TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
@@ -153,6 +157,13 @@ return [
             $entityManager->getClassMetaData(ScoreConfig::class)
         );
     },
+    QualifyAgainstConfigRepository::class => function (ContainerInterface $container): QualifyAgainstConfigRepository {
+        $entityManager = $container->get(EntityManager::class);
+        return new QualifyAgainstConfigRepository(
+            $entityManager,
+            $entityManager->getClassMetaData(QualifyAgainstConfig::class)
+        );
+    },
     RoundNumberRepository::class => function (ContainerInterface $container): RoundNumberRepository {
         $entityManager = $container->get(EntityManager::class);
         return new RoundNumberRepository($entityManager, $entityManager->getClassMetaData(RoundNumber::class));
@@ -168,5 +179,12 @@ return [
     PlanningConfigRepository::class => function (ContainerInterface $container): PlanningConfigRepository {
         $entityManager = $container->get(EntityManager::class);
         return new PlanningConfigRepository($entityManager, $entityManager->getClassMetaData(PlanningConfig::class));
+    },
+    GameAmountConfigRepository::class => function (ContainerInterface $container): GameAmountConfigRepository {
+        $entityManager = $container->get(EntityManager::class);
+        return new GameAmountConfigRepository(
+            $entityManager,
+            $entityManager->getClassMetaData(GameAmountConfig::class)
+        );
     },
 ];

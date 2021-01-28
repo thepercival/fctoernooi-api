@@ -7,6 +7,8 @@ namespace App\Actions\Sports;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
@@ -23,18 +25,9 @@ use Sports\Competition;
 
 final class FieldAction extends Action
 {
-    /**
-     * @var FieldRepository
-     */
-    protected $fieldRepos;
-    /**
-     * @var CompetitionSportRepository
-     */
-    protected $competitionSportRepos;
-    /**
-     * @var CompetitionRepos
-     */
-    protected $competitionRepos;
+    protected FieldRepository $fieldRepos;
+    protected CompetitionSportRepository $competitionSportRepos;
+    protected CompetitionRepos $competitionRepos;
 
     public function __construct(
         LoggerInterface $logger,
@@ -49,6 +42,16 @@ final class FieldAction extends Action
         $this->competitionRepos = $competitionRepos;
     }
 
+    protected function getDeserializationContext()
+    {
+        return DeserializationContext::create()->setGroups(['Default', 'noReference']);
+    }
+
+    protected function getSerializationContext()
+    {
+        return SerializationContext::create()->setGroups(['Default', 'noReference']);
+    }
+
     public function add(Request $request, Response $response, $args): Response
     {
         try {
@@ -61,7 +64,8 @@ final class FieldAction extends Action
             }
 
             /** @var Field $field */
-            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
+            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json',
+                                                    $this->getDeserializationContext());
 
             $availabilityChecker = new AvailabilityChecker();
             $availabilityChecker->checkFieldName($competition, $field->getName());
@@ -71,7 +75,7 @@ final class FieldAction extends Action
 
             $this->fieldRepos->save($newField);
 
-            $json = $this->serializer->serialize($newField, 'json');
+            $json = $this->serializer->serialize($newField, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);
@@ -96,7 +100,8 @@ final class FieldAction extends Action
             }
 
             /** @var Field|false $fieldSer */
-            $fieldSer = $this->serializer->deserialize($this->getRawData(), Field::class, 'json');
+            $fieldSer = $this->serializer->deserialize($this->getRawData(), Field::class, 'json',
+                                                       $this->getDeserializationContext());
             if ($fieldSer === false) {
                 throw new Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
@@ -108,7 +113,7 @@ final class FieldAction extends Action
             $field->setName($fieldSer->getName());
             $this->fieldRepos->save($field);
 
-            $json = $this->serializer->serialize($field, 'json');
+            $json = $this->serializer->serialize($field, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $e) {
             return new ErrorResponse($e->getMessage(), 422);

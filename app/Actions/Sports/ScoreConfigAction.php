@@ -42,7 +42,7 @@ final class ScoreConfigAction extends Action
         $this->scoreConfigRepos = $scoreConfigRepos;
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    public function save(Request $request, Response $response, $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -92,50 +92,6 @@ final class ScoreConfigAction extends Action
             return new ErrorResponse($e->getMessage(), 422);
         }
     }
-
-//    public function edit(Request $request, Response $response, $args): Response
-//    {
-//        try {
-//            /** @var Competition $competition */
-//            $competition = $request->getAttribute('tournament')->getCompetition();
-//
-//            if (!array_key_exists('roundId', $args) || strlen($args['roundId']) === 0) {
-//                throw new \Exception('geen ronde opgegeven', E_ERROR);
-//            }
-//            $structure = $this->structureRepos->getStructure($competition);
-//            $round = $this->getRound($structure, (int)$args["roundId"]);
-//
-//            /** @var ScoreConfig $scoreConfigSer */
-//            $scoreConfigSer = $this->serializer->deserialize(
-//                $this->getRawData(),
-//                ScoreConfig::class,
-//                'json'
-//            );
-//
-//            /** @var ScoreConfig|null $scoreConfig */
-//            $scoreConfig = $this->scoreConfigRepos->find((int)$args['sportscoreconfigId']);
-//            if ($scoreConfig === null) {
-//                throw new \Exception('er zijn geen score-instellingen gevonden om te wijzigen', E_ERROR);
-//            }
-//
-//            $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
-//            $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
-//            $this->scoreConfigRepos->save($scoreConfig);
-//            if ($scoreConfig->hasNext() && $scoreConfigSer->hasNext()) {
-//                $nextScoreConfig = $scoreConfig->getNext();
-//                $nextScoreConfig->setMaximum($scoreConfigSer->getNext()->getMaximum());
-//                $nextScoreConfig->setEnabled($scoreConfigSer->getNext()->getEnabled());
-//                $this->scoreConfigRepos->save($nextScoreConfig);
-//            }
-//
-//            $this->removeNext($round, $scoreConfig->getCompetitionSport());
-//
-//            $json = $this->serializer->serialize($scoreConfig, 'json');
-//            return $this->respondWithJson($response, $json);
-//        } catch (\Exception $e) {
-//            return new ErrorResponse($e->getMessage(), 422);
-//        }
-//    }
 
     protected function removeNext(Round $round, CompetitionSport $competitionSport)
     {

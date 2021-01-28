@@ -21,18 +21,9 @@ use Sports\Competition\Sport as CompetitionSport;
 
 final class CompetitionSportAction extends Action
 {
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var CompetitionSportRepository
-     */
-    protected $competitionSportRepos;
+    protected SportRepository $sportRepos;
+    protected StructureRepository $structureRepos;
+    protected CompetitionSportRepository $competitionSportRepos;
 
     public function __construct(
         LoggerInterface $logger,

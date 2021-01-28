@@ -69,8 +69,7 @@
     "test": [
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
-    "phpstan": "vendor/bin/phpstan -c phpstan.neon",
-    "stan": "vendor/bin/phpstan analyse --level=5 app config domain tests",
+    "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse --level=5 app config domain tests",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
     "cs-fix": "php-cs-fixer fix .",
@@ -82,5 +81,12 @@
   },
   "config": {
     "process-timeout": 0
+  },
+  "extra": {
+    "phpstan": {
+      "includes": [
+        "extension.neon"
+      ]
+    }
   }
 }
