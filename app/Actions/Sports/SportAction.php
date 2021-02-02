@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
+use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Sports\Sport\Repository as SportRepository;
@@ -31,14 +32,25 @@ final class SportAction extends Action
         $this->sportRepos = $sportRepos;
     }
 
-    protected function getDeserializationContext()
+    protected function getDeserializationContext(): DeserializationContext
     {
         return DeserializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
-    protected function getSerializationContext()
+    protected function getSerializationContext(): SerializationContext
     {
         return SerializationContext::create()->setGroups(['Default', 'noReference']);
+    }
+
+    public function fetch(Request $request, Response $response, $args): Response
+    {
+        try {
+            $sports = $this->sportRepos->findByExt(true);
+            $json = $this->serializer->serialize($sports, 'json', $this->getSerializationContext());
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $e) {
+            return new ErrorResponse($e->getMessage(), 400);
+        }
     }
 
     public function fetchOne(Request $request, Response $response, $args): Response
@@ -48,25 +60,29 @@ final class SportAction extends Action
             throw new \Exception("geen sport met het opgegeven id gevonden", E_ERROR);
         }
 
-        $json = $this->serializer->serialize($sport, 'json', $this->getSerializationContext() );
+        $json = $this->serializer->serialize($sport, 'json', $this->getSerializationContext());
         return $this->respondWithJson($response, $json);
     }
 
     public function add(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var Sport $sport */
-            $sport = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json', $this->getDeserializationContext());
+            /** @var Sport $sportSer */
+            $sportSer = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json', $this->getDeserializationContext());
 
-            // check if name exists, else create sport
-            $newSport = $this->sportRepos->findOneBy(["name" => $sport->getName()]);
-
+            $newSport = $this->sportRepos->findOneBy(['name' => strtolower($sportSer->getName())]);
+            if ($newSport !== null
+                && ($sportSer->getTeam() !== $newSport->getTeam()
+                || $sportSer->getGameMode() !== $newSport->getGameMode()
+                || $sportSer->getNrOfGamePlaces() !== $newSport->getNrOfGamePlaces())
+            ) {
+                throw new \Exception('de sport "' . $newSport->getName() . '" bestaat al, kies een andere naam', E_ERROR);
+            }
             if ($newSport === null) {
-                $newSport = new Sport($sport->getName(), $sport->getTeam(), $sport->getNrOfGamePlaces(), $sport->getGameMode() );
-                $newSport->setCustomId($sport->getCustomId());
+                $newSport = new Sport(strtolower($sportSer->getName()), $sportSer->getTeam(), $sportSer->getNrOfGamePlaces(), $sportSer->getGameMode());
+                $newSport->setCustomId($sportSer->getCustomId());
                 $this->sportRepos->save($newSport);
             }
-            $this->sportRepos->save($newSport);
 
             $json = $this->serializer->serialize($newSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);

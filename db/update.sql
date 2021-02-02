@@ -1,4 +1,6 @@
 -- PRE PRE PRE doctrine-update =============================================================
+update sports set name = lower(name);
+
 delete g from games g join poules p on p.id = g.pouleid join rounds r on r.id = p.roundid join roundnumbers rn on rn.id = r.numberid join competitions c on c.id = rn.competitionid where exists( select * from tournaments t where t.competitionid = c.id and t.updated = false );
 delete from competitions where exists( select * from tournaments t where t.competitionid = competitions.id and t.updated = false );
 
@@ -9,7 +11,7 @@ alter table planninginputs rename planningInputs;
 alter table planningpoules rename planningPoules;
 alter table planningreferees rename planningReferees;
 alter table planningsports rename planningSports;
-update sports set customId = 15 where name = 'sjoelen';
+update sports set customId = 15, gameMode = 1, nrOfGamePlaces = 1 where name = 'sjoelen';
 delete from planningInputs;
 -- from sports
 alter table roundnumbers rename roundNumbers;

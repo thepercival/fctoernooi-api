@@ -367,6 +367,7 @@ return function (App $app): void {
             $group->options('/sports/{sportCustomId}', SportAction::class . ':options');
             $group->get('/sports/{sportCustomId}', SportAction::class . ':fetchOne');
             $group->options('/sports', SportAction::class . ':options');
+            $group->get('/sports', SportAction::class . ':fetch');
             $group->post('/sports', SportAction::class . ':add');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
