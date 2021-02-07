@@ -34,6 +34,8 @@ use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Planning;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Input as PlanningInput;
+use Sports\Game\Repository as GameRepository;
+use Sports\Game as Game;
 use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together\Repository as TogetherGameRepository;
@@ -125,6 +127,10 @@ return [
             $entityManager,
             $entityManager->getClassMetaData(PlanningInput::class)
         );
+    },
+    GameRepository::class => function (ContainerInterface $container): GameRepository {
+        $entityManager = $container->get(EntityManager::class);
+        return new GameRepository($entityManager, $entityManager->getClassMetaData(Game::class));
     },
     AgainstGameRepository::class => function (ContainerInterface $container): AgainstGameRepository {
         $entityManager = $container->get(EntityManager::class);

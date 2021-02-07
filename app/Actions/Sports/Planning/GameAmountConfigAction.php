@@ -67,8 +67,10 @@ final class GameAmountConfigAction extends Action
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }
             $gameAmountConfig = $roundNumber->getGameAmountConfig($competitionSport);
-            if ( $gameAmountConfig === null) {
+            if ($gameAmountConfig === null) {
                 $gameAmountConfig = new GameAmountConfig($competitionSport, $roundNumber, $gameAmountConfigSer->getAmount());
+            } else {
+                $gameAmountConfig->setAmount($gameAmountConfigSer->getAmount());
             }
 
             $this->gameAmountConfigRepos->save($gameAmountConfig);
