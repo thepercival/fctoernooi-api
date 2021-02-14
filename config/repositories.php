@@ -42,6 +42,8 @@ use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Game\Together as TogetherGame;
 use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Score\Against as AgainstScore;
+use Sports\Score\Together\Repository as TogetherScoreRepository;
+use Sports\Score\Together as TogetherScore;
 use Sports\Competition\Field\Repository as FieldRepository;
 use Sports\Competition\Field;
 use Sports\Competition\Referee\Repository as RefereeRepository;
@@ -143,6 +145,10 @@ return [
     AgainstScoreRepository::class => function (ContainerInterface $container): AgainstScoreRepository {
         $entityManager = $container->get(EntityManager::class);
         return new AgainstScoreRepository($entityManager, $entityManager->getClassMetaData(AgainstScore::class));
+    },
+    TogetherScoreRepository::class => function (ContainerInterface $container): TogetherScoreRepository {
+        $entityManager = $container->get(EntityManager::class);
+        return new TogetherScoreRepository($entityManager, $entityManager->getClassMetaData(TogetherScore::class));
     },
     FieldRepository::class => function (ContainerInterface $container): FieldRepository {
         $entityManager = $container->get(EntityManager::class);

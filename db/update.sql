@@ -1,6 +1,6 @@
 -- PRE PRE PRE doctrine-update =============================================================
 update sports set name = lower(name);
-
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('klaverjassen', false, 16, 4, 1 );
 delete g from games g join poules p on p.id = g.pouleid join rounds r on r.id = p.roundid join roundnumbers rn on rn.id = r.numberid join competitions c on c.id = rn.competitionid where exists( select * from tournaments t where t.competitionid = c.id and t.updated = false );
 delete from competitions where exists( select * from tournaments t where t.competitionid = competitions.id and t.updated = false );
 

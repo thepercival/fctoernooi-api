@@ -13,6 +13,7 @@ use Interop\Queue\Message;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sports\Competition;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -54,6 +55,8 @@ class Create extends PlanningCommand
      * @var EntityManager
      */
     protected $entityManager;
+
+    protected bool $showSuccessful = false;
     /**
      * @var Mailer
      */
@@ -83,12 +86,14 @@ class Create extends PlanningCommand
         parent::configure();
 
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
+        $this->addOption('showSuccessful', null, InputOption::VALUE_NONE, 'show successful planning');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->initLogger($input, 'command-planning-create');
         $this->logger->info('starting command app:planning-create');
+        $this->showSuccessful = $input->getOption('showSuccessful');
 
         try {
             $queueService = new QueueService($this->config->getArray('queue'));
@@ -162,10 +167,11 @@ class Create extends PlanningCommand
             throw new \Exception($message, E_ERROR);
         }
 
-//        $planningOutput = new PlanningOutput($this->logger);
-//        $planningOutput->outputWithGames($bestPlanning, false);
-//        $planningOutput->outputWithTotals($bestPlanning, false);
-
+        if ($this->showSuccessful === true) {
+            $planningOutput = new PlanningOutput($this->logger);
+            $planningOutput->outputWithGames($bestPlanning, false);
+            $planningOutput->outputWithTotals($bestPlanning, false);
+        }
         if ($competition !== null and $roundNumberAsValue !== null) {
             $this->updateRoundNumberWithPlanning($queueService, $competition, $roundNumberAsValue);
         }
@@ -180,11 +186,12 @@ class Create extends PlanningCommand
 
         $this->entityManager->refresh($competition);
         // all roundnumbers should be refreshed, because planningConfig can be gotten from roundnumber above
-        for( $roundNumberValueIt = 1 ;$roundNumberValueIt <= $roundNumberAsValue ; $roundNumberValueIt++ ) {
-            $roundNumberIt = $this->getRoundNumber($competition, $roundNumberValueIt );
+        for ($roundNumberValueIt = 1 ;$roundNumberValueIt <= $roundNumberAsValue ; $roundNumberValueIt++) {
+            $roundNumberIt = $this->getRoundNumber($competition, $roundNumberValueIt);
             $this->refreshDb($competition, $roundNumberIt);
         }
-        $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue );
+        $roundNumber = $this->getRoundNumber($competition, $roundNumberAsValue);
+
         $tournament = $this->tournamentRepos->findOneBy(["competition" => $roundNumber->getCompetition()]);
         $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
             $this->planningInputRepos,
@@ -194,9 +201,6 @@ class Create extends PlanningCommand
         );
         try {
             $this->entityManager->getConnection()->beginTransaction();
-            if( $roundNumber->getNumber() === 2 ){
-                $debug = true;
-            }
             $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
             $this->entityManager->getConnection()->commit();
         } catch (Exception $e) {
@@ -214,7 +218,8 @@ class Create extends PlanningCommand
         $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
         if ($roundNumber === null) {
             throw new \Exception(
-                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . $competition->getId(), E_ERROR
+                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . $competition->getId(),
+                E_ERROR
             );
         }
         return $roundNumber;
@@ -225,10 +230,13 @@ class Create extends PlanningCommand
         // $this->entityManager->refresh($competition);
 
 //        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
-            $this->entityManager->refresh($roundNumber/*$roundNumberParam*/);
-            if( $roundNumber->getPlanningConfig() !== null ) {
-                $this->entityManager->refresh($roundNumber->getPlanningConfig());
-            }
+        $this->entityManager->refresh($roundNumber/*$roundNumberParam*/);
+        if ($roundNumber->getPlanningConfig() !== null) {
+            $this->entityManager->refresh($roundNumber->getPlanningConfig());
+        }
+        foreach ($roundNumber->getValidGameAmountConfigs() as $gameAmountConfig ) {
+            $this->entityManager->refresh($gameAmountConfig);
+        }
 
 //            if ($roundNumberParam->hasNext()) {
 //                $refreshDbRoundNumber($roundNumberParam->getNext());

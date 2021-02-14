@@ -17,7 +17,8 @@ use App\Actions\Sports\PlanningAction;
 use App\Actions\Sports\Planning\ConfigAction as PlanningConfigAction;
 use App\Actions\Sports\SportAction;
 use App\Actions\Sports\FieldAction;
-use App\Actions\Sports\AgainstGameAction;
+use App\Actions\Sports\GameAgainstAction;
+use App\Actions\Sports\GameTogetherAction;
 use App\Actions\Sports\RefereeAction;
 use App\Actions\Sports\CompetitorAction;
 use App\Actions\Sports\CompetitionSportAction;
@@ -248,8 +249,20 @@ return function (App $app): void {
                     $group->group(
                         'games',
                         function (Group $group): void {
-                            $group->options('/{gameId}', AgainstGameAction::class . ':options');
-                            $group->put('/{gameId}', AgainstGameAction::class . ':edit');
+                            $group->group(
+                                'against',
+                                function (Group $group): void {
+                                    $group->options('/{gameId}', GameAgainstAction::class . ':options');
+                                    $group->put('/{gameId}', GameAgainstAction::class . ':edit');
+                                }
+                            );
+                            $group->group(
+                                'together',
+                                function (Group $group): void {
+                                    $group->options('/{gameId}', GameTogetherAction::class . ':options');
+                                    $group->put('/{gameId}', GameTogetherAction::class . ':edit');
+                                }
+                            );
                         }
                     )->add(TournamentGameAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
