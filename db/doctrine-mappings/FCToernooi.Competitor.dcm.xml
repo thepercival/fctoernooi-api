@@ -3,7 +3,7 @@
     <entity name="FCToernooi\Competitor" table="competitors" repository-class="FCToernooi\Competitor\Repository">
         <field name="placeNr" column="placeNr" type="smallint" nullable="false" unique="false"/>
         <field name="pouleNr" column="pouleNr" type="smallint" nullable="false" unique="false"/>
-        <field name="registered" column="registered" type="boolean" nullable="true" unique="false"/>
+        <field name="registered" column="registered" type="boolean" nullable="false" unique="false"/>
         <field name="info" column="info" type="string" length="200" nullable="true" unique="false"/>
         <field name="name" column="name" type="string" length="30" unique="false"/>
         <field name="abbreviationDep" column="abbreviationDep" type="string" length="3" nullable="true" unique="false"/>

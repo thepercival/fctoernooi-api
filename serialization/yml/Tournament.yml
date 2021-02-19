@@ -20,4 +20,4 @@ FCToernooi\Tournament:
     competitors:
       type: ArrayCollection<FCToernooi\Competitor>
     lockerRooms:
-      type: ArrayCollection<Sports\LockerRoom>
+      type: ArrayCollection<FCToernooi\LockerRoom>

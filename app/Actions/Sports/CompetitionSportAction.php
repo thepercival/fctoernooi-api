@@ -9,10 +9,13 @@ use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Sports\Competition\Field;
+use Sports\Sport;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Competition\Sport\Service as CompetitionSportService;
 use Sports\Sport\Repository as SportRepository;
+use Sports\Competition\Field\Repository as FieldRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
@@ -24,18 +27,21 @@ final class CompetitionSportAction extends Action
     protected SportRepository $sportRepos;
     protected StructureRepository $structureRepos;
     protected CompetitionSportRepository $competitionSportRepos;
+    protected FieldRepository $fieldRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         SportRepository $sportRepos,
         StructureRepository $structureRepos,
-        CompetitionSportRepository $competitionSportRepos
+        CompetitionSportRepository $competitionSportRepos,
+        FieldRepository $fieldRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->sportRepos = $sportRepos;
         $this->structureRepos = $structureRepos;
         $this->competitionSportRepos = $competitionSportRepos;
+        $this->fieldRepos = $fieldRepos;
     }
 
     protected function getDeserializationContext()
@@ -52,28 +58,28 @@ final class CompetitionSportAction extends Action
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
-            /** @var CompetitionSport $competitionSport */
-            $competitionSport = $this->serializer->deserialize(
-                $this->getRawData(),
-                CompetitionSport::class,
-                'json',
-                $this->getDeserializationContext()
-            );
+            /** @var Sport $sportSer */
+            $sportSer = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json');
 
-            $sport = $this->sportRepos->findOneBy(["name" => $competitionSport->getSport()->getName()]);
+            $sport = $this->sportRepos->find($sportSer->getId());
             if ($sport === null) {
-                throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
+                throw new \Exception('de sport van de configuratie kan niet gevonden worden', E_ERROR);
             }
             if ($competition->getSport($sport) !== null) {
-                throw new \Exception("de sport wordt al gebruikt binnen de competitie", E_ERROR);
+                throw new \Exception('de sport wordt al gebruikt binnen de competitie', E_ERROR);
             }
 
             $competitionSportService = new CompetitionSportService();
             $structure = $this->structureRepos->getStructure($competition);
             $newCompetitionSport = $competitionSportService->createDefault($sport, $competition, $structure);
             $this->competitionSportRepos->customAdd($newCompetitionSport, $structure);
+
+            // add one field!!
+            $field = new Field($newCompetitionSport);
+            $field->setName(substr($newCompetitionSport->getSport()->getName(), 0, 1) . '1');
+            $this->fieldRepos->save($field);
 
             $json = $this->serializer->serialize($newCompetitionSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
@@ -86,7 +92,7 @@ final class CompetitionSportAction extends Action
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
             /** @var CompetitionSport|false $competitionSportSer */
             $competitionSportSer = $this->serializer->deserialize(
@@ -96,13 +102,13 @@ final class CompetitionSportAction extends Action
                 $this->getDeserializationContext()
             );
 
-            $sport = $this->sportRepos->findOneBy(["name" => $competitionSportSer->getSport()->getName()]);
+            $sport = $this->sportRepos->findOneBy(['name' => $competitionSportSer->getSport()->getName()]);
             if ($sport === null) {
-                throw new \Exception("de sport van de configuratie kan niet gevonden worden", E_ERROR);
+                throw new \Exception('de sport van de configuratie kan niet gevonden worden', E_ERROR);
             }
             $competitionSport = $competition->getSport($sport);
             if ($competitionSport === null) {
-                throw new \Exception("de competitionSport is niet gevonden bij de competitie", E_ERROR);
+                throw new \Exception('de competitionSport is niet gevonden bij de competitie', E_ERROR);
             }
             $this->competitionSportRepos->save($competitionSport);
 
@@ -117,9 +123,9 @@ final class CompetitionSportAction extends Action
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
-            $competitionSport = $this->getCompetitionSportFromInput((int)$args["competitionSportId"], $competition);
+            $competitionSport = $this->getCompetitionSportFromInput((int)$args['competitionSportId'], $competition);
 
             $this->competitionSportRepos->remove($competitionSport);
 
@@ -133,11 +139,12 @@ final class CompetitionSportAction extends Action
     {
         $competitionSport = $this->competitionSportRepos->find($id);
         if ($competitionSport === null) {
-            throw new \Exception("de sport kon niet gevonden worden o.b.v. de invoer", E_ERROR);
+            throw new \Exception('de sport kon niet gevonden worden o.b.v. de invoer', E_ERROR);
         }
         if ($competitionSport->getCompetition() !== $competition) {
             throw new \Exception(
-                "de competitie van de sport komt niet overeen met de verstuurde competitie", E_ERROR
+                'de competitie van de sport komt niet overeen met de verstuurde competitie',
+                E_ERROR
             );
         }
         return $competitionSport;
