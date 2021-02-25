@@ -102,8 +102,8 @@ class Validator extends Command
             (new PlanningOutput($this->logger))->outputInput( $planningInput );
             try {
                 $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
-            } catch (Exception $e) {
-                $this->logger->error( $e->getMessage() );
+            } catch (Exception $exception) {
+                $this->logger->error( $exception->getMessage() );
 
                 if ($this->exitAtFirstInvalid) {
                     return 0;

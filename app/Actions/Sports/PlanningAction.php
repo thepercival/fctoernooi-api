@@ -100,8 +100,8 @@ final class PlanningAction extends Action
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -122,8 +122,8 @@ final class PlanningAction extends Action
 
             $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 

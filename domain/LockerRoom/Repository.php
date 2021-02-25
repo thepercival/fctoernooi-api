@@ -47,7 +47,7 @@ class Repository extends \Sports\Repository
 
             $this->_em->flush();
             $conn->commit();
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $conn->rollBack();
             throw $e;
         }

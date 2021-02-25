@@ -81,8 +81,8 @@ class ReportAction extends Action
                     'amount' => count($tournamentHelpers)
                 ]
             );
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 400);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 400);
         }
     }
 

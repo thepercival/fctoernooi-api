@@ -88,13 +88,13 @@ class Validator extends Command
             foreach ($tournaments as $tournament) {
                 try {
                     $this->checkValidity($tournament);
-                } catch (\Exception $e) {
-                    $this->logger->error($e->getMessage());
+                } catch (\Exception $exception) {
+                    $this->logger->error($exception->getMessage());
                 }
             }
             $this->logger->info('alle toernooien gevalideerd');
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
         return 0;
     }
@@ -110,8 +110,8 @@ class Validator extends Command
             $this->structureValidator->checkValidity($competition, $structure);
             $this->gamesValidator->setBlockedPeriod($tournament->getBreak());
             $this->validateGames($tournament, $structure->getFirstRoundNumber(), $competition->getReferees()->count());
-        } catch (\Exception $e) {
-            throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $e->getMessage(), E_ERROR);
+        } catch (\Exception $exception) {
+            throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $exception->getMessage(), E_ERROR);
         }
     }
 
@@ -122,10 +122,10 @@ class Validator extends Command
             if ($roundNumber->hasNext()) {
                 $this->validateGames($tournament, $roundNumber->getNext(), $nrOfReferees);
             }
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $this->logger->info("invalid roundnumber " . $roundNumber->getId());
             // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
-            throw new \Exception($e->getMessage(), E_ERROR);
+            throw new \Exception($exception->getMessage(), E_ERROR);
         }
     }
 

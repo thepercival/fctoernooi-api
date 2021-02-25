@@ -91,7 +91,7 @@ class LockerRooms extends ToernooiPdfPage
             $lockerRoom = array_shift($lockerRooms);
             try {
                 $nY = $this->drawLockerRoom($lockerRoom, $nX, $nY, $columnWidth);
-            } catch (PdfOutOfBoundsException $e) {
+            } catch (PdfOutOfBoundsException $exception) {
                 $nY = $nYStart;
                 $nX += $columnWidth + $this->getPageMargin();
                 $nY = $this->drawLockerRoom($lockerRoom, $nX, $nY, $columnWidth);

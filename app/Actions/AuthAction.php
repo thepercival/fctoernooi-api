@@ -47,8 +47,8 @@ final class AuthAction extends Action
             $user = $request->getAttribute("user");
             $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -73,8 +73,8 @@ final class AuthAction extends Action
 
             $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -109,8 +109,8 @@ final class AuthAction extends Action
 
             $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -129,8 +129,8 @@ final class AuthAction extends Action
             $data = ["retval" => $retVal];
             $json = $this->serializer->serialize($data, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -156,8 +156,8 @@ final class AuthAction extends Action
 
             $authItem = new AuthItem($this->authService->createToken($user), $user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 }

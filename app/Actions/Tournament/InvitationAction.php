@@ -57,8 +57,8 @@ final class InvitationAction extends Action
 
             $json = $this->serializer->serialize($invitations, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -84,8 +84,8 @@ final class InvitationAction extends Action
 
             $json = $this->serializer->serialize($authorization, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -116,8 +116,8 @@ final class InvitationAction extends Action
 
             $json = $this->serializer->serialize($invitation, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -141,8 +141,8 @@ final class InvitationAction extends Action
             $this->invitationRepos->remove($invitation);
 
             return $response->withStatus(200);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 }

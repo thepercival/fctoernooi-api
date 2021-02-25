@@ -111,8 +111,8 @@ class Create extends PlanningCommand
 
             $timeoutInSeconds = 295;
             $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
         return 0;
     }
@@ -140,8 +140,8 @@ class Create extends PlanningCommand
                     $this->logger->info('planningInput ' . $content->inputId . ' not found');
                 }
                 $consumer->acknowledge($message);
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
+            } catch (\Exception $exception) {
+                $this->logger->error($exception->getMessage());
                 $consumer->reject($message);
             }
         };
@@ -203,7 +203,7 @@ class Create extends PlanningCommand
             $this->entityManager->getConnection()->beginTransaction();
             $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
             $this->entityManager->getConnection()->commit();
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $this->entityManager->getConnection()->rollBack();
             throw $e;
         }

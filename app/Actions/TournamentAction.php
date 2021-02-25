@@ -105,8 +105,8 @@ class TournamentAction extends Action
                 $this->getSerializationContext($tournament, $user)
             );
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 400);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 400);
         }
     }
 
@@ -155,8 +155,8 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($refereeId, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -188,8 +188,8 @@ class TournamentAction extends Action
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -220,8 +220,8 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -234,8 +234,8 @@ class TournamentAction extends Action
             $this->tournamentRepos->remove($tournament);
 
             return $response->withStatus(200);
-        } catch (\Exception $e) {
-            return new ErrorResponse('het toernooi is niet verwijdered : ' . $e->getMessage(), 404);
+        } catch (\Exception $exception) {
+            return new ErrorResponse('het toernooi is niet verwijdered : ' . $exception->getMessage(), 404);
         }
     }
 
@@ -288,9 +288,9 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($newTournament->getId(), 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $conn->rollBack();
-            return new ErrorResponse($e->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -302,8 +302,8 @@ class TournamentAction extends Action
 
             $hash = $this->getExportHash($tournament->getId());
             return $this->respondWithJson($response, json_encode(["hash" => $hash]));
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -344,8 +344,8 @@ class TournamentAction extends Action
             } else {
                 return $this->writeExcel($response, $config, $tournament, $this->config->getString("www.wwwurl"));
             }
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 

@@ -188,9 +188,13 @@ return function (App $app): void {
                         'competitors',
                         function (Group $group): void {
                             $group->options('', CompetitorAction::class . ':options');
+                            $group->get('', CompetitorAction::class . ':fetch');
                             $group->post('', CompetitorAction::class . ':add');
                             $group->options('/{competitorId}', CompetitorAction::class . ':options');
                             $group->put('/{competitorId}', CompetitorAction::class . ':edit');
+                            $group->delete('/{competitorId}', CompetitorAction::class . ':remove');
+                            $group->options('/{competitorOneId}/{competitorTwoId}', CompetitorAction::class . ':options');
+                            $group->put('/{competitorOneId}/{competitorTwoId}', CompetitorAction::class . ':swap');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class

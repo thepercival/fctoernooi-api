@@ -79,8 +79,8 @@ class RetryTimeout extends PlanningCommand
                 $this->sendMailWithSuccessfullTimedoutPlanning($planningInput);
             }
             $this->setStatusToFinishedProcessingTimedout();
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
         return 0;
     }

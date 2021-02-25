@@ -16,28 +16,31 @@ class Repository extends \Sports\Repository
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function syncCompetitors(Tournament $tournament, Round $rootRound) {
+    public function syncCompetitors(Tournament $tournament, Round $rootRound)
+    {
         /**
          * @param Round $rootRound
          * @return array|Place[]
          */
-        $getUnassignedPlaces = function(Round $rootRound): array {
+        $getUnassignedPlaces = function (Round $rootRound): array {
             $unassignedPlaces = [];
-            foreach( $rootRound->getPlaces() as $place ) {
-                $unassignedPlaces[$place->getPoule()->getNumber() . "." . $place->getNumber() ] = true;
+            foreach ($rootRound->getPlaces() as $place) {
+                $unassignedPlaces[$place->getPoule()->getNumber() . '.' . $place->getNumber() ] = $place;
             }
             return $unassignedPlaces;
         };
+        $unassignedPlaces = $getUnassignedPlaces($rootRound);
+
         /**
          * @param Tournament $tournament
          * @param array|Place[] $unassignedPlaces
          * @return array|CompetitorBase[]
          */
-        $getUnassignedCompetitors = function(Tournament $tournament, array $unassignedPlaces ): array {
+        $getUnassignedCompetitors = function (Tournament $tournament) use (&$unassignedPlaces): array {
             $unassignedCompetitors = [];
-            foreach( $tournament->getCompetitors() as $competitor ) {
+            foreach ($tournament->getCompetitors() as $competitor) {
                 $placeLocationId = $competitor->getPouleNr() . "." . $competitor->getPlaceNr();
-                if( array_key_exists( $placeLocationId, $unassignedPlaces ) ) {
+                if (array_key_exists($placeLocationId, $unassignedPlaces)) {
                     unset($unassignedPlaces[$placeLocationId]);
                 } else {
                     $unassignedCompetitors[$placeLocationId] = $competitor;
@@ -46,20 +49,20 @@ class Repository extends \Sports\Repository
             return $unassignedCompetitors;
         };
 
-        $unassignedPlaces = $getUnassignedPlaces( $rootRound );
-        $unassignedCompetitors = $getUnassignedCompetitors($tournament, $unassignedPlaces);
+        $unassignedCompetitors = $getUnassignedCompetitors($tournament);
 
-        foreach( $unassignedCompetitors as $unassignedCompetitor ) {
-
-            if( count($unassignedPlaces) === 0 ) {
-                $tournament->getCompetitors()->removeElement( $unassignedCompetitor );
-                $this->remove($unassignedCompetitor);
-            } else {
-                $unassignedPlace = array_shift($unassignedPlaces);
-                $unassignedCompetitor->setPouleNr( $unassignedPlace->getPoule()->getNumber() );
-                $unassignedCompetitor->setPlaceNr( $unassignedPlace->getNumber());
-                $this->save($unassignedCompetitor);
-            }
+        while (count($unassignedPlaces) > 0 && count($unassignedCompetitors) > 0) {
+            $unassignedPlace = array_shift($unassignedPlaces);
+            $unassignedCompetitor = array_shift($unassignedCompetitors);
+            $unassignedCompetitor->setPouleNr($unassignedPlace->getPoule()->getNumber());
+            $unassignedCompetitor->setPlaceNr($unassignedPlace->getNumber());
+            $this->save($unassignedCompetitor);
+        }
+        while (count($unassignedCompetitors) > 0) {
+            $unassignedCompetitor = array_shift($unassignedCompetitors);
+            $tournament->getCompetitors()->removeElement($unassignedCompetitor);
+            $this->remove($unassignedCompetitor);
+            $this->save($unassignedCompetitor);
         }
     }
 }

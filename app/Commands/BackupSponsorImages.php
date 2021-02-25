@@ -70,8 +70,8 @@ class BackupSponsorImages extends Command
                     $this->logger->error("failed to copy  " . $logoLocalPath);
                 }
             }
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
         return 0;
     }

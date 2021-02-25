@@ -64,8 +64,12 @@ final class FieldAction extends Action
             }
 
             /** @var Field $field */
-            $field = $this->serializer->deserialize($this->getRawData(), Field::class, 'json',
-                                                    $this->getDeserializationContext());
+            $field = $this->serializer->deserialize(
+                $this->getRawData(),
+                Field::class,
+                'json',
+                $this->getDeserializationContext()
+            );
 
             $availabilityChecker = new AvailabilityChecker();
             $availabilityChecker->checkFieldName($competition, $field->getName());
@@ -77,8 +81,8 @@ final class FieldAction extends Action
 
             $json = $this->serializer->serialize($newField, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
-        } catch (Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -100,8 +104,12 @@ final class FieldAction extends Action
             }
 
             /** @var Field|false $fieldSer */
-            $fieldSer = $this->serializer->deserialize($this->getRawData(), Field::class, 'json',
-                                                       $this->getDeserializationContext());
+            $fieldSer = $this->serializer->deserialize(
+                $this->getRawData(),
+                Field::class,
+                'json',
+                $this->getDeserializationContext()
+            );
             if ($fieldSer === false) {
                 throw new Exception("het veld kon niet gevonden worden o.b.v. de invoer", E_ERROR);
             }
@@ -115,8 +123,8 @@ final class FieldAction extends Action
 
             $json = $this->serializer->serialize($field, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
-        } catch (Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -145,8 +153,8 @@ final class FieldAction extends Action
             }
 
             return $response->withStatus(200);
-        } catch (Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
@@ -176,8 +184,8 @@ final class FieldAction extends Action
             }
 
             return $response->withStatus(200);
-        } catch (Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 }

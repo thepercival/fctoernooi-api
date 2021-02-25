@@ -23,8 +23,8 @@ abstract class AuthorizationMiddleware implements MiddlewareInterface
         }
         try {
             $this->isAuthorized($request, $request->getAttribute('user'), $request->getAttribute('tournament'));
-        } catch (Exception $e) {
-            return new ForbiddenResponse($e->getMessage());
+        } catch (Exception $exception) {
+            return new ForbiddenResponse($exception->getMessage());
         }
         return $handler->handle($request);
     }

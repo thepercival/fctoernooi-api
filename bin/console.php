@@ -21,6 +21,6 @@ try {
     $application = new Application();
     $application->add($container->get($command));
     $application->run();
-} catch (\Exception $e) {
-    echo $e->getMessage() . PHP_EOL;
+} catch (\Exception $exception) {
+    echo $exception->getMessage() . PHP_EOL;
 }

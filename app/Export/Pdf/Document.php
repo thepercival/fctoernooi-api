@@ -254,7 +254,7 @@ class Document extends \Zend_Pdf
         try {
             $page->draw();
             $this->pages[] = $page;
-        } catch (PdfOutOfBoundsException $e) {
+        } catch (PdfOutOfBoundsException $exception) {
             if ($pageLayout === \Zend_Pdf_Page::SIZE_A4) {
                 $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4_LANDSCAPE, false);
             }

@@ -160,7 +160,7 @@ EOT;
             $this->userRepos->save($user);
             $this->mailPasswordCode($user);
             $conn->commit();
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             $conn->rollback();
             throw $e;
         }

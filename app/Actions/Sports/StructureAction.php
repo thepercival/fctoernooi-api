@@ -50,8 +50,8 @@ final class StructureAction extends Action
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 500);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 500);
         }
     }
 
@@ -79,13 +79,12 @@ final class StructureAction extends Action
             $roundNumberAsValue = 1;
             $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
 
-            $this->competitorRepos->syncCompetitors($tournament, $newStructure->getRootRound() );
+            $this->competitorRepos->syncCompetitors($tournament, $newStructure->getRootRound());
 
             $json = $this->serializer->serialize($newStructure, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
-
 }

@@ -88,15 +88,15 @@ class TournamentReport
         $structureValidator = new StructureValidator();
         try {
             $structureValidator->checkValidity($competition, $structure);
-        } catch (Exception $e) {
-            $this->validateMessage = $e->getMessage();
+        } catch (Exception $exception) {
+            $this->validateMessage = $exception->getMessage();
         }
         $gamesValidator = new GamesValidator();
         $gamesValidator->setBlockedPeriod($tournament->getBreak());
         try {
             $gamesValidator->validateStructure($structure, $nrOfReferees);
-        } catch (Exception $e) {
-            $this->validatePlanningMessage = $e->getMessage();
+        } catch (Exception $exception) {
+            $this->validatePlanningMessage = $exception->getMessage();
         }
         $this->createdDateTime = $tournament->getCreatedDateTime()->format('Y-m-d H:i');
     }

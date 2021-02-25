@@ -48,8 +48,8 @@ final class SportAction extends Action
             $sports = $this->sportRepos->findByExt(true);
             $json = $this->serializer->serialize($sports, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 400);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 400);
         }
     }
 
@@ -86,8 +86,8 @@ final class SportAction extends Action
 
             $json = $this->serializer->serialize($newSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $e) {
-            return new ErrorResponse($e->getMessage(), 422);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 }
