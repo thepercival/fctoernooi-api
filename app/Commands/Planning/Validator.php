@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use App\Command;
 use SportsHelpers\PouleStructure;
 use SportsPlanning\Planning;
+use SportsPlanning\SelfReferee;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -97,18 +98,18 @@ class Validator extends Command
 
         $this->logger->info('valideren gestart..');
 
-        $planningInputs = $this->getPlanningInputsToValidate( $input );
+        $planningInputs = $this->getPlanningInputsToValidate($input);
         foreach ($planningInputs as $planningInput) {
-            (new PlanningOutput($this->logger))->outputInput( $planningInput );
+            (new PlanningOutput($this->logger))->outputInput($planningInput);
             try {
                 $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
             } catch (Exception $exception) {
-                $this->logger->error( $exception->getMessage() );
+                $this->logger->error($exception->getMessage());
 
                 if ($this->exitAtFirstInvalid) {
                     return 0;
                 }
-                if( $resetPlanningInputWhenInvalid ) {
+                if ($resetPlanningInputWhenInvalid) {
                     $this->planningInputRepos->reset($planningInput);
                     $queueService->sendCreatePlannings($planningInput);
                 }
@@ -122,11 +123,11 @@ class Validator extends Command
     /**
      * @return array|PlanningInput[]
      */
-    protected function getPlanningInputsToValidate( InputInterface $input ): array {
-
+    protected function getPlanningInputsToValidate(InputInterface $input): array
+    {
         if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
             $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
-            if( $planningInput === null ) {
+            if ($planningInput === null) {
                 return [];
             }
             return [ $planningInput ];
@@ -156,12 +157,12 @@ class Validator extends Command
             $this->logger->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
-        $succeededPlannings = $planningInput->getPlannings( Planning::STATE_SUCCEEDED );
+        $succeededPlannings = $planningInput->getPlannings(Planning::STATE_SUCCEEDED);
         if ($succeededPlannings->count() === 0) {
-            throw new \Exception( "input (inputid " . $planningInput->getId() . ") has no bestplanning", E_ERROR );
+            throw new \Exception("input (inputid " . $planningInput->getId() . ") has no bestplanning", E_ERROR);
         }
         $validator = new PlanningValidator();
-        foreach( $succeededPlannings as $succeededPlanning ) {
+        foreach ($succeededPlannings as $succeededPlanning) {
             if ($succeededPlanning->getValidity() === PlanningValidator::VALID) {
                 continue;
             }
@@ -180,7 +181,8 @@ class Validator extends Command
         }
     }
 
-    protected function setValidity( Planning $planning, int $validity ) {
+    protected function setValidity(Planning $planning, int $validity)
+    {
         $planning->setValidity($validity);
         $this->planningRepos->save($planning);
     }
@@ -201,7 +203,7 @@ class Validator extends Command
                 }
             }
         }
-        if( $pouleStructure === null ) {
+        if ($pouleStructure === null) {
             return null;
         }
         return new PouleStructure($pouleStructure);
@@ -214,10 +216,11 @@ class Validator extends Command
     protected function getSelfReferee(InputInterface $input): ?int
     {
         $selfReferee = null;
-        if (strlen($input->getOption('selfReferee')) > 0 && ctype_digit($input->getOption('selfReferee')) ) {
+        $optionSelfReferee = (string)$input->getOption('selfReferee');
+        if ($optionSelfReferee !== null && strlen($optionSelfReferee) > 0 && ctype_digit($optionSelfReferee)) {
             $selfReferee = (int) $input->getOption('selfReferee');
-            if ($selfReferee !== PlanningInput::SELFREFEREE_OTHERPOULES && $selfReferee !== PlanningInput::SELFREFEREE_SAMEPOULE ) {
-                $selfReferee = PlanningInput::SELFREFEREE_DISABLED;
+            if ($selfReferee !== SelfReferee::OTHERPOULES && $selfReferee !== SelfReferee::SAMEPOULE) {
+                $selfReferee = SelfReferee::DISABLED;
             }
         }
         return $selfReferee;

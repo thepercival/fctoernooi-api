@@ -86,7 +86,7 @@ return [
         // $em->getConnection()->setAutoCommit(false);
         return $em;
     },
-    SerializerInterface::class => function (ContainerInterface $container) {
+    SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {
         $config = $container->get(Configuration::class);
         $env = $config->getString("environment");
         $serializerBuilder = SerializerBuilder::create()->setDebug($env === "development");

@@ -17,14 +17,14 @@ use FCToernooi\Auth\Token as AuthToken;
 
 // middleware is executed by LIFO
 
-return function (App $app) {
+return function (App $app): void {
     $container = $app->getContainer();
     $config = $container->get(Configuration::class);
 
     $app->add(
         function (Request $request, RequestHandler $handler): Response {
             $response = $handler->handle($request);
-            header_remove("X-Powered-By");
+            header_remove('X-Powered-By');
             return $response; // ->withoutHeader("X-Powered-By");
         }
     );
@@ -32,27 +32,27 @@ return function (App $app) {
     $app->add(
         new JwtAuthentication(
             [
-                "secret" => $config->getString('auth.jwtsecret'),
-                "logger" => $container->get(LoggerInterface::class),
-                "rules" => [
+                'secret' => $config->getString('auth.jwtsecret'),
+                'logger' => $container->get(LoggerInterface::class),
+                'rules' => [
                     new JwtAuthentication\RequestPathRule(
                         [
-                            "path" => "/",
-                            "ignore" => ["/public"]
+                            'path' => '/',
+                            'ignore' => ['/public']
                         ]
                     ),
                     new JwtAuthentication\RequestMethodRule(
-                               [
-                                   "ignore" => ["OPTIONS"]
+                        [
+                                   'ignore' => ['OPTIONS']
                                ]
-                           )
+                    )
                        ],
-                       "error" => function (Response $response, $arguments): UnauthorizedResponse {
-                           return new UnauthorizedResponse($arguments["message"]);
+                       'error' => function (Response $response, $arguments): UnauthorizedResponse {
+                           return new UnauthorizedResponse($arguments['message']);
                        },
-                "before" => function (Request $request, $arguments): Request {
-                    $token = new AuthToken($arguments["decoded"]);
-                    return $request->withAttribute("token", $token);
+                'before' => function (Request $request, $arguments): Request {
+                    $token = new AuthToken($arguments['decoded']);
+                    return $request->withAttribute('token', $token);
                 }
                    ]
         )
@@ -62,13 +62,13 @@ return function (App $app) {
     $app->add((new Middlewares\ContentType())->charsets(['UTF-8'])->errorResponse());
     $app->add((new Middlewares\ContentEncoding(['gzip', 'deflate'])));
 
-    $app->add(new CorsMiddleware($config->getString("www.wwwurl")));
+    $app->add(new CorsMiddleware($config->getString('www.wwwurl')));
 
     // Add Routing Middleware
     $app->addRoutingMiddleware();
 
 //    // always last, so it is called first!
-    $errorMiddleware = $app->addErrorMiddleware($config->getString('environment') === "development", true, true);
+    $errorMiddleware = $app->addErrorMiddleware($config->getString('environment') === 'development', true, true);
 
     // Set the Not Found Handler
     $errorMiddleware->setErrorHandler(

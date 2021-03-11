@@ -151,7 +151,7 @@ EOT;
     {
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if (!$user) {
-            throw new \Exception("kan geen code versturen");
+            throw new Exception("kan geen code versturen");
         }
         $conn = $this->userRepos->getEM()->getConnection();
         $conn->beginTransaction();
@@ -160,9 +160,9 @@ EOT;
             $this->userRepos->save($user);
             $this->mailPasswordCode($user);
             $conn->commit();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $conn->rollback();
-            throw $e;
+            throw $exception;
         }
 
 
@@ -213,15 +213,15 @@ EOT;
     {
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if (!$user) {
-            throw new \Exception("het wachtwoord kan niet gewijzigd worden");
+            throw new Exception("het wachtwoord kan niet gewijzigd worden");
         }
         // check code and deadline
         if ($user->getForgetpasswordToken() !== $code) {
-            throw new \Exception("het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt");
+            throw new Exception("het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt");
         }
         $now = new \DateTimeImmutable();
         if ($now > $user->getForgetpasswordDeadline()) {
-            throw new \Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
+            throw new Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
         }
 
         // set password

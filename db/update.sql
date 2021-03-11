@@ -84,12 +84,16 @@ ALTER TABLE places DROP INDEX CDKTMP;
 ALTER TABLE competitors DROP INDEX CDKTMP2;
 
 update sports set name = lower(name);
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('klaverjassen', false, 16, 4, 1 );
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('klaverjassen', false, 16, 4, 2 );
 update sports set customId = 15, gameMode = 1, nrOfGamePlaces = 1 where name = 'sjoelen';
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('badminton dubbel', false, 17, 4, 2 );
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('squash dubbel', false, 18, 4, 2 );
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('tennis dubbel', false, 19, 4, 2 );
+insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('tafeltennis dubbel', false, 20, 4, 2 );
 
 -- from sports
 update sports set gameMode = 2, nrOfGamePlaces = 2 where gameMode = 0;
-update planningConfigs set gameMode = 2;
+update planningConfigs set creationStrategy = 1;
 
 -- scoreConfigs: fk to competitionSports needs to be not null again
 -- fields: fk to competitionSports needs to be not null again

@@ -205,7 +205,7 @@ class Create extends PlanningCommand
             $this->entityManager->getConnection()->commit();
         } catch (Exception $exception) {
             $this->entityManager->getConnection()->rollBack();
-            throw $e;
+            throw $exception;
         }
     }
 

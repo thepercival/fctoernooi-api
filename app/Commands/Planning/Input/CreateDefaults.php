@@ -61,19 +61,18 @@ class CreateDefaults extends PlanningCommand
         $planningInputIterator = new PlanningInputIterator(
             $this->getPlaceRange($input, $tournamentStructureRanges),
             new Range(1, 64),
-            new Range(1, 1), // sports
-            new Range(1, 10),// fields
-            new Range(0, 10),// referees
-            new Range(1, 2),// headtohead
+            new Range(1, 10),// referees
+            new Range(0, 10),// fields
+            new Range(1, 2),// gameAmount
         );
         $recreate = $input->getOption("recreate");
         $onlySelfReferee = $input->getOption("onlySelfReferee");
         $queueService = new QueueService($this->config->getArray('queue'));
         $showNrOfPlaces = [];
-        $planningOutput = new PlanningOutput( $this->logger );
-        while ( $planningInputIterator->valid()) {
+        $planningOutput = new PlanningOutput($this->logger);
+        while ($planningInputIterator->valid()) {
             $planningInputIt = $planningInputIterator->current();
-            if( $onlySelfReferee && !$planningInputIt->selfRefereeEnabled() ) {
+            if ($onlySelfReferee && !$planningInputIt->selfRefereeEnabled()) {
                 $planningInputIterator->next();
                 continue;
             }
@@ -83,11 +82,11 @@ class CreateDefaults extends PlanningCommand
             }
 
             $planningInputDb = $this->planningInputRepos->getFromInput($planningInputIt);
-            if ( $planningInputDb === null) {
+            if ($planningInputDb === null) {
                 $planningInputDb = $this->createPlanningInput($planningInputIt);
                 $queueService->sendCreatePlannings($planningInputDb);
                 $planningOutput->outputInput($planningInputDb, "created + message ");
-            } else if( $recreate ) {
+            } elseif ($recreate) {
                 $this->planningInputRepos->reset($planningInputDb);
                 $queueService->sendCreatePlannings($planningInputDb);
                 $planningOutput->outputInput($planningInputDb, "reset + message ");

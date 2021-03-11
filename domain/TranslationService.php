@@ -71,6 +71,22 @@ class TranslationService
             {
                 return 'honkbal';
             }
+            case SportCustom::BadmintonDouble:
+            {
+                return $this->getSportName( $language, SportCustom::Badminton ) . ' dubbel';
+            }
+            case SportCustom::SquashDouble:
+            {
+                return $this->getSportName( $language, SportCustom::SquashDouble ) . ' dubbel';
+            }
+            case SportCustom::TennisDouble:
+            {
+                return $this->getSportName( $language, SportCustom::TennisDouble ) . ' dubbel';
+            }
+            case SportCustom::TableTennisDouble:
+            {
+                return $this->getSportName( $language, SportCustom::TableTennisDouble ) . ' dubbel';
+            }
         }
         return '';
     }

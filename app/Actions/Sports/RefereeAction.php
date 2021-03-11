@@ -127,8 +127,8 @@ final class RefereeAction extends Action
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
             $availabilityChecker = new AvailabilityChecker();
-            $availabilityChecker->checkRefereeEmailaddress($competition, $refereeSer->getInitials(), $referee);
-            $availabilityChecker->checkRefereeInitials($competition, $refereeSer->getEmailaddress(), $referee);
+            $availabilityChecker->checkRefereeEmailaddress($competition, $refereeSer->getEmailaddress(), $referee);
+            $availabilityChecker->checkRefereeInitials($competition, $refereeSer->getInitials(), $referee);
             $availabilityChecker->checkRefereePriority($competition, $refereeSer->getPriority(), $referee);
 
             $referee->setPriority($refereeSer->getPriority());

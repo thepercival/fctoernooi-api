@@ -49,7 +49,7 @@ class Repository extends \Sports\Repository
             $conn->commit();
         } catch (\Exception $exception) {
             $conn->rollBack();
-            throw $e;
+            throw $exception;
         }
     }
 }
