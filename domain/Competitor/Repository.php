@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace FCToernooi\Competitor;
 
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor as CompetitorBase;
 use FCToernooi\Tournament;
 use Sports\Place;
 use Sports\Round;
 
-class Repository extends \Sports\Repository
+/**
+ * @template-extends EntityRepository<CompetitorBase>
+ */
+class Repository extends EntityRepository
 {
-    public function find($id, $lockMode = null, $lockVersion = null): ?CompetitorBase
-    {
-        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    }
+    use \Sports\Repository;
 
     public function syncCompetitors(Tournament $tournament, Round $rootRound)
     {
         /**
          * @param Round $rootRound
-         * @return array|Place[]
+         * @return list<Place>
          */
         $getUnassignedPlaces = function (Round $rootRound): array {
             $unassignedPlaces = [];
@@ -33,8 +34,8 @@ class Repository extends \Sports\Repository
 
         /**
          * @param Tournament $tournament
-         * @param array|Place[] $unassignedPlaces
-         * @return array|CompetitorBase[]
+         * @param list<Place> $unassignedPlaces
+         * @return list<CompetitorBase>
          */
         $getUnassignedCompetitors = function (Tournament $tournament) use (&$unassignedPlaces): array {
             $unassignedCompetitors = [];

@@ -99,7 +99,7 @@ final class AuthAction extends Action
                 array('emailaddress' => $emailaddress)
             );
 
-            if (!$user or !password_verify($user->getSalt() . $authData->password, $user->getPassword())) {
+            if ($user === null || !password_verify($user->getSalt() . $authData->password, $user->getPassword())) {
                 throw new \Exception("ongeldige emailadres en wachtwoord combinatie");
             }
 

@@ -117,7 +117,7 @@ final class LockerRoomAction extends Action
     public function syncCompetitors(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var ArrayCollection|Competitor[] $newCompetitors */
+            /** @var ArrayCollection<int|string, Competitor> $newCompetitors */
             $newCompetitors = $this->serializer->deserialize(
                 $this->getRawData(),
                 ArrayCollection::class . '<' . Competitor::class . '>',

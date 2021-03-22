@@ -1,32 +1,27 @@
 <?php
-
 declare(strict_types=1);
-/**
- * Created by PhpStorm.
- * User: coen
- * Date: 22-5-18
- * Time: 12:14
- */
 
 namespace FCToernooi\Sponsor;
 
-use FCToernooi\Sponsor;
+use Doctrine\ORM\EntityRepository;
+use FCToernooi\Sponsor as SponsorBase;
 use FCToernooi\Tournament;
 
 /**
- * Class Repository
- * @package FCToernooi\Sponsor
+ * @template-extends EntityRepository<SponsorBase>
  */
-class Repository extends \Sports\Repository
+class Repository extends EntityRepository
 {
+    use \Sports\Repository;
+
     const MAXNROFSPONSORSPERSCREEN = 4;
 
-    public function find($id, $lockMode = null, $lockVersion = null): ?Sponsor
+    public function find($id, $lockMode = null, $lockVersion = null): ?SponsorBase
     {
         return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
     }
 
-    public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, Sponsor $sponsor = null)
+    public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, SponsorBase $sponsor = null)
     {
         $max = static::MAXNROFSPONSORSPERSCREEN;
         if ($sponsor === null || $sponsor->getScreenNr() !== $newScreenNr) {
@@ -35,7 +30,7 @@ class Repository extends \Sports\Repository
         $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb
             ->select('count(s.id)')
-            ->from(Sponsor::class, 's');
+            ->from(SponsorBase::class, 's');
 
         $qb = $qb->where('s.tournament = :tournament')->andWhere('s.screenNr = :screenNr');
         $qb = $qb->setParameter('tournament', $tournament);

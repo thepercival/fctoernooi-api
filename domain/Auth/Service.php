@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
+use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
@@ -21,51 +22,16 @@ use App\Mailer;
 
 class Service
 {
-    /**
-     * @var UserRepository
-     */
-    protected $userRepos;
-    /**
-     * @var TournamentUserRepository
-     */
-    protected $tournamentUserRepos;
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var TournamentInvitationRepository
-     */
-    protected $tournamentInvitationRepos;
-    /**
-     * @var AuthSyncService
-     */
-    protected $syncService;
-    /**
-     * @var Configuration
-     */
-    protected $config;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
-
     public function __construct(
-        UserRepository $userRepos,
-        TournamentUserRepository $tournamentUserRepos,
-        TournamentRepository $tournamentRepos,
-        TournamentInvitationRepository $tournamentInvitationRepos,
-        AuthSyncService $syncService,
-        Configuration $config,
-        Mailer $mailer
+        protected UserRepository $userRepos,
+        protected TournamentUserRepository $tournamentUserRepos,
+        protected TournamentRepository $tournamentRepos,
+        protected TournamentInvitationRepository $tournamentInvitationRepos,
+        protected AuthSyncService $syncService,
+        protected EntityManager $em,
+        protected Configuration $config,
+        protected Mailer $mailer
     ) {
-        $this->userRepos = $userRepos;
-        $this->tournamentUserRepos = $tournamentUserRepos;
-        $this->tournamentRepos = $tournamentRepos;
-        $this->tournamentInvitationRepos = $tournamentInvitationRepos;
-        $this->syncService = $syncService;
-        $this->config = $config;
-        $this->mailer = $mailer;
     }
 
     /**
@@ -84,12 +50,12 @@ class Service
             );
         }
         $userTmp = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
-        if ($userTmp) {
+        if ($userTmp !== null) {
             throw new Exception("het emailadres is al in gebruik", E_ERROR);
         }
         if ($name !== null) {
             $userTmp = $this->userRepos->findOneBy(array('name' => $name));
-            if ($userTmp) {
+            if ($userTmp !== null) {
                 throw new Exception("de gebruikersnaam is al in gebruik", E_ERROR);
             }
         }
@@ -110,7 +76,7 @@ class Service
      * @param string $emailAddress
      * @param array|TournamentUser[] $tournamentUsers
      */
-    protected function sendRegisterEmail(string $emailAddress, array $tournamentUsers)
+    protected function sendRegisterEmail(string $emailAddress, array $tournamentUsers): void
     {
         $subject = 'welkom bij FCToernooi';
         $bodyBegin = <<<EOT
@@ -147,13 +113,13 @@ EOT;
         $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
 
-    public function sendPasswordCode($emailAddress)
+    public function sendPasswordCode(string $emailAddress): bool
     {
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
-        if (!$user) {
+        if ($user === null) {
             throw new Exception("kan geen code versturen");
         }
-        $conn = $this->userRepos->getEM()->getConnection();
+        $conn = $this->em->getConnection();
         $conn->beginTransaction();
         try {
             $user->resetForgetpassword();
@@ -161,15 +127,13 @@ EOT;
             $this->mailPasswordCode($user);
             $conn->commit();
         } catch (Exception $exception) {
-            $conn->rollback();
+            $conn->rollBack();
             throw $exception;
         }
-
-
         return true;
     }
 
-    public function createToken(User $user)
+    public function createToken(User $user): string
     {
         $jti = (new Base62)->encode(random_bytes(16));
 
@@ -187,7 +151,7 @@ EOT;
         return JWT::encode($payload, $this->config->getString("auth.jwtsecret"));
     }
 
-    protected function mailPasswordCode(User $user)
+    protected function mailPasswordCode(User $user): void
     {
         $subject = 'wachtwoord herstellen';
         $forgetpasswordToken = $user->getForgetpasswordToken();
@@ -209,10 +173,11 @@ EOT;
         $this->mailer->send($subject, $body, $user->getEmailaddress());
     }
 
-    public function changePassword($emailAddress, $password, $code)
+    public function changePassword(string $emailAddress, string $password, string $code): User
     {
+        /** @var User|null $user */
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
-        if (!$user) {
+        if ($user === null) {
             throw new Exception("het wachtwoord kan niet gewijzigd worden");
         }
         // check code and deadline

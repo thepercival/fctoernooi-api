@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
+use DateTimeImmutable;
+use Exception;
 use Sports\Competition\Referee;
 use SportsHelpers\Identifiable;
 
 class User extends Identifiable
 {
-    /**
-     * @var string
-     */
-    private $emailaddress;
+    private string $emailaddress;
 
     /**
      * @var string
@@ -46,7 +45,7 @@ class User extends Identifiable
     const MIN_LENGTH_NAME = 3;
     const MAX_LENGTH_NAME = 15;
 
-    public function __construct($emailaddress)
+    public function __construct(string $emailaddress)
     {
         $this->validated = false;
         $this->setEmailaddress($emailaddress);
@@ -60,10 +59,7 @@ class User extends Identifiable
         return $this->emailaddress;
     }
 
-    /**
-     * @param string $emailaddress
-     */
-    public function setEmailaddress($emailaddress)
+    final public function setEmailaddress(string $emailaddress): void
     {
         if (strlen($emailaddress) < static::MIN_LENGTH_EMAIL or strlen($emailaddress) > static::MAX_LENGTH_EMAIL) {
             throw new \InvalidArgumentException(
@@ -71,131 +67,93 @@ class User extends Identifiable
                 E_ERROR
             );
         }
-
         if (!filter_var($emailaddress, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException("het emailadres " . $emailaddress . " is niet valide", E_ERROR);
         }
         $this->emailaddress = $emailaddress;
     }
 
-    /**
-     * @return string
-     */
-    public function getPassword()
+    public function getPassword(): string|null
     {
         return $this->password;
     }
 
-    /**
-     * @param string $password
-     */
-    public function setPassword($password)
+    public function setPassword(string|null $password): void
     {
-        if (strlen($password) === 0) {
+        if ($password !== null && strlen($password) === 0) {
             throw new \InvalidArgumentException("de wachtwoord-hash mag niet leeg zijn", E_ERROR);
         }
         $this->password = $password;
     }
 
-    /**
-     * @return string
-     */
-    public function getSalt()
+    public function getSalt(): string|null
     {
         return $this->salt;
     }
 
-    /**
-     * @param string $salt
-     */
-    public function setSalt($salt)
+    public function setSalt(string|null $salt): void
     {
         $this->salt = $salt;
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string|null
     {
         return $this->name;
     }
 
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string|null $name): void
     {
-        if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
-            throw new \InvalidArgumentException(
-                "de naam moet minimaal " . static::MIN_LENGTH_NAME . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_NAME . " karakters bevatten",
-                E_ERROR
-            );
-        }
-
-        if (!ctype_alnum($name)) {
-            throw new \InvalidArgumentException("de naam mag alleen cijfers en letters bevatten", E_ERROR);
+        if ($name !== null) {
+            if (strlen($name) < self::MIN_LENGTH_NAME or strlen($name) > self::MAX_LENGTH_NAME) {
+                throw new \InvalidArgumentException(
+                    "de naam moet minimaal " . self::MIN_LENGTH_NAME . " karakters bevatten en mag maximaal " . self::MAX_LENGTH_NAME . " karakters bevatten",
+                    E_ERROR
+                );
+            }
+            if (!ctype_alnum($name)) {
+                throw new \InvalidArgumentException("de naam mag alleen cijfers en letters bevatten", E_ERROR);
+            }
         }
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getForgetpassword()
+    public function getForgetpassword(): string|null
     {
         return $this->forgetpassword;
     }
 
-    /**
-     * @param string $forgetpassword
-     */
-    public function setForgetpassword($forgetpassword)
+    public function setForgetpassword(string|null $forgetpassword): void
     {
         $this->forgetpassword = $forgetpassword;
     }
 
-    /**
-     * return string
-     */
-    public function resetForgetpassword()
+    public function resetForgetpassword(): void
     {
         $forgetpassword = rand(100000, 999999);
         $tomorrow = date("Y-m-d", strtotime('tomorrow'));
-        $tomorrow = new \DateTimeImmutable($tomorrow);
+        $tomorrow = new DateTimeImmutable($tomorrow);
         $tomorrow = $tomorrow->modify("+1 days");
         $this->setForgetpassword($forgetpassword . ":" . $tomorrow->format("Y-m-d"));
     }
 
-    /**
-     * first 6 characters
-     *
-     * @return string
-     */
-    public function getForgetpasswordToken()
+    public function getForgetpasswordToken(): string
     {
         $forgetpassword = $this->getForgetpassword();
         if (strlen($forgetpassword) === 0) {
-            return "";
+            return '';
         }
-        $arrForgetPassword = explode(":", $forgetpassword);
+        $arrForgetPassword = explode(':', $forgetpassword);
         return $arrForgetPassword[0];
     }
 
-    /**
-     * last 10 characters
-     *
-     * @return \DateTimeImmutable|null
-     * @throws \Exception
-     */
-    public function getForgetpasswordDeadline()
+    public function getForgetpasswordDeadline(): DateTimeImmutable|null
     {
         $forgetpassword = $this->getForgetpassword();
         if (strlen($forgetpassword) === 0) {
             return null;
         }
-        $arrForgetPassword = explode(":", $forgetpassword);
-        return new \DateTimeImmutable($arrForgetPassword[1]);
+        $arrForgetPassword = explode(':', $forgetpassword);
+        return new DateTimeImmutable($arrForgetPassword[1]);
     }
 
     public function getValidated(): bool
@@ -203,7 +161,7 @@ class User extends Identifiable
         return $this->validated;
     }
 
-    public function setValidated(bool $validated)
+    public function setValidated(bool $validated): void
     {
         $this->validated = $validated;
     }

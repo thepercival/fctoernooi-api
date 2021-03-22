@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace FCToernooi\TournamentUser;
 
-class Repository extends \Sports\Repository
+use Doctrine\ORM\EntityRepository;
+use FCToernooi\TournamentUser as TournamentUserBase;
+
+/**
+ * @template-extends EntityRepository<TournamentUserBase>
+ */
+class Repository extends EntityRepository
 {
+    use \Sports\Repository;
 }

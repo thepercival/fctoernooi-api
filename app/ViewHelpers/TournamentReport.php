@@ -92,9 +92,8 @@ class TournamentReport
             $this->validateMessage = $exception->getMessage();
         }
         $gamesValidator = new GamesValidator();
-        $gamesValidator->setBlockedPeriod($tournament->getBreak());
         try {
-            $gamesValidator->validateStructure($structure, $nrOfReferees);
+            $gamesValidator->validateStructure($structure, $nrOfReferees, $tournament->getBreak());
         } catch (Exception $exception) {
             $this->validatePlanningMessage = $exception->getMessage();
         }

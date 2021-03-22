@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace FCToernooi\LockerRoom;
 
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use \Doctrine\Common\Collections\ArrayCollection;
 use FCToernooi\Competitor;
 
-class Repository extends \Sports\Repository
+/**
+ * @template-extends EntityRepository<LockerRoomBase>
+ */
+class Repository extends EntityRepository
 {
-    public function find($id, $lockMode = null, $lockVersion = null): ?LockerRoomBase
-    {
-        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    }
+    use \Sports\Repository;
 
     public function updateCompetitors(LockerRoom $lockerRoom, ArrayCollection $newCompetitors)
     {

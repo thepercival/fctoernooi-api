@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace FCToernooi\Tournament;
 
 use DateTimeImmutable;
-use FCToernooi\Tournament;
+use Doctrine\ORM\EntityRepository;
+use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
@@ -13,22 +14,15 @@ use Sports\League;
 use Sports\Competition;
 use Sports\Competition\Repository as CompetitionRepository;
 use Sports\League\Repository as LeagueRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
-class Repository extends \Sports\Repository
+/**
+ * @template-extends EntityRepository<TournamentBase>
+ */
+class Repository extends EntityRepository
 {
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
+    use \Sports\Repository;
 
-    public function find($id, $lockMode = null, $lockVersion = null): ?Tournament
-    {
-        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    }
-
-    public function customPersist(Tournament $tournament, bool $flush)
+    public function customPersist(TournamentBase $tournament, bool $flush): void
     {
         $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetadata(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
@@ -40,6 +34,15 @@ class Repository extends \Sports\Repository
         }
     }
 
+    /**
+     * @param string|null $name
+     * @param DateTimeImmutable|null $startDateTime
+     * @param DateTimeImmutable|null $endDateTime
+     * @param bool|null $public
+     * @param DateTimeImmutable|null $startDateTimeCreated
+     * @param DateTimeImmutable|null $endDateTimeCreated
+     * @return list<TournamentBase>
+     */
     public function findByFilter(
         string $name = null,
         DateTimeImmutable $startDateTime = null,
@@ -47,7 +50,7 @@ class Repository extends \Sports\Repository
         bool $public = null,
         DateTimeImmutable $startDateTimeCreated = null,
         DateTimeImmutable $endDateTimeCreated = null
-    ) {
+    ): array {
         $query = $this->createQueryBuilder('t')
             ->join("t.competition", "c")
             ->join("c.league", "l");
@@ -93,7 +96,12 @@ class Repository extends \Sports\Repository
         return $query->getQuery()->getResult();
     }
 
-    public function findByRoles(User $user, int $roles)
+    /**
+     * @param User $user
+     * @param int $roles
+     * @return list<TournamentBase>
+     */
+    public function findByRoles(User $user, int $roles): array
     {
         $qb = $this->createQueryBuilder('t')
             ->join(TournamentUser::class, 'tu', Expr\Join::WITH, 't.id = tu.tournament');
@@ -101,13 +109,13 @@ class Repository extends \Sports\Repository
         $qb = $qb->where('tu.user = :user')->andWhere('BIT_AND(tu.roles, :roles) > 0');
         $qb = $qb->setParameter('user', $user);
         $qb = $qb->setParameter('roles', $roles);
-
-        return $qb->getQuery()->getResult();
+        /** @var list<TournamentBase> $results */
+        $results = $qb->getQuery()->getResult();
+        return $results;
     }
 
-    public function remove($tournament)
+    public function removeByLeague(TournamentBase $tournament): void
     {
-        $leagueRepos = new LeagueRepository($this->_em, $this->_em->getClassMetadata(League::class));
-        $leagueRepos->remove($tournament->getCompetition()->getLeague());
+        $this->remove($tournament->getCompetition()->getLeague());
     }
 }

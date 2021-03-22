@@ -69,19 +69,16 @@ class Shell
     }
 
     /**
-     * @param array|Sport[] $sports
+     * @param list<Sport> $sports
      * @return int
      */
     protected function getSportCustomIdBySports(array $sports): int
     {
-        if (count($sports) === 1) {
-            $sport = $sports[0];
-            if ($sport->getCustomId() === null) {
-                return 0;
+        $firstSport = reset($sports);
+        if ($firstSport !== false) {
+            if (count($sports) === 1) {
+                return $firstSport->getCustomId();
             }
-            return reset($sports)->getCustomId();
-        }
-        if (count($sports) > 1) {
             return -1;
         }
         return 0;

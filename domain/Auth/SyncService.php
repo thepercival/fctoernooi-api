@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Auth;
@@ -18,45 +17,24 @@ use Selective\Config\Configuration;
 
 class SyncService
 {
-    /**
-     * @var UserRepository
-     */
-    private $userRepos;
-    /**
-     * @var TournamentUserRepository
-     */
-    private $tournamentUserRepos;
-    /**
-     * @var TournamentInvitationRepository
-     */
-    private $tournamentInvitationRepos;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
     public function __construct(
-        UserRepository $userRepos,
-        TournamentUserRepository $tournamentUserRepos,
-        TournamentInvitationRepository $tournamentInvitationRepos,
-        Mailer $mailer,
-        Configuration $config
+        private UserRepository $userRepos,
+        private TournamentUserRepository $tournamentUserRepos,
+        private TournamentInvitationRepository $tournamentInvitationRepos,
+        private Mailer $mailer,
+        private Configuration $config
     ) {
-        $this->userRepos = $userRepos;
-        $this->tournamentUserRepos = $tournamentUserRepos;
-        $this->tournamentInvitationRepos = $tournamentInvitationRepos;
-        $this->mailer = $mailer;
-        $this->config = $config;
     }
 
-    public function add(Tournament $tournament, int $roles, string $emailaddress = null, bool $sendMail = false)
+    public function add(
+        Tournament $tournament,
+        int $roles,
+        string $emailaddress = null,
+        bool $sendMail = false
+    ): TournamentUser|TournamentInvitation|null
     {
         if ($emailaddress === null) {
-            return;
+            return null;
         }
         /** @var User|null $user */
         $user = $this->userRepos->findOneBy(["emailaddress" => $emailaddress]);
@@ -93,7 +71,7 @@ class SyncService
         return $invitation;
     }
 
-    public function remove(Tournament $tournament, int $roles, string $emailaddress = null)
+    public function remove(Tournament $tournament, int $roles, string $emailaddress = null): void
     {
         if ($emailaddress === null) {
             return;
@@ -134,8 +112,8 @@ class SyncService
 
     /**
      * @param User $user
-     * @param array | TournamentInvitation[] $invitations
-     * @return array | TournamentUser[]
+     * @param list<TournamentInvitation> $invitations
+     * @return list<TournamentUser>
      */
     public function processInvitations(User $user, array $invitations): array
     {
@@ -145,7 +123,9 @@ class SyncService
             $this->tournamentInvitationRepos->remove($invitation);
             $tournamentUsers[] = $this->tournamentUserRepos->save(
                 new TournamentUser(
-                    $invitation->getTournament(), $user, $invitation->getRoles()
+                    $invitation->getTournament(),
+                    $user,
+                    $invitation->getRoles()
                 )
             );
         }
@@ -154,7 +134,7 @@ class SyncService
 
     /**
      * @param User $user
-     * @return array|TournamentInvitation[]
+     * @return list<TournamentInvitation>
      */
     public function revertTournamentUsers(User $user): array
     {
@@ -175,7 +155,7 @@ class SyncService
         return $invitations;
     }
 
-    protected function sendEmailTournamentUser(TournamentUser $tournamentUser)
+    protected function sendEmailTournamentUser(TournamentUser $tournamentUser): void
     {
         $url = $this->config->getString('www.wwwurl');
         $tournamentName = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
@@ -188,7 +168,7 @@ class SyncService
         );
     }
 
-    protected function sendEmailTournamentInvitation(TournamentInvitation $invitation)
+    protected function sendEmailTournamentInvitation(TournamentInvitation $invitation): void
     {
         $url = $this->config->getString('www.wwwurl');
         $tournamentName = $invitation->getTournament()->getCompetition()->getLeague()->getName();
@@ -206,7 +186,7 @@ class SyncService
         string $tournamentName,
         int $roles,
         string $suffix
-    ) {
+    ): void {
         $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
         $url = $this->config->getString('www.wwwurl');
 

@@ -66,20 +66,22 @@ final class ScoreConfigAction extends Action
             }
             $scoreConfig = $round->getScoreConfig($competitionSport);
             if ($scoreConfig === null) {
-                $scoreConfig = new ScoreConfig($competitionSport, $round, null);
-                // throw new \Exception('er zijn al score-instellingen aanwezig', E_ERROR);
-            }
-            $scoreConfig->setDirection(ScoreConfig::UPWARDS);
-            $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
-            $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
-            if ($scoreConfigSer->hasNext()) {
-                $nextScoreConfig = $scoreConfig->getNext();
-                if ($nextScoreConfig === null) {
-                    $nextScoreConfig = new ScoreConfig($competitionSport, $round, $scoreConfig);
+                $scoreConfig = new ScoreConfig(
+                    $competitionSport,
+                    $round,
+                    $scoreConfigSer->getDirection(),
+                    $scoreConfigSer->getMaximum(),
+                    $scoreConfigSer->getEnabled());
+                $nextSer = $scoreConfigSer->getNext();
+                if ($nextSer !== null) {
+                    new ScoreConfig(
+                        $competitionSport,
+                        $round,
+                        $nextSer->getDirection(),
+                        $nextSer->getMaximum(),
+                        $nextSer->getEnabled(),
+                        $scoreConfig);
                 }
-                $nextScoreConfig->setDirection(ScoreConfig::UPWARDS);
-                $nextScoreConfig->setMaximum($scoreConfigSer->getNext()->getMaximum());
-                $nextScoreConfig->setEnabled($scoreConfigSer->getNext()->getEnabled());
             }
 
             $this->scoreConfigRepos->save($scoreConfig);

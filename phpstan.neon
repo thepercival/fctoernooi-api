@@ -1,10 +1,10 @@
 parameters:
-    level: 5
+    level: 0
     paths:
         - domain
         - tests/cases
     inferPrivatePropertyTypeFromConstructor:
         true
-#    doctrine:
-#        repositoryClass:
-#            \Sports\Repository
+    doctrine:
+        repositoryClass:
+            \Sports\Repository

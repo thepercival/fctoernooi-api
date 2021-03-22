@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace FCToernooi\Tournament\Invitation;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\EntityRepository;
+use FCToernooi\Tournament\Invitation as InvitationBase;
 
-class Repository extends \Sports\Repository
+/**
+ * @template-extends EntityRepository<InvitationBase>
+ */
+class Repository extends EntityRepository
 {
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
+    use \Sports\Repository;
 }

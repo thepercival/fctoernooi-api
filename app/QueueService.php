@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App;
@@ -26,9 +25,9 @@ use Interop\Queue\Consumer;
 class QueueService implements CreatePlanningsEvent
 {
     /**
-     * @var array
+     * @var array<string, string|int>
      */
-    protected $options;
+    protected array $options;
     /**
      * @var string
      */
@@ -36,9 +35,9 @@ class QueueService implements CreatePlanningsEvent
 
     public function __construct(array $options)
     {
-        if (array_key_exists("queueSuffix", $options)) {
-            $this->queueSuffix = $options["queueSuffix"];
-            unset($options["queueSuffix"]);
+        if (array_key_exists('queueSuffix', $options)) {
+            $this->queueSuffix = $options['queueSuffix'];
+            unset($options['queueSuffix']);
         }
         $this->options = $options;
     }
@@ -47,7 +46,7 @@ class QueueService implements CreatePlanningsEvent
         PlanningInput $input,
         Competition $competition = null,
         int $startRoundNumber = null
-    ) {
+    ): void {
         $context = $this->getContext();
 
         $exchange = $context->createTopic('amq.direct');

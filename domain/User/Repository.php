@@ -1,20 +1,15 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\User;
 
-use FCToernooi\User;
-use FCToernooi\Tournament;
+use Doctrine\ORM\EntityRepository;
+use FCToernooi\User as UserBase;
 
 /**
- * Class Repository
- * @package FCToernooi\User
+ * @template-extends EntityRepository<UserBase>
  */
-class Repository extends \Sports\Repository
+class Repository extends EntityRepository
 {
-    public function find($id, $lockMode = null, $lockVersion = null): ?User
-    {
-        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    }
+    use \Sports\Repository;
 }
