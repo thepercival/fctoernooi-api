@@ -26,49 +26,34 @@ use Sports\Priority\Service as PriorityService;
 
 final class RefereeAction extends Action
 {
-    /**
-     * @var RefereeRepository
-     */
-    protected $refereeRepos;
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
-    /**
-     * @var CompetitionRepos
-     */
-    protected $competitionRepos;
-    /**
-     * @var AuthSyncService
-     */
-    protected $authSyncService;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        RefereeRepository $refereeRepos,
-        SportRepository $sportRepos,
-        CompetitionRepos $competitionRepos,
-        AuthSyncService $authSyncService
+        private RefereeRepository $refereeRepos,
+        private SportRepository $sportRepos,
+        private CompetitionRepos $competitionRepos,
+        private AuthSyncService $authSyncService
     ) {
         parent::__construct($logger, $serializer);
-        $this->refereeRepos = $refereeRepos;
-        $this->sportRepos = $sportRepos;
-        $this->competitionRepos = $competitionRepos;
-        $this->authSyncService = $authSyncService;
     }
 
-    protected function getDeserializationContext()
+    protected function getDeserializationContext(): DeserializationContext
     {
         return DeserializationContext::create()->setGroups(['Default', 'privacy', 'noReference']);
     }
 
-    protected function getSerializationContext()
+    protected function getSerializationContext(): SerializationContext
     {
         return SerializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Referee $referee */
@@ -87,8 +72,7 @@ final class RefereeAction extends Action
             $availabilityChecker->checkRefereeEmailaddress($competition, $referee->getInitials());
             $availabilityChecker->checkRefereeInitials($competition, $referee->getInitials());
 
-            $newReferee = new Referee($competition);
-            $newReferee->setInitials($referee->getInitials());
+            $newReferee = new Referee($competition, $referee->getInitials());
             $newReferee->setName($referee->getName());
             $newReferee->setEmailaddress($referee->getEmailaddress());
             $newReferee->setInfo($referee->getInfo());
@@ -108,7 +92,13 @@ final class RefereeAction extends Action
         }
     }
 
-    public function edit($request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Referee $refereeSer */
@@ -158,7 +148,13 @@ final class RefereeAction extends Action
         }
     }
 
-    public function priorityUp($request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function priorityUp(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -180,7 +176,13 @@ final class RefereeAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */

@@ -21,34 +21,23 @@ use FCToernooi\Auth\SyncService;
 
 final class InvitationAction extends Action
 {
-    /**
-     * @var TournamentRepository
-     */
-    private $tournamentRepos;
-    /**
-     * @var TournamentInvitationRepository
-     */
-    private $invitationRepos;
-    /**
-     * @var SyncService
-     */
-    private $syncService;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        TournamentRepository $tournamentRepos,
-        TournamentInvitationRepository $invitationRepos,
-        SyncService $syncService
+        private TournamentRepository $tournamentRepos,
+        private TournamentInvitationRepository $invitationRepos,
+        private SyncService $syncService
     ) {
         parent::__construct($logger, $serializer);
-        $this->tournamentRepos = $tournamentRepos;
-        $this->invitationRepos = $invitationRepos;
-        $this->serializer = $serializer;
-        $this->syncService = $syncService;
     }
 
-    public function fetch(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetch(Request $request, Response $response, array $args): Response
     {
         try {
             $tournament = $request->getAttribute("tournament");
@@ -62,7 +51,13 @@ final class InvitationAction extends Action
         }
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -89,7 +84,13 @@ final class InvitationAction extends Action
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -121,7 +122,13 @@ final class InvitationAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */

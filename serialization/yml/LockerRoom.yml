@@ -6,5 +6,5 @@ FCToernooi\LockerRoom:
       type: string
   virtual_properties:
     getCompetitorIds:
-      type: ArrayCollection<integer>
+      type: array<integer>
       serialized_name: competitorIds

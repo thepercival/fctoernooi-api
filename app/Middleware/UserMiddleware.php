@@ -46,9 +46,6 @@ class UserMiddleware implements MiddlewareInterface
 
     protected function getUser(AuthToken $token): ?User
     {
-        if ($token->getUserId() === null) {
-            return null;
-        }
         return $this->userRepos->find($token->getUserId());
     }
 }

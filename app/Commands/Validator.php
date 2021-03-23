@@ -1,15 +1,15 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands;
 
 use App\Mailer;
-use Sports\Place\Location\Map as PlaceLocationMap;
+use Exception;
+use Sports\Game\Against as AgainstGame;
+use Sports\Competitor\Map as CompetitorMap;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
-use SportsHelpers\SportConfig;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,30 +23,14 @@ use Sports\Round\Number\GamesValidator;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
 use Sports\Game;
-use SportsHelpers\GameMode;
 
 class Validator extends Command
 {
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var StructureValidator
-     */
-    protected $structureValidator;
-    /**
-     * @var PlanningInputRepository
-     */
-    protected $planningInputRepos;
-    /**
-     * @var GamesValidator
-     */
-    protected $gamesValidator;
+    protected TournamentRepository $tournamentRepos;
+    protected StructureRepository $structureRepos;
+    protected StructureValidator $structureValidator;
+    protected PlanningInputRepository $planningInputRepos;
+    protected GamesValidator $gamesValidator;
 
     public function __construct(ContainerInterface $container)
     {
@@ -59,7 +43,7 @@ class Validator extends Command
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")
@@ -74,75 +58,73 @@ class Validator extends Command
         $this->addArgument('tournamentId', InputArgument::OPTIONAL);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'cron-tournament-validator');
         try {
             $this->logger->info('aan het valideren..');
-            $filter = ["updated" => true];
-            if (((int)$input->getArgument("tournamentId")) > 0) {
-                $filter = ["id" => (int)$input->getArgument("tournamentId")];
+            $filter = ['updated' => true];
+            if (((int)$input->getArgument('tournamentId')) > 0) {
+                $filter = ['id' => (int)$input->getArgument('tournamentId')];
             }
             $tournaments = $this->tournamentRepos->findBy($filter);
             /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
                 try {
                     $this->checkValidity($tournament);
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     $this->logger->error($exception->getMessage());
                 }
             }
             $this->logger->info('alle toernooien gevalideerd');
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
         return 0;
     }
 
-    protected function checkValidity(Tournament $tournament)
+    protected function checkValidity(Tournament $tournament): void
     {
         try {
             $competition = $tournament->getCompetition();
             if (count($competition->getFields()) === 0) {
-                throw new \Exception("het toernooi moet minimaal 1 veld bevatten", E_ERROR);
+                throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
             }
             $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure);
-            $this->gamesValidator->setBlockedPeriod($tournament->getBreak());
             $this->validateGames($tournament, $structure->getFirstRoundNumber(), $competition->getReferees()->count());
-        } catch (\Exception $exception) {
-            throw new \Exception("toernooi-id(" . $tournament->getId() . ") => " . $exception->getMessage(), E_ERROR);
+        } catch (Exception $exception) {
+            throw new Exception('toernooi-id(' . $tournament->getId() . ') => ' . $exception->getMessage(), E_ERROR);
         }
     }
 
-    protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees)
+    protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
         try {
-            $this->gamesValidator->validate($roundNumber, $nrOfReferees);
+            $this->gamesValidator->validate($roundNumber, $nrOfReferees, $tournament->getBreak());
             if ($roundNumber->hasNext()) {
                 $this->validateGames($tournament, $roundNumber->getNext(), $nrOfReferees);
             }
-        } catch (\Exception $exception) {
-            $this->logger->info("invalid roundnumber " . $roundNumber->getId());
+        } catch (Exception $exception) {
+            $this->logger->info('invalid roundnumber ' . $roundNumber->getId());
             // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
-            throw new \Exception($exception->getMessage(), E_ERROR);
+            throw new Exception($exception->getMessage(), E_ERROR);
         }
     }
 
-    protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees)
+    protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
-        $map = new PlaceLocationMap($tournament->getCompetitors()->toArray());
-        $gameOutput = null;
-        if( $roundNumber->getValidPlanningConfig()->getGameMode() === GameMode::AGAINST ) {
-            $gameOutput = new AgainstGameOutput($map, $this->logger);
-        } else {
-            $gameOutput = new TogetherGameOutput($map, $this->logger);
-        }
+        $map = new CompetitorMap(array_values($tournament->getCompetitors()->toArray()));
+        $againstGameOutput = new AgainstGameOutput($map, $this->logger);
+        $togetherGameOutput = new TogetherGameOutput($map, $this->logger);
         foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
-            $gameOutput->output($game);
+            if ($game instanceof AgainstGame) {
+                $againstGameOutput->output($game);
+            } else {
+                $togetherGameOutput->output($game);
+            }
         }
-        return;
-
+        // return;
 
 //        $planningOutput = new PlanningOutput($this->logger);
 //

@@ -10,7 +10,7 @@ use FCToernooi\TournamentUser;
 
 class UserMiddleware extends AuthorizationTournamentAdminMiddleware
 {
-    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser)
+    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
     }
 }

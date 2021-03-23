@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
+use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
@@ -18,61 +19,60 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 final class UserAction extends Action
 {
-    /**
-     * @var UserRepository
-     */
-    private $userRepos;
-    /**
-     * @var AuthSyncService
-     */
-    protected $syncService;
-
-
     public function __construct(
         LoggerInterface $logger,
-        UserRepository $userRepository,
-        AuthSyncService $syncService,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        private UserRepository $userRepos,
+        private AuthSyncService $syncService
     ) {
         parent::__construct($logger, $serializer);
-        $this->userRepos = $userRepository;
-        $this->syncService = $syncService;
-        $this->serializer = $serializer;
     }
 
-    protected function getDeserializationContext()
+    protected function getDeserializationContext(): DeserializationContext
     {
         $serGroups = ['Default', 'roleadmin'];
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
-    protected function getSerializationContext()
+    protected function getSerializationContext(): SerializationContext
     {
         $serGroups = ['Default', 'roleadmin'];
         return SerializationContext::create()->setGroups($serGroups);
     }
 
-    public function fetchOne(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchOne(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var User $user */
-            $user = $request->getAttribute("user");
+            $user = $request->getAttribute('user');
 
             if ($user->getId() !== (int)$args['userId']) {
-                throw new \Exception("de ingelogde gebruiker en de op te halen gebruiker zijn verschillend", E_ERROR);
+                throw new Exception('de ingelogde gebruiker en de op te halen gebruiker zijn verschillend', E_ERROR);
             }
             $json = $this->serializer->serialize($user, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400);
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var User $userAuth */
-            $userAuth = $request->getAttribute("user");
+            $userAuth = $request->getAttribute('user');
 
             /** @var User $userSer */
             $userSer = $this->serializer->deserialize(
@@ -83,7 +83,7 @@ final class UserAction extends Action
             );
 
             if ($userAuth->getId() !== $userSer->getId()) {
-                throw new \Exception("de ingelogde gebruiker en de aan te passen gebruiker zijn verschillend", E_ERROR);
+                throw new Exception('de ingelogde gebruiker en de aan te passen gebruiker zijn verschillend', E_ERROR);
             }
 
             $userAuth->setEmailaddress(strtolower(trim($userSer->getEmailaddress())));
@@ -96,21 +96,28 @@ final class UserAction extends Action
                     $this->getSerializationContext()
                 )
             );
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var User $userAuth */
-            $userAuth = $request->getAttribute("user");
+            $userAuth = $request->getAttribute('user');
 
             $user = $this->userRepos->find((int)$args['userId']);
             if ($userAuth->getId() !== $user->getId()) {
-                throw new \Exception(
-                    "de ingelogde gebruiker en de te verwijderen gebruiker zijn verschillend", E_ERROR
+                throw new Exception(
+                    'de ingelogde gebruiker en de te verwijderen gebruiker zijn verschillend',
+                    E_ERROR
                 );
             }
 
@@ -118,7 +125,7 @@ final class UserAction extends Action
 
             $this->userRepos->remove($user);
             return $response->withStatus(200);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }

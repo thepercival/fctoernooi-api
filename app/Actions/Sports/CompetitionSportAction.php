@@ -24,37 +24,34 @@ use Sports\Competition\Sport as CompetitionSport;
 
 final class CompetitionSportAction extends Action
 {
-    protected SportRepository $sportRepos;
-    protected StructureRepository $structureRepos;
-    protected CompetitionSportRepository $competitionSportRepos;
-    protected FieldRepository $fieldRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        SportRepository $sportRepos,
-        StructureRepository $structureRepos,
-        CompetitionSportRepository $competitionSportRepos,
-        FieldRepository $fieldRepos
+        protected SportRepository $sportRepos,
+        protected StructureRepository $structureRepos,
+        protected CompetitionSportRepository $competitionSportRepos,
+        protected FieldRepository $fieldRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->sportRepos = $sportRepos;
-        $this->structureRepos = $structureRepos;
-        $this->competitionSportRepos = $competitionSportRepos;
-        $this->fieldRepos = $fieldRepos;
     }
 
-    protected function getDeserializationContext()
+    protected function getDeserializationContext(): DeserializationContext
     {
         return DeserializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
-    protected function getSerializationContext()
+    protected function getSerializationContext(): SerializationContext
     {
         return SerializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -88,7 +85,13 @@ final class CompetitionSportAction extends Action
         }
     }
 
-    public function edit($request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -119,7 +122,13 @@ final class CompetitionSportAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */

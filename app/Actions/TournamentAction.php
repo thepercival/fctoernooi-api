@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -12,12 +11,15 @@ use App\Response\ErrorResponse;
 use App\TmpService;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
+use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\LockerRoom;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -36,81 +38,59 @@ use Sports\Round\Number\PlanningCreator;
 use Selective\Config\Configuration;
 use Sports\Structure\Validator as StructureValidator;
 
-class TournamentAction extends Action
+final class TournamentAction extends Action
 {
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var TournamentCopier
-     */
-    protected $tournamentCopier;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var LockerRoomRepistory
-     */
-    protected $lockerRoomRepos;
-    /**
-     * @var PlanningCreator
-     */
-    protected $planningCreator;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        TournamentRepository $tournamentRepos,
-        TournamentCopier $tournamentCopier,
-        StructureRepository $structureRepos,
-        LockerRoomRepistory $lockerRoomRepos,
-        PlanningCreator $planningCreator,
-        Mailer $mailer,
-        Configuration $config
+        private TournamentRepository $tournamentRepos,
+        private TournamentCopier $tournamentCopier,
+        private StructureRepository $structureRepos,
+        private LockerRoomRepistory $lockerRoomRepos,
+        private EntityManager $entityManager,
+        private PlanningCreator $planningCreator,
+        private Mailer $mailer,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-        $this->tournamentRepos = $tournamentRepos;
-        $this->tournamentCopier = $tournamentCopier;
-        $this->structureRepos = $structureRepos;
-        $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->planningCreator = $planningCreator;
-        $this->mailer = $mailer;
-        $this->config = $config;
     }
 
-    public function fetchOne(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchOne(Request $request, Response $response, array $args): Response
     {
         return $this->fetchOneHelper($request, $response, $args);
     }
 
-    protected function fetchOneHelper(Request $request, Response $response, $args, User $user = null)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @param User|null $user
+     * @return Response
+     */
+    public function fetchOneHelper(Request $request, Response $response, array $args, User $user = null): Response
     {
-        $user = $request->getAttribute("user");
+        $user = $request->getAttribute('user');
         try {
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            $tournament = $request->getAttribute('tournament');
             $json = $this->serializer->serialize(
                 $tournament,
                 'json',
                 $this->getSerializationContext($tournament, $user)
             );
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400);
         }
     }
 
-    protected function getDeserializationContext(User $user = null)
+    protected function getDeserializationContext(User $user = null): DeserializationContext
     {
         $serGroups = ['Default','noReference'];
 
@@ -120,7 +100,7 @@ class TournamentAction extends Action
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
-    protected function getSerializationContext(Tournament $tournament, User $user = null)
+    protected function getSerializationContext(Tournament $tournament, User $user = null): SerializationContext
     {
         $serGroups = ['Default','noReference'];
         if ($user !== null) {
@@ -138,12 +118,18 @@ class TournamentAction extends Action
         return SerializationContext::create()->setGroups($serGroups);
     }
 
-    public function getUserRefereeId(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function getUserRefereeId(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-            $user = $request->getAttribute("user");
+            $tournament = $request->getAttribute('tournament');
+            $user = $request->getAttribute('user');
 
             $refereeId = 0;
             if (strlen($user->getEmailaddress()) > 0) {
@@ -155,16 +141,22 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($refereeId, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
-            $user = $request->getAttribute("user");
+            $user = $request->getAttribute('user');
 
             $deserializationContext = $this->getDeserializationContext($user);
             /** @var Tournament $tournamentSer */
@@ -175,7 +167,7 @@ class TournamentAction extends Action
                 $deserializationContext
             );
 
-            $tournamentSer->setUsers(new ArrayCollection());
+            // $tournamentSer->setUsers(new ArrayCollection());
             $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
 // var_dump($tournamentSer->getCompetition()); die();
             $tournament = $this->tournamentCopier->copy(
@@ -188,20 +180,26 @@ class TournamentAction extends Action
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournamentSer */
             $tournamentSer = $this->serializer->deserialize($this->getRawData(), Tournament::class, 'json');
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            $tournament = $request->getAttribute('tournament');
 
-            $user = $request->getAttribute("user");
+            $user = $request->getAttribute('user');
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $ruleSet = $tournamentSer->getCompetition()->getRankingRuleSet();
@@ -220,40 +218,51 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            $tournament = $request->getAttribute('tournament');
 
             $this->tournamentRepos->remove($tournament);
 
             return $response->withStatus(200);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse('het toernooi is niet verwijdered : ' . $exception->getMessage(), 404);
         }
     }
 
-    public function copy(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function copy(Request $request, Response $response, array $args): Response
     {
-        $em = $this->tournamentRepos->getEM();
-        $conn = $em->getConnection();
+        $conn = $this->entityManager->getConnection();
         $conn->beginTransaction();
         try {
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            $tournament = $request->getAttribute('tournament');
 
-            $user = $request->getAttribute("user");
+            $user = $request->getAttribute('user');
 
             /** @var stdClass $copyData */
             $copyData = $this->getFormData($request);
-            if (property_exists($copyData, "startdatetime") === false) {
-                throw new \Exception("er is geen nieuwe startdatum-tijd opgegeven");
+            if (property_exists($copyData, 'startdatetime') === false) {
+                throw new Exception('er is geen nieuwe startdatum-tijd opgegeven');
             }
 
             $competition = $tournament->getCompetition();
@@ -288,21 +297,27 @@ class TournamentAction extends Action
 
             $json = $this->serializer->serialize($newTournament->getId(), 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $conn->rollBack();
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
-    public function exportGenerateHash(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function exportGenerateHash(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
 
             $hash = $this->getExportHash($tournament->getId());
-            return $this->respondWithJson($response, json_encode(["hash" => $hash]));
-        } catch (\Exception $exception) {
+            return $this->respondWithJson($response, json_encode(['hash' => $hash]));
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
@@ -310,71 +325,82 @@ class TournamentAction extends Action
     protected function getExportHash(int $tournamentId): string
     {
         $decoded = $tournamentId . getenv('EXPORT_SECRET') . $tournamentId;
-        return hash("sha1", $decoded);
+        return hash('sha1', $decoded);
     }
 
-    public function export(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function export(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
+            $tournament = $request->getAttribute('tournament');
 
             $queryParams = $request->getQueryParams();
-            if (array_key_exists("hash", $queryParams) === false) {
-                throw new \Exception("de link om het toernooi te exporteren is niet correct", E_ERROR);
+            if (array_key_exists('hash', $queryParams) === false) {
+                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
             }
-            if ($queryParams["hash"] !== $this->getExportHash($tournament->getId())) {
-                throw new \Exception("de link om het toernooi te exporteren is niet correct", E_ERROR);
+            if ($queryParams['hash'] !== $this->getExportHash($tournament->getId())) {
+                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
             }
 
             $queryParams = $request->getQueryParams();
-            if (array_key_exists("type", $queryParams) === false) {
-                throw new \Exception("kies een type export(pdf/excel)", E_ERROR);
+            if (array_key_exists('type', $queryParams) === false) {
+                throw new Exception('kies een type export(pdf/excel)', E_ERROR);
             }
 
-            $type = filter_var($queryParams["type"], FILTER_SANITIZE_STRING);
-            $type = $type === "pdf" ? Tournament::EXPORTED_PDF : Tournament::EXPORTED_EXCEL;
+            $type = filter_var($queryParams['type'], FILTER_SANITIZE_STRING);
+            $type = $type === 'pdf' ? Tournament::EXPORTED_PDF : Tournament::EXPORTED_EXCEL;
             $config = $this->getExportConfig($queryParams);
 
             $tournament->setExported($tournament->getExported() | $type);
             $this->tournamentRepos->save($tournament);
 
             if ($type === Tournament::EXPORTED_PDF) {
-                return $this->writePdf($response, $config, $tournament, $this->config->getString("www.wwwurl"));
+                return $this->writePdf($response, $config, $tournament, $this->config->getString('www.wwwurl'));
             } else {
-                return $this->writeExcel($response, $config, $tournament, $this->config->getString("www.wwwurl"));
+                return $this->writeExcel($response, $config, $tournament, $this->config->getString('www.wwwurl'));
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
+    /**
+     * @param array<string, bool> $queryParams
+     * @return TournamentConfig
+     * @throws Exception
+     */
     protected function getExportConfig(array $queryParams): TournamentConfig
     {
         $getParam = function (string $param) use ($queryParams): bool {
-            if (array_key_exists($param, $queryParams) && strlen($queryParams[$param]) > 0) {
+            if (array_key_exists($param, $queryParams)) {
                 return filter_var($queryParams[$param], FILTER_VALIDATE_BOOLEAN);
             }
             return false;
         };
         $exportConfig = new TournamentConfig(
-            $getParam("gamenotes"),
-            $getParam("structure"),
-            $getParam("rules"),
-            $getParam("gamesperpoule"),
-            $getParam("gamesperfield"),
-            $getParam("planning"),
-            $getParam("poulepivottables"),
-            $getParam("qrcode"),
-            $getParam("lockerrooms")
+            $getParam('gamenotes'),
+            $getParam('structure'),
+            $getParam('rules'),
+            $getParam('gamesperpoule'),
+            $getParam('gamesperfield'),
+            $getParam('planning'),
+            $getParam('poulepivottables'),
+            $getParam('qrcode'),
+            $getParam('lockerrooms')
         );
         if ($exportConfig->allOptionsOff()) {
-            throw new \Exception("kies minimaal 1 exportoptie", E_ERROR);
+            throw new Exception('kies minimaal 1 exportoptie', E_ERROR);
         }
         return $exportConfig;
     }
 
-    protected function writePdf(Response $response, TournamentConfig $config, Tournament $tournament, string $url)
+    protected function writePdf(Response $response, TournamentConfig $config, Tournament $tournament, string $url): Response
     {
         $fileName = $this->getFileName($config);
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
@@ -394,7 +420,7 @@ class TournamentAction extends Action
             ->withHeader('Content-Length', '' . strlen($vtData));
     }
 
-    protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url)
+    protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url): Response
     {
         $fileName = $this->getFileName($config);
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
@@ -402,7 +428,7 @@ class TournamentAction extends Action
         $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $config, $url);
         $spreadsheet->fillContents();
 
-        $excelWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $excelWriter = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
         $tmpService = new TmpService();
         $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . $tournament->getId() . '.xlsx');
@@ -424,23 +450,23 @@ class TournamentAction extends Action
     protected function getFileName(TournamentConfig $exportConfig): string
     {
         if ($exportConfig->hasOnly(TournamentConfig::GAMENOTES)) {
-            return "wedstrijdbrieven";
+            return 'wedstrijdbrieven';
         } elseif ($exportConfig->hasOnly(TournamentConfig::STRUCTURE)) {
-            return "opzet-en-indeling";
+            return 'opzet-en-indeling';
         } elseif ($exportConfig->hasOnly(TournamentConfig::RULES)) {
-            return "reglementen";
+            return 'reglementen';
         } elseif ($exportConfig->hasOnly(TournamentConfig::GAMESPERPOULE)) {
-            return "wedstrijden-per-poule";
+            return 'wedstrijden-per-poule';
         } elseif ($exportConfig->hasOnly(TournamentConfig::GAMESPERFIELD)) {
-            return "wedstrijden-per-veld";
+            return 'wedstrijden-per-veld';
         } elseif ($exportConfig->hasOnly(TournamentConfig::PLANNING)) {
-            return "wedstrijdplanning";
+            return 'wedstrijdplanning';
         } elseif ($exportConfig->hasOnly(TournamentConfig::PIVOTTABLES)) {
-            return "poule-draaitabellen";
+            return 'poule-draaitabellen';
         } elseif ($exportConfig->hasOnly(TournamentConfig::QRCODE)) {
-            return "qrcode-en-link";
+            return 'qrcode-en-link';
         }
-        return "toernooi";
+        return 'toernooi';
     }
 
 

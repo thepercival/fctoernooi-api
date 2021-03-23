@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -21,33 +20,23 @@ use FCToernooi\LockerRoom;
 
 final class LockerRoomAction extends Action
 {
-    /**
-     * @var LockerRoomRepository
-     */
-    private $lockerRoomRepos;
-    /**
-     * @var TournamentRepository
-     */
-    private $tournamentRepos;
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        LockerRoomRepository $lockerRoomRepos,
-        TournamentRepository $tournamentRepos,
-        Configuration $config
+        private LockerRoomRepository $lockerRoomRepos,
+        private TournamentRepository $tournamentRepos,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-        $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->tournamentRepos = $tournamentRepos;
-        $this->config = $config;
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -66,7 +55,13 @@ final class LockerRoomAction extends Action
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -92,10 +87,16 @@ final class LockerRoomAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $lockerRoom = $this->lockerRoomRepos->find((int)$args['lockerRoomId']);
@@ -114,17 +115,25 @@ final class LockerRoomAction extends Action
         }
     }
 
-    public function syncCompetitors(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function syncCompetitors(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var ArrayCollection<int|string, Competitor> $newCompetitors */
+            /** @psalm-var class-string<ArrayCollection<Competitor>> $className */
+            /** @psalm-template Competitor */
+            $className = ArrayCollection::class . '<' . Competitor::class . '>';
             $newCompetitors = $this->serializer->deserialize(
                 $this->getRawData(),
-                ArrayCollection::class . '<' . Competitor::class . '>',
+                $className,
                 'json'
             );
 
-            /** @var \FCToernooi\Tournament $tournament */
+            /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $lockerRoom = $this->lockerRoomRepos->find((int)$args['lockerRoomId']);

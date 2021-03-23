@@ -25,7 +25,7 @@ class UpdateSitemap extends Command
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")

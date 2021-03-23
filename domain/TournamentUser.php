@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -8,19 +7,12 @@ use SportsHelpers\Identifiable;
 
 class TournamentUser extends Identifiable
 {
-    private Tournament $tournament;
-    private User $user;
     private int $roles;
 
-    public function __construct(Tournament $tournament, User $user, int $roles = null)
+    public function __construct(private Tournament $tournament, private User $user, int $roles = null)
     {
-        $this->tournament = $tournament;
-        if ($roles === null) {
-            $roles = 0;
-        }
-        $this->roles = $roles;
+        $this->roles = $roles === null ? 0 : $roles;
         $this->tournament->getUsers()->add($this);
-        $this->user = $user;
     }
 
     public function getTournament(): Tournament
@@ -33,17 +25,12 @@ class TournamentUser extends Identifiable
         return $this->user;
     }
 
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-    }
-
     public function getRoles(): int
     {
         return $this->roles;
     }
 
-    public function setRoles(int $roles)
+    public function setRoles(int $roles): void
     {
         if (($roles & Role::ALL) !== $roles) {
             throw new \InvalidArgumentException("de rol heeft een onjuiste waarde", E_ERROR);

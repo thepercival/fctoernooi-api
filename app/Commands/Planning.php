@@ -10,27 +10,15 @@ use App\Command;
 use Selective\Config\Configuration;
 
 use SportsHelpers\Place\Range as PlaceRange;
-use SportsPlanning\Planning as PlanningBase;
-use SportsPlanning\Planning\Validator as PlanningValidator;
+use SportsHelpers\SportRange;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
-use SportsPlanning\Resource\RefereePlace\Service as RefereePlaceService;
-use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Batch\SelfReferee as SelfRefereeBatch;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Planning extends Command
 {
-    /**
-     * @var PlanningInputRepository
-     */
-    protected $planningInputRepos;
-    /**
-     * @var PlanningRepository
-     */
-    protected $planningRepos;
-
+    protected PlanningInputRepository $planningInputRepos;
+    protected PlanningRepository $planningRepos;
 
     public function __construct(ContainerInterface $container)
     {
@@ -45,16 +33,16 @@ class Planning extends Command
         TournamentStructureRanges $tournamentStructureRanges
     ): ?PlaceRange {
         $placeRange = $tournamentStructureRanges->getFirstPlaceRange();
-        if ($input->getOption("placesRange") === null || strlen($input->getOption("placesRange")) === 0) {
+        /** @var string|null $placeRangeOption */
+        $placeRangeOption = $input->getOption("placesRange");
+        if ($placeRangeOption === null || strlen($placeRangeOption) === 0) {
             return null;
         }
-        if (strpos($input->getOption("placesRange"), "-") === false ) {
-            throw new \Exception("misformat placesRange-option");
+        if (strpos($placeRangeOption, "-") === false) {
+            throw new \Exception('misformat placesRange-option', E_ERROR);
         }
         $minMax = explode('-', $input->getOption('placesRange'));
-        $placeRange->min = (int)$minMax[0];
-        $placeRange->max = (int)$minMax[1];
-        return $placeRange;
+        return new PlaceRange((int)$minMax[0], (int)$minMax[1], $placeRange->getPlacesPerPouleRange());
     }
 
 //    protected function updateSelfReferee(PlanningInput $planningInput)

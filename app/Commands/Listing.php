@@ -18,22 +18,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Listing extends Command
 {
     /**
-     * @var array|string[]
-     */
-    protected $commandKeys;
-    /**
      * @var ContainerInterface
      */
     protected $container;
 
-    public function __construct(ContainerInterface $container, array $commandKeys)
+    /**
+     * Listing constructor.
+     * @param ContainerInterface $container
+     * @param list<string> $commandKeys
+     */
+    public function __construct(ContainerInterface $container, private array $commandKeys)
     {
         $this->container = $container;
-        $this->commandKeys = $commandKeys;
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")
@@ -49,7 +49,7 @@ class Listing extends Command
         $this->addArgument('commandName', InputArgument::OPTIONAL, 'command-name');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $commandFilter = null;
         if ($input->getArgument('commandName') !== null && strlen($input->getArgument('commandName')) > 0) {

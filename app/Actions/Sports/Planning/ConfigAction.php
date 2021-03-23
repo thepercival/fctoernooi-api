@@ -14,16 +14,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Sports\Planning\Config as PlanningConfig;
 use Sports\Competition;
 use Sports\Planning\Config\Repository as PlanningConfigRepository;
+use Sports\Planning\Config\Service as PlanningConfigService;
 use Sports\Round\Number as RoundNumber;
 use Sports\Structure\Repository as StructureRepository;
 
-/**
- * Class ConfigAction
- * @package App\Actions\Sports\Planning
- */
 final class ConfigAction extends Action
 {
     protected PlanningConfigRepository $planningConfigRepos;
+    protected PlanningConfigService $planningConfigService;
     protected StructureRepository $structureRepos;
 
     public function __construct(
@@ -35,15 +33,16 @@ final class ConfigAction extends Action
         parent::__construct($logger, $serializer);
         $this->planningConfigRepos = $planningConfigRepos;
         $this->structureRepos = $structureRepos;
+        $this->planningConfigService = new PlanningConfigService();
     }
 
     /**
      * @param Request $request
      * @param Response $response
-     * @param mixed $args
+     * @param array<string, int|string> $args
      * @return Response
      */
-    public function save(Request $request, Response $response, $args): Response
+    public function save(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -56,19 +55,8 @@ final class ConfigAction extends Action
             if ($roundNumber === null) {
                 throw new Exception('geen rondenummer gevonden', E_ERROR);
             }
-            $planningConfig = $roundNumber->getPlanningConfig();
-            if ($planningConfig === null) {
-                $planningConfig = new PlanningConfig($roundNumber);
-            }
 
-            $planningConfig->setGameMode($planningConfigSer->getGameMode());
-            $planningConfig->setExtension($planningConfigSer->getExtension());
-            $planningConfig->setEnableTime($planningConfigSer->getEnableTime());
-            $planningConfig->setMinutesPerGame($planningConfigSer->getMinutesPerGame());
-            $planningConfig->setMinutesPerGameExt($planningConfigSer->getMinutesPerGameExt());
-            $planningConfig->setMinutesBetweenGames($planningConfigSer->getMinutesBetweenGames());
-            $planningConfig->setMinutesAfter($planningConfigSer->getMinutesAfter());
-            $planningConfig->setSelfReferee($planningConfigSer->getSelfReferee());
+            $planningConfig = $this->planningConfigService->copy($planningConfigSer, $roundNumber);
 
             $this->planningConfigRepos->save($planningConfig);
 
@@ -81,15 +69,14 @@ final class ConfigAction extends Action
         }
     }
 
-    protected function removeNext(RoundNumber $roundNumber)
+    protected function removeNext(RoundNumber $roundNumber): void
     {
-        while ($roundNumber->hasNext()) {
-            $roundNumber = $roundNumber->getNext();
-            $planningConfig = $roundNumber->getPlanningConfig();
+        while ($next = $roundNumber->getNext()) {
+            $planningConfig = $next->getPlanningConfig();
             if ($planningConfig === null) {
                 continue;
             }
-            $roundNumber->setPlanningConfig(null);
+            $next->setPlanningConfig(null);
             $this->planningConfigRepos->remove($planningConfig);
         }
     }

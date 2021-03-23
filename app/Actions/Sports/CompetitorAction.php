@@ -18,21 +18,21 @@ use Sports\Availability\Checker as AvailabilityChecker;
 
 final class CompetitorAction extends Action
 {
-    /**
-     * @var CompetitorRepository
-     */
-    protected $competitorRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        CompetitorRepository $competitorRepos
+        protected CompetitorRepository $competitorRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->competitorRepos = $competitorRepos;
     }
 
-    public function fetch(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetch(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -44,7 +44,13 @@ final class CompetitorAction extends Action
         }
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competitor $competitor */
@@ -74,7 +80,13 @@ final class CompetitorAction extends Action
         }
     }
 
-    public function edit($request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competitor $competitorSer */
@@ -101,7 +113,13 @@ final class CompetitorAction extends Action
         }
     }
 
-    public function swap($request, $response, $args)
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function swap(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -125,7 +143,13 @@ final class CompetitorAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */

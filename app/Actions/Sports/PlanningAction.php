@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
@@ -15,73 +14,57 @@ use League\Period\Period;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
+use Sports\Round;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use Sports\Round\Number as RoundNumber;
+use FCToernooi\Tournament;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
+use Sports\Structure;
 use SportsPlanning\Input\Repository as InputRepository;
 use App\Actions\Sports\Deserialize\RefereeService as DeserializeRefereeService;
 use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
-    /**
-     * @var PlanningRepository
-     */
-    protected $repos;
-    /**
-     * @var InputRepository
-     */
-    protected $inputRepos;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var RoundNumberRepository
-     */
-    protected $roundNumberRepos;
-    /**
-     * @var DeserializeRefereeService
-     */
-    protected $deserializeRefereeService;
-    /**
-     * @var Configuration
-     */
-    protected $config;
+    private DeserializeRefereeService $deserializeRefereeService;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        PlanningRepository $repos,
-        InputRepository $inputRepos,
-        StructureRepository $structureRepos,
-        RoundNumberRepository $roundNumberRepos,
-        Configuration $config
+        private PlanningRepository $repos,
+        private InputRepository $inputRepos,
+        private StructureRepository $structureRepos,
+        private RoundNumberRepository $roundNumberRepos,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-
-        $this->repos = $repos;
-        $this->inputRepos = $inputRepos;
-        $this->structureRepos = $structureRepos;
-        $this->roundNumberRepos = $roundNumberRepos;
-        $this->serializer = $serializer;
         $this->deserializeRefereeService = new DeserializeRefereeService();
-        $this->config = $config;
     }
 
-    public function fetch(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     * @throws \Exception
+     */
+    public function fetch(Request $request, Response $response, array $args): Response
     {
         list($structure, $roundNumber) = $this->getFromRequest($request, $args);
         $json = $this->serializer->serialize($structure, 'json');
         return $this->respondWithJson($response, $json);
     }
 
+    // do game remove and add for multiple games
     /**
-     * do game remove and add for multiple games
-     *
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     * @throws \Exception
      */
-    public function create(Request $request, Response $response, $args): Response
+    public function create(Request $request, Response $response, array $args): Response
     {
         /** @var \FCToernooi\Tournament $tournament */
         $tournament = $request->getAttribute('tournament');
@@ -105,12 +88,17 @@ final class PlanningAction extends Action
         }
     }
 
+    // do game remove and add for multiple games
+
     /**
-     * do game remove and add for multiple games
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
      */
-    public function reschedule(Request $request, Response $response, $args): Response
+    public function reschedule(Request $request, Response $response, array $args): Response
     {
-        /** @var \FCToernooi\Tournament $tournament */
+        /** @var Tournament $tournament */
         $tournament = $request->getAttribute('tournament');
 
         try {
@@ -127,7 +115,13 @@ final class PlanningAction extends Action
         }
     }
 
-    protected function getFromRequest(Request $request, $args): array
+    /**
+     * @param Request $request
+     * @param array<string, int|string> $args
+     * @return list<Structure|RoundNumber>
+     * @throws \Exception
+     */
+    protected function getFromRequest(Request $request, array $args): array
     {
         $competition = $request->getAttribute('tournament')->getCompetition();
         if (array_key_exists('roundNumber', $args) === false) {
@@ -138,6 +132,9 @@ final class PlanningAction extends Action
             throw new \Exception('geen structuur opgegeven', E_ERROR);
         }
         $roundNumber = $structure->getRoundNumber((int)$args['roundNumber']);
+        if ($roundNumber === null) {
+            throw new \Exception('geen rondenumber gevonden', E_ERROR);
+        }
         return [$structure, $roundNumber];
     }
 }

@@ -10,20 +10,15 @@ use Sports\Game;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use Sports\NameService;
-use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Score\Config\Service as ScoreConfigService;
+use Zend_Pdf_Exception;
 
 class Planning extends ToernooiPdfPage
 {
-    /**
-     * @var SportScoreConfigService
-     */
-    protected $sportScoreConfigService;
-
     use GamesTrait;
-    /**
-     * @var bool
-     */
-    protected $drewbreak;
+
+    protected ScoreConfigService $scoreConfigService;
+    protected bool $drewbreak = false;
 
     /**
      * @var Period|null
@@ -41,12 +36,16 @@ class Planning extends ToernooiPdfPage
 
     protected $rowHeight;
 
-    public function __construct($param1)
+    /**
+     * Planning constructor.
+     * @param mixed $param1
+     * @throws Zend_Pdf_Exception
+     */
+    public function __construct(mixed $param1)
     {
         parent::__construct($param1);
-        $this->drewbreak = false;
         $this->setLineWidth(0.5);
-        $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->scoreConfigService = new ScoreConfigService();
     }
 
     public function setTournamentBreak(Period $break = null)

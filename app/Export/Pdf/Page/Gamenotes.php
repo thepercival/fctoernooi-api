@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
@@ -7,27 +6,19 @@ namespace App\Export\Pdf\Page;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
 use Sports\Game;
-use Sports\NameService;
-use Sports\Sport\ScoreConfig as SportScoreConfig;
-use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+
+use SportsHelpers\Against\Side as AgainstSide;
+use Sports\Score\Config as ScoreConfig;
+use Sports\Score\Config\Service as ScoreConfigService;
 use FCToernooi\TranslationService;
 
 class Gamenotes extends ToernooiPdfPage
 {
     const MAXNROFSCORELINES = 5;
 
-    /**
-     * @var SportScoreConfigService
-     */
-    protected $sportScoreConfigService;
-    /**
-     * @var TranslationService
-     */
-    protected $translationService;
-    /**
-     * @var QRService
-     */
-    protected $qrService;
+    protected ScoreConfigService $scoreConfigService;
+    protected TranslationService $translationService;
+    protected QRService $qrService;
     /**
      * @var string
      */
@@ -47,7 +38,7 @@ class Gamenotes extends ToernooiPdfPage
         $this->setLineWidth(0.5);
         $this->gameOne = $gameA;
         $this->gameTwo = $gameB;
-        $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
     }
@@ -148,8 +139,8 @@ class Gamenotes extends ToernooiPdfPage
             ToernooiPdfPage::ALIGNRIGHT
         );
         $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
-        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), false, !$planningConfig->getTeamup());
-        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), false, !$planningConfig->getTeamup());
+        $home = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), false, !$planningConfig->getTeamup());
+        $away = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::AWAY), false, !$planningConfig->getTeamup());
         $this->drawCell($home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight);
         $nY -= $nRowHeight;
 

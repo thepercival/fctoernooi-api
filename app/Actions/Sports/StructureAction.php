@@ -40,7 +40,13 @@ final class StructureAction extends Action
         $this->competitorRepos = $competitorRepos;
     }
 
-    public function fetchOne(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchOne(Request $request, Response $response, array $args): Response
     {
         try {
             $competition = $request->getAttribute("tournament")->getCompetition();
@@ -55,7 +61,13 @@ final class StructureAction extends Action
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Structure|false $structureSer */

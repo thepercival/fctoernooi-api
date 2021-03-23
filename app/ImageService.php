@@ -1,23 +1,18 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App;
 
 use Exception;
+use GdImage;
 use Psr\Http\Message\UploadedFileInterface;
 use Selective\Config\Configuration;
 
 class ImageService
 {
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
     protected const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
 
-    public function __construct(Configuration $config)
+    public function __construct(private Configuration $config)
     {
         $this->config = $config;
     }
@@ -44,14 +39,17 @@ class ImageService
         $source_properties = getimagesize($newImagePath);
         $image_type = $source_properties[2];
         if ($image_type == IMAGETYPE_JPEG) {
+            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromjpeg($newImagePath);
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagejpeg($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_GIF) {
+            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromgif($newImagePath);
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagegif($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_PNG) {
+            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefrompng($newImagePath);
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagepng($target_layer, $newImagePath);
@@ -74,7 +72,13 @@ class ImageService
         throw new \Exception("alleen jpg, png em gif zijn toegestaan", E_ERROR);
     }
 
-    private function resize($image_resource_id, int $width, int $height)
+    /**
+     * @param false|GdImage $image_resource_id
+     * @param int $width
+     * @param int $height
+     * @return false|GdImage|resource
+     */
+    private function resize(false|GdImage $image_resource_id, int $width, int $height): false|GdImage
     {
         $target_height = 200;
         if ($height === $target_height) {
@@ -96,7 +100,16 @@ class ImageService
         }*/
     }
 
-    private function resizeHelper($image_resource_id, int $width, int $height, int $target_width, int $target_height)
+    /**
+     * @param false|GdImage|resource $image_resource_id
+     * @param int $width
+     * @param int $height
+     * @param int $target_width
+     * @param int $target_height
+     * @return false|GdImage|resource
+     */
+    private function resizeHelper(false|GdImage $image_resource_id,
+        int $width, int $height, int $target_width, int $target_height): false|GdImage
     {
         $target_layer = imagecreatetruecolor($target_width, $target_height);
         imagecopyresampled(

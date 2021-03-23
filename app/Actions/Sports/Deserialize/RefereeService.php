@@ -10,22 +10,26 @@ use Sports\Place;
 class RefereeService
 {
     /**
-     * @var array
+     * @var array<string|int, Place>|null
      */
-    protected $roundNumberPlaces;
+    protected array|null $roundNumberPlaceMap = null;
 
     public function getPlace(RoundNumber $roundNumber, int $placeId): ?Place
     {
-        if ($this->roundNumberPlaces === null) {
-            $this->roundNumberPlaces = $this->getPlaces($roundNumber);
+        if ($this->roundNumberPlaceMap === null) {
+            $this->roundNumberPlaceMap = $this->getPlaceMap($roundNumber);
         }
-        if (array_key_exists($placeId, $this->roundNumberPlaces) === false) {
+        if (array_key_exists($placeId, $this->roundNumberPlaceMap) === false) {
             return null;
         }
-        return $this->roundNumberPlaces[$placeId];
+        return $this->roundNumberPlaceMap[$placeId];
     }
 
-    protected function getPlaces(RoundNumber $roundNumber): array
+    /**
+     * @param RoundNumber $roundNumber
+     * @return array<string|int, Place>
+     */
+    protected function getPlaceMap(RoundNumber $roundNumber): array
     {
         $roundNumberPlaces = [];
         foreach ($roundNumber->getPoules() as $poule) {

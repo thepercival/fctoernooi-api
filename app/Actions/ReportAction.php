@@ -20,55 +20,28 @@ use App\Copiers\TournamentCopier;
 use Selective\Config\Configuration;
 use Slim\Views\Twig as TwigView;
 
-class ReportAction extends Action
+final class ReportAction extends Action
 {
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var TournamentCopier
-     */
-    protected $tournamentCopier;
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var LockerRoomRepistory
-     */
-    protected $lockerRoomRepos;
-    /**
-     * @var TwigView
-     */
-    protected $view;
-
-
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        TournamentRepository $tournamentRepos,
-        TournamentCopier $tournamentCopier,
-        StructureRepository $structureRepos,
-        LockerRoomRepistory $lockerRoomRepos,
-        TwigView $view,
-        Configuration $config
+        private TournamentRepository $tournamentRepos,
+        private TournamentCopier $tournamentCopier,
+        private StructureRepository $structureRepos,
+        private LockerRoomRepistory $lockerRoomRepos,
+        private TwigView $view,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-        $this->tournamentRepos = $tournamentRepos;
-        $this->tournamentCopier = $tournamentCopier;
-        $this->structureRepos = $structureRepos;
-        $this->lockerRoomRepos = $lockerRoomRepos;
-        $this->view = $view;
-        $this->config = $config;
     }
 
-    public function usage(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, string|int> $args
+     * @return Response
+     */
+    public function usage(Request $request, Response $response, array $args): Response
     {
         // $user = $request->getAttribute("user");
         try {
@@ -88,7 +61,7 @@ class ReportAction extends Action
 
     /**
      * @param Request $request
-     * @return array|TournamentReportHelper[]
+     * @return list<TournamentReportHelper>
      */
     public function getTournamentHelpers(Request $request): array
     {
@@ -104,7 +77,7 @@ class ReportAction extends Action
 
     /**
      * @param Request $request
-     * @return array|Tournament[]
+     * @return list<Tournament>
      */
     public function getTournaments(Request $request): array
     {

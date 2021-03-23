@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -8,64 +7,45 @@ use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
 use Sports\Competition;
 use League\Period\Period;
+use Sports\Competition\Referee;
 use SportsHelpers\Identifiable;
 
 class Tournament extends Identifiable
 {
-    private Competition $competition;
+    private DateTimeImmutable|null $breakStartDateTime = null;
+    private DateTimeImmutable|null $breakEndDateTime = null;
+    private bool $public = false;
     /**
-     * @var DateTimeImmutable
+     * @var ArrayCollection<int|string, TournamentUser>
      */
-    private $breakStartDateTime;
+    private ArrayCollection $users;
     /**
-     * @var DateTimeImmutable
+     * @var ArrayCollection<int|string, Sponsor>
      */
-    private $breakEndDateTime;
+    private ArrayCollection $sponsors;
     /**
-     * @var bool
+     * @var ArrayCollection<int|string, Competitor>
      */
-    private $public;
+    private ArrayCollection $competitors;
     /**
-     * @var ArrayCollection
+     * @var ArrayCollection<int|string, LockerRoom>
      */
-    private $users;
-    /**
-     * @var ArrayCollection|Sponsor[]
-     */
-    private $sponsors;
-    /**
-     * @var ArrayCollection|Competitor[]
-     */
-    private $competitors;
-    /**
-     * @var ArrayCollection|LockerRoom[]
-     */
-    private $lockerRooms;
-    /**
-     * @var integer
-     */
-    protected $exported;
-    /**
-     * @var DateTimeImmutable
-     */
-    private $createdDateTime;
+    private ArrayCollection $lockerRooms;
+    protected int $exported = 0;
+    private DateTimeImmutable|null $createdDateTime = null;
 
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
 
-    public function __construct(Competition $competition)
+    public function __construct(private Competition $competition)
     {
-        $this->competition = $competition;
         $this->users = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
         $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
     }
 
-    /**
-     * @return Competition
-     */
-    public function getCompetition()
+    public function getCompetition(): Competition
     {
         return $this->competition;
     }
@@ -75,7 +55,7 @@ class Tournament extends Identifiable
         return $this->breakStartDateTime;
     }
 
-    public function setBreakStartDateTime(DateTimeImmutable $datetime = null)
+    public function setBreakStartDateTime(DateTimeImmutable $datetime = null): void
     {
         $this->breakStartDateTime = $datetime;
     }
@@ -85,7 +65,7 @@ class Tournament extends Identifiable
         return $this->breakEndDateTime;
     }
 
-    public function setBreakEndDateTime(DateTimeImmutable $datetime = null)
+    public function setBreakEndDateTime(DateTimeImmutable $datetime = null): void
     {
         $this->breakEndDateTime = $datetime;
     }
@@ -98,45 +78,28 @@ class Tournament extends Identifiable
         return new Period($this->getBreakStartDateTime(), $this->getBreakEndDateTime());
     }
 
-    /**
-     * @param Period|null $period
-     */
-    public function setBreak(Period $period = null)
+    public function setBreak(Period $period = null): void
     {
         $this->setBreakStartDateTime($period !== null ? $period->getStartDate() : null);
         $this->setBreakEndDateTime($period !== null ? $period->getEndDate() : null);
     }
 
-    /**
-     * @return ?bool
-     */
-    public function getPublic()
+    public function getPublic(): bool
     {
         return $this->public;
     }
 
-    /**
-     * @param bool $public
-     */
-    public function setPublic(bool $public)
+    public function setPublic(bool $public): void
     {
         $this->public = $public;
     }
 
     /**
-     * @return TournamentUser[] | ArrayCollection
+     * @return ArrayCollection<int|string, TournamentUser>
      */
-    public function getUsers()
+    public function getUsers(): ArrayCollection
     {
         return $this->users;
-    }
-
-    /**
-     * @param ArrayCollection $users
-     */
-    public function setUsers(ArrayCollection $users)
-    {
-        $this->users = $users;
     }
 
     public function getUser(User $user): ?TournamentUser
@@ -151,70 +114,40 @@ class Tournament extends Identifiable
     }
 
     /**
-     * @return Sponsor[] | ArrayCollection
+     * @return ArrayCollection<int|string, Sponsor>
      */
-    public function getSponsors()
+    public function getSponsors(): ArrayCollection
     {
         return $this->sponsors;
     }
 
     /**
-     * @param ArrayCollection $sponsors
+     * @return ArrayCollection<int|string, Competitor>
      */
-    public function setSponsors(ArrayCollection $sponsors)
-    {
-        $this->sponsors = $sponsors;
-    }
-
-    /**
-     * @return Competitor[] | ArrayCollection
-     */
-    public function getCompetitors()
+    public function getCompetitors(): ArrayCollection
     {
         return $this->competitors;
     }
 
     /**
-     * @param ArrayCollection | Competitor[] $competitors
+     * @return ArrayCollection<int|string, LockerRoom>
      */
-    public function setCompetitors(ArrayCollection $competitors)
-    {
-        $this->competitors = $competitors;
-    }
-
-    /**
-     * @return LockerRoom[] | ArrayCollection
-     */
-    public function getLockerRooms()
+    public function getLockerRooms(): ArrayCollection
     {
         return $this->lockerRooms;
     }
 
-    /**
-     * @param ArrayCollection $lockerRooms
-     */
-    public function setLockerRooms(ArrayCollection $lockerRooms)
-    {
-        $this->lockerRooms = $lockerRooms;
-    }
-
-    /**
-     * @return int
-     */
-    public function getExported()
+    public function getExported(): int
     {
         return $this->exported;
     }
 
-    /**
-     * @param int $exported
-     */
-    public function setExported($exported)
+    public function setExported(int $exported): void
     {
         $this->exported = $exported;
     }
 
-    public function getReferee(string $emailaddress)
+    public function getReferee(string $emailaddress): Referee|null
     {
         $referees = $this->getCompetition()->getReferees();
         foreach ($referees as $referee) {
@@ -230,7 +163,7 @@ class Tournament extends Identifiable
         return $this->createdDateTime;
     }
 
-    public function setCreatedDateTime(DateTimeImmutable $createdDateTime)
+    public function setCreatedDateTime(DateTimeImmutable $createdDateTime): void
     {
         $this->createdDateTime = $createdDateTime;
     }

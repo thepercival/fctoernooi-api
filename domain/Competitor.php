@@ -1,9 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
 
+use Sports\Association;
 use Sports\Competition;
 use Sports\Competitor\Base;
 use Sports\Competitor as SportsCompetitor;
@@ -11,24 +11,19 @@ use SportsHelpers\Identifiable;
 
 class Competitor extends Identifiable implements SportsCompetitor
 {
-    /**
-     * @var string
-     */
-    protected $name;
-    /**
-     * @var Tournament
-     */
-    protected $tournament;
+    protected string $name;
 
-    protected $abbreviationDep;
-    protected $imageUrlDep;
-    protected $associationDep;
+    protected string|null $abbreviationDep = null;
+    protected string|null $imageUrlDep = null;
+    protected Association|null $associationDep = null;
 
     use Base;
 
-    public function __construct(Tournament $tournament, int $pouleNr, int $placeNr, string $name)
+    public function __construct(protected Tournament $tournament, int $pouleNr, int $placeNr, string $name)
     {
-        $this->setTournament($tournament);
+        if (!$tournament->getCompetitors()->contains($this)) {
+            $tournament->getCompetitors()->add($this) ;
+        }
         $this->setName($name);
         $this->setPouleNr($pouleNr);
         $this->setPlaceNr($placeNr);
@@ -37,14 +32,6 @@ class Competitor extends Identifiable implements SportsCompetitor
     public function getTournament(): Tournament
     {
         return $this->tournament;
-    }
-
-    protected function setTournament(Tournament $tournament)
-    {
-        if ($this->tournament === null and !$tournament->getCompetitors()->contains($this)) {
-            $tournament->getCompetitors()->add($this) ;
-        }
-        $this->tournament = $tournament;
     }
 
     public function getCompetition(): Competition

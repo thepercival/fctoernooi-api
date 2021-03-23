@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Excel\Worksheet;
@@ -10,15 +9,15 @@ use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\TranslationService;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use Sports\Game;
-use Sports\Round;
+use SportsHelpers\Against\Side as AgainstSide;
 use Sports\Poule;
 use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use Sports\Round\Number as RoundNumber;
-use Sports\Sport\ScoreConfig as SportScoreConfig;
-use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Score\Config as SportScoreConfig;
+use Sports\Score\Config\Service as SportScoreConfigService;
 
 class Gamenotes extends FCToernooiWorksheet
 {
@@ -88,8 +87,8 @@ class Gamenotes extends FCToernooiWorksheet
         );
 
         // plekken
-        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), false, !$planningConfig->getTeamup());
-        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), false, !$planningConfig->getTeamup());
+        $home = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), false, !$planningConfig->getTeamup());
+        $away = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::AWAY), false, !$planningConfig->getTeamup());
         $row = $this->drawGameRow($row, "plekken", $home . " - " . $away);
 
         // speelronde
@@ -142,7 +141,7 @@ class Gamenotes extends FCToernooiWorksheet
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             $cell->setValue("wedstrijd");
 
-            $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+            $home = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), true, true);
             $cell = $this->getCellByColumnAndRow(2, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             $cell->setValue($home);
@@ -151,7 +150,7 @@ class Gamenotes extends FCToernooiWorksheet
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $cell->setValue("-");
 
-            $away = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+            $away = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), true, true);
             $cell = $this->getCellByColumnAndRow(4, $row);
             $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
             $cell->setValue($away);

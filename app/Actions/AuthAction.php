@@ -19,28 +19,22 @@ use FCToernooi\Auth\Item as AuthItem;
 
 final class AuthAction extends Action
 {
-    /**
-     * @var AuthService
-     */
-    private $authService;
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
-
     public function __construct(
         LoggerInterface $logger,
-        AuthService $authService,
-        UserRepository $userRepository,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        private AuthService $authService,
+        private UserRepository $userRepository
     ) {
         parent::__construct($logger, $serializer);
-        $this->authService = $authService;
-        $this->userRepository = $userRepository;
-        $this->serializer = $serializer;
     }
 
-    public function extendToken(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function extendToken(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var User $user */
@@ -52,7 +46,13 @@ final class AuthAction extends Action
         }
     }
 
-    public function register(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function register(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $registerData */
@@ -78,7 +78,13 @@ final class AuthAction extends Action
         }
     }
 
-    public function login(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function login(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $authData */
@@ -114,7 +120,13 @@ final class AuthAction extends Action
         }
     }
 
-    public function passwordreset(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function passwordreset(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $paswordResetData */
@@ -134,7 +146,13 @@ final class AuthAction extends Action
         }
     }
 
-    public function passwordchange(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function passwordchange(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $paswordChangeData */

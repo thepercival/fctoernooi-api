@@ -14,7 +14,7 @@ use FCToernooi\TournamentUser;
 
 abstract class AdminMiddleware extends AuthorizationMiddleware
 {
-    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null)
+    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void
     {
         if ($user === null) {
             throw new \Exception("je moet ingelogd zijn voor dit toernooi", E_ERROR);
@@ -30,5 +30,5 @@ abstract class AdminMiddleware extends AuthorizationMiddleware
         $this->isTournamentUserAuthorized($request, $tournamentUser);
     }
 
-    abstract protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser);
+    abstract protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void;
 }

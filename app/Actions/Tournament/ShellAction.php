@@ -19,34 +19,23 @@ use Psr\Log\LoggerInterface;
 
 final class ShellAction extends Action
 {
-    /**
-     * @var TournamentRepository
-     */
-    private $tournamentRepos;
-    /**
-     * @var AuthService
-     */
-    private $authService;
-    /**
-     * @var EntityManager
-     */
-    protected $em;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        TournamentRepository $tournamentRepos,
-        AuthService $authService,
-        EntityManager $em
+        private TournamentRepository $tournamentRepos,
+        private AuthService $authService,
+        private EntityManager $em
     ) {
         parent::__construct($logger, $serializer);
-        $this->tournamentRepos = $tournamentRepos;
-        $this->authService = $authService;
-        $this->serializer = $serializer;
-        $this->em = $em;
     }
 
-    public function fetchPublic(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchPublic(Request $request, Response $response, array $args): Response
     {
         $user = $request->getAttribute("user");
         try {
@@ -87,7 +76,13 @@ final class ShellAction extends Action
         }
     }
 
-    public function fetchWithRole(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchWithRole(Request $request, Response $response, array $args): Response
     {
         try {
             $queryParams = $request->getQueryParams();

@@ -24,22 +24,18 @@ use Interop\Queue\Consumer;
  */
 class QueueService implements CreatePlanningsEvent
 {
-    /**
-     * @var array<string, string|int>
-     */
-    protected array $options;
-    /**
-     * @var string
-     */
-    protected $queueSuffix;
+    private string $queueSuffix;
 
-    public function __construct(array $options)
+    /**
+     * @param array<string, mixed> $amqpOptions
+     */
+    public function __construct(private array $amqpOptions)
     {
-        if (array_key_exists('queueSuffix', $options)) {
-            $this->queueSuffix = $options['queueSuffix'];
-            unset($options['queueSuffix']);
+        if (array_key_exists('suffix', $amqpOptions) === false) {
+            throw new \Exception('option queue:suffix is missing', E_ERROR);
         }
-        $this->options = $options;
+        $this->queueSuffix = $amqpOptions['suffix'];
+        unset($amqpOptions['suffix']);
     }
 
     public function sendCreatePlannings(
@@ -48,7 +44,7 @@ class QueueService implements CreatePlanningsEvent
         int $startRoundNumber = null
     ): void {
         $context = $this->getContext();
-
+        /** @var AmqpTopic $exchange */
         $exchange = $context->createTopic('amq.direct');
         // $topic->setType(AmqpTopic::TYPE_DIRECT);
         $exchange->addFlag(AmqpTopic::FLAG_DURABLE);
@@ -73,7 +69,7 @@ class QueueService implements CreatePlanningsEvent
         $context->createProducer()->send($queue, $message);
     }
 
-    public function receive(callable $callable, int $timeoutInSeconds)
+    public function receive(callable $callable, int $timeoutInSeconds): void
     {
         $context = $this->getContext();
         $consumer = $context->createConsumer($this->getQueue());
@@ -86,7 +82,7 @@ class QueueService implements CreatePlanningsEvent
 
     protected function getContext(): AmqpContext
     {
-        $factory = new AmqpConnectionFactory($this->options);
+        $factory = new AmqpConnectionFactory($this->amqpOptions);
         return $factory->createContext();
     }
 

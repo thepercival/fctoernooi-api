@@ -100,7 +100,7 @@ class TournamentReport
         $this->createdDateTime = $tournament->getCreatedDateTime()->format('Y-m-d H:i');
     }
 
-    protected function getScoresUsage(RoundNumber $roundNumber, int &$nrOfGames, int &$nrOfScores)
+    protected function getScoresUsage(RoundNumber $roundNumber, int &$nrOfGames, int &$nrOfScores): void
     {
         foreach ($roundNumber->getGames() as $game) {
             $nrOfGames++;

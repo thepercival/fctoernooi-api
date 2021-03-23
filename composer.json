@@ -52,7 +52,8 @@
     "phpstan/phpstan-strict-rules": "^0.12",
     "phpunit/phpunit": "^9.5",
     "vimeo/psalm": "^4.3",
-    "weirdan/doctrine-psalm-plugin": "^1.0"
+    "weirdan/doctrine-psalm-plugin": "^1.0",
+    "composer/composer": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -70,11 +71,11 @@
     "test": [
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
-    "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse --level=5 app config domain tests",
+    "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
     "cs-fix": "php-cs-fixer fix .",
-    "post-custom-install-cmd": [
+    "post-install-cmd": [
       "App\\Handlers\\ComposerPostInstall::execute",
       "composer run doctrine-update",
       "php vendor/bin/doctrine orm:generate-proxies --quiet"

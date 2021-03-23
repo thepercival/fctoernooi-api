@@ -20,33 +20,23 @@ use FCToernooi\Tournament;
 
 final class SponsorAction extends Action
 {
-    /**
-     * @var SponsorRepository
-     */
-    private $sponsorRepos;
-    /**
-     * @var TournamentRepository
-     */
-    private $tournamentRepos;
-    /**
-     * @var ImageService
-     */
-    protected $imageService;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        SponsorRepository $sponsorRepos,
-        TournamentRepository $tournamentRepos,
-        ImageService $imageService
+        private SponsorRepository $sponsorRepos,
+        private TournamentRepository $tournamentRepos,
+        private ImageService $imageService
     ) {
         parent::__construct($logger, $serializer);
-        $this->sponsorRepos = $sponsorRepos;
-        $this->tournamentRepos = $tournamentRepos;
-        $this->imageService = $imageService;
     }
 
-    public function fetch(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetch(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -58,7 +48,13 @@ final class SponsorAction extends Action
         }
     }
 
-    public function fetchOne(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchOne(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -78,7 +74,13 @@ final class SponsorAction extends Action
         }
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -102,7 +104,13 @@ final class SponsorAction extends Action
         }
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -134,7 +142,13 @@ final class SponsorAction extends Action
         }
     }
 
-    public function remove(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -156,7 +170,13 @@ final class SponsorAction extends Action
         }
     }
 
-    public function upload(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function upload(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Tournament $tournament */
@@ -186,6 +206,4 @@ final class SponsorAction extends Action
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
-
-
 }

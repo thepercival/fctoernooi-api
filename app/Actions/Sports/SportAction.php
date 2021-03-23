@@ -18,18 +18,12 @@ use JMS\Serializer\SerializationContext;
 
 final class SportAction extends Action
 {
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        SportRepository $sportRepos
+        protected SportRepository $sportRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->sportRepos = $sportRepos;
     }
 
     protected function getDeserializationContext(): DeserializationContext
@@ -42,7 +36,13 @@ final class SportAction extends Action
         return SerializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
-    public function fetch(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetch(Request $request, Response $response, array $args): Response
     {
         try {
             $sports = $this->sportRepos->findByExt(true);
@@ -53,7 +53,13 @@ final class SportAction extends Action
         }
     }
 
-    public function fetchOne(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchOne(Request $request, Response $response, array $args): Response
     {
         $sport = $this->sportRepos->findOneBy(["customId" => (int)$args['sportCustomId']]);
         if ($sport === null) {
@@ -64,7 +70,13 @@ final class SportAction extends Action
         return $this->respondWithJson($response, $json);
     }
 
-    public function add(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Sport $sportSer */

@@ -11,7 +11,7 @@ use App\Middleware\AuthorizationMiddleware;
 
 class PublicMiddleware extends AuthorizationMiddleware
 {
-    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null)
+    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void
     {
         if ($tournament === null) {
             throw new \Exception("het toernooi is onbekend", E_ERROR);

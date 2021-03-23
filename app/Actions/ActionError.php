@@ -17,29 +17,10 @@ class ActionError implements JsonSerializable
     public const VALIDATION_ERROR = 'VALIDATION_ERROR';
     public const VERIFICATION_ERROR = 'VERIFICATION_ERROR';
 
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $description;
-
-    /**
-     * @param string        $type
-     * @param string|null   $description
-     */
-    public function __construct(string $type, ?string $description)
+    public function __construct(private string $type, private string|null $description)
     {
-        $this->type = $type;
-        $this->description = $description;
     }
 
-    /**
-     * @return string
-     */
     public function getType(): string
     {
         return $this->type;
@@ -55,31 +36,24 @@ class ActionError implements JsonSerializable
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getDescription(): string
+    public function getDescription(): string|null
     {
         return $this->description;
     }
 
-    /**
-     * @param string|null $description
-     * @return self
-     */
-    public function setDescription(?string $description = null): self
+    public function setDescription(string|null $description = null): self
     {
         $this->description = $description;
         return $this;
     }
 
     /**
-     * @return array
+     * @return array<string, string|null>
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $payload = [
-                'type' => $this->type,
+            'type' => $this->type,
             'description' => $this->description,
         ];
 

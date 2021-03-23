@@ -9,16 +9,18 @@ use Psr\Log\LoggerInterface;
 
 final class TmpService
 {
-    /**
-     * @var string
-     */
-    private $path;
+    private string $path;
 
     public function __construct()
     {
         $this->path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "fctoernooi";
     }
 
+    /**
+     * @param list<string> $subDirs
+     * @param string|null $file
+     * @return string
+     */
     public function getPath(array $subDirs, string $file = null): string
     {
         $path = $this->path;

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
@@ -8,53 +7,18 @@ use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\Role;
 use FCToernooi\User;
+use SportsHelpers\Identifiable;
 
-class Invitation
+class Invitation extends Identifiable
 {
-    /**
-     * @var int
-     */
-    private $id;
-    /**
-     * @var Tournament
-     */
-    private $tournament;
-    /**
-     * @var string
-     */
-    private $emailaddress;
-    /**
-     * @var int
-     */
-    private $roles;
-    /**
-     * @var DateTimeImmutable
-     */
-    private $createdDateTime;
+    private string $emailaddress;
+    private int $roles;
+    private DateTimeImmutable|null $createdDateTime = null;
 
-    public function __construct(Tournament $tournament, string $emailaddress, int $roles)
+    public function __construct(private Tournament $tournament, string $emailaddress, int $roles)
     {
-        $this->tournament = $tournament;
-        $this->emailaddress = $emailaddress;
-        $this->roles = $roles;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
+        $this->setEmailaddress($emailaddress);
+        $this->setRoles($roles);
     }
 
     public function getTournament(): Tournament
@@ -67,7 +31,7 @@ class Invitation
         return $this->emailaddress;
     }
 
-    public function setEmailaddress(string $emailaddress)
+    final public function setEmailaddress(string $emailaddress): void
     {
         if (strlen($emailaddress) < User::MIN_LENGTH_EMAIL or strlen($emailaddress) > User::MAX_LENGTH_EMAIL) {
             throw new \InvalidArgumentException(
@@ -87,7 +51,7 @@ class Invitation
         return $this->createdDateTime;
     }
 
-    public function setCreatedDateTime(DateTimeImmutable $createdDateTime)
+    public function setCreatedDateTime(DateTimeImmutable $createdDateTime): void
     {
         $this->createdDateTime = $createdDateTime;
     }
@@ -97,7 +61,7 @@ class Invitation
         return $this->roles;
     }
 
-    public function setRoles(int $roles)
+    public function setRoles(int $roles): void
     {
         if (($roles & Role::ALL) !== $roles) {
             throw new \InvalidArgumentException("de rol heeft een onjuiste waarde", E_ERROR);

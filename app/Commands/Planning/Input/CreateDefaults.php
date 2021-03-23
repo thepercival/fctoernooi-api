@@ -1,11 +1,11 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;
 use App\QueueService;
+use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,24 +15,24 @@ use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Planning;
-use SportsHelpers\Range;
+use SportsHelpers\SportRange;
 use SportsHelpers\SportConfig as SportConfigHelper;
 use SportsPlanning\Planning\Output as PlanningOutput;
 
 class CreateDefaults extends PlanningCommand
 {
-    /**
-     * @var PlanningInputService
-     */
-    protected $planningInputSerivce;
+    protected PlanningInputService $planningInputSerivce;
+    protected EntityManager $entityManager;
 
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
         $this->planningInputSerivce = new PlanningInputService();
+        $this->entityManager = $container->get(EntityManager::class);
+
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")
@@ -60,10 +60,10 @@ class CreateDefaults extends PlanningCommand
         $tournamentStructureRanges = new TournamentStructureRanges();
         $planningInputIterator = new PlanningInputIterator(
             $this->getPlaceRange($input, $tournamentStructureRanges),
-            new Range(1, 64),
-            new Range(1, 10),// referees
-            new Range(0, 10),// fields
-            new Range(1, 2),// gameAmount
+            new SportRange(1, 64),
+            new SportRange(1, 10),// referees
+            new SportRange(0, 10),// fields
+            new SportRange(1, 2),// gameAmount
         );
         $recreate = $input->getOption("recreate");
         $onlySelfReferee = $input->getOption("onlySelfReferee");
@@ -95,7 +95,7 @@ class CreateDefaults extends PlanningCommand
             } */
 
             $planningInputIterator->next();
-            $this->planningInputRepos->getEM()->clear();
+            $this->entityManager->clear();
         }
         return 0;
     }
@@ -106,84 +106,4 @@ class CreateDefaults extends PlanningCommand
         $this->planningInputRepos->createBatchGamesPlannings($planningInput);
         return $planningInput;
     }
-
-
-//    protected function addInput(
-//        array $pouleStructure,
-//        array $sportConfig,
-//        int $nrOfReferees,
-//        int $nrOfFields,
-//        bool $teamup,
-//        bool $selfReferee,
-//        int $nrOfHeadtohead
-//    ) {
-//        /*if ($nrOfCompetitors === 6 && $nrOfPoules === 1 && $nrOfSports === 1 && $nrOfFields === 2
-//            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
-//            $w1 = 1;
-//        } else*/ /*if ($nrOfCompetitors === 12 && $nrOfPoules === 2 && $nrOfSports === 1 && $nrOfFields === 4
-//            && $nrOfReferees === 0 && $nrOfHeadtohead === 1 && $teamup === false && $selfReferee === false ) {
-//            $w1 = 1;
-//        } else {
-//            continue;
-//        }*/
-//
-//        $multipleSports = count($sportConfig) > 1;
-//        $newNrOfHeadtohead = $nrOfHeadtohead;
-//        if ($multipleSports) {
-//            //                                    if( count($sportConfig) === 4 && $sportConfig[0]["nrOfFields"] == 1 && $sportConfig[1]["nrOfFields"] == 1
-//            //                                        && $sportConfig[2]["nrOfFields"] == 1 && $sportConfig[3]["nrOfFields"] == 1
-//            //                                        && $teamup === false && $selfReferee === false && $nrOfHeadtohead === 1 && $pouleStructure == [3]  ) {
-//            //                                        $e = 2;
-//            //                                    }
-//            $newNrOfHeadtohead = $this->planningInputSerivce->getSufficientNrOfHeadtohead(
-//                $nrOfHeadtohead,
-//                min($pouleStructure),
-//                $teamup,
-//                $selfReferee,
-//                $sportConfig
-//            );
-//        }
-//        $planningInput = $this->planningInputRepos->get(
-//            $pouleStructure,
-//            $sportConfig,
-//            $nrOfReferees,
-//            $teamup,
-//            $selfReferee,
-//            $newNrOfHeadtohead
-//        );
-//        if ($planningInput !== null) {
-//            return;
-//        }
-//        $planningInput = new PlanningInput(
-//            $pouleStructure,
-//            $sportConfig,
-//            $nrOfReferees,
-//            $teamup,
-//            $selfReferee,
-//            $newNrOfHeadtohead
-//        );
-//
-//        if (!$multipleSports) {
-//            $maxNrOfFieldsInPlanning = $planningInput->getMaxNrOfBatchGames(
-//                Resources::REFEREES + Resources::PLACES
-//            );
-//            if ($nrOfFields > $maxNrOfFieldsInPlanning) {
-//                return;
-//            }
-//        } else {
-//            if ($nrOfFields > self::MAXNROFFIELDS_FOR_MULTIPLESPORTS) {
-//                return;
-//            }
-//        }
-//
-//        $maxNrOfRefereesInPlanning = $planningInput->getMaxNrOfBatchGames(
-//            Resources::FIELDS + Resources::PLACES
-//        );
-//        if ($nrOfReferees > $maxNrOfRefereesInPlanning) {
-//            return;
-//        }
-//
-//        $this->planningInputRepos->save($planningInput);
-//        // die();
-//    }
 }

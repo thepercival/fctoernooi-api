@@ -23,23 +23,23 @@ use Sports\Competition\Sport as CompetitionSport;
 
 final class GameAmountConfigAction extends Action
 {
-    protected CompetitionSportRepository $competiionSportRepos;
-    protected StructureRepository $structureRepos;
-    protected GameAmountConfigRepository $gameAmountConfigRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        CompetitionSportRepository $competiionSportRepos,
-        StructureRepository $structureRepos,
-        GameAmountConfigRepository $gameAmountConfigRepos
+        protected CompetitionSportRepository $competiionSportRepos,
+        protected StructureRepository $structureRepos,
+        protected GameAmountConfigRepository $gameAmountConfigRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->competiionSportRepos = $competiionSportRepos;
-        $this->structureRepos = $structureRepos;
-        $this->gameAmountConfigRepos = $gameAmountConfigRepos;
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
     public function save(Request $request, Response $response, $args): Response
     {
         try {
@@ -84,15 +84,14 @@ final class GameAmountConfigAction extends Action
         }
     }
 
-    protected function removeNext(RoundNumber $roundNumber, CompetitionSport $competitionSport)
+    protected function removeNext(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
     {
-        while ($roundNumber->hasNext()) {
-            $roundNumber = $roundNumber->getNext();
-            $gameAmountConfig = $roundNumber->getGameAmountConfig($competitionSport);
+        while ($next = $roundNumber->getNext()) {
+            $gameAmountConfig = $next->getGameAmountConfig($competitionSport);
             if ($gameAmountConfig === null) {
                 continue;
             }
-            $roundNumber->getGameAmountConfigs()->removeElement($gameAmountConfig);
+            $next->getGameAmountConfigs()->removeElement($gameAmountConfig);
             $this->gameAmountConfigRepos->remove($gameAmountConfig);
         }
     }

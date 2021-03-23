@@ -14,14 +14,9 @@ class Repository extends EntityRepository
 {
     use \Sports\Repository;
 
-    const MAXNROFSPONSORSPERSCREEN = 4;
+    public const MAXNROFSPONSORSPERSCREEN = 4;
 
-    public function find($id, $lockMode = null, $lockVersion = null): ?SponsorBase
-    {
-        return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    }
-
-    public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, SponsorBase $sponsor = null)
+    public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, SponsorBase $sponsor = null): void
     {
         $max = static::MAXNROFSPONSORSPERSCREEN;
         if ($sponsor === null || $sponsor->getScreenNr() !== $newScreenNr) {

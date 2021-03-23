@@ -35,32 +35,13 @@ use App\Commands\Planning as PlanningCommand;
 
 class Create extends PlanningCommand
 {
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var RoundNumberRepository
-     */
-    protected $roundNumberRepos;
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var CompetitionRepository
-     */
-    protected $competitionRepos;
-    /**
-     * @var EntityManager
-     */
-    protected $entityManager;
+    protected StructureRepository $structureRepos;
+    protected RoundNumberRepository $roundNumberRepos;
+    protected TournamentRepository $tournamentRepos;
+    protected CompetitionRepository $competitionRepos;
+    protected EntityManager $entityManager;
 
     protected bool $showSuccessful = false;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
 
     public function __construct(ContainerInterface $container)
     {
@@ -73,7 +54,7 @@ class Create extends PlanningCommand
         $this->entityManager = $container->get(EntityManager::class);
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")
@@ -152,21 +133,13 @@ class Create extends PlanningCommand
         PlanningInput $planningInput,
         Competition $competition = null,
         int $roundNumberAsValue = null
-    ) {
+    ): void {
         $planningOutput = new PlanningOutput($this->logger);
 
         $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
         // $planningSeeker->disableThrowOnTimeout();
         $planningSeeker->process($planningInput);
         $bestPlanning = $planningInput->getBestPlanning();
-        if ($bestPlanning === null) {
-            $message = "best planning not found";
-            if ($competition !== null && $roundNumberAsValue !== null) {
-                $message .= " for roundnumber " . $roundNumberAsValue . " and competitionid " . $competition->getId();
-            }
-            throw new \Exception($message, E_ERROR);
-        }
-
         if ($this->showSuccessful === true) {
             $planningOutput = new PlanningOutput($this->logger);
             $planningOutput->outputWithGames($bestPlanning, false);
@@ -181,7 +154,7 @@ class Create extends PlanningCommand
         QueueService $queueService,
         Competition $competition,
         int $roundNumberAsValue
-    ) {
+    ): void {
         $this->logger->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
 
         $this->entityManager->refresh($competition);
@@ -225,7 +198,7 @@ class Create extends PlanningCommand
         return $roundNumber;
     }
 
-    protected function refreshDb(Competition $competition, RoundNumber $roundNumber)
+    protected function refreshDb(Competition $competition, RoundNumber $roundNumber): void
     {
         // $this->entityManager->refresh($competition);
 
@@ -234,7 +207,7 @@ class Create extends PlanningCommand
         if ($roundNumber->getPlanningConfig() !== null) {
             $this->entityManager->refresh($roundNumber->getPlanningConfig());
         }
-        foreach ($roundNumber->getValidGameAmountConfigs() as $gameAmountConfig ) {
+        foreach ($roundNumber->getValidGameAmountConfigs() as $gameAmountConfig) {
             $this->entityManager->refresh($gameAmountConfig);
         }
 

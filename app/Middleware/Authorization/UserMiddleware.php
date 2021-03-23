@@ -11,10 +11,10 @@ use App\Middleware\AuthorizationMiddleware;
 
 class UserMiddleware extends AuthorizationMiddleware
 {
-    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null)
+    protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void
     {
         if ($user === null) {
-            throw new \Exception("je moet ingelogd zijn voor dit toernooi", E_ERROR);
+            throw new \Exception('je moet ingelogd zijn voor dit toernooi', E_ERROR);
         };
     }
 }

@@ -1,11 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export;
 
 use FCToernooi\Tournament;
-use Sports\Place\Location\Map as PlaceLocationMap;
+use Sports\Competitor\Map as CompetitorMap;
 use Sports\Game;
 use Sports\NameService;
 use Sports\Round;
@@ -36,9 +35,9 @@ trait Document
      */
     protected $nameService;
     /**
-     * @var PlaceLocationMap
+     * @var CompetitorMap
      */
-    protected $placeLocationMap;
+    protected $competitorMap;
     /**
      * @var string
      */
@@ -74,13 +73,13 @@ trait Document
             if ($roundNumber->getValidPlanningConfig()->selfRefereeEnabled()) {
                 $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
                 if (count(
-                        array_filter(
+                    array_filter(
                             $games,
                             function (Game $game): bool {
                                 return $game->getRefereePlace() !== null;
                             }
                         )
-                    ) > 0) {
+                ) > 0) {
                     return true;
                 }
             }
@@ -125,17 +124,18 @@ trait Document
     public function getNameService(): NameService
     {
         if ($this->nameService === null) {
-            $this->nameService = new NameService( $this->getPlaceLocationMap() );
+            $this->nameService = new NameService($this->getPlaceLocationMap());
         }
         return $this->nameService;
     }
 
-    public function getPlaceLocationMap(): PlaceLocationMap
+    public function getPlaceLocationMap(): CompetitorMap
     {
-        if ($this->placeLocationMap === null) {
-            $this->placeLocationMap = new PlaceLocationMap( $this->tournament->getCompetitors()->toArray() );
+        if ($this->competitorMap === null) {
+            $competitors = array_values($this->tournament->getCompetitors()->toArray());
+            $this->competitorMap = new CompetitorMap($competitors);
         }
-        return $this->placeLocationMap;
+        return $this->competitorMap;
     }
 
 

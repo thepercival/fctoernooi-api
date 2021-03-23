@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Middleware\Authorization\Tournament\Admin;
@@ -7,6 +6,7 @@ namespace App\Middleware\Authorization\Tournament\Admin;
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
 use FCToernooi\Role;
 use FCToernooi\TournamentUser;
+use Sports\Game;
 use Sports\Game\Repository as GameRepository;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteContext;
@@ -14,23 +14,21 @@ use Slim\Routing\RouteContext;
 class GameAdminMiddleware extends AuthorizationTournamentAdminMiddleware
 {
     /**
-     * @var GameRepository
+     * GameAdminMiddleware constructor.
+     * @param GameRepository<Game> $gameRepos
      */
-    protected $gameRepos;
-
-    public function __construct(GameRepository $gameRepos)
+    public function __construct(protected GameRepository $gameRepos)
     {
-        $this->gameRepos = $gameRepos;
     }
 
-    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser)
+    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
         if ($tournamentUser->hasRoles(Role::GAMERESULTADMIN)) {
             return;
         }
         if ($tournamentUser->hasRoles(Role::REFEREE) === false) {
             throw new \Exception(
-                "je bent geen " . Role::getName(Role::REFEREE) . " of " . Role::getName(
+                'je bent geen ' . Role::getName(Role::REFEREE) . " of " . Role::getName(
                     Role::GAMERESULTADMIN
                 ) . " voor dit toernooi", E_ERROR
             );

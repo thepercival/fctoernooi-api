@@ -51,10 +51,7 @@ class User extends Identifiable
         $this->setEmailaddress($emailaddress);
     }
 
-    /**
-     * @return string
-     */
-    public function getEmailaddress()
+    public function getEmailaddress(): string
     {
         return $this->emailaddress;
     }

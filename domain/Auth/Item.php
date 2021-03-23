@@ -6,27 +6,16 @@ namespace FCToernooi\Auth;
 
 class Item
 {
-    /**
-     * @var string
-     */
-    protected $token;
-    /**
-     * @var int
-     */
-    protected $userId;
-
-    public function __construct(string $token, int $userId)
+    public function __construct(protected string $token, protected int|string $userId)
     {
-        $this->token = $token;
-        $this->userId = $userId;
     }
 
-    public function getToken()
+    public function getToken(): string
     {
         return $this->token;
     }
 
-    public function getUserId()
+    public function getUserId(): string|int
     {
         return $this->userId;
     }

@@ -37,8 +37,8 @@ $commands = [
     }
 ];
 
-$commands["app:list"] = function (ContainerInterface $container) use($commands) : ListingCommand {
-    return new ListingCommand($container, array_keys( $commands) );
+$commands["app:list"] = function (ContainerInterface $container) use ($commands) : ListingCommand {
+    return new ListingCommand($container, array_keys($commands));
 };
 
 return $commands;

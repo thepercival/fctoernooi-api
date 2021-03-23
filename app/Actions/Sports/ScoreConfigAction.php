@@ -25,24 +25,23 @@ use Sports\Score\Config as ScoreConfig;
 
 final class ScoreConfigAction extends Action
 {
-    protected CompetitionSportRepository $competiionSportRepos;
-    protected StructureRepository $structureRepos;
-    protected ScoreConfigRepository $scoreConfigRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        CompetitionSportRepository $competiionSportRepos,
-        StructureRepository $structureRepos,
-        ScoreConfigRepository $scoreConfigRepos
+        protected CompetitionSportRepository $competiionSportRepos,
+        protected StructureRepository $structureRepos,
+        protected ScoreConfigRepository $scoreConfigRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->competiionSportRepos = $competiionSportRepos;
-        $this->structureRepos = $structureRepos;
-        $this->scoreConfigRepos = $scoreConfigRepos;
     }
 
-    public function save(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function save(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -95,7 +94,7 @@ final class ScoreConfigAction extends Action
         }
     }
 
-    protected function removeNext(Round $round, CompetitionSport $competitionSport)
+    protected function removeNext(Round $round, CompetitionSport $competitionSport): void
     {
         foreach ($round->getChildren() as $childRound) {
             $scoreConfig = $childRound->getScoreConfig($competitionSport);

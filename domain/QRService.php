@@ -71,7 +71,7 @@ class QRService
         return $pathWithoutExtension . ".jpg";
     }
 
-    protected function writeToPng(string $path, string $qrCodeText, int $imgWidthPx)
+    protected function writeToPng(string $path, string $qrCodeText, int $imgWidthPx): void
     {
         if (file_exists($path)) {
             return;

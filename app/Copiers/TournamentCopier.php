@@ -25,29 +25,13 @@ use FCToernooi\TournamentUser;
 
 class TournamentCopier
 {
-    /**
-     * @var SportRepository
-     */
-    protected $sportRepos;
-    /**
-     * @var SeasonRepository
-     */
-    protected $seasonRepos;
-    /**
-     * @var LockerRoomRepository
-     */
-    protected $lockerRoomRepos;
 
     public function __construct(
-        SportRepository $sportRepos,
-        SeasonRepository $seasonRepos,
-        LockerRoomRepository $lockerRoomRepos
+        private SportRepository $sportRepos,
+        private SeasonRepository $seasonRepos,
+        private LockerRoomRepository $lockerRoomRepos
     ) {
-        $this->sportRepos = $sportRepos;
-        $this->seasonRepos = $seasonRepos;
-        $this->lockerRoomRepos = $lockerRoomRepos;
     }
-
 
     public function copy(Tournament $tournament, DateTimeImmutable $newStartDateTime, User $user): Tournament
     {
@@ -85,8 +69,7 @@ class TournamentCopier
                 }
             }
             foreach ($refereesSer as $refereeSer) {
-                $referee = new Referee($newCompetition, $refereeSer->getPriority());
-                $referee->setInitials($refereeSer->getInitials());
+                $referee = new Referee($newCompetition, $refereeSer->getInitials(), $refereeSer->getPriority());
                 $referee->setName($refereeSer->getName());
                 $referee->setEmailaddress($refereeSer->getEmailaddress());
                 $referee->setInfo($refereeSer->getInfo());
@@ -105,8 +88,7 @@ class TournamentCopier
             $diffEnd = $tournament->getCompetition()->getStartDateTime()->diff($tournament->getBreakEndDateTime());
             $newTournament->setBreakEndDateTime($newStartDateTime->add($diffEnd));
         }
-        $public = $tournament->getPublic() !== null ? $tournament->getPublic() : true;
-        $newTournament->setPublic($public);
+        $newTournament->setPublic($tournament->getPublic());
 
         foreach ($tournament->getUsers() as $tournamentUser) {
             new TournamentUser($newTournament, $tournamentUser->getUser(), $tournamentUser->getRoles());
@@ -115,7 +97,7 @@ class TournamentCopier
         return $newTournament;
     }
 
-    protected function createAssociationFromUserIdAndDateTime($userId): Association
+    protected function createAssociationFromUserIdAndDateTime(string|int $userId): Association
     {
         $dateTime = new DateTimeImmutable();
         return new Association($userId . '-' . $dateTime->getTimestamp());
@@ -124,10 +106,10 @@ class TournamentCopier
     /**
      * @param Tournament $sourceTournament
      * @param Tournament $newTournament
-     * @param array|Competitor[] $newCompetitors
+     * @param list<Competitor> $newCompetitors
      * @throws Exception
      */
-    public function copyLockerRooms(Tournament $sourceTournament, Tournament $newTournament, array $newCompetitors)
+    public function copyLockerRooms(Tournament $sourceTournament, Tournament $newTournament, array $newCompetitors): void
     {
         foreach ($sourceTournament->getLockerRooms() as $sourceLockerRoom) {
             $newLocerRoom = new LockerRoom($newTournament, $sourceLockerRoom->getName());

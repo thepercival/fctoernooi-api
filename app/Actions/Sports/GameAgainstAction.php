@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
@@ -25,30 +24,25 @@ use Sports\Qualify\Service as QualifyService;
 
 final class GameAgainstAction extends Action
 {
-    protected AgainstGameRepository $gameRepos;
-    protected PouleRepository $pouleRepos;
-    protected PlaceRepository $placeRepos;
-    protected StructureRepository $structureRepos;
-    protected AgainstScoreRepository $scoreRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        AgainstGameRepository $gameRepos,
-        PouleRepository $pouleRepos,
-        PlaceRepository $placeRepos,
-        StructureRepository $structureRepos,
-        AgainstScoreRepository $scoreRepos
+        protected AgainstGameRepository $gameRepos,
+        protected PouleRepository $pouleRepos,
+        protected PlaceRepository $placeRepos,
+        protected StructureRepository $structureRepos,
+        protected AgainstScoreRepository $scoreRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->gameRepos = $gameRepos;
-        $this->pouleRepos = $pouleRepos;
-        $this->placeRepos = $placeRepos;
-        $this->structureRepos = $structureRepos;
-        $this->scoreRepos = $scoreRepos;
     }
 
-    public function edit(Request $request, Response $response, $args): Response
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function edit(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Competition $competition */
@@ -115,7 +109,7 @@ final class GameAgainstAction extends Action
      * @param Competition $competition
      * @param Poule $poule
      * @param int $originalPouleState
-     * @return array|Place[]
+     * @return list<Place>
      */
     protected function getChangedQualifyPlaces(Competition $competition, Poule $poule, int $originalPouleState): array
     {
@@ -125,7 +119,7 @@ final class GameAgainstAction extends Action
         }
         $structure = $this->structureRepos->getStructure($competition);
 
-        $qualifyService = new QualifyService($poule->getRound(), $competition->getRankingRuleSet());
+        $qualifyService = new QualifyService($poule->getRound());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
         return $qualifyService->setQualifiers($pouleToFilter);
     }

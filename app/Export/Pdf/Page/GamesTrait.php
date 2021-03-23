@@ -1,9 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use SportsHelpers\Against\Side as AgainstSide;
 use App\Export\Excel\Worksheet\Planning;
 use Sports\Game;
 use Sports\Round\Number as RoundNumber;
@@ -244,7 +244,7 @@ trait GamesTrait
         );
         // }
 
-        $home = $nameService->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+        $home = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), true, true);
         $nX = $this->drawCell($home, $nX, $nY, $this->getGamesHomeWidth(), $nRowHeight, Page::ALIGNRIGHT, "black");
 
         $nX = $this->drawCell(
@@ -257,7 +257,7 @@ trait GamesTrait
             "black"
         );
 
-        $away = $nameService->getPlacesFromName($game->getPlaces(Game::AWAY), true, true);
+        $away = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::AWAY), true, true);
         $nX = $this->drawCell($away, $nX, $nY, $this->getGamesAwayWidth(), $nRowHeight, Page::ALIGNLEFT, "black");
 
         if ($game->getReferee() !== null) {

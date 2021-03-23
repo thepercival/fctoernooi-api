@@ -1,36 +1,36 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
 class Token
 {
-    protected $decoded;
-
-    public function __construct(array $decoded)
+    /**
+     * @param array<string, string|int|array>|null $decoded
+     */
+    public function __construct(protected array|null $decoded = null)
     {
-        $this->populate($decoded);
     }
 
-    protected function populate($decoded)
-    {
-        $this->decoded = $decoded;
-    }
-
-    public function hasScope(array $scope)
+    /**
+     * @param array<string, string|int> $scope
+     * @return bool
+     */
+    public function hasScope(array $scope): bool
     {
         $arr = array_intersect($scope, $this->decoded["scope"]);
         return count($arr) > 0;
     }
 
-    public function isPopulated()
+    public function isPopulated(): bool
     {
         return $this->decoded !== null;
     }
 
-    public function getUserId()
+    public function getUserId(): int|string
     {
-        return $this->decoded["sub"];
+        /** @var string|int $sub */
+        $sub = $this->decoded['sub'];
+        return $sub;
     }
 }

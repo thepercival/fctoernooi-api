@@ -1,7 +1,5 @@
 <?php
-
 declare(strict_types=1);
-
 
 namespace App\Export\Excel\Worksheet;
 
@@ -9,23 +7,23 @@ use App\Export\Excel\Spreadsheet;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Game;
 use Sports\Place;
-use Sports\Ranking\Service as RankingService;
-use Sports\Round;
+use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
+use SportsHelpers\Against\Side as AgainstSide;
 use Sports\Poule;
 use Sports\NameService;
 use App\Export\Excel\Worksheet as FCToernooiWorksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use Sports\Round\Number as RoundNumber;
-use Sports\Sport\ScoreConfig\Service as SportScoreConfigService;
+use Sports\Score\Config\Service as ScoreConfigService;
 use Sports\State;
 
 class PoulePivotTables extends FCToernooiWorksheet
 {
     /**
-     * @var SportScoreConfigService
+     * @var ScoreConfigService
      */
-    protected $sportScoreConfigService;
+    protected $scoreConfigService;
     /**
      * @var int
      */
@@ -38,7 +36,7 @@ class PoulePivotTables extends FCToernooiWorksheet
     {
         parent::__construct($parent, 'draaitabellen');
         $parent->addSheet($this, Spreadsheet::INDEX_POULEPIVOTTABLES);
-        $this->sportScoreConfigService = new SportScoreConfigService();
+        $this->scoreConfigService = new ScoreConfigService();
         $this->setCustomHeader();
     }
 
@@ -202,7 +200,7 @@ class PoulePivotTables extends FCToernooiWorksheet
         $foundHomeGames = array_filter(
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
-                return $game->isParticipating($awayPlace, Game::AWAY) && $game->isParticipating($homePlace, Game::HOME);
+                return $game->isParticipating($awayPlace, Game::AWAY) && $game->isParticipating($homePlace, AgainstSide::HOME);
             }
         );
         if (count($foundHomeGames) > 1) {
@@ -214,7 +212,7 @@ class PoulePivotTables extends FCToernooiWorksheet
         $foundAwayGames = array_filter(
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
-                return $game->isParticipating($homePlace, Game::AWAY) && $game->isParticipating($awayPlace, Game::HOME);
+                return $game->isParticipating($homePlace, Game::AWAY) && $game->isParticipating($awayPlace, AgainstSide::HOME);
             }
         );
         if (count($foundAwayGames) !== 1) {

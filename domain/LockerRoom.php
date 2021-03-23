@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -12,22 +11,16 @@ use SportsHelpers\Identifiable;
 class LockerRoom extends Identifiable
 {
     protected string $name;
-    protected Tournament $tournament;
     /**
-     * @var ArrayCollection|Competitor[]
+     * @var ArrayCollection<int|string, Competitor>
      */
-    private $competitors;
-    /**
-     * @var Collection|int[]
-     */
-    private $competitorIds;
+    private ArrayCollection $competitors;
 
     const MIN_LENGTH_NAME = 1;
     const MAX_LENGTH_NAME = 6;
 
-    public function __construct(Tournament $tournament, string $name)
+    public function __construct(protected Tournament $tournament, string $name)
     {
-        $this->tournament = $tournament;
         $this->tournament->getLockerRooms()->add($this);
         $this->competitors = new ArrayCollection();
         $this->setName($name);
@@ -43,11 +36,11 @@ class LockerRoom extends Identifiable
         return $this->name;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): void
     {
-        if (strlen($name) < static::MIN_LENGTH_NAME or strlen($name) > static::MAX_LENGTH_NAME) {
+        if (strlen($name) < self::MIN_LENGTH_NAME or strlen($name) > self::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(
-                "de naam moet minimaal " . static::MIN_LENGTH_NAME . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_NAME . " karakters bevatten",
+                'de naam moet minimaal ' . self::MIN_LENGTH_NAME . ' karakters bevatten en mag maximaal ' . self::MAX_LENGTH_NAME . " karakters bevatten",
                 E_ERROR
             );
         }
@@ -55,41 +48,22 @@ class LockerRoom extends Identifiable
     }
 
     /**
-     * @return Competitor[] | ArrayCollection
+     * @return ArrayCollection<int|string, Competitor>
      */
-    public function getCompetitors()
+    public function getCompetitors(): ArrayCollection
     {
         return $this->competitors;
     }
 
     /**
-     * @param ArrayCollection $competitors
+     * @return list<int|string>
      */
-    public function setCompetitors(ArrayCollection $competitors)
+    public function getCompetitorIds(): array
     {
-        $this->competitors = $competitors;
-    }
-
-    /**
-     * @return Collection|int[]
-     */
-    public function getCompetitorIds()
-    {
-        if ($this->competitorIds !== null) {
-            return $this->competitorIds;
-        }
-        return $this->competitors->map(
-            function ($competitor) {
+        return array_values($this->competitors->map(
+            function (Competitor $competitor): string|int {
                 return $competitor->getId();
             }
-        );
-    }
-
-    /**
-     * @param Collection | int[] $competitorIds
-     */
-    public function setCompetitorIds(Collection $competitorIds)
-    {
-        $this->competitorIds = $competitorIds;
+        )->toArray());
     }
 }

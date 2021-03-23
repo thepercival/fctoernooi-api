@@ -17,7 +17,7 @@ class Repository extends EntityRepository
 {
     use \Sports\Repository;
 
-    public function syncCompetitors(Tournament $tournament, Round $rootRound)
+    public function syncCompetitors(Tournament $tournament, Round $rootRound): void
     {
         /**
          * @param Round $rootRound

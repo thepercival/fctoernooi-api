@@ -18,32 +18,21 @@ use Symfony\Component\Console\Input\InputOption;
 
 class Command extends SymCommand
 {
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-    /**
-     * @var Mailer
-     */
-    protected $mailer;
-    /**
-     * @var Configuration
-     */
-    protected $config;
-
-    public function __construct(Configuration $config)
+    protected LoggerInterface $logger;
+    protected Mailer $mailer;
+    public function __construct(protected Configuration $config)
     {
         parent::__construct();
         $this->config = $config;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addOption('logtofile', null, InputOption::VALUE_NONE, 'logtofile?');
         $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '100');
     }
 
-    protected function initLogger(InputInterface $input, string $name)
+    protected function initLogger(InputInterface $input, string $name): void
     {
         $loggerSettings = $this->config->getArray('logger');
         $logLevel = $loggerSettings['level'];

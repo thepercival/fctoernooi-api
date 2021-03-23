@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Excel\Worksheet;
@@ -7,7 +6,7 @@ namespace App\Export\Excel\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Sports\Game;
 use Sports\Round\Number as RoundNumber;
-use App\Export\Pdf\Page;
+use SportsHelpers\Against\Side as AgainstSide;
 use Sports\State;
 
 trait GamesTrait
@@ -119,7 +118,7 @@ trait GamesTrait
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $cell->setValue($game->getField()->getName());
 
-        $home = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(Game::HOME), true, true);
+        $home = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(AgainstSide::HOME), true, true);
         $cell = $this->getCellByColumnAndRow(Planning::COLUMN_HOME, $row);
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $cell->setValue($home);
@@ -128,7 +127,7 @@ trait GamesTrait
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $cell->setValue($this->getScore($game));
 
-        $away = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(Game::AWAY), true, true);
+        $away = $this->getParent()->getNameService()->getPlacesFromName($game->getPlaces(AgainstSide::AWAY), true, true);
         $cell = $this->getCellByColumnAndRow(Planning::COLUMN_AWAY, $row);
         $cell->getStyle()->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
         $cell->setValue($away);

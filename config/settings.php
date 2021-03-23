@@ -92,6 +92,6 @@ return [
         'user' => 'guest',
         'pass' => 'guest',
         'persisted' => false,
-        'queueSuffix' => getenv('QUEUE_NAME_SUFFIX')
+        'suffix' => getenv('QUEUE_NAME_SUFFIX')
     ]
 ];

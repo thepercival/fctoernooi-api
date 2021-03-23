@@ -10,7 +10,7 @@ use Psr\Container\ContainerInterface;
 use App\Command;
 use SportsHelpers\PouleStructure;
 use SportsPlanning\Planning;
-use SportsPlanning\SelfReferee;
+use SportsHelpers\SelfReferee;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -57,7 +57,7 @@ class Validator extends Command
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             // the name of the command (the part after "bin/console")
@@ -84,7 +84,7 @@ class Validator extends Command
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'command-planning-validate');
 
@@ -121,7 +121,7 @@ class Validator extends Command
     }
 
     /**
-     * @return array|PlanningInput[]
+     * @return list<PlanningInput>
      */
     protected function getPlanningInputsToValidate(InputInterface $input): array
     {
@@ -146,7 +146,16 @@ class Validator extends Command
         return $this->planningInputRepos->findNotValidated($validateInvalid, $maxNrOfInputs, $pouleStructure, $selfReferee);
     }
 
-    protected function validatePlanningInput(PlanningInput $planningInputParam, bool $resetPlanningInputWhenInvalid, array &$showNrOfPlaces = null)
+    /**
+     * @param PlanningInput $planningInputParam
+     * @param bool $resetPlanningInputWhenInvalid
+     * @param array<int, bool>|null $showNrOfPlaces
+     * @throws Exception
+     */
+    protected function validatePlanningInput(
+        PlanningInput $planningInputParam,
+        bool $resetPlanningInputWhenInvalid,
+        array &$showNrOfPlaces = null): void
     {
         $planningInput = $this->planningInputRepos->getFromInput($planningInputParam);
 
@@ -181,7 +190,7 @@ class Validator extends Command
         }
     }
 
-    protected function setValidity(Planning $planning, int $validity)
+    protected function setValidity(Planning $planning, int $validity): void
     {
         $planning->setValidity($validity);
         $this->planningRepos->save($planning);

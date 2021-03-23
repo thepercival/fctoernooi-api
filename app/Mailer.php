@@ -10,46 +10,28 @@ use Psr\Log\LoggerInterface;
 final class Mailer
 {
     /**
-     * @var LoggerInterface
+     * @param LoggerInterface $logger
+     * @param string $fromEmailaddress
+     * @param string $fromName
+     * @param string $adminEmailaddress
+     * @param array<string, string|int>|null $smtpConfig
      */
-    protected $logger;
-    /**
-     * @var string
-     */
-    private $fromEmailaddress;
-    /**
-     * @var string
-     */
-    private $fromName;
-    /**
-     * @var string
-     */
-    protected $adminEmailaddress;
-    /**
-     * @var array
-     */
-    protected $smtpConfig;
-
     public function __construct(
-        LoggerInterface $logger,
-        string $fromEmailaddress,
-        string $fromName,
-        string $adminEmailaddress,
-        array $smtpConfig = null
+        protected LoggerInterface $logger,
+        protected string $fromEmailaddress,
+        protected string $fromName,
+        protected string $adminEmailaddress,
+        protected array|null $smtpConfig = null
     ) {
-        $this->logger = $logger;
-        $this->fromEmailaddress = $fromEmailaddress;
-        $this->fromName = $fromName;
-        $this->adminEmailaddress = $adminEmailaddress;
-        $this->smtpConfig = $smtpConfig;
+
     }
 
-    public function sendToAdmin(string $subject, string $body, bool $text = null)
+    public function sendToAdmin(string $subject, string $body, bool $text = null): void
     {
         $this->send($subject, $body, $this->adminEmailaddress, $text);
     }
 
-    public function send(string $subject, string $body, string $toEmailaddress, bool $text = null)
+    public function send(string $subject, string $body, string $toEmailaddress, bool $text = null): void
     {
         $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp();
         // $mailer->'MIME-Version' = '1.0';

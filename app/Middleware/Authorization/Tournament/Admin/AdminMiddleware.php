@@ -14,7 +14,7 @@ use FCToernooi\TournamentUser;
 
 class AdminMiddleware extends AuthorizationTournamentAdminMiddleware
 {
-    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser)
+    protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
         if ($tournamentUser->hasRoles(Role::ADMIN) === false) {
             throw new \Exception("je bent geen " . Role::getName(Role::ADMIN) . " voor dit toernooi", E_ERROR);
