@@ -1,9 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
+use SportsHelpers\Repository as BaseRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Tournament as TournamentBase;
@@ -20,7 +20,7 @@ use Sports\League\Repository as LeagueRepository;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 
     public function customPersist(TournamentBase $tournament, bool $flush): void
     {

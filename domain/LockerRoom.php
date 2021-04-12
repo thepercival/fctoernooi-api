@@ -5,6 +5,7 @@ namespace FCToernooi;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\PersistentCollection;
 use FCToernooi\Competitor;
 use SportsHelpers\Identifiable;
 
@@ -12,9 +13,10 @@ class LockerRoom extends Identifiable
 {
     protected string $name;
     /**
-     * @var ArrayCollection<int|string, Competitor>
+     * @phpstan-var ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
+     * @psalm-var ArrayCollection<int|string, Competitor>
      */
-    private ArrayCollection $competitors;
+    private ArrayCollection|PersistentCollection $competitors;
 
     const MIN_LENGTH_NAME = 1;
     const MAX_LENGTH_NAME = 6;
@@ -36,7 +38,7 @@ class LockerRoom extends Identifiable
         return $this->name;
     }
 
-    public function setName(string $name): void
+    final public function setName(string $name): void
     {
         if (strlen($name) < self::MIN_LENGTH_NAME or strlen($name) > self::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(
@@ -48,21 +50,22 @@ class LockerRoom extends Identifiable
     }
 
     /**
-     * @return ArrayCollection<int|string, Competitor>
+     * @phpstan-return ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
+     * @psalm-return ArrayCollection<int|string, Competitor>
      */
-    public function getCompetitors(): ArrayCollection
+    public function getCompetitors(): ArrayCollection|PersistentCollection
     {
         return $this->competitors;
     }
 
     /**
-     * @return list<int|string>
+     * @return list<int>
      */
     public function getCompetitorIds(): array
     {
         return array_values($this->competitors->map(
-            function (Competitor $competitor): string|int {
-                return $competitor->getId();
+            function (Competitor $competitor): int {
+                return (int)$competitor->getId();
             }
         )->toArray());
     }

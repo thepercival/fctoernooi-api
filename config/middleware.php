@@ -51,8 +51,11 @@ return function (App $app): void {
                            return new UnauthorizedResponse($arguments['message']);
                        },
                 'before' => function (Request $request, $arguments): Request {
-                    $token = new AuthToken($arguments['decoded']);
-                    return $request->withAttribute('token', $token);
+                    if (is_array($arguments['decoded']) && count($arguments['decoded']) > 0) {
+                        $token = new AuthToken($arguments['decoded']);
+                        return $request->withAttribute('token', $token);
+                    }
+                    return $request;
                 }
                    ]
         )

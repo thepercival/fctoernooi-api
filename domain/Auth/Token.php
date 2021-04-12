@@ -5,32 +5,21 @@ namespace FCToernooi\Auth;
 
 class Token
 {
-    /**
-     * @param array<string, string|int|array>|null $decoded
-     */
-    public function __construct(protected array|null $decoded = null)
-    {
-    }
+//    protected \DateTimeImmutable $iat;
+//    protected \DateTimeImmutable $exp;
+//    protected string $jti;
+    protected string|int $userId;
 
     /**
-     * @param array<string, string|int> $scope
-     * @return bool
+     * @param array<string, string|int> $decoded
      */
-    public function hasScope(array $scope): bool
+    public function __construct(array $decoded)
     {
-        $arr = array_intersect($scope, $this->decoded["scope"]);
-        return count($arr) > 0;
-    }
-
-    public function isPopulated(): bool
-    {
-        return $this->decoded !== null;
+        $this->userId = $decoded['sub'];
     }
 
     public function getUserId(): int|string
     {
-        /** @var string|int $sub */
-        $sub = $this->decoded['sub'];
-        return $sub;
+        return $this->userId;
     }
 }

@@ -12,31 +12,9 @@ use SportsHelpers\Identifiable;
 class User extends Identifiable
 {
     private string $emailaddress;
-
-    /**
-     * @var string
-     */
-    private $password;
-
-    /**
-     * @var string
-     */
-    private $salt;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var string
-     */
-    private $forgetpassword;
-
-    /**
-     * @var bool
-     */
-    private $validated;
+    private string|null $name = null;
+    private string|null $forgetpassword = null;
+    private bool $validated;
 
     const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
     const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
@@ -45,7 +23,7 @@ class User extends Identifiable
     const MIN_LENGTH_NAME = 3;
     const MAX_LENGTH_NAME = 15;
 
-    public function __construct(string $emailaddress)
+    public function __construct(string $emailaddress, protected string $salt, protected string $password)
     {
         $this->validated = false;
         $this->setEmailaddress($emailaddress);
@@ -70,25 +48,25 @@ class User extends Identifiable
         $this->emailaddress = $emailaddress;
     }
 
-    public function getPassword(): string|null
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    public function setPassword(string|null $password): void
+    public function setPassword(string $password): void
     {
-        if ($password !== null && strlen($password) === 0) {
+        if (strlen($password) === 0) {
             throw new \InvalidArgumentException("de wachtwoord-hash mag niet leeg zijn", E_ERROR);
         }
         $this->password = $password;
     }
 
-    public function getSalt(): string|null
+    public function getSalt(): string
     {
         return $this->salt;
     }
 
-    public function setSalt(string|null $salt): void
+    public function setSalt(string $salt): void
     {
         $this->salt = $salt;
     }
@@ -136,7 +114,7 @@ class User extends Identifiable
     public function getForgetpasswordToken(): string
     {
         $forgetpassword = $this->getForgetpassword();
-        if (strlen($forgetpassword) === 0) {
+        if ($forgetpassword === null || strlen($forgetpassword) === 0) {
             return '';
         }
         $arrForgetPassword = explode(':', $forgetpassword);
@@ -146,7 +124,7 @@ class User extends Identifiable
     public function getForgetpasswordDeadline(): DateTimeImmutable|null
     {
         $forgetpassword = $this->getForgetpassword();
-        if (strlen($forgetpassword) === 0) {
+        if ($forgetpassword === null || strlen($forgetpassword) === 0) {
             return null;
         }
         $arrForgetPassword = explode(':', $forgetpassword);

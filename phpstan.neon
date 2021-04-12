@@ -2,13 +2,14 @@ parameters:
     level: 6
     paths:
         - domain
-        - tests/cases
-        - app
-        - config
+        #- tests/cases
+        #- app
+        #- config
+        #- serialization/handler
     excludePaths:
         - app/Export/*
     inferPrivatePropertyTypeFromConstructor:
         true
-    doctrine:
-        repositoryClass:
-            \Sports\Repository
+#    doctrine:
+#        objectManagerLoader: build/phpstan/doctrine-orm-bootstrap.php
+#        repositoryClass: \Sports\Repository

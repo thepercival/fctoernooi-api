@@ -45,6 +45,7 @@ final class TournamentAction extends Action
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private TournamentCopier $tournamentCopier,
+        private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
         private LockerRoomRepistory $lockerRoomRepos,
         private EntityManager $entityManager,
@@ -175,7 +176,6 @@ final class TournamentAction extends Action
                 $tournamentSer->getCompetition()->getStartDateTime(),
                 $user
             );
-            $tournament->setCreatedDateTime(new DateTimeImmutable());
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
@@ -274,13 +274,11 @@ final class TournamentAction extends Action
             $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
 
             $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
-            $newTournament->setCreatedDateTime(new DateTimeImmutable());
             $this->tournamentRepos->customPersist($newTournament, true);
 
             $structure = $this->structureRepos->getStructure($competition);
 
-            $structureCopier = new StructureCopier($newTournament->getCompetition() );
-            $newStructure = $structureCopier->copy($structure);
+            $newStructure = $this->structureCopier->copy($structure, $newTournament->getCompetition());
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure);

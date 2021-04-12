@@ -57,6 +57,7 @@ final class GameAgainstAction extends Action
             $initialPouleState = $poule->getState();
 
             /** @var AgainstGame $gameSer */
+
             $gameSer = $this->serializer->deserialize($this->getRawData(), AgainstGame::class, 'json');
 
             $game = $this->gameRepos->find((int)$args["gameId"]);
@@ -132,7 +133,7 @@ final class GameAgainstAction extends Action
     protected function shouldQualifiersBeCalculatedForRound(Poule $poule): bool
     {
         foreach ($poule->getRound()->getQualifyGroups() as $qualifyGroup) {
-            if ($qualifyGroup->getNrOfToPlacesTooMuch() > 0) {
+            if ($qualifyGroup->getMultipleRule() !== null) {
                 return true;
             }
         }

@@ -61,7 +61,7 @@ class Invitation extends Identifiable
         return $this->roles;
     }
 
-    public function setRoles(int $roles): void
+    final public function setRoles(int $roles): void
     {
         if (($roles & Role::ALL) !== $roles) {
             throw new \InvalidArgumentException("de rol heeft een onjuiste waarde", E_ERROR);

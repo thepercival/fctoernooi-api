@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\ViewHelpers;
@@ -10,58 +9,23 @@ use Sports\Structure;
 use Sports\Structure\Validator as StructureValidator;
 use Sports\Round\Number\GamesValidator;
 use Sports\Round\Number as RoundNumber;
+use Sports\Game\Together as TogetherGame;
+use Sports\Game\Against as AgainstGame;
 
 class TournamentReport
 {
-
-    /**
-     * @var string
-     */
-    public $name;
-    /**
-     * @var string
-     */
-    public $firstRoundStructure;
-    /**
-     * @var int
-     */
-    public $nrOfRoundNumbers;
-    /**
-     * @var string
-     */
-    public $validateMessage;
-    /**
-     * @var string
-     */
-    public $validatePlanningMessage;
-    /**
-     * @var string
-     */
-    public $competitorUsage;
-    /**
-     * @var string
-     */
-    public $refereeUsage;
-    /**
-     * @var string
-     */
-    public $lockerRoomUsage;
-    /**
-     * @var string
-     */
-    public $exported;
-    /**
-     * @var string
-     */
-    public $scoresUsage;
-    /**
-     * @var string
-     */
-    public $createdDateTime;
-    /**
-     * @var string
-     */
-    public $publicUrl;
+    public string $name;
+    public string $firstRoundStructure;
+    public int $nrOfRoundNumbers;
+    public string|null $validateMessage = null;
+    public string|null $validatePlanningMessage = null;
+    public string $competitorUsage;
+    public string $refereeUsage;
+    public string $lockerRoomUsage;
+    public string $exported;
+    public string $scoresUsage;
+    public string $createdDateTime;
+    public string|null $publicUrl;
 
     public function __construct(Tournament $tournament, Structure $structure, string $publicUrl = null)
     {
@@ -70,7 +34,8 @@ class TournamentReport
         $nrOfPlaces = $firstRoundNumber->getNrOfPlaces();
         $this->name = $competition->getLeague()->getName();
         $this->publicUrl = $publicUrl;
-        $this->firstRoundStructure = $nrOfPlaces . '(' . count($firstRoundNumber->getPoules()) . ')';;
+        $this->firstRoundStructure = $nrOfPlaces . '(' . count($firstRoundNumber->getPoules()) . ')';
+        ;
         $this->nrOfRoundNumbers = count($structure->getRoundNumbers());
         $this->competitorUsage = count($tournament->getCompetitors()) . '/' . $nrOfPlaces;
         $nrOfReferees = $competition->getReferees()->count();
@@ -104,12 +69,21 @@ class TournamentReport
     {
         foreach ($roundNumber->getGames() as $game) {
             $nrOfGames++;
-            if ($game->getScores()->count() > 0) {
-                $nrOfScores++;
+            if ($game instanceof AgainstGame) {
+                if ($game->getScores()->count() > 0) {
+                    $nrOfScores++;
+                }
+            } else {
+                foreach ($game->getPlaces() as $gamePlace) {
+                    if ($gamePlace->getScores()->count() > 0) {
+                        $nrOfScores++;
+                    }
+                }
             }
         }
-        if ($roundNumber->hasNext()) {
-            $this->getScoresUsage($roundNumber->getNext(), $nrOfGames, $nrOfScores);
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->getScoresUsage($nextRoundNumber, $nrOfGames, $nrOfScores);
         }
     }
 }

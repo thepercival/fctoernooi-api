@@ -4,38 +4,13 @@ declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
-use Doctrine\DBAL\Connection;
-use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Role\Repository as RoleRepository;
-use FCToernooi\TournamentUser;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use Firebase\JWT\JWT;
-use Tuupola\Base62;
-
 class Settings
 {
-    /**
-     * @var string
-     */
-    protected $jwtSecret;
-    /**
-     * @var string
-     */
-    protected $jwtAlgorithm;
-    /**
-     * @var string
-     */
-    protected $activationSecret;
-
     public function __construct(
-        string $jwtSecret,
-        string $jwtAlgorithm,
-        string $activationSecret
+        protected string $jwtSecret,
+        protected string $jwtAlgorithm,
+        protected string $activationSecret
     ) {
-        $this->jwtSecret = $jwtSecret;
-        $this->jwtAlgorithm = $jwtAlgorithm;
-        $this->activationSecret = $activationSecret;
     }
 
     public function getJwtSecret(): string

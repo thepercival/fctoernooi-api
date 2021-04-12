@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 use Slim\Views\Twig as TwigView;
 
 use App\Mailer;
-use Sports\SerializationHandler\Round\NumberEvent as RoundNumberEventSubscriber;
+use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
 use Sports\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
 use Sports\SerializationHandler\Structure as StructureSerializationHandler;
 use JMS\Serializer\SerializationContext;
@@ -25,6 +25,7 @@ use Sports\SerializationHandler\Round as RoundSerializationHandler;
 use Selective\Config\Configuration;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Sports\SerializationHandler\DummyCreator;
 use FCToernooi\Auth\Settings as AuthSettings;
 
 return [
@@ -111,12 +112,10 @@ return [
         foreach ($config->getArray('serializer.yml_dir') as $ymlnamespace => $ymldir) {
             $serializerBuilder->addMetadataDir($ymldir, $ymlnamespace);
         }
+        $dummyCreator = new DummyCreator();
         $serializerBuilder->configureHandlers(
-            function (JMS\Serializer\Handler\HandlerRegistry $registry): void {
-                $registry->registerSubscribingHandler(new StructureSerializationHandler());
-                $registry->registerSubscribingHandler(new RoundNumberSerializationHandler());
-                $registry->registerSubscribingHandler(new RoundSerializationHandler());
-//            $registry->registerSubscribingHandler(new QualifyGroupSerializationHandler());
+            function (JMS\Serializer\Handler\HandlerRegistry $registry) use ($dummyCreator): void {
+                (new HandlerSubscriber($dummyCreator))->subscribeHandlers($registry);
             }
         );
 //            $serializerBuilder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {

@@ -1,9 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament\Invitation;
 
+use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Tournament\Invitation as InvitationBase;
 
@@ -12,5 +12,5 @@ use FCToernooi\Tournament\Invitation as InvitationBase;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 }

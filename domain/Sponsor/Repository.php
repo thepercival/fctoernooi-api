@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Sponsor;
 
+use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Sponsor as SponsorBase;
 use FCToernooi\Tournament;
@@ -12,7 +13,7 @@ use FCToernooi\Tournament;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 
     public const MAXNROFSPONSORSPERSCREEN = 4;
 

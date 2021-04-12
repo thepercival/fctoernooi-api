@@ -5,6 +5,7 @@ namespace FCToernooi;
 
 use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\PersistentCollection;
 use Sports\Competition;
 use League\Period\Period;
 use Sports\Competition\Referee;
@@ -12,33 +13,38 @@ use SportsHelpers\Identifiable;
 
 class Tournament extends Identifiable
 {
+    private DateTimeImmutable $createdDateTime;
     private DateTimeImmutable|null $breakStartDateTime = null;
     private DateTimeImmutable|null $breakEndDateTime = null;
     private bool $public = false;
     /**
-     * @var ArrayCollection<int|string, TournamentUser>
+     * @phpstan-var ArrayCollection<int|string, TournamentUser>|PersistentCollection<int|string, TournamentUser>
+     * @psalm-var ArrayCollection<int|string, TournamentUser>
      */
-    private ArrayCollection $users;
+    private ArrayCollection|PersistentCollection $users;
     /**
-     * @var ArrayCollection<int|string, Sponsor>
+     * @phpstan-var ArrayCollection<int|string, Sponsor>|PersistentCollection<int|string, Sponsor>
+     * @psalm-var ArrayCollection<int|string, Sponsor>
      */
-    private ArrayCollection $sponsors;
+    private ArrayCollection|PersistentCollection $sponsors;
     /**
-     * @var ArrayCollection<int|string, Competitor>
+     * @phpstan-var ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
+     * @psalm-var ArrayCollection<int|string, Competitor>
      */
-    private ArrayCollection $competitors;
+    private ArrayCollection|PersistentCollection $competitors;
     /**
-     * @var ArrayCollection<int|string, LockerRoom>
+     * @phpstan-var ArrayCollection<int|string, LockerRoom>|PersistentCollection<int|string, LockerRoom>
+     * @psalm-var ArrayCollection<int|string, LockerRoom>
      */
-    private ArrayCollection $lockerRooms;
+    private ArrayCollection|PersistentCollection $lockerRooms;
     protected int $exported = 0;
-    private DateTimeImmutable|null $createdDateTime = null;
 
     const EXPORTED_PDF = 1;
     const EXPORTED_EXCEL = 2;
 
     public function __construct(private Competition $competition)
     {
+        $this->createdDateTime = new DateTimeImmutable();
         $this->users = new ArrayCollection();
         $this->sponsors = new ArrayCollection();
         $this->competitors = new ArrayCollection();
@@ -95,9 +101,10 @@ class Tournament extends Identifiable
     }
 
     /**
-     * @return ArrayCollection<int|string, TournamentUser>
+     * @phpstan-return ArrayCollection<int|string, TournamentUser>|PersistentCollection<int|string, TournamentUser>
+     * @psalm-return ArrayCollection<int|string, TournamentUser>
      */
-    public function getUsers(): ArrayCollection
+    public function getUsers(): ArrayCollection|PersistentCollection
     {
         return $this->users;
     }
@@ -114,25 +121,28 @@ class Tournament extends Identifiable
     }
 
     /**
-     * @return ArrayCollection<int|string, Sponsor>
+     * @phpstan-return ArrayCollection<int|string, Sponsor>|PersistentCollection<int|string, Sponsor>
+     * @psalm-return ArrayCollection<int|string, Sponsor>
      */
-    public function getSponsors(): ArrayCollection
+    public function getSponsors(): ArrayCollection|PersistentCollection
     {
         return $this->sponsors;
     }
 
     /**
-     * @return ArrayCollection<int|string, Competitor>
+     * @phpstan-return ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
+     * @psalm-return ArrayCollection<int|string, Competitor>
      */
-    public function getCompetitors(): ArrayCollection
+    public function getCompetitors(): ArrayCollection|PersistentCollection
     {
         return $this->competitors;
     }
 
     /**
-     * @return ArrayCollection<int|string, LockerRoom>
+     * @phpstan-return ArrayCollection<int|string, LockerRoom>|PersistentCollection<int|string, LockerRoom>
+     * @psalm-return ArrayCollection<int|string, LockerRoom>
      */
-    public function getLockerRooms(): ArrayCollection
+    public function getLockerRooms(): ArrayCollection|PersistentCollection
     {
         return $this->lockerRooms;
     }
@@ -158,13 +168,8 @@ class Tournament extends Identifiable
         return null;
     }
 
-    public function getCreatedDateTime(): ?DateTimeImmutable
+    public function getCreatedDateTime(): DateTimeImmutable
     {
         return $this->createdDateTime;
-    }
-
-    public function setCreatedDateTime(DateTimeImmutable $createdDateTime): void
-    {
-        $this->createdDateTime = $createdDateTime;
     }
 }

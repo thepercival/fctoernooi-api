@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Competitor;
 
+use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor as CompetitorBase;
 use FCToernooi\Tournament;
@@ -15,7 +16,7 @@ use Sports\Round;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 
     public function syncCompetitors(Tournament $tournament, Round $rootRound): void
     {

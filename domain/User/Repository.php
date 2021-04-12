@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\User;
 
+use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\User as UserBase;
 
@@ -11,5 +12,5 @@ use FCToernooi\User as UserBase;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 }

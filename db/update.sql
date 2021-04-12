@@ -1,7 +1,7 @@
 select * from tournaments t join competitions c on c.id = t.competitionid join leagues l on l.id = c.leagueid where l.name like '%Flater%';
 
 -- PRE PRE PRE doctrine-update =============================================================
-
+update tournaments set exported = 0 where exported is null;
 delete g from games g join poules p on p.id = g.pouleid join rounds r on r.id = p.roundid join roundnumbers rn on rn.id = r.numberid join competitions c on c.id = rn.competitionid where exists( select * from tournaments t where t.competitionid = c.id and t.updated = false );
 delete from competitions where exists( select * from tournaments t where t.competitionid = competitions.id and t.updated = false );
 
@@ -94,6 +94,8 @@ insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('taf
 -- from sports
 update sports set gameMode = 2, nrOfGamePlaces = 2 where gameMode = 0;
 update planningConfigs set creationStrategy = 1;
+update qualifyGroups set target = 'W' where winnersOrLosers = 1;
+update qualifyGroups set target = 'L' where winnersOrLosers = 3;
 
 -- scoreConfigs: fk to competitionSports needs to be not null again
 -- fields: fk to competitionSports needs to be not null again

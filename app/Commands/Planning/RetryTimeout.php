@@ -183,7 +183,7 @@ class RetryTimeout extends PlanningCommand
                 }
             }
         }
-        return new PouleStructure($pouleStructure);
+        return new PouleStructure(...$pouleStructure);
     }
 
     protected function setStatusToStartProcessingTimedout(): bool

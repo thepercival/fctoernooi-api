@@ -34,7 +34,7 @@ class UserMiddleware implements MiddlewareInterface
 
         /** @var AuthToken|null $token */
         $token = $request->getAttribute('token');
-        if ($token === null || !$token->isPopulated()) {
+        if ($token === null) {
             return $handler->handle($request);
         }
         $user = $this->getUser($token);

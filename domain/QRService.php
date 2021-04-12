@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -11,10 +10,7 @@ use Sports\Game;
 
 class QRService
 {
-    /**
-     * @var TmpService
-     */
-    protected $tmpService;
+    protected TmpService $tmpService;
 
     public function __construct()
     {
@@ -55,9 +51,9 @@ class QRService
     protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, Game $game = null): string
     {
         $path = $this->tmpService->getPath(["qrcode"]);
-        $path .= "tournament-" . $tournament->getId();
+        $path .= "tournament-" . (string)$tournament->getId();
         if ($game !== null) {
-            $path .= "-game-" . $game->getId();
+            $path .= "-game-" . (string)$game->getId();
         }
         return $path . "-width-" . $imgWidth;
     }

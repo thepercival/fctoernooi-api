@@ -41,9 +41,10 @@ class SyncService
 
         if ($user !== null) {
             $tournamentUser = $tournament->getUser($user);
-            $newUser = $tournamentUser === null;
-            if ($newUser) {
+            $newUser = false;
+            if ($tournamentUser === null) {
                 $tournamentUser = new TournamentUser($tournament, $user, $roles);
+                $newUser = true;
             } else {
                 $tournamentUser->setRoles($tournamentUser->getRoles() | $roles);
             }
@@ -57,10 +58,11 @@ class SyncService
         $invitation = $this->tournamentInvitationRepos->findOneBy(
             ["tournament" => $tournament, "emailaddress" => $emailaddress]
         );
-        $newInvitation = $invitation === null;
-        if ($newInvitation) {
+        $newInvitation = false;;
+        if ($invitation === null) {
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
+            $newInvitation = true;
         } else {
             $invitation->setRoles($invitation->getRoles() | $roles);
         }

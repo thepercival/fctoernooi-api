@@ -41,16 +41,19 @@ class ImageService
         if ($image_type == IMAGETYPE_JPEG) {
             /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromjpeg($newImagePath);
+            /** @var GdImage|false|resource $target_layer */
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagejpeg($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_GIF) {
             /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromgif($newImagePath);
+            /** @var GdImage|false|resource $target_layer */
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagegif($target_layer, $newImagePath);
         } elseif ($image_type == IMAGETYPE_PNG) {
             /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefrompng($newImagePath);
+            /** @var GdImage|false|resource $target_layer */
             $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
             imagepng($target_layer, $newImagePath);
         }
@@ -76,7 +79,7 @@ class ImageService
      * @param false|GdImage $image_resource_id
      * @param int $width
      * @param int $height
-     * @return false|GdImage|resource
+     * @return false|GdImage
      */
     private function resize(false|GdImage $image_resource_id, int $width, int $height): false|GdImage
     {
@@ -101,17 +104,26 @@ class ImageService
     }
 
     /**
-     * @param false|GdImage|resource $image_resource_id
+     * @param GdImage $image_resource_id
      * @param int $width
      * @param int $height
      * @param int $target_width
      * @param int $target_height
-     * @return false|GdImage|resource
+     * @return GdImage
      */
-    private function resizeHelper(false|GdImage $image_resource_id,
-        int $width, int $height, int $target_width, int $target_height): false|GdImage
+    private function resizeHelper(
+        GdImage $image_resource_id,
+        int $width,
+        int $height,
+        int $target_width,
+        int $target_height
+    ): GdImage
     {
         $target_layer = imagecreatetruecolor($target_width, $target_height);
+        if (!($target_layer instanceof GdImage)) {
+            throw new \Exception('could not create image',E_ERROR);
+        }
+        /** @psalm-suppress InvalidArgument */
         imagecopyresampled(
             $target_layer,
             $image_resource_id,
@@ -124,6 +136,7 @@ class ImageService
             $width,
             $height
         );
+        /** @var GdImage $target_layer */
         return $target_layer;
     }
 }

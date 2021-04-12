@@ -1,9 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\LockerRoom;
 
+use SportsHelpers\Repository as BaseRepository;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -18,7 +18,7 @@ use FCToernooi\Competitor;
  */
 class Repository extends EntityRepository
 {
-    use \Sports\Repository;
+    use BaseRepository;
 
     /**
      * @param LockerRoomBase $lockerRoom
@@ -33,8 +33,9 @@ class Repository extends EntityRepository
         $conn->beginTransaction();
         try {
             // remove
-            while ($lockerRoom->getCompetitors()->count() > 0) {
-                $lockerRoom->getCompetitors()->removeElement($lockerRoom->getCompetitors()->first());
+
+            while ($competitor = $lockerRoom->getCompetitors()->first()) {
+                $lockerRoom->getCompetitors()->removeElement($competitor);
             }
             // $lockerRoom->getCompetitors()->clear();
             $this->_em->flush();

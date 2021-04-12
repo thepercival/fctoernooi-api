@@ -148,7 +148,7 @@ final class GameTogetherAction extends Action
     protected function shouldQualifiersBeCalculatedForRound(Poule $poule): bool
     {
         foreach ($poule->getRound()->getQualifyGroups() as $qualifyGroup) {
-            if ($qualifyGroup->getNrOfToPlacesTooMuch() > 0) {
+            if ($qualifyGroup->getMultipleRule() !== null) {
                 return true;
             }
         }

@@ -1,49 +1,29 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
 use DateTimeImmutable;
-use Sports\Sport;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 
 class Shell
 {
-    /**
-     * @var int
-     */
-    private $tournamentId;
-    /**
-     * @var int
-     */
-    private $sportCustomId;
-    /**
-     * @var string
-     */
-    private $name;
-    /**
-     * @var DateTimeImmutable
-     */
-    private $startDateTime;
-    /**
-     * @var int
-     */
-    private $roles;
-    /**
-     * @var bool
-     */
-    private $public;
+    private int $tournamentId;
+    private int $sportCustomId;
+    private string $name;
+    private DateTimeImmutable $startDateTime;
+    private int $roles;
+    private bool $public;
 
     public function __construct(Tournament $tournament, User $user = null)
     {
-        $this->tournamentId = $tournament->getId();
+        $this->tournamentId = (int)$tournament->getId();
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
         $this->sportCustomId = 0;
-        if ($competition->getSports()->count() === 1) {
-            $this->sportCustomId = $competition->getSports()->first()->getSport()->getCustomId();
+        if (!$competition->hasMultipleSports()) {
+            $this->sportCustomId = $competition->getSingleSport()->getSport()->getCustomId();
         }
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
@@ -66,22 +46,6 @@ class Shell
     public function getSportCustomId(): int
     {
         return $this->sportCustomId;
-    }
-
-    /**
-     * @param list<Sport> $sports
-     * @return int
-     */
-    protected function getSportCustomIdBySports(array $sports): int
-    {
-        $firstSport = reset($sports);
-        if ($firstSport !== false) {
-            if (count($sports) === 1) {
-                return $firstSport->getCustomId();
-            }
-            return -1;
-        }
-        return 0;
     }
 
     public function getName(): string

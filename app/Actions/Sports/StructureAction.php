@@ -20,24 +20,15 @@ use Sports\Structure\Validator as StructureValidator;
 
 final class StructureAction extends Action
 {
-    /**
-     * @var StructureRepository
-     */
-    protected $structureRepos;
-    /**
-     * @var CompetitorRepository
-     */
-    protected $competitorRepos;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        StructureRepository $structureRepos,
-        CompetitorRepository $competitorRepos
+        protected StructureRepository $structureRepos,
+        private StructureCopier $structureCopier,
+        protected CompetitorRepository $competitorRepos
     ) {
         parent::__construct($logger, $serializer);
         $this->structureRepos = $structureRepos;
-        $this->competitorRepos = $competitorRepos;
     }
 
     /**
@@ -82,8 +73,7 @@ final class StructureAction extends Action
             $competition = $tournament->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
-            $structureCopier = new StructureCopier($competition);
-            $newStructure = $structureCopier->copy($structureSer);
+            $newStructure = $this->structureCopier->copy($structureSer, $competition);
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($competition, $newStructure);

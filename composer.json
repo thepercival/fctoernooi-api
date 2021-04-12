@@ -53,12 +53,14 @@
     "phpunit/phpunit": "^9.5",
     "vimeo/psalm": "^4.3",
     "weirdan/doctrine-psalm-plugin": "^1.0",
-    "composer/composer": "^2.0"
+    "composer/composer": "^2.0",
+    "psalm/plugin-phpunit": "^0.15.1"
   },
   "autoload": {
     "psr-4": {
       "FCToernooi\\": "domain/",
-      "App\\": "app/"
+      "App\\": "app/",
+      "FCToernooi\\SerializationHandler\\": "serialization/handler"
     }
   },
   "autoload-dev": {

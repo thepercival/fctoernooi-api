@@ -20,6 +20,7 @@ use FCToernooi\Competitor;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\LockerRoom;
 
+use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
 use Sports\Sport\Repository as SportRepository;
 use Sports\Sport;
 use Sports\Season\Repository as SeasonRepository;
@@ -64,6 +65,7 @@ use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\Config as PlanningConfig;
 use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
 use Sports\Planning\GameAmountConfig;
+use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
 
 return [
     TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
@@ -95,7 +97,7 @@ return [
     },
     LockerRoomRepository::class => function (ContainerInterface $container): LockerRoomRepository {
         $entityManager = $container->get(EntityManager::class);
-        return new LockerRoomRepository($entityManager, $entityManager->getClassMetaData(LockerRoom::class));
+        return new LockerRoomRepository($entityManager, $entityManager->getClassMetadata(LockerRoom::class));
     },
 
     SportRepository::class => function (ContainerInterface $container): SportRepository {
@@ -117,7 +119,10 @@ return [
 
     StructureRepository::class => function (ContainerInterface $container): StructureRepository {
         $entityManager = $container->get(EntityManager::class);
-        return new StructureRepository($entityManager);
+        return new StructureRepository(
+            $entityManager,
+            new HorizontalPouleCreator(),
+            new QualifyRuleCreator());
     },
     PlanningRepository::class => function (ContainerInterface $container): PlanningRepository {
         $entityManager = $container->get(EntityManager::class);

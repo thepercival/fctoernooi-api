@@ -32,7 +32,7 @@ class Sponsor extends Identifiable
         return $this->name;
     }
 
-    public function setName(string $name): void
+    final public function setName(string $name): void
     {
         if (strlen($name) < self::MIN_LENGTH_NAME or strlen($name) > self::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(

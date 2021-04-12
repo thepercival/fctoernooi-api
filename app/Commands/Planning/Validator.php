@@ -8,6 +8,7 @@ use App\QueueService;
 use \Exception;
 use Psr\Container\ContainerInterface;
 use App\Command;
+use Sports\Structure\Copier as StructureCopier;
 use SportsHelpers\PouleStructure;
 use SportsPlanning\Planning;
 use SportsHelpers\SelfReferee;
@@ -48,7 +49,7 @@ class Validator extends Command
      */
     protected $exitAtFirstInvalid;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container,)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
@@ -215,7 +216,7 @@ class Validator extends Command
         if ($pouleStructure === null) {
             return null;
         }
-        return new PouleStructure($pouleStructure);
+        return new PouleStructure(...$pouleStructure);
     }
 
     /**

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Auth;
@@ -8,7 +7,6 @@ use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
-use FCToernooi\Tournament;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
@@ -45,7 +43,7 @@ class Service
     {
         if (strlen($password) < User::MIN_LENGTH_PASSWORD or strlen($password) > User::MAX_LENGTH_PASSWORD) {
             throw new \InvalidArgumentException(
-                "het wachtwoord moet minimaal " . User::MIN_LENGTH_PASSWORD . " karakters bevatten en mag maximaal " . User::MAX_LENGTH_PASSWORD . " karakters bevatten",
+                'het wachtwoord moet minimaal ' . User::MIN_LENGTH_PASSWORD . " karakters bevatten en mag maximaal " . User::MAX_LENGTH_PASSWORD . " karakters bevatten",
                 E_ERROR
             );
         }
@@ -60,9 +58,12 @@ class Service
             }
         }
 
-        $user = new User($emailaddress);
-        $user->setSalt(bin2hex(random_bytes(15)));
-        $user->setPassword(password_hash($user->getSalt() . $password, PASSWORD_DEFAULT));
+        $salt = bin2hex(random_bytes(15));
+        $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
+        if ($hashedPassword === false || $hashedPassword === null) {
+            throw new Exception('er kan geen wachtwoord-hash gemaakt worden', E_ERROR);
+        }
+        $user = new User($emailaddress, $salt, $hashedPassword);
 
         $savedUser = $this->userRepos->save($user);
         $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
@@ -155,7 +156,11 @@ EOT;
     {
         $subject = 'wachtwoord herstellen';
         $forgetpasswordToken = $user->getForgetpasswordToken();
-        $forgetpasswordDeadline = $user->getForgetpasswordDeadline()->modify("-1 days")->format("Y-m-d");
+        $forgetpasswordDeadline = $user->getForgetpasswordDeadline();
+        if ($forgetpasswordDeadline === null) {
+            throw new Exception("je hebt je wachtwoord al gewijzigd, vraag opnieuw een nieuw wachtwoord aan");
+        }
+        $forgetpasswordDeadline = $forgetpasswordDeadline->modify("-1 days")->format("Y-m-d");
         $body = <<<EOT
 <p>Hallo,</p>
 <p>            
@@ -188,9 +193,11 @@ EOT;
         if ($now > $user->getForgetpasswordDeadline()) {
             throw new Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
         }
-
-        // set password
-        $user->setPassword(password_hash($user->getSalt() . $password, PASSWORD_DEFAULT));
+        $passwordHash = password_hash($user->getSalt() . $password, PASSWORD_DEFAULT);
+        if (is_string($passwordHash) === false) {
+            throw new Exception("er kan geen wachtwoord-hash gemaakt worden", E_ERROR);
+        }
+        $user->setPassword($passwordHash);
         $user->setForgetpassword(null);
         return $this->userRepos->save($user);
     }

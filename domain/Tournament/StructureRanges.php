@@ -9,14 +9,16 @@ use SportsHelpers\Place\Range as PlaceRange;
 class StructureRanges
 {
     /**
-     * @var list<PlaceRange>
+     * @var non-empty-list<PlaceRange>
      */
-    protected $placeRanges;
+    protected array $placeRanges;
 
     public function __construct()
     {
-        $this->placeRanges[] = new PlaceRange(2, 40, new SportRange(2, 12));
-        $this->placeRanges[] = new PlaceRange(41, 128, new SportRange(2, 8));
+        $this->placeRanges = [
+            new PlaceRange(2, 40, new SportRange(2, 12)),
+            new PlaceRange(41, 128, new SportRange(2, 8))
+        ];
     }
 
     public function getFirstPlaceRange(): PlaceRange

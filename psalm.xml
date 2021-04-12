@@ -11,8 +11,13 @@
         <directory name="config/"/>
         <directory name="domain/"/>
         <directory name="tests/cases/"/>
+<!--        <directory name="serialization/handler/"/>-->
         <ignoreFiles>
             <directory name="app/Export/"/>
         </ignoreFiles>
     </projectFiles>
-<plugins><pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/></plugins></psalm>
+    <plugins>
+        <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+    </plugins>
+</psalm>
