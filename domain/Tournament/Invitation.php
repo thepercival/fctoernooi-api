@@ -40,7 +40,7 @@ class Invitation extends Identifiable
             );
         }
 
-        if (!filter_var($emailaddress, FILTER_VALIDATE_EMAIL)) {
+        if (filter_var($emailaddress, FILTER_VALIDATE_EMAIL) === false) {
             throw new \InvalidArgumentException("het emailadres " . $emailaddress . " is niet valide", E_ERROR);
         }
         $this->emailaddress = $emailaddress;

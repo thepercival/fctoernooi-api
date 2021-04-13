@@ -38,11 +38,11 @@ class User extends Identifiable
     {
         if (strlen($emailaddress) < static::MIN_LENGTH_EMAIL or strlen($emailaddress) > static::MAX_LENGTH_EMAIL) {
             throw new \InvalidArgumentException(
-                "het emailadres moet minimaal " . static::MIN_LENGTH_EMAIL . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_EMAIL . " karakters bevatten",
+                'het emailadres moet minimaal ' . static::MIN_LENGTH_EMAIL . " karakters bevatten en mag maximaal " . static::MAX_LENGTH_EMAIL . " karakters bevatten",
                 E_ERROR
             );
         }
-        if (!filter_var($emailaddress, FILTER_VALIDATE_EMAIL)) {
+        if (filter_var($emailaddress, FILTER_VALIDATE_EMAIL) === false) {
             throw new \InvalidArgumentException("het emailadres " . $emailaddress . " is niet valide", E_ERROR);
         }
         $this->emailaddress = $emailaddress;

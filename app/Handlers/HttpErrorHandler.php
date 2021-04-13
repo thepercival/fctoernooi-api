@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Handlers;
 
-use App\Actions\ActionError;
-use App\Actions\ActionPayload;
 use Exception;
-use Psr\Http\Message\ResponseInterface as Response;
-use Slim\Exception\HttpBadRequestException;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpMethodNotAllowedException;
@@ -15,14 +14,28 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpNotImplementedException;
 use Slim\Exception\HttpUnauthorizedException;
 use Slim\Handlers\ErrorHandler as SlimErrorHandler;
+use Slim\Interfaces\CallableResolverInterface;
 use Throwable;
 
 class HttpErrorHandler extends SlimErrorHandler
 {
     /**
+     * @param CallableResolverInterface $callableResolver
+     * @param ResponseFactoryInterface  $responseFactory
+     * @param LoggerInterface|null      $logger
+     */
+    public function __construct(
+        CallableResolverInterface $callableResolver,
+        ResponseFactoryInterface $responseFactory,
+        ?LoggerInterface $logger = null
+    ) {
+        parent::__construct($callableResolver, $responseFactory, $logger );
+    }
+
+    /**
      * @inheritdoc
      */
-    protected function respond(): Response
+    protected function respond(): ResponseInterface
     {
         $exception = $this->exception;
         $statusCode = 500;

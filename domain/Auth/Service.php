@@ -47,11 +47,13 @@ class Service
                 E_ERROR
             );
         }
+        /** @var User|null $userTmp */
         $userTmp = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
         if ($userTmp !== null) {
             throw new Exception("het emailadres is al in gebruik", E_ERROR);
         }
         if ($name !== null) {
+            /** @var User|null $userTmp */
             $userTmp = $this->userRepos->findOneBy(array('name' => $name));
             if ($userTmp !== null) {
                 throw new Exception("de gebruikersnaam is al in gebruik", E_ERROR);
@@ -60,17 +62,18 @@ class Service
 
         $salt = bin2hex(random_bytes(15));
         $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
-        if ($hashedPassword === false || $hashedPassword === null) {
+        /** @phpstan-ignore-next-line */
+        if (!is_string($hashedPassword)) {
             throw new Exception('er kan geen wachtwoord-hash gemaakt worden', E_ERROR);
         }
         $user = new User($emailaddress, $salt, $hashedPassword);
 
-        $savedUser = $this->userRepos->save($user);
+        $this->userRepos->save($user);
         $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
-        $tournamentUsers = $this->syncService->processInvitations($savedUser, $invitations);
+        $tournamentUsers = $this->syncService->processInvitations($user, $invitations);
         $this->sendRegisterEmail($emailaddress, $tournamentUsers);
 
-        return $savedUser;
+        return $user;
     }
 
     /**
@@ -194,6 +197,7 @@ EOT;
             throw new Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
         }
         $passwordHash = password_hash($user->getSalt() . $password, PASSWORD_DEFAULT);
+        /** @phpstan-ignore-next-line */
         if (is_string($passwordHash) === false) {
             throw new Exception("er kan geen wachtwoord-hash gemaakt worden", E_ERROR);
         }

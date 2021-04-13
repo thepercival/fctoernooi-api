@@ -19,6 +19,9 @@ use FCToernooi\Auth\Token as AuthToken;
 
 return function (App $app): void {
     $container = $app->getContainer();
+    if( $container === null ) {
+        return;
+    }
     $config = $container->get(Configuration::class);
 
     $app->add(
@@ -47,12 +50,12 @@ return function (App $app): void {
                                ]
                     )
                        ],
-                       'error' => function (Response $response, $arguments): UnauthorizedResponse {
-                           return new UnauthorizedResponse($arguments['message']);
+                       'error' => function (Response $response, array $args): UnauthorizedResponse {
+                           return new UnauthorizedResponse($args['message']);
                        },
-                'before' => function (Request $request, $arguments): Request {
-                    if (is_array($arguments['decoded']) && count($arguments['decoded']) > 0) {
-                        $token = new AuthToken($arguments['decoded']);
+                'before' => function (Request $request, array $args): Request {
+                    if (is_array($args['decoded']) && count($args['decoded']) > 0) {
+                        $token = new AuthToken($args['decoded']);
                         return $request->withAttribute('token', $token);
                     }
                     return $request;

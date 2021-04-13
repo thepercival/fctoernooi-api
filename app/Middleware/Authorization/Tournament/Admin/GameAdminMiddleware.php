@@ -41,10 +41,11 @@ class GameAdminMiddleware extends AuthorizationTournamentAdminMiddleware
         if ($game === null) {
             throw new \Exception("de wedstrijd is niet gevonden", E_ERROR);
         }
-        if ($game->getReferee() === null) {
+        $referee = $game->getReferee();
+        if ($referee === null) {
             throw new \Exception("bij de wedstrijd is geen scheidsrechter gevonden", E_ERROR);
         }
-        if ($game->getReferee()->getEmailaddress() !== $tournamentUser->getUser()->getEmailaddress()) {
+        if ($referee->getEmailaddress() !== $tournamentUser->getUser()->getEmailaddress()) {
             throw new \Exception("voor deze wedstrijd ben je geen " . Role::getName(Role::REFEREE), E_ERROR);
         }
     }

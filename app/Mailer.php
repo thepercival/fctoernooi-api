@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App;
@@ -33,7 +32,7 @@ final class Mailer
 
     public function send(string $subject, string $body, string $toEmailaddress, bool $text = null): void
     {
-        $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp();
+        $mailer = $this->smtpConfig === null ? $this->sendInitMail() : $this->sendInitSmtp($this->smtpConfig);
         // $mailer->'MIME-Version' = '1.0';
         $mailer->ContentType = PHPMailer::CONTENT_TYPE_TEXT_HTML;
         $mailer->CharSet = PHPMailer::CHARSET_UTF8;
@@ -62,15 +61,19 @@ final class Mailer
         return $mail;
     }
 
-    protected function sendInitSmtp(): PHPMailer
+    /**
+     * @param array<string, string|int> $smtpConfig
+     * @return PHPMailer
+     */
+    protected function sendInitSmtp(array $smtpConfig): PHPMailer
     {
         $mail = new PHPMailer();
         $mail->isSMTP();
-        $mail->Host = $this->smtpConfig["smtp_host"];
-        $mail->Port = $this->smtpConfig["smtp_port"];
+        $mail->Host = (string)$smtpConfig["smtp_host"];
+        $mail->Port = (int)$smtpConfig["smtp_port"];
         $mail->SMTPAuth = true;
-        $mail->Username = $this->smtpConfig["smtp_user"];
-        $mail->Password = $this->smtpConfig["smtp_pass"];
+        $mail->Username = (string)$smtpConfig["smtp_user"];
+        $mail->Password = (string)$smtpConfig["smtp_pass"];
         return $mail;
     }
 

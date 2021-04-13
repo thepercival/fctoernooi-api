@@ -7,17 +7,17 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="app/"/>
+<!--        <directory name="app/"/>-->
         <directory name="config/"/>
         <directory name="domain/"/>
-        <directory name="tests/cases/"/>
+<!--        <directory name="tests/cases/"/>-->
 <!--        <directory name="serialization/handler/"/>-->
         <ignoreFiles>
             <directory name="app/Export/"/>
         </ignoreFiles>
     </projectFiles>
     <plugins>
-        <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+        <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/>
     </plugins>
 </psalm>

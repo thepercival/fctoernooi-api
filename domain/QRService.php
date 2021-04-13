@@ -62,6 +62,9 @@ class QRService
     {
         $this->writeToPng($pathWithoutExtension . ".png", $qrCodeText, $imgWidthPx);
         $image = imagecreatefrompng($pathWithoutExtension . ".png");
+        if( $image === false ) {
+            throw new \Exception('could not create image from path', E_ERROR);
+        }
         imagejpeg($image, $pathWithoutExtension . ".jpg");
         imagedestroy($image);
         return $pathWithoutExtension . ".jpg";

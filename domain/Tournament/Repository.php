@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
+use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
@@ -17,8 +18,9 @@ use Sports\League\Repository as LeagueRepository;
 
 /**
  * @template-extends EntityRepository<TournamentBase>
+ * @template-implements SaveRemoveRepository<TournamentBase>
  */
-class Repository extends EntityRepository
+class Repository extends EntityRepository implements SaveRemoveRepository
 {
     use BaseRepository;
 

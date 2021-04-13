@@ -83,15 +83,12 @@ final class SportAction extends Action
             $sportSer = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json', $this->getDeserializationContext());
 
             $newSport = $this->sportRepos->findOneBy(['name' => strtolower($sportSer->getName())]);
-            if ($newSport !== null
-                && ($sportSer->getTeam() !== $newSport->getTeam()
-                || $sportSer->getGameMode() !== $newSport->getGameMode()
-                || $sportSer->getNrOfGamePlaces() !== $newSport->getNrOfGamePlaces())
+            if ($newSport !== null && ($sportSer->getTeam() !== $newSport->getTeam())
             ) {
                 throw new \Exception('de sport "' . $newSport->getName() . '" bestaat al, kies een andere naam', E_ERROR);
             }
             if ($newSport === null) {
-                $newSport = new Sport(strtolower($sportSer->getName()), $sportSer->getTeam(), $sportSer->getNrOfGamePlaces(), $sportSer->getGameMode());
+                $newSport = new Sport(strtolower($sportSer->getName()), $sportSer->getTeam());
                 $newSport->setCustomId($sportSer->getCustomId());
                 $this->sportRepos->save($newSport);
             }

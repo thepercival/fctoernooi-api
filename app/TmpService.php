@@ -34,7 +34,9 @@ final class TmpService
                 mkdir($path, 0777);
             }
         }
-
+        if( $file === null ) {
+            return $path . DIRECTORY_SEPARATOR;
+        }
         return $path . DIRECTORY_SEPARATOR . $file;
     }
 }

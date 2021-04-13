@@ -31,8 +31,7 @@ class SyncService
         int $roles,
         string $emailaddress = null,
         bool $sendMail = false
-    ): TournamentUser|TournamentInvitation|null
-    {
+    ): TournamentUser|TournamentInvitation|null {
         if ($emailaddress === null) {
             return null;
         }
@@ -58,7 +57,8 @@ class SyncService
         $invitation = $this->tournamentInvitationRepos->findOneBy(
             ["tournament" => $tournament, "emailaddress" => $emailaddress]
         );
-        $newInvitation = false;;
+        $newInvitation = false;
+        ;
         if ($invitation === null) {
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
@@ -123,13 +123,13 @@ class SyncService
         while (count($invitations) > 0) {
             $invitation = array_shift($invitations);
             $this->tournamentInvitationRepos->remove($invitation);
-            $tournamentUsers[] = $this->tournamentUserRepos->save(
-                new TournamentUser(
-                    $invitation->getTournament(),
-                    $user,
-                    $invitation->getRoles()
-                )
+            $tournamentUser = new TournamentUser(
+                $invitation->getTournament(),
+                $user,
+                $invitation->getRoles()
             );
+            $this->tournamentUserRepos->save($tournamentUser);
+            $tournamentUsers[] = $tournamentUser;
         }
         return $tournamentUsers;
     }
@@ -152,7 +152,8 @@ class SyncService
                 $tournamentUser->getRoles()
             );
             $invitation->setCreatedDateTime(new DateTimeImmutable());
-            $invitations[] = $this->tournamentInvitationRepos->save($invitation);
+            $this->tournamentInvitationRepos->save($invitation);
+            $invitations[] = $invitation;
         }
         return $invitations;
     }

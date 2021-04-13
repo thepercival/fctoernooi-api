@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Sponsor;
 
+use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Sponsor as SponsorBase;
@@ -10,8 +11,9 @@ use FCToernooi\Tournament;
 
 /**
  * @template-extends EntityRepository<SponsorBase>
+ * @template-implements SaveRemoveRepository<SponsorBase>
  */
-class Repository extends EntityRepository
+class Repository extends EntityRepository implements SaveRemoveRepository
 {
     use BaseRepository;
 

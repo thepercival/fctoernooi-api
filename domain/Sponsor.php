@@ -57,7 +57,7 @@ class Sponsor extends Identifiable
                     E_ERROR
                 );
             }
-            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            if (filter_var($url, FILTER_VALIDATE_URL) === false) {
                 throw new \InvalidArgumentException("de url " . $url . " is niet valide (begin met https://)", E_ERROR);
             }
         }
@@ -78,7 +78,7 @@ class Sponsor extends Identifiable
                     E_ERROR
                 );
             }
-            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            if (filter_var($url, FILTER_VALIDATE_URL) === false) {
                 throw new \InvalidArgumentException('de url ' . $url . ' is niet valide (begin met https://)', E_ERROR);
             }
         }

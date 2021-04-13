@@ -61,7 +61,12 @@ class TournamentCopier
             foreach ($competitionSportsSer as $competitionSportSer) {
                 /** @var Sport $sport */
                 $sport = $this->sportRepos->findOneBy(["name" => $competitionSportSer->getSport()->getName()]);
-                $newCompetitionSport = $competitionSportService->copy($newCompetition, $sport);
+                $newCompetitionSport = new CompetitionSport(
+                    $sport,
+                    $newCompetition,
+                    $competitionSportSer->getNrOfGamePlaces(),
+                    $competitionSportSer->getGameMode()
+                );
                 /** @var Field $fieldSer */
                 foreach ($competitionSportSer->getFields() as $fieldSer) {
                     $field = new Field($newCompetitionSport, $fieldSer->getPriority());

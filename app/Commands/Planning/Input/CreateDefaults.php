@@ -16,7 +16,6 @@ use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Planning;
 use SportsHelpers\SportRange;
-use SportsHelpers\SportConfig as SportConfigHelper;
 use SportsPlanning\Planning\Output as PlanningOutput;
 
 class CreateDefaults extends PlanningCommand
