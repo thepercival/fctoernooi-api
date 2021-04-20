@@ -56,7 +56,7 @@ class BackupSponsorImages extends Command
             $sponsors = $this->sponsorRepos->findAll();
             foreach ($sponsors as $sponsor) {
                 $logoUrl = $sponsor->getLogoUrl();
-                if (strpos($logoUrl, $apiUrl) === false) {
+                if ($logoUrl === null || strpos($logoUrl, $apiUrl) === false) {
                     continue;
                 }
                 // $logoUrl = $settings["www"]["apiurl-localpath"];
@@ -67,11 +67,13 @@ class BackupSponsorImages extends Command
 
                 $newPath = str_replace($path, $backupPath, $logoLocalPath);
                 if (!copy($logoLocalPath, $newPath)) {
-                    $this->logger->error("failed to copy  " . $logoLocalPath);
+                    $this->getLogger()->error("failed to copy  " . $logoLocalPath);
                 }
             }
         } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            if($this->logger !== null) {
+                $this->logger->error($exception->getMessage());
+            }
         }
         return 0;
     }

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
@@ -9,8 +8,11 @@ use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
+use Sports\Game\Against as AgainstGame;
 use Sports\Score\Together\Repository as TogetherScoreRepository;
+use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Game\Together\Repository as TogetherGameRepository;
+use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Place\Repository as PlaceRepository;
 use Sports\Structure\Repository as StructureRepository;
@@ -26,15 +28,16 @@ use Sports\Qualify\Service as QualifyService;
 
 final class GameTogetherAction extends Action
 {
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected TogetherGameRepository $gameRepos,
+        protected AgainstGameRepository $againstGameRepos,
         protected PouleRepository $pouleRepos,
         protected PlaceRepository $placeRepos,
         protected StructureRepository $structureRepos,
-        protected TogetherScoreRepository $scoreRepos
+        protected TogetherScoreRepository $scoreRepos,
+        protected AgainstScoreRepository $againstScoreRepos
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -60,7 +63,7 @@ final class GameTogetherAction extends Action
             $initialPouleState = $poule->getState();
 
             /** @var TogetherGame $gameSer */
-            $gameSer = $this->serializer->deserialize($this->getRawData(), TogetherGame::class, 'json');
+            $gameSer = $this->serializer->deserialize($this->getRawData($request), TogetherGame::class, 'json');
 
             $game = $this->gameRepos->find((int)$args["gameId"]);
             if ($game === null) {
@@ -86,7 +89,8 @@ final class GameTogetherAction extends Action
                 throw new \Exception("de pouleplek kon niet gevonden worden", E_ERROR);
             };
             foreach ($game->getPlaces() as $gamePlace) {
-                $gameScoreCreator->addTogetherScores($gamePlace, $getSerGamePlace($gamePlace)->getScores()->toArray());
+                $scores = array_values($getSerGamePlace($gamePlace)->getScores()->toArray());
+                $gameScoreCreator->addTogetherScores($gamePlace, $scores);
             }
 
             $this->gameRepos->save($game);
@@ -97,8 +101,12 @@ final class GameTogetherAction extends Action
                 foreach ($changedPlace->getGames() as $gameIt) {
                     $gameIt->setState(State::Created);
                     $this->gameRepos->save($gameIt);
-                    foreach ($gameIt->getPlaces() as $gamePlace) {
-                        $this->scoreRepos->removeScores($gamePlace);
+                    if ($gameIt instanceof AgainstGame) {
+                        $this->againstScoreRepos->removeScores($gameIt);
+                    } else {
+                        foreach ($gameIt->getPlaces() as $gamePlace) {
+                            $this->scoreRepos->removeScores($gamePlace);
+                        }
                     }
                 }
             }

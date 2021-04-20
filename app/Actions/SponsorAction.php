@@ -87,7 +87,7 @@ final class SponsorAction extends Action
             $tournament = $request->getAttribute("tournament");
 
             /** @var Sponsor $sponsor */
-            $sponsor = $this->serializer->deserialize($this->getRawData(), Sponsor::class, 'json');
+            $sponsor = $this->serializer->deserialize($this->getRawData($request), Sponsor::class, 'json');
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsor->getScreenNr());
 
@@ -117,7 +117,7 @@ final class SponsorAction extends Action
             $tournament = $request->getAttribute("tournament");
 
             /** @var Sponsor $sponsorSer */
-            $sponsorSer = $this->serializer->deserialize($this->getRawData(), Sponsor::class, 'json');
+            $sponsorSer = $this->serializer->deserialize($this->getRawData($request), Sponsor::class, 'json');
 
             $sponsor = $this->sponsorRepos->find((int)$args['sponsorId']);
             if ($sponsor === null) {

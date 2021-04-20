@@ -43,7 +43,7 @@ final class LockerRoomAction extends Action
             $tournament = $request->getAttribute("tournament");
 
             /** @var LockerRoom $lockerRoomSer */
-            $lockerRoomSer = $this->serializer->deserialize($this->getRawData(), LockerRoom::class, 'json');
+            $lockerRoomSer = $this->serializer->deserialize($this->getRawData($request), LockerRoom::class, 'json');
 
             $newLockerRoom = new LockerRoom($tournament, $lockerRoomSer->getName());
             $this->lockerRoomRepos->save($newLockerRoom);
@@ -68,7 +68,7 @@ final class LockerRoomAction extends Action
             $tournament = $request->getAttribute("tournament");
 
             /** @var LockerRoom $lockerRoomSer */
-            $lockerRoomSer = $this->serializer->deserialize($this->getRawData(), LockerRoom::class, 'json');
+            $lockerRoomSer = $this->serializer->deserialize($this->getRawData($request), LockerRoom::class, 'json');
 
             $lockerRoom = $this->lockerRoomRepos->find((int)$args['lockerRoomId']);
             if ($lockerRoom === null) {
@@ -128,7 +128,7 @@ final class LockerRoomAction extends Action
             /** @psalm-template Competitor */
             $className = ArrayCollection::class . '<' . Competitor::class . '>';
             $newCompetitors = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 $className,
                 'json'
             );

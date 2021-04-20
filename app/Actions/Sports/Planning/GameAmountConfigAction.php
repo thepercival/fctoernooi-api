@@ -47,22 +47,23 @@ final class GameAmountConfigAction extends Action
             $competition = $request->getAttribute('tournament')->getCompetition();
 
             /** @var GameAmountConfig $gameAmountConfigSer */
-            $gameAmountConfigSer = $this->serializer->deserialize($this->getRawData(), GameAmountConfig::class, 'json');
+            $gameAmountConfigSer = $this->serializer->deserialize($this->getRawData($request), GameAmountConfig::class, 'json');
 
-            $roundNumberAsValue = 0;
-            if (array_key_exists('roundNumber', $args) && strlen($args['roundNumber']) > 0) {
-                $roundNumberAsValue = (int)$args['roundNumber'];
-            }
-            if ($roundNumberAsValue === 0) {
-                throw new Exception('geen rondenummer opgegeven', E_ERROR);
-            }
             $structure = $this->structureRepos->getStructure($competition);
-            $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
 
-            if (!array_key_exists('competitionSportId', $args) || strlen($args['competitionSportId']) === 0) {
+            $argRoundNumber = isset($args['roundNumber']) ? $args['roundNumber'] : null;
+            if (!is_string($argRoundNumber) || strlen($argRoundNumber) === 0) {
+                throw new \Exception('geen rondenummer opgegeven', E_ERROR);
+            }
+            $roundNumber = $structure->getRoundNumber((int)$argRoundNumber);
+            if ($roundNumber === null) {
+                throw new \Exception('het rondenummer kan niet gevonden worden', E_ERROR);
+            }
+            $argCompetitionSportId = isset($args['competitionSportId']) ? $args['competitionSportId'] : null;
+            if (!is_string($argCompetitionSportId) || strlen($argCompetitionSportId) === 0) {
                 throw new \Exception('geen sport opgegeven', E_ERROR);
             }
-            $competitionSport = $this->competiionSportRepos->find((int)$args['competitionSportId']);
+            $competitionSport = $this->competiionSportRepos->find((int)$argCompetitionSportId);
             if ($competitionSport === null) {
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }

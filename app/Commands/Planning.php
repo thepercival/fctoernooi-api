@@ -31,17 +31,16 @@ class Planning extends Command
     protected function getPlaceRange(
         InputInterface $input,
         TournamentStructureRanges $tournamentStructureRanges
-    ): ?PlaceRange {
+    ): PlaceRange {
         $placeRange = $tournamentStructureRanges->getFirstPlaceRange();
-        /** @var string|null $placeRangeOption */
         $placeRangeOption = $input->getOption("placesRange");
-        if ($placeRangeOption === null || strlen($placeRangeOption) === 0) {
-            return null;
+        if (!is_string($placeRangeOption) || strlen($placeRangeOption) === 0) {
+            return $tournamentStructureRanges->getFirstPlaceRange();
         }
-        if (strpos($placeRangeOption, "-") === false) {
+        if (strpos($placeRangeOption, '-') === false) {
             throw new \Exception('misformat placesRange-option', E_ERROR);
         }
-        $minMax = explode('-', $input->getOption('placesRange'));
+        $minMax = explode('-', $placeRangeOption);
         return new PlaceRange((int)$minMax[0], (int)$minMax[1], $placeRange->getPlacesPerPouleRange());
     }
 
@@ -55,10 +54,10 @@ class Planning extends Command
 //        $firstBatch = new SelfRefereeBatch( $planning->createFirstBatch() );
 //        $refereePlaceService = new RefereePlaceService($planning);
 //        if (!$refereePlaceService->assign($firstBatch)) {
-//            $this->logger->info("refereeplaces could not be equally assigned");
+//            $this->getLogger()->info("refereeplaces could not be equally assigned");
 //            $planning->setValidity( PlanningValidator::UNEQUALLY_ASSIGNED_REFEREEPLACES );
 //
-//            $planningOutput = new PlanningOutput($this->logger);
+//            $planningOutput = new PlanningOutput($this->getLogger());
 //            $planningOutput->outputWithGames($planning, false);
 //            $planningOutput->outputWithTotals($planning, false);
 //        }
@@ -68,6 +67,6 @@ class Planning extends Command
 //
 //        $planningInput->setState(PlanningInput::STATE_ALL_PLANNINGS_TRIED);
 //        $this->planningInputRepos->save($planningInput);
-//        $this->logger->info('   update state => STATE_ALL_PLANNINGS_TRIED');
+//        $this->getLogger()->info('   update state => STATE_ALL_PLANNINGS_TRIED');
 //    }
 }

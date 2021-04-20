@@ -43,7 +43,7 @@ abstract class Action
      */
     protected function getFormData(Request $request): array|object
     {
-        $input = json_decode($this->getRawData());
+        $input = json_decode($this->getRawData($request));
         if ($input === null) {
             return new \stdClass();
         }
@@ -55,9 +55,13 @@ abstract class Action
         return $input;
     }
 
-    protected function getRawData(): false|string
+    protected function getRawData(Request $request): string
     {
-        return file_get_contents('php://input');
+        $contents = file_get_contents('php://input');
+        if ($contents === false) {
+            throw new HttpBadRequestException($request, 'Malformed JSON input.');
+        }
+        return $contents;
     }
 
     /**

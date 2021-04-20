@@ -28,7 +28,6 @@ use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
 
 class RetryTimeout extends PlanningCommand
 {
-
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
@@ -55,13 +54,13 @@ class RetryTimeout extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'command-planning-retry-timeout');
-        $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos);
         $planningSeeker->enableTimedout($this->getMaxTimeoutSeconds($input));
 
 
         try {
             if (!$this->setStatusToStartProcessingTimedout()) {
-                $this->logger->info('still processing..');
+                $this->getLogger()->info('still processing..');
                 $this->setStatusToFinishedProcessingTimedout();
                 return 0;
             }
@@ -74,20 +73,20 @@ class RetryTimeout extends PlanningCommand
             }
             $this->setStatusToFinishedProcessingTimedout();
         } catch (Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            if( $this->logger !== null ) {
+                $this->logger->error($exception->getMessage());
+            }
         }
         return 0;
     }
 
     protected function getPlanningInputFromInput(InputInterface $input): PlanningInput
     {
-        if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
-            $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+        $inputId = $input->getOption('inputId');
+        if (is_string($inputId) && strlen($inputId) > 0) {
+            $planningInput = $this->planningInputRepos->find((int)$inputId);
             if ($planningInput === null) {
-                throw new Exception(
-                    'no timedout-planninginput found for inputId ' . $input->getArgument('inputId'),
-                    E_ERROR
-                );
+                throw new Exception('no timedout-planninginput found for inputId ' . $inputId, E_ERROR);
             }
             return $planningInput;
         }
@@ -139,8 +138,9 @@ class RetryTimeout extends PlanningCommand
 
     protected function getMaxTimeoutSeconds(InputInterface $input): int
     {
-        if ($input->getOption('maxTimeoutSeconds') !== null && strlen($input->getOption('maxTimeoutSeconds')) > 0) {
-            return (int) $input->getOption('maxTimeoutSeconds');
+        $maxTimeoutSeconds = $input->getOption('maxTimeoutSeconds');
+        if (is_string($maxTimeoutSeconds) && strlen($maxTimeoutSeconds) > 0) {
+            return (int)$maxTimeoutSeconds;
         }
         return PlanningBase::DEFAULT_TIMEOUTSECONDS;
     }
@@ -148,21 +148,25 @@ class RetryTimeout extends PlanningCommand
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void
     {
         $stream = fopen('php://memory', 'r+');
-        $loggerOutput = new Logger('succesfull-retry-planning-output-logger');
+        if( $stream === false ) {
+            return;
+        }
+        $loggerOutput = new Logger('successful-retry-planning-output-logger');
         $loggerOutput->pushProcessor(new UidProcessor());
         $handler = new StreamHandler($stream, Logger::INFO);
         $loggerOutput->pushHandler($handler);
 
         $planningOutput = new PlanningOutput($loggerOutput);
-        $planningOutput->outputInput($planningInput, null, 'is succesfull');
+        $planningOutput->outputInput($planningInput, null, 'is successful');
 
         $batchOutput = new BatchOutput($loggerOutput);
-        $batchOutput->output($planningInput->getBestPlanning()->createFirstBatch(), 'succesful retry planning');
+        $batchOutput->output($planningInput->getBestPlanning()->createFirstBatch(), 'successful retry planning');
 
         rewind($stream);
+        $emailBody = stream_get_contents($stream/*$handler->getStream()*/);
         $this->mailer->sendToAdmin(
             'timeout-planning successful',
-            stream_get_contents($stream/*$handler->getStream()*/),
+            $emailBody === false ? 'unable to convert stream into string' : $emailBody,
             true
         );
     }
@@ -173,15 +177,14 @@ class RetryTimeout extends PlanningCommand
      */
     protected function getPouleStructure(InputInterface $input): ?PouleStructure
     {
-        $pouleStructure = null;
-        if (strlen($input->getOption('pouleStructure')) > 0) {
-            $pouleStructureParam = explode(',', $input->getOption('pouleStructure'));
-            if ($pouleStructureParam != false) {
-                $pouleStructure = [];
-                foreach ($pouleStructureParam as $nrOfPlaces) {
-                    $pouleStructure[] = (int)$nrOfPlaces;
-                }
-            }
+        $pouleStructureParam = $input->getOption('pouleStructure');
+        if (!is_string($pouleStructureParam) || strlen($pouleStructureParam) === 0) {
+            return null;
+        }
+        $pouleStructureArray = explode(',', $pouleStructureParam);
+        $pouleStructure = [];
+        foreach ($pouleStructureArray as $nrOfPlaces) {
+            $pouleStructure[] = (int)$nrOfPlaces;
         }
         return new PouleStructure(...$pouleStructure);
     }

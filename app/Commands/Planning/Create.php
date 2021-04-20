@@ -72,28 +72,31 @@ class Create extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'command-planning-create');
-        $this->logger->info('starting command app:planning-create');
-        $this->showSuccessful = $input->getOption('showSuccessful');
-
         try {
+            $this->initLogger($input, 'command-planning-create');
+            $this->getLogger()->info('starting command app:planning-create');
+            $showSuccessful = $input->getOption('showSuccessful');
+            $this->showSuccessful = is_bool($showSuccessful) ? $showSuccessful : false;
             $queueService = new QueueService($this->config->getArray('queue'));
-            if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
-                $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+            $inputId = $input->getArgument('inputId');
+            if (is_string($inputId) && strlen($inputId) > 0) {
+                $planningInput = $this->planningInputRepos->find((int)$inputId);
                 if ($planningInput === null) {
-                    $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' not found');
+                    $this->getLogger()->info('planningInput ' . $inputId . ' not found');
                     return 0;
                 }
                 $this->planningInputRepos->reset($planningInput);
                 $this->processPlanning($queueService, $planningInput);
-                $this->logger->info('planningInput ' . $input->getArgument('inputId') . ' created');
+                $this->getLogger()->info('planningInput ' . $inputId . ' created');
                 return 0;
             }
 
             $timeoutInSeconds = 295;
             $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
         } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            if( $this->logger !== null ) {
+                $this->logger->error($exception->getMessage());
+            }
         }
         return 0;
     }
@@ -102,8 +105,8 @@ class Create extends PlanningCommand
     {
         return function (Message $message, Consumer $consumer) use ($queueService) : void {
             // process message
-            $this->logger->info('------ EXECUTING ------');
             try {
+                $this->getLogger()->info('------ EXECUTING ------');
                 $content = json_decode($message->getBody());
                 $competition = null;
                 if (property_exists($content, "competitionId")) {
@@ -118,11 +121,13 @@ class Create extends PlanningCommand
                     $this->planningInputRepos->reset($planningInput);
                     $this->processPlanning($queueService, $planningInput, $competition, $roundNumberAsValue);
                 } else {
-                    $this->logger->info('planningInput ' . $content->inputId . ' not found');
+                    $this->getLogger()->info('planningInput ' . $content->inputId . ' not found');
                 }
                 $consumer->acknowledge($message);
             } catch (\Exception $exception) {
-                $this->logger->error($exception->getMessage());
+                if($this->logger !== null ) {
+                    $this->logger->error($exception->getMessage());
+                }
                 $consumer->reject($message);
             }
         };
@@ -134,14 +139,14 @@ class Create extends PlanningCommand
         Competition $competition = null,
         int $roundNumberAsValue = null
     ): void {
-        $planningOutput = new PlanningOutput($this->logger);
+        $planningOutput = new PlanningOutput($this->getLogger());
 
-        $planningSeeker = new PlanningSeeker($this->logger, $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos);
         // $planningSeeker->disableThrowOnTimeout();
         $planningSeeker->process($planningInput);
         $bestPlanning = $planningInput->getBestPlanning();
         if ($this->showSuccessful === true) {
-            $planningOutput = new PlanningOutput($this->logger);
+            $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($bestPlanning, false);
             $planningOutput->outputWithTotals($bestPlanning, false);
         }
@@ -155,7 +160,7 @@ class Create extends PlanningCommand
         Competition $competition,
         int $roundNumberAsValue
     ): void {
-        $this->logger->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
+        $this->getLogger()->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
 
         $this->entityManager->refresh($competition);
         // all roundnumbers should be refreshed, because planningConfig can be gotten from roundnumber above
@@ -170,9 +175,12 @@ class Create extends PlanningCommand
             $this->planningInputRepos,
             $this->planningRepos,
             $this->roundNumberRepos,
-            $this->logger
+            $this->getLogger()
         );
         try {
+            if ($tournament === null) {
+                throw new \Exception('no tournament found for competitionid ' . $roundNumber->getCompetition()->getId(), E_ERROR);
+            }
             $this->entityManager->getConnection()->beginTransaction();
             $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
             $this->entityManager->getConnection()->commit();
@@ -185,9 +193,6 @@ class Create extends PlanningCommand
     protected function getRoundNumber(Competition $competition, int $roundNumberAsValue): RoundNumber
     {
         $structure = $this->structureRepos->getStructure($competition);
-        if ($structure === null) {
-            throw new \Exception("structure not found for competitionid " . $competition->getId(), E_ERROR);
-        }
         $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
         if ($roundNumber === null) {
             throw new \Exception(

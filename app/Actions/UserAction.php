@@ -76,7 +76,7 @@ final class UserAction extends Action
 
             /** @var User $userSer */
             $userSer = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 User::class,
                 'json',
                 $this->getDeserializationContext()
@@ -114,7 +114,7 @@ final class UserAction extends Action
             $userAuth = $request->getAttribute('user');
 
             $user = $this->userRepos->find((int)$args['userId']);
-            if ($userAuth->getId() !== $user->getId()) {
+            if ($user === null || $userAuth->getId() !== $user->getId()) {
                 throw new Exception(
                     'de ingelogde gebruiker en de te verwijderen gebruiker zijn verschillend',
                     E_ERROR

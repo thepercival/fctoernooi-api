@@ -162,7 +162,7 @@ final class TournamentAction extends Action
             $deserializationContext = $this->getDeserializationContext($user);
             /** @var Tournament $tournamentSer */
             $tournamentSer = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 Tournament::class,
                 'json',
                 $deserializationContext
@@ -195,7 +195,7 @@ final class TournamentAction extends Action
     {
         try {
             /** @var Tournament $tournamentSer */
-            $tournamentSer = $this->serializer->deserialize($this->getRawData(), Tournament::class, 'json');
+            $tournamentSer = $this->serializer->deserialize($this->getRawData($request), Tournament::class, 'json');
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
@@ -262,7 +262,7 @@ final class TournamentAction extends Action
             /** @var stdClass $copyData */
             $copyData = $this->getFormData($request);
             if (property_exists($copyData, 'startdatetime') === false) {
-                throw new Exception('er is geen nieuwe startdatum-tijd opgegeven');
+                throw new Exception('er is geen nieuwe startdatum-tijd opgegeven', E_ERROR);
             }
 
             $competition = $tournament->getCompetition();
@@ -272,6 +272,9 @@ final class TournamentAction extends Action
 //            }
 
             $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
+            if ($startDateTime === false) {
+                throw new Exception('no input for startdatetime', E_ERROR );
+            }
 
             $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
             $this->tournamentRepos->customPersist($newTournament, true);
@@ -313,8 +316,9 @@ final class TournamentAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $hash = $this->getExportHash($tournament->getId());
-            return $this->respondWithJson($response, json_encode(['hash' => $hash]));
+            $hash = $this->getExportHash((int)$tournament->getId());
+            $json = json_encode(['hash' => $hash]);
+            return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
@@ -342,7 +346,7 @@ final class TournamentAction extends Action
             if (array_key_exists('hash', $queryParams) === false) {
                 throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
             }
-            if ($queryParams['hash'] !== $this->getExportHash($tournament->getId())) {
+            if ($queryParams['hash'] !== $this->getExportHash((int)$tournament->getId())) {
                 throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
             }
 

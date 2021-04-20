@@ -2,11 +2,12 @@ parameters:
     level: 8
     paths:
         - domain
-        #- tests/cases
-        #- app
+        - tests/cases
+        - app
         - config
         #- serialization/handler
     excludePaths:
         - app/Export/*
+        - app/ImageService.php
     inferPrivatePropertyTypeFromConstructor:
         true

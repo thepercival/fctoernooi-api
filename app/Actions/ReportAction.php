@@ -85,8 +85,8 @@ final class ReportAction extends Action
 
         $startDateTimeCreated = null;
         if (array_key_exists("startDateTimeCreated", $queryParams) && strlen(
-                $queryParams["startDateTimeCreated"]
-            ) > 0) {
+            $queryParams["startDateTimeCreated"]
+        ) > 0) {
             $startDateTimeCreated = \DateTimeImmutable::createFromFormat(
                 'Y-m-d\TH:i:s.u\Z',
                 $queryParams["startDateTimeCreated"]

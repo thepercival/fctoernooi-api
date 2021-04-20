@@ -58,7 +58,7 @@ final class RefereeAction extends Action
         try {
             /** @var Referee $referee */
             $referee = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 Referee::class,
                 'json',
                 $this->getDeserializationContext()
@@ -103,7 +103,7 @@ final class RefereeAction extends Action
         try {
             /** @var Referee $refereeSer */
             $refereeSer = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 Referee::class,
                 'json',
                 $this->getDeserializationContext()
@@ -164,7 +164,7 @@ final class RefereeAction extends Action
 
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
-            $priorityService = new PriorityService($competition->getReferees()->toArray());
+            $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->upgrade($referee);
             foreach ($changedReferees as $changedReferee) {
                 $this->refereeRepos->save($changedReferee);
@@ -196,7 +196,7 @@ final class RefereeAction extends Action
             $this->refereeRepos->remove($referee);
             $this->authSyncService->remove($tournament, Role::REFEREE, $referee->getEmailaddress());
 
-            $priorityService = new PriorityService($competition->getReferees()->toArray());
+            $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->validate();
             foreach ($changedReferees as $changedReferee) {
                 $this->refereeRepos->save($changedReferee);

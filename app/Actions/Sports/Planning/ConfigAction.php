@@ -48,7 +48,7 @@ final class ConfigAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute('tournament')->getCompetition();
             /** @var PlanningConfig $planningConfigSer */
-            $planningConfigSer = $this->serializer->deserialize($this->getRawData(), PlanningConfig::class, 'json');
+            $planningConfigSer = $this->serializer->deserialize($this->getRawData($request), PlanningConfig::class, 'json');
 
             $structure = $this->structureRepos->getStructure($competition);
             $roundNumber = $structure->getRoundNumber((int)$args['roundNumber']);

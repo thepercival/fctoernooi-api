@@ -37,6 +37,9 @@ class ImageService
         $logostream->moveTo($newImagePath);
 
         $source_properties = getimagesize($newImagePath);
+        if($source_properties === false ) {
+            throw new \Exception("could not read img dimensions", E_ERROR);
+        }
         $image_type = $source_properties[2];
         if ($image_type == IMAGETYPE_JPEG) {
             /** @var GdImage|false $image_resource_id */

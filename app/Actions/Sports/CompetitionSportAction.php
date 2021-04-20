@@ -58,7 +58,7 @@ final class CompetitionSportAction extends Action
             $competition = $request->getAttribute('tournament')->getCompetition();
 
             /** @var Sport $sportSer */
-            $sportSer = $this->serializer->deserialize($this->getRawData(), Sport::class, 'json');
+            $sportSer = $this->serializer->deserialize($this->getRawData($request), Sport::class, 'json');
 
             $sport = $this->sportRepos->find($sportSer->getId());
             if ($sport === null) {
@@ -97,9 +97,9 @@ final class CompetitionSportAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute('tournament')->getCompetition();
 
-            /** @var CompetitionSport|false $competitionSportSer */
+            /** @var CompetitionSport $competitionSportSer */
             $competitionSportSer = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 CompetitionSport::class,
                 'json',
                 $this->getDeserializationContext()

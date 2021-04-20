@@ -66,7 +66,9 @@ class UpdateSitemap extends Command
 //            chown($distPath . "sitemap.txt", "coen");
 //            chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            if( $this->logger !== null ) {
+                $this->logger->error($exception->getMessage());
+            }
         }
         return 0;
     }

@@ -44,7 +44,7 @@ final class TournamentUserAction extends Action
 
             /** @var TournamentUser $tournamentUserSer */
             $tournamentUserSer = $this->serializer->deserialize(
-                $this->getRawData(),
+                $this->getRawData($request),
                 TournamentUser::class,
                 'json'
             );

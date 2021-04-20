@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands\Planning;
@@ -28,28 +27,13 @@ use SportsPlanning\Planning\Validator as PlanningValidator;
 
 class Validator extends Command
 {
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
-    /**
-     * @var PlanningInputRepository
-     */
-    protected $planningInputRepos;
-    /**
-     * @var PlanningRepository
-     */
-    protected $planningRepos;
-    /**
-     * @var PlanningValidator
-     */
-    protected $planningValidator;
-    /**
-     * @var bool
-     */
-    protected $exitAtFirstInvalid;
+    protected TournamentRepository $tournamentRepos;
+    protected PlanningInputRepository $planningInputRepos;
+    protected PlanningRepository $planningRepos;
+    protected PlanningValidator $planningValidator;
+    protected bool $exitAtFirstInvalid;
 
-    public function __construct(ContainerInterface $container,)
+    public function __construct(ContainerInterface $container)
     {
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
@@ -90,6 +74,7 @@ class Validator extends Command
         $this->initLogger($input, 'command-planning-validate');
 
         $resetPlanningInputWhenInvalid = $input->getOption('resetInvalid');
+        $resetPlanningInputWhenInvalid = is_bool($resetPlanningInputWhenInvalid) ? $resetPlanningInputWhenInvalid : false;
 
         $showNrOfPlaces = [];
 
@@ -97,16 +82,17 @@ class Validator extends Command
 
         $queueService = new QueueService($this->config->getArray('queue'));
 
-        $this->logger->info('valideren gestart..');
+        $this->getLogger()->info('valideren gestart..');
 
         $planningInputs = $this->getPlanningInputsToValidate($input);
         foreach ($planningInputs as $planningInput) {
-            (new PlanningOutput($this->logger))->outputInput($planningInput);
+            (new PlanningOutput($this->getLogger()))->outputInput($planningInput);
             try {
                 $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
             } catch (Exception $exception) {
-                $this->logger->error($exception->getMessage());
-
+                if( $this->logger !== null ) {
+                    $this->logger->error($exception->getMessage());
+                }
                 if ($this->exitAtFirstInvalid) {
                     return 0;
                 }
@@ -117,7 +103,7 @@ class Validator extends Command
             }
             // $this->planningInputRepos->getEM()->clear();
         }
-        $this->logger->info('alle planningen gevalideerd');
+        $this->getLogger()->info('alle planningen gevalideerd');
         return 0;
     }
 
@@ -126,8 +112,9 @@ class Validator extends Command
      */
     protected function getPlanningInputsToValidate(InputInterface $input): array
     {
-        if ($input->getArgument('inputId') !== null && strlen($input->getArgument('inputId')) > 0) {
-            $planningInput = $this->planningInputRepos->find((int)$input->getArgument('inputId'));
+        $inputId = $input->getArgument('inputId');
+        if (is_string($inputId) && strlen($inputId) > 0) {
+            $planningInput = $this->planningInputRepos->find((int)$inputId);
             if ($planningInput === null) {
                 return [];
             }
@@ -135,13 +122,15 @@ class Validator extends Command
         }
 
         $validateInvalid = $input->getOption("validateInvalid");
+        $validateInvalid = is_bool($validateInvalid) ? $validateInvalid : false;
 
         $pouleStructure = $this->getPouleStructure($input);
         $selfReferee = $this->getSelfReferee($input);
 
         $maxNrOfInputs = 100;
-        if (strlen($input->getOption('maxNrOfInputs')) > 0) {
-            $maxNrOfInputs = (int)$input->getOption('maxNrOfInputs');
+        $maxNrOfInputsInput = $input->getOption('maxNrOfInputs');
+        if (is_string($maxNrOfInputsInput) && strlen($maxNrOfInputsInput) > 0) {
+            $maxNrOfInputs = (int)$maxNrOfInputsInput;
         }
 
         return $this->planningInputRepos->findNotValidated($validateInvalid, $maxNrOfInputs, $pouleStructure, $selfReferee);
@@ -156,18 +145,18 @@ class Validator extends Command
     protected function validatePlanningInput(
         PlanningInput $planningInputParam,
         bool $resetPlanningInputWhenInvalid,
-        array &$showNrOfPlaces = null): void
-    {
+        array &$showNrOfPlaces = null
+    ): void {
         $planningInput = $this->planningInputRepos->getFromInput($planningInputParam);
 
         if ($planningInput === null) {
             return;
         }
         if ($showNrOfPlaces !== null && array_key_exists($planningInput->getNrOfPlaces(), $showNrOfPlaces) === false) {
-            $this->logger->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
+            $this->getLogger()->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
-        $succeededPlannings = $planningInput->getPlannings(Planning::STATE_SUCCEEDED);
+        $succeededPlannings = $planningInput->getPlanningsWithState(Planning::STATE_SUCCEEDED);
         if ($succeededPlannings->count() === 0) {
             throw new \Exception("input (inputid " . $planningInput->getId() . ") has no bestplanning", E_ERROR);
         }
@@ -183,7 +172,7 @@ class Validator extends Command
                 continue;
             }
             // output
-            $planningOutput = new PlanningOutput($this->logger);
+            $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($succeededPlanning, true);
             $planningOutput->outputWithTotals($succeededPlanning, true);
 
@@ -204,17 +193,14 @@ class Validator extends Command
     protected function getPouleStructure(InputInterface $input): ?PouleStructure
     {
         $pouleStructure = null;
-        if (strlen($input->getOption('pouleStructure')) > 0) {
-            $pouleStructureParam = explode(",", $input->getOption('pouleStructure'));
-            if ($pouleStructureParam != false) {
-                $pouleStructure = [];
-                foreach ($pouleStructureParam as $nrOfPlaces) {
-                    $pouleStructure[] = (int)$nrOfPlaces;
-                }
-            }
-        }
-        if ($pouleStructure === null) {
+        $pouleStructureParam = $input->getOption('pouleStructure');
+        if (!is_string($pouleStructureParam) || strlen($pouleStructureParam) === 0) {
             return null;
+        }
+        $pouleStructureParam = explode(',', $pouleStructureParam);
+        $pouleStructure = [];
+        foreach ($pouleStructureParam as $nrOfPlaces) {
+            $pouleStructure[] = (int)$nrOfPlaces;
         }
         return new PouleStructure(...$pouleStructure);
     }
@@ -226,9 +212,9 @@ class Validator extends Command
     protected function getSelfReferee(InputInterface $input): ?int
     {
         $selfReferee = null;
-        $optionSelfReferee = (string)$input->getOption('selfReferee');
-        if ($optionSelfReferee !== null && strlen($optionSelfReferee) > 0 && ctype_digit($optionSelfReferee)) {
-            $selfReferee = (int) $input->getOption('selfReferee');
+        $optionSelfReferee = $input->getOption('selfReferee');
+        if (is_string($optionSelfReferee) && strlen($optionSelfReferee) > 0 && ctype_digit($optionSelfReferee)) {
+            $selfReferee = (int)$optionSelfReferee;
             if ($selfReferee !== SelfReferee::OTHERPOULES && $selfReferee !== SelfReferee::SAMEPOULE) {
                 $selfReferee = SelfReferee::DISABLED;
             }

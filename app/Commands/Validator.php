@@ -62,10 +62,11 @@ class Validator extends Command
     {
         $this->initLogger($input, 'cron-tournament-validator');
         try {
-            $this->logger->info('aan het valideren..');
+            $this->getLogger()->info('aan het valideren..');
             $filter = ['updated' => true];
-            if (((int)$input->getArgument('tournamentId')) > 0) {
-                $filter = ['id' => (int)$input->getArgument('tournamentId')];
+            $tournamentId = $input->getArgument('tournamentId');
+            if (is_string($tournamentId) && (int)$tournamentId > 0) {
+                $filter = ['id' => $tournamentId];
             }
             $tournaments = $this->tournamentRepos->findBy($filter);
             /** @var Tournament $tournament */
@@ -73,12 +74,14 @@ class Validator extends Command
                 try {
                     $this->checkValidity($tournament);
                 } catch (Exception $exception) {
-                    $this->logger->error($exception->getMessage());
+                    $this->getLogger()->error($exception->getMessage());
                 }
             }
             $this->logger->info('alle toernooien gevalideerd');
         } catch (Exception $exception) {
-            $this->logger->error($exception->getMessage());
+            if( $this->logger !== null ) {
+                $this->logger->error($exception->getMessage());
+            }
         }
         return 0;
     }
@@ -102,11 +105,12 @@ class Validator extends Command
     {
         try {
             $this->gamesValidator->validate($roundNumber, $nrOfReferees, $tournament->getBreak());
-            if ($roundNumber->hasNext()) {
-                $this->validateGames($tournament, $roundNumber->getNext(), $nrOfReferees);
+            $nextRoundNumber = $roundNumber->getNext();
+            if ($nextRoundNumber !== null) {
+                $this->validateGames($tournament, $nextRoundNumber, $nrOfReferees);
             }
         } catch (Exception $exception) {
-            $this->logger->info('invalid roundnumber ' . $roundNumber->getId());
+            $this->getLogger()->info('invalid roundnumber ' . $roundNumber->getId());
             // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
             throw new Exception($exception->getMessage(), E_ERROR);
         }
@@ -115,8 +119,8 @@ class Validator extends Command
     protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
         $map = new CompetitorMap(array_values($tournament->getCompetitors()->toArray()));
-        $againstGameOutput = new AgainstGameOutput($map, $this->logger);
-        $togetherGameOutput = new TogetherGameOutput($map, $this->logger);
+        $againstGameOutput = new AgainstGameOutput($map, $this->getLogger());
+        $togetherGameOutput = new TogetherGameOutput($map, $this->getLogger());
         foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
             if ($game instanceof AgainstGame) {
                 $againstGameOutput->output($game);
@@ -126,7 +130,7 @@ class Validator extends Command
         }
         // return;
 
-//        $planningOutput = new PlanningOutput($this->logger);
+//        $planningOutput = new PlanningOutput($this->getLogger());
 //
 //        $inputService = new PlanningInputService();
 //        $planningService = new PlanningService();
@@ -134,7 +138,7 @@ class Validator extends Command
 //            $inputService->get($roundNumber, $nrOfReferees)
 //        );
 //        if ($planningInput === null) {
-//            $this->logger->info('no planninginput');
+//            $this->getLogger()->info('no planninginput');
 //            return;
 //        }
 //

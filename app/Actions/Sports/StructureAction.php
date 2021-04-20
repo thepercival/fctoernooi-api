@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use Exception;
 use FCToernooi\Tournament;
 use Sports\Competition;
 use Sports\Structure;
@@ -62,7 +63,7 @@ final class StructureAction extends Action
     {
         try {
             /** @var Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize($this->getRawData(), Structure::class, 'json');
+            $structureSer = $this->serializer->deserialize($this->getRawData($request), Structure::class, 'json');
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
@@ -72,18 +73,23 @@ final class StructureAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $structure = $this->structureRepos->getStructure($competition);
             $newStructure = $this->structureCopier->copy($structureSer, $competition);
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($competition, $newStructure);
 
             $roundNumberAsValue = 1;
-            $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
+            try {
+                $structure = $this->structureRepos->getStructure($competition);
+                $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
+            } catch (Exception) {
+                $this->structureRepos->add($newStructure, $roundNumberAsValue);
+            }
 
-            $this->competitorRepos->syncCompetitors($tournament, $newStructure->getRootRound());
+            $structure = $this->structureRepos->getStructure($competition);
+            $this->competitorRepos->syncCompetitors($tournament, $structure->getRootRound());
 
-            $json = $this->serializer->serialize($newStructure, 'json');
+            $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);

@@ -51,7 +51,7 @@ final class PlanningAction extends Action
      */
     public function fetch(Request $request, Response $response, array $args): Response
     {
-        list($structure, $roundNumber) = $this->getFromRequest($request, $args);
+        $structure = $this->getStructureFromRequest($request, $args);
         $json = $this->serializer->serialize($structure, 'json');
         return $this->respondWithJson($response, $json);
     }
@@ -66,11 +66,12 @@ final class PlanningAction extends Action
      */
     public function create(Request $request, Response $response, array $args): Response
     {
-        /** @var \FCToernooi\Tournament $tournament */
+        /** @var Tournament $tournament */
         $tournament = $request->getAttribute('tournament');
 
         try {
-            list($structure, $startRoundNumber) = $this->getFromRequest($request, $args);
+            $structure = $this->getStructureFromRequest($request, $args);
+            $startRoundNumber = $this->getRoundNumberFromRequest($request, $args);
 
             $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
                 $this->inputRepos,
@@ -102,7 +103,7 @@ final class PlanningAction extends Action
         $tournament = $request->getAttribute('tournament');
 
         try {
-            list($structure, $roundNumber) = $this->getFromRequest($request, $args);
+            $roundNumber = $this->getRoundNumberFromRequest($request, $args);
             $scheduler = new RoundNumber\PlanningScheduler($tournament->getBreak());
             $dates = $scheduler->rescheduleGames($roundNumber);
 
@@ -118,23 +119,36 @@ final class PlanningAction extends Action
     /**
      * @param Request $request
      * @param array<string, int|string> $args
-     * @return list<Structure|RoundNumber>
+     * @return Structure
      * @throws \Exception
      */
-    protected function getFromRequest(Request $request, array $args): array
+    protected function getStructureFromRequest(Request $request, array $args): Structure
     {
         $competition = $request->getAttribute('tournament')->getCompetition();
         if (array_key_exists('roundNumber', $args) === false) {
             throw new \Exception('geen rondenummer opgegeven', E_ERROR);
         }
         $structure = $this->structureRepos->getStructure($competition);
-        if ($structure === null) {
-            throw new \Exception('geen structuur opgegeven', E_ERROR);
+        return $structure;
+    }
+
+    /**
+     * @param Request $request
+     * @param array<string, int|string> $args
+     * @return RoundNumber
+     * @throws \Exception
+     */
+    protected function getRoundNumberFromRequest(Request $request, array $args): RoundNumber
+    {
+        $competition = $request->getAttribute('tournament')->getCompetition();
+        if (array_key_exists('roundNumber', $args) === false) {
+            throw new \Exception('geen rondenummer opgegeven', E_ERROR);
         }
+        $structure = $this->structureRepos->getStructure($competition);
         $roundNumber = $structure->getRoundNumber((int)$args['roundNumber']);
         if ($roundNumber === null) {
             throw new \Exception('geen rondenumber gevonden', E_ERROR);
         }
-        return [$structure, $roundNumber];
+        return $roundNumber;
     }
 }

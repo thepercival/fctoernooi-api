@@ -44,18 +44,20 @@ final class QualifyAgainstConfigAction extends Action
             $competition = $request->getAttribute('tournament')->getCompetition();
 
             /** @var QualifyAgainstConfig $qualifyConfigSer */
-            $qualifyConfigSer = $this->serializer->deserialize($this->getRawData(), QualifyAgainstConfig::class, 'json');
+            $qualifyConfigSer = $this->serializer->deserialize($this->getRawData($request), QualifyAgainstConfig::class, 'json');
 
-            if (!array_key_exists('roundId', $args) || strlen($args['roundId']) === 0) {
+            $argRoundId = isset($args['roundId']) ? $args['roundId'] : null;
+            if (!is_string($argRoundId) || strlen($argRoundId) === 0) {
                 throw new \Exception('geen ronde opgegeven', E_ERROR);
             }
             $structure = $this->structureRepos->getStructure($competition);
-            $round = $this->getRound($structure, (int)$args['roundId']);
+            $round = $this->getRound($structure, (int)$argRoundId);
 
-            if (!array_key_exists('competitionSportId', $args) || strlen($args['competitionSportId']) === 0) {
+            $argCompetitionSportId = isset($args['competitionSportId']) ? $args['competitionSportId'] : null;
+            if (!is_string($argCompetitionSportId) || strlen($argCompetitionSportId) === 0) {
                 throw new \Exception('geen sport opgegeven', E_ERROR);
             }
-            $competitionSport = $this->competiionSportRepos->find((int)$args['competitionSportId']);
+            $competitionSport = $this->competiionSportRepos->find((int)$argCompetitionSportId);
             if ($competitionSport === null) {
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }
@@ -89,7 +91,7 @@ final class QualifyAgainstConfigAction extends Action
 //
 //            /** @var QualifyAgainstConfig $qualifyConfigSer */
 //            $qualifyConfigSer = $this->serializer->deserialize(
-//                $this->getRawData(),
+//                $this->getRawData($request),
 //                QualifyAgainstConfig::class,
 //                'json'
 //            );

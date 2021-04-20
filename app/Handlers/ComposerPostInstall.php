@@ -46,7 +46,11 @@ class ComposerPostInstall
     public static function rrmdir(string $src): void
     {
         $dir = opendir($src);
-        while (false !== ($file = readdir($dir))) {
+        if ( $dir === false ) {
+            echo "could not open dir : " . $src . PHP_EOL;
+            return;
+        }
+        while ($file = readdir($dir)) {
             if (($file != '.') && ($file != '..')) {
                 $full = $src . '/' . $file;
                 if (is_dir($full)) {

@@ -64,19 +64,20 @@ class CreateDefaults extends PlanningCommand
             new SportRange(0, 10),// fields
             new SportRange(1, 2),// gameAmount
         );
-        $recreate = $input->getOption("recreate");
-        $onlySelfReferee = $input->getOption("onlySelfReferee");
+        $recreate = $input->getOption('recreate');
+        $recreate = is_bool($recreate) ? $recreate : false;
+        $onlySelfReferee = $input->getOption('onlySelfReferee');
+        $onlySelfReferee = is_bool($onlySelfReferee) ? $onlySelfReferee : false;
         $queueService = new QueueService($this->config->getArray('queue'));
         $showNrOfPlaces = [];
-        $planningOutput = new PlanningOutput($this->logger);
-        while ($planningInputIterator->valid()) {
-            $planningInputIt = $planningInputIterator->current();
+        $planningOutput = new PlanningOutput($this->getLogger());
+        while ($planningInputIt = $planningInputIterator->current()) {
             if ($onlySelfReferee && !$planningInputIt->selfRefereeEnabled()) {
                 $planningInputIterator->next();
                 continue;
             }
             if (array_key_exists($planningInputIt->getNrOfPlaces(), $showNrOfPlaces) === false) {
-                $this->logger->info("TRYING NROFPLACES: " . $planningInputIt->getNrOfPlaces());
+                $this->getLogger()->info('TRYING NROFPLACES: ' . $planningInputIt->getNrOfPlaces());
                 $showNrOfPlaces[$planningInputIt->getNrOfPlaces()] = true;
             }
 
@@ -84,11 +85,11 @@ class CreateDefaults extends PlanningCommand
             if ($planningInputDb === null) {
                 $planningInputDb = $this->createPlanningInput($planningInputIt);
                 $queueService->sendCreatePlannings($planningInputDb);
-                $planningOutput->outputInput($planningInputDb, "created + message ");
+                $planningOutput->outputInput($planningInputDb, 'created + message ');
             } elseif ($recreate) {
                 $this->planningInputRepos->reset($planningInputDb);
                 $queueService->sendCreatePlannings($planningInputDb);
-                $planningOutput->outputInput($planningInputDb, "reset + message ");
+                $planningOutput->outputInput($planningInputDb, 'reset + message ');
             } /*else {
                 $planningOutput->outputInput($planningInputDb, "no action ");
             } */

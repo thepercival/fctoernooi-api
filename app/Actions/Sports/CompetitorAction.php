@@ -54,13 +54,14 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var Competitor $competitor */
-            $competitor = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
+            $competitor = $this->serializer->deserialize($this->getRawData($request), Competitor::class, 'json');
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $availabilityChecker = new AvailabilityChecker();
-            $availabilityChecker->checkCompetitorName($tournament->getCompetitors()->toArray(), $competitor->getName());
-            $availabilityChecker->checkCompetitorPlaceLocation($tournament->getCompetitors()->toArray(), $competitor );
+            $competitors = array_values($tournament->getCompetitors()->toArray());
+            $availabilityChecker->checkCompetitorName($competitors, $competitor->getName());
+            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor );
 
             $newCompetitor = new Competitor(
                 $tournament,
@@ -90,7 +91,7 @@ final class CompetitorAction extends Action
     {
         try {
             /** @var Competitor $competitorSer */
-            $competitorSer = $this->serializer->deserialize($this->getRawData(), Competitor::class, 'json');
+            $competitorSer = $this->serializer->deserialize($this->getRawData($request), Competitor::class, 'json');
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
@@ -98,8 +99,9 @@ final class CompetitorAction extends Action
             $competitor = $this->getCompetitorFromInput((int)$args["competitorId"], $tournament);
 
             $availabilityChecker = new AvailabilityChecker();
-            $availabilityChecker->checkCompetitorName($tournament->getCompetitors()->toArray(), $competitor->getName(), $competitor);
-            $availabilityChecker->checkCompetitorPlaceLocation($tournament->getCompetitors()->toArray(), $competitor, $competitor );
+            $competitors = array_values($tournament->getCompetitors()->toArray());
+            $availabilityChecker->checkCompetitorName($competitors, $competitor->getName(), $competitor);
+            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor, $competitor );
 
             $competitor->setName($competitorSer->getName());
             $competitor->setRegistered($competitorSer->getRegistered());

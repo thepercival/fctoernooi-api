@@ -28,26 +28,42 @@ alter table planningsports rename planningSports;
 -- from sports
 alter table roundnumbers rename roundNumbers;
 alter table planningconfigs rename planningConfigs;
+alter table qualifygroups rename qualifyGroups;
 
 update competitors set registered = 0 where registered is null;
 
 -- POST POST POST doctrine-update ===========================================================
+
 CREATE INDEX CDKTMP ON places(competitorid);
 CREATE INDEX CDKTMP2 ON competitors(name);
 
-update fields f join sportconfigs sc on sc.id = f.sportConfigId set competitionSportId = ( select id from competitionSports where competitionId = sc.competitionId );
-
-delete from competitors where not exists ( select * from places where competitorid = competitors.id );
-update competitors c set name = substr(name, 0, 28 ) where exists( select * from competitors csub where csub.id <> c.id and csub.name = c.name and csub.associationId = c.associationId ) and length(c.name) > 28;
-update	competitors c set c.name = concat( c.name, '#', (select count(*) from competitors csub where csub.id < c.id and csub.name = c.name and csub.associationId = c.associationId) + 1 ) where ( select count(*) from competitors csub where csub.id < c.id and csub.name = c.name and csub.associationId = c.associationId ) > 0;
--- CHECK -- select * from competitors c where exists( select * from competitors csub where csub.id <> c.id and csub.name = c.name and csub.associationId = c.associationId ) order by c.name;
-
--- remove orphans
+-- ------ BEGIN REMOVE ORPHANS ------------------
 delete from competitors where not exists ( select * from places where competitorid = competitors.id );
 delete from competitions where not exists ( select * from tournaments where competitionId = competitions.id );
 delete from leagues where not exists ( select * from competitions where leagueid = leagues.id );
 delete from associations where not exists ( select * from competitors where associationid = associations.id ) and not exists ( select * from leagues where associationid = associations.id );
 delete from associations where not exists ( select * from leagues where associationid = associations.id );
+
+delete from competitors where not exists ( select * from places where competitorid = competitors.id );
+update competitors c set name = substr(name, 0, 28 ) where exists( select * from competitors csub where csub.id <> c.id and csub.name = c.name and csub.associationId = c.associationId ) and length(c.name) > 28;
+update	competitors c set c.name = concat( c.name, '#', (select count(*) from competitors csub where csub.id < c.id and csub.name = c.name and csub.associationId = c.associationId) + 1 ) where ( select count(*) from competitors csub where csub.id < c.id and csub.name = c.name and csub.associationId = c.associationId ) > 0;
+-- ------ END REMOVE ORPHANS ------------------
+
+
+update sports set name = lower(name);
+insert into sports(name, team, customId, defaultNrOfSidePlaces, defaultGameMode ) values ('klaverjassen', false, 16, 2, 2 );
+update sports set defaultGameMode = 2, defaultNrOfSidePlaces = 1;
+update sports set defaultGameMode = 2, defaultNrOfSidePlaces = 1;
+update sports set customId = 15, defaultGameMode = 1, defaultNrOfSidePlaces = 0 where name = 'sjoelen';
+update planningConfigs set creationStrategy = 1;
+update qualifyGroups set target = 'W' where winnersOrLosers = 1;
+update qualifyGroups set target = '' where winnersOrLosers = 2;
+update qualifyGroups set target = 'L' where winnersOrLosers = 3;
+-- enable unique-constraints-qualifygroup again
+
+-- BEGIN FIXES FCTOERNOOI --------------
+
+-- CHECK -- select * from competitors c where exists( select * from competitors csub where csub.id <> c.id and csub.name = c.name and csub.associationId = c.associationId ) order by c.name;
 
 -- STAP 1 : kopieer alle associations die meerdere leagues hebben
 -- select *, ( select count(*) from leagues lsub where lsub.associationid = a.id ) from competitions c join leagues l on l.id = c.leagueid join associations a on a.id = l.associationid where ( select count(*) from leagues lsub where lsub.associationid = a.id ) > 1 order by a.id
@@ -80,26 +96,12 @@ update places p join competitors c on c.id = p.competitorid join poules po on po
 -- );
 update places p join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundNumbers rn on rn.id = r.numberid and rn.number > 1 join competitions c on c.id = rn.competitionid join tournaments t on t.competitionid = c.id set p.qualifiedPlaceId = ( select pprev.id from places pprev join poules poprev on poprev.id = pprev.pouleid join rounds rprev on rprev.id = poprev.roundid join roundNumbers rnprev on rnprev.id = rprev.numberid where rnprev.number = rn.number-1 and pprev.competitorid = p.competitorid );
 
-ALTER TABLE places DROP INDEX CDKTMP;
-ALTER TABLE competitors DROP INDEX CDKTMP2;
-
-update sports set name = lower(name);
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('klaverjassen', false, 16, 4, 2 );
-update sports set customId = 15, gameMode = 1, nrOfGamePlaces = 1 where name = 'sjoelen';
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('badminton dubbel', false, 17, 4, 2 );
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('squash dubbel', false, 18, 4, 2 );
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('tennis dubbel', false, 19, 4, 2 );
-insert into sports(name, team, customId, nrOfGamePlaces, gameMode ) values ('tafeltennis dubbel', false, 20, 4, 2 );
-
--- from sports
-update sports set gameMode = 2, nrOfGamePlaces = 2 where gameMode = 0;
-update planningConfigs set creationStrategy = 1;
-update qualifyGroups set target = 'W' where winnersOrLosers = 1;
-update qualifyGroups set target = 'L' where winnersOrLosers = 3;
+-- END FIXES FCTOERNOOI --------------
 
 -- scoreConfigs: fk to competitionSports needs to be not null again
 -- fields: fk to competitionSports needs to be not null again
-INSERT INTO competitionSports ( sportId, competitionId )( SELECT sportid, competitionid from sportconfigs );
+INSERT INTO competitionSports ( sportId, competitionId, gameMode, nrOfHomePlaces, nrOfAwayPlaces, nrOfH2H, nrOfGamePlaces, gameAmount )( SELECT sportid, competitionid, 2, 1, 1, 1, 0, 0  from sportconfigs );
+update fields f join sportconfigs sc on sc.id = f.sportConfigId set competitionSportId = ( select id from competitionSports where competitionId = sc.competitionId );
 INSERT INTO gameAmountConfigs ( amount, roundNumberId, competitionSportId )(
     SELECT pc.nrOfHeadtohead, rn.id, (select id from competitionSports where competitionId = rn.competitionId ) from roundNumbers rn join planningConfigs pc on rn.planningConfigId = pc.id
 );
@@ -127,6 +129,10 @@ INSERT INTO scoresAgainst (phase, number, home, away, gameId)
     (
         SELECT phase, number, home, away, gameId from gamescores
     );
+
+ALTER TABLE places DROP INDEX CDKTMP;
+ALTER TABLE competitors DROP INDEX CDKTMP2;
+
 
 -- ACC
 -- delete from planninginputs where exists ( select * from plannings where timeoutSeconds < 0 and inputId = planninginputs.id );

@@ -14,7 +14,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-
 class Listing extends Command
 {
     /**
@@ -52,8 +51,9 @@ class Listing extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $commandFilter = null;
-        if ($input->getArgument('commandName') !== null && strlen($input->getArgument('commandName')) > 0) {
-            $commandFilter = $input->getArgument('commandName');
+        $commandName = $input->getArgument('commandName');
+        if (is_string($commandName) && strlen($commandName) > 0) {
+            $commandFilter = $commandName;
         }
 
         foreach ($this->commandKeys as $commandKey) {
@@ -73,5 +73,4 @@ class Listing extends Command
         }
         return 0;
     }
-
 }

@@ -8,6 +8,7 @@ use Exception;
 use FCToernooi\LockerRoom;
 use Sports\Association;
 use FCToernooi\Competitor;
+use Sports\Competition;
 use Sports\Sport;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Service as CompetitionSportService;
@@ -25,7 +26,6 @@ use FCToernooi\TournamentUser;
 
 class TournamentCopier
 {
-
     public function __construct(
         private SportRepository $sportRepos,
         private SeasonRepository $seasonRepos,
@@ -33,70 +33,36 @@ class TournamentCopier
     ) {
     }
 
-    public function copy(Tournament $tournament, DateTimeImmutable $newStartDateTime, User $user): Tournament
+    public function copy(Tournament $fromTournament, DateTimeImmutable $newStartDateTime, User $user): Tournament
     {
-        $competition = $tournament->getCompetition();
+        $association = $this->createAssociationFromUserIdAndDateTime((int)$user->getId());
 
-        $association = $this->createAssociationFromUserIdAndDateTime($user->getId());
-
-        $leagueSer = $competition->getLeague();
-        $league = new League($association, $leagueSer->getName());
+        $fromCompetition = $fromTournament->getCompetition();
+        $fromLeague = $fromCompetition->getLeague();
+        $league = new League($association, $fromLeague->getName());
 
         $season = $this->seasonRepos->findOneBy(array('name' => '9999'));
+        if ($season === null) {
+            throw new \Exception('season 9999 not found', E_ERROR);
+        }
 
-        $ruleSet = $competition->getRankingRuleSet();
-        $competitionService = new CompetitionService();
-        $newCompetition = $competitionService->create($league, $season, $ruleSet, $competition->getStartDateTime());
-
-        // add serialized fields and referees to source-competition
-        $competitionSportService = new CompetitionSportService();
-        /**
-         * @param array|CompetitionSport[] $competitionSportsSer
-         * @param array|Referee[] $refereesSer
-         */
-        $createFieldsAndReferees = function (array $competitionSportsSer, array $refereesSer) use (
-            $newCompetition,
-            $competitionSportService
-        ): void {
-            foreach ($competitionSportsSer as $competitionSportSer) {
-                /** @var Sport $sport */
-                $sport = $this->sportRepos->findOneBy(["name" => $competitionSportSer->getSport()->getName()]);
-                $newCompetitionSport = new CompetitionSport(
-                    $sport,
-                    $newCompetition,
-                    $competitionSportSer->getNrOfGamePlaces(),
-                    $competitionSportSer->getGameMode()
-                );
-                /** @var Field $fieldSer */
-                foreach ($competitionSportSer->getFields() as $fieldSer) {
-                    $field = new Field($newCompetitionSport, $fieldSer->getPriority());
-                    $field->setName($fieldSer->getName());
-                }
-            }
-            foreach ($refereesSer as $refereeSer) {
-                $referee = new Referee($newCompetition, $refereeSer->getInitials(), $refereeSer->getPriority());
-                $referee->setName($refereeSer->getName());
-                $referee->setEmailaddress($refereeSer->getEmailaddress());
-                $referee->setInfo($refereeSer->getInfo());
-            }
-        };
-        $createFieldsAndReferees(
-            $competition->getSports()->toArray(),
-            $competition->getReferees()->toArray()
+        $newCompetition = (new CompetitionService())->create(
+            $league,
+            $season,
+            $fromCompetition->getRankingRuleSet(),
+            $fromCompetition->getStartDateTime()
         );
 
-        $newTournament = new TournamentBase($newCompetition);
-        $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
-        if ($tournament->getBreakStartDateTime() !== null) {
-            $diffStart = $tournament->getCompetition()->getStartDateTime()->diff($tournament->getBreakStartDateTime());
-            $newTournament->setBreakStartDateTime($newStartDateTime->add($diffStart));
-            $diffEnd = $tournament->getCompetition()->getStartDateTime()->diff($tournament->getBreakEndDateTime());
-            $newTournament->setBreakEndDateTime($newStartDateTime->add($diffEnd));
-        }
-        $newTournament->setPublic($tournament->getPublic());
+        $this->copyFieldsAndReferees(
+            $newCompetition,
+            $fromCompetition->getSports()->toArray(),
+            $fromCompetition->getReferees()->toArray()
+        );
 
-        foreach ($tournament->getUsers() as $tournamentUser) {
-            new TournamentUser($newTournament, $tournamentUser->getUser(), $tournamentUser->getRoles());
+        $newTournament = $this->createTournament($fromTournament, $newCompetition, $newStartDateTime);
+
+        foreach ($fromTournament->getUsers() as $fromTournamentUser) {
+            new TournamentUser($newTournament, $fromTournamentUser->getUser(), $fromTournamentUser->getRoles());
         }
 
         return $newTournament;
@@ -106,6 +72,59 @@ class TournamentCopier
     {
         $dateTime = new DateTimeImmutable();
         return new Association($userId . '-' . $dateTime->getTimestamp());
+    }
+
+    // add serialized fields and referees to source-competition
+
+    /**
+     * @param Competition $newCompetition
+     * @param array<CompetitionSport> $compSportsSer
+     * @param array<Referee> $refereesSer
+     */
+    protected function copyFieldsAndReferees(
+        Competition $newCompetition,
+        array $compSportsSer,
+        array $refereesSer
+    ): void {
+        foreach ($compSportsSer as $competitionSportSer) {
+            /** @var Sport $sport */
+            $sport = $this->sportRepos->findOneBy(["name" => $competitionSportSer->getSport()->getName()]);
+            $newCompetitionSport = new CompetitionSport(
+                $sport,
+                $newCompetition,
+                $competitionSportSer
+            );
+            /** @var Field $fieldSer */
+            foreach ($competitionSportSer->getFields() as $fieldSer) {
+                $field = new Field($newCompetitionSport, $fieldSer->getPriority());
+                $field->setName($fieldSer->getName());
+            }
+        }
+        foreach ($refereesSer as $refereeSer) {
+            $referee = new Referee($newCompetition, $refereeSer->getInitials(), $refereeSer->getPriority());
+            $referee->setName($refereeSer->getName());
+            $referee->setEmailaddress($refereeSer->getEmailaddress());
+            $referee->setInfo($refereeSer->getInfo());
+        }
+    }
+
+    protected function createTournament(
+        Tournament $fromTournament,
+        Competition $newCompetition,
+        DateTimeImmutable $newStartDateTime
+    ): Tournament {
+        $newTournament = new TournamentBase($newCompetition);
+        $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
+        $breakStart = $fromTournament->getBreakStartDateTime();
+        $breakEnd = $fromTournament->getBreakEndDateTime();
+        if ($breakStart !== null && $breakEnd !== null) {
+            $diffStart = $fromTournament->getCompetition()->getStartDateTime()->diff($breakStart);
+            $newTournament->setBreakStartDateTime($newStartDateTime->add($diffStart));
+            $diffEnd = $fromTournament->getCompetition()->getStartDateTime()->diff($breakEnd);
+            $newTournament->setBreakEndDateTime($newStartDateTime->add($diffEnd));
+        }
+        $newTournament->setPublic($fromTournament->getPublic());
+        return $newTournament;
     }
 
     /**
