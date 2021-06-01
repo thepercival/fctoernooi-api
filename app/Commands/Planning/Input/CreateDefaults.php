@@ -7,11 +7,12 @@ use App\Commands\Planning as PlanningCommand;
 use App\QueueService;
 use Doctrine\ORM\EntityManager;
 use Psr\Container\ContainerInterface;
+use SportsHelpers\PlaceRanges;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use SportsPlanning\Input;
-use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
+use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Planning;
@@ -28,7 +29,6 @@ class CreateDefaults extends PlanningCommand
         parent::__construct($container);
         $this->planningInputSerivce = new PlanningInputService();
         $this->entityManager = $container->get(EntityManager::class);
-
     }
 
     protected function configure(): void
@@ -56,9 +56,9 @@ class CreateDefaults extends PlanningCommand
 
     protected function createPlanningInputs(InputInterface $input): int
     {
-        $tournamentStructureRanges = new TournamentStructureRanges();
         $planningInputIterator = new PlanningInputIterator(
-            $this->getPlaceRange($input, $tournamentStructureRanges),
+            $this->getPlacesRange($input),
+            new SportRange(PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall),
             new SportRange(1, 64),
             new SportRange(1, 10),// referees
             new SportRange(0, 10),// fields

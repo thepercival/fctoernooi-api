@@ -11,8 +11,6 @@ use Interop\Amqp\Impl\AmqpBind;
 use Sports\Competition;
 use Sports\Queue\PlanningInput\CreatePlanningsEvent;
 use SportsPlanning\Input as PlanningInput;
-use Interop\Queue\Message;
-use Interop\Queue\Consumer;
 
 /**
  * sudo rabbitmqctl list_queues
@@ -88,6 +86,7 @@ class QueueService implements CreatePlanningsEvent
 
     protected function getQueue(): AmqpQueue
     {
+        /** @var AmqpQueue $queue */
         $queue = $this->getContext()->createQueue('process-planning-queue-' . $this->queueSuffix);
         $queue->addFlag(AmqpQueue::FLAG_DURABLE);
         return $queue;

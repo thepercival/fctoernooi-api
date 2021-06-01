@@ -51,14 +51,16 @@ update	competitors c set c.name = concat( c.name, '#', (select count(*) from com
 
 
 update sports set name = lower(name);
-insert into sports(name, team, customId, defaultNrOfSidePlaces, defaultGameMode ) values ('klaverjassen', false, 16, 2, 2 );
 update sports set defaultGameMode = 2, defaultNrOfSidePlaces = 1;
 update sports set defaultGameMode = 2, defaultNrOfSidePlaces = 1;
 update sports set customId = 15, defaultGameMode = 1, defaultNrOfSidePlaces = 0 where name = 'sjoelen';
-update planningConfigs set creationStrategy = 1;
+update sports set name = 'klavrjassen' where name = 'klaverjassen';
+insert into sports(name, team, customId, defaultGameMode, defaultNrOfSidePlaces ) values ('klaverjassen', false, 16, 2, 2 );
 update qualifyGroups set target = 'W' where winnersOrLosers = 1;
 update qualifyGroups set target = '' where winnersOrLosers = 2;
 update qualifyGroups set target = 'L' where winnersOrLosers = 3;
+update planningConfigs set editMode = 1;
+update planningConfigs set gamePlaceStrategy = 1;
 -- enable unique-constraints-qualifygroup again
 
 -- BEGIN FIXES FCTOERNOOI --------------
@@ -100,10 +102,10 @@ update places p join poules po on po.id = p.pouleid join rounds r on r.id = po.r
 
 -- scoreConfigs: fk to competitionSports needs to be not null again
 -- fields: fk to competitionSports needs to be not null again
-INSERT INTO competitionSports ( sportId, competitionId, gameMode, nrOfHomePlaces, nrOfAwayPlaces, nrOfH2H, nrOfGamePlaces, gameAmount )( SELECT sportid, competitionid, 2, 1, 1, 1, 0, 0  from sportconfigs );
+INSERT INTO competitionSports ( sportId, competitionId, gameMode, nrOfHomePlaces, nrOfAwayPlaces, nrOfGamePlaces, nrOfH2H, nrOfGamesPerPlace )( SELECT sportid, competitionid, 2, 1, 1, 0, 1, 0  from sportconfigs );
 update fields f join sportconfigs sc on sc.id = f.sportConfigId set competitionSportId = ( select id from competitionSports where competitionId = sc.competitionId );
-INSERT INTO gameAmountConfigs ( amount, roundNumberId, competitionSportId )(
-    SELECT pc.nrOfHeadtohead, rn.id, (select id from competitionSports where competitionId = rn.competitionId ) from roundNumbers rn join planningConfigs pc on rn.planningConfigId = pc.id
+INSERT INTO gameAmountConfigs ( amount, nrOfGamesPerPlace, roundNumberId, competitionSportId )(
+    SELECT pc.nrOfHeadtohead, 0, rn.id, (select id from competitionSports where competitionId = rn.competitionId ) from roundNumbers rn join planningConfigs pc on rn.planningConfigId = pc.id
 );
 -- parent is null
 INSERT INTO scoreConfigs ( direction, maximum, enabled, parentId, competitionSportId, roundId )(
@@ -114,18 +116,19 @@ INSERT INTO scoreConfigs ( direction, maximum, enabled, parentId, competitionSpo
     SELECT ssc.direction, ssc.maximum, ssc.enabled, sc.id, sc.competitionSportId, sc.roundId
     from scoreConfigs sc join rounds r on r.id = sc.roundId join roundNumbers rn on r.numberId = rn.id join sportscoreconfigs ssc on ssc.roundnumberid = rn.id and ssc.parentid is not null
 );
--- CHECK INSERT INTO qualifyAgainstConfigs
-INSERT INTO qualifyAgainstConfigs ( winPoints, drawPoints, winPointsExt, drawPointsExt, losePointsExt, pointsCalculation, competitionSportId, roundId )(
+-- CHECK INSERT INTO againstQualifyConfigs
+INSERT INTO againstQualifyConfigs ( winPoints, drawPoints, winPointsExt, drawPointsExt, losePointsExt, pointsCalculation, competitionSportId, roundId )(
     SELECT sc.winPoints, sc.drawPoints, sc.winPointsExt, sc.drawPointsExt, sc.losePointsExt, sc.pointsCalculation, (select id from competitionSports where competitionId = rn.competitionId ), r.id from rounds r join roundNumbers rn on r.numberId = rn.id join sportconfigs sc where sc.competitionid = rn.competitionid and rn.number = 1
 );
-INSERT INTO gamesAgainst (id, pouleid, resourcebatch, state, startDateTime, refereeId, placerefereeId, fieldId, competitionSportId )
-SELECT id, pouleid, resourcebatch, state, startDateTime, refereeId, placerefereeId, fieldId, (select id from competitionSports where competitionId = ( select rn.competitionId from poules p join rounds r on r.id = p.roundid join roundNumbers rn on rn.id = r.numberid where p.id = games.pouleid ) ) from games
+INSERT INTO againstGames (id, pouleid, resourcebatch, state, startDateTime, refereeId, placerefereeId, fieldId, competitionSportId, gameRoundNumber )
+SELECT id, pouleid, resourcebatch, state, startDateTime, refereeId, placerefereeId, fieldId, (select id from competitionSports where competitionId = ( select rn.competitionId from poules p join rounds r on r.id = p.roundid join roundNumbers rn on rn.id = r.numberid where p.id = games.pouleid ) ), 0 from games
 ;
-INSERT INTO gamePlacesAgainst (side, placeId, gameId)
+
+INSERT INTO againstGamePlaces (side, placeId, gameId)
     (
         SELECT if(homeAway,1,2), placeId, gameId from gameplaces
     );
-INSERT INTO scoresAgainst (phase, number, home, away, gameId)
+INSERT INTO againstScores (phase, number, home, away, gameId)
     (
         SELECT phase, number, home, away, gameId from gamescores
     );

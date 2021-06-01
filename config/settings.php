@@ -11,6 +11,7 @@ return [
     // Renderer settings
     'renderer' => [
         'template_path' => __DIR__ . '/../templates/',
+        'export_secret' => getenv('EXPORT_SECRET')
     ],
     // Serializer(JMS)
     'serializer' => [

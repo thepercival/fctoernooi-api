@@ -76,7 +76,7 @@ final class StructureAction extends Action
             $newStructure = $this->structureCopier->copy($structureSer, $competition);
 
             $structureValidator = new StructureValidator();
-            $structureValidator->checkValidity($competition, $newStructure);
+            $structureValidator->checkValidity($competition, $newStructure, $tournament->getPlaceRanges());
 
             $roundNumberAsValue = 1;
             try {

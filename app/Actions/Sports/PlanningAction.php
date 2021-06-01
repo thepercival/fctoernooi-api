@@ -5,16 +5,13 @@ namespace App\Actions\Sports;
 
 use App\QueueService;
 use App\Response\ErrorResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use App\Actions\Action;
-use Doctrine\ORM\EntityManager;
-use JMS\Serializer\Serializer;
-use League\Period\Period;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
-use Sports\Round;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use Sports\Round\Number as RoundNumber;
 use FCToernooi\Tournament;
@@ -27,7 +24,7 @@ use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
-    private DeserializeRefereeService $deserializeRefereeService;
+//    private DeserializeRefereeService $deserializeRefereeService;
 
     public function __construct(
         LoggerInterface $logger,
@@ -39,7 +36,7 @@ final class PlanningAction extends Action
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-        $this->deserializeRefereeService = new DeserializeRefereeService();
+//        $this->deserializeRefereeService = new DeserializeRefereeService();
     }
 
     /**
@@ -47,7 +44,7 @@ final class PlanningAction extends Action
      * @param Response $response
      * @param array<string, int|string> $args
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function fetch(Request $request, Response $response, array $args): Response
     {
@@ -56,13 +53,12 @@ final class PlanningAction extends Action
         return $this->respondWithJson($response, $json);
     }
 
-    // do game remove and add for multiple games
     /**
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
      * @return Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function create(Request $request, Response $response, array $args): Response
     {
@@ -84,12 +80,10 @@ final class PlanningAction extends Action
 
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
-
-    // do game remove and add for multiple games
 
     /**
      * @param Request $request
@@ -111,7 +105,7 @@ final class PlanningAction extends Action
 
             $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
@@ -120,13 +114,13 @@ final class PlanningAction extends Action
      * @param Request $request
      * @param array<string, int|string> $args
      * @return Structure
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getStructureFromRequest(Request $request, array $args): Structure
     {
         $competition = $request->getAttribute('tournament')->getCompetition();
         if (array_key_exists('roundNumber', $args) === false) {
-            throw new \Exception('geen rondenummer opgegeven', E_ERROR);
+            throw new Exception('geen rondenummer opgegeven', E_ERROR);
         }
         $structure = $this->structureRepos->getStructure($competition);
         return $structure;
@@ -136,18 +130,18 @@ final class PlanningAction extends Action
      * @param Request $request
      * @param array<string, int|string> $args
      * @return RoundNumber
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getRoundNumberFromRequest(Request $request, array $args): RoundNumber
     {
         $competition = $request->getAttribute('tournament')->getCompetition();
         if (array_key_exists('roundNumber', $args) === false) {
-            throw new \Exception('geen rondenummer opgegeven', E_ERROR);
+            throw new Exception('geen rondenummer opgegeven', E_ERROR);
         }
         $structure = $this->structureRepos->getStructure($competition);
         $roundNumber = $structure->getRoundNumber((int)$args['roundNumber']);
         if ($roundNumber === null) {
-            throw new \Exception('geen rondenumber gevonden', E_ERROR);
+            throw new Exception('geen rondenumber gevonden', E_ERROR);
         }
         return $roundNumber;
     }

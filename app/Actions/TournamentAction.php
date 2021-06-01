@@ -10,27 +10,23 @@ use App\QueueService;
 use App\Response\ErrorResponse;
 use App\TmpService;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Service as TournamentService;
-use FCToernooi\LockerRoom;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use App\Mailer;
 use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
 use stdClass;
 use Sports\Structure\Repository as StructureRepository;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
 use JMS\Serializer\SerializerInterface;
 use App\Copiers\TournamentCopier;
 use Sports\Structure\Copier as StructureCopier;
@@ -40,6 +36,8 @@ use Sports\Structure\Validator as StructureValidator;
 
 final class TournamentAction extends Action
 {
+    protected string $exportSecret;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
@@ -47,13 +45,12 @@ final class TournamentAction extends Action
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
-        private LockerRoomRepistory $lockerRoomRepos,
         private EntityManager $entityManager,
         private PlanningCreator $planningCreator,
-        private Mailer $mailer,
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
+        $this->exportSecret = $config->getString('renderer.export_secret');
     }
 
     /**
@@ -170,7 +167,7 @@ final class TournamentAction extends Action
 
             // $tournamentSer->setUsers(new ArrayCollection());
             $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
-// var_dump($tournamentSer->getCompetition()); die();
+            // var_dump($tournamentSer->getCompetition()); die();
             $tournament = $this->tournamentCopier->copy(
                 $tournamentSer,
                 $tournamentSer->getCompetition()->getStartDateTime(),
@@ -273,7 +270,7 @@ final class TournamentAction extends Action
 
             $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
             if ($startDateTime === false) {
-                throw new Exception('no input for startdatetime', E_ERROR );
+                throw new Exception('no input for startdatetime', E_ERROR);
             }
 
             $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
@@ -284,7 +281,7 @@ final class TournamentAction extends Action
             $newStructure = $this->structureCopier->copy($structure, $newTournament->getCompetition());
 
             $structureValidator = new StructureValidator();
-            $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure);
+            $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure, $newTournament->getPlaceRanges());
 
             $this->structureRepos->add($newStructure);
 
@@ -326,7 +323,7 @@ final class TournamentAction extends Action
 
     protected function getExportHash(int $tournamentId): string
     {
-        $decoded = $tournamentId . getenv('EXPORT_SECRET') . $tournamentId;
+        $decoded = $tournamentId . $this->exportSecret . $tournamentId;
         return hash('sha1', $decoded);
     }
 
@@ -433,7 +430,7 @@ final class TournamentAction extends Action
         $excelWriter = IOFactory::createWriter($spreadsheet, 'Xlsx');
 
         $tmpService = new TmpService();
-        $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . $tournament->getId() . '.xlsx');
+        $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . ((string)$tournament->getId()) . '.xlsx');
         $excelWriter->save($excelFileName);
 
         // For Excel2007 and above .xlsx files

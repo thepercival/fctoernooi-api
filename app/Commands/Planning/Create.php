@@ -147,7 +147,7 @@ class Create extends PlanningCommand
         $bestPlanning = $planningInput->getBestPlanning();
         if ($this->showSuccessful === true) {
             $planningOutput = new PlanningOutput($this->getLogger());
-            $planningOutput->outputWithGames($bestPlanning, false);
+            $planningOutput->outputWithGames($bestPlanning, true);
             $planningOutput->outputWithTotals($bestPlanning, false);
         }
         if ($competition !== null and $roundNumberAsValue !== null) {
@@ -160,7 +160,7 @@ class Create extends PlanningCommand
         Competition $competition,
         int $roundNumberAsValue
     ): void {
-        $this->getLogger()->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . $competition->getId() . ' with new planning');
+        $this->getLogger()->info('update roundnumber ' . $roundNumberAsValue . " and competitionid " . ((string)$competition->getId()) . ' with new planning');
 
         $this->entityManager->refresh($competition);
         // all roundnumbers should be refreshed, because planningConfig can be gotten from roundnumber above
@@ -179,7 +179,7 @@ class Create extends PlanningCommand
         );
         try {
             if ($tournament === null) {
-                throw new \Exception('no tournament found for competitionid ' . $roundNumber->getCompetition()->getId(), E_ERROR);
+                throw new \Exception('no tournament found for competitionid ' . ((string)$roundNumber->getCompetition()->getId()), E_ERROR);
             }
             $this->entityManager->getConnection()->beginTransaction();
             $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak());
@@ -196,7 +196,7 @@ class Create extends PlanningCommand
         $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
         if ($roundNumber === null) {
             throw new \Exception(
-                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . $competition->getId(),
+                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . ((string)$competition->getId()),
                 E_ERROR
             );
         }
@@ -209,8 +209,9 @@ class Create extends PlanningCommand
 
 //        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
         $this->entityManager->refresh($roundNumber/*$roundNumberParam*/);
-        if ($roundNumber->getPlanningConfig() !== null) {
-            $this->entityManager->refresh($roundNumber->getPlanningConfig());
+        $planningConfig =$roundNumber->getPlanningConfig();
+        if ($planningConfig !== null) {
+            $this->entityManager->refresh($planningConfig);
         }
         foreach ($roundNumber->getValidGameAmountConfigs() as $gameAmountConfig) {
             $this->entityManager->refresh($gameAmountConfig);

@@ -77,7 +77,7 @@ class Validator extends Command
                     $this->getLogger()->error($exception->getMessage());
                 }
             }
-            $this->logger->info('alle toernooien gevalideerd');
+            $this->getLogger()->info('alle toernooien gevalideerd');
         } catch (Exception $exception) {
             if( $this->logger !== null ) {
                 $this->logger->error($exception->getMessage());
@@ -94,10 +94,10 @@ class Validator extends Command
                 throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
             }
             $structure = $this->structureRepos->getStructure($competition);
-            $this->structureValidator->checkValidity($competition, $structure);
+            $this->structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
             $this->validateGames($tournament, $structure->getFirstRoundNumber(), $competition->getReferees()->count());
         } catch (Exception $exception) {
-            throw new Exception('toernooi-id(' . $tournament->getId() . ') => ' . $exception->getMessage(), E_ERROR);
+            throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
         }
     }
 
@@ -110,7 +110,7 @@ class Validator extends Command
                 $this->validateGames($tournament, $nextRoundNumber, $nrOfReferees);
             }
         } catch (Exception $exception) {
-            $this->getLogger()->info('invalid roundnumber ' . $roundNumber->getId());
+            $this->getLogger()->info('invalid roundnumber ' . ((string)$roundNumber->getId()));
             // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
             throw new Exception($exception->getMessage(), E_ERROR);
         }

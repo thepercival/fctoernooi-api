@@ -42,23 +42,23 @@ class ImageService
         }
         $image_type = $source_properties[2];
         if ($image_type == IMAGETYPE_JPEG) {
-            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromjpeg($newImagePath);
-            /** @var GdImage|false|resource $target_layer */
-            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-            imagejpeg($target_layer, $newImagePath);
+            if( $image_resource_id instanceof GdImage ) {
+                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                imagejpeg($target_layer, $newImagePath);
+            }
         } elseif ($image_type == IMAGETYPE_GIF) {
-            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefromgif($newImagePath);
-            /** @var GdImage|false|resource $target_layer */
-            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-            imagegif($target_layer, $newImagePath);
+            if( $image_resource_id instanceof GdImage ) {
+                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                imagegif($target_layer, $newImagePath);
+            }
         } elseif ($image_type == IMAGETYPE_PNG) {
-            /** @var GdImage|false $image_resource_id */
             $image_resource_id = imagecreatefrompng($newImagePath);
-            /** @var GdImage|false|resource $target_layer */
-            $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-            imagepng($target_layer, $newImagePath);
+            if( $image_resource_id instanceof GdImage ) {
+                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                imagepng($target_layer, $newImagePath);
+            }
         }
         $urlPath = $this->config->getString('www.apiurl') . $this->config->getString('images.sponsors.pathpostfix');
         return $urlPath . $imageName . '.' . $extension;
@@ -79,12 +79,12 @@ class ImageService
     }
 
     /**
-     * @param false|GdImage $image_resource_id
+     * @param GdImage $image_resource_id
      * @param int $width
      * @param int $height
-     * @return false|GdImage
+     * @return GdImage
      */
-    private function resize(false|GdImage $image_resource_id, int $width, int $height): false|GdImage
+    private function resize(GdImage $image_resource_id, int $width, int $height): GdImage
     {
         $target_height = 200;
         if ($height === $target_height) {

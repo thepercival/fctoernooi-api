@@ -6,10 +6,12 @@ namespace FCToernooi;
 use DateTimeImmutable;
 use \Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\PersistentCollection;
+use FCToernooi\Tournament\CustomPlaceRanges;
 use Sports\Competition;
 use League\Period\Period;
 use Sports\Competition\Referee;
 use SportsHelpers\Identifiable;
+use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 
 class Tournament extends Identifiable
 {
@@ -171,5 +173,12 @@ class Tournament extends Identifiable
     public function getCreatedDateTime(): DateTimeImmutable
     {
         return $this->createdDateTime;
+    }
+
+    public function getPlaceRanges(): CustomPlaceRanges
+    {
+        $sportVariants = $this->getCompetition()->createSportVariants();
+        $minNrOfPlacesPerPoule = (new MinNrOfPlacesCalculator())->getMinNrOfPlacesPerPoule($sportVariants);
+        return new CustomPlaceRanges($minNrOfPlacesPerPoule);
     }
 }

@@ -17,9 +17,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Actions\Action;
 use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
-use Sports\Qualify\AgainstConfig as QualifyAgainstConfig;
+use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
 
-final class QualifyAgainstConfigAction extends Action
+final class AgainstQualifyConfigAction extends Action
 {
     public function __construct(
         LoggerInterface $logger,
@@ -43,8 +43,8 @@ final class QualifyAgainstConfigAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute('tournament')->getCompetition();
 
-            /** @var QualifyAgainstConfig $qualifyConfigSer */
-            $qualifyConfigSer = $this->serializer->deserialize($this->getRawData($request), QualifyAgainstConfig::class, 'json');
+            /** @var AgainstQualifyConfig $qualifyConfigSer */
+            $qualifyConfigSer = $this->serializer->deserialize($this->getRawData($request), AgainstQualifyConfig::class, 'json');
 
             $argRoundId = isset($args['roundId']) ? $args['roundId'] : null;
             if (!is_string($argRoundId) || strlen($argRoundId) === 0) {
@@ -61,9 +61,9 @@ final class QualifyAgainstConfigAction extends Action
             if ($competitionSport === null) {
                 throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
             }
-            $qualifyConfig = $round->getQualifyAgainstConfig($competitionSport);
+            $qualifyConfig = $round->getAgainstQualifyConfig($competitionSport);
             if ($qualifyConfig === null) {
-                $qualifyConfig = new QualifyAgainstConfig($competitionSport, $round, $qualifyConfigSer->getPointsCalculation());
+                $qualifyConfig = new AgainstQualifyConfig($competitionSport, $round, $qualifyConfigSer->getPointsCalculation());
             }
 
             $qualifyConfig->setWinPoints($qualifyConfigSer->getWinPoints());
@@ -89,10 +89,10 @@ final class QualifyAgainstConfigAction extends Action
 //            /** @var Competition $competition */
 //            $competition = $request->getAttribute('tournament')->getCompetition();
 //
-//            /** @var QualifyAgainstConfig $qualifyConfigSer */
+//            /** @var AgainstQualifyConfig $qualifyConfigSer */
 //            $qualifyConfigSer = $this->serializer->deserialize(
 //                $this->getRawData($request),
-//                QualifyAgainstConfig::class,
+//                AgainstQualifyConfig::class,
 //                'json'
 //            );
 //
@@ -111,9 +111,9 @@ final class QualifyAgainstConfigAction extends Action
 //            if ($competitionSport === null) {
 //                throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
 //            }
-//            $qualifyConfig = $round->getQualifyAgainstConfig($competitionSport);
+//            $qualifyConfig = $round->getAgainstQualifyConfig($competitionSport);
 //            if ($qualifyConfig === null) {
-//                $qualifyConfig = new QualifyAgainstConfig($competitionSport, $round);
+//                $qualifyConfig = new AgainstQualifyConfig($competitionSport, $round);
 //                // throw new \Exception('er zijn al score-instellingen aanwezig', E_ERROR);
 //            }
 //
@@ -137,11 +137,11 @@ final class QualifyAgainstConfigAction extends Action
     protected function removeNext(Round $round, CompetitionSport $competitionSport): void
     {
         foreach ($round->getChildren() as $childRound) {
-            $qualifyConfig = $childRound->getQualifyAgainstConfig($competitionSport);
+            $qualifyConfig = $childRound->getAgainstQualifyConfig($competitionSport);
             if ($qualifyConfig === null) {
                 continue;
             }
-            $childRound->getQualifyAgainstConfigs()->removeElement($qualifyConfig);
+            $childRound->getAgainstQualifyConfigs()->removeElement($qualifyConfig);
             $this->qualifyConfigRepos->remove($qualifyConfig);
             $this->removeNext($childRound, $competitionSport);
         }

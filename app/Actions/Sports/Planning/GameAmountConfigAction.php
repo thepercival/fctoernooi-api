@@ -23,7 +23,6 @@ use Sports\Competition\Sport as CompetitionSport;
 
 final class GameAmountConfigAction extends Action
 {
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
@@ -69,9 +68,15 @@ final class GameAmountConfigAction extends Action
             }
             $gameAmountConfig = $roundNumber->getGameAmountConfig($competitionSport);
             if ($gameAmountConfig === null) {
-                $gameAmountConfig = new GameAmountConfig($competitionSport, $roundNumber, $gameAmountConfigSer->getAmount());
+                $gameAmountConfig = new GameAmountConfig(
+                    $competitionSport,
+                    $roundNumber,
+                    $gameAmountConfigSer->getAmount(),
+                    $gameAmountConfigSer->getNrOfGamesPerPlace()
+                );
             } else {
                 $gameAmountConfig->setAmount($gameAmountConfigSer->getAmount());
+                $gameAmountConfig->setNrOfGamesPerPlace($gameAmountConfigSer->getNrOfGamesPerPlace());
             }
 
             $this->gameAmountConfigRepos->save($gameAmountConfig);

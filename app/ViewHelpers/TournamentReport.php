@@ -52,7 +52,7 @@ class TournamentReport
         $this->scoresUsage = $nrOfScores . '/' . $nrOfGames;
         $structureValidator = new StructureValidator();
         try {
-            $structureValidator->checkValidity($competition, $structure);
+            $structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
         } catch (Exception $exception) {
             $this->validateMessage = $exception->getMessage();
         }

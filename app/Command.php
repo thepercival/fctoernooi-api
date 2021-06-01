@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputOption;
 class Command extends SymCommand
 {
     protected LoggerInterface|null $logger = null;
-    protected Mailer $mailer;
+    protected Mailer|null $mailer = null;
 
     public function __construct(protected Configuration $config)
     {
@@ -46,7 +46,10 @@ class Command extends SymCommand
         $logLevel = $loggerSettings['level'];
         $logLevelParam = $input->getOption('loglevel');
         if (is_string($logLevelParam) && strlen($logLevelParam) > 0) {
-            $logLevel = filter_var($logLevelParam, FILTER_VALIDATE_INT);
+            $logLevelTmp = filter_var($logLevelParam, FILTER_VALIDATE_INT);
+            if( $logLevelTmp !== false ) {
+                $logLevel = $logLevelTmp;
+            }
         }
 
         $this->logger = new Logger($name);
@@ -64,7 +67,7 @@ class Command extends SymCommand
             $this->logger->pushHandler(
                 new NativeMailerHandler(
                     $emailSettings['admin'],
-                    $this->getName() . ' : error',
+                    ((string)$this->getName()) . ' : error',
                     $emailSettings['from']
                 )
             );

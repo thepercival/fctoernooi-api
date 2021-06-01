@@ -35,6 +35,14 @@ final class CompetitionSportAction extends Action
         parent::__construct($logger, $serializer);
     }
 
+    /**
+     * @return list<string>
+     */
+    protected function getDeserializationGroups(): array
+    {
+        return ['Default', 'noReference'];
+    }
+
     protected function getDeserializationContext(): DeserializationContext
     {
         return DeserializationContext::create()->setGroups(['Default', 'noReference']);
@@ -57,26 +65,28 @@ final class CompetitionSportAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute('tournament')->getCompetition();
 
-            /** @var Sport $sportSer */
-            $sportSer = $this->serializer->deserialize($this->getRawData($request), Sport::class, 'json');
+            /** @var CompetitionSport $compSportSer */
+            $compSportSer = $this->deserialize($request, CompetitionSport::class, $this->getDeserializationGroups());
 
-            $sport = $this->sportRepos->find($sportSer->getId());
+            $sport = $this->sportRepos->find($compSportSer->getSport()->getId());
             if ($sport === null) {
-                throw new \Exception('de sport van de configuratie kan niet gevonden worden', E_ERROR);
-            }
-            if ($competition->getSport($sport) !== null) {
-                throw new \Exception('de sport wordt al gebruikt binnen de competitie', E_ERROR);
+                throw new \Exception('de sport kan niet gevonden worden', E_ERROR);
             }
 
-            $competitionSportService = new CompetitionSportService();
             $structure = $this->structureRepos->getStructure($competition);
-            $newCompetitionSport = $competitionSportService->createDefault($sport, $competition, $structure);
+            $newCompetitionSport = new CompetitionSport(
+                $sport,
+                $competition,
+                $compSportSer->createVariant()->toPersistVariant()
+            );
+            (new CompetitionSportService())->addToStructure($newCompetitionSport, $structure);
             $this->competitionSportRepos->customAdd($newCompetitionSport, $structure);
 
-            // add one field!!
-            $field = new Field($newCompetitionSport);
-            $field->setName(substr($newCompetitionSport->getSport()->getName(), 0, 1) . '1');
-            $this->fieldRepos->save($field);
+            foreach ($compSportSer->getFields() as $fieldSer) {
+                $field = new Field($newCompetitionSport);
+                $field->setName($fieldSer->getName());
+                $this->fieldRepos->save($field);
+            }
 
             $json = $this->serializer->serialize($newCompetitionSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
@@ -85,42 +95,42 @@ final class CompetitionSportAction extends Action
         }
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array<string, int|string> $args
-     * @return Response
-     */
-    public function edit(Request $request, Response $response, array $args): Response
-    {
-        try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
-
-            /** @var CompetitionSport $competitionSportSer */
-            $competitionSportSer = $this->serializer->deserialize(
-                $this->getRawData($request),
-                CompetitionSport::class,
-                'json',
-                $this->getDeserializationContext()
-            );
-
-            $sport = $this->sportRepos->findOneBy(['name' => $competitionSportSer->getSport()->getName()]);
-            if ($sport === null) {
-                throw new \Exception('de sport van de configuratie kan niet gevonden worden', E_ERROR);
-            }
-            $competitionSport = $competition->getSport($sport);
-            if ($competitionSport === null) {
-                throw new \Exception('de competitionSport is niet gevonden bij de competitie', E_ERROR);
-            }
-            $this->competitionSportRepos->save($competitionSport);
-
-            $json = $this->serializer->serialize($competitionSport, 'json', $this->getSerializationContext());
-            return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
-        }
-    }
+//    /**
+//     * @param Request $request
+//     * @param Response $response
+//     * @param array<string, int|string> $args
+//     * @return Response
+//     */
+//    public function edit(Request $request, Response $response, array $args): Response
+//    {
+//        try {
+//            /** @var Competition $competition */
+//            $competition = $request->getAttribute('tournament')->getCompetition();
+//
+//            /** @var CompetitionSport $competitionSportSer */
+//            $competitionSportSer = $this->serializer->deserialize(
+//                $this->getRawData($request),
+//                CompetitionSport::class,
+//                'json',
+//                $this->getDeserializationContext()
+//            );
+//
+//            $sport = $this->sportRepos->findOneBy(['name' => $competitionSportSer->getSport()->getName()]);
+//            if ($sport === null) {
+//                throw new \Exception('de sport van de configuratie kan niet gevonden worden', E_ERROR);
+//            }
+//            $competitionSport = $competition->getSport($sport);
+//            if ($competitionSport === null) {
+//                throw new \Exception('de competitionSport is niet gevonden bij de competitie', E_ERROR);
+//            }
+//            $this->competitionSportRepos->save($competitionSport);
+//
+//            $json = $this->serializer->serialize($competitionSport, 'json', $this->getSerializationContext());
+//            return $this->respondWithJson($response, $json);
+//        } catch (\Exception $exception) {
+//            return new ErrorResponse($exception->getMessage(), 422);
+//        }
+//    }
 
     /**
      * @param Request $request

@@ -5,13 +5,12 @@ namespace App\Commands\Planning;
 
 use App\Mailer;
 use Exception;
-use FCToernooi\Tournament;
-use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
+use SportsHelpers\PlaceRanges;
+use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use SportsHelpers\Place\Range as PlaceRange;
 use SportsHelpers\PouleStructure;
 use SportsHelpers\SportRange;
 use Symfony\Component\Console\Input\InputArgument;
@@ -73,7 +72,7 @@ class RetryTimeout extends PlanningCommand
             }
             $this->setStatusToFinishedProcessingTimedout();
         } catch (Exception $exception) {
-            if( $this->logger !== null ) {
+            if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
             }
         }
@@ -82,7 +81,7 @@ class RetryTimeout extends PlanningCommand
 
     protected function getPlanningInputFromInput(InputInterface $input): PlanningInput
     {
-        $inputId = $input->getOption('inputId');
+        $inputId = $input->getArgument('inputId');
         if (is_string($inputId) && strlen($inputId) > 0) {
             $planningInput = $this->planningInputRepos->find((int)$inputId);
             if ($planningInput === null) {
@@ -90,8 +89,7 @@ class RetryTimeout extends PlanningCommand
             }
             return $planningInput;
         }
-        $tournamentStructureRanges = new TournamentStructureRanges();
-        $placesRange = $this->getPlaceRange($input, $tournamentStructureRanges);
+        $placesRange = $this->getPlacesRange($input);
         $maxTimeOutSeconds = $this->getMaxTimeoutSeconds($input);
         $planningInput = $this->getTimedoutInput(true, $maxTimeOutSeconds, $placesRange);
         if ($planningInput === null) {
@@ -106,19 +104,19 @@ class RetryTimeout extends PlanningCommand
         return $planningInput;
     }
 
-    protected function getTimedoutInput(bool $batchGames, int $maxTimeOutSeconds, PlaceRange $placesRange = null): ?PlanningInput
-    {
-        if ($placesRange === null) {
-            $planningInput = null;
-            if ($batchGames) {
-                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds);
-            } else {
-                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds);
-            }
-            return $planningInput;
-        }
+    protected function getTimedoutInput(bool $batchGames, int $maxTimeOutSeconds, SportRange $placesRange ): ?PlanningInput {
+//        if ($placesRange === null) {
+//            $planningInput = null;
+//            if ($batchGames) {
+//                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds);
+//            } else {
+//                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds);
+//            }
+//            return $planningInput;
+//        }
 
-        $structureIterator = new PouleStructureIterator($placesRange, new SportRange(1, 64));
+        $placesPerPouleRange = new SportRange( PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall);
+        $structureIterator = new PouleStructureIterator($placesRange, $placesPerPouleRange, new SportRange(1, 64));
         while ($structureIterator->valid()) {
             // echo PHP_EOL . $structureIterator->current()->toString();
             $planningInput = null;
@@ -148,7 +146,7 @@ class RetryTimeout extends PlanningCommand
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void
     {
         $stream = fopen('php://memory', 'r+');
-        if( $stream === false ) {
+        if ($stream === false || $this->mailer === null) {
             return;
         }
         $loggerOutput = new Logger('successful-retry-planning-output-logger');

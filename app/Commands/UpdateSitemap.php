@@ -55,7 +55,7 @@ class UpdateSitemap extends Command
                 if ($tournament->getPublic() === false) {
                     continue;
                 }
-                $content .= $url . $tournament->getId() . PHP_EOL;
+                $content .= $url . ((string)$tournament->getId()) . PHP_EOL;
             }
             file_put_contents($distPath . "sitemap.txt", $content);
 

@@ -74,6 +74,7 @@
       "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
     ],
     "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
+    "psalm": "XDEBUG_MODE=off vendor/bin/psalm --output-format=phpstorm --show-info=true --no-diff",
     "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
     "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
     "cs-fix": "php-cs-fixer fix .",

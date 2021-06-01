@@ -34,7 +34,10 @@ class RefereeService
         $roundNumberPlaces = [];
         foreach ($roundNumber->getPoules() as $poule) {
             foreach ($poule->getPlaces() as $place) {
-                $roundNumberPlaces[$place->getId()] = $place;
+                $placeId = $place->getId();
+                if($placeId !== null) {
+                    $roundNumberPlaces[$placeId] = $place;
+                }
             }
         }
         return $roundNumberPlaces;

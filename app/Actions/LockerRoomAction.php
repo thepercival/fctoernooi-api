@@ -18,14 +18,15 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 
+/**
+ * @template Action<LockerRoom>
+ */
 final class LockerRoomAction extends Action
 {
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private LockerRoomRepository $lockerRoomRepos,
-        private TournamentRepository $tournamentRepos,
-        private Configuration $config
+        private LockerRoomRepository $lockerRoomRepos
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -124,14 +125,15 @@ final class LockerRoomAction extends Action
     public function syncCompetitors(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @psalm-var class-string<ArrayCollection<Competitor>> $className */
-            /** @psalm-template Competitor */
+            /** @psalm-var class-string $className */
             $className = ArrayCollection::class . '<' . Competitor::class . '>';
-            $newCompetitors = $this->serializer->deserialize(
+            /** @psalm-var ArrayCollection<int|string, Competitor> $newCompetitors */
+            $newCompetitors =  $this->serializer->deserialize(
                 $this->getRawData($request),
                 $className,
                 'json'
             );
+            // $this->deserialize($request, $className);
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");

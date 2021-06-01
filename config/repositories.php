@@ -53,8 +53,8 @@ use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Score\Config\Repository as ScoreConfigRepository;
 use Sports\Score\Config as ScoreConfig;
-use Sports\Qualify\AgainstConfig\Repository as QualifyAgainstConfigRepository;
-use Sports\Qualify\AgainstConfig as QualifyAgainstConfig;
+use Sports\Qualify\AgainstConfig\Repository as AgainstQualifyConfigRepository;
+use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
 use Sports\Place\Repository as PlaceRepository;
 use Sports\Place;
 use Sports\Poule\Repository as PouleRepository;
@@ -174,11 +174,11 @@ return [
             $entityManager->getClassMetaData(ScoreConfig::class)
         );
     },
-    QualifyAgainstConfigRepository::class => function (ContainerInterface $container): QualifyAgainstConfigRepository {
+    AgainstQualifyConfigRepository::class => function (ContainerInterface $container): AgainstQualifyConfigRepository {
         $entityManager = $container->get(EntityManager::class);
-        return new QualifyAgainstConfigRepository(
+        return new AgainstQualifyConfigRepository(
             $entityManager,
-            $entityManager->getClassMetaData(QualifyAgainstConfig::class)
+            $entityManager->getClassMetaData(AgainstQualifyConfig::class)
         );
     },
     RoundNumberRepository::class => function (ContainerInterface $container): RoundNumberRepository {

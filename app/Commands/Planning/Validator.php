@@ -31,7 +31,7 @@ class Validator extends Command
     protected PlanningInputRepository $planningInputRepos;
     protected PlanningRepository $planningRepos;
     protected PlanningValidator $planningValidator;
-    protected bool $exitAtFirstInvalid;
+    protected bool $exitAtFirstInvalid = false;
 
     public function __construct(ContainerInterface $container)
     {
@@ -158,7 +158,7 @@ class Validator extends Command
         }
         $succeededPlannings = $planningInput->getPlanningsWithState(Planning::STATE_SUCCEEDED);
         if ($succeededPlannings->count() === 0) {
-            throw new \Exception("input (inputid " . $planningInput->getId() . ") has no bestplanning", E_ERROR);
+            throw new \Exception("input (inputid " . ((string)$planningInput->getId()) . ") has no bestplanning", E_ERROR);
         }
         $validator = new PlanningValidator();
         foreach ($succeededPlannings as $succeededPlanning) {

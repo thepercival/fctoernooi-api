@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use JMS\Serializer\DeserializationContext;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -11,6 +12,9 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use JMS\Serializer\SerializerInterface;
 
+/**
+ * @tempate T
+ */
 abstract class Action
 {
     public function __construct(protected LoggerInterface $logger, protected SerializerInterface $serializer)
@@ -84,5 +88,27 @@ abstract class Action
     {
         $response->getBody()->write($json);
         return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * @template T
+     * @param Request $request
+     * @param class-string<T> $className
+     * @param list<string> $deeserializationGroups
+     * @return T
+     * @throws HttpBadRequestException
+     */
+    protected function deserialize(Request $request, string $className, array|null $deeserializationGroups = null): mixed
+    {
+        $context = null;
+        if (is_array($deeserializationGroups)) {
+            $context = DeserializationContext::create()->setGroups($deeserializationGroups);
+        }
+        return $this->serializer->deserialize(
+            $this->getRawData($request),
+            $className,
+            'json',
+            $context
+        );
     }
 }

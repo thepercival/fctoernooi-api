@@ -26,9 +26,7 @@ final class ReportAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
-        private TournamentCopier $tournamentCopier,
         private StructureRepository $structureRepos,
-        private LockerRoomRepistory $lockerRoomRepos,
         private TwigView $view,
         private Configuration $config
     ) {
@@ -68,8 +66,8 @@ final class ReportAction extends Action
         $tournamentHelpers = [];
         foreach ($this->getTournaments($request) as $tournament) {
             $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-            $publicUrl = $tournament->getPublic() ? ($this->config->getString("www.wwwurl") . $tournament->getId(
-                )) : '';
+            $publicUrl = $tournament->getPublic() ? ($this->config->getString("www.wwwurl") .
+                ((string)$tournament->getId())) : '';
             $tournamentHelpers[] = new TournamentReportHelper($tournament, $structure, $publicUrl);
         }
         return $tournamentHelpers;
@@ -113,6 +111,6 @@ final class ReportAction extends Action
                 return $tA->getCreatedDateTime() > $tB->getCreatedDateTime() ? -1 : 1;
             }
         );
-        return $tournaments;
+        return array_values($tournaments);
     }
 }

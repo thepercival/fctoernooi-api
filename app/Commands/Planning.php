@@ -1,15 +1,14 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands;
 
-use FCToernooi\Tournament\StructureRanges as TournamentStructureRanges;
+use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use App\Command;
 use Selective\Config\Configuration;
 
-use SportsHelpers\Place\Range as PlaceRange;
+use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
@@ -28,20 +27,21 @@ class Planning extends Command
         parent::__construct($container->get(Configuration::class));
     }
 
-    protected function getPlaceRange(
-        InputInterface $input,
-        TournamentStructureRanges $tournamentStructureRanges
-    ): PlaceRange {
-        $placeRange = $tournamentStructureRanges->getFirstPlaceRange();
+    protected function getPlacesRange(InputInterface $input): SportRange
+    {
+        $placesRange = new SportRange(
+            PlaceRanges::MinNrOfPlacesPerPoule,
+            TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
+        );
         $placeRangeOption = $input->getOption("placesRange");
         if (!is_string($placeRangeOption) || strlen($placeRangeOption) === 0) {
-            return $tournamentStructureRanges->getFirstPlaceRange();
+            return $placesRange;
         }
         if (strpos($placeRangeOption, '-') === false) {
             throw new \Exception('misformat placesRange-option', E_ERROR);
         }
         $minMax = explode('-', $placeRangeOption);
-        return new PlaceRange((int)$minMax[0], (int)$minMax[1], $placeRange->getPlacesPerPouleRange());
+        return new SportRange((int)$minMax[0], (int)$minMax[1]);
     }
 
 //    protected function updateSelfReferee(PlanningInput $planningInput)

@@ -22,7 +22,7 @@ use App\Actions\Sports\GameTogetherAction;
 use App\Actions\Sports\RefereeAction;
 use App\Actions\Sports\CompetitorAction;
 use App\Actions\Sports\CompetitionSportAction;
-use App\Actions\Sports\QualifyAgainstConfigAction;
+use App\Actions\Sports\AgainstQualifyConfigAction;
 use App\Actions\Sports\Planning\GameAmountConfigAction;
 use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
@@ -162,7 +162,7 @@ return function (App $app): void {
                             $group->options('', CompetitionSportAction::class . ':options');
                             $group->post('', CompetitionSportAction::class . ':add');
                             $group->options('/{competitionSportId}', CompetitionSportAction::class . ':options');
-                            $group->put('/{competitionSportId}', CompetitionSportAction::class . ':edit');
+                            // $group->put('/{competitionSportId}', CompetitionSportAction::class . ':edit');
                             $group->delete('/{competitionSportId}', CompetitionSportAction::class . ':remove');
 
                             $group->group(
@@ -239,8 +239,8 @@ return function (App $app): void {
                                     $group->group(
                                         '/qualifyagainstconfigs',
                                         function (Group $group): void {
-                                            $group->options('', QualifyAgainstConfigAction::class . ':options');
-                                            $group->post('', QualifyAgainstConfigAction::class . ':save');
+                                            $group->options('', AgainstQualifyConfigAction::class . ':options');
+                                            $group->post('', AgainstQualifyConfigAction::class . ':save');
                                         }
                                     );
                                 }
