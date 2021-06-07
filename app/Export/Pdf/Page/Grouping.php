@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Round;
 use Sports\Poule;
@@ -11,31 +12,27 @@ use Sports\NameService;
 
 class Grouping extends ToernooiPdfPage
 {
-    protected $maxPoulesPerLine;
-    protected $rowHeight;
+    protected int $maxPoulesPerLine = 3;
+    protected float $rowHeight = 18;
 
-    public function __construct($param1)
+    public function __construct(Document $document, mixed $param1)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
-        $this->maxPoulesPerLine = 3;
     }
 
-    public function getPageMargin()
+    public function getPageMargin(): float
     {
         return 20;
     }
 
-    public function getHeaderHeight()
+    public function getHeaderHeight(): float
     {
         return 0;
     }
 
-    protected function getRowHeight()
+    protected function getRowHeight(): float
     {
-        if ($this->rowHeight === null) {
-            $this->rowHeight = 18;
-        }
         return $this->rowHeight;
     }
 
@@ -46,7 +43,7 @@ class Grouping extends ToernooiPdfPage
         $nY = $this->drawGrouping($rooRound, $nY);
     }
 
-    public function drawGrouping(Round $round, $nY)
+    public function drawGrouping(Round $round, float $nY): float
     {
         $nY = $this->drawSubHeader("Indeling", $nY);
         $nRowHeight = $this->getRowHeight();
@@ -115,7 +112,7 @@ class Grouping extends ToernooiPdfPage
         return $nY - (2 * $nRowHeight);
     }
 
-    protected function getNrOfLines($nrOfPoules)
+    protected function getNrOfLines(int $nrOfPoules): int
     {
         if (($nrOfPoules % 3) !== 0) {
             $nrOfPoules += (3 - ($nrOfPoules % 3));
@@ -123,7 +120,7 @@ class Grouping extends ToernooiPdfPage
         return ($nrOfPoules / 3);
     }
 
-    protected function getNrOfPoulesForLine($nrOfPoules, $lastLine)
+    protected function getNrOfPoulesForLine(int $nrOfPoules, bool $lastLine): int
     {
         if ($nrOfPoules === 4) {
             return 2;
@@ -140,7 +137,7 @@ class Grouping extends ToernooiPdfPage
         return ($nrOfPoules % 3);
     }
 
-    protected function getPouleWidth($nrOfPoules, $margin)
+    protected function getPouleWidth(int $nrOfPoules, float $margin): float
     {
         if ($nrOfPoules === 1) {
             $nrOfPoules++;
@@ -151,7 +148,7 @@ class Grouping extends ToernooiPdfPage
     /**
      * maximaal 4 poules in de breedte
      */
-    protected function getXLineCentered($nrOfPoules, $pouleWidth, $margin)
+    protected function getXLineCentered(int $nrOfPoules, float $pouleWidth, float $margin): float
     {
         if ($nrOfPoules > $this->maxPoulesPerLine) {
             $nrOfPoules = $this->maxPoulesPerLine;

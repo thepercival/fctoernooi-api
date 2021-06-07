@@ -12,7 +12,7 @@ use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use App\Export\Pdf\Page\PoulePivotTables as PagePoules;
 use App\Export\Pdf\Page\Planning as PagePlanning;
-use App\Export\TournamentConfig;
+use FCToernooi\Tournament\ExportConfig;
 use App\Export\Document as ExportDocument;
 use App\Exceptions\PdfOutOfBoundsException;
 
@@ -36,13 +36,12 @@ class Document extends \Zend_Pdf
     public function __construct(
         Tournament $tournament,
         Structure $structure,
-        TournamentConfig $config,
+        protected int $subjects,
         string $url
     ) {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->config = $config;
         $this->url = $url;
     }
 
@@ -79,34 +78,34 @@ class Document extends \Zend_Pdf
 
     protected function fillContent()
     {
-        if ($this->config->getStructure()) {
+        if (($this->subjects & ExportConfig::Structure) === ExportConfig::Structure) {
             $page = $this->createPageGrouping();
             $page->draw();
 
             $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4);
         }
-        if ($this->config->getPoulePivotTables()) {
+        if (($this->subjects & ExportConfig::PoulePivotTables) === ExportConfig::PoulePivotTables) {
             list($page, $nY) = $this->createPagePoulePivotTables();
             $this->drawPoulePivotTables($this->structure->getFirstRoundNumber(), $page, $nY);
         }
-        if ($this->config->getPlanning()) {
+        if (($this->subjects & ExportConfig::Planning) === ExportConfig::Planning) {
             list($page, $nY) = $this->createPagePlanning("wedstrijden");
             $this->drawPlanning($this->structure->getFirstRoundNumber(), $page, $nY);
         }
-        if ($this->config->getGamenotes()) {
+        if (($this->subjects & ExportConfig::GameNotes) === ExportConfig::GameNotes) {
             $this->drawGamenotes();
         }
-        if ($this->config->getGamesperpoule()) {
+        if (($this->subjects & ExportConfig::GamesPerPoule) === ExportConfig::GamesPerPoule) {
             $this->drawPlanningPerPoule($this->structure->getFirstRoundNumber());
         }
-        if ($this->config->getGamesperfield()) {
+        if (($this->subjects & ExportConfig::GamesPerField) === ExportConfig::GamesPerField) {
             $this->drawPlanningPerField($this->structure->getFirstRoundNumber());
         }
-        if ($this->config->getQRCode()) {
+        if (($this->subjects & ExportConfig::QrCode) === ExportConfig::QrCode) {
             $page = $this->createPageQRCode();
             $page->draw();
         }
-        if ($this->config->getLockerRooms()) {
+        if (($this->subjects & ExportConfig::LockerRooms) === ExportConfig::LockerRooms) {
             $page = $this->createPageLockerRooms();
             $page->draw();
 

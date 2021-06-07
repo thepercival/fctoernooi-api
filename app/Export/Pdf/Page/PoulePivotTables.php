@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Document;
+use Sports\Ranking\Item\Round as RoundRankingItem;
 use SportsHelpers\Against\Side as AgainstSide;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\NameService;
 use Sports\Poule;
 use Sports\Place;
-use Sports\Game;
+use Sports\Game\Against as AgainstGame;
 use Sports\State;
 use Sports\Round\Number as RoundNumber;
 use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
@@ -30,9 +32,9 @@ class PoulePivotTables extends ToernooiPdfPage
      */
     protected array $fontSizeMap;
 
-    public function __construct($param1)
+    public function __construct(Document $document, mixed $param1)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
         $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
         $this->versusColumnsWidth = $this->getDisplayWidth() * 0.62;
@@ -56,7 +58,7 @@ class PoulePivotTables extends ToernooiPdfPage
         return 0;
     }
 
-    public function drawRoundNumberHeader(RoundNumber $roundNumber, $nY): float
+    public function drawRoundNumberHeader(RoundNumber $roundNumber, float $nY): float
     {
         $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
         $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
@@ -164,6 +166,7 @@ class PoulePivotTables extends ToernooiPdfPage
 
         $pouleState = $poule->getState();
         $competition = $this->getParent()->getTournament()->getCompetition();
+        /** @var list<RoundRankingItem>|null $rankingItems */
         $rankingItems = null;
         if ($pouleState === State::Finished) {
             $rankingService = new RoundRankingCalculator();
@@ -218,7 +221,7 @@ class PoulePivotTables extends ToernooiPdfPage
                     $this->setFillColor(new \Zend_Pdf_Color_Html("white"));
                 }
             }
-
+            /** @var RoundRankingItem|null $rankingItem */
             $rankingItem = null;
             if ($rankingItems !== null) {
                 $arrFoundRankingItems = array_filter(
@@ -283,13 +286,13 @@ class PoulePivotTables extends ToernooiPdfPage
         return $this->getGameScore(reset($foundAwayGames), true);
     }
 
-    protected function getGameScore(Game $game, bool $reverse): string
+    protected function getGameScore(AgainstGame $game, bool $reverse): string
     {
         $score = ' - ';
         if ($game->getState() !== State::Finished) {
             return $score;
         }
-        $finalScore = $this->scoreConfigService->getFinalScore($game);
+        $finalScore = $this->scoreConfigService->getFinalAgainstScore($game);
         if ($finalScore === null) {
             return $score;
         }
@@ -310,7 +313,7 @@ class PoulePivotTables extends ToernooiPdfPage
         return 45;
     }
 
-    public function getVersusHeight($versusColumnWidth, int $degrees): float
+    public function getVersusHeight(float $versusColumnWidth, int $degrees): float
     {
         if ($degrees === 0) {
             return $this->rowHeight;

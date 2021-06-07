@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\ExportConfig;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
@@ -21,6 +22,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\ExportFormat;
 use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
@@ -340,7 +342,7 @@ final class TournamentAction extends Action
             $tournament = $request->getAttribute('tournament');
 
             $queryParams = $request->getQueryParams();
-            if (array_key_exists('hash', $queryParams) === false) {
+            if (!isset($queryParams['hash'])) {
                 throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
             }
             if ($queryParams['hash'] !== $this->getExportHash((int)$tournament->getId())) {
@@ -348,21 +350,19 @@ final class TournamentAction extends Action
             }
 
             $queryParams = $request->getQueryParams();
-            if (array_key_exists('type', $queryParams) === false) {
-                throw new Exception('kies een type export(pdf/excel)', E_ERROR);
+            if (!isset($queryParams['format'])) {
+                throw new Exception('kies een  exportformaat(pdf/excel)', E_ERROR);
             }
 
-            $type = filter_var($queryParams['type'], FILTER_SANITIZE_STRING);
-            $type = $type === 'pdf' ? Tournament::EXPORTED_PDF : Tournament::EXPORTED_EXCEL;
-            $config = $this->getExportConfig($queryParams);
+            $format = (int)$queryParams['format'];
 
-            $tournament->setExported($tournament->getExported() | $type);
+            $tournament->setExported($tournament->getExported() | $format);
             $this->tournamentRepos->save($tournament);
 
-            if ($type === Tournament::EXPORTED_PDF) {
-                return $this->writePdf($response, $config, $tournament, $this->config->getString('www.wwwurl'));
+            if ($format === ExportFormat::Pdf) {
+                return $this->writePdf($response, $format, $tournament, $this->config->getString('www.wwwurl'));
             } else {
-                return $this->writeExcel($response, $config, $tournament, $this->config->getString('www.wwwurl'));
+                return $this->writeExcel($response, $format, $tournament, $this->config->getString('www.wwwurl'));
             }
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
@@ -370,41 +370,29 @@ final class TournamentAction extends Action
     }
 
     /**
-     * @param array<string, bool> $queryParams
+     * @param array<string, int> $queryParams
      * @return TournamentConfig
      * @throws Exception
      */
     protected function getExportConfig(array $queryParams): TournamentConfig
     {
-        $getParam = function (string $param) use ($queryParams): bool {
-            if (array_key_exists($param, $queryParams)) {
-                return filter_var($queryParams[$param], FILTER_VALIDATE_BOOLEAN);
-            }
-            return false;
-        };
-        $exportConfig = new TournamentConfig(
-            $getParam('gamenotes'),
-            $getParam('structure'),
-            $getParam('rules'),
-            $getParam('gamesperpoule'),
-            $getParam('gamesperfield'),
-            $getParam('planning'),
-            $getParam('poulepivottables'),
-            $getParam('qrcode'),
-            $getParam('lockerrooms')
-        );
+        $subjects = 0;
+        if (isset($queryParams['subjects'])) {
+            $subjects = $queryParams['subjects'];
+        }
+        $exportConfig = new TournamentConfig($subjects);
         if ($exportConfig->allOptionsOff()) {
             throw new Exception('kies minimaal 1 exportoptie', E_ERROR);
         }
         return $exportConfig;
     }
 
-    protected function writePdf(Response $response, TournamentConfig $config, Tournament $tournament, string $url): Response
+    protected function writePdf(Response $response, int $subjects, Tournament $tournament, string $url): Response
     {
-        $fileName = $this->getFileName($config);
+        $fileName = $this->getFileName($subjects);
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-        $pdf = new PdfDocument($tournament, $structure, $config, $url);
+        $pdf = new PdfDocument($tournament, $structure, $subjects, $url);
         $vtData = $pdf->render();
 
         $response->getBody()->write($vtData);
@@ -419,12 +407,12 @@ final class TournamentAction extends Action
             ->withHeader('Content-Length', '' . strlen($vtData));
     }
 
-    protected function writeExcel(Response $response, TournamentConfig $config, Tournament $tournament, string $url): Response
+    protected function writeExcel(Response $response, int $subjects, Tournament $tournament, string $url): Response
     {
-        $fileName = $this->getFileName($config);
+        $fileName = $this->getFileName($subjects);
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $config, $url);
+        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $subjects, $url);
         $spreadsheet->fillContents();
 
         $excelWriter = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -446,26 +434,26 @@ final class TournamentAction extends Action
         return $response->withBody($newStream);
     }
 
-    protected function getFileName(TournamentConfig $exportConfig): string
+    protected function getFileName(int $exportSubjects): string
     {
-        if ($exportConfig->hasOnly(TournamentConfig::GAMENOTES)) {
-            return 'wedstrijdbrieven';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::STRUCTURE)) {
-            return 'opzet-en-indeling';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::RULES)) {
-            return 'reglementen';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::GAMESPERPOULE)) {
-            return 'wedstrijden-per-poule';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::GAMESPERFIELD)) {
-            return 'wedstrijden-per-veld';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::PLANNING)) {
-            return 'wedstrijdplanning';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::PIVOTTABLES)) {
-            return 'poule-draaitabellen';
-        } elseif ($exportConfig->hasOnly(TournamentConfig::QRCODE)) {
-            return 'qrcode-en-link';
+        switch ($exportSubjects) {
+            case ExportConfig::GameNotes:
+                return 'wedstrijdbrieven';
+            case ExportConfig::Structure:
+                return 'opzet-en-indeling';
+            case ExportConfig::GamesPerPoule:
+                return 'wedstrijden-per-poule';
+            case ExportConfig::GamesPerField:
+                return 'wedstrijden-per-veld';
+            case ExportConfig::Planning:
+                return 'wedstrijdplanning';
+            case ExportConfig::PoulePivotTables:
+                return 'poule-draaitabellen';
+            case ExportConfig::QrCode:
+                return 'qrcode-en-link';
+            default:
+                return 'toernooi';
         }
-        return 'toernooi';
     }
 
 

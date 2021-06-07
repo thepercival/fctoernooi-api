@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
 use Sports\Game;
@@ -19,41 +20,28 @@ class Gamenotes extends ToernooiPdfPage
     protected ScoreConfigService $scoreConfigService;
     protected TranslationService $translationService;
     protected QRService $qrService;
-    /**
-     * @var string
-     */
-    protected $qrCodeUrlPrefix;
-    /**
-     * @var Game
-     */
-    protected $gameOne;
-    /**
-     * @var Game
-     */
-    protected $gameTwo;
+    protected string|null $qrCodeUrlPrefix = null;
 
-    public function __construct($param1, Game $gameA = null, Game $gameB = null)
+    public function __construct(Document $document, mixed $param1, protected Game|null $gameOne, protected Game|null $gameTwo)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
-        $this->gameOne = $gameA;
-        $this->gameTwo = $gameB;
         $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
     }
 
-    public function getPageMargin()
+    public function getPageMargin(): float
     {
         return 20;
     }
 
-    public function getHeaderHeight()
+    public function getHeaderHeight(): float
     {
         return 0;
     }
 
-    protected function getQrCodeUrlPrefix()
+    protected function getQrCodeUrlPrefix(): string
     {
         if ($this->qrCodeUrlPrefix === null) {
             $this->qrCodeUrlPrefix = $this->getParent()->getUrl() . "admin/game/" . $this->getParent()->getTournament(
@@ -62,7 +50,7 @@ class Gamenotes extends ToernooiPdfPage
         return $this->qrCodeUrlPrefix;
     }
 
-    public function draw()
+    public function draw(): void
     {
         $nY = $this->drawHeader("wedstrijdbriefje");
         $this->drawGame($this->gameOne, $nY);
@@ -82,7 +70,7 @@ class Gamenotes extends ToernooiPdfPage
         }
     }
 
-    public function drawGame(Game $game, $nOffSetY)
+    public function drawGame(Game $game, float $nOffSetY): float
     {
         $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
         $nY = $nOffSetY;
@@ -139,8 +127,10 @@ class Gamenotes extends ToernooiPdfPage
             ToernooiPdfPage::ALIGNRIGHT
         );
         $this->drawCell(':', $nSecondBorder, $nY, $nMargin, $nRowHeight);
-        $home = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::HOME), false, !$planningConfig->getTeamup());
-        $away = $nameService->getPlacesFromName($game->getPlaces(AgainstSide::AWAY), false, !$planningConfig->getTeamup());
+        $homePlaces = $game->getAgainstPlaces(AgainstSide::HOME);
+        $home = $nameService->getPlacesFromName($homePlaces, false, $homePlaces->count() === 1);
+        $awayPlaces = $game->getAgainstPlaces(AgainstSide::AWAY);
+        $away = $nameService->getPlacesFromName($homePlaces, false, $awayPlaces->count() === 1);
         $this->drawCell($home . " - " . $away, $nX2, $nY, $nWidthResult, $nRowHeight);
         $nY -= $nRowHeight;
 

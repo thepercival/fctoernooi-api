@@ -6,6 +6,8 @@ namespace App\Actions\Sports;
 
 use Exception;
 use FCToernooi\Tournament;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
 use Sports\Competition;
 use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
@@ -33,6 +35,19 @@ final class StructureAction extends Action
     }
 
     /**
+     * @return list<string>
+     */
+    protected function getDeserialzeGroups(): array
+    {
+        return ['Default', 'structure'];
+    }
+
+    protected function getSerializationContext(): SerializationContext
+    {
+        return SerializationContext::create()->setGroups(['Default', 'structure']);
+    }
+
+    /**
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -46,7 +61,7 @@ final class StructureAction extends Action
             $structure = $this->structureRepos->getStructure($competition);
             // var_dump($structure); die();
 
-            $json = $this->serializer->serialize($structure, 'json');
+            $json = $this->serializer->serialize($structure, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 500);
@@ -63,7 +78,7 @@ final class StructureAction extends Action
     {
         try {
             /** @var Structure|false $structureSer */
-            $structureSer = $this->serializer->deserialize($this->getRawData($request), Structure::class, 'json');
+            $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
@@ -89,7 +104,7 @@ final class StructureAction extends Action
             $structure = $this->structureRepos->getStructure($competition);
             $this->competitorRepos->syncCompetitors($tournament, $structure->getRootRound());
 
-            $json = $this->serializer->serialize($structure, 'json');
+            $json = $this->serializer->serialize($structure, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);

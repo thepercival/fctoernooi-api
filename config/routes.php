@@ -256,15 +256,21 @@ return function (App $app): void {
                             $group->group(
                                 'against',
                                 function (Group $group): void {
+                                    $group->options('', GameAgainstAction::class . ':options');
+                                    $group->post('', GameAgainstAction::class . ':add');
                                     $group->options('/{gameId}', GameAgainstAction::class . ':options');
                                     $group->put('/{gameId}', GameAgainstAction::class . ':edit');
+                                    $group->delete('/{gameId}', GameAgainstAction::class . ':remove');
                                 }
                             );
                             $group->group(
                                 'together',
                                 function (Group $group): void {
+                                    $group->options('', GameTogetherAction::class . ':options');
+                                    $group->post('', GameTogetherAction::class . ':add');
                                     $group->options('/{gameId}', GameTogetherAction::class . ':options');
                                     $group->put('/{gameId}', GameTogetherAction::class . ':edit');
+                                    $group->delete('/{gameId}', GameTogetherAction::class . ':remove');
                                 }
                             );
                         }

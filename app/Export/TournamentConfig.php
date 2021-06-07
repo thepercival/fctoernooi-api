@@ -1,132 +1,61 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export;
 
+use FCToernooi\Tournament\ExportConfig;
+
 class TournamentConfig
 {
-    const GAMENOTES = 1;
-    const STRUCTURE = 2;
-    const RULES = 4;
-    const GAMESPERPOULE = 8;
-    const GAMESPERFIELD = 16;
-    const PLANNING = 32;
-    const PIVOTTABLES = 64;
-    const QRCODE = 128;
-    const LOCKERROOMS = 256;
-
-    /**
-     * @var int
-     */
-    private $value;
-
-    public function __construct(
-        bool $gamenotes = true,
-        bool $structure = false,
-        bool $rules = false,
-        bool $gamesperpoule = false,
-        bool $gamesperfield = false,
-        bool $planning = false,
-        bool $poulePivotTables = false,
-        bool $qrcode = false,
-        bool $lockerRooms = false
-    ) {
-        $this->value = $gamenotes ? static::GAMENOTES : 0;
-        $this->value += $structure ? static::STRUCTURE : 0;
-        $this->value += $rules ? static::RULES : 0;
-        $this->value += $gamesperpoule ? static::GAMESPERPOULE : 0;
-        $this->value += $gamesperfield ? static::GAMESPERFIELD : 0;
-        $this->value += $planning ? static::PLANNING : 0;
-        $this->value += $poulePivotTables ? static::PIVOTTABLES : 0;
-        $this->value += $qrcode ? static::QRCODE : 0;
-        $this->value += $lockerRooms ? static::LOCKERROOMS : 0;
+    public function __construct(private int $value) {
     }
 
-    /**
-     * @return bool
-     */
-    public function getGamenotes()
+    public function getGamenotes(): bool
     {
-        return ($this->value & static::GAMENOTES) === static::GAMENOTES;
+        return ($this->value & ExportConfig::GameNotes) === ExportConfig::GameNotes;
     }
 
-    /**
-     * @return bool
-     */
-    public function getStructure()
+    public function getStructure(): bool
     {
-        return ($this->value & static::STRUCTURE) === static::STRUCTURE;
+        return ($this->value & ExportConfig::Structure) === ExportConfig::Structure;
     }
 
-    /**
-     * @return bool
-     */
-    public function getRules()
+    public function getGamesPerPoule(): bool
     {
-        return ($this->value & static::RULES) === static::RULES;
+        return ($this->value & ExportConfig::GamesPerPoule) === ExportConfig::GamesPerPoule;
     }
 
-    /**
-     * @return bool
-     */
-    public function getGamesperpoule()
+    public function getGamesperfield(): bool
     {
-        return ($this->value & static::GAMESPERPOULE) === static::GAMESPERPOULE;
+        return ($this->value & ExportConfig::GamesPerField) === ExportConfig::GamesPerField;
     }
 
-    /**
-     * @return bool
-     */
-    public function getGamesperfield()
+    public function getPlanning(): bool
     {
-        return ($this->value & static::GAMESPERFIELD) === static::GAMESPERFIELD;
+        return ($this->value & ExportConfig::Planning) === ExportConfig::Planning;
     }
 
-    /**
-     * @return bool
-     */
-    public function getPlanning()
+    public function getPoulePivotTables(): bool
     {
-        return ($this->value & static::PLANNING) === static::PLANNING;
+        return ($this->value & ExportConfig::PoulePivotTables) === ExportConfig::PoulePivotTables;
     }
 
-    /**
-     * @return bool
-     */
-    public function getPoulePivotTables()
+    public function getQrCode(): bool
     {
-        return ($this->value & static::PIVOTTABLES) === static::PIVOTTABLES;
+        return ($this->value & ExportConfig::QrCode) === ExportConfig::QrCode;
     }
 
-    /**
-     * @return bool
-     */
-    public function getQRCode()
+    public function getLockerRooms(): bool
     {
-        return ($this->value & static::QRCODE) === static::QRCODE;
+        return ($this->value & ExportConfig::LockerRooms) === ExportConfig::LockerRooms;
     }
 
-    /**
-     * @return bool
-     */
-    public function getLockerRooms()
-    {
-        return ($this->value & static::LOCKERROOMS) === static::LOCKERROOMS;
-    }
-
-    /**
-     * @return bool
-     */
-    public function allOptionsOff()
+    public function allOptionsOff(): bool
     {
         return $this->value === 0;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasOnly(int $option)
+    public function hasOnly(int $option): bool
     {
         return $this->value === $option;
     }

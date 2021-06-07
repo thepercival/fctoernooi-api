@@ -7,7 +7,6 @@ parameters:
         - config
         #- serialization/handler
     excludePaths:
-        - app/Export/*
         - app/ImageService.php
     inferPrivatePropertyTypeFromConstructor:
         true

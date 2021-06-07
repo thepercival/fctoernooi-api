@@ -5,20 +5,25 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Exceptions\PdfOutOfBoundsException;
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\LockerRoom;
 
 class LockerRooms extends ToernooiPdfPage
 {
-    protected $rowHeight;
+    protected float $rowHeight = 18;
 
-    public function __construct($param1)
+    public function __construct(Document $document, mixed $param1)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
     }
 
-    protected function getLinesNeeded(array $lockerRooms)
+    /**
+     * @param list<LockerRoom> $lockerRooms
+     * @return int
+     */
+    protected function getLinesNeeded(array $lockerRooms): int
     {
         $nrOfLines = 0;
         foreach ($lockerRooms as $lockerRoom) {
@@ -30,24 +35,29 @@ class LockerRooms extends ToernooiPdfPage
         return $nrOfLines;
     }
 
-    protected function getLockerRoomHeight(LockerRoom $lockerRoom)
+    protected function getLockerRoomHeight(LockerRoom $lockerRoom): float
     {
         $nrOfLines = 1; // header
         $nrOfLines += $lockerRoom->getCompetitors()->count();
         return $nrOfLines * $this->getRowHeight();
     }
 
-    protected function getLinesAvailable($nY): int
+    protected function getLinesAvailable(float $nY): int
     {
         return (int)floor(($nY - $this->getPageMargin()) / $this->getRowHeight());
     }
 
-    protected function getNrOfColumns($nY, array $lockerRooms): int
+    protected function getNrOfColumns(float $nY, array $lockerRooms): int
     {
         return (int)ceil($this->getLinesNeeded($lockerRooms) / $this->getLinesAvailable($nY));
     }
 
-    protected function getColumnWidth($nY, array $lockerRooms): int
+    /**
+     * @param float $nY
+     * @param list<LockerRoom> $lockerRooms
+     * @return float
+     */
+    protected function getColumnWidth(float $nY, array $lockerRooms): float
     {
         $nrOfColumns = $this->getNrOfColumns($nY, $lockerRooms);
         if ($nrOfColumns === 1 || $nrOfColumns === 2) {
@@ -56,30 +66,27 @@ class LockerRooms extends ToernooiPdfPage
         return ($this->getDisplayWidth() - (($nrOfColumns - 1) * $this->getPageMargin())) / $nrOfColumns;
     }
 
-    public function getMaxColumnWidth()
+    public function getMaxColumnWidth(): float
     {
         return ($this->getDisplayWidth() - $this->getPageMargin()) / 2;
     }
 
-    public function getPageMargin()
+    public function getPageMargin(): float
     {
         return 20;
     }
 
-    public function getHeaderHeight()
+    public function getHeaderHeight(): float
     {
         return 0;
     }
 
-    protected function getRowHeight()
+    protected function getRowHeight(): float
     {
-        if ($this->rowHeight === null) {
-            $this->rowHeight = 18;
-        }
         return $this->rowHeight;
     }
 
-    public function draw()
+    public function draw(): void
     {
         $nY = $this->drawHeader("kleedkamers");
         $nY = $this->drawSubHeader("Kleedkamer-indeling", $nY);
@@ -99,7 +106,7 @@ class LockerRooms extends ToernooiPdfPage
         }
     }
 
-    public function drawLockerRoom(LockerRoom $lockerRoom, $nX, $nY, $columnWidth)
+    public function drawLockerRoom(LockerRoom $lockerRoom, float $nX, float $nY, float $columnWidth): float
     {
         if (($nY - $this->getLockerRoomHeight($lockerRoom)) < $this->getPageMargin()) {
             throw new PdfOutOfBoundsException("Y", E_ERROR);

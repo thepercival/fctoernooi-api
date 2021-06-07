@@ -7,6 +7,7 @@ namespace App\Export\Excel;
 use App\Export\Document as ExportDocument;
 use App\Export\TournamentConfig;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\ExportConfig;
 use Sports\Structure;
 use PhpOffice\PhpSpreadsheet\Spreadsheet as SpreadsheetBase;
 use App\Export\Excel\Worksheet\Structure as StructureSheet;
@@ -36,13 +37,12 @@ class Spreadsheet extends SpreadsheetBase
     public function __construct(
         Tournament $tournament,
         Structure $structure,
-        TournamentConfig $config,
+        protected int $subjects,
         string $url
     ) {
         parent::__construct();
         $this->tournament = $tournament;
         $this->structure = $structure;
-        $this->config = $config;
         $this->url = $url;
     }
 
@@ -52,7 +52,7 @@ class Spreadsheet extends SpreadsheetBase
 
         $this->removeSheetByIndex(0);
 
-        if ($this->config->getStructure()) {
+        if (($this->subjects & ExportConfig::Structure) === ExportConfig::Structure) {
             $indelingSheet = new IndelingSheet($this);
             $indelingSheet->draw();
 
@@ -60,37 +60,37 @@ class Spreadsheet extends SpreadsheetBase
             $structureSheet->draw();
         }
 
-        if ($this->config->getPlanning()) {
+        if (($this->subjects & ExportConfig::Planning) === ExportConfig::Planning) {
             $planningSheet = new PlanningAllSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if ($this->config->getGamenotes()) {
+        if (($this->subjects & ExportConfig::GameNotes) === ExportConfig::GameNotes) {
             $gamenotesSheet = new GamenotesSheet($this);
             $gamenotesSheet->draw();
         }
-        if ($this->config->getGamesperpoule()) {
+        if (($this->subjects & ExportConfig::GamesPerPoule) === ExportConfig::GamesPerPoule) {
             $planningSheet = new PlanningPerPouleSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if ($this->config->getGamesperfield()) {
+        if (($this->subjects & ExportConfig::GamesPerField) === ExportConfig::GamesPerField) {
             $planningSheet = new PlanningPerFieldSheet($this);
             $planningSheet->setSelfRefereesAssigned($this->areSelfRefereesAssigned());
             $planningSheet->setRefereesAssigned($this->areRefereesAssigned());
             $planningSheet->draw();
         }
-        if ($this->config->getPoulePivotTables()) {
+        if (($this->subjects & ExportConfig::PoulePivotTables) === ExportConfig::PoulePivotTables) {
             $poulePivotTablesSheet = new PoulePivotTablesSheet($this);
             $poulePivotTablesSheet->draw();
         }
-        if ($this->config->getQRCode()) {
+        if (($this->subjects & ExportConfig::QrCode) === ExportConfig::QrCode) {
             $qrcodeSheet = new QRCodeSheet($this);
             $qrcodeSheet->draw();
         }
-        if ($this->config->getLockerRooms()) {
+        if (($this->subjects & ExportConfig::LockerRooms) === ExportConfig::LockerRooms) {
             $lockerRoomsSheet = new LockerRoomsSheet($this);
             $lockerRoomsSheet->draw();
         }

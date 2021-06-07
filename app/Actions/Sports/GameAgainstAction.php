@@ -4,40 +4,73 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
+use Sports\Competition\Field;
 use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Score\Together\Repository as TogetherScoreRepository;
 use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Place\Repository as PlaceRepository;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Place;
+use Sports\Game\Place\Against as AgainstGamePlace;
 use Sports\Poule;
+use Sports\Competition\Referee;
+use Sports\Competition\Sport as CompetitionSport;
 use Sports\Poule\Repository as PouleRepository;
 use App\Actions\Action;
 use Sports\Competition;
+use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Score\Creator as GameScoreCreator;
 use Sports\Game\Against as AgainstGame;
 use Sports\State;
 use Sports\Qualify\Service as QualifyService;
 
-final class GameAgainstAction extends Action
+final class GameAgainstAction extends GameAction
 {
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected AgainstGameRepository $gameRepos,
-        protected TogetherGameRepository $togetherGameRepos,
-        protected PouleRepository $pouleRepos,
-        protected PlaceRepository $placeRepos,
-        protected StructureRepository $structureRepos,
-        protected AgainstScoreRepository $scoreRepos,
-        protected TogetherScoreRepository $togetherScoreRepos
+        AgainstGameRepository $gameRepos,
+        PouleRepository $pouleRepos,
+        PlaceRepository $placeRepos,
+        StructureRepository $structureRepos,
+        AgainstScoreRepository $scoreRepos,
+        TogetherScoreRepository $togetherScoreRepos,
+        CompetitionSportRepository $competitionSportRepos
     ) {
-        parent::__construct($logger, $serializer);
+        parent::__construct(
+            $logger,
+            $serializer,
+            $gameRepos,
+            $pouleRepos,
+            $placeRepos,
+            $structureRepos,
+            $scoreRepos,
+            $togetherScoreRepos,
+            $competitionSportRepos
+        );
+    }
+
+    protected function createGame(Poule $poule, AgainstGame $gameSer, CompetitionSport $competitionSport): AgainstGame
+    {
+        $game = new AgainstGame(
+            $poule,
+            $gameSer->getBatchNr(),
+            $gameSer->getStartDateTime(),
+            $competitionSport,
+            $gameSer->getGameRoundNumber()
+        );
+        foreach ($gameSer->getPlaces() as $gamePlaceSer) {
+            $place = $poule->getPlace($gamePlaceSer->getPlace()->getPlaceNr());
+            new AgainstGamePlace($game, $place, $gamePlaceSer->getSide());
+        }
+        return $game;
     }
 
     /**
@@ -52,100 +85,63 @@ final class GameAgainstAction extends Action
             /** @var Competition $competition */
             $competition = $request->getAttribute("tournament")->getCompetition();
 
-            $queryParams = $request->getQueryParams();
-            $pouleId = 0;
-            if (array_key_exists("pouleId", $queryParams) && strlen($queryParams["pouleId"]) > 0) {
-                $pouleId = (int)$queryParams["pouleId"];
-            }
-            $poule = $this->getPouleFromInput($pouleId, $competition);
+            $poule = $this->getPouleFromInput($request, $competition);
             $initialPouleState = $poule->getState();
 
             /** @var AgainstGame $gameSer */
-
             $gameSer = $this->serializer->deserialize($this->getRawData($request), AgainstGame::class, 'json');
 
-            $game = $this->gameRepos->find((int)$args["gameId"]);
-            if ($game === null) {
-                throw new \Exception("de pouleplek kan niet gevonden worden o.b.v. id", E_ERROR);
-            }
-            if ($game->getPoule() !== $poule) {
-                throw new \Exception("de poule van de pouleplek komt niet overeen met de verstuurde poule", E_ERROR);
-            }
+            /** @var AgainstGame $game */
+            $game = $this->getGameFromInput($args, $poule);
 
-            $this->scoreRepos->removeScores($game);
+            $this->againstScoreRepos->removeScores($game);
 
             $game->setState($gameSer->getState());
-            $game->setStartDateTime($gameSer->getStartDateTime());
+
             $gameScoreCreator = new GameScoreCreator();
             $gameScoreCreator->addAgainstScores($game, array_values($gameSer->getScores()->toArray()));
 
+            $this->editBase($game, $gameSer);
+
             $this->gameRepos->save($game);
 
-            $changedPlaces = $this->getChangedQualifyPlaces($competition, $game->getPoule(), $initialPouleState);
-            foreach ($changedPlaces as $changedPlace) {
-                $this->placeRepos->save($changedPlace);
-                foreach ($changedPlace->getGames() as $gameIt) {
-                    $gameIt->setState(State::Created);
-                    $this->gameRepos->save($gameIt);
-                    if ($gameIt instanceof AgainstGame) {
-                        $this->scoreRepos->removeScores($gameIt);
-                    } else {
-                        foreach ($gameIt->getPlaces() as $gamePlace) {
-                            $this->togetherScoreRepos->removeScores($gamePlace);
-                        }
-                    }
-                }
-            }
+            $this->changeQualifyPlaces($competition, $game->getPoule(), $initialPouleState);
 
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
-    protected function getPouleFromInput(int $pouleId, Competition $competition): Poule
-    {
-        $poule = $this->pouleRepos->find($pouleId);
-        if ($poule === null) {
-            throw new \Exception("er kan poule worden gevonden o.b.v. de invoergegevens", E_ERROR);
-        }
-        if ($poule->getRound()->getNumber()->getCompetition() !== $competition) {
-            throw new \Exception("de competitie van de poule komt niet overeen met de verstuurde competitie", E_ERROR);
-        }
-        return $poule;
-    }
-
     /**
-     * @param Competition $competition
-     * @param Poule $poule
-     * @param int $originalPouleState
-     * @return list<Place>
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
      */
-    protected function getChangedQualifyPlaces(Competition $competition, Poule $poule, int $originalPouleState): array
+    public function remove(Request $request, Response $response, array $args): Response
     {
-        if (!$this->shouldQualifiersBeCalculated($poule, $originalPouleState)) {
-            return [];
-        }
-        $structure = $this->structureRepos->getStructure($competition);
+        try {
+            /** @var Competition $competition */
+            $competition = $request->getAttribute("tournament")->getCompetition();
 
-        $qualifyService = new QualifyService($poule->getRound());
-        $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
-        return $qualifyService->setQualifiers($pouleToFilter);
-    }
+            $poule = $this->getPouleFromInput($request, $competition);
 
-    protected function shouldQualifiersBeCalculated(Poule $poule, int $originalPouleState): bool
-    {
-        return !($originalPouleState !== State::Finished && $poule->getState() !== State::Finished);
-    }
-
-    protected function shouldQualifiersBeCalculatedForRound(Poule $poule): bool
-    {
-        foreach ($poule->getRound()->getQualifyGroups() as $qualifyGroup) {
-            if ($qualifyGroup->getMultipleRule() !== null) {
-                return true;
+            $planningConfig = $poule->getRound()->getNumber()->getValidPlanningConfig();
+            if ($planningConfig->getEditMode() === PlanningEditMode::Auto) {
+                throw new Exception("de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat", E_ERROR);
             }
+
+            $game = $this->getGameFromInput($args, $poule);
+
+            /** @var AgainstGame $game */
+            $poule->getAgainstGames()->removeElement($game);
+            $this->gameRepos->remove($game);
+
+            return $response->withStatus(200);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
-        return false;
     }
 }

@@ -12,6 +12,7 @@ use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
+use Sports\Planning\EditMode;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use Sports\Round\Number as RoundNumber;
 use FCToernooi\Tournament;
@@ -78,6 +79,8 @@ final class PlanningAction extends Action
             $queueService = new QueueService($this->config->getArray('queue'));
             $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak());
 
+            $this->updatePlanningEditMode($startRoundNumber);
+
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
@@ -102,6 +105,8 @@ final class PlanningAction extends Action
             $dates = $scheduler->rescheduleGames($roundNumber);
 
             $this->roundNumberRepos->savePlanning($roundNumber);
+
+            $this->updatePlanningEditMode($roundNumber);
 
             $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
@@ -144,5 +149,19 @@ final class PlanningAction extends Action
             throw new Exception('geen rondenumber gevonden', E_ERROR);
         }
         return $roundNumber;
+    }
+
+    protected function updatePlanningEditMode(RoundNumber $roundNumber): void
+    {
+        $planningConfig = $roundNumber->getPlanningConfig();
+        if ($planningConfig !== null && $planningConfig->getEditMode() === EditMode::Manual) {
+            $planningConfig->setEditMode(EditMode::Auto);
+            $this->roundNumberRepos->save($planningConfig);
+        }
+
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->updatePlanningEditMode($nextRoundNumber);
+        }
     }
 }

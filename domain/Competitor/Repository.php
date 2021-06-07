@@ -29,7 +29,7 @@ class Repository extends EntityRepository implements SaveRemoveRepository
         $getUnassignedPlaces = function (Round $rootRound): array {
             $unassignedPlaces = [];
             foreach ($rootRound->getPlaces() as $place) {
-                $unassignedPlaces[$place->getPoule()->getNumber() . '.' . $place->getNumber() ] = $place;
+                $unassignedPlaces[$place->getRoundLocationId()] = $place;
             }
             return $unassignedPlaces;
         };
@@ -58,8 +58,8 @@ class Repository extends EntityRepository implements SaveRemoveRepository
         while (count($unassignedPlaces) > 0 && count($unassignedCompetitors) > 0) {
             $unassignedPlace = array_shift($unassignedPlaces);
             $unassignedCompetitor = array_shift($unassignedCompetitors);
-            $unassignedCompetitor->setPouleNr($unassignedPlace->getPoule()->getNumber());
-            $unassignedCompetitor->setPlaceNr($unassignedPlace->getNumber());
+            $unassignedCompetitor->setPouleNr($unassignedPlace->getPouleNr());
+            $unassignedCompetitor->setPlaceNr($unassignedPlace->getPlaceNr());
             $this->save($unassignedCompetitor);
         }
         while (count($unassignedCompetitors) > 0) {

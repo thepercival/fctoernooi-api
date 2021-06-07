@@ -4,47 +4,42 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
 
 class QRCode extends ToernooiPdfPage
 {
-    protected $rowHeight;
-    /**
-     * @var QRService
-     */
-    protected $qrService;
+    protected float $rowHeight = 18;
+    protected QRService $qrService;
 
-    public function __construct($param1)
+    public function __construct(Document $document, mixed $param1)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
         $this->qrService = new QRService();
     }
 
-    public function getPageMargin()
+    public function getPageMargin(): float
     {
         return 20;
     }
 
-    public function getHeaderHeight()
+    public function getHeaderHeight(): float
     {
         return 0;
     }
 
-    protected function getRowHeight()
+    protected function getRowHeight(): float
     {
-        if ($this->rowHeight === null) {
-            $this->rowHeight = 18;
-        }
         return $this->rowHeight;
     }
 
-    public function draw()
+    public function draw(): void
     {
         $nY = $this->drawHeader("qrcode");
 
-        $url = $this->getParent()->getUrl() . $this->getParent()->getTournament()->getId();
+        $url = $this->getParent()->getUrl() . (string)$this->getParent()->getTournament()->getId();
 
         $nY = $this->drawSubHeader($url, $nY);
 

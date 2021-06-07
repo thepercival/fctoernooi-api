@@ -41,9 +41,6 @@ class Tournament extends Identifiable
     private ArrayCollection|PersistentCollection $lockerRooms;
     protected int $exported = 0;
 
-    const EXPORTED_PDF = 1;
-    const EXPORTED_EXCEL = 2;
-
     public function __construct(private Competition $competition)
     {
         $this->createdDateTime = new DateTimeImmutable();

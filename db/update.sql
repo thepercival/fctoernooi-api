@@ -74,6 +74,7 @@ insert into associations( name )
     (
         select concat(a.name,'-',l.id) from leagues l join associations a on a.id = l.associationid where exists( select * from leagues lsub where lsub.id < l.id and lsub.associationid = l.associationid )
     );
+
 -- STAP 3 : update alle leagues die dezelfde association hebben
 update leagues l join associations a on a.id = l.associationid set associationid = ( select id from associations where name = concat(a.name,'-',l.id) ) where exists( select * from leagues lsub where lsub.id < l.id and lsub.associationid = l.associationid );
 
@@ -85,7 +86,7 @@ set c.tournamentId = t.id;
 -- CONTROLE: select * from competitors where tournamentid is null;
 
 -- 23565
-update places p join competitors c on c.id = p.competitorid join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundNumbers rn on rn.id = r.numberid and rn.number = 1 join tournaments t on t.competitionId = rn.competitionId set c.placeNr = p.number, c.pouleNr = po.number;
+update places p join competitors c on c.id = p.competitorid join poules po on po.id = p.pouleid join rounds r on r.id = po.roundid join roundNumbers rn on rn.id = r.numberid and rn.number = 1 join tournaments t on t.competitionId = rn.competitionId set c.placeNr = p.placeNr, c.pouleNr = po.number;
 -- CONTROLE: select * from competitors where placeNr = 0 or pouleNr = 0;
 -- ER ZIJN DUS NOG COMPETITORS DIE NIET GEKOPPELD ZIJN, KIJK WAAROM
 

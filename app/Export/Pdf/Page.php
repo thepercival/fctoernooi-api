@@ -1,85 +1,85 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use Zend_Pdf_Color;
+
 abstract class Page extends \Zend_Pdf_Page
 {
-    /**
-     * @var Document
-     */
-    protected $m_oParent;
-    protected $m_oTextColor;
-    protected $m_oFillColor;
-    protected $m_oFillColorTmp;
-    protected $m_nLineWidth;
-    protected $m_nPadding;
-    protected $m_arrImages;
+    protected Zend_Pdf_Color $textColor;
+    protected Zend_Pdf_Color $fillColor;
+    protected $fillColorTmp;
+    protected float $lineWidth;
+    protected float $padding;
+    protected array $images;
 
     const ALIGNLEFT = 1;
     const ALIGNCENTER = 2;
     const ALIGNRIGHT = 3;
 
-    public function __construct($param1, $param2 = null, $param3 = null)
+    public function __construct(protected Document $parent, mixed $param1, mixed $param2 = null, mixed $param3 = null)
     {
         parent::__construct($param1, $param2, $param3);
         $this->setFillColor(new \Zend_Pdf_Color_Html("white"));
-        $this->m_oTextColor = new \Zend_Pdf_Color_Html("black");
+        $this->textColor = new \Zend_Pdf_Color_Html("black");
         $this->setLineWidth(1);
-        $this->m_nPadding = 1;
-        $this->m_arrImages = array();
+        $this->padding = 1.0;
+        $this->images = array();
+        $this->_fontSize = 0.0;
+        $this->_safeGS = true;
+        $this->_attached = true;
+        $this->lineWidth = 1.0;
     }
 
-    abstract public function getHeaderHeight();
+    abstract public function getHeaderHeight(): float;
 
-    abstract public function getPageMargin();
+    abstract public function getPageMargin(): float;
 
     public function getParent(): Document
     {
-        return $this->m_oParent;
+        return $this->parent;
     }
 
-    public function putParent(Document $oParent)
+    public function getFillColor(): Zend_Pdf_Color
     {
-        $this->m_oParent = $oParent;
+        return $this->fillColor;
     }
 
-    public function getFillColor()
-    {
-        return $this->m_oFillColor;
-    }
-
-    public function setFillColor(\Zend_Pdf_Color $color)
+    final public function setFillColor(\Zend_Pdf_Color $color): self
     {
         parent::setFillColor($color);
-        $this->m_oFillColor = $color;
+        $this->fillColor = $color;
         return $this;
     }
 
-    public function getLineWidth()
+    public function getLineWidth(): float
     {
-        return $this->m_nLineWidth;
+        return $this->lineWidth;
     }
 
-    public function setLineWidth($nLineWidth)
+    /**
+     * @param float $lineWidth
+     * @return $this|\Zend_Pdf_Canvas_Interface
+     */
+    public function setLineWidth($lineWidth)
     {
-        parent::setLineWidth($nLineWidth);
-        $this->m_nLineWidth = $nLineWidth;
+        parent::setLineWidth($lineWidth);
+        $this->lineWidth = $lineWidth;
         return $this;
     }
 
-    public function getPadding()
+    public function getPadding(): float
     {
-        return $this->m_nPadding;
+        return $this->padding;
     }
 
-    public function setPadding($nPadding)
+    public function setPadding(float $padding): void
     {
-        $this->m_nPadding = $nPadding;
+        $this->padding = $padding;
     }
 
-    public function drawHeader($subTitle = null, $nY = null)
+    public function drawHeader(string $subTitle = null, float $nY = null)
     {
         if ($nY === null) {
             $nY = $this->getHeight() - $this->getPageMargin();
@@ -141,15 +141,27 @@ abstract class Page extends \Zend_Pdf_Page
         return $this->getWidth() - (2 * $this->getPageMargin());
     }
 
+    /**
+     * @param string $sText
+     * @param float $nXPos
+     * @param float $nYPos
+     * @param float $nWidth
+     * @param float $nHeight
+     * @param int $nAlign
+     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
+     * @param int|null $degrees
+     * @return float
+     * @throws \Zend_Pdf_Exception
+     */
     public function drawCell(
-        $sText,
-        $nXPos,
-        $nYPos,
-        $nWidth,
-        $nHeight,
-        $nAlign = Page::ALIGNLEFT,
-        $vtLineColors = null,
-        $degrees = null
+        string $sText,
+        float $nXPos,
+        float $nYPos,
+        float $nWidth,
+        float $nHeight,
+        int $nAlign = Page::ALIGNLEFT,
+        array|string|null $vtLineColors = null,
+        int $degrees = null
     ) {
         $nStyle = \Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
 
@@ -203,7 +215,12 @@ abstract class Page extends \Zend_Pdf_Page
         return $nXPos + $nWidth;
     }
 
-    protected function getLineColorsFromInput($vtLineColors)
+    /**
+     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
+     * @return array<string, Zend_Pdf_Color>| null
+     * @throws \Zend_Pdf_Exception
+     */
+    protected function getLineColorsFromInput(array | null $vtLineColors): array | null
     {
         if ($vtLineColors !== null) {
             if (is_array($vtLineColors)) {
@@ -292,8 +309,8 @@ abstract class Page extends \Zend_Pdf_Page
             $nCharWidth = $nCharWidth / $nFontUnitsPerEM * $nFontSize;
 
             if ($nMaxWidth !== null and ($nCharPosition + $nCharWidth + $nDotDotWidth) > $nMaxWidth and $nCharIndex < (count(
-                        $chrArray
-                    ) - 2)) {
+                $chrArray
+            ) - 2)) {
                 $this->drawText("..", $nNewXPos + $nCharPosition, $nYPos, 'UTF-8');
                 break;
             }

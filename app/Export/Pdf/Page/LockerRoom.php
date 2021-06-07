@@ -5,48 +5,40 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Exceptions\PdfOutOfBoundsException;
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use FCToernooi\QRService;
 
 class LockerRoom extends ToernooiPdfPage
 {
-    protected $rowHeight;
+    protected $rowHeight = 18;
 
-    /**
-     * @var QRService
-     */
-    protected $qrService;
+    protected QRService $qrService;
 
-    /**
-     * @var LockerRoomBase
-     */
-    protected $lockerRoom;
-
-    public function __construct($param1, LockerRoomBase $lockerRoom)
+    public function __construct(Document $document, mixed $param1, protected LockerRoomBase $lockerRoom)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
-        $this->lockerRoom = $lockerRoom;
         $this->qrService = new QRService();
     }
 
-    public function getPageMargin()
+    public function getPageMargin(): float
     {
         return 20;
     }
 
-    public function getHeaderHeight()
+    public function getHeaderHeight(): float
     {
         return 0;
     }
 
-    protected function getRowHeight()
+    protected function getRowHeight(): float
     {
-        return 18;
+        return $this->rowHeight;
     }
 
-    protected function getCompetitorFontHeight($columnWidth)
+    protected function getCompetitorFontHeight(float $columnWidth): float
     {
         $fontHeight = 40;
 
@@ -79,7 +71,7 @@ class LockerRoom extends ToernooiPdfPage
         return $fontHeight;
     }
 
-    public function draw()
+    public function draw(): void
     {
         $nY = $this->drawHeader("kleedkamer");
         $nY = $this->drawLockerRoom($nY);
@@ -88,7 +80,7 @@ class LockerRoom extends ToernooiPdfPage
         }
     }
 
-    protected function drawLockerRoom($nY)
+    protected function drawLockerRoom(float $nY): float
     {
         $nX = $this->getPageMargin();
         $columnWidth = $this->getDisplayWidth();
@@ -124,7 +116,7 @@ class LockerRoom extends ToernooiPdfPage
         return $nY - $nRowHeight;
     }
 
-    protected function drawInfo($nY)
+    protected function drawInfo(float $nY): void
     {
         $infoHeight = 150;
         if (($nY - $infoHeight) < $this->getPageMargin()) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use League\Period\Period;
 use Sports\Game;
@@ -36,14 +37,9 @@ class Planning extends ToernooiPdfPage
 
     protected $rowHeight;
 
-    /**
-     * Planning constructor.
-     * @param mixed $param1
-     * @throws Zend_Pdf_Exception
-     */
-    public function __construct(mixed $param1)
+    public function __construct(Document $document, mixed $param1)
     {
-        parent::__construct($param1);
+        parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
         $this->scoreConfigService = new ScoreConfigService();
     }

@@ -13,7 +13,6 @@
         <directory name="tests/cases/"/>
 <!--        <directory name="serialization/handler/"/>-->
         <ignoreFiles>
-            <directory name="app/Export/"/>
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
