@@ -19,7 +19,7 @@
     "ext-gmp": "*",
     "ext-json": "*",
     "doctrine/orm": "^2.7",
-    "endroid/qr-code": "^3.7",
+    "endroid/qr-code": "^4.0",
     "jms/serializer": "^3.7",
     "middlewares/negotiation": "^2.0",
     "monolog/monolog": "^2.0",

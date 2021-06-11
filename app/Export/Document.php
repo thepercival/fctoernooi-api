@@ -6,6 +6,8 @@ namespace App\Export;
 use FCToernooi\Tournament;
 use Sports\Competitor\Map as CompetitorMap;
 use Sports\Game;
+use Sports\Game\Together as TogetherGame;
+use Sports\Game\Against as AgainstGame;
 use Sports\NameService;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
@@ -14,47 +16,18 @@ use Sports\Structure;
 
 trait Document
 {
-    /**
-     * @var Tournament
-     */
-    protected $tournament;
-    /**
-     * @var Structure
-     */
-    protected $structure;
-    /**
-     * @var TournamentConfig
-     */
-    protected $config;
-    /**
-     * @var bool
-     */
-    protected $areSelfRefereesAssigned;
-    /**
-     * @var NameService
-     */
-    protected $nameService;
-    /**
-     * @var CompetitorMap
-     */
-    protected $competitorMap;
-    /**
-     * @var string
-     */
-    protected $url;
+    protected Tournament $tournament;
+    protected Structure $structure;
+    protected NameService|null $nameService = null;
+    protected CompetitorMap|null $competitorMap = null;
+    protected string $url;
 
-    /**
-     * @return Structure
-     */
-    public function getStructure()
+    public function getStructure(): Structure
     {
         return $this->structure;
     }
 
-    /**
-     * @return Tournament
-     */
-    public function getTournament()
+    public function getTournament(): Tournament
     {
         return $this->tournament;
     }
@@ -64,54 +37,7 @@ trait Document
         return $this->url;
     }
 
-    protected function areSelfRefereesAssigned(): bool
-    {
-        if ($this->areSelfRefereesAssigned !== null) {
-            return $this->areSelfRefereesAssigned;
-        };
-        $hasSelfRefereeHelper = function (RoundNumber $roundNumber) use (&$hasSelfRefereeHelper): bool {
-            if ($roundNumber->getValidPlanningConfig()->selfRefereeEnabled()) {
-                $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
-                if (count(
-                    array_filter(
-                            $games,
-                            function (Game $game): bool {
-                                return $game->getRefereePlace() !== null;
-                            }
-                        )
-                ) > 0) {
-                    return true;
-                }
-            }
-            if ($roundNumber->hasNext() === false) {
-                return false;
-            }
-            return $hasSelfRefereeHelper($roundNumber->getNext());
-        };
-        $this->areSelfRefereesAssigned = $hasSelfRefereeHelper($this->structure->getFirstRoundNumber());
-        return $this->areSelfRefereesAssigned;
-    }
-
-    protected function areRefereesAssigned()
-    {
-        return $this->tournament->getCompetition()->getReferees()->count() > 0 || $this->areSelfRefereesAssigned();
-    }
-
-    /**
-     * @param Round $round
-     * @param array $games
-     * @return array
-     */
-    public function getScheduledGames(Round $round, $games = []): array
-    {
-        $games = array_merge($games, $round->getGamesWithState(State::Created));
-        foreach ($round->getChildren() as $childRound) {
-            $games = $this->getScheduledGames($childRound, $games);
-        }
-        return $games;
-    }
-
-    public function gamesOnSameDay(RoundNumber $roundNumber)
+    public function gamesOnSameDay(RoundNumber $roundNumber): bool
     {
         $dateOne = $roundNumber->getFirstStartDateTime();
         $dateTwo = $roundNumber->getLastStartDateTime();

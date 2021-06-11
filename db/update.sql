@@ -105,7 +105,7 @@ update places p join poules po on po.id = p.pouleid join rounds r on r.id = po.r
 -- fields: fk to competitionSports needs to be not null again
 INSERT INTO competitionSports ( sportId, competitionId, gameMode, nrOfHomePlaces, nrOfAwayPlaces, nrOfGamePlaces, nrOfH2H, nrOfGamesPerPlace )( SELECT sportid, competitionid, 2, 1, 1, 0, 1, 0  from sportconfigs );
 update fields f join sportconfigs sc on sc.id = f.sportConfigId set competitionSportId = ( select id from competitionSports where competitionId = sc.competitionId );
-INSERT INTO gameAmountConfigs ( amount, nrOfGamesPerPlace, roundNumberId, competitionSportId )(
+INSERT INTO gameAmountConfigs ( amount, nrOfGamesPerPlaceMixed, roundNumberId, competitionSportId )(
     SELECT pc.nrOfHeadtohead, 0, rn.id, (select id from competitionSports where competitionId = rn.competitionId ) from roundNumbers rn join planningConfigs pc on rn.planningConfigId = pc.id
 );
 -- parent is null

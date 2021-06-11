@@ -359,32 +359,32 @@ final class TournamentAction extends Action
             $tournament->setExported($tournament->getExported() | $format);
             $this->tournamentRepos->save($tournament);
 
-            if ($format === ExportFormat::Pdf) {
-                return $this->writePdf($response, $format, $tournament, $this->config->getString('www.wwwurl'));
-            } else {
-                return $this->writeExcel($response, $format, $tournament, $this->config->getString('www.wwwurl'));
-            }
+            //if ($format === ExportFormat::Pdf) {
+            $subjects = $this->getExportSubjects($queryParams);
+            return $this->writePdf($response, $subjects, $tournament, $this->config->getString('www.wwwurl'));
+           // } /*else {
+            //    return $this->writeExcel($response, $format, $tournament, $this->config->getString('www.wwwurl'));
+            //}
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
 
     /**
-     * @param array<string, int> $queryParams
-     * @return TournamentConfig
+     * @param array<string, int|string> $queryParams
+     * @return int
      * @throws Exception
      */
-    protected function getExportConfig(array $queryParams): TournamentConfig
+    protected function getExportSubjects(array $queryParams): int
     {
         $subjects = 0;
         if (isset($queryParams['subjects'])) {
-            $subjects = $queryParams['subjects'];
+            $subjects = (int)$queryParams['subjects'];
         }
-        $exportConfig = new TournamentConfig($subjects);
-        if ($exportConfig->allOptionsOff()) {
+        if ($subjects === 0) {
             throw new Exception('kies minimaal 1 exportoptie', E_ERROR);
         }
-        return $exportConfig;
+        return $subjects;
     }
 
     protected function writePdf(Response $response, int $subjects, Tournament $tournament, string $url): Response
@@ -407,32 +407,32 @@ final class TournamentAction extends Action
             ->withHeader('Content-Length', '' . strlen($vtData));
     }
 
-    protected function writeExcel(Response $response, int $subjects, Tournament $tournament, string $url): Response
-    {
-        $fileName = $this->getFileName($subjects);
-        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-
-        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $subjects, $url);
-        $spreadsheet->fillContents();
-
-        $excelWriter = IOFactory::createWriter($spreadsheet, 'Xlsx');
-
-        $tmpService = new TmpService();
-        $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . ((string)$tournament->getId()) . '.xlsx');
-        $excelWriter->save($excelFileName);
-
-        // For Excel2007 and above .xlsx files
-        $response = $response->withHeader('Cache-Control', 'must-revalidate');
-        $response = $response->withHeader('Pragma', 'public');
-        $response = $response->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '.xlsx";');
-        $response = $response->withHeader(
-            'Content-Type',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
-        );
-
-        $newStream = new LazyOpenStream($excelFileName, 'r');
-        return $response->withBody($newStream);
-    }
+//    protected function writeExcel(Response $response, int $subjects, Tournament $tournament, string $url): Response
+//    {
+//        $fileName = $this->getFileName($subjects);
+//        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
+//
+//        $spreadsheet = new FCToernooiSpreadsheet($tournament, $structure, $subjects, $url);
+//        $spreadsheet->fillContents();
+//
+//        $excelWriter = IOFactory::createWriter($spreadsheet, 'Xlsx');
+//
+//        $tmpService = new TmpService();
+//        $excelFileName = $tmpService->getPath(['worksheets'], 'toernooi-' . ((string)$tournament->getId()) . '.xlsx');
+//        $excelWriter->save($excelFileName);
+//
+//        // For Excel2007 and above .xlsx files
+//        $response = $response->withHeader('Cache-Control', 'must-revalidate');
+//        $response = $response->withHeader('Pragma', 'public');
+//        $response = $response->withHeader('Content-Disposition', 'attachment; filename="' . $fileName . '.xlsx";');
+//        $response = $response->withHeader(
+//            'Content-Type',
+//            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'
+//        );
+//
+//        $newStream = new LazyOpenStream($excelFileName, 'r');
+//        return $response->withBody($newStream);
+//    }
 
     protected function getFileName(int $exportSubjects): string
     {

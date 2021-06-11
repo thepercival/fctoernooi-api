@@ -22,7 +22,7 @@ use Sports\Structure\Validator as StructureValidator;
 use Sports\Round\Number\GamesValidator;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
-use Sports\Game;
+use Sports\Game\Order as GameOrder;
 
 class Validator extends Command
 {
@@ -121,7 +121,7 @@ class Validator extends Command
         $map = new CompetitorMap(array_values($tournament->getCompetitors()->toArray()));
         $againstGameOutput = new AgainstGameOutput($map, $this->getLogger());
         $togetherGameOutput = new TogetherGameOutput($map, $this->getLogger());
-        foreach ($roundNumber->getGames(Game::ORDER_BY_BATCH) as $game) {
+        foreach ($roundNumber->getGames(GameOrder::ByBatch) as $game) {
             if ($game instanceof AgainstGame) {
                 $againstGameOutput->output($game);
             } else {

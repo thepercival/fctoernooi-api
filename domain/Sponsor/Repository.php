@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Sponsor;
 
+use Exception;
 use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
@@ -21,7 +22,7 @@ class Repository extends EntityRepository implements SaveRemoveRepository
 
     public function checkNrOfSponsors(Tournament $tournament, int $newScreenNr, SponsorBase $sponsor = null): void
     {
-        $max = static::MAXNROFSPONSORSPERSCREEN;
+        $max = Repository::MAXNROFSPONSORSPERSCREEN;
         if ($sponsor === null || $sponsor->getScreenNr() !== $newScreenNr) {
             $max--;
         }
@@ -34,10 +35,10 @@ class Repository extends EntityRepository implements SaveRemoveRepository
         $qb = $qb->setParameter('tournament', $tournament);
         $qb = $qb->setParameter('screenNr', $newScreenNr);
 
-        $nrOfSponsorsPresent = $qb->getQuery()->getSingleScalarResult();
+        $nrOfSponsorsPresent = (int)$qb->getQuery()->getSingleScalarResult();
         if ($nrOfSponsorsPresent > $max) {
-            throw new \Exception(
-                "er kan geen sponsor aan schermnummer " . $newScreenNr . " meer worden toegevoegd, het maximum van " . static::MAXNROFSPONSORSPERSCREEN . " is bereikt",
+            throw new Exception(
+                'er kan geen sponsor aan schermnummer ' . $newScreenNr . ' meer worden toegevoegd, het maximum van ' . Repository::MAXNROFSPONSORSPERSCREEN . ' is bereikt',
                 E_ERROR
             );
         }

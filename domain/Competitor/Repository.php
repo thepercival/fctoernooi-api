@@ -24,7 +24,7 @@ class Repository extends EntityRepository implements SaveRemoveRepository
     {
         /**
          * @param Round $rootRound
-         * @return list<Place>
+         * @return array<string, Place>
          */
         $getUnassignedPlaces = function (Round $rootRound): array {
             $unassignedPlaces = [];
@@ -37,13 +37,13 @@ class Repository extends EntityRepository implements SaveRemoveRepository
 
         /**
          * @param Tournament $tournament
-         * @param list<Place> $unassignedPlaces
          * @return list<CompetitorBase>
          */
         $getUnassignedCompetitors = function (Tournament $tournament) use (&$unassignedPlaces): array {
             $unassignedCompetitors = [];
             foreach ($tournament->getCompetitors() as $competitor) {
                 $placeLocationId = $competitor->getPouleNr() . "." . $competitor->getPlaceNr();
+                /** @var array<string, Place> $unassignedPlaces */
                 if (array_key_exists($placeLocationId, $unassignedPlaces)) {
                     unset($unassignedPlaces[$placeLocationId]);
                 } else {
@@ -55,6 +55,7 @@ class Repository extends EntityRepository implements SaveRemoveRepository
 
         $unassignedCompetitors = $getUnassignedCompetitors($tournament);
 
+        /** @var array<string, Place> $unassignedPlaces */
         while (count($unassignedPlaces) > 0 && count($unassignedCompetitors) > 0) {
             $unassignedPlace = array_shift($unassignedPlaces);
             $unassignedCompetitor = array_shift($unassignedCompetitors);

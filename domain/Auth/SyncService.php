@@ -35,7 +35,6 @@ class SyncService
         if ($emailaddress === null) {
             return null;
         }
-        /** @var User|null $user */
         $user = $this->userRepos->findOneBy(["emailaddress" => $emailaddress]);
 
         if ($user !== null) {
@@ -78,7 +77,6 @@ class SyncService
         if ($emailaddress === null) {
             return;
         }
-        /** @var User|null $user */
         $user = $this->userRepos->findOneBy(["emailaddress" => $emailaddress]);
 
         if ($user !== null) {

@@ -4,8 +4,12 @@ declare(strict_types=1);
 namespace FCToernooi;
 
 use App\TmpService;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\Result\PngResult;
 use Sports\Game;
 
 class QRService
@@ -62,7 +66,7 @@ class QRService
     {
         $this->writeToPng($pathWithoutExtension . ".png", $qrCodeText, $imgWidthPx);
         $image = imagecreatefrompng($pathWithoutExtension . ".png");
-        if( $image === false ) {
+        if ($image === false) {
             throw new \Exception('could not create image from path', E_ERROR);
         }
         imagejpeg($image, $pathWithoutExtension . ".jpg");
@@ -75,26 +79,24 @@ class QRService
         if (file_exists($path)) {
             return;
         }
-        // Create a basic QR code
-        $qrCode = new QrCode($qrCodeText);
-        $qrCode->setSize($imgWidthPx);
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->writerOptions([])
+            ->data($qrCodeText)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size($imgWidthPx)
+            ->margin(0)
+            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
+//            ->logoPath($path)
+//            ->labelText('This is the label')
+//            ->labelFont(new NotoSans(20))
+//            ->labelAlignment(new LabelAlignmentCenter())
+            ->build();
 
-        // Set advanced options
-        $qrCode->setWriterByName('png');
-        $qrCode->setMargin(0);
-        $qrCode->setEncoding('UTF-8');
-        $qrCode->setErrorCorrectionLevel(new ErrorCorrectionLevel(ErrorCorrectionLevel::HIGH));
-        //$qrCode->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0, 'a' => 0]);
-        //$qrCode->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0]);
-        //$qrCode->setLogoSize(150, 200);
-        // $qrCode->setRoundBlockSize(true);
-        // $qrCode->setValidateResult(false);
-        // $qrCode->setWriterOptions(['exclude_xml_declaration' => true]);
-
-        // Directly output the QR code
-        // header('Content-Type: '.$qrCode->getContentType());
-        // echo $qrCode->writeString();
-
-        $qrCode->writeFile($path);
+        if (!($result instanceof  PngResult)) {
+            throw new \Exception('could not create qrcode from path', E_ERROR);
+        }
+        $result->saveToFile($path);
     }
 }

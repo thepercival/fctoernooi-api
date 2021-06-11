@@ -11,6 +11,7 @@ use Sports\Round\Number\GamesValidator;
 use Sports\Round\Number as RoundNumber;
 use Sports\Game\Together as TogetherGame;
 use Sports\Game\Against as AgainstGame;
+use Sports\Game\Order as GameOrder;
 
 class TournamentReport
 {
@@ -67,7 +68,7 @@ class TournamentReport
 
     protected function getScoresUsage(RoundNumber $roundNumber, int &$nrOfGames, int &$nrOfScores): void
     {
-        foreach ($roundNumber->getGames() as $game) {
+        foreach ($roundNumber->getGames(GameOrder::ByBatch) as $game) {
             $nrOfGames++;
             if ($game instanceof AgainstGame) {
                 if ($game->getScores()->count() > 0) {

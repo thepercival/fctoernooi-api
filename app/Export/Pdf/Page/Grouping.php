@@ -1,14 +1,12 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Round;
-use Sports\Poule;
-use Sports\NameService;
 
 class Grouping extends ToernooiPdfPage
 {
@@ -31,21 +29,21 @@ class Grouping extends ToernooiPdfPage
         return 0;
     }
 
-    protected function getRowHeight(): float
+    public function getRowHeight(): float
     {
         return $this->rowHeight;
     }
 
-    public function draw()
+    public function draw(): void
     {
         $rooRound = $this->getParent()->getStructure()->getRootRound();
-        $nY = $this->drawHeader("indeling");
-        $nY = $this->drawGrouping($rooRound, $nY);
+        $y = $this->drawHeader("indeling");
+        $this->drawGrouping($rooRound, $y);
     }
 
-    public function drawGrouping(Round $round, float $nY): float
+    public function drawGrouping(Round $round, float $y): float
     {
-        $nY = $this->drawSubHeader("Indeling", $nY);
+        $y = $this->drawSubHeader("Indeling", $y);
         $nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         $pouleMargin = 20;
@@ -53,63 +51,60 @@ class Grouping extends ToernooiPdfPage
         $nrOfPoules = $round->getPoules()->count();
         $percNumberWidth = 0.1;
         $nameService = $this->getParent()->getNameService();
-        $nYPouleStart = $nY;
-        $maxNrOfPlacesPerPoule = null;
+        $yPouleStart = $y;
+        $maxNrOfPlacesPerPoule = $round->getPoule(1)->getPlaces()->count();
         $nrOfLines = $this->getNrOfLines($nrOfPoules);
         for ($line = 1; $line <= $nrOfLines; $line++) {
             $nrOfPoulesForLine = $this->getNrOfPoulesForLine($nrOfPoules, $line === $nrOfLines);
             $pouleWidth = $this->getPouleWidth($nrOfPoulesForLine, $pouleMargin);
-            $nX = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
+            $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
             while ($nrOfPoulesForLine > 0) {
                 $poule = array_shift($poules);
 
-                if ($maxNrOfPlacesPerPoule === null) {
-                    $maxNrOfPlacesPerPoule = $poule->getPlaces()->count();
-                }
                 $numberWidth = $pouleWidth * $percNumberWidth;
                 $this->setFont($this->getParent()->getFont(true), $fontHeight);
                 $this->drawCell(
                     $this->getParent()->getNameService()->getPouleName($poule, true),
-                    $nX,
-                    $nYPouleStart,
+                    $x,
+                    $yPouleStart,
                     $pouleWidth,
                     $nRowHeight,
-                    ToernooiPdfPage::ALIGNCENTER,
+                    Align::Center,
                     "black"
                 );
                 $this->setFont($this->getParent()->getFont(), $fontHeight);
-                $nY = $nYPouleStart - $nRowHeight;
+                $y = $yPouleStart - $nRowHeight;
                 foreach ($poule->getPlaces() as $place) {
                     $this->drawCell(
-                        $place->getNumber(),
-                        $nX,
-                        $nY,
+                        (string)$place->getPlaceNr(),
+                        $x,
+                        $y,
                         $numberWidth,
                         $nRowHeight,
-                        ToernooiPdfPage::ALIGNRIGHT,
+                        Align::Right,
                         "black"
                     );
-                    $name = null;
-                    if( $this->getParent()->getPlaceLocationMap()->getCompetitor( $place ) !== null ) {
-                       $name = $nameService->getPlaceName($place, true);
+                    $name = '';
+                    if ($this->getParent()->getPlaceLocationMap()->getCompetitor($place) !== null) {
+                        $name = $nameService->getPlaceName($place, true);
                     }
                     $this->drawCell(
                         $name,
-                        $nX + $numberWidth,
-                        $nY,
+                        $x + $numberWidth,
+                        $y,
                         $pouleWidth - $numberWidth,
                         $nRowHeight,
-                        ToernooiPdfPage::ALIGNLEFT,
+                        Align::Left,
                         "black"
                     );
-                    $nY -= $nRowHeight;
+                    $y -= $nRowHeight;
                 }
-                $nX += $pouleMargin + $pouleWidth;
+                $x += $pouleMargin + $pouleWidth;
                 $nrOfPoulesForLine--;
             }
-            $nYPouleStart -= ($maxNrOfPlacesPerPoule + 2 /* header + empty line */) * $nRowHeight;
+            $yPouleStart -= ($maxNrOfPlacesPerPoule + 2 /* header + empty line */) * $nRowHeight;
         }
-        return $nY - (2 * $nRowHeight);
+        return $y - (2 * $nRowHeight);
     }
 
     protected function getNrOfLines(int $nrOfPoules): int
@@ -117,7 +112,7 @@ class Grouping extends ToernooiPdfPage
         if (($nrOfPoules % 3) !== 0) {
             $nrOfPoules += (3 - ($nrOfPoules % 3));
         }
-        return ($nrOfPoules / 3);
+        return (int)($nrOfPoules / 3);
     }
 
     protected function getNrOfPoulesForLine(int $nrOfPoules, bool $lastLine): int

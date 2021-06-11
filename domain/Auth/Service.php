@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
@@ -14,6 +15,7 @@ use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Firebase\JWT\JWT;
+use InvalidArgumentException;
 use Selective\Config\Configuration;
 use Tuupola\Base62;
 use App\Mailer;
@@ -42,21 +44,21 @@ class Service
     public function register(string $emailaddress, string $password, string $name = null): ?User
     {
         if (strlen($password) < User::MIN_LENGTH_PASSWORD or strlen($password) > User::MAX_LENGTH_PASSWORD) {
-            throw new \InvalidArgumentException(
-                'het wachtwoord moet minimaal ' . User::MIN_LENGTH_PASSWORD . " karakters bevatten en mag maximaal " . User::MAX_LENGTH_PASSWORD . " karakters bevatten",
+            throw new InvalidArgumentException(
+                'het wachtwoord moet minimaal ' . User::MIN_LENGTH_PASSWORD . ' karakters bevatten en mag maximaal ' . User::MAX_LENGTH_PASSWORD . ' karakters bevatten',
                 E_ERROR
             );
         }
         /** @var User|null $userTmp */
         $userTmp = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
         if ($userTmp !== null) {
-            throw new Exception("het emailadres is al in gebruik", E_ERROR);
+            throw new Exception('het emailadres is al in gebruik', E_ERROR);
         }
         if ($name !== null) {
             /** @var User|null $userTmp */
             $userTmp = $this->userRepos->findOneBy(array('name' => $name));
             if ($userTmp !== null) {
-                throw new Exception("de gebruikersnaam is al in gebruik", E_ERROR);
+                throw new Exception('de gebruikersnaam is al in gebruik', E_ERROR);
             }
         }
 
@@ -69,7 +71,7 @@ class Service
         $user = new User($emailaddress, $salt, $hashedPassword);
 
         $this->userRepos->save($user);
-        $invitations = $this->tournamentInvitationRepos->findBy(["emailaddress" => $user->getEmailaddress()]);
+        $invitations = $this->tournamentInvitationRepos->findBy(['emailaddress' => $user->getEmailaddress()]);
         $tournamentUsers = $this->syncService->processInvitations($user, $invitations);
         $this->sendRegisterEmail($emailaddress, $tournamentUsers);
 
@@ -78,7 +80,7 @@ class Service
 
     /**
      * @param string $emailAddress
-     * @param array|TournamentUser[] $tournamentUsers
+     * @param list<TournamentUser> $tournamentUsers
      */
     protected function sendRegisterEmail(string $emailAddress, array $tournamentUsers): void
     {
@@ -95,24 +97,24 @@ EOT;
             if (strlen($bodyMiddle) === 0) {
                 $bodyMiddle = '<p>Je hebt voor de volgende toernooien rollen gekregen:</p>';
                 $bodyMiddle .= '<table cellpadding="2" cellspacing="2" border="1"';
-                $bodyMiddle .= "<thead><tr><th>toernooinaam</th><th>rolnaam</th><th>rolomschrijving</th></tr></thead>";
-                $bodyMiddle .= "<tbody>";
+                $bodyMiddle .= '<thead><tr><th>toernooinaam</th><th>rolnaam</th><th>rolomschrijving</th></tr></thead>';
+                $bodyMiddle .= '<tbody>';
             }
             $roleDefinitions = Role::getDefinitions($tournamentUser->getRoles());
             foreach ($roleDefinitions as $roleDefinition) {
-                $bodyMiddle .= "<tr>";
-                $bodyMiddle .= '<td>' . $tournamentUser->getTournament()->getCompetition()->getLeague()->getName(
-                    ) . '</td>';
-                $bodyMiddle .= '<td>' . $roleDefinition["name"] . '</td>';
-                $bodyMiddle .= '<td>' . $roleDefinition["description"] . '</td>';
-                $bodyMiddle .= "</tr>";
+                $bodyMiddle .= '<tr>';
+                $name = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
+                $bodyMiddle .= '<td>' . $name . '</td>';
+                $bodyMiddle .= '<td>' . $roleDefinition['name'] . '</td>';
+                $bodyMiddle .= '<td>' . $roleDefinition['description'] . '</td>';
+                $bodyMiddle .= '</tr>';
             }
         }
         if (strlen($bodyMiddle) > 0) {
             $bodyMiddle .= '</tbody></table><br/>';
         }
         $bodyEnd = '<p>met vriendelijke groet,<br/><br/>Coen Dunnink<br/>06-14363514<br/><a href="' . $this->config->getString(
-                "www.wwwurl"
+                'www.wwwurl'
             ) . '">FCToernooi</a></p>';
         $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
@@ -121,7 +123,7 @@ EOT;
     {
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if ($user === null) {
-            throw new Exception("kan geen code versturen");
+            throw new Exception('kan geen code versturen');
         }
         $conn = $this->em->getConnection();
         $conn->beginTransaction();
@@ -139,20 +141,20 @@ EOT;
 
     public function createToken(User $user): string
     {
-        $jti = (new Base62)->encode(random_bytes(16));
+        $jti = (new Base62())->encode(random_bytes(16));
 
-        $now = new \DateTimeImmutable();
-        $future = $now->modify("+3 months");
+        $now = new DateTimeImmutable();
+        $future = $now->modify('+3 months');
         // $future = $now->modify("+10 seconds");
 
         $payload = [
-            "iat" => $now->getTimestamp(),
-            "exp" => $future->getTimestamp(),
-            "jti" => $jti,
-            "sub" => $user->getId(),
+            'iat' => $now->getTimestamp(),
+            'exp' => $future->getTimestamp(),
+            'jti' => $jti,
+            'sub' => $user->getId(),
         ];
 
-        return JWT::encode($payload, $this->config->getString("auth.jwtsecret"));
+        return JWT::encode($payload, $this->config->getString('auth.jwtsecret'));
     }
 
     protected function mailPasswordCode(User $user): void
@@ -161,9 +163,9 @@ EOT;
         $forgetpasswordToken = $user->getForgetpasswordToken();
         $forgetpasswordDeadline = $user->getForgetpasswordDeadline();
         if ($forgetpasswordDeadline === null) {
-            throw new Exception("je hebt je wachtwoord al gewijzigd, vraag opnieuw een nieuw wachtwoord aan");
+            throw new Exception('je hebt je wachtwoord al gewijzigd, vraag opnieuw een nieuw wachtwoord aan');
         }
-        $forgetpasswordDeadline = $forgetpasswordDeadline->modify("-1 days")->format("Y-m-d");
+        $forgetpasswordDeadline = $forgetpasswordDeadline->modify('-1 days')->format('Y-m-d');
         $body = <<<EOT
 <p>Hallo,</p>
 <p>            
@@ -186,23 +188,24 @@ EOT;
         /** @var User|null $user */
         $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
         if ($user === null) {
-            throw new Exception("het wachtwoord kan niet gewijzigd worden");
+            throw new Exception('het wachtwoord kan niet gewijzigd worden');
         }
         // check code and deadline
         if ($user->getForgetpasswordToken() !== $code) {
-            throw new Exception("het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt");
+            throw new Exception('het wachtwoord kan niet gewijzigd worden, je hebt een onjuiste code gebruikt');
         }
-        $now = new \DateTimeImmutable();
+        $now = new DateTimeImmutable();
         if ($now > $user->getForgetpasswordDeadline()) {
-            throw new Exception("het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij");
+            throw new Exception('het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij');
         }
         $passwordHash = password_hash($user->getSalt() . $password, PASSWORD_DEFAULT);
         /** @phpstan-ignore-next-line */
         if (is_string($passwordHash) === false) {
-            throw new Exception("er kan geen wachtwoord-hash gemaakt worden", E_ERROR);
+            throw new Exception('er kan geen wachtwoord-hash gemaakt worden', E_ERROR);
         }
         $user->setPassword($passwordHash);
         $user->setForgetpassword(null);
-        return $this->userRepos->save($user);
+        $this->userRepos->save($user);
+        return $user;
     }
 }

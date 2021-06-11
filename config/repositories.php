@@ -198,6 +198,7 @@ return [
         return new PlanningConfigRepository($entityManager, $entityManager->getClassMetaData(PlanningConfig::class));
     },
     GameAmountConfigRepository::class => function (ContainerInterface $container): GameAmountConfigRepository {
+        /** @var EntityManager $entityManager */
         $entityManager = $container->get(EntityManager::class);
         return new GameAmountConfigRepository(
             $entityManager,

@@ -6,30 +6,44 @@ namespace App\Export\Pdf;
 
 use FCToernooi\Tournament;
 use FCToernooi\LockerRoom;
-use Sports\Structure;
 use Sports\Game;
-use Sports\Round;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Game\Together as TogetherGame;
+use Sports\Poule;
+use Sports\State;
+use Sports\Structure;
+use Sports\Game\Against as AgainstGame;
+use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
-use App\Export\Pdf\Page\PoulePivotTables as PagePoules;
+use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
+use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
+use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
 use App\Export\Pdf\Page\Planning as PagePlanning;
 use FCToernooi\Tournament\ExportConfig;
 use App\Export\Document as ExportDocument;
 use App\Exceptions\PdfOutOfBoundsException;
+use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
+use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
+use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
+use Zend_Pdf;
+use Zend_Pdf_Exception;
+use Zend_Pdf_Font;
+use Zend_Pdf_Page;
+use Zend_Pdf_Parser;
+use Zend_Pdf_Resource_Font;
 
-class Document extends \Zend_Pdf
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
+class Document extends Zend_Pdf
 {
+//    protected int $m_nHeaderHeight;
+//    protected int $m_nPageMargin;
+
     /**
-     * @var int
+     * @var array<string, float>
      */
-    protected $m_nHeaderHeight;
-    /**
-     * @var int
-     */
-    protected $m_nPageMargin;
-    /**
-     * @var array
-     */
-    protected $widthText = [];
+    protected array $widthText = [];
 
     use ExportDocument;
 
@@ -45,55 +59,56 @@ class Document extends \Zend_Pdf
         $this->url = $url;
     }
 
-    public function getFontHeight()
+    public function getFontHeight(): int
     {
         return 14;
     }
 
-    public function getFontHeightSubHeader()
+    public function getFontHeightSubHeader(): int
     {
         return 16;
     }
 
-    public function render($newSegmentOnly = false, $outputStream = null)
+    public function render($newSegmentOnly = false, $outputStream = null): string
     {
         $this->fillContent();
         return parent::render($newSegmentOnly, $outputStream);
     }
 
-    public function getFont($bBold = false, $bItalic = false)
+    public function getFont(bool $bBold = false, bool $bItalic = false): Zend_Pdf_Resource_Font
     {
-        $sFontDir = __DIR__ . "/../../../fonts/";
-        if ($bBold === false and $bItalic === false) {
-            return \Zend_Pdf_Font::fontWithPath($sFontDir . "times.ttf");
-        }
+        $suffix = 'times.ttf';
         if ($bBold === true and $bItalic === false) {
-            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesbd.ttf");
+            $suffix = 'timesbd.ttf';
         } elseif ($bBold === false and $bItalic === true) {
-            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesi.ttf");
+            $suffix = 'timesi.ttf';
         } elseif ($bBold === true and $bItalic === true) {
-            return \Zend_Pdf_Font::fontWithPath($sFontDir . "timesbi.ttf");
+            $suffix = 'timesbi.ttf';
         }
+        $sFontDir = __DIR__ . '/../../../fonts/';
+        return Zend_Pdf_Font::fontWithPath($sFontDir . $suffix);
     }
 
-    protected function fillContent()
+    protected function fillContent(): void
     {
         if (($this->subjects & ExportConfig::Structure) === ExportConfig::Structure) {
             $page = $this->createPageGrouping();
             $page->draw();
 
-            $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4);
+            $this->createAndDrawPageStructure(Zend_Pdf_Page::SIZE_A4);
         }
         if (($this->subjects & ExportConfig::PoulePivotTables) === ExportConfig::PoulePivotTables) {
-            list($page, $nY) = $this->createPagePoulePivotTables();
-            $this->drawPoulePivotTables($this->structure->getFirstRoundNumber(), $page, $nY);
+            $this->drawPoulePivotTables($this->structure->getFirstRoundNumber());
         }
         if (($this->subjects & ExportConfig::Planning) === ExportConfig::Planning) {
-            list($page, $nY) = $this->createPagePlanning("wedstrijden");
-            $this->drawPlanning($this->structure->getFirstRoundNumber(), $page, $nY);
+            $firstRoundNumber = $this->structure->getFirstRoundNumber();
+            $title = 'wedstrijden';
+            $page = $this->createPagePlanning($firstRoundNumber, $title);
+            $y = $page->drawHeader($title);
+            $this->drawPlanning($firstRoundNumber, $page, $y);
         }
         if (($this->subjects & ExportConfig::GameNotes) === ExportConfig::GameNotes) {
-            $this->drawGamenotes();
+            $this->drawGameNotes($this->structure->getFirstRoundNumber());
         }
         if (($this->subjects & ExportConfig::GamesPerPoule) === ExportConfig::GamesPerPoule) {
             $this->drawPlanningPerPoule($this->structure->getFirstRoundNumber());
@@ -116,222 +131,333 @@ class Document extends \Zend_Pdf
         }
     }
 
-    protected function drawPlanning(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
+    protected function drawPlanning(RoundNumber $roundNumber, PagePlanning $page, float$y): void
     {
-        $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
-        $games = $page->getGames($roundNumber);
+        $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
-            $nY = $page->drawGamesHeader($roundNumber, $nY);
-        }
-        $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
-        foreach ($games as $game) {
-            $gameHeight = $page->getGameHeight();
-            $drawBreak = $page->drawBreakBeforeGame($game);
-            $gameHeight += $drawBreak ? $gameHeight : 0;
-            if ($nY - $gameHeight < $page->getPageMargin()) {
-                list($page, $nY) = $this->createPagePlanning("wedstrijden");
-                $nY = $page->drawGamesHeader($roundNumber, $nY);
-            }
-            if ($drawBreak) {
-                $nY = $page->drawBreak($roundNumber, $nY);
-            }
-            $nY = $page->drawGame($game, $nY, true);
+            $y = $page->drawRoundNumberHeader($roundNumber, $y);
+            $y = $page->drawGamesHeader($roundNumber, $y);
         }
 
-        if ($roundNumber->hasNext()) {
-            $nY -= 20;
-            $this->drawPlanning($roundNumber->getNext(), $page, $nY);
+//        $games = $page->getGames($roundNumber);
+//        if (count($games) > 0) {
+//            $y = $page->drawGamesHeader($roundNumber, $y);
+//        }
+        $games = $roundNumber->getGames(GameOrder::ByBatch);
+        $drewbreak = false;
+        foreach ($games as $game) {
+            $gameHeight = $page->getRowHeight();
+            $drawBreak = $page->drawBreakBeforeGame($game, $drewbreak);
+            $gameHeight += $drawBreak ? $gameHeight : 0;
+            if ($y - $gameHeight < $page->getPageMargin()) {
+                $title = 'wedstrijden';
+                $page = $this->createPagePlanning($roundNumber, $title);
+                $y = $page->drawHeader($title);
+                $y = $page->drawGamesHeader($roundNumber, $y);
+            }
+            if ($drawBreak && !$drewbreak) {
+                $y = $page->drawBreak($roundNumber, $game, $y);
+                $drewbreak = true;
+            }
+            $y = $page->drawGame($game, $y, true);
+        }
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $y -= 20;
+            $this->drawPlanning($nextRoundNumber, $page, $y);
         }
     }
 
-    protected function drawPlanningPerPoule(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
+    protected function drawPlanningPerPoule(RoundNumber $roundNumber): void
     {
         $poules = $roundNumber->getPoules();
         foreach ($poules as $poule) {
-            list($page, $nY) = $this->createPagePlanning("poule " . $poule->getNumber());
+            $title = $this->getNameService()->getPouleName($poule, true);
+            $page = $this->createPagePlanning($roundNumber, $title);
+            $y = $page->drawHeader($title);
             $page->setGameFilter(
                 function (Game $game) use ($poule): bool {
                     return $game->getPoule() === $poule;
                 }
             );
-            $this->drawPlanningPerHelper($roundNumber, $page, $nY);
+            $this->drawPlanningPerHelper($roundNumber, $page, $y, false);
+        }
+
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->drawPlanningPerPoule($nextRoundNumber);
         }
     }
 
-    protected function drawPlanningPerField(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
+    protected function drawPlanningPerField(RoundNumber $roundNumber): void
     {
         $fields = $this->getTournament()->getCompetition()->getFields();
         foreach ($fields as $field) {
-            list($page, $nY) = $this->createPagePlanning("veld " . $field->getName());
+            $title = 'veld ' . (string)$field->getName();
+            $page = $this->createPagePlanning($roundNumber, $title);
+            $y = $page->drawHeader($title);
             $page->setGameFilter(
                 function (Game $game) use ($field): bool {
                     return $game->getField() === $field;
                 }
             );
-            $this->drawPlanningPerHelper($roundNumber, $page, $nY);
+            $this->drawPlanningPerHelper($roundNumber, $page, $y, true);
         }
     }
 
-    protected function drawPlanningPerHelper(RoundNumber $roundNumber, PagePlanning $page = null, int $nY = null)
+    protected function drawPlanningPerHelper(RoundNumber $roundNumber, PagePlanning $page, float $y, bool $recursive): void
     {
-        $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
-        $games = $page->getGames($roundNumber);
+        $y = $page->drawRoundNumberHeader($roundNumber, $y);
+        $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
-            $nY = $page->drawGamesHeader($roundNumber, $nY);
+            $y = $page->drawGamesHeader($roundNumber, $y);
         }
-        $games = $roundNumber->getGames(Game::ORDER_BY_BATCH);
+        $games = $roundNumber->getGames(GameOrder::ByBatch);
+        $drewbreak = false;
         foreach ($games as $game) {
-            $gameHeight = $page->getGameHeight();
-            $drawBreak = $page->drawBreakBeforeGame($game);
+            $gameHeight = $page->getRowHeight();
+            $drawBreak = $page->drawBreakBeforeGame($game, $drewbreak);
             $gameHeight += $drawBreak ? $gameHeight : 0;
-            if ($nY - $gameHeight < $page->getPageMargin()) {
+            if ($y - $gameHeight < $page->getPageMargin()) {
                 // $field = $page->getFieldFilter();
-                list($page, $nY) = $this->createPagePlanning($page->getTitle());
+                $page = $this->createPagePlanning($roundNumber, $page->getTitle() ?? '');
+                $y = $page->drawHeader($page->getTitle());
                 $page->setGameFilter($page->getGameFilter());
-                $nY = $page->drawGamesHeader($roundNumber, $nY);
+                $y = $page->drawGamesHeader($roundNumber, $y);
             }
-            if ($drawBreak) {
-                $nY = $page->drawBreak($roundNumber, $nY);
+            if ($drawBreak && !$drewbreak) {
+                $y = $page->drawBreak($roundNumber, $game, $y);
+                $drewbreak = true;
             }
-            $nY = $page->drawGame($game, $nY);
+            $y = $page->drawGame($game, $y);
         }
 
-        if ($roundNumber->hasNext()) {
-            $nY -= 20;
-            $this->drawPlanningPerHelper($roundNumber->getNext(), $page, $nY);
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null && $recursive) {
+            $y -= 20;
+            $this->drawPlanningPerHelper($nextRoundNumber, $page, $y, $recursive);
         }
     }
 
-    protected function drawGamenotes()
+    protected function drawGameNotes(RoundNumber $roundNumber): void
     {
-        $games = $this->getScheduledGames($this->structure->getRootRound());
-        while (count($games) > 0) {
-            $page = $this->createPageGamenotes(array_shift($games), array_shift($games));
+        foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
+            $sportVariant = $competitionSport->createVariant();
+            if ($sportVariant instanceof AgainstSportVariant) {
+                $this->drawAgainstGameNotes($roundNumber, $competitionSport);
+            } else {
+                throw new \Exception('implement together', E_ERROR);
+            }
+        }
+
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->drawGameNotes($nextRoundNumber);
+        }
+    }
+
+    protected function drawAgainstGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
+    {
+        $games = $this->getAgainstGames($roundNumber, $competitionSport); // per poule
+        while ($gameOne = array_shift($games)) {
+            $page = $this->createAgainstGameNotesPage($gameOne, array_shift($games));
             $page->draw();
         }
     }
 
-    protected function drawPoulePivotTables(RoundNumber $roundNumber, PagePoules $page = null, int $nY = null)
+    /**
+     * @param RoundNumber $roundNumber
+     * @param CompetitionSport $competitionSport
+     * @return list<AgainstGame>
+     */
+    protected function getAgainstGames(RoundNumber $roundNumber, CompetitionSport $competitionSport): array
+    {
+        $games = [];
+        foreach ($roundNumber->getRounds() as $round) {
+            $roundGames = $round->getGamesWithState(State::Created);
+            $againstRoundGames = array_filter($roundGames, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+                return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
+            });
+            $games = array_merge($games, $againstRoundGames);
+        }
+        return array_values($games);
+
+
+        $games = $this->getGames($roundNumber, $competitionSport); // per poule
+        while ($gameOne = array_shift($games)) {
+            $page = $this->createAgainstGameNotesPage($gameOne, array_shift($games));
+            $page->draw();
+        }
+    }
+
+    protected function drawPoulePivotTables(
+        RoundNumber $roundNumber,
+        AgainstPoulePivotTablePage|TogetherPoulePivotTablePage $page = null,
+        float $y = null
+    ): void
     {
         if ($roundNumber->needsRanking()) {
-            $nY = $page->drawRoundNumberHeader($roundNumber, $nY);
+            $gameAmountConfigs = $roundNumber->getValidGameAmountConfigs();
+            $drawRoundNumberHeader = true;
             foreach ($roundNumber->getRounds() as $round) {
                 foreach ($round->getPoules() as $poule) {
                     if (!$poule->needsRanking()) {
                         continue;
                     }
-                    $pouleHeight = $page->getPouleHeight($poule);
-                    if ($nY - $pouleHeight < $page->getPageMargin()) {
-                        list($page, $nY) = $this->createPagePoulePivotTables();
+                    foreach ($gameAmountConfigs as $gameAmountConfig) {
+                        if ($page === null) {
+                            $page = $this->createPagePoulePivotTables($gameAmountConfig->createVariant(), $poule);
+                            $y = $page->drawHeader('pouledraaitabel');
+                            if ($drawRoundNumberHeader) {
+                                $y = $page->drawRoundNumberHeader($roundNumber, $y);
+                            }
+                            $drawRoundNumberHeader = false;
+                        }
+                        $pouleHeight = $page->getPouleHeight($poule);
+                        if ($y !== null && $y - $pouleHeight < $page->getPageMargin()) {
+                            $page = $this->createPagePoulePivotTables($gameAmountConfig->createVariant(), $poule);
+                            $y = $page->drawHeader('pouledraaitabel');
+                            if ($drawRoundNumberHeader) {
+                                $y = $page->drawRoundNumberHeader($roundNumber, $y);
+                            }
+                            $drawRoundNumberHeader = false;
+                        }
+                        if ($y !== null) {
+                            $y = $page->draw($poule, $gameAmountConfig, $y);
+                        }
                     }
-                    $nY = $page->draw($poule, $nY);
                 }
             }
         }
-        if ($roundNumber->hasNext()) {
-            $this->drawPoulePivotTables($roundNumber->getNext(), $page, $nY);
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->drawPoulePivotTables($nextRoundNumber, $page, $y);
         }
     }
 
-    protected function createPageGrouping()
+    protected function createPageGrouping(): Page\Grouping
     {
-        $page = new Page\Grouping(\Zend_Pdf_Page::SIZE_A4);
+        $page = new Page\Grouping($this, Zend_Pdf_Page::SIZE_A4);
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    /**
-     * @throws \Zend_Pdf_Exception
-     */
-    protected function createAndDrawPageStructure($pageLayout, $enableOutOfBoundsException = true)
+    protected function createAndDrawPageStructure(string $pageLayout, bool $enableOutOfBoundsException = true): void
     {
-        $page = new Page\Structure($pageLayout, $enableOutOfBoundsException);
+        $page = new Page\Structure($this, $pageLayout, $enableOutOfBoundsException);
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         try {
             $page->draw();
             $this->pages[] = $page;
         } catch (PdfOutOfBoundsException $exception) {
-            if ($pageLayout === \Zend_Pdf_Page::SIZE_A4) {
-                $this->createAndDrawPageStructure(\Zend_Pdf_Page::SIZE_A4_LANDSCAPE, false);
+            if ($pageLayout === Zend_Pdf_Page::SIZE_A4) {
+                $this->createAndDrawPageStructure(Zend_Pdf_Page::SIZE_A4_LANDSCAPE, false);
             }
         }
     }
 
-    protected function createPagePlanning(string $title)
+    /**
+     * @param RoundNumber $roundNumber
+     * @param string $title
+     * @return PagePlanning
+     * @throws Zend_Pdf_Exception
+     */
+    protected function createPagePlanning(RoundNumber $roundNumber, string $title): PagePlanning
     {
-        $selfRefereesAssigned = $this->areSelfRefereesAssigned();
-        $page = new PagePlanning($selfRefereesAssigned ? \Zend_Pdf_Page::SIZE_A4_LANDSCAPE : \Zend_Pdf_Page::SIZE_A4);
+        $selfRefereeEnabled = $roundNumber->getValidPlanningConfig()->selfRefereeEnabled();
+        $page = new PagePlanning($this, $selfRefereeEnabled ? Zend_Pdf_Page::SIZE_A4_LANDSCAPE : Zend_Pdf_Page::SIZE_A4);
         $page->setTournamentBreak($this->tournament->getBreak());
-        $page->setSelfRefereesAssigned($selfRefereesAssigned);
-        $page->setRefereesAssigned($this->areRefereesAssigned());
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
-        $this->pages[] = $page;
         $page->setTitle($title);
-        $nY = $page->drawHeader($title);
-        return array( $page, $nY );
-    }
-
-    protected function createPageGamenotes(Game $gameA = null, Game $gameB = null)
-    {
-        $page = new Page\Gamenotes(\Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createPagePoulePivotTables()
+    protected function createAgainstGameNotesPage(AgainstGame $gameA, AgainstGame $gameB = null): AgainstGameNotesPage
     {
-        $page = new PagePoules(\Zend_Pdf_Page::SIZE_A4);
+        $page = new AgainstGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
-        $this->pages[] = $page;
-        $nY = $page->drawHeader("pouledraaitabel");
-        return array($page, $nY);
-    }
-
-    protected function createPageQRCode()
-    {
-        $page = new Page\QRCode(\Zend_Pdf_Page::SIZE_A4);
-        $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createPageLockerRooms()
-    {
-        $page = new Page\LockerRooms(\Zend_Pdf_Page::SIZE_A4);
+//    protected function createTogetherGameNotesPage(AgainstGame $gameA = null, AgainstGame $gameB = null): AgainstGameNotesPage
+//    {
+//        $page = new AgainstGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
+//        $page->setFont($this->getFont(), $this->getFontHeight());
+//        $this->pages[] = $page;
+//        return $page;
+//    }
+
+    /**
+     * @param SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant
+     * @param Poule $poule
+     * @return AgainstPoulePivotTablePage|TogetherPoulePivotTablePage
+     */
+    protected function createPagePoulePivotTables(
+        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant,
+        Poule $poule
+    ): AgainstPoulePivotTablePage | TogetherPoulePivotTablePage {
+        $dimension = $this->getPoulePivotPageDimension($sportVariant, $poule);
+        if ($sportVariant instanceof AgainstSportVariant) {
+            $page = new AgainstPoulePivotTablePage($this, $dimension);
+        } else {
+            $page = new TogetherPoulePivotTablePage($this, $dimension);
+        }
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createPageLockerRoom(LockerRoom $lockerRoom)
+    protected function getPoulePivotPageDimension(
+        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant,
+        Poule $poule
+    ): string
     {
-        $page = new Page\LockerRoom(\Zend_Pdf_Page::SIZE_A4, $lockerRoom);
+        if ($sportVariant instanceof AgainstSportVariant) {
+            $nrOfColumns = $poule->getPlaces()->count();
+        } else {
+            $nrOfColumns = $sportVariant->getNrOfGamesPerPlace();
+        }
+        return $nrOfColumns <= 12 ? Zend_Pdf_Page::SIZE_A4 : Zend_Pdf_Page::SIZE_A4_LANDSCAPE;
+    }
+
+    protected function createPageQRCode(): Page\QRCode
+    {
+        $page = new Page\QRCode($this, Zend_Pdf_Page::SIZE_A4);
         $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->putParent($this);
         $this->pages[] = $page;
         return $page;
     }
 
-    public function hasTextWidth(string $key)
+    protected function createPageLockerRooms(): Page\LockerRooms
+    {
+        $page = new Page\LockerRooms($this, Zend_Pdf_Page::SIZE_A4);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    protected function createPageLockerRoom(LockerRoom $lockerRoom): Page\LockerRoom
+    {
+        $page = new Page\LockerRoom($this, Zend_Pdf_Page::SIZE_A4, $lockerRoom);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    public function hasTextWidth(string $key): bool
     {
         return array_key_exists($key, $this->widthText);
     }
 
-    public function getTextWidth(string $key)
+    public function getTextWidth(string $key): float
     {
         return $this->widthText[$key];
     }
 
-    public function setTextWidth(string $key, $value)
+    public function setTextWidth(string $key, float $value): float
     {
         $this->widthText[$key] = $value;
         return $value;

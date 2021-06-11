@@ -72,11 +72,11 @@ final class GameAmountConfigAction extends Action
                     $competitionSport,
                     $roundNumber,
                     $gameAmountConfigSer->getAmount(),
-                    $gameAmountConfigSer->getNrOfGamesPerPlace()
+                    $gameAmountConfigSer->getNrOfGamesPerPlaceMixed()
                 );
             } else {
                 $gameAmountConfig->setAmount($gameAmountConfigSer->getAmount());
-                $gameAmountConfig->setNrOfGamesPerPlace($gameAmountConfigSer->getNrOfGamesPerPlace());
+                $gameAmountConfig->setNrOfGamesPerPlaceMixed($gameAmountConfigSer->getNrOfGamesPerPlaceMixed());
             }
 
             $this->gameAmountConfigRepos->save($gameAmountConfig);
