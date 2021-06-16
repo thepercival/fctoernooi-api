@@ -85,6 +85,15 @@ final class ScoreConfigAction extends Action
                         $scoreConfig
                     );
                 }
+            } else {
+                $scoreConfig->setMaximum($scoreConfigSer->getMaximum());
+                $scoreConfig->setEnabled($scoreConfigSer->getEnabled());
+                $next = $scoreConfig->getNext();
+                $nextSer = $scoreConfigSer->getNext();
+                if ($next !== null && $nextSer !== null) {
+                    $next->setMaximum($nextSer->getMaximum());
+                    $next->setEnabled($nextSer->getEnabled());
+                }
             }
 
             $this->scoreConfigRepos->save($scoreConfig);

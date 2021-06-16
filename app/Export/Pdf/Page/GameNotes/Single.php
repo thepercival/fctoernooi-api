@@ -6,103 +6,113 @@ namespace App\Export\Pdf\Page\GameNotes;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page\GameNotes;
-use FCToernooi\QRService;
 use App\Export\Pdf\Page\GameNotes as GameNotesBase;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
-use SportsHelpers\Against\Side as AgainstSide;
-use Sports\Score\Config as ScoreConfig;
-use Sports\Score\Config\Service as ScoreConfigService;
-use FCToernooi\TranslationService;
+use Sports\Game\Place\Together as TogetherGamePlace;
 
-class Against extends GameNotesBase
+class Single extends GameNotesBase
 {
-    public function __construct(Document $document, mixed $param1, AgainstGame $gameOne, AgainstGame|null $gameTwo)
+    public function __construct(Document $document, mixed $param1, TogetherGame $gameOne, TogetherGame|null $gameTwo)
     {
         parent::__construct($document, $param1, $gameOne, $gameTwo);
     }
 
     protected function drawPlaces(AgainstGame|TogetherGame $game, float $x, float $y, float $width, float $height): void
     {
-        if ($game instanceof TogetherGame) {
+        if ($game instanceof AgainstGame) {
             return;
         }
         $nameService = $this->getParent()->getNameService();
-        $homePlaces = $game->getSidePlaces(AgainstSide::HOME);
-        $home = $nameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
-        $awayPlaces = $game->getSidePlaces(AgainstSide::AWAY);
-        $away = $nameService->getPlacesFromName($homePlaces, false, count($awayPlaces) === 1);
-        $this->drawCell($home . ' - ' . $away, $x, $y, $width, $height);
+        $places = array_values($game->getPlaces()->toArray());
+        $description = $nameService->getPlacesFromName($places, false, count($places) <= 3);
+        $this->drawCell($description, $x, $y, $width, $height);
     }
 
     protected function drawGameRoundNumber(AgainstGame|TogetherGame $game, float $x, float $y, float $width, float $height): float
     {
-        if ($game instanceof TogetherGame) {
+        if ($game instanceof AgainstGame) {
             return $y;
         }
-        $gameRoundNumber = (string)$game->getGameRoundNumber();
-        $this->drawCell($gameRoundNumber, $x, $y, $width, $height);
+        $grs = array_map(fn (TogetherGamePlace $gp): string => (string)$gp->getGameRoundNumber(), $game->getPlaces()->toArray());
+        $this->drawCell(implode(' & ', $grs), $x, $y, $width, $height);
         return $y - $height;
+    }
+
+    protected function getPlaceWidth(TogetherGame $game): float
+    {
+        $placesWidth = $this->getDetailPartWidth() + GameNotes::Margin + $this->getDetailPartWidth();
+        $placesWidth -=  (GameNotes::Margin + $this->getPartWidth()); // unit(right side)
+        $placesWidth -= ($game->getPlaces()->count() - 1) * GameNotes::Margin;
+        return $placesWidth / $game->getPlaces()->count();
     }
 
     protected function drawScore(AgainstGame|TogetherGame $game, float $y): void
     {
-        if ($game instanceof TogetherGame) {
+        if ($game instanceof AgainstGame) {
             return;
         }
         $nameService = $this->getParent()->getNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
-        $margin = GameNotes::Margin;
+        $fontSize = $this->getParent()->getFontHeight();
         $larger = 1.2;
+        $largerFontSize = $this->getParent()->getFontHeight() * $larger;
         $height = GameNotes::RowHeight * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
-        $homeStart = $this->getStartDetailLabel();
-        $homeWidth = $this->getDetailPartWidth();
-        $sepStartX = $homeStart + $homeWidth;
-        $awayStart = $this->getStartDetailValue();
-        $dotsWidth = $this->getPartWidth();
-        $unitStart = $awayStart + $dotsWidth + $margin;
+        $placesStart = $this->getStartDetailLabel();
+        $placeWidth = $this->getPlaceWidth($game);
         $unitWidth = $this->getPartWidth();
-//        $detailValueWidth = $this->getDetailValueWidth($x);
-//        $x2 = $this->getXSecondBorder() + ($margin * 0.5);
+        $unitStart = $placesStart;
+        foreach ($game->getPlaces() as $gamePlace) {
+            $unitStart += $placeWidth + GameNotes::Margin;
+        }
 
         // 2x font thuis - uit
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
+        $this->setFont($this->getParent()->getFont(), $largerFontSize);
         $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
 
         // COMPETITORS
-        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::HOME), true, true);
-        $this->drawCell($home, $homeStart, $y, $homeWidth, $height, Align::Right);
-        $this->drawCell('-', $sepStartX, $y, GameNotesBase::Margin, $height, Align::Center);
-        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::AWAY), true, true);
-        $this->drawCell($away, $awayStart, $y, $dotsWidth, $height);
+        $competitorFontSize = $game->getPlaces()->count() > 3 ? $fontSize : $largerFontSize;
+        $this->setFont($this->getParent()->getFont(), $competitorFontSize);
+        $placesX = $placesStart;
+        foreach ($game->getPlaces() as $gamePlace) {
+            $name = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
+            $placesX = $this->drawCell($name, $placesX, $y, $placeWidth + GameNotes::Margin, $height);
+        }
         $y -= 2 * $height;
 
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
+
+        $this->setFont($this->getParent()->getFont(), $largerFontSize);
 
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
-
-        $dots = '...............';
         $nrOfScoreLines = $this->getNrOfScoreLines($game->getRound(), $game->getCompetitionSport());
+        $dots = '...............';
 
         // DOTS
         if ($firstScoreConfig !== $calculateScoreConfig) {
             $yDelta = 0;
+
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
                 $this->drawCell($descr, $this->getPageMargin(), $y - $yDelta, $leftPartWidth, $height, Align::Right);
-                $this->drawCell($dots, $homeStart, $y - $yDelta, $homeWidth, $height, Align::Right);
-                $this->drawCell('-', $sepStartX, $y - $yDelta, $margin, $height, Align::Center);
-                $this->drawCell($dots, $awayStart, $y - $yDelta, $dotsWidth, $height);
+
+                $placesX = $placesStart;
+                foreach ($game->getPlaces() as $gamePlace) {
+                    $placesX = $this->drawCell($dots, $placesX, $y - $yDelta, $placeWidth, $height);
+                    $placesX += GameNotes::Margin;
+                }
+
                 $yDelta += $height;
             }
         } else {
             $this->drawCell('score', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
-            $this->drawCell($dots, $homeStart, $y, $homeWidth, $height, Align::Right);
-            $this->drawCell('-', $sepStartX, $y, $margin, $height, Align::Center);
-            $this->drawCell($dots, $awayStart, $y, $dotsWidth, $height);
+            $placesX = $placesStart;
+            foreach ($game->getPlaces() as $gamePlace) {
+                $placesX = $this->drawCell($dots, $placesX, $y, $placeWidth, $height, Align::Left);
+                $placesX += GameNotes::Margin;
+            }
         }
 
         // SCOREUNITS
@@ -122,9 +132,11 @@ class Against extends GameNotesBase
 
         if ($planningConfig->getExtension()) {
             $this->drawCell('na verleng.', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
-            $this->drawCell($dots, $homeStart, $y, $homeWidth, $height, Align::Right);
-            $this->drawCell('-', $sepStartX, $y, $margin, $height, Align::Center);
-            $this->drawCell($dots, $awayStart, $y, $dotsWidth, $height);
+            $placesX = $placesStart;
+            foreach ($game->getPlaces() as $gamePlace) {
+                $placesX = $this->drawCell($dots, $placesX, $y, $placeWidth, $height);
+                $placesX += GameNotes::Margin;
+            }
 
             $name = $this->translationService->getScoreNamePlural($firstScoreConfig);
             $this->drawCell($name, $unitStart, $y, $unitWidth, $height, Align::Right);

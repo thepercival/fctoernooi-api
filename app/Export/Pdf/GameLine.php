@@ -22,6 +22,7 @@ use Zend_Pdf_Color_GrayScale;
 
 abstract class GameLine
 {
+    public const MaxNrOfPlacesPerLine = 4;
     /**
      * @var array<int, float>
      */
@@ -58,9 +59,10 @@ abstract class GameLine
         }
     }
 
-    public function getGameHeight(): float
+    public function getGameHeight(TogetherGame|AgainstGame $game): float
     {
-        return $this->page->getRowHeight();
+        $nrOfLines = (int) ceil($game->getPlaces()->count() / GameLine::MaxNrOfPlacesPerLine);
+        return $this->page->getRowHeight() * $nrOfLines;
     }
 
     protected function getColumnWidth(int $columnId): float
@@ -152,12 +154,12 @@ abstract class GameLine
         }
         $x += $fieldWidth;
         $this->drawCell('PAUZE', $x, $y, $placesAndScoreWidth, $height, ['top' => 'black']);
-        return $y - $this->getGameHeight();
+        return $y - $height;
     }
 
     public function drawGame(AgainstGame|TogetherGame $game, float $y, bool $striped = false): float
     {
-        $height = $this->page->getRowHeight();
+        $height = $this->getGameHeight($game);
         $pouleWidth = $this->getColumnWidth(Column::Poule);
         $startWidth = $this->getColumnWidth(Column::Start);
         $fieldWidth = $this->getColumnWidth(Column::Field);

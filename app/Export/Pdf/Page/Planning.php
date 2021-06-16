@@ -9,6 +9,7 @@ use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
 use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\GameLine\Against as AgainstGameLine;
+use App\Export\Pdf\GameLine\Together as TogetherGameLine;
 use League\Period\Period;
 use Sports\Competition;
 use Sports\Game;
@@ -24,6 +25,7 @@ class Planning extends ToernooiPdfPage
 {
     protected Period|null $tournamentBreak = null;
     protected AgainstGameLine|null $againstGameLine = null;
+    protected TogetherGameLine|null $togetherGameLine = null;
     protected mixed $gameFilter = null;
     protected string|null $title = null;
 
@@ -50,17 +52,23 @@ class Planning extends ToernooiPdfPage
         $this->title = $title;
     }
 
-    protected function getGameLine(AgainstGame|TogetherGame $game): AgainstGameLine
+    protected function getGameLine(AgainstGame|TogetherGame $game): AgainstGameLine|TogetherGameLine
     {
         return $this->getGameLineByGameMode($game->getCompetitionSport()->getGameMode());
     }
 
-    protected function getGameLineByGameMode(int $gameMode): AgainstGameLine
+    protected function getGameLineByGameMode(int $gameMode): AgainstGameLine|TogetherGameLine
     {
         if ($gameMode === GameMode::AGAINST && $this->againstGameLine !== null) {
             return $this->againstGameLine;
         }
-        throw new \Exception('togethergame should be implemented', E_ERROR);
+        if ($gameMode === GameMode::SINGLE && $this->togetherGameLine !== null) {
+            return $this->togetherGameLine;
+        }
+        if ($gameMode === GameMode::ALL_IN_ONE_GAME && $this->togetherGameLine !== null) {
+            return $this->togetherGameLine;
+        }
+        throw new \Exception('gameline should be implemented', E_ERROR);
     }
 
     public function getPageMargin(): float
@@ -95,7 +103,9 @@ class Planning extends ToernooiPdfPage
                     $this->againstGameLine = new AgainstGameLine($this, $showDateTime, $showReferee);
                 }
             } else {
-                throw new \Exception('togethergame should be implemented', E_ERROR);
+                if ($this->togetherGameLine === null) {
+                    $this->togetherGameLine = new TogetherGameLine($this, $showDateTime, $showReferee);
+                }
             }
         }
     }
