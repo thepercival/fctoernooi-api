@@ -5,11 +5,15 @@ namespace App\Commands;
 
 use App\Mailer;
 use Exception;
+use Sports\Competition;
+use Sports\Structure;
 use Sports\Game\Against as AgainstGame;
 use Sports\Competitor\Map as CompetitorMap;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
+use Sports\Output\StructureOutput;
+use Sports\Planning\EditMode as PlanningEditMode;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -63,7 +67,7 @@ class Validator extends Command
         $this->initLogger($input, 'cron-tournament-validator');
         try {
             $this->getLogger()->info('aan het valideren..');
-            $filter = ['updated' => true];
+            $filter = [];
             $tournamentId = $input->getArgument('tournamentId');
             if (is_string($tournamentId) && (int)$tournamentId > 0) {
                 $filter = ['id' => $tournamentId];
@@ -71,31 +75,39 @@ class Validator extends Command
             $tournaments = $this->tournamentRepos->findBy($filter);
             /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
+                $structure = null;
                 try {
-                    $this->checkValidity($tournament);
+                    $structure = $this->structureRepos->getStructure($tournament->getCompetition());
+                    $this->checkValidity($tournament, $structure);
+                    $this->addStructureToLog($tournament, $structure);
                 } catch (Exception $exception) {
                     $this->getLogger()->error($exception->getMessage());
+                    if( $structure !== null && count($filter) > 0 ) {
+                        $this->addStructureToLog($tournament, $structure);
+                    }
                 }
             }
             $this->getLogger()->info('alle toernooien gevalideerd');
         } catch (Exception $exception) {
-            if( $this->logger !== null ) {
+            if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
             }
         }
         return 0;
     }
 
-    protected function checkValidity(Tournament $tournament): void
+    protected function checkValidity(Tournament $tournament, Structure $structure): void
     {
         try {
             $competition = $tournament->getCompetition();
             if (count($competition->getFields()) === 0) {
                 throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
             }
-            $structure = $this->structureRepos->getStructure($competition);
             $this->structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
-            $this->validateGames($tournament, $structure->getFirstRoundNumber(), $competition->getReferees()->count());
+            $roundNumber = $structure->getFirstRoundNumber();
+            if ($roundNumber->getValidPlanningConfig()->getEditMode() === PlanningEditMode::Auto) {
+                $this->validateGames($tournament, $roundNumber, $competition->getReferees()->count());
+            }
         } catch (Exception $exception) {
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
         }
@@ -148,5 +160,14 @@ class Validator extends Command
 //            return;
 //        }
 //        $planningOutput->outputWithGames($bestPlanning, true);
+    }
+
+    protected function addStructureToLog(Tournament $tournament, Structure $structure): void
+    {
+        try {
+            (new StructureOutput($this->getLogger()))->output($structure);
+        } catch (Exception $exception) {
+            $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
+        }
     }
 }

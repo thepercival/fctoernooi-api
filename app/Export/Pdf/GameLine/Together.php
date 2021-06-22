@@ -25,8 +25,9 @@ class Together extends GameLineBase
         parent::initColumnWidths();
     }
 
-    protected function getPlaceWidth(int $nrOfGamePlaces): float {
-        if( $nrOfGamePlaces > GameLine::MaxNrOfPlacesPerLine) {
+    protected function getPlaceWidth(int $nrOfGamePlaces): float
+    {
+        if ($nrOfGamePlaces > GameLine::MaxNrOfPlacesPerLine) {
             $nrOfGamePlaces = GameLine::MaxNrOfPlacesPerLine;
         }
         $width = $this->getColumnWidth(Column::PlacesAndScore);
@@ -65,7 +66,7 @@ class Together extends GameLineBase
                 $score = $this->getScore($gamePlace);
                 $x = $this->page->drawCell($score, $x, $y, $scoreWidth, $height, Align::Right, 'black');
             }
-            if( $placeCounter++ % GameLine::MaxNrOfPlacesPerLine === 0 ) {
+            if ($placeCounter++ % GameLine::MaxNrOfPlacesPerLine === 0) {
                 $x = $xStart;
                 $y -= $height;
             }

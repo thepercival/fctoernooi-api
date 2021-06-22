@@ -14,7 +14,8 @@ use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Against as AgainstGame;
-use Sports\Game\Place\Against as AgainstGamePlace;
+use Sports\Round;
+use Sports\Round\Number as RoundNumber;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Score\Together\Repository as TogetherScoreRepository;
 use Sports\Score\Against\Repository as AgainstScoreRepository;
@@ -104,18 +105,18 @@ class GameAction extends Action
         }
     }
 
-    protected function editBase(AgainstGame|TogetherGame $game, AgainstGame|TogetherGame $gameSer ): void {
+    protected function editBase(AgainstGame|TogetherGame $game, AgainstGame|TogetherGame $gameSer): void
+    {
         $poule = $game->getPoule();
         $roundNumber = $poule->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         if ($planningConfig->getEditMode() === PlanningEditMode::Manual) {
             $game->setStartDateTime($gameSer->getStartDateTime());
-            $refereePlaceSer = $gameSer->getRefereePlace();
+            $refereeStructureLocation = $gameSer->getRefereeStructureLocation();
             $refereeSer = $gameSer->getReferee();
-            if ($refereePlaceSer !== null) {
-                $placeLocation = new Place\Location($poule->getNumber(), $refereePlaceSer->getPlaceNr());
-                $place = $poule->getRound()->getPlace($placeLocation);
-                $game->setRefereePlace($place);
+            if ($refereeStructureLocation !== null) {
+                $placeMap = $this->getPlaceMap($roundNumber);
+                $game->setRefereePlace($placeMap[$refereeStructureLocation]);
                 $game->setReferee(null);
             } elseif ($refereeSer !== null) {
                 $referee = $this->getRefereeById($roundNumber->getCompetition(), $refereeSer);
@@ -128,6 +129,21 @@ class GameAction extends Action
                 $game->setField($field);
             }
         }
+    }
+
+    /**
+     * @param RoundNumber $roundNumber
+     * @return array<string, Place>
+     */
+    protected function getPlaceMap(RoundNumber $roundNumber): array
+    {
+        $map = [];
+        foreach ($roundNumber->getRounds() as $round) {
+            foreach ($round->getPlaces() as $place) {
+                $map[$place->getStructureLocation()] = $place;
+            }
+        }
+        return $map;
     }
 
     protected function getRefereeById(Competition $competition, Referee $referee): Referee|null
@@ -198,6 +214,8 @@ class GameAction extends Action
 
         $qualifyService = new QualifyService($poule->getRound());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
+
+        $this->removeQualifiedPlaces($qualifyService->resetQualifiers($pouleToFilter));
         return $qualifyService->setQualifiers($pouleToFilter);
     }
 
@@ -216,7 +234,19 @@ class GameAction extends Action
         return false;
     }
 
-    protected function changeQualifyPlaces(Competition $competition, Poule $poule, int $initialPouleState):void {
+    /**
+     * @param list<Place> $places
+     * @throws Exception
+     */
+    protected function removeQualifiedPlaces(array $places): void
+    {
+        foreach ($places as $place) {
+            $this->placeRepos->save($place);
+        }
+    }
+
+    protected function changeQualifyPlaces(Competition $competition, Poule $poule, int $initialPouleState):void
+    {
         $changedPlaces = $this->getChangedQualifyPlaces($competition, $poule, $initialPouleState);
         foreach ($changedPlaces as $changedPlace) {
             $this->placeRepos->save($changedPlace);

@@ -7,8 +7,8 @@ use SportsHelpers\PlaceRanges;
 
 class CustomPlaceRanges extends PlaceRanges
 {
-    public const MaxNrOfPlacesPerPouleSmall = 16;
-    public const MaxNrOfPlacesPerPouleLarge = 10;
+    public const MaxNrOfPlacesPerPouleSmall = 20;
+    public const MaxNrOfPlacesPerPouleLarge = 12;
     public const MaxNrOfPlacesPerRoundSmall = 40;
     public const MaxNrOfPlacesPerRoundLarge = 128;
 

@@ -68,6 +68,7 @@ class Create extends PlanningCommand
 
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
         $this->addOption('showSuccessful', null, InputOption::VALUE_NONE, 'show successful planning');
+        $this->addOption('disableThrowOnTimeout', null, InputOption::VALUE_NONE, 'show successful planning');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -86,7 +87,9 @@ class Create extends PlanningCommand
                     return 0;
                 }
                 $this->planningInputRepos->reset($planningInput);
-                $this->processPlanning($queueService, $planningInput);
+                $disableThrowOnTimeout = $input->getOption('disableThrowOnTimeout');
+                $disableThrowOnTimeout = is_bool($disableThrowOnTimeout) ? $disableThrowOnTimeout : false;
+                $this->processPlanning($queueService, $planningInput, null, null, $disableThrowOnTimeout);
                 $this->getLogger()->info('planningInput ' . $inputId . ' created');
                 return 0;
             }
@@ -94,7 +97,7 @@ class Create extends PlanningCommand
             $timeoutInSeconds = 295;
             $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
         } catch (\Exception $exception) {
-            if( $this->logger !== null ) {
+            if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
             }
         }
@@ -125,7 +128,7 @@ class Create extends PlanningCommand
                 }
                 $consumer->acknowledge($message);
             } catch (\Exception $exception) {
-                if($this->logger !== null ) {
+                if ($this->logger !== null) {
                     $this->logger->error($exception->getMessage());
                 }
                 $consumer->reject($message);
@@ -136,13 +139,16 @@ class Create extends PlanningCommand
     protected function processPlanning(
         QueueService $queueService,
         PlanningInput $planningInput,
-        Competition $competition = null,
-        int $roundNumberAsValue = null
+        Competition|null $competition,
+        int|null $roundNumberAsValue,
+        bool|null $disableThrowOnTimeout = null
     ): void {
         $planningOutput = new PlanningOutput($this->getLogger());
 
         $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos);
-        // $planningSeeker->disableThrowOnTimeout();
+        if ($disableThrowOnTimeout === true) {
+            $planningSeeker->disableThrowOnTimeout();
+        }
         $planningSeeker->process($planningInput);
         $bestPlanning = $planningInput->getBestPlanning();
         if ($this->showSuccessful === true) {
