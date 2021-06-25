@@ -118,7 +118,7 @@ class RetryTimeout extends PlanningCommand
         $placesPerPouleRange = new SportRange( PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall);
         $structureIterator = new PouleStructureIterator($placesRange, $placesPerPouleRange, new SportRange(1, 64));
         while ($structureIterator->valid()) {
-            // echo PHP_EOL . $structureIterator->current()->toString();
+            // $this->getLogger()->info((string)$structureIterator->current());
             $planningInput = null;
             if ($batchGames) {
                 $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds, $structureIterator->current());
@@ -145,6 +145,9 @@ class RetryTimeout extends PlanningCommand
 
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void
     {
+        $msg = 'new planning(timedout) found for inputid: ' . (string)$planningInput->getId();
+        $msg .= '(' . $planningInput->getUniqueString() . ')';
+        $this->getLogger()->info($msg);
         $stream = fopen('php://memory', 'r+');
         if ($stream === false || $this->mailer === null) {
             return;
@@ -157,8 +160,11 @@ class RetryTimeout extends PlanningCommand
         $planningOutput = new PlanningOutput($loggerOutput);
         $planningOutput->outputInput($planningInput, null, 'is successful');
 
-        $batchOutput = new BatchOutput($loggerOutput);
-        $batchOutput->output($planningInput->getBestPlanning()->createFirstBatch(), 'successful retry planning');
+        $bestPlanning = $planningInput->getBestPlanning();
+
+        $planningOutput = new PlanningOutput($loggerOutput);
+        $planningOutput->outputWithGames($bestPlanning, true);
+        $planningOutput->outputWithTotals($bestPlanning, false);
 
         rewind($stream);
         $emailBody = stream_get_contents($stream/*$handler->getStream()*/);

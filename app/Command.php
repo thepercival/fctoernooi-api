@@ -62,15 +62,13 @@ class Command extends SymCommand
         $handler = new StreamHandler($path, $logLevel);
         $this->logger->pushHandler($handler);
 
-        if ($this->config->getString('environment') === 'production') {
-            $emailSettings = $this->config->getArray('email');
-            $this->logger->pushHandler(
-                new NativeMailerHandler(
-                    $emailSettings['admin'],
-                    ((string)$this->getName()) . ' : error',
-                    $emailSettings['from']
-                )
-            );
-        }
+        $emailSettings = $this->config->getArray('email');
+        $this->logger->pushHandler(
+            new MailHandler(
+                $emailSettings['admin'],
+                ((string)$this->getName()) . ' : error',
+                $emailSettings['from']
+            )
+        );
     }
 }

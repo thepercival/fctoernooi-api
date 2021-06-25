@@ -60,8 +60,8 @@ class CreateDefaults extends PlanningCommand
             $this->getPlacesRange($input),
             new SportRange(PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall),
             new SportRange(1, 64),
-            new SportRange(1, 10),// referees
-            new SportRange(0, 10),// fields
+            new SportRange(0, 10),// referees
+            new SportRange(1, 10),// fields
             new SportRange(1, 2),// gameAmount
         );
         $recreate = $input->getOption('recreate');

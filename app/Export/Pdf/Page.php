@@ -61,13 +61,13 @@ abstract class Page extends Zend_Pdf_Page
     }
 
     /**
-     * @param float $lineWidth
+     * @param float $width
      * @return self
      */
-    public function setLineWidth($lineWidth): self
+    public function setLineWidth($width): self
     {
-        parent::setLineWidth($lineWidth);
-        $this->lineWidth = $lineWidth;
+        parent::setLineWidth($width);
+        $this->lineWidth = $width;
         return $this;
     }
 

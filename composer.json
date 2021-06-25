@@ -29,7 +29,7 @@
     "selective/config": "^1.1",
     "slim/psr7": "^1.1",
     "slim/slim": "^4.3",
-    "slim/php-view": "^2.2",
+    "slim/php-view": "^3.0",
     "symfony/yaml": "^5.0",
     "symfony/property-access": "^5.0",
     "symfony/console": "^5.0",
@@ -39,7 +39,7 @@
     "tuupola/base62": "^2.0",
     "tuupola/slim-basic-auth": "^3.2",
     "tuupola/slim-jwt-auth": "^3.4",
-    "vlucas/phpdotenv": "^4.1",
+    "vlucas/phpdotenv": "^5.3",
     "zf1s/zend-pdf": "^1.13",
     "slim/twig-view": "^3.1",
     "enqueue/amqp-lib": "^0.10"

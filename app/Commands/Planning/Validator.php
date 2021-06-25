@@ -86,12 +86,12 @@ class Validator extends Command
 
         $planningInputs = $this->getPlanningInputsToValidate($input);
         foreach ($planningInputs as $planningInput) {
-            (new PlanningOutput($this->getLogger()))->outputInput($planningInput);
+            (new PlanningOutput($this->getLogger()))->outputInput($planningInput, 'validating.. ');
             try {
                 $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
             } catch (Exception $exception) {
-                if( $this->logger !== null ) {
-                    $this->logger->error($exception->getMessage());
+                if ($this->logger !== null) {
+                    $this->logger->error('inputid: ' . (string)$planningInput->getId() . ' => ' . $exception->getMessage());
                 }
                 if ($this->exitAtFirstInvalid) {
                     return 0;
