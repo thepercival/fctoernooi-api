@@ -71,13 +71,15 @@ final class ConfigAction extends Action
 
     protected function removeNext(RoundNumber $roundNumber): void
     {
-        while ($next = $roundNumber->getNext()) {
-            $planningConfig = $next->getPlanningConfig();
-            if ($planningConfig === null) {
-                continue;
-            }
+        $next = $roundNumber->getNext();
+        if ($next === null) {
+            return;
+        }
+        $planningConfig = $next->getPlanningConfig();
+        if ($planningConfig !== null) {
             $next->setPlanningConfig(null);
             $this->planningConfigRepos->remove($planningConfig);
         }
+        $this->removeNext($next);
     }
 }

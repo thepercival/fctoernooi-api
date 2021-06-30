@@ -2,30 +2,32 @@
 
 declare(strict_types=1);
 
+use Monolog\Logger;
+
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
 return [
-    'environment' => getenv('ENVIRONMENT'),
-    'displayErrorDetails' => (getenv('ENVIRONMENT') === "development"),
+    'environment' => $_ENV['ENVIRONMENT'],
+    'displayErrorDetails' => $_ENV['ENVIRONMENT'] === 'development',
     // Renderer settings
     'renderer' => [
         'template_path' => __DIR__ . '/../templates/',
-        'export_secret' => getenv('EXPORT_SECRET')
+        'export_secret' => $_ENV['EXPORT_SECRET']
     ],
     // Serializer(JMS)
     'serializer' => [
         'cache_dir' => __DIR__ . '/../cache/serializer',
         'yml_dir' => [
-            "SportsHelpers" => __DIR__ . '/../vendor/thepercival/php-sports-helpers/serialization/yml',
-            "Sports" => __DIR__ . '/../vendor/thepercival/php-sports/serialization/yml',
-            "FCToernooi" => __DIR__ . '/../serialization/yml'
+            'SportsHelpers' => __DIR__ . '/../vendor/thepercival/php-sports-helpers/serialization/yml',
+            'Sports' => __DIR__ . '/../vendor/thepercival/php-sports/serialization/yml',
+            'FCToernooi' => __DIR__ . '/../serialization/yml'
         ],
     ],
     // Monolog settings
     'logger' => [
         'path' => __DIR__ . '/../logs/',
-        'level' => (getenv('ENVIRONMENT') === "development" ? \Monolog\Logger::DEBUG : \Monolog\Logger::ERROR),
+        'level' => ($_ENV['ENVIRONMENT'] === 'development' ? Logger::DEBUG : Logger::ERROR),
     ],
     'router' => [
         'cache_file' => __DIR__ . '/../cache/router',
@@ -39,16 +41,16 @@ return [
                 __DIR__ . '/../vendor/thepercival/php-sports/db/doctrine-mappings',
                 __DIR__ . '/../db/doctrine-mappings'
             ],
-            'dev_mode' => (getenv('ENVIRONMENT') === "development"),
+            'dev_mode' => ($_ENV['ENVIRONMENT'] === 'development'),
             'proxy_dir' => __DIR__ . '/../cache/proxies',
             'cache' => null,
         ],
         'connection' => [
             'driver' => 'pdo_mysql',
-            'host' => getenv('DB_HOST'),
-            'dbname' => getenv('DB_NAME'),
-            'user' => getenv('DB_USERNAME'),
-            'password' => getenv('DB_PASSWORD'),
+            'host' => $_ENV['DB_HOST'],
+            'dbname' => $_ENV['DB_NAME'],
+            'user' => $_ENV['DB_USERNAME'],
+            'password' => $_ENV['DB_PASSWORD'],
             'charset' => 'utf8mb4',
             'driverOptions' => array(
                 1002 => "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_general_ci'"
@@ -59,25 +61,25 @@ return [
         ),
     ],
     'auth' => [
-        'jwtsecret' => getenv('JWT_SECRET'),
-        'jwtalgorithm' => getenv('JWT_ALGORITHM'),
-        'activationsecret' => getenv('ACTIVATION_SECRET'),
+        'jwtsecret' => $_ENV['JWT_SECRET'],
+        'jwtalgorithm' => $_ENV['JWT_ALGORITHM'],
+        'activationsecret' => $_ENV['ACTIVATION_SECRET'],
     ],
     'www' => [
-        'wwwurl' => getenv('WWW_URL'),
-        'wwwurl-localpath' => realpath(__DIR__ . "/../../") . "/fctoernooi/dist/",
-        'apiurl' => getenv('API_URL'),
-        "apiurl-localpath" => realpath(__DIR__ . '/../public/') . '/',
+        'wwwurl' => $_ENV['WWW_URL'],
+        'wwwurl-localpath' => realpath(__DIR__ . '/../../') . '/fctoernooi/dist/',
+        'apiurl' => $_ENV['API_URL'],
+        'apiurl-localpath' => realpath(__DIR__ . '/../public/') . '/',
     ],
     'email' => [
-        'from' => "info@fctoernooi.nl",
-        'fromname' => "FCToernooi",
-        'admin' => "fctoernooi2018@gmail.com",
+        'from' => 'info@fctoernooi.nl',
+        'fromname' => 'FCToernooi',
+        'admin' => 'fctoernooi2018@gmail.com',
         'mailtrap' => [
             'smtp_host' => 'smtp.mailtrap.io',
             'smtp_port' => 2525,
-            'smtp_user' => getenv('MAILTRAP_USER'),
-            'smtp_pass' => getenv('MAILTRAP_PASSWORD')
+            'smtp_user' => $_ENV['MAILTRAP_USER'],
+            'smtp_pass' => $_ENV['MAILTRAP_PASSWORD']
         ]
     ],
     'images' => [
@@ -93,6 +95,6 @@ return [
         'user' => 'guest',
         'pass' => 'guest',
         'persisted' => false,
-        'suffix' => getenv('QUEUE_NAME_SUFFIX')
+        'suffix' => $_ENV['QUEUE_NAME_SUFFIX']
     ]
 ];

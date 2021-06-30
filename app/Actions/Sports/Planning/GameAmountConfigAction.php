@@ -92,13 +92,15 @@ final class GameAmountConfigAction extends Action
 
     protected function removeNext(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
     {
-        while ($next = $roundNumber->getNext()) {
-            $gameAmountConfig = $next->getGameAmountConfig($competitionSport);
-            if ($gameAmountConfig === null) {
-                continue;
-            }
+        $next = $roundNumber->getNext();
+        if ($next === null) {
+            return;
+        }
+        $gameAmountConfig = $next->getGameAmountConfig($competitionSport);
+        if ($gameAmountConfig !== null) {
             $next->getGameAmountConfigs()->removeElement($gameAmountConfig);
             $this->gameAmountConfigRepos->remove($gameAmountConfig);
         }
+        $this->removeNext($next, $competitionSport);
     }
 }
