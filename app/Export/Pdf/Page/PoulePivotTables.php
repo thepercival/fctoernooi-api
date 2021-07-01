@@ -61,13 +61,14 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         return 0;
     }
 
-    public function drawRoundNumberHeader(RoundNumber $roundNumber, float $y): float
+    public function drawPageStartHeader(RoundNumber $roundNumber, CompetitionSport $competitionSport,  float $y): float
     {
         $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
         $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
         $x = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
         $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $subHeader .= ' - ' . $competitionSport->getSport()->getName();
         $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
         $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
         return $y - (2 * $fontHeightSubHeader);

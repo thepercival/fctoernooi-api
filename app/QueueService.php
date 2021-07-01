@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App;
 
 use Enqueue\AmqpLib\AmqpConnectionFactory;
+use Exception;
 use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpContext;
 use Interop\Amqp\AmqpTopic;
@@ -30,7 +31,7 @@ class QueueService implements CreatePlanningsEvent
     public function __construct(private array $amqpOptions)
     {
         if (array_key_exists('suffix', $amqpOptions) === false) {
-            throw new \Exception('option queue:suffix is missing', E_ERROR);
+            throw new Exception('option queue:suffix is missing', E_ERROR);
         }
         $this->queueSuffix = $amqpOptions['suffix'];
         unset($amqpOptions['suffix']);
@@ -46,7 +47,7 @@ class QueueService implements CreatePlanningsEvent
         $exchange = $context->createTopic('amq.direct');
         // $topic->setType(AmqpTopic::TYPE_DIRECT);
         $exchange->addFlag(AmqpTopic::FLAG_DURABLE);
-////$topic->setArguments(['alternate-exchange' => 'foo']);
+        ////$topic->setArguments(['alternate-exchange' => 'foo']);
 
 
         $queue = $this->getQueue();
@@ -54,17 +55,17 @@ class QueueService implements CreatePlanningsEvent
 
         $context->bind(new AmqpBind($exchange, $queue));
 
-        $content = ["inputId" => $input->getId()];
-        if ($competition !== null) {
-            $content["competitionId"] = $competition->getId();
-            $content["name"] = $competition->getLeague()->getName();
-        }
-        if ($startRoundNumber !== null) {
-            $content["roundNumber"] = $startRoundNumber;
+        $content = ['inputId' => $input->getId()];
+        $priority = null;
+        if ($competition !== null && $startRoundNumber !== null) {
+            $content['competitionId'] = $competition->getId();
+            $content['name'] = $competition->getLeague()->getName();
+            $content['roundNumber'] = $startRoundNumber;
+            $priority = 5;
         }
 
         $message = $context->createMessage(json_encode($content));
-        $context->createProducer()->send($queue, $message);
+        $context->createProducer()->setPriority($priority)->send($queue, $message);
     }
 
     public function receive(callable $callable, int $timeoutInSeconds): void
@@ -88,6 +89,7 @@ class QueueService implements CreatePlanningsEvent
     {
         /** @var AmqpQueue $queue */
         $queue = $this->getContext()->createQueue('process-planning-queue-' . $this->queueSuffix);
+        $queue->setArguments(['x-max-priority' => 10]);
         $queue->addFlag(AmqpQueue::FLAG_DURABLE);
         return $queue;
     }

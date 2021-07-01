@@ -6,7 +6,7 @@ namespace App\Export\Pdf\GameLine;
 use App\Export\Pdf\GameLine;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\GameLine\Column\Against as AgainstColumn;
-use Sports\Game;
+use Sports\Game\Phase as GamePhase;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use SportsHelpers\Against\Side as AgainstSide;
@@ -73,7 +73,7 @@ class Against extends GameLineBase
         if ($finalScore === null) {
             return $score;
         }
-        $extension = $game->getFinalPhase() === Game::PHASE_EXTRATIME ? '*' : '';
+        $extension = $game->getFinalPhase() === GamePhase::ExtraTime ? '*' : '';
         return $finalScore->getHome() . $score . $finalScore->getAway() . $extension;
     }
 }
