@@ -19,6 +19,7 @@ use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
 use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
+use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
 use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
 use App\Export\Pdf\Page\GameNotes\Single as SingleGameNotesPage;
 use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
@@ -375,6 +376,9 @@ class Document extends Zend_Pdf
         float $y = null
     ): void {
         if ($roundNumber->needsRanking()) {
+            if ($roundNumber->getCompetition()->hasMultipleSports()) {
+                $this->drawPoulePivotTablesMultipleSports($roundNumber);
+            }
             $biggestPoule = $roundNumber->createPouleStructure()->getBiggestPoule();
             $gameAmountConfigs = $roundNumber->getValidGameAmountConfigs();
             foreach ($gameAmountConfigs as $gameAmountConfig) {
@@ -401,6 +405,32 @@ class Document extends Zend_Pdf
         $nextRoundNumber = $roundNumber->getNext();
         if ($nextRoundNumber !== null) {
             $this->drawPoulePivotTables($nextRoundNumber, $page, $y);
+        }
+    }
+
+    protected function drawPoulePivotTablesMultipleSports(RoundNumber $roundNumber): void {
+        if (!$roundNumber->needsRanking()) {
+            return;
+        }
+        $biggestPoule = $roundNumber->createPouleStructure()->getBiggestPoule();
+        $page = $this->createPagePoulePivotTablesMultipleSports($biggestPoule);
+        $y = $page->drawHeader('pouledraaitabel');
+        $y = $page->drawPageStartHeader($roundNumber, $y);
+
+        foreach ($roundNumber->getRounds() as $round) {
+            foreach ($round->getPoules() as $poule) {
+                if (!$poule->needsRanking()) {
+                    continue;
+                }
+                $pouleHeight = $page->getPouleHeight($poule);
+                if ($y - $pouleHeight < $page->getPageMargin()) {
+                    $nrOfPlaces = $poule->getPlaces()->count();
+                    $page = $this->createPagePoulePivotTablesMultipleSports($nrOfPlaces);
+                    $y = $page->drawHeader('pouledraaitabel');
+                    $y = $page->drawPageStartHeader($roundNumber, $y);
+                }
+                $y = $page->draw($poule, $y);
+            }
         }
     }
 
@@ -451,7 +481,7 @@ class Document extends Zend_Pdf
         foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
             $sportVariant = $competitionSport->createVariant();
             if ($sportVariant instanceof AllInOneGameSportVariant) {
-                if( $this->getMaxNrOfPlacesPerPoule($roundNumber) > 3) {
+                if ($this->getMaxNrOfPlacesPerPoule($roundNumber) > 3) {
                     return Zend_Pdf_Page::SIZE_A4_LANDSCAPE;
                 }
             } elseif ($sportVariant->getNrOfGamePlaces() > 3) {
@@ -497,12 +527,27 @@ class Document extends Zend_Pdf
     }
 
     /**
+     * @param int $maxNrOfPlaces
+     * @return MultipleSportsPoulePivotTablePage
+     */
+    protected function createPagePoulePivotTablesMultipleSports(
+        int $maxNrOfPlaces
+    ): MultipleSportsPoulePivotTablePage {
+        $dimension = $this->getPoulePivotPageDimension(null, $maxNrOfPlaces);
+        $page = new MultipleSportsPoulePivotTablePage($this, $dimension);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $this->pages[] = $page;
+        return $page;
+    }
+
+    /**
      * @param SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant
      * @param int $maxNrOfPlaces
      * @return AgainstPoulePivotTablePage|TogetherPoulePivotTablePage
      */
     protected function createPagePoulePivotTables(
-        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant, int $maxNrOfPlaces
+        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant,
+        int $maxNrOfPlaces
     ): AgainstPoulePivotTablePage | TogetherPoulePivotTablePage {
         $dimension = $this->getPoulePivotPageDimension($sportVariant, $maxNrOfPlaces);
         if ($sportVariant instanceof AgainstSportVariant) {
@@ -516,10 +561,10 @@ class Document extends Zend_Pdf
     }
 
     protected function getPoulePivotPageDimension(
-        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant $sportVariant,
+        SingleSportVariant|AgainstSportVariant|AllInOneGameSportVariant|null $sportVariant,
         int $maxNrOfPlaces
     ): string {
-        if ($sportVariant instanceof AgainstSportVariant) {
+        if ($sportVariant === null || $sportVariant instanceof AgainstSportVariant) {
             $nrOfColumns = $maxNrOfPlaces;
         } else {
             $nrOfColumns = $sportVariant->getNrOfGamesPerPlace();

@@ -287,6 +287,8 @@ return function (App $app): void {
                             $group->post('/create', PlanningAction::class . ':create');
                             $group->options('/reschedule', PlanningAction::class . ':options');
                             $group->post('/reschedule', PlanningAction::class . ':reschedule');
+                            $group->options('/progress', PlanningAction::class . ':options');
+                            $group->get('/progress', PlanningAction::class . ':progress');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class

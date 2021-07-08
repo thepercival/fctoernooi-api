@@ -14,8 +14,9 @@ use Sports\NameService;
 use Sports\Poule;
 use Sports\Game\Place\Against as AgainstGamePlace;
 use Sports\Game\Against as AgainstGame;
+use Sports\Game\Together as TogetherGame;
 use Sports\State;
-use Sports\Round\Number as RoundNumber;
+use Sports\Competition\Sport as CompetitionSport;
 use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
 use Sports\Score\Config\Service as ScoreConfigService;
 use Zend_Pdf_Color_Html;
@@ -47,14 +48,15 @@ class Against extends PoulePivotTablesPage
 
     protected function drawPouleHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $y): float
     {
-        return parent::drawPouleHeaderHelper($poule, $gameAmountConfig, $y, $this->getVersusHeaderDegrees($poule));
+        $nrOfItems = $poule->getPlaces()->count();
+        return parent::drawPouleHeaderHelper($poule, $gameAmountConfig, $y, $this->getVersusHeaderDegrees($nrOfItems));
     }
 
     protected function drawVersusHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
         $nrOfPlaces = $poule->getPlaces()->count();
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
-        $degrees = $this->getVersusHeaderDegrees($poule);
+        $degrees = $this->getVersusHeaderDegrees($nrOfPlaces);
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         $nVersus = 0;
@@ -72,7 +74,7 @@ class Against extends PoulePivotTablesPage
     protected function drawVersusCell(Place $place, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
         $poule = $place->getPoule();
-        $games = $place->getAgainstGames();
+        $games = $place->getAgainstGames($gameAmountConfig->getCompetitionSport());
         $columnWidth = $this->versusColumnsWidth / $poule->getPlaces()->count();
 
         // draw versus
@@ -88,6 +90,7 @@ class Against extends PoulePivotTablesPage
         }
         return $x;
     }
+
 
     /**
      * @param Place $homePlace
@@ -144,24 +147,12 @@ class Against extends PoulePivotTablesPage
 
         // header row
         $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
-        $degrees = $this->getVersusHeaderDegrees($poule);
+        $degrees = $this->getVersusHeaderDegrees($nrOfPlaces);
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         // places
         $height += $this->rowHeight * $nrOfPlaces;
 
         return $height;
-    }
-
-    protected function getVersusHeaderDegrees(Poule $poule): int
-    {
-        $nrOfPlaces = $poule->getPlaces()->count();
-        if ($nrOfPlaces <= 3) {
-            return 0;
-        }
-        if ($nrOfPlaces >= 6) {
-            return 90;
-        }
-        return 45;
     }
 }

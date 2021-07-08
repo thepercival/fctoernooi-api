@@ -49,7 +49,7 @@ class TournamentCopier
         $newCompetition = (new CompetitionService())->create(
             $league,
             $season,
-            $fromCompetition->getRankingRuleSet(),
+            $fromCompetition->getAgainstRuleSet(),
             $fromCompetition->getStartDateTime()
         );
 

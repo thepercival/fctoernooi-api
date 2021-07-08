@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
 use Sports\Planning\EditMode;
+use SportsPlanning\Planning;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use Sports\Round\Number as RoundNumber;
 use FCToernooi\Tournament;
@@ -49,9 +50,31 @@ final class PlanningAction extends Action
      */
     public function fetch(Request $request, Response $response, array $args): Response
     {
-        $structure = $this->getStructureFromRequest($request, $args);
-        $json = $this->serializer->serialize($structure, 'json');
+        $roundNumber = $this->getRoundNumberFromRequest($request, $args);
+        $json = $this->serializer->serialize($roundNumber->getPoules(), 'json');
         return $this->respondWithJson($response, $json);
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     * @throws Exception
+     */
+    public function progress(Request $request, Response $response, array $args): Response
+    {
+        $roundNumber = $this->getRoundNumberFromRequest($request, $args);
+        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
+        $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
+        $input = $this->inputRepos->getFromInput($defaultInput);
+        $progressPerc = 0;
+        if ($input !== null) {
+            $nrToBeProcessed = $input->getPlanningsWithState(Planning::STATE_TOBEPROCESSED)->count();
+            $total = $input->getPlannings()->count();
+            $progressPerc = (int)((($total - $nrToBeProcessed) / $total) * 100);
+        }
+        return $this->respondWithJson($response, json_encode(['progress' => $progressPerc]));
     }
 
     /**

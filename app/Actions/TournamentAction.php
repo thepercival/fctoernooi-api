@@ -201,7 +201,7 @@ final class TournamentAction extends Action
             $user = $request->getAttribute('user');
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
-            $ruleSet = $tournamentSer->getCompetition()->getRankingRuleSet();
+            $ruleSet = $tournamentSer->getCompetition()->getAgainstRuleSet();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
             $tournamentService = new TournamentService();
             $tournament = $tournamentService->changeBasics(

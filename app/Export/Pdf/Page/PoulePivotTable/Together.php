@@ -7,17 +7,11 @@ use App\Export\Pdf\Document;
 use App\Export\Pdf\Align;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
-use Sports\Ranking\Item\Round as RoundRankingItem;
-use SportsHelpers\Against\Side as AgainstSide;
+use Sports\Competition\Sport as CompetitionSport;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
-use Sports\NameService;
 use Sports\Poule;
 use Sports\Game\Place\Together as TogetherGamePlace;
-use Sports\Game\Against as AgainstGame;
 use Sports\State;
-use Sports\Round\Number as RoundNumber;
-use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
-use Sports\Score\Config\Service as ScoreConfigService;
 
 class Together extends PoulePivotTablesPage
 {
@@ -74,15 +68,15 @@ class Together extends PoulePivotTablesPage
     {
         $columnWidth = $this->versusColumnsWidth / $gameAmountConfig->getAmount();
         for ($gameRoundNumber = 1 ; $gameRoundNumber <= $gameAmountConfig->getAmount() ; $gameRoundNumber++) {
-            $score = $this->getScore($place, $gameRoundNumber);
+            $score = $this->getScore($place, $gameAmountConfig->getCompetitionSport(), $gameRoundNumber);
             $x = $this->drawCellCustom($score, $x, $y, $columnWidth, $this->rowHeight, Align::Center);
         }
         return $x;
     }
 
-    protected function getScore(Place $place, int $gameRoundNumber): string
+    protected function getScore(Place $place, CompetitionSport $competitionSport, int $gameRoundNumber): string
     {
-        $gamePlace = $this->getGamePlace($place, $gameRoundNumber);
+        $gamePlace = $this->getGamePlace($place, $competitionSport, $gameRoundNumber);
         if ($gamePlace === null) {
             return '';
         }
@@ -92,10 +86,10 @@ class Together extends PoulePivotTablesPage
         return (string)$this->scoreConfigService->getFinalTogetherScore($gamePlace);
     }
 
-    protected function getGamePlace(Place $place, int $gameRoundNumber): TogetherGamePlace|null
+    protected function getGamePlace(Place $place, CompetitionSport $competitionSport, int $gameRoundNumber): TogetherGamePlace|null
     {
         $foundGames = array_filter(
-            $place->getTogetherGamePlaces(),
+            $place->getTogetherGamePlaces($competitionSport),
             function (TogetherGamePlace $gamePlace) use ($gameRoundNumber): bool {
                 return $gamePlace->getGameRoundNumber() === $gameRoundNumber;
             }
