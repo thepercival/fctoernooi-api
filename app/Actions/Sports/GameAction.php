@@ -110,24 +110,26 @@ class GameAction extends Action
         $poule = $game->getPoule();
         $roundNumber = $poule->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
-        if ($planningConfig->getEditMode() === PlanningEditMode::Manual) {
-            $game->setStartDateTime($gameSer->getStartDateTime());
-            $refereeStructureLocation = $gameSer->getRefereeStructureLocation();
-            $refereeSer = $gameSer->getReferee();
-            if ($refereeStructureLocation !== null) {
-                $placeMap = $this->getPlaceMap($roundNumber);
-                $game->setRefereePlace($placeMap[$refereeStructureLocation]);
-                $game->setReferee(null);
-            } elseif ($refereeSer !== null) {
-                $referee = $this->getRefereeById($roundNumber->getCompetition(), $refereeSer);
-                $game->setReferee($referee);
-                $game->setRefereePlace(null);
-            }
-            $fieldSer = $gameSer->getField();
-            if ($fieldSer !== null) {
-                $field = $this->getFieldById($game->getCompetitionSport(), $fieldSer);
-                $game->setField($field);
-            }
+        if ($planningConfig->getEditMode() !== PlanningEditMode::Manual) {
+            return;
+        }
+
+        $game->setStartDateTime($gameSer->getStartDateTime());
+        $refereeStructureLocation = $gameSer->getRefereeStructureLocation();
+        $refereeSer = $gameSer->getReferee();
+        if ($refereeStructureLocation !== null) {
+            $placeMap = $this->getPlaceMap($roundNumber);
+            $game->setRefereePlace($placeMap[$refereeStructureLocation]);
+            $game->setReferee(null);
+        } elseif ($refereeSer !== null) {
+            $referee = $this->getRefereeById($roundNumber->getCompetition(), $refereeSer);
+            $game->setReferee($referee);
+            $game->setRefereePlace(null);
+        }
+        $fieldSer = $gameSer->getField();
+        if ($fieldSer !== null) {
+            $field = $this->getFieldById($game->getCompetitionSport(), $fieldSer);
+            $game->setField($field);
         }
     }
 
