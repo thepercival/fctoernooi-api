@@ -64,10 +64,6 @@ class Service
 
         $salt = bin2hex(random_bytes(15));
         $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
-        /** @phpstan-ignore-next-line */
-        if (!is_string($hashedPassword)) {
-            throw new Exception('er kan geen wachtwoord-hash gemaakt worden', E_ERROR);
-        }
         $user = new User($emailaddress, $salt, $hashedPassword);
 
         $this->userRepos->save($user);
@@ -199,10 +195,6 @@ EOT;
             throw new Exception('het wachtwoord kan niet gewijzigd worden, de wijzigingstermijn is voorbij');
         }
         $passwordHash = password_hash($user->getSalt() . $password, PASSWORD_DEFAULT);
-        /** @phpstan-ignore-next-line */
-        if (is_string($passwordHash) === false) {
-            throw new Exception('er kan geen wachtwoord-hash gemaakt worden', E_ERROR);
-        }
         $user->setPassword($passwordHash);
         $user->setForgetpassword(null);
         $this->userRepos->save($user);
