@@ -30,7 +30,7 @@ class Command extends SymCommand
     protected function configure(): void
     {
         $this->addOption('logtofile', null, InputOption::VALUE_NONE, 'logtofile?');
-        $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '100');
+        $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '' . Logger::INFO);
     }
 
     protected function getLogger(): LoggerInterface {
