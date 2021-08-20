@@ -12,7 +12,6 @@ use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Selective\Config\Configuration;
-use Sports\Game\Order as GameOrder;
 use Sports\Planning\EditMode;
 use SportsPlanning\Planning;
 use SportsPlanning\Planning\Repository as PlanningRepository;
@@ -103,7 +102,6 @@ final class PlanningAction extends Action
                 $this->roundNumberRepos
             );
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
-            $x = $startRoundNumber->getGames(GameOrder::ByPoule);
             $queueService = new QueueService($this->config->getArray('queue'));
             $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak());
 
