@@ -218,12 +218,9 @@ class Create extends PlanningCommand
 
 //        $refreshDbRoundNumber = function (RoundNumber $roundNumberParam) use (&$refreshDbRoundNumber): void {
         $this->entityManager->refresh($roundNumber/*$roundNumberParam*/);
-        $x = $competition->getReferees()->count();
-
         foreach( $roundNumber->getPoules() as $poule ) {
             $this->entityManager->refresh($poule);
         }
-        $y = $competition->getReferees()->count();
         $planningConfig =$roundNumber->getPlanningConfig();
         if ($planningConfig !== null) {
             $this->entityManager->refresh($planningConfig);

@@ -134,6 +134,9 @@ final class GameAgainstAction extends GameAction
             }
 
             $game = $this->getGameFromInput($args, $poule);
+            if (count($poule->getGames()) < 2) {
+                throw new Exception("de wedstrijd kan niet verwijderd worden omdat het de laatste poule-wedstrijd is", E_ERROR);
+            }
 
             /** @var AgainstGame $game */
             $poule->getAgainstGames()->removeElement($game);

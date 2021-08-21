@@ -72,6 +72,15 @@ class GameAction extends Action
             /** @var TogetherGame $gameSer */
             $gameSer = $this->serializer->deserialize($this->getRawData($request), TogetherGame::class, 'json');
 
+            /* --------------------------  ------------------ */
+
+            /* Je kan nu geen againstGames aanmaken in de code */
+            /* De vraag is als alles blijft werken, wanneer in manual mode */
+            /* Dus eerst gewoon toelaten en daarna kijken als het werkt */
+            /* Voor nu alleen kunnen toevoegen in de client bij together */
+            /* --------------------------  ------------------ */
+
+
             $competitionSport = $this->competitionSportRepos->find($gameSer->getCompetitionSport()->getId());
             if ($competitionSport === null) {
                 throw new Exception("de sport van de wedstrijd kan niet gevonden worden", E_ERROR);

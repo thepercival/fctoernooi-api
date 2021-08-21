@@ -22,6 +22,7 @@ use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Score\Creator as GameScoreCreator;
 use Sports\Game\Together as TogetherGame;
+use Sports\Planning\EditMode as PlanningEditMode;
 
 final class GameTogetherAction extends GameAction
 {
@@ -110,6 +111,40 @@ final class GameTogetherAction extends GameAction
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function remove(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Competition $competition */
+            $competition = $request->getAttribute("tournament")->getCompetition();
+
+            $poule = $this->getPouleFromInput($request, $competition);
+
+            $planningConfig = $poule->getRound()->getNumber()->getValidPlanningConfig();
+            if ($planningConfig->getEditMode() === PlanningEditMode::Auto) {
+                throw new Exception("de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat", E_ERROR);
+            }
+
+            $game = $this->getGameFromInput($args, $poule);
+            if (count($poule->getGames()) < 2) {
+                throw new Exception("de wedstrijd kan niet verwijderd worden omdat het de laatste poule-wedstrijd is", E_ERROR);
+            }
+
+            /** @var TogetherGame $game */
+            $poule->getTogetherGames()->removeElement($game);
+            $this->gameRepos->remove($game);
+
+            return $response->withStatus(200);
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
