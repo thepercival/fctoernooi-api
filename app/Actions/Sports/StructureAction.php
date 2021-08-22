@@ -97,7 +97,7 @@ final class StructureAction extends Action
             try {
                 $structure = $this->structureRepos->getStructure($competition);
                 $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
-            } catch (Exception) {
+            } catch (Exception $e) {
                 $this->structureRepos->add($newStructure, $roundNumberAsValue);
             }
 

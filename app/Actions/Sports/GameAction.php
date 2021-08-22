@@ -50,67 +50,23 @@ class GameAction extends Action
         parent::__construct($logger, $serializer);
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array<string, int|string> $args
-     * @return Response
-     */
-    public function add(Request $request, Response $response, array $args): Response
+    protected function addBase(AgainstGame|TogetherGame $game, AgainstGame|TogetherGame $gameSer): void
     {
-        try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
-
-            $poule = $this->getPouleFromInput($request, $competition);
-
-            $planningConfig = $poule->getRound()->getNumber()->getValidPlanningConfig();
-            if ($planningConfig->getEditMode() === PlanningEditMode::Auto) {
-                throw new Exception("de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat", E_ERROR);
-            }
-
-            /** @var TogetherGame $gameSer */
-            $gameSer = $this->serializer->deserialize($this->getRawData($request), TogetherGame::class, 'json');
-
-            /* --------------------------  ------------------ */
-
-            /* Je kan nu geen againstGames aanmaken in de code */
-            /* De vraag is als alles blijft werken, wanneer in manual mode */
-            /* Dus eerst gewoon toelaten en daarna kijken als het werkt */
-            /* Voor nu alleen kunnen toevoegen in de client bij together */
-            /* --------------------------  ------------------ */
-
-
-            $competitionSport = $this->competitionSportRepos->find($gameSer->getCompetitionSport()->getId());
-            if ($competitionSport === null) {
-                throw new Exception("de sport van de wedstrijd kan niet gevonden worden", E_ERROR);
-            }
-            $game = new TogetherGame($poule, $gameSer->getBatchNr(), $gameSer->getStartDateTime(), $competitionSport);
-            $game->setState($gameSer->getState());
-            foreach ($gameSer->getPlaces() as $gamePlaceSer) {
-                $place = $poule->getPlace($gamePlaceSer->getPlace()->getPlaceNr());
-                new TogetherGamePlace($game, $place, $gamePlaceSer->getGameRoundNumber());
-            }
-            $refereePlaceSer = $gameSer->getRefereePlace();
-            $refereeSer = $gameSer->getReferee();
-            if ($refereePlaceSer !== null) {
-                $place = $poule->getRound()->getPlace($refereePlaceSer);
-                $game->setRefereePlace($place);
-            } elseif ($refereeSer !== null) {
-                $referee = $this->getRefereeById($competition, $refereeSer);
-                $game->setReferee($referee);
-            }
-            $fieldSer = $gameSer->getField();
-            if ($fieldSer !== null) {
-                $field = $this->getFieldById($competitionSport, $fieldSer);
-                $game->setField($field);
-            }
-            $this->gameRepos->save($game);
-
-            $json = $this->serializer->serialize($game, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+        $round = $game->getPoule()->getRound();
+        $game->setState($gameSer->getState());
+        $refereePlaceSer = $gameSer->getRefereePlace();
+        $refereeSer = $gameSer->getReferee();
+        if ($refereePlaceSer !== null) {
+            $place = $round->getPlace($refereePlaceSer);
+            $game->setRefereePlace($place);
+        } elseif ($refereeSer !== null) {
+            $referee = $this->getRefereeById($round->getCompetition(), $refereeSer);
+            $game->setReferee($referee);
+        }
+        $fieldSer = $gameSer->getField();
+        if ($fieldSer !== null) {
+            $field = $this->getFieldById($game->getCompetitionSport(), $fieldSer);
+            $game->setField($field);
         }
     }
 

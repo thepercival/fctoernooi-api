@@ -109,6 +109,7 @@ class Validator extends Command
                 $this->validateGames($tournament, $roundNumber, $competition->getReferees()->count());
             }
         } catch (Exception $exception) {
+            // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
         }
     }
@@ -122,8 +123,7 @@ class Validator extends Command
                 $this->validateGames($tournament, $nextRoundNumber, $nrOfReferees);
             }
         } catch (Exception $exception) {
-            $this->getLogger()->info('invalid roundnumber ' . ((string)$roundNumber->getId()));
-            // $this->showPlanning($tournament, $roundNumber, $nrOfReferees);
+            // $this->getLogger()->info('invalid roundnumber ' . ((string)$roundNumber->getId()));
             throw new Exception($exception->getMessage(), E_ERROR);
         }
     }
@@ -165,7 +165,7 @@ class Validator extends Command
     protected function addStructureToLog(Tournament $tournament, Structure $structure): void
     {
         try {
-            (new StructureOutput($this->getLogger()))->output($structure);
+            // (new StructureOutput($this->getLogger()))->output($structure);
         } catch (Exception $exception) {
             $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
         }

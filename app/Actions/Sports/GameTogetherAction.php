@@ -50,6 +50,43 @@ final class GameTogetherAction extends GameAction
         );
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function add(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Competition $competition */
+            $competition = $request->getAttribute('tournament')->getCompetition();
+
+            $poule = $this->getPouleFromInput($request, $competition);
+
+            $planningConfig = $poule->getRound()->getNumber()->getValidPlanningConfig();
+            if ($planningConfig->getEditMode() === PlanningEditMode::Auto) {
+                throw new Exception('de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat', E_ERROR);
+            }
+
+            /** @var TogetherGame $gameSer */
+            $gameSer = $this->serializer->deserialize($this->getRawData($request), TogetherGame::class, 'json');
+
+            $competitionSport = $this->competitionSportRepos->find($gameSer->getCompetitionSport()->getId());
+            if ($competitionSport === null) {
+                throw new Exception('de sport van de wedstrijd kan niet gevonden worden', E_ERROR);
+            }
+            $game = $this->createGame($poule, $gameSer, $competitionSport);
+            $this->addBase($game, $gameSer);
+            $this->gameRepos->save($game);
+
+            $json = $this->serializer->serialize($game, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
     protected function createGame(Poule $poule, TogetherGame $gameSer, CompetitionSport $competitionSport): TogetherGame
     {
         $game = new TogetherGame($poule, $gameSer->getBatchNr(), $gameSer->getStartDateTime(), $competitionSport);
@@ -71,7 +108,7 @@ final class GameTogetherAction extends GameAction
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
             $initialPouleState = $poule->getState();
@@ -95,7 +132,7 @@ final class GameTogetherAction extends GameAction
                         return $gamePlaceSer;
                     }
                 }
-                throw new \Exception("de pouleplek kon niet gevonden worden", E_ERROR);
+                throw new Exception('de pouleplek kon niet gevonden worden', E_ERROR);
             };
             foreach ($game->getPlaces() as $gamePlace) {
                 $scores = array_values($getSerGamePlace($gamePlace)->getScores()->toArray());
@@ -110,7 +147,7 @@ final class GameTogetherAction extends GameAction
 
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }
@@ -125,18 +162,18 @@ final class GameTogetherAction extends GameAction
     {
         try {
             /** @var Competition $competition */
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            $competition = $request->getAttribute('tournament')->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
 
             $planningConfig = $poule->getRound()->getNumber()->getValidPlanningConfig();
             if ($planningConfig->getEditMode() === PlanningEditMode::Auto) {
-                throw new Exception("de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat", E_ERROR);
+                throw new Exception('de wedstrijd kan niet verwijderd worden omdat automatische modus aan staat', E_ERROR);
             }
 
             $game = $this->getGameFromInput($args, $poule);
             if (count($poule->getGames()) < 2) {
-                throw new Exception("de wedstrijd kan niet verwijderd worden omdat het de laatste poule-wedstrijd is", E_ERROR);
+                throw new Exception('de wedstrijd kan niet verwijderd worden omdat het de laatste poule-wedstrijd is', E_ERROR);
             }
 
             /** @var TogetherGame $game */
