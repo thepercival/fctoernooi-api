@@ -13,10 +13,6 @@ class Competitor extends Identifiable implements SportsCompetitor
 {
     protected string $name;
 
-    protected string|null $abbreviationDep = null;
-    protected string|null $imageUrlDep = null;
-    protected Association|null $associationDep = null;
-
     use Base;
 
     public function __construct(protected Tournament $tournament, int $pouleNr, int $placeNr, string $name)
