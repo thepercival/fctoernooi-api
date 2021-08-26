@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FCToernooi\SerializationHandler;
 
+use DateTimeImmutable;
 use FCToernooi\Tournament;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonDeserializationVisitor;
@@ -13,7 +14,8 @@ use Sports\SerializationHandler\DummyCreator;
 
 class TournamentHandler extends Handler implements SubscribingHandlerInterface
 {
-    public function __construct(protected DummyCreator $dummyCreator) {
+    public function __construct(protected DummyCreator $dummyCreator)
+    {
     }
 
     /**
@@ -37,9 +39,13 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
         array $type,
         Context $context
     ): Tournament {
-        $competition = $this->getProperty($visitor, $fieldValue, "competition", Competition::class);
+        $competition = $this->getProperty($visitor, $fieldValue, 'competition', Competition::class);
         $tournament = new Tournament($competition);
-        $tournament->setPublic($fieldValue["public"]);
+        $tournament->setPublic($fieldValue['public']);
+        if (isset($fieldValue['breakStartDateTime']) && isset($fieldValue['breakStartDateTime'])) {
+            $tournament->setBreakStartDateTime(new DateTimeImmutable($fieldValue['breakStartDateTime']));
+            $tournament->setBreakEndDateTime(new DateTimeImmutable($fieldValue['breakEndDateTime']));
+        }
         return $tournament;
     }
 }

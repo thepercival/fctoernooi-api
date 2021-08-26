@@ -82,7 +82,7 @@ class Validator extends Command
                     $this->addStructureToLog($tournament, $structure);
                 } catch (Exception $exception) {
                     $this->getLogger()->error($exception->getMessage());
-                    if( $structure !== null && count($filter) > 0 ) {
+                    if ($structure !== null && count($filter) > 0) {
                         $this->addStructureToLog($tournament, $structure);
                     }
                 }
@@ -117,7 +117,7 @@ class Validator extends Command
     protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
         try {
-            $this->gamesValidator->validate($roundNumber, $nrOfReferees, $tournament->getBreak());
+            $this->gamesValidator->validate($roundNumber, $nrOfReferees, $tournament->getId() > 4858, $tournament->getBreak());
             $nextRoundNumber = $roundNumber->getNext();
             if ($nextRoundNumber !== null) {
                 $this->validateGames($tournament, $nextRoundNumber, $nrOfReferees);

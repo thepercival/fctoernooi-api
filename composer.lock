@@ -120,16 +120,16 @@
         },
         {
             "name": "composer/package-versions-deprecated",
-            "version": "1.11.99.2",
+            "version": "1.11.99.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/package-versions-deprecated.git",
-                "reference": "c6522afe5540d5fc46675043d3ed5a45a740b27c"
+                "reference": "fff576ac850c045158a250e7e27666e146e78d18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/package-versions-deprecated/zipball/c6522afe5540d5fc46675043d3ed5a45a740b27c",
-                "reference": "c6522afe5540d5fc46675043d3ed5a45a740b27c",
+                "url": "https://api.github.com/repos/composer/package-versions-deprecated/zipball/fff576ac850c045158a250e7e27666e146e78d18",
+                "reference": "fff576ac850c045158a250e7e27666e146e78d18",
                 "shasum": ""
             },
             "require": {
@@ -173,7 +173,7 @@
             "description": "Composer plugin that provides efficient querying for installed package versions (no runtime IO)",
             "support": {
                 "issues": "https://github.com/composer/package-versions-deprecated/issues",
-                "source": "https://github.com/composer/package-versions-deprecated/tree/1.11.99.2"
+                "source": "https://github.com/composer/package-versions-deprecated/tree/1.11.99.3"
             },
             "funding": [
                 {
@@ -189,7 +189,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-24T07:46:03+00:00"
+            "time": "2021-08-17T13:49:14+00:00"
         },
         {
             "name": "dasprid/enum",
@@ -1982,16 +1982,16 @@
         },
         {
             "name": "jms/metadata",
-            "version": "2.5.0",
+            "version": "2.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/metadata.git",
-                "reference": "b5c52549807b2d855b3d7e36ec164c00eb547338"
+                "reference": "a995e6cef6d6f56a6226e1616a519630e2ef0aeb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/metadata/zipball/b5c52549807b2d855b3d7e36ec164c00eb547338",
-                "reference": "b5c52549807b2d855b3d7e36ec164c00eb547338",
+                "url": "https://api.github.com/repos/schmittjoh/metadata/zipball/a995e6cef6d6f56a6226e1616a519630e2ef0aeb",
+                "reference": "a995e6cef6d6f56a6226e1616a519630e2ef0aeb",
                 "shasum": ""
             },
             "require": {
@@ -2040,9 +2040,9 @@
             ],
             "support": {
                 "issues": "https://github.com/schmittjoh/metadata/issues",
-                "source": "https://github.com/schmittjoh/metadata/tree/2.5.0"
+                "source": "https://github.com/schmittjoh/metadata/tree/2.5.1"
             },
-            "time": "2021-03-07T19:20:09+00:00"
+            "time": "2021-08-04T19:32:08+00:00"
         },
         {
             "name": "jms/serializer",
@@ -6127,16 +6127,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.18",
+            "version": "v1.0.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "b89066ce4278360a2aacad44e685ec037b33ac26"
+                "reference": "e38c166723d4ea7c79c1e31beefe7f3e4adb3f98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/b89066ce4278360a2aacad44e685ec037b33ac26",
-                "reference": "b89066ce4278360a2aacad44e685ec037b33ac26",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/e38c166723d4ea7c79c1e31beefe7f3e4adb3f98",
+                "reference": "e38c166723d4ea7c79c1e31beefe7f3e4adb3f98",
                 "shasum": ""
             },
             "require": {
@@ -6197,9 +6197,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.18"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.19"
             },
-            "time": "2021-08-23T21:09:59+00:00"
+            "time": "2021-08-26T13:13:05+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",

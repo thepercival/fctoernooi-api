@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -71,21 +70,9 @@ class TranslationService
             {
                 return 'honkbal';
             }
-            case SportCustom::BadmintonDouble:
+            case SportCustom::Padel:
             {
-                return $this->getSportName( $language, SportCustom::Badminton ) . ' dubbel';
-            }
-            case SportCustom::SquashDouble:
-            {
-                return $this->getSportName( $language, SportCustom::SquashDouble ) . ' dubbel';
-            }
-            case SportCustom::TennisDouble:
-            {
-                return $this->getSportName( $language, SportCustom::TennisDouble ) . ' dubbel';
-            }
-            case SportCustom::TableTennisDouble:
-            {
-                return $this->getSportName( $language, SportCustom::TableTennisDouble ) . ' dubbel';
+                return 'padel';
             }
         }
         return '';
@@ -110,6 +97,7 @@ class TranslationService
                 return 'leg';
             }
             case SportCustom::Tennis:
+            case SportCustom::Padel:
             {
                 return 'game';
             }
@@ -130,6 +118,7 @@ class TranslationService
             case SportCustom::Squash:
             case SportCustom::TableTennis:
             case SportCustom::Tennis:
+            case SportCustom::Padel:
             case SportCustom::Volleyball:
             {
                 return 'set';
@@ -159,6 +148,7 @@ class TranslationService
                 return 'legs';
             }
             case SportCustom::Tennis:
+            case SportCustom::Padel:
             {
                 return 'games';
             }
@@ -179,6 +169,7 @@ class TranslationService
             case SportCustom::Squash:
             case SportCustom::TableTennis:
             case SportCustom::Tennis:
+            case SportCustom::Padel:
             case SportCustom::Volleyball:
             {
                 return 'sets';
@@ -220,6 +211,7 @@ class TranslationService
                 return 'bord';
             case SportCustom::Squash:
             case SportCustom::Tennis:
+            case SportCustom::Padel:
                 return 'baan';
             case SportCustom::TableTennis:
                 return 'tafel';
@@ -245,6 +237,7 @@ class TranslationService
                 return 'borden';
             case SportCustom::Squash:
             case SportCustom::Tennis:
+            case SportCustom::Padel:
                 return 'banen';
             case SportCustom::TableTennis:
                 return 'tafels';

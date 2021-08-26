@@ -59,7 +59,7 @@ class TournamentReport
         }
         $gamesValidator = new GamesValidator();
         try {
-            $gamesValidator->validateStructure($structure, $nrOfReferees, $tournament->getBreak());
+            $gamesValidator->validateStructure($structure, $nrOfReferees, true, $tournament->getBreak());
         } catch (Exception $exception) {
             $this->validatePlanningMessage = $exception->getMessage();
         }
