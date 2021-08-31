@@ -88,9 +88,12 @@ class LockerRooms extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $y = $this->drawHeader("kleedkamers");
-        $y = $this->drawSubHeader("Kleedkamer-indeling", $y);
+        $y = $this->drawHeader('kleedkamers');
+        $y = $this->drawSubHeader('Kleedkamer-indeling', $y);
         $lockerRooms = array_values($this->getParent()->getTournament()->getLockerRooms()->toArray());
+        if (count($lockerRooms) === 0) {
+            return;
+        }
         $columnWidth = $this->getColumnWidth($y, $lockerRooms);
         $yStart = $y;
         $x = $this->getPageMargin();
@@ -109,20 +112,20 @@ class LockerRooms extends ToernooiPdfPage
     public function drawLockerRoom(LockerRoom $lockerRoom, float $x, float $y, float $columnWidth): float
     {
         if (($y - $this->getLockerRoomHeight($lockerRoom)) < $this->getPageMargin()) {
-            throw new PdfOutOfBoundsException("Y", E_ERROR);
+            throw new PdfOutOfBoundsException('Y', E_ERROR);
         }
         $nRowHeight = $this->getRowHeight();
         $fontHeight = $nRowHeight - 4;
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
         $this->setFont($this->getParent()->getFont(true), $fontHeight);
         $this->drawCell(
-            "kleedkamer " . $lockerRoom->getName(),
+            'kleedkamer ' . $lockerRoom->getName(),
             $x,
             $y,
             $columnWidth,
             $nRowHeight,
             Align::Center,
-            "black"
+            'black'
         );
         $this->setFont($this->getParent()->getFont(), $fontHeight);
         $y -= $nRowHeight;
@@ -134,7 +137,7 @@ class LockerRooms extends ToernooiPdfPage
                 $columnWidth,
                 $nRowHeight,
                 Align::Center,
-                "black"
+                'black'
             );
             $y -= $nRowHeight;
         }
