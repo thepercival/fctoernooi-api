@@ -72,9 +72,11 @@ final class PlanningAction extends Action
         if ($input !== null) {
             $nrToBeProcessed = $input->getPlanningsWithState(Planning::STATE_TOBEPROCESSED)->count();
             $total = $input->getPlannings()->count();
-            $progressPerc = (int)((($total - $nrToBeProcessed) / $total) * 100);
-            if ($progressPerc === 100 && !$roundNumber->allPoulesHaveGames()) {
-                $progressPerc--;
+            if ($total > 0) {
+                $progressPerc = (int)((($total - $nrToBeProcessed) / $total) * 100);
+                if ($progressPerc === 100 && !$roundNumber->allPoulesHaveGames()) {
+                    $progressPerc--;
+                }
             }
         }
         return $this->respondWithJson($response, json_encode(['progress' => $progressPerc]));
