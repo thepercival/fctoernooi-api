@@ -12,6 +12,7 @@ use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
 use App\Commands\Validator;
 use App\Commands\Planning\Validator as PlanningValidator;
+use App\Commands\Pdf\Validator as PdfValidator;
 
 $commands = [
     "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
@@ -34,6 +35,9 @@ $commands = [
     },
     "app:validate-planning" => function (ContainerInterface $container): PlanningValidator {
         return new PlanningValidator($container);
+    },
+    "app:validate-pdf" => function (ContainerInterface $container): PdfValidator {
+        return new PdfValidator($container);
     }
 ];
 
