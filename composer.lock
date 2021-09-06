@@ -6123,16 +6123,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.22",
+            "version": "v1.0.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "35ea5d4c870ab6430fcb521beaf5fdf1085f62b3"
+                "reference": "ed1cac9abeb0fc702bc652b2f7403166dbb05a7f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/35ea5d4c870ab6430fcb521beaf5fdf1085f62b3",
-                "reference": "35ea5d4c870ab6430fcb521beaf5fdf1085f62b3",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/ed1cac9abeb0fc702bc652b2f7403166dbb05a7f",
+                "reference": "ed1cac9abeb0fc702bc652b2f7403166dbb05a7f",
                 "shasum": ""
             },
             "require": {
@@ -6193,9 +6193,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.22"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.23"
             },
-            "time": "2021-09-02T14:03:18+00:00"
+            "time": "2021-09-06T14:02:34+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -6265,16 +6265,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.19",
+            "version": "v1.0.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "66ce27dd2569703057855c94281fb3b54113f17b"
+                "reference": "beab2e878ba88ecfac32fb437202d3964cb7f2a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/66ce27dd2569703057855c94281fb3b54113f17b",
-                "reference": "66ce27dd2569703057855c94281fb3b54113f17b",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/beab2e878ba88ecfac32fb437202d3964cb7f2a1",
+                "reference": "beab2e878ba88ecfac32fb437202d3964cb7f2a1",
                 "shasum": ""
             },
             "require": {
@@ -6330,9 +6330,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.19"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.20"
             },
-            "time": "2021-08-31T07:27:34+00:00"
+            "time": "2021-09-06T14:00:38+00:00"
         },
         {
             "name": "tuupola/base62",
@@ -10344,6 +10344,7 @@
                     "type": "github"
                 }
             ],
+            "abandoned": true,
             "time": "2020-09-28T06:45:17+00:00"
         },
         {
@@ -11179,16 +11180,16 @@
         },
         {
             "name": "vimeo/psalm",
-            "version": "4.9.3",
+            "version": "4.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "4c262932602b9bbab5020863d1eb22d49de0dbf4"
+                "reference": "916b098b008f6de4543892b1e0651c1c3b92cbfa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/4c262932602b9bbab5020863d1eb22d49de0dbf4",
-                "reference": "4c262932602b9bbab5020863d1eb22d49de0dbf4",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/916b098b008f6de4543892b1e0651c1c3b92cbfa",
+                "reference": "916b098b008f6de4543892b1e0651c1c3b92cbfa",
                 "shasum": ""
             },
             "require": {
@@ -11198,6 +11199,7 @@
                 "composer/semver": "^1.4 || ^2.0 || ^3.0",
                 "composer/xdebug-handler": "^1.1 || ^2.0",
                 "dnoegel/php-xdg-base-dir": "^0.1.1",
+                "ext-ctype": "*",
                 "ext-dom": "*",
                 "ext-json": "*",
                 "ext-libxml": "*",
@@ -11277,9 +11279,9 @@
             ],
             "support": {
                 "issues": "https://github.com/vimeo/psalm/issues",
-                "source": "https://github.com/vimeo/psalm/tree/4.9.3"
+                "source": "https://github.com/vimeo/psalm/tree/4.10.0"
             },
-            "time": "2021-08-14T16:19:38+00:00"
+            "time": "2021-09-04T21:00:09+00:00"
         },
         {
             "name": "webmozart/assert",
