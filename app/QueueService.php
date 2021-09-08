@@ -24,6 +24,8 @@ use SportsPlanning\Input as PlanningInput;
 class QueueService implements CreatePlanningsEvent
 {
     private string $queueSuffix;
+    public const MIN_PRIORITY = 0;
+    public const MAX_PRIORITY = 9;
 
     /**
      * @param array<string, mixed> $amqpOptions
@@ -39,8 +41,10 @@ class QueueService implements CreatePlanningsEvent
 
     public function sendCreatePlannings(
         PlanningInput $input,
-        Competition $competition = null,
-        int $startRoundNumber = null
+        Competition|null $competition = null,
+        int|null $startRoundNumber = null,
+        int|null $priority = null
+
     ): void {
         $context = $this->getContext();
         /** @var AmqpTopic $exchange */
@@ -56,12 +60,11 @@ class QueueService implements CreatePlanningsEvent
         $context->bind(new AmqpBind($exchange, $queue));
 
         $content = ['inputId' => $input->getId()];
-        $priority = null;
+
         if ($competition !== null && $startRoundNumber !== null) {
             $content['competitionId'] = $competition->getId();
             $content['name'] = $competition->getLeague()->getName();
             $content['roundNumber'] = $startRoundNumber;
-            $priority = 5;
         }
 
         $message = $context->createMessage(json_encode($content));

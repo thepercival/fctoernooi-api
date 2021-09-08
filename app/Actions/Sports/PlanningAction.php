@@ -105,7 +105,7 @@ final class PlanningAction extends Action
             );
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
             $queueService = new QueueService($this->config->getArray('queue'));
-            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak());
+            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak(), QueueService::MAX_PRIORITY);
 
             $this->updatePlanningEditMode($startRoundNumber);
 

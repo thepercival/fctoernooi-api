@@ -290,7 +290,8 @@ final class TournamentAction extends Action
             $this->planningCreator->addFrom(
                 new QueueService($this->config->getArray('queue')),
                 $newStructure->getFirstRoundNumber(),
-                $newTournament->getBreak()
+                $newTournament->getBreak(),
+                QueueService::MAX_PRIORITY
             );
 
             $conn->commit();
