@@ -3,12 +3,9 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Export\Excel\Spreadsheet as FCToernooiSpreadsheet;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\TournamentConfig;
 use App\QueueService;
 use App\Response\ErrorResponse;
-use App\TmpService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use Exception;
@@ -18,12 +15,9 @@ use FCToernooi\Tournament\ExportConfig;
 use FCToernooi\Tournament\Service as TournamentService;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Tournament\ExportFormat;
-use GuzzleHttp\Psr7\LazyOpenStream;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\DeserializationContext;
@@ -34,6 +28,7 @@ use App\Copiers\TournamentCopier;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Round\Number\PlanningCreator;
 use Selective\Config\Configuration;
+use Sports\Competition\Validator as CompetitionValidator;
 use Sports\Structure\Validator as StructureValidator;
 
 final class TournamentAction extends Action
@@ -281,6 +276,9 @@ final class TournamentAction extends Action
             $structure = $this->structureRepos->getStructure($competition);
 
             $newStructure = $this->structureCopier->copy($structure, $newTournament->getCompetition());
+
+            $competitionValidator = new CompetitionValidator();
+            $competitionValidator->checkValidity($newTournament->getCompetition());
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure, $newTournament->getPlaceRanges());

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f8df6eea0a53ee49303252713efd8de7",
+    "content-hash": "bb5592fc1ebff643b56af5f994924c1a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6123,16 +6123,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.27",
+            "version": "v1.0.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "31758c55f0f8f36d5122b179d4e71c6b63aad881"
+                "reference": "72e6cd9c4f948a43275a6cad5a0ab28922cb02b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/31758c55f0f8f36d5122b179d4e71c6b63aad881",
-                "reference": "31758c55f0f8f36d5122b179d4e71c6b63aad881",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/72e6cd9c4f948a43275a6cad5a0ab28922cb02b1",
+                "reference": "72e6cd9c4f948a43275a6cad5a0ab28922cb02b1",
                 "shasum": ""
             },
             "require": {
@@ -6193,22 +6193,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.27"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.28"
             },
-            "time": "2021-09-08T07:31:34+00:00"
+            "time": "2021-09-09T12:35:07+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
-            "version": "v1.0.14",
+            "version": "v1.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-helpers.git",
-                "reference": "aa6509e81f13ebea0e872fd5f2a1ada778d547a9"
+                "reference": "6024ef28ec1f1abff1d282423c08a2f1afbb6640"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/aa6509e81f13ebea0e872fd5f2a1ada778d547a9",
-                "reference": "aa6509e81f13ebea0e872fd5f2a1ada778d547a9",
+                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/6024ef28ec1f1abff1d282423c08a2f1afbb6640",
+                "reference": "6024ef28ec1f1abff1d282423c08a2f1afbb6640",
                 "shasum": ""
             },
             "require": {
@@ -6259,22 +6259,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-helpers/issues",
-                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.0.14"
+                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.0.15"
             },
-            "time": "2021-07-09T08:35:28+00:00"
+            "time": "2021-09-09T12:30:55+00:00"
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.22",
+            "version": "v1.0.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "8083c2c8c67f926987c59dd45ab258e2d5a47e5e"
+                "reference": "6e49893430d223ad321f73733721e9b2e0cbfcb4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/8083c2c8c67f926987c59dd45ab258e2d5a47e5e",
-                "reference": "8083c2c8c67f926987c59dd45ab258e2d5a47e5e",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/6e49893430d223ad321f73733721e9b2e0cbfcb4",
+                "reference": "6e49893430d223ad321f73733721e9b2e0cbfcb4",
                 "shasum": ""
             },
             "require": {
@@ -6330,9 +6330,67 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.22"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.23"
             },
-            "time": "2021-09-07T10:28:46+00:00"
+            "time": "2021-09-09T12:33:10+00:00"
+        },
+        {
+            "name": "thepercival/zend-pdf",
+            "version": "1.14.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thepercival/zend-pdf.git",
+                "reference": "5d8a6fe3ebaf86bac0865393333e61f8f50682c2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thepercival/zend-pdf/zipball/5d8a6fe3ebaf86bac0865393333e61f8f50682c2",
+                "reference": "5d8a6fe3ebaf86bac0865393333e61f8f50682c2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-gd": "*",
+                "ext-iconv": "*",
+                "ext-zlib": "*",
+                "php": ">=8.0",
+                "zf1s/zend-exception": "^1.13.4",
+                "zf1s/zend-log": "^1.13.4",
+                "zf1s/zend-memory": "^1.13.4"
+            },
+            "replace": {
+                "zf1/zend-pdf": "^1.12"
+            },
+            "require-dev": {
+                "vimeo/psalm": "^4.6"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Zend_Pdf": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Framework 1 Pdf package",
+            "homepage": "http://framework.zend.com/",
+            "keywords": [
+                "ZF1",
+                "framework",
+                "pdf",
+                "zend"
+            ],
+            "support": {
+                "source": "https://github.com/thepercival/zend-pdf/tree/v1.0.2"
+            },
+            "time": "2021-09-08T07:47:05+00:00"
         },
         {
             "name": "tuupola/base62",
@@ -7087,61 +7145,6 @@
             ],
             "support": {
                 "source": "https://github.com/zf1s/zend-memory/tree/1.13.4"
-            },
-            "time": "2020-11-23T08:37:28+00:00"
-        },
-        {
-            "name": "zf1s/zend-pdf",
-            "version": "1.13.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zf1s/zend-pdf.git",
-                "reference": "a52035ffb239cc92c0000d26081a3d2751520263"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zf1s/zend-pdf/zipball/a52035ffb239cc92c0000d26081a3d2751520263",
-                "reference": "a52035ffb239cc92c0000d26081a3d2751520263",
-                "shasum": ""
-            },
-            "require": {
-                "ext-ctype": "*",
-                "ext-gd": "*",
-                "ext-iconv": "*",
-                "ext-zlib": "*",
-                "php": ">=5.3.3",
-                "zf1s/zend-exception": "^1.13.4",
-                "zf1s/zend-log": "^1.13.4",
-                "zf1s/zend-memory": "^1.13.4"
-            },
-            "replace": {
-                "zf1/zend-pdf": "^1.12"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Zend_Pdf": "library/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "Zend Framework 1 Pdf package",
-            "homepage": "http://framework.zend.com/",
-            "keywords": [
-                "ZF1",
-                "framework",
-                "pdf",
-                "zend"
-            ],
-            "support": {
-                "source": "https://github.com/zf1s/zend-pdf/tree/1.13.4"
             },
             "time": "2020-11-23T08:37:28+00:00"
         }

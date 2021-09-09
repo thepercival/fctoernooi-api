@@ -7,9 +7,9 @@ use \Exception;
 use FCToernooi\Tournament;
 use Sports\Structure;
 use Sports\Structure\Validator as StructureValidator;
+use Sports\Competition\Validator as CompetitionValidator;
 use Sports\Round\Number\GamesValidator;
 use Sports\Round\Number as RoundNumber;
-use Sports\Game\Together as TogetherGame;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
 
@@ -51,8 +51,10 @@ class TournamentReport
         $nrOfScores = 0;
         $this->getScoresUsage($firstRoundNumber, $nrOfGames, $nrOfScores);
         $this->scoresUsage = $nrOfScores . '/' . $nrOfGames;
+        $competitionValidator = new CompetitionValidator();
         $structureValidator = new StructureValidator();
         try {
+            $competitionValidator->checkValidity($competition);
             $structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
         } catch (Exception $exception) {
             $this->validateMessage = $exception->getMessage();

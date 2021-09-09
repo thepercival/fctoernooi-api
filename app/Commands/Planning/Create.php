@@ -30,7 +30,6 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Competition\Repository as CompetitionRepository;
 use Sports\Round\Number as RoundNumber;
-use Sports\Structure\Validator as StructureValidator;
 use App\Commands\Planning as PlanningCommand;
 
 class Create extends PlanningCommand

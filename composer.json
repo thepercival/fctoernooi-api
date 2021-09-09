@@ -40,7 +40,7 @@
         "tuupola/slim-basic-auth": "^3.2",
         "tuupola/slim-jwt-auth": "^3.4",
         "vlucas/phpdotenv": "^5.3",
-        "zf1s/zend-pdf": "^1.13",
+        "thepercival/zend-pdf": "^1.0",
         "slim/twig-view": "^3.1",
         "enqueue/amqp-lib": "^0.10",
         "symfony/cache": "^5.3"

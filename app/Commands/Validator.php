@@ -23,6 +23,7 @@ use Sports\Round\Number as RoundNumber;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Sports\Structure\Validator as StructureValidator;
+use Sports\Competition\Validator as CompetitionValidator;
 use Sports\Round\Number\GamesValidator;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
@@ -33,6 +34,7 @@ class Validator extends Command
     protected TournamentRepository $tournamentRepos;
     protected StructureRepository $structureRepos;
     protected StructureValidator $structureValidator;
+    protected CompetitionValidator $competitionValidator;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
 
@@ -41,6 +43,7 @@ class Validator extends Command
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
+        $this->competitionValidator = new CompetitionValidator();
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
 
@@ -77,6 +80,9 @@ class Validator extends Command
             foreach ($tournaments as $tournament) {
                 $structure = null;
                 try {
+                    if ($tournament->getUsers()->count() === 0) {
+                        throw new \Exception('no users', E_ERROR);
+                    }
                     $structure = $this->structureRepos->getStructure($tournament->getCompetition());
                     $this->checkValidity($tournament, $structure);
                     $this->addStructureToLog($tournament, $structure);
@@ -103,6 +109,7 @@ class Validator extends Command
             if (count($competition->getFields()) === 0) {
                 throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
             }
+            $this->competitionValidator->checkValidity($competition);
             $this->structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
             $roundNumber = $structure->getFirstRoundNumber();
             if ($roundNumber->getValidPlanningConfig()->getEditMode() === PlanningEditMode::Auto) {
