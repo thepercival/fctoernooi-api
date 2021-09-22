@@ -29,7 +29,7 @@ final class GameAgainstAction extends GameAction
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        AgainstGameRepository $gameRepos,
+        protected AgainstGameRepository $againstGameRepos,
         PouleRepository $pouleRepos,
         PlaceRepository $placeRepos,
         StructureRepository $structureRepos,
@@ -40,7 +40,7 @@ final class GameAgainstAction extends GameAction
         parent::__construct(
             $logger,
             $serializer,
-            $gameRepos,
+            $againstGameRepos,
             $pouleRepos,
             $placeRepos,
             $structureRepos,
@@ -79,7 +79,7 @@ final class GameAgainstAction extends GameAction
 
             $game = $this->createGame($poule, $gameSer, $competitionSport);
             $this->addBase($game, $gameSer);
-            $this->gameRepos->save($game);
+            $this->againstGameRepos->save($game);
 
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
@@ -134,7 +134,7 @@ final class GameAgainstAction extends GameAction
 
             $this->editBase($game, $gameSer);
 
-            $this->gameRepos->save($game);
+            $this->againstGameRepos->save($game);
 
             $this->changeQualifyPlaces($competition, $game->getPoule(), $initialPouleState);
 
@@ -171,7 +171,7 @@ final class GameAgainstAction extends GameAction
 
             /** @var AgainstGame $game */
             $poule->getAgainstGames()->removeElement($game);
-            $this->gameRepos->remove($game);
+            $this->againstGameRepos->remove($game);
 
             return $response->withStatus(200);
         } catch (Exception $exception) {

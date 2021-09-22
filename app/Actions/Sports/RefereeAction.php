@@ -167,7 +167,9 @@ final class RefereeAction extends Action
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->upgrade($referee);
             foreach ($changedReferees as $changedReferee) {
-                $this->refereeRepos->save($changedReferee);
+                if( $changedReferee instanceof Referee ) {
+                    $this->refereeRepos->save($changedReferee);
+                }
             }
 
             return $response->withStatus(200);
@@ -199,7 +201,9 @@ final class RefereeAction extends Action
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->validate();
             foreach ($changedReferees as $changedReferee) {
-                $this->refereeRepos->save($changedReferee);
+                if( $changedReferee instanceof Referee ) {
+                    $this->refereeRepos->save($changedReferee);
+                }
             }
 
             return $response->withStatus(200);

@@ -1,10 +1,8 @@
 <?php
-
 declare(strict_types=1);
 
 namespace FCToernooi\Competitor;
 
-use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor as CompetitorBase;
@@ -14,10 +12,12 @@ use Sports\Round;
 
 /**
  * @template-extends EntityRepository<CompetitorBase>
- * @template-implements SaveRemoveRepository<CompetitorBase>
  */
-class Repository extends EntityRepository implements SaveRemoveRepository
+class Repository extends EntityRepository
 {
+    /**
+     * @use BaseRepository<CompetitorBase>
+     */
     use BaseRepository;
 
     public function syncCompetitors(Tournament $tournament, Round $rootRound): void

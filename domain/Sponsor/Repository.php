@@ -12,10 +12,12 @@ use FCToernooi\Tournament;
 
 /**
  * @template-extends EntityRepository<SponsorBase>
- * @template-implements SaveRemoveRepository<SponsorBase>
  */
-class Repository extends EntityRepository implements SaveRemoveRepository
+class Repository extends EntityRepository
 {
+    /**
+     * @use BaseRepository<SponsorBase>
+     */
     use BaseRepository;
 
     public const MAXNROFSPONSORSPERSCREEN = 4;

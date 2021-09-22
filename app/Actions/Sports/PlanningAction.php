@@ -18,6 +18,7 @@ use SportsPlanning\Planning\Repository as PlanningRepository;
 use Sports\Round\Number as RoundNumber;
 use FCToernooi\Tournament;
 use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure;
 use SportsPlanning\Input\Repository as InputRepository;
@@ -35,6 +36,7 @@ final class PlanningAction extends Action
         private InputRepository $inputRepos,
         private StructureRepository $structureRepos,
         private RoundNumberRepository $roundNumberRepos,
+        private PlanningConfigRepository $planningConfigRepos,
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
@@ -184,7 +186,7 @@ final class PlanningAction extends Action
         $planningConfig = $roundNumber->getPlanningConfig();
         if ($planningConfig !== null && $planningConfig->getEditMode() === EditMode::Manual) {
             $planningConfig->setEditMode(EditMode::Auto);
-            $this->roundNumberRepos->save($planningConfig);
+            $this->planningConfigRepos->save($planningConfig);
         }
 
         $nextRoundNumber = $roundNumber->getNext();

@@ -159,7 +159,9 @@ final class FieldAction extends Action
             $priorityService = new PriorityService(array_values($competitionSport->getFields()->toArray()));
             $changedFields = $priorityService->upgrade($field);
             foreach ($changedFields as $changedField) {
-                $this->fieldRepos->save($changedField);
+                if ($changedField instanceof Field) {
+                    $this->fieldRepos->save($changedField);
+                }
             }
 
             return $response->withStatus(200);
@@ -196,7 +198,9 @@ final class FieldAction extends Action
             $priorityService = new PriorityService(array_values($competitionSport->getFields()->toArray()));
             $changedFields = $priorityService->upgrade($field);
             foreach ($changedFields as $changedField) {
-                $this->fieldRepos->save($changedField);
+                if ($changedField instanceof Field) {
+                    $this->fieldRepos->save($changedField);
+                }
             }
 
             return $response->withStatus(200);

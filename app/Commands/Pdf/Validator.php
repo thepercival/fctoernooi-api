@@ -4,38 +4,29 @@ declare(strict_types=1);
 namespace App\Commands\Pdf;
 
 use App\Export\Pdf\Document as PdfDocument;
-use App\Mailer;
 use Exception;
 use FCToernooi\Tournament\ExportConfig;
-use Sports\Competition;
 use Sports\Structure;
-use Sports\Game\Against as AgainstGame;
-use Sports\Competitor\Map as CompetitorMap;
 use FCToernooi\Tournament;
 use Psr\Container\ContainerInterface;
 use App\Command;
-use Sports\Output\StructureOutput;
-use Sports\Planning\EditMode as PlanningEditMode;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use Sports\Round\Number as RoundNumber;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
-use Sports\Structure\Validator as StructureValidator;
 use Sports\Round\Number\GamesValidator;
+use Sports\Output\StructureOutput;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
-use Sports\Game\Order as GameOrder;
 
 class Validator extends Command
 {
     protected TournamentRepository $tournamentRepos;
     protected StructureRepository $structureRepos;
-    protected StructureValidator $structureValidator;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
 
@@ -44,7 +35,6 @@ class Validator extends Command
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->structureRepos = $container->get(StructureRepository::class);
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
 
         parent::__construct($container->get(Configuration::class));
@@ -80,8 +70,11 @@ class Validator extends Command
             $subjects = $this->getSubjects($input);
             /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
-                foreach( $subjects as $subject) {
-                    $this->getLogger()->info('creating for pdf ' . $tournament->getId() . '-' . $subject);
+                if ($tournament->getId() < 3000) {
+                    continue;
+                }
+                foreach ($subjects as $subject) {
+                    $this->getLogger()->info('creating for pdf ' . (string)$tournament->getId() . '-' . $subject);
                     $structure = null;
                     try {
                         $structure = $this->structureRepos->getStructure($tournament->getCompetition());

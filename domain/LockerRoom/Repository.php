@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace FCToernooi\LockerRoom;
 
-use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\ORM\EntityRepository;
@@ -16,10 +15,12 @@ use FCToernooi\Competitor;
 
 /**
  * @template-extends EntityRepository<LockerRoomBase>
- * @template-implements SaveRemoveRepository<LockerRoomBase>
  */
-class Repository extends EntityRepository implements SaveRemoveRepository
+class Repository extends EntityRepository
 {
+    /**
+     * @use BaseRepository<LockerRoomBase>
+     */
     use BaseRepository;
 
     /**

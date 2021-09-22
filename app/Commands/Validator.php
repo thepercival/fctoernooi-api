@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Mailer;
+use DateTime;
+use DateTimeImmutable;
 use Exception;
 use Sports\Competition;
 use Sports\Structure;
@@ -16,6 +18,7 @@ use Sports\Output\StructureOutput;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -37,6 +40,9 @@ class Validator extends Command
     protected CompetitionValidator $competitionValidator;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
+    private const DEFAULT_START_DAYS_IN_PAST = 7;
+    private const DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
+    private const TOURNAMENT_STARTID_VALIDATE_PRIO = 4000;
 
     public function __construct(ContainerInterface $container)
     {
@@ -62,33 +68,37 @@ class Validator extends Command
             ->setHelp('validates the tournaments');
         parent::configure();
 
+        $this->addOption('startdate', null, InputArgument::OPTIONAL, 'Y-m-d');
+        $this->addOption('enddate', null, InputArgument::OPTIONAL, 'Y-m-d');
+
         $this->addArgument('tournamentId', InputArgument::OPTIONAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'cron-tournament-validator');
+
         try {
+            $tournaments = $this->getTournamentsFromInput($input);
+
             $this->getLogger()->info('aan het valideren..');
-            $filter = [];
-            $tournamentId = $input->getArgument('tournamentId');
-            if (is_string($tournamentId) && (int)$tournamentId > 0) {
-                $filter = ['id' => $tournamentId];
-            }
-            $tournaments = $this->tournamentRepos->findBy($filter);
-            /** @var Tournament $tournament */
+
             foreach ($tournaments as $tournament) {
+                $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
+                $description .= $tournament->getCreatedDateTime()->format(DATE_ISO8601);
+
+                $this->getLogger()->info($description);
                 $structure = null;
                 try {
                     if ($tournament->getUsers()->count() === 0) {
-                        throw new \Exception('no users', E_ERROR);
+                        throw new \Exception('no users for tournament ' . (string)$tournament->getId(), E_ERROR);
                     }
                     $structure = $this->structureRepos->getStructure($tournament->getCompetition());
                     $this->checkValidity($tournament, $structure);
                     $this->addStructureToLog($tournament, $structure);
                 } catch (Exception $exception) {
                     $this->getLogger()->error($exception->getMessage());
-                    if ($structure !== null && count($filter) > 0) {
+                    if ($structure !== null) {
                         $this->addStructureToLog($tournament, $structure);
                     }
                 }
@@ -112,9 +122,7 @@ class Validator extends Command
             $this->competitionValidator->checkValidity($competition);
             $this->structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
             $roundNumber = $structure->getFirstRoundNumber();
-            if ($roundNumber->getValidPlanningConfig()->getEditMode() === PlanningEditMode::Auto) {
-                $this->validateGames($tournament, $roundNumber, $competition->getReferees()->count());
-            }
+            $this->validateGames($tournament, $roundNumber, $competition->getReferees()->count());
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
@@ -124,7 +132,14 @@ class Validator extends Command
     protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
         try {
-            $this->gamesValidator->validate($roundNumber, $nrOfReferees, $tournament->getId() > 4858, $tournament->getBreak());
+            if ($roundNumber->getValidPlanningConfig()->getEditMode() === PlanningEditMode::Auto) {
+                $this->gamesValidator->validate(
+                    $roundNumber,
+                    $nrOfReferees,
+                    $tournament->getId() > self::TOURNAMENT_STARTID_VALIDATE_PRIO,
+                    $tournament->getBreak()
+                );
+            }
             $nextRoundNumber = $roundNumber->getNext();
             if ($nextRoundNumber !== null) {
                 $this->validateGames($tournament, $nextRoundNumber, $nrOfReferees);
@@ -176,5 +191,50 @@ class Validator extends Command
         } catch (Exception $exception) {
             $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
         }
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return list<Tournament>
+     */
+    protected function getTournamentsFromInput(InputInterface $input): array
+    {
+        $tournamentId = $input->getArgument('tournamentId');
+        if (is_string($tournamentId) && (int)$tournamentId > 0) {
+            $tournament = $this->tournamentRepos->find($tournamentId);
+            return $tournament !== null ? [$tournament] : [];
+        }
+
+        $start = $this->getStartFromInput($input);
+        $end = $this->getEndFromInput($input);
+        return $this->tournamentRepos->findByFilter(null, $start, $end);
+    }
+
+    protected function getStartFromInput(InputInterface $input): DateTimeImmutable
+    {
+        $startDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_START_DAYS_IN_PAST . ' days');
+        $start = $input->getOption('startdate');
+        if (!is_string($start) || strlen($start) === 0) {
+            return $startDate;
+        }
+        $startDateFromInput = DateTimeImmutable::createFromFormat('Y-m-d', $start);
+        if ($startDateFromInput === false) {
+            return $startDate;
+        }
+        return $startDateFromInput;
+    }
+
+    protected function getEndFromInput(InputInterface $input): DateTimeImmutable
+    {
+        $endDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
+        $end = $input->getOption('enddate');
+        if (!is_string($end) || strlen($end) === 0) {
+            return $endDate;
+        }
+        $endDateFromInput = DateTimeImmutable::createFromFormat('Y-m-d', $end);
+        if ($endDateFromInput === false) {
+            return $endDate;
+        }
+        return $endDateFromInput;
     }
 }

@@ -219,7 +219,7 @@ class GameAction extends Action
             $this->placeRepos->save($changedPlace);
             foreach ($changedPlace->getGames() as $gameIt) {
                 $gameIt->setState(State::Created);
-                $this->gameRepos->save($gameIt);
+                $this->gameRepos->customSave($gameIt);
                 if ($gameIt instanceof AgainstGame) {
                     $this->againstScoreRepos->removeScores($gameIt);
                 } else {

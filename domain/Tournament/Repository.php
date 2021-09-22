@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
-use Doctrine\ORM\EntityManagerInterface;
-use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
 use SportsHelpers\Repository as BaseRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
@@ -12,18 +10,17 @@ use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\User;
 use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
-use Sports\League;
 use Sports\Competition;
 use Sports\Competition\Repository as CompetitionRepository;
-use Sports\League\Repository as LeagueRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * @template-extends EntityRepository<TournamentBase>
- * @template-implements SaveRemoveRepository<TournamentBase>
  */
-class Repository extends EntityRepository implements SaveRemoveRepository
+class Repository extends EntityRepository
 {
+    /**
+     * @use BaseRepository<TournamentBase>
+     */
     use BaseRepository;
 
     public function customPersist(TournamentBase $tournament, bool $flush): void
@@ -31,7 +28,8 @@ class Repository extends EntityRepository implements SaveRemoveRepository
         /** @psalm-suppress MixedArgumentTypeCoercion */
         $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetadata(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
-        $this->save($tournament->getCompetition()->getLeague());
+        $this->_em->remove($tournament->getCompetition()->getLeague());
+        $this->_em->flush();
         $this->_em->persist($tournament);
         if ($flush) {
             $this->_em->flush();
@@ -122,6 +120,7 @@ class Repository extends EntityRepository implements SaveRemoveRepository
 
     public function removeByLeague(TournamentBase $tournament): void
     {
-        $this->remove($tournament->getCompetition()->getLeague());
+        $this->_em->remove($tournament->getCompetition()->getLeague());
+        $this->_em->flush();
     }
 }

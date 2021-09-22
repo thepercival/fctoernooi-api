@@ -140,7 +140,7 @@ class RetryTimeout extends PlanningCommand
         if (is_string($maxTimeoutSeconds) && strlen($maxTimeoutSeconds) > 0) {
             return (int)$maxTimeoutSeconds;
         }
-        return PlanningBase::DEFAULT_TIMEOUTSECONDS;
+        return PlanningBase::MINIMUM_TIMEOUTSECONDS;
     }
 
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void
