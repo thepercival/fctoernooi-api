@@ -28,7 +28,7 @@ class Repository extends EntityRepository
         /** @psalm-suppress MixedArgumentTypeCoercion */
         $competitionRepos = new CompetitionRepository($this->_em, $this->_em->getClassMetadata(Competition::class));
         $competitionRepos->customPersist($tournament->getCompetition());
-        $this->_em->remove($tournament->getCompetition()->getLeague());
+        $this->_em->persist($tournament->getCompetition()->getLeague());
         $this->_em->flush();
         $this->_em->persist($tournament);
         if ($flush) {
