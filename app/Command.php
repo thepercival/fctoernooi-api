@@ -11,6 +11,8 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Planning\Output as PlanningOutput;
 use Symfony\Component\Console\Command\Command as SymCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +26,6 @@ class Command extends SymCommand
     public function __construct(protected Configuration $config)
     {
         parent::__construct();
-        $this->config = $config;
     }
 
     protected function configure(): void
@@ -71,4 +72,5 @@ class Command extends SymCommand
             )
         );
     }
+
 }

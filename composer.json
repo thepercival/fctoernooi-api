@@ -24,7 +24,6 @@
         "middlewares/negotiation": "^2.0",
         "monolog/monolog": "^2.0",
         "phpmailer/phpmailer": "^6.1",
-        "phpoffice/phpspreadsheet": "^1.10",
         "php-di/php-di": "^6.0",
         "selective/config": "^1.1",
         "slim/psr7": "^1.1",
@@ -46,7 +45,7 @@
         "symfony/cache": "^5.3"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.00",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "phpstan/phpstan": "^0.12",
         "phpstan/phpstan-doctrine": "^0.12",
         "phpstan/extension-installer": "^1.0",

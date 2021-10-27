@@ -17,15 +17,13 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Sports\Competition;
 use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Batch\Output as BatchOutput;
-use Sports\Planning as PlanningBase;
+use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
+use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 use Sports\Structure\Repository as StructureRepository;
 
 use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Input\Service as PlanningInputService;
-use SportsPlanning\Planning\Seeker as PlanningSeeker;
-use SportsPlanning\Planning\Service as PlanningService;
+use SportsPlanning\Seeker as PlanningSeeker;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Competition\Repository as CompetitionRepository;
@@ -38,9 +36,11 @@ class Create extends PlanningCommand
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
     protected CompetitionRepository $competitionRepos;
+    protected ScheduleRepository $scheduleRepos;
     protected EntityManager $entityManager;
 
     protected bool $showSuccessful = false;
+    protected bool $disableThrowOnTimeout = false;
 
     public function __construct(ContainerInterface $container)
     {
@@ -50,6 +50,7 @@ class Create extends PlanningCommand
         $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->competitionRepos = $container->get(CompetitionRepository::class);
+        $this->scheduleRepos = $container->get(ScheduleRepository::class);
         $this->entityManager = $container->get(EntityManager::class);
     }
 
@@ -77,27 +78,13 @@ class Create extends PlanningCommand
             $this->getLogger()->info('starting command app:planning-create');
             $showSuccessful = $input->getOption('showSuccessful');
             $this->showSuccessful = is_bool($showSuccessful) ? $showSuccessful : false;
+            $disableThrowOnTimeout = $input->getOption('disableThrowOnTimeout');
+            $this->disableThrowOnTimeout = is_bool($disableThrowOnTimeout) ? $disableThrowOnTimeout : false;
+
             $queueService = new QueueService($this->config->getArray('queue'));
             $inputId = $input->getArgument('inputId');
             if (is_string($inputId) && strlen($inputId) > 0) {
-                $planningInput = $this->planningInputRepos->find((int)$inputId);
-                if ($planningInput === null) {
-                    $this->getLogger()->info('planningInput ' . $inputId . ' not found');
-                    return 0;
-                }
-                $this->planningInputRepos->reset($planningInput);
-                $disableThrowOnTimeout = $input->getOption('disableThrowOnTimeout');
-                $disableThrowOnTimeout = is_bool($disableThrowOnTimeout) ? $disableThrowOnTimeout : false;
-                $this->processPlanning(
-                    $queueService,
-                    $planningInput,
-                    null,
-                    null,
-                    QueueService::MAX_PRIORITY,
-                    $disableThrowOnTimeout
-                );
-                $this->getLogger()->info('planningInput ' . $inputId . ' created');
-                return 0;
+                return $this->processSinglePlanningInput((int)$inputId, $queueService);
             }
 
             $timeoutInSeconds = 295;
@@ -154,7 +141,17 @@ class Create extends PlanningCommand
     ): void {
         $planningOutput = new PlanningOutput($this->getLogger());
 
-        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos);
+        if (!$this->scheduleRepos->hasSchedules($planningInput)) {
+            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
+            $gameRoundSchedules = $scheduleCreatorService->createSchedules($planningInput);
+            foreach($gameRoundSchedules as $gameRoundSchedule) {
+                $this->scheduleRepos->save($gameRoundSchedule);
+            }
+        } else {
+            $gameRoundSchedules = $this->scheduleRepos->findByInput($planningInput);
+        }
+
+        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos);
         if ($disableThrowOnTimeout === true) {
             $planningSeeker->disableThrowOnTimeout();
         }
@@ -250,5 +247,27 @@ class Create extends PlanningCommand
         if ($nextRoundNumber !== null) {
             $this->refreshRoundNumber($nextRoundNumber);
         }
+    }
+
+    protected function processSinglePlanningInput(int $inputId, QueueService $queueService): int
+    {
+        $planningInput = $this->planningInputRepos->find($inputId);
+        if ($planningInput === null) {
+            $this->getLogger()->info('planningInput ' . $inputId . ' not found');
+            return 0;
+        }
+        $this->planningInputRepos->reset($planningInput);
+
+        $this->processPlanning(
+            $queueService,
+            $planningInput,
+            null,
+            null,
+            QueueService::MAX_PRIORITY,
+            $this->disableThrowOnTimeout
+        );
+        $this->getLogger()->info('planningInput ' . $inputId . ' created');
+        $this->getLogger()->info('memory usage: ' . memory_get_usage() . '('.memory_get_usage(true).')');
+        return 0;
     }
 }

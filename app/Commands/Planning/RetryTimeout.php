@@ -13,6 +13,7 @@ use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PouleStructure;
 use SportsHelpers\SportRange;
+use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,15 +22,18 @@ use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning as PlanningBase;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Batch\Output as BatchOutput;
-use SportsPlanning\Planning\Seeker as PlanningSeeker;
+use SportsPlanning\Seeker as PlanningSeeker;
 use App\Commands\Planning as PlanningCommand;
 use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
 
 class RetryTimeout extends PlanningCommand
 {
+    protected ScheduleRepository $scheduleRepos;
+
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
+        $this->scheduleRepos = $container->get(ScheduleRepository::class);
         $this->mailer = $container->get(Mailer::class);
     }
 
@@ -53,7 +57,7 @@ class RetryTimeout extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'command-planning-retry-timeout');
-        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos);
+        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos );
         $planningSeeker->enableTimedout($this->getMaxTimeoutSeconds($input));
 
 

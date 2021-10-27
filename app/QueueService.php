@@ -44,7 +44,6 @@ class QueueService implements CreatePlanningsEvent
         Competition|null $competition = null,
         int|null $startRoundNumber = null,
         int|null $priority = null
-
     ): void {
         $context = $this->getContext();
         /** @var AmqpTopic $exchange */

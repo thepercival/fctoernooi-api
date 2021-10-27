@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Middleware;
@@ -15,15 +14,8 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 class UserMiddleware implements MiddlewareInterface
 {
-    /**
-     * @var UserRepository
-     */
-    protected $userRepos;
-
-    public function __construct(
-        UserRepository $userRepos
-    ) {
-        $this->userRepos = $userRepos;
+    public function __construct(protected UserRepository $userRepos)
+    {
     }
 
     public function process(Request $request, RequestHandler $handler): Response

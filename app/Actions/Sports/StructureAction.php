@@ -6,9 +6,7 @@ namespace App\Actions\Sports;
 
 use Exception;
 use FCToernooi\Tournament;
-use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
-use Sports\Competition;
 use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
 use App\Response\ErrorResponse;
@@ -95,7 +93,7 @@ final class StructureAction extends Action
 
             $roundNumberAsValue = 1;
             try {
-                $structure = $this->structureRepos->getStructure($competition);
+                $this->structureRepos->getStructure($competition);
                 $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
             } catch (Exception $e) {
                 $this->structureRepos->add($newStructure, $roundNumberAsValue);

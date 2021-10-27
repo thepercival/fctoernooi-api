@@ -29,11 +29,9 @@ abstract class AuthorizationMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    /**
-     * @param Request $request
-     * @param User|null $user
-     * @param Tournament|null $tournament
-     * @throws Exception
-     */
-    abstract protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void;
+    abstract protected function isAuthorized(
+        Request $request,
+        User|null $user = null,
+        Tournament|null $tournament = null
+    ): void;
 }

@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace App\Commands\Planning;
 
+use App\Mailer;
 use App\QueueService;
 use \Exception;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use App\Command;
-use Sports\Structure\Copier as StructureCopier;
 use SportsHelpers\PouleStructure;
 use SportsPlanning\Planning;
 use SportsHelpers\SelfReferee;
@@ -17,12 +20,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use SportsPlanning\Output\Batch as BatchOutput;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Planning\Repository as PlanningRepository;
-use SportsPlanning\Planning\Service as PlanningService;
 use SportsPlanning\Planning\Validator as PlanningValidator;
 
 class Validator extends Command
@@ -39,6 +40,7 @@ class Validator extends Command
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningRepos = $container->get(PlanningRepository::class);
         $this->planningValidator = new PlanningValidator();
+        $this->mailer = $container->get(Mailer::class);
         parent::__construct($container->get(Configuration::class));
     }
 
@@ -55,16 +57,12 @@ class Validator extends Command
         parent::configure();
 
         $this->addOption('pouleStructure', null, InputOption::VALUE_OPTIONAL, '6,6');
-//        $this->addOption('structure', null, InputOption::VALUE_OPTIONAL, '3|2|2|');
-//        $this->addOption('sportConfig', null, InputOption::VALUE_OPTIONAL, '2|2');
-//        $this->addOption('nrOfReferees', null, InputOption::VALUE_OPTIONAL, '0');
-//        $this->addOption('nrOfHeadtohead', null, InputOption::VALUE_OPTIONAL, '1');
-//        $this->addOption('teamup', null, InputOption::VALUE_OPTIONAL, 'false');
         $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, '0,1 or 2');
         $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_OPTIONAL, 'false|true');
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
         $this->addOption('resetInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('validateInvalid', null, InputOption::VALUE_NONE);
+        $this->addOption('sendEmailWhenInvalid', null, InputOption::VALUE_NONE);
 
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
     }
@@ -76,7 +74,11 @@ class Validator extends Command
         $resetPlanningInputWhenInvalid = $input->getOption('resetInvalid');
         $resetPlanningInputWhenInvalid = is_bool($resetPlanningInputWhenInvalid) ? $resetPlanningInputWhenInvalid : false;
 
+        $sendEmailWhenInvalid = $input->getOption('sendEmailWhenInvalid');
+        $sendEmailWhenInvalid = is_bool($sendEmailWhenInvalid) ? $sendEmailWhenInvalid : false;
+
         $showNrOfPlaces = [];
+        $invalidPlanningInputsMessages = [];
 
         $this->exitAtFirstInvalid = filter_var($input->getOption("exitAtFirstInvalid"), FILTER_VALIDATE_BOOLEAN);
 
@@ -90,8 +92,9 @@ class Validator extends Command
             try {
                 $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
             } catch (Exception $exception) {
+                $errorMsg = 'inputid: ' . (string)$planningInput->getId() . ' (' . $planningInput->getUniqueString() . ') => ' . $exception->getMessage();
                 if ($this->logger !== null) {
-                    $this->logger->error('inputid: ' . (string)$planningInput->getId() . ' => ' . $exception->getMessage());
+                    $this->logger->error($errorMsg);
                 }
                 if ($this->exitAtFirstInvalid) {
                     return 0;
@@ -100,10 +103,16 @@ class Validator extends Command
                     $this->planningInputRepos->reset($planningInput);
                     $queueService->sendCreatePlannings($planningInput);
                 }
+                $invalidPlanningInputsMessages[] = $errorMsg;
             }
             // $this->planningInputRepos->getEM()->clear();
         }
         $this->getLogger()->info('alle planningen gevalideerd');
+
+        if (count($invalidPlanningInputsMessages) > 0 && $sendEmailWhenInvalid) {
+            $this->sendMailWithInvalid($invalidPlanningInputsMessages);
+        }
+
         return 0;
     }
 
@@ -220,5 +229,36 @@ class Validator extends Command
             }
         }
         return $selfReferee;
+    }
+
+    /**
+     * @param list<string> $invalidPlanningInputsMessages
+     * @throws Exception
+     */
+    protected function sendMailWithInvalid(array $invalidPlanningInputsMessages): void
+    {
+        $subject = count($invalidPlanningInputsMessages) . ' invalid planningInputs';
+        $this->getLogger()->info($subject);
+        $stream = fopen('php://memory', 'r+');
+        if ($stream === false || $this->mailer === null) {
+            return;
+        }
+        $loggerOutput = new Logger('invalida-planninginput-logger');
+        $loggerOutput->pushProcessor(new UidProcessor());
+        $handler = new StreamHandler($stream, Logger::INFO);
+        $loggerOutput->pushHandler($handler);
+
+        foreach ($invalidPlanningInputsMessages as $invalidPlanningInputsMessage) {
+            $loggerOutput->info($invalidPlanningInputsMessage);
+            $loggerOutput->info('');
+        }
+
+        rewind($stream);
+        $emailBody = stream_get_contents($stream/*$handler->getStream()*/);
+        $this->mailer->sendToAdmin(
+            $subject,
+            $emailBody === false ? 'unable to convert stream into string' : $emailBody,
+            true
+        );
     }
 }
