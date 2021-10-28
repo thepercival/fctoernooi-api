@@ -143,6 +143,7 @@ class Create extends PlanningCommand
 
         if (!$this->scheduleRepos->hasSchedules($planningInput)) {
             $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
+            $this->getLogger()->info('creating schedules .. ');
             $schedules = $scheduleCreatorService->createSchedules($planningInput);
             foreach ($schedules as $schedule) {
                 $this->scheduleRepos->save($schedule);
