@@ -36,6 +36,7 @@ return [
     App::class => function (ContainerInterface $container): App {
         AppFactory::setContainer($container);
         $app = AppFactory::create();
+        /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         if ($config->getString("environment") === "production") {
             $routeCacheFile = $config->getString('router.cache_file');
@@ -47,14 +48,16 @@ return [
     },
     TwigView::class => function (ContainerInterface $container): TwigView {
         $cache = [];
-        if ($container->get(Configuration::class)->getString("environment") === "production") {
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        if ($config->getString("environment") === "production") {
             $cache['cache'] = __DIR__ . '/../cache';
         }
         return TwigView::create(__DIR__ . '/../templates', $cache);
     },
     LoggerInterface::class => function (ContainerInterface $container): LoggerInterface {
+        /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-
         $loggerSettings = $config->getArray('logger');
         $name = "application";
         $logger = new Logger($name);
@@ -72,10 +75,10 @@ return [
         return $logger;
     },
     EntityManager::class => function (ContainerInterface $container): EntityManager {
-        $config = $container->get(Configuration::class)->getArray('doctrine');
-        $doctrineBaseConfig = $container->get(Configuration::class)->getArray('doctrine');
-        // $settings = $container->get('settings')['doctrine'];
-        $doctrineMetaConfig = $config['meta'];
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        $appDoctrineConfig = $config->getArray('doctrine');
+        $doctrineMetaConfig = $appDoctrineConfig['meta'];
         $doctrineConfig = Doctrine\ORM\Tools\Setup::createConfiguration(
             $doctrineMetaConfig['dev_mode'],
             $doctrineMetaConfig['proxy_dir'],
@@ -83,11 +86,12 @@ return [
         );
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($doctrineMetaConfig['entity_path']);
         $doctrineConfig->setMetadataDriverImpl($driver);
-        $em = EntityManager::create($config['connection'], $doctrineConfig);
+        $em = EntityManager::create($appDoctrineConfig['connection'], $doctrineConfig);
         // $em->getConnection()->setAutoCommit(false);
         return $em;
     },
     SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {
+        /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $env = $config->getString("environment");
         $serializerBuilder = SerializerBuilder::create()->setDebug($env === "development");
@@ -132,6 +136,7 @@ return [
         return $serializerBuilder->build();
     },
     Mailer::class => function (ContainerInterface $container): Mailer {
+        /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $smtpForDev = $config->getString("environment") === "development" ? $config->getArray("email.mailtrap") : null;
         return new Mailer(
@@ -143,7 +148,9 @@ return [
         );
     },
     AuthSettings::class => function (ContainerInterface $container): AuthSettings {
-        $authSettings = $config = $container->get(Configuration::class)->getArray('auth');
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        $authSettings = $config->getArray('auth');
         return new AuthSettings(
             $authSettings['jwtsecret'],
             $authSettings['jwtalgorithm'],

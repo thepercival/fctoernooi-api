@@ -22,6 +22,7 @@ return function (App $app): void {
     if( $container === null ) {
         return;
     }
+    /** @var Configuration $config */
     $config = $container->get(Configuration::class);
 
     $app->add(

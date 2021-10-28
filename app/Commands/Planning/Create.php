@@ -11,6 +11,7 @@ use Exception;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
 use Psr\Container\ContainerInterface;
+use SportsPlanning\Input;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -139,16 +140,9 @@ class Create extends PlanningCommand
         int $eventPriority,
         bool|null $disableThrowOnTimeout = null
     ): void {
-        $planningOutput = new PlanningOutput($this->getLogger());
+        // new PlanningOutput($this->getLogger());
 
-        if (!$this->scheduleRepos->hasSchedules($planningInput)) {
-            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
-            $this->getLogger()->info('creating schedules .. ');
-            $schedules = $scheduleCreatorService->createSchedules($planningInput);
-            foreach ($schedules as $schedule) {
-                $this->scheduleRepos->save($schedule);
-            }
-        }
+        $this->createSchedules($planningInput);
 
         $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos);
         if ($disableThrowOnTimeout === true) {
@@ -163,6 +157,20 @@ class Create extends PlanningCommand
         }
         if ($competition !== null and $roundNumberAsValue !== null) {
             $this->updateRoundNumberWithPlanning($queueService, $competition, $roundNumberAsValue, $eventPriority);
+        }
+    }
+
+    protected function createSchedules(Input $planningInput): void {
+        $existingSchedules = $this->scheduleRepos->findByInput($planningInput);
+        $distinctNrOfPoulePlaces = $this->scheduleRepos->getDistinctNrOfPoulePlaces($planningInput);
+        if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
+            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
+            $scheduleCreatorService->setExistingSchedules($existingSchedules);
+            $this->getLogger()->info('creating schedules .. ');
+            $schedules = $scheduleCreatorService->createSchedules($planningInput);
+            foreach ($schedules as $schedule) {
+                $this->scheduleRepos->save($schedule);
+            }
         }
     }
 
