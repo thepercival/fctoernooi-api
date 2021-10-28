@@ -2,7 +2,7 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="FCToernooi\Tournament\Invitation" table="tournamentinvitations"
+    <entity name="FCToernooi\Tournament\Invitation" table="tournamentInvitations"
             repository-class="FCToernooi\Tournament\Invitation\Repository">
         <field name="createdDateTime" column="createdDateTime" type="datetime_immutable" nullable="false"
                unique="false"/>
@@ -13,11 +13,11 @@
                 <cascade-persist/>
             </cascade>
             <join-columns>
-                <join-column name="tournamentid" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+                <join-column name="tournamentId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
             </join-columns>
         </many-to-one>
         <unique-constraints>
-            <unique-constraint columns="tournamentid,emailaddress" name="main_u_idx"/>
+            <unique-constraint columns="tournamentId,emailaddress" name="main_u_idx"/>
         </unique-constraints>
     </entity>
 </doctrine-mapping>

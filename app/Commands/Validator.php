@@ -76,7 +76,7 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->initLogger($input, 'cron-tournament-validator');
+        $this->initLogger($input, 'command-validate');
 
         try {
             $tournaments = $this->getTournamentsFromInput($input);
