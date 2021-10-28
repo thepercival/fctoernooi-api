@@ -143,12 +143,10 @@ class Create extends PlanningCommand
 
         if (!$this->scheduleRepos->hasSchedules($planningInput)) {
             $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
-            $gameRoundSchedules = $scheduleCreatorService->createSchedules($planningInput);
-            foreach($gameRoundSchedules as $gameRoundSchedule) {
-                $this->scheduleRepos->save($gameRoundSchedule);
+            $schedules = $scheduleCreatorService->createSchedules($planningInput);
+            foreach ($schedules as $schedule) {
+                $this->scheduleRepos->save($schedule);
             }
-        } else {
-            $gameRoundSchedules = $this->scheduleRepos->findByInput($planningInput);
         }
 
         $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos);

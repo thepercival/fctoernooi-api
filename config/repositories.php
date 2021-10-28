@@ -35,6 +35,8 @@ use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Planning;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Schedule\Repository as ScheduleRepository;
+use SportsPlanning\Schedule;
 use Sports\Game\Repository as GameRepository;
 use Sports\Game as Game;
 use Sports\Game\Against\Repository as AgainstGameRepository;
@@ -122,7 +124,8 @@ return [
         return new StructureRepository(
             $entityManager,
             new HorizontalPouleCreator(),
-            new QualifyRuleCreator());
+            new QualifyRuleCreator()
+        );
     },
     PlanningRepository::class => function (ContainerInterface $container): PlanningRepository {
         $entityManager = $container->get(EntityManager::class);
@@ -134,6 +137,10 @@ return [
             $entityManager,
             $entityManager->getClassMetaData(PlanningInput::class)
         );
+    },
+    ScheduleRepository::class => function (ContainerInterface $container): ScheduleRepository {
+        $entityManager = $container->get(EntityManager::class);
+        return new ScheduleRepository($entityManager, $entityManager->getClassMetaData(Schedule::class));
     },
     GameRepository::class => function (ContainerInterface $container): GameRepository {
         $entityManager = $container->get(EntityManager::class);
