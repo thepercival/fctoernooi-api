@@ -52,7 +52,7 @@
         "phpstan/phpstan-strict-rules": "^0.12",
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "^4.3",
-        "weirdan/doctrine-psalm-plugin": "^1.0",
+        "weirdan/doctrine-psalm-plugin": "^2.0",
         "composer/composer": "^2.0",
         "psalm/plugin-phpunit": "^0.15"
     },

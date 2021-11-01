@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace FCToernooi;
 
 use DateTimeImmutable;
-use \Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\PersistentCollection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use FCToernooi\Tournament\CustomPlaceRanges;
-use Sports\Competition;
 use League\Period\Period;
+use Sports\Competition;
 use Sports\Competition\Referee;
 use SportsHelpers\Identifiable;
 use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
@@ -20,25 +20,21 @@ class Tournament extends Identifiable
     private DateTimeImmutable|null $breakEndDateTime = null;
     private bool $public = false;
     /**
-     * @phpstan-var ArrayCollection<int|string, TournamentUser>|PersistentCollection<int|string, TournamentUser>
-     * @psalm-var ArrayCollection<int|string, TournamentUser>
+     * @var Collection<int|string, TournamentUser>
      */
-    private ArrayCollection|PersistentCollection $users;
+    private Collection $users;
     /**
-     * @phpstan-var ArrayCollection<int|string, Sponsor>|PersistentCollection<int|string, Sponsor>
-     * @psalm-var ArrayCollection<int|string, Sponsor>
+     * @var Collection<int|string, Sponsor>
      */
-    private ArrayCollection|PersistentCollection $sponsors;
+    private Collection $sponsors;
     /**
-     * @phpstan-var ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
-     * @psalm-var ArrayCollection<int|string, Competitor>
+     * @var Collection<int|string, Competitor>
      */
-    private ArrayCollection|PersistentCollection $competitors;
+    private Collection $competitors;
     /**
-     * @phpstan-var ArrayCollection<int|string, LockerRoom>|PersistentCollection<int|string, LockerRoom>
-     * @psalm-var ArrayCollection<int|string, LockerRoom>
+     * @var Collection<int|string, LockerRoom>
      */
-    private ArrayCollection|PersistentCollection $lockerRooms;
+    private Collection $lockerRooms;
     protected int $exported = 0;
 
     public function __construct(private Competition $competition)
@@ -100,10 +96,9 @@ class Tournament extends Identifiable
     }
 
     /**
-     * @phpstan-return ArrayCollection<int|string, TournamentUser>|PersistentCollection<int|string, TournamentUser>
-     * @psalm-return ArrayCollection<int|string, TournamentUser>
+     * @return Collection<int|string, TournamentUser>
      */
-    public function getUsers(): ArrayCollection|PersistentCollection
+    public function getUsers(): Collection
     {
         return $this->users;
     }
@@ -120,28 +115,25 @@ class Tournament extends Identifiable
     }
 
     /**
-     * @phpstan-return ArrayCollection<int|string, Sponsor>|PersistentCollection<int|string, Sponsor>
-     * @psalm-return ArrayCollection<int|string, Sponsor>
+     * @return Collection<int|string, Sponsor>
      */
-    public function getSponsors(): ArrayCollection|PersistentCollection
+    public function getSponsors(): Collection
     {
         return $this->sponsors;
     }
 
     /**
-     * @phpstan-return ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
-     * @psalm-return ArrayCollection<int|string, Competitor>
+     * @return Collection<int|string, Competitor>
      */
-    public function getCompetitors(): ArrayCollection|PersistentCollection
+    public function getCompetitors(): Collection
     {
         return $this->competitors;
     }
 
     /**
-     * @phpstan-return ArrayCollection<int|string, LockerRoom>|PersistentCollection<int|string, LockerRoom>
-     * @psalm-return ArrayCollection<int|string, LockerRoom>
+     * @return Collection<int|string, LockerRoom>
      */
-    public function getLockerRooms(): ArrayCollection|PersistentCollection
+    public function getLockerRooms(): Collection
     {
         return $this->lockerRooms;
     }

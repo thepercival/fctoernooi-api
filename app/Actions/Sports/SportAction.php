@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
-use FCToernooi\Tournament;
-use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
-use Sports\Sport\Repository as SportRepository;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
-use Sports\Sport;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use Sports\Sport;
+use Sports\Sport\Repository as SportRepository;
 
 final class SportAction extends Action
 {
@@ -84,10 +83,6 @@ final class SportAction extends Action
             $sportSer = $this->serializer->deserialize($this->getRawData($request), Sport::class, 'json', $this->getDeserializationContext());
 
             $newSport = $this->sportRepos->findOneBy(['name' => strtolower($sportSer->getName())]);
-            if ($newSport !== null && ($sportSer->getTeam() !== $newSport->getTeam())
-            ) {
-                throw new Exception('de sport "' . $newSport->getName() . '" bestaat al, kies een andere naam', E_ERROR);
-            }
             if ($newSport === null) {
                 $newSport = new Sport(
                     strtolower($sportSer->getName()),

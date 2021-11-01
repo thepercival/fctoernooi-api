@@ -1,7 +1,22 @@
-
-
 -- PRE PRE PRE doctrine-update =============================================================
-update sports set customId = 17 where name = 'padel';
+update sports
+set customId = 17
+where name = 'padel';
+
+update sports
+set defaultGameMode = 1
+where name = 'golf';
+update sports
+set defaultGameMode = 1,
+    team            = false
+where name = 'hoogspringen';
+update sports
+set defaultGameMode = 1
+where name = 'midget golf';
+update sports
+set defaultGameMode = 3,
+    team            = false
+where name = 'wielrennen';
 
 drop table roundscoreconfigs;
 drop table roundconfigs;

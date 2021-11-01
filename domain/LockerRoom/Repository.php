@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace FCToernooi\LockerRoom;
 
-use SportsHelpers\Repository as BaseRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\ConnectionException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom as LockerRoomBase;
-use \Doctrine\Common\Collections\ArrayCollection;
-use FCToernooi\Competitor;
+use SportsHelpers\Repository as BaseRepository;
 
 /**
  * @template-extends EntityRepository<LockerRoomBase>
@@ -25,12 +25,12 @@ class Repository extends EntityRepository
 
     /**
      * @param LockerRoomBase $lockerRoom
-     * @param ArrayCollection<int|string, Competitor> $newCompetitors
+     * @param Collection<int|string, Competitor> $newCompetitors
      * @throws ConnectionException
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function updateCompetitors(LockerRoom $lockerRoom, ArrayCollection $newCompetitors): void
+    public function updateCompetitors(LockerRoom $lockerRoom, Collection $newCompetitors): void
     {
         $conn = $this->_em->getConnection();
         $conn->beginTransaction();

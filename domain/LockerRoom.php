@@ -5,18 +5,15 @@ namespace FCToernooi;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\PersistentCollection;
-use FCToernooi\Competitor;
 use SportsHelpers\Identifiable;
 
 class LockerRoom extends Identifiable
 {
     protected string $name;
     /**
-     * @phpstan-var ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
-     * @psalm-var ArrayCollection<int|string, Competitor>
+     * @var Collection<int|string, Competitor>
      */
-    private ArrayCollection|PersistentCollection $competitors;
+    private Collection $competitors;
 
     const MIN_LENGTH_NAME = 1;
     const MAX_LENGTH_NAME = 6;
@@ -50,10 +47,9 @@ class LockerRoom extends Identifiable
     }
 
     /**
-     * @phpstan-return ArrayCollection<int|string, Competitor>|PersistentCollection<int|string, Competitor>
-     * @psalm-return ArrayCollection<int|string, Competitor>
+     * @return Collection<int|string, Competitor>
      */
-    public function getCompetitors(): ArrayCollection|PersistentCollection
+    public function getCompetitors(): Collection
     {
         return $this->competitors;
     }
