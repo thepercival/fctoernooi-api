@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
-use Psr\Container\ContainerInterface;
 use App\Command;
+use FCToernooi\Sponsor\Repository as SponsorRepository;
+use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
 
 class BackupSponsorImages extends Command
 {
@@ -22,7 +21,9 @@ class BackupSponsorImages extends Command
     public function __construct(ContainerInterface $container)
     {
         $this->sponsorRepos = $container->get(SponsorRepository::class);
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void

@@ -103,15 +103,15 @@ class Tournament extends Identifiable
         return $this->users;
     }
 
-    public function getUser(User $user): ?TournamentUser
+    public function getUser(User $user): TournamentUser|null
     {
         $filteredUsers = $this->getUsers()->filter(
-            function (TournamentUser $tournamentUser) use ($user) : bool {
+            function (TournamentUser $tournamentUser) use ($user): bool {
                 return $user === $tournamentUser->getUser();
             }
         );
         $user = $filteredUsers->first();
-        return $user ? $user : null;
+        return $user !== false ? $user : null;
     }
 
     /**

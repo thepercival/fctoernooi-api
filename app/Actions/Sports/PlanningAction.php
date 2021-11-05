@@ -3,27 +3,26 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\QueueService;
 use App\Response\ErrorResponse;
 use Exception;
-use Psr\Log\LoggerInterface;
+use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
-use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\EditMode;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
+use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Structure;
+use Sports\Structure\Repository as StructureRepository;
+use SportsPlanning\Input\Repository as InputRepository;
 use SportsPlanning\Planning;
 use SportsPlanning\Planning\Repository as PlanningRepository;
-use Sports\Round\Number as RoundNumber;
-use FCToernooi\Tournament;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Planning\Config\Repository as PlanningConfigRepository;
-use Sports\Structure\Repository as StructureRepository;
-use Sports\Structure;
-use SportsPlanning\Input\Repository as InputRepository;
-use App\Actions\Sports\Deserialize\RefereeService as DeserializeRefereeService;
-use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 
 final class PlanningAction extends Action
 {
@@ -81,7 +80,8 @@ final class PlanningAction extends Action
                 }
             }
         }
-        return $this->respondWithJson($response, json_encode(['progress' => $progressPerc]));
+        $json = json_encode(['progress' => $progressPerc]);
+        return $this->respondWithJson($response, $json === false ? '' : $json);
     }
 
     /**

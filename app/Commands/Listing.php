@@ -1,35 +1,23 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands;
 
-use DateTimeImmutable;
-use Psr\Container\ContainerInterface;
 use App\Command;
-use Selective\Config\Configuration;
-
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Listing extends Command
 {
     /**
-     * @var ContainerInterface
-     */
-    protected $container;
-
-    /**
      * Listing constructor.
      * @param ContainerInterface $container
      * @param list<string> $commandKeys
      */
-    public function __construct(ContainerInterface $container, private array $commandKeys)
+    public function __construct(protected ContainerInterface $container, private array $commandKeys)
     {
-        $this->container = $container;
-        parent::__construct($container->get(Configuration::class));
     }
 
     protected function configure(): void

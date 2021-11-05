@@ -47,6 +47,11 @@ class LockerRooms extends ToernooiPdfPage
         return (int)floor(($y - $this->getPageMargin()) / $this->getRowHeight());
     }
 
+    /**
+     * @param float $y
+     * @param list<LockerRoom> $lockerRooms
+     * @return int
+     */
     protected function getNrOfColumns(float $y, array $lockerRooms): int
     {
         return (int)ceil($this->getLinesNeeded($lockerRooms) / $this->getLinesAvailable($y));

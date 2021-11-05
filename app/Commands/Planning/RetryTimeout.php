@@ -3,28 +3,27 @@ declare(strict_types=1);
 
 namespace App\Commands\Planning;
 
+use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
 use Exception;
-use SportsHelpers\PlaceRanges;
 use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
+use SportsHelpers\PlaceRanges;
 use SportsHelpers\PouleStructure;
+use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
 use SportsHelpers\SportRange;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Planning as PlanningBase;
+use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
+use SportsPlanning\Seeker as PlanningSeeker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Planning as PlanningBase;
-use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Batch\Output as BatchOutput;
-use SportsPlanning\Seeker as PlanningSeeker;
-use App\Commands\Planning as PlanningCommand;
-use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
 
 class RetryTimeout extends PlanningCommand
 {
@@ -57,7 +56,12 @@ class RetryTimeout extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initLogger($input, 'command-planning-retry-timeout');
-        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos );
+        $planningSeeker = new PlanningSeeker(
+            $this->getLogger(),
+            $this->planningInputRepos,
+            $this->planningRepos,
+            $this->scheduleRepos
+        );
         $planningSeeker->enableTimedout($this->getMaxTimeoutSeconds($input));
 
 
@@ -101,14 +105,18 @@ class RetryTimeout extends PlanningCommand
         }
 
         if ($planningInput === null) {
-            $suffix = 'maxTimeoutSeconds: ' .$maxTimeOutSeconds;
+            $suffix = 'maxTimeoutSeconds: ' . $maxTimeOutSeconds;
             $suffix .= ', placesRange: ' . $placesRange->getMin() . '-' . $placesRange->getMax();
             throw new Exception('no timedout-planning found for ' . $suffix, E_ERROR);
         }
         return $planningInput;
     }
 
-    protected function getTimedoutInput(bool $batchGames, int $maxTimeOutSeconds, SportRange $placesRange ): ?PlanningInput {
+    protected function getTimedoutInput(
+        bool $batchGames,
+        int $maxTimeOutSeconds,
+        SportRange $placesRange
+    ): ?PlanningInput {
 //        if ($placesRange === null) {
 //            $planningInput = null;
 //            if ($batchGames) {
@@ -119,7 +127,10 @@ class RetryTimeout extends PlanningCommand
 //            return $planningInput;
 //        }
 
-        $placesPerPouleRange = new SportRange( PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall);
+        $placesPerPouleRange = new SportRange(
+            PlaceRanges::MinNrOfPlacesPerPoule,
+            TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall
+        );
         $structureIterator = new PouleStructureIterator($placesRange, $placesPerPouleRange, new SportRange(1, 64));
         while ($structureIterator->valid()) {
             // $this->getLogger()->info((string)$structureIterator->current());

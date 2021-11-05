@@ -53,7 +53,7 @@ class Repository extends EntityRepository
                     }
                 );
                 $competitor = reset($foundCompetitors);
-                if (!$competitor) {
+                if ($competitor === false) {
                     continue;
                 }
                 $lockerRoom->getCompetitors()->add($competitor);

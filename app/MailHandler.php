@@ -23,7 +23,7 @@ final class MailHandler extends NativeMailerHandler
         if ($this->mailer === null) {
             return;
         }
-        $contentType = $this->getContentType() ?: ($this->isHtmlBody($content) ? 'text/html' : 'text/plain');
+        $contentType = $this->getContentType() ?? ($this->isHtmlBody($content) ? 'text/html' : 'text/plain');
 
         if ($contentType !== 'text/html') {
             $content = wordwrap($content, $this->maxColumnWidth);
@@ -36,7 +36,7 @@ final class MailHandler extends NativeMailerHandler
 //        }
 
         $subject = $this->subject;
-        if ($records) {
+        if (count($records) > 0) {
             $subjectFormatter = new LineFormatter($this->subject);
             $subject = $subjectFormatter->format($this->getHighestRecord($records));
         }

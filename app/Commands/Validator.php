@@ -3,34 +3,29 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
-use App\Mailer;
-use DateTime;
+use App\Command;
 use DateTimeImmutable;
 use Exception;
-use Sports\Competition;
-use Sports\Structure;
-use Sports\Game\Against as AgainstGame;
-use Sports\Competitor\Map as CompetitorMap;
 use FCToernooi\Tournament;
-use Psr\Container\ContainerInterface;
-use App\Command;
-use Sports\Output\StructureOutput;
-use Sports\Planning\EditMode as PlanningEditMode;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Selective\Config\Configuration;
 use FCToernooi\Tournament\Repository as TournamentRepository;
-use Sports\Round\Number as RoundNumber;
-use Sports\Structure\Repository as StructureRepository;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
-use Sports\Structure\Validator as StructureValidator;
+use Psr\Container\ContainerInterface;
+use Selective\Config\Configuration;
 use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Round\Number\GamesValidator;
+use Sports\Competitor\Map as CompetitorMap;
+use Sports\Game\Against as AgainstGame;
+use Sports\Game\Order as GameOrder;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
-use Sports\Game\Order as GameOrder;
+use Sports\Planning\EditMode as PlanningEditMode;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\GamesValidator;
+use Sports\Structure;
+use Sports\Structure\Repository as StructureRepository;
+use Sports\Structure\Validator as StructureValidator;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Validator extends Command
 {
@@ -46,14 +41,19 @@ class Validator extends Command
 
     public function __construct(ContainerInterface $container)
     {
+        /** @var TournamentRepository tournamentRepos */
         $this->tournamentRepos = $container->get(TournamentRepository::class);
+        /** @var StructureRepository structureRepos */
         $this->structureRepos = $container->get(StructureRepository::class);
+        /** @var PlanningInputRepository planningInputRepos */
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->competitionValidator = new CompetitionValidator();
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
 
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void
@@ -88,6 +88,7 @@ class Validator extends Command
                 $description .= $tournament->getCreatedDateTime()->format(DATE_ISO8601);
 
                 $this->getLogger()->info($description);
+                /** @var Structure|null $structure */
                 $structure = null;
                 try {
                     if ($tournament->getUsers()->count() === 0) {
@@ -199,8 +200,8 @@ class Validator extends Command
      */
     protected function getTournamentsFromInput(InputInterface $input): array
     {
-        $tournamentId = $input->getArgument('tournamentId');
-        if (is_string($tournamentId) && (int)$tournamentId > 0) {
+        $tournamentId = (string)$input->getArgument('tournamentId');
+        if ((int)$tournamentId > 0) {
             $tournament = $this->tournamentRepos->find($tournamentId);
             return $tournament !== null ? [$tournament] : [];
         }

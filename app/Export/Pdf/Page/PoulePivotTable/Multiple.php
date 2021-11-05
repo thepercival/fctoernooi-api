@@ -3,23 +3,17 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
-use App\Export\Pdf\Document;
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Place;
-use Sports\Planning\GameAmountConfig;
+use Sports\Poule;
+use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
 use Sports\Ranking\Item\Round as RoundRankingItem;
 use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
-use SportsHelpers\Against\Side as AgainstSide;
-use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
-use Sports\NameService;
-use Sports\Poule;
-use Sports\Game\Place\Together as TogetherGamePlace;
-use Sports\State;
 use Sports\Round\Number as RoundNumber;
-use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
-use Sports\Score\Config\Service as ScoreConfigService;
+use Sports\State;
 
 class Multiple extends ToernooiPdfPage
 {
@@ -263,12 +257,6 @@ class Multiple extends ToernooiPdfPage
         return $rankingItem === false ? null : $rankingItem;
     }
 
-    /**
-     * @param RoundRankingItem $rankingItems
-     * @param CompetitionSport $competitionSport
-     * @return string
-     * @throws \Exception
-     */
     protected function getRank(RoundRankingItem|null $rankingItem, CompetitionSport $competitionSport): string
     {
         if ($rankingItem === null) {

@@ -8,15 +8,16 @@ use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use DateTimeZone;
 use FCToernooi\QRService;
+use FCToernooi\TranslationService;
+use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round;
-use Sports\Competition\Sport as CompetitionSport;
 use Sports\Score\Config as ScoreConfig;
 use Sports\Score\Config\Service as ScoreConfigService;
-use FCToernooi\TranslationService;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
 use Zend_Pdf_Color_Html;
+use Zend_Pdf_Image;
 use Zend_Pdf_Page;
 use Zend_Pdf_Resource_ImageFactory;
 
@@ -133,6 +134,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
         $imgSize = $this->getLeftPartWidth() * 1.5;
         $qrPath = $this->qrService->writeGameToJpg($this->getParent()->getTournament(), $game, $url, (int)$imgSize);
+        /** @var Zend_Pdf_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $this->getPageMargin(), $y - $imgSize, ($this->getPageMargin() + $imgSize), $y);
     }

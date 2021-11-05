@@ -1,11 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use App\Handlers\ShutdownHandler;
-use App\ResponseEmitter\ResponseEmitter;
 use DI\ContainerBuilder;
 use Slim\App;
-use Slim\Factory\ServerRequestCreatorFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -18,7 +15,7 @@ if (isset($_SERVER['REQUEST_METHOD']) === false) {
 }
 // Build PHP-DI Container instance
 $container = $containerBuilder->build();
-// Create App instance
+/** @var App $app */
 $app = $container->get(App::class);
 // Register routes
 (require __DIR__ . '/routes.php')($app);

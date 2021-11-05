@@ -3,25 +3,22 @@ declare(strict_types=1);
 
 namespace App\Commands\Pdf;
 
+use App\Command;
 use App\Export\Pdf\Document as PdfDocument;
 use Exception;
-use FCToernooi\Tournament\ExportConfig;
-use Sports\Structure;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\ExportConfig;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Container\ContainerInterface;
-use App\Command;
+use Selective\Config\Configuration;
+use Sports\Round\Number\GamesValidator;
+use Sports\Structure;
+use Sports\Structure\Repository as StructureRepository;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Selective\Config\Configuration;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use Sports\Structure\Repository as StructureRepository;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
-use Sports\Round\Number\GamesValidator;
-use Sports\Output\StructureOutput;
-use Sports\Output\Game\Against as AgainstGameOutput;
-use Sports\Output\Game\Together as TogetherGameOutput;
 
 class Validator extends Command
 {
@@ -112,8 +109,8 @@ class Validator extends Command
     }
 
     /**
-     * @param array<string, int|string> $queryParams
-     * @return array|int[]
+     * @param InputInterface $input
+     * @return list<int>
      * @throws Exception
      */
     protected function getSubjects(InputInterface $input): array

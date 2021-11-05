@@ -3,28 +3,28 @@ declare(strict_types=1);
 
 namespace App\Commands\Planning;
 
+use App\Command;
 use App\Mailer;
 use App\QueueService;
-use \Exception;
+use Exception;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use App\Command;
+use Selective\Config\Configuration;
 use SportsHelpers\PouleStructure;
-use SportsPlanning\Planning;
 use SportsHelpers\SelfReferee;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Planning;
+use SportsPlanning\Planning\Output as PlanningOutput;
+use SportsPlanning\Planning\Repository as PlanningRepository;
+use SportsPlanning\Planning\Validator as PlanningValidator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Selective\Config\Configuration;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
-use SportsPlanning\Planning\Repository as PlanningRepository;
-use SportsPlanning\Planning\Validator as PlanningValidator;
 
 class Validator extends Command
 {
@@ -41,7 +41,9 @@ class Validator extends Command
         $this->planningRepos = $container->get(PlanningRepository::class);
         $this->planningValidator = new PlanningValidator();
         $this->mailer = $container->get(Mailer::class);
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void

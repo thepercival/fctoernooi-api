@@ -2,31 +2,25 @@
 
 declare(strict_types=1);
 
+use App\Mailer;
+use Doctrine\Common\Cache\Cache;
+use Doctrine\ORM\EntityManager;
+use FCToernooi\Auth\Settings as AuthSettings;
+use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerBuilder;
 use JMS\Serializer\SerializerInterface;
-use Psr\Container\ContainerInterface;
-use Doctrine\ORM\EntityManager;
-
-use DI\ContainerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-
-use Slim\Views\Twig as TwigView;
-
-use App\Mailer;
-use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
-use Sports\SerializationHandler\Round\Number as RoundNumberSerializationHandler;
-use Sports\SerializationHandler\Structure as StructureSerializationHandler;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\DeserializationContext;
-use Sports\SerializationHandler\Round as RoundSerializationHandler;
 use Selective\Config\Configuration;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Views\Twig as TwigView;
 use Sports\SerializationHandler\DummyCreator;
-use FCToernooi\Auth\Settings as AuthSettings;
 
 return [
     // Application settings
@@ -39,9 +33,10 @@ return [
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         if ($config->getString("environment") === "production") {
-            $routeCacheFile = $config->getString('router.cache_file');
-            if ($routeCacheFile) {
+            try {
+                $routeCacheFile = $config->getString('router.cache_file');
                 $app->getRouteCollector()->setCacheFile($routeCacheFile);
+            } catch (Exception $e) {
             }
         }
         return $app;
@@ -59,15 +54,14 @@ return [
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $loggerSettings = $config->getArray('logger');
-        $name = "application";
+        $name = 'application';
         $logger = new Logger($name);
 
         $processor = new UidProcessor();
         $logger->pushProcessor($processor);
 
-        $path = $config->getString(
-            "environment"
-        ) === "development" ? 'php://stdout' : ($loggerSettings['path'] . $name . '.log');
+        $loggerPath = $config->getString('logger.path') . $name . '.log';
+        $path = $config->getString('environment') === 'development' ? 'php://stdout' : $loggerPath;
 
         $handler = new StreamHandler($path, $loggerSettings['level']);
         $logger->pushHandler($handler);
@@ -77,16 +71,21 @@ return [
     EntityManager::class => function (ContainerInterface $container): EntityManager {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        $appDoctrineConfig = $config->getArray('doctrine');
-        $doctrineMetaConfig = $appDoctrineConfig['meta'];
-        $doctrineConfig = Doctrine\ORM\Tools\Setup::createConfiguration(
-            $doctrineMetaConfig['dev_mode'],
-            $doctrineMetaConfig['proxy_dir'],
-            $doctrineMetaConfig['cache']
-        );
+        $doctrineAppConfig = $config->getArray('doctrine');
+        /** @var array<string, string|bool|null> $doctrineMetaConfig */
+        $doctrineMetaConfig = $doctrineAppConfig['meta'];
+        /** @var bool $devMode */
+        $devMode = $doctrineMetaConfig['dev_mode'];
+        /** @var string|null $proxyDir */
+        $proxyDir = $doctrineMetaConfig['proxy_dir'];
+        /** @var Cache|null $cache */
+        $cache = $doctrineMetaConfig['cache'];
+        $doctrineConfig = Doctrine\ORM\Tools\Setup::createConfiguration($devMode, $proxyDir, $cache);
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($doctrineMetaConfig['entity_path']);
         $doctrineConfig->setMetadataDriverImpl($driver);
-        $em = EntityManager::create($appDoctrineConfig['connection'], $doctrineConfig);
+        /** @var array<string, mixed> $connectionParams */
+        $connectionParams = $doctrineAppConfig['connection'];
+        $em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
         // $em->getConnection()->setAutoCommit(false);
         return $em;
     },
@@ -113,7 +112,9 @@ return [
                 return DeserializationContext::create()->setGroups(['Default']);
             }
         );
-        foreach ($config->getArray('serializer.yml_dir') as $ymlnamespace => $ymldir) {
+        /** @var array<string, string> $ymlDirs */
+        $ymlDirs = $config->getArray('serializer.yml_dir');
+        foreach ($ymlDirs as $ymlnamespace => $ymldir) {
             $serializerBuilder->addMetadataDir($ymldir, $ymlnamespace);
         }
         $dummyCreator = new DummyCreator();
@@ -138,9 +139,12 @@ return [
     Mailer::class => function (ContainerInterface $container): Mailer {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
+        /** @var LoggerInterface $logger */
+        $logger = $container->get(LoggerInterface::class);
+        /** @var array<string, string|int>|null|null $smtpForDev */
         $smtpForDev = $config->getString("environment") === "development" ? $config->getArray("email.mailtrap") : null;
         return new Mailer(
-            $container->get(LoggerInterface::class),
+            $logger,
             $config->getString('email.from'),
             $config->getString('email.fromname'),
             $config->getString('email.admin'),
@@ -152,9 +156,9 @@ return [
         $config = $container->get(Configuration::class);
         $authSettings = $config->getArray('auth');
         return new AuthSettings(
-            $authSettings['jwtsecret'],
-            $authSettings['jwtalgorithm'],
-            $authSettings['activationsecret']
+            $config->getString('auth.jwtsecret'),
+            $config->getString('auth.jwtalgorithm'),
+            $config->getString('auth.activationsecret')
         );
     }
 ];

@@ -5,27 +5,28 @@ namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
-use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
-use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
-use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\GameLine\Against as AgainstGameLine;
+use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
+use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
 use App\Export\Pdf\GameLine\Together as TogetherGameLine;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use League\Period\Period;
 use Sports\Competition;
 use Sports\Game;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
+use Sports\Round\Number as RoundNumber;
 use SportsHelpers\GameMode;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
-use Sports\Round\Number as RoundNumber;
-use Sports\NameService;
-use Zend_Pdf_Exception;
 
 class Planning extends ToernooiPdfPage
 {
     protected Period|null $tournamentBreak = null;
     protected AgainstGameLine|null $againstGameLine = null;
     protected TogetherGameLine|null $togetherGameLine = null;
+    /**
+     * @var callable|null
+     */
     protected mixed $gameFilter = null;
     protected string|null $title = null;
 
@@ -182,6 +183,10 @@ class Planning extends ToernooiPdfPage
         return $this->getGameLine($game)->drawBreak($roundNumber, $this->tournamentBreak, $y);
     }
 
+    /**
+     * @param RoundNumber $roundNumber
+     * @return list<AgainstGame|TogetherGame>
+     */
     public function getFilteredGames(RoundNumber $roundNumber): array
     {
         $games = [];

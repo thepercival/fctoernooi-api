@@ -60,7 +60,9 @@ class Grouping extends ToernooiPdfPage
             $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
             while ($nrOfPoulesForLine > 0) {
                 $poule = array_shift($poules);
-
+                if ($poule === null) {
+                    break;
+                }
                 $numberWidth = $pouleWidth * $percNumberWidth;
                 $this->setFont($this->getParent()->getFont(true), $fontHeight);
                 $this->drawCell(

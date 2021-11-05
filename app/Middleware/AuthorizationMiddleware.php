@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Exception;
 use FCToernooi\Tournament;
 use FCToernooi\User;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
-use FCToernooi\TournamentUser;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 abstract class AuthorizationMiddleware implements MiddlewareInterface
@@ -22,7 +21,11 @@ abstract class AuthorizationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
         try {
-            $this->isAuthorized($request, $request->getAttribute('user'), $request->getAttribute('tournament'));
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+            $this->isAuthorized($request, $user, $tournament);
         } catch (Exception $exception) {
             return new ForbiddenResponse($exception->getMessage());
         }

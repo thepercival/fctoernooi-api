@@ -1,19 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
+use App\Middleware\CorsMiddleware;
+use App\Response\ErrorResponse;
+use App\Response\UnauthorizedResponse;
+use FCToernooi\Auth\Token as AuthToken;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use App\Response\UnauthorizedResponse;
-use App\Response\ErrorResponse;
+use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use Tuupola\Middleware\JwtAuthentication;
-use App\Middleware\CorsMiddleware;
+use Slim\App;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
-use Psr\Log\LoggerInterface;
-use Slim\App;
-use FCToernooi\Auth\Token as AuthToken;
+use Tuupola\Middleware\JwtAuthentication;
 
 // middleware is executed by LIFO
 
@@ -45,23 +46,23 @@ return function (App $app): void {
                             'ignore' => ['/public']
                         ]
                     ),
-                    new JwtAuthentication\RequestMethodRule(
-                        [
-                                   'ignore' => ['OPTIONS']
-                               ]
-                    )
-                       ],
-                       'error' => function (Response $response, array $args): UnauthorizedResponse {
-                           return new UnauthorizedResponse($args['message']);
-                       },
+                    new JwtAuthentication\RequestMethodRule(['ignore' => ['OPTIONS']])
+                ],
+                'error' => function (Response $response, array $args): UnauthorizedResponse {
+                    /** @var string $message */
+                    $message = $args['message'];
+                    return new UnauthorizedResponse($message);
+                },
                 'before' => function (Request $request, array $args): Request {
                     if (is_array($args['decoded']) && count($args['decoded']) > 0) {
-                        $token = new AuthToken($args['decoded']);
+                        /** @var array<string, string|int> $decoded */
+                        $decoded = $args['decoded'];
+                        $token = new AuthToken($decoded);
                         return $request->withAttribute('token', $token);
                     }
                     return $request;
                 }
-                   ]
+            ]
         )
     );
 

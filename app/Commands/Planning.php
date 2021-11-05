@@ -3,15 +3,14 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Command;
 use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
-use App\Command;
 use Selective\Config\Configuration;
-
 use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
-use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Planning\Repository as PlanningRepository;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Planning extends Command
@@ -24,7 +23,9 @@ class Planning extends Command
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningRepos = $container->get(PlanningRepository::class);
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function getPlacesRange(InputInterface $input): SportRange

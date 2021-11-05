@@ -6,11 +6,13 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
+        <directory name="app/Commands"/>
         <directory name="app/"/>
         <directory name="config/"/>
         <directory name="domain/"/>
         <directory name="tests/cases/"/>
-<!--        <directory name="serialization/handler/"/>-->
+
+        <!--        <directory name="serialization/handler/"/>-->
         <ignoreFiles>
             <directory name="vendor"/>
         </ignoreFiles>

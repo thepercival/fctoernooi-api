@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
-use App\Export\Pdf\Align;
-use Zend_Pdf_Canvas_Interface;
 use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
 use Zend_Pdf_Exception;
+use Zend_Pdf_Image;
 use Zend_Pdf_Page;
 use Zend_Pdf_Resource_ImageFactory;
 
@@ -18,7 +17,6 @@ abstract class Page extends Zend_Pdf_Page
     protected Zend_Pdf_Color|null $fillColorTmp = null;
     protected float $lineWidth;
     protected float $padding;
-    protected array $images;
 
     public function __construct(protected Document $parent, mixed $param1, mixed $param2 = null, mixed $param3 = null)
     {
@@ -27,7 +25,6 @@ abstract class Page extends Zend_Pdf_Page
         $this->textColor = new Zend_Pdf_Color_Html('black');
         $this->setLineWidth(1);
         $this->padding = 1.0;
-        $this->images = [];
         $this->_fontSize = 0.0;
         $this->_safeGS = true;
         $this->_attached = false;
@@ -103,7 +100,7 @@ abstract class Page extends Zend_Pdf_Page
         if (strlen($subTitle) > 0) {
             $widthCenter -= ($margin + $widthRight);
         }
-
+        /** @var Zend_Pdf_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../logo.jpg');
         $this->drawImage($img, $xLeft, $y - $imgSize, $xLeft + $imgSize, $y);
 
@@ -209,7 +206,7 @@ abstract class Page extends Zend_Pdf_Page
 
         $maxLength = $nWidth;
         $stringXPos = $xPos;
-        if( $degrees === null) {
+        if ($degrees === null) {
             $degrees = 0;
         } elseif ($degrees > 45) {
             $maxLength = $nHeight;
@@ -290,7 +287,7 @@ abstract class Page extends Zend_Pdf_Page
         $this->setFillColor($this->textColor);
 
         $widthForStartPosition = 0;
-        if( $nMaxWidth !== null ) {
+        if ($nMaxWidth !== null) {
             $widthForStartPosition = $nMaxWidth;
         }
         $nNewXPos = $this->getTextStartPosition($xPos, $sText, $nAlign, $widthForStartPosition);
@@ -302,6 +299,9 @@ abstract class Page extends Zend_Pdf_Page
         $nCharPosition = 0;
         // $unicodeString = 'aÄ…bcÄ�deÄ™Ã«Å‚';
         $chrArray = preg_split('//u', $sText, -1, PREG_SPLIT_NO_EMPTY);
+        if ($chrArray === false) {
+            return $nNewXPos;
+        }
         for ($nCharIndex = 0; $nCharIndex < count($chrArray); $nCharIndex++) {
             $nTmp = $this->uniord($chrArray[$nCharIndex]);
 
@@ -344,11 +344,14 @@ abstract class Page extends Zend_Pdf_Page
         if ($nFontSize === null) {
             $nFontSize = $this->getFontSize();
         }
-        if( $sText === null ) {
+        if ($sText === null) {
             $sText = '';
         }
         // $unicodeString = 'aÄ…bcÄ�deÄ™Ã«Å‚';
         $chrArray = preg_split('//u', $sText, -1, PREG_SPLIT_NO_EMPTY);
+        if ($chrArray === false) {
+            return $nCharPosition;
+        }
         for ($nCharIndex = 0; $nCharIndex < count($chrArray); $nCharIndex++) {
             $nTmp = $this->uniord($chrArray[$nCharIndex]);
 
@@ -440,7 +443,7 @@ abstract class Page extends Zend_Pdf_Page
                     'l' => $vtLineColor,
                     'r' => $vtLineColor
                 ];
-            } elseif ( is_array($vtLineColor) ){
+            } elseif (is_array($vtLineColor)) {
                 if (array_key_exists('b', $vtLineColor) === true) {
                     $arrTopLineColors['b'] = $oFillColor;
                     $arrMiddleLineColors['b'] = $oFillColor;

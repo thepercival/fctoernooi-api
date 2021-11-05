@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
-use FCToernooi\Tournament;
-use Psr\Container\ContainerInterface;
 use App\Command;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\Repository as TournamentRepository;
+use Psr\Container\ContainerInterface;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Selective\Config\Configuration;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 
 class UpdateSitemap extends Command
 {
-    /**
-     * @var TournamentRepository
-     */
-    protected $tournamentRepos;
+    protected TournamentRepository $tournamentRepos;
 
     public function __construct(ContainerInterface $container)
     {
+        /** @var TournamentRepository tournamentRepos */
         $this->tournamentRepos = $container->get(TournamentRepository::class);
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void
