@@ -4,32 +4,28 @@ declare(strict_types=1);
 
 namespace App\Commands\Planning;
 
+use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
 use App\QueueService;
 use Doctrine\ORM\EntityManager;
 use Exception;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
 use Psr\Container\ContainerInterface;
-use SportsPlanning\Input;
+use Sports\Competition;
+use Sports\Competition\Repository as CompetitionRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
+use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Structure\Repository as StructureRepository;
+use SportsPlanning\Input as PlanningInput;
+use SportsPlanning\Planning\Output as PlanningOutput;
+use SportsPlanning\Seeker as PlanningSeeker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Sports\Competition;
-use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
-use SportsPlanning\Schedule\Repository as ScheduleRepository;
-use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
-use Sports\Structure\Repository as StructureRepository;
-
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Seeker as PlanningSeeker;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Competition\Repository as CompetitionRepository;
-use Sports\Round\Number as RoundNumber;
-use App\Commands\Planning as PlanningCommand;
 
 class Create extends PlanningCommand
 {
@@ -37,7 +33,6 @@ class Create extends PlanningCommand
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
     protected CompetitionRepository $competitionRepos;
-    protected ScheduleRepository $scheduleRepos;
     protected EntityManager $entityManager;
 
     protected bool $showSuccessful = false;
@@ -51,7 +46,6 @@ class Create extends PlanningCommand
         $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
         $this->tournamentRepos = $container->get(TournamentRepository::class);
         $this->competitionRepos = $container->get(CompetitionRepository::class);
-        $this->scheduleRepos = $container->get(ScheduleRepository::class);
         $this->entityManager = $container->get(EntityManager::class);
     }
 
@@ -157,20 +151,6 @@ class Create extends PlanningCommand
         }
         if ($competition !== null and $roundNumberAsValue !== null) {
             $this->updateRoundNumberWithPlanning($queueService, $competition, $roundNumberAsValue, $eventPriority);
-        }
-    }
-
-    protected function createSchedules(Input $planningInput): void {
-        $existingSchedules = $this->scheduleRepos->findByInput($planningInput);
-        $distinctNrOfPoulePlaces = $this->scheduleRepos->getDistinctNrOfPoulePlaces($planningInput);
-        if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
-            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
-            $scheduleCreatorService->setExistingSchedules($existingSchedules);
-            $this->getLogger()->info('creating schedules .. ');
-            $schedules = $scheduleCreatorService->createSchedules($planningInput);
-            foreach ($schedules as $schedule) {
-                $this->scheduleRepos->save($schedule);
-            }
         }
     }
 

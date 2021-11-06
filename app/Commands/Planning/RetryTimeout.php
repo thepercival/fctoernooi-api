@@ -73,6 +73,7 @@ class RetryTimeout extends PlanningCommand
             }
 
             $planningInput = $this->getPlanningInputFromInput($input);
+            $this->createSchedules($planningInput);
             $oldBestPlanning = $planningInput->getBestPlanning();
             $planningSeeker->process($planningInput);
             if ($oldBestPlanning !== $planningInput->getBestPlanning()) {

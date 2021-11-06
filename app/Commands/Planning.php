@@ -9,20 +9,25 @@ use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
+use SportsPlanning\Input;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Planning\Repository as PlanningRepository;
+use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
+use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Planning extends Command
 {
     protected PlanningInputRepository $planningInputRepos;
     protected PlanningRepository $planningRepos;
+    protected ScheduleRepository $scheduleRepos;
 
     public function __construct(ContainerInterface $container)
     {
         // $settings = $container->get('settings');
         $this->planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningRepos = $container->get(PlanningRepository::class);
+        $this->scheduleRepos = $container->get(ScheduleRepository::class);
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);
@@ -43,6 +48,21 @@ class Planning extends Command
         }
         $minMax = explode('-', $placeRangeOption);
         return new SportRange((int)$minMax[0], (int)$minMax[1]);
+    }
+
+    protected function createSchedules(Input $planningInput): void
+    {
+        $existingSchedules = $this->scheduleRepos->findByInput($planningInput);
+        $distinctNrOfPoulePlaces = $this->scheduleRepos->getDistinctNrOfPoulePlaces($planningInput);
+        if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
+            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
+            $scheduleCreatorService->setExistingSchedules($existingSchedules);
+            $this->getLogger()->info('creating schedules .. ');
+            $schedules = $scheduleCreatorService->createSchedules($planningInput);
+            foreach ($schedules as $schedule) {
+                $this->scheduleRepos->save($schedule);
+            }
+        }
     }
 
 //    protected function updateSelfReferee(PlanningInput $planningInput)
