@@ -6,8 +6,8 @@ namespace App\Export\Pdf;
 use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
 use Zend_Pdf_Exception;
-use Zend_Pdf_Image;
 use Zend_Pdf_Page;
+use Zend_Pdf_Resource_Image;
 use Zend_Pdf_Resource_ImageFactory;
 
 abstract class Page extends Zend_Pdf_Page
@@ -100,7 +100,7 @@ abstract class Page extends Zend_Pdf_Page
         if (strlen($subTitle) > 0) {
             $widthCenter -= ($margin + $widthRight);
         }
-        /** @var Zend_Pdf_Image $img */
+        /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../logo.jpg');
         $this->drawImage($img, $xLeft, $y - $imgSize, $xLeft + $imgSize, $y);
 

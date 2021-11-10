@@ -18,8 +18,9 @@ class UpdateSitemap extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        /** @var TournamentRepository tournamentRepos */
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);

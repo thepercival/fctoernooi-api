@@ -6,15 +6,11 @@ namespace App\Commands\Planning;
 use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
 use Exception;
-use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
-use SportsHelpers\PlaceRanges;
 use SportsHelpers\PouleStructure;
-use SportsHelpers\PouleStructure\BalancedIterator as PouleStructureIterator;
-use SportsHelpers\SportRange;
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning as PlanningBase;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -49,7 +45,6 @@ class RetryTimeout extends PlanningCommand
         parent::configure();
 
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
-        $this->addOption('placesRange', null, InputOption::VALUE_OPTIONAL, '2-6');
         $this->addOption('maxTimeoutSeconds', null, InputOption::VALUE_OPTIONAL, '5');
     }
 
@@ -63,7 +58,6 @@ class RetryTimeout extends PlanningCommand
             $this->scheduleRepos
         );
         $planningSeeker->enableTimedout($this->getMaxTimeoutSeconds($input));
-
 
         try {
             if (!$this->setStatusToStartProcessingTimedout()) {
@@ -98,56 +92,25 @@ class RetryTimeout extends PlanningCommand
             }
             return $planningInput;
         }
-        $placesRange = $this->getPlacesRange($input);
         $maxTimeOutSeconds = $this->getMaxTimeoutSeconds($input);
-        $planningInput = $this->getTimedoutInput(true, $maxTimeOutSeconds, $placesRange);
+        $planningInput = $this->getTimedoutInput(true, $maxTimeOutSeconds);
         if ($planningInput === null) {
-            $planningInput = $this->getTimedoutInput(false, $maxTimeOutSeconds, $placesRange);
+            $planningInput = $this->getTimedoutInput(false, $maxTimeOutSeconds);
         }
 
         if ($planningInput === null) {
             $suffix = 'maxTimeoutSeconds: ' . $maxTimeOutSeconds;
-            $suffix .= ', placesRange: ' . $placesRange->getMin() . '-' . $placesRange->getMax();
             throw new Exception('no timedout-planning found for ' . $suffix, E_ERROR);
         }
         return $planningInput;
     }
 
-    protected function getTimedoutInput(
-        bool $batchGames,
-        int $maxTimeOutSeconds,
-        SportRange $placesRange
-    ): ?PlanningInput {
-//        if ($placesRange === null) {
-//            $planningInput = null;
-//            if ($batchGames) {
-//                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds);
-//            } else {
-//                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds);
-//            }
-//            return $planningInput;
-//        }
-
-        $placesPerPouleRange = new SportRange(
-            PlaceRanges::MinNrOfPlacesPerPoule,
-            TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall
-        );
-        $structureIterator = new PouleStructureIterator($placesRange, $placesPerPouleRange, new SportRange(1, 64));
-        while ($structureIterator->valid()) {
-            // $this->getLogger()->info((string)$structureIterator->current());
-            $planningInput = null;
-            if ($batchGames) {
-                $planningInput = $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds, $structureIterator->current());
-            } else {
-                $planningInput = $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds, $structureIterator->current());
-            }
-            if ($planningInput !== null) {
-                return $planningInput;
-            }
-            $structureIterator->next();
+    protected function getTimedoutInput(bool $batchGames, int $maxTimeOutSeconds): PlanningInput|null
+    {
+        if ($batchGames) {
+            return $this->planningInputRepos->findBatchGamestTimedout($maxTimeOutSeconds);
         }
-
-        return null;
+        return $this->planningInputRepos->findGamesInARowTimedout($maxTimeOutSeconds);
     }
 
     protected function getMaxTimeoutSeconds(InputInterface $input): int

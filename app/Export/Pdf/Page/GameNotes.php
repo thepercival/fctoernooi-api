@@ -17,8 +17,8 @@ use Sports\Score\Config as ScoreConfig;
 use Sports\Score\Config\Service as ScoreConfigService;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
 use Zend_Pdf_Color_Html;
-use Zend_Pdf_Image;
 use Zend_Pdf_Page;
+use Zend_Pdf_Resource_Image;
 use Zend_Pdf_Resource_ImageFactory;
 
 abstract class GameNotes extends ToernooiPdfPage
@@ -134,7 +134,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
         $imgSize = $this->getLeftPartWidth() * 1.5;
         $qrPath = $this->qrService->writeGameToJpg($this->getParent()->getTournament(), $game, $url, (int)$imgSize);
-        /** @var Zend_Pdf_Image $img */
+        /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $this->getPageMargin(), $y - $imgSize, ($this->getPageMargin() + $imgSize), $y);
     }

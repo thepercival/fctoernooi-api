@@ -41,12 +41,18 @@ class Validator extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        /** @var TournamentRepository tournamentRepos */
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
-        /** @var StructureRepository structureRepos */
-        $this->structureRepos = $container->get(StructureRepository::class);
-        /** @var PlanningInputRepository planningInputRepos */
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
+
+        /** @var StructureRepository $structureRepos */
+        $structureRepos = $container->get(StructureRepository::class);
+        $this->structureRepos = $structureRepos;
+
+        /** @var PlanningInputRepository $planningInputRepos */
+        $planningInputRepos = $container->get(PlanningInputRepository::class);
+        $this->planningInputRepos = $planningInputRepos;
+
         $this->competitionValidator = new CompetitionValidator();
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();

@@ -8,7 +8,7 @@ use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use FCToernooi\QRService;
-use Zend_Pdf_Image;
+use Zend_Pdf_Resource_Image;
 
 class LockerRoom extends ToernooiPdfPage
 {
@@ -141,7 +141,7 @@ class LockerRoom extends ToernooiPdfPage
 
         $y = $this->getPageMargin() + $infoHeight;
         $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $infoHeight);
-        /** @var Zend_Pdf_Image $img */
+        /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $centerRight, $y - $infoHeight, $centerRight + $infoHeight, $y);
     }

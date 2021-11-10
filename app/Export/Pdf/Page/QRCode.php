@@ -7,7 +7,7 @@ namespace App\Export\Pdf\Page;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
-use Zend_Pdf_Image;
+use Zend_Pdf_Resource_Image;
 
 class QRCode extends ToernooiPdfPage
 {
@@ -46,7 +46,7 @@ class QRCode extends ToernooiPdfPage
 
         $imgWidth = 300;
         $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $imgWidth);
-        /** @var Zend_Pdf_Image $img */
+        /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $xLeft = $this->getPageMargin() + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
         $this->drawImage($img, $xLeft, $y - $imgWidth, $xLeft + $imgWidth, $y);

@@ -81,7 +81,9 @@ return [
         /** @var Cache|null $cache */
         $cache = $doctrineMetaConfig['cache'];
         $doctrineConfig = Doctrine\ORM\Tools\Setup::createConfiguration($devMode, $proxyDir, $cache);
-        $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($doctrineMetaConfig['entity_path']);
+        /** @var list<string> $entityPath */
+        $entityPath = $doctrineMetaConfig['entity_path'];
+        $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($entityPath);
         $doctrineConfig->setMetadataDriverImpl($driver);
         /** @var array<string, mixed> $connectionParams */
         $connectionParams = $doctrineAppConfig['connection'];

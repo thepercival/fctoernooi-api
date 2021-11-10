@@ -5,6 +5,7 @@ namespace App\Commands;
 
 use App\Command;
 use Psr\Container\ContainerInterface;
+use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,6 +19,9 @@ class Listing extends Command
      */
     public function __construct(protected ContainerInterface $container, private array $commandKeys)
     {
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void
