@@ -34,18 +34,25 @@ class Planning extends Command
 
     protected function getPlacesRange(InputInterface $input): SportRange
     {
-        $placesRange = new SportRange(
-            PlaceRanges::MinNrOfPlacesPerPoule,
-            TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
+        $placeRange = $this->getInputRange($input, 'placesRange');
+        if ($placeRange !== null) {
+            return $placeRange;
+        }
+        return new SportRange(
+            PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
         );
-        $placeRangeOption = $input->getOption("placesRange");
-        if (!is_string($placeRangeOption) || strlen($placeRangeOption) === 0) {
-            return $placesRange;
+    }
+
+    protected function getInputRange(InputInterface $input, string $paramName): SportRange|null
+    {
+        $rangeOption = $input->getOption($paramName);
+        if (!is_string($rangeOption) || strlen($rangeOption) === 0) {
+            return null;
         }
-        if (strpos($placeRangeOption, '-') === false) {
-            throw new \Exception('misformat placesRange-option', E_ERROR);
+        if (!str_contains($rangeOption, '-')) {
+            throw new \Exception('misformat "' . $rangeOption . '"-option', E_ERROR);
         }
-        $minMax = explode('-', $placeRangeOption);
+        $minMax = explode('-', $rangeOption);
         return new SportRange((int)$minMax[0], (int)$minMax[1]);
     }
 

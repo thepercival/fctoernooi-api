@@ -178,7 +178,7 @@ class Validator extends Command
             }
             $validity = $validator->validate($succeededPlanning);
             $this->setValidity($succeededPlanning, $validity);
-            $validations = $validator->getValidityDescriptions($validity);
+            $validations = $validator->getValidityDescriptions($validity, $succeededPlanning);
             if (count($validations) === 0) {
                 continue;
             }
