@@ -70,30 +70,4 @@ class Planning extends Command
             }
         }
     }
-
-//    protected function updateSelfReferee(PlanningInput $planningInput)
-//    {
-//        $planning = $planningInput->getBestPlanning();
-//        if ($planning === null) {
-//            throw new \Exception("there should be a best planning", E_ERROR);
-//        }
-//
-//        $firstBatch = new SelfRefereeBatch( $planning->createFirstBatch() );
-//        $refereePlaceService = new RefereePlaceService($planning);
-//        if (!$refereePlaceService->assign($firstBatch)) {
-//            $this->getLogger()->info("refereeplaces could not be equally assigned");
-//            $planning->setValidity( PlanningValidator::UNEQUALLY_ASSIGNED_REFEREEPLACES );
-//
-//            $planningOutput = new PlanningOutput($this->getLogger());
-//            $planningOutput->outputWithGames($planning, false);
-//            $planningOutput->outputWithTotals($planning, false);
-//        }
-//
-//        $planning->setState(PlanningBase::STATE_SUCCESS);
-//        $this->planningRepos->save($planning);
-//
-//        $planningInput->setState(PlanningInput::STATE_ALL_PLANNINGS_TRIED);
-//        $this->planningInputRepos->save($planningInput);
-//        $this->getLogger()->info('   update state => STATE_ALL_PLANNINGS_TRIED');
-//    }
 }

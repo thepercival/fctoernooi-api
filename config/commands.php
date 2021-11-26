@@ -2,21 +2,28 @@
 
 declare(strict_types=1);
 
-use Psr\Container\ContainerInterface;
-
-use App\Commands\Planning\Input\CreateDefaults as PlanningCreateDefaultInput;
-use App\Commands\Planning\Create as PlanningCreate;
-use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
-use App\Commands\Listing as ListingCommand;
-use App\Commands\UpdateSitemap;
 use App\Commands\BackupSponsorImages;
-use App\Commands\Validator;
-use App\Commands\Planning\Validator as PlanningValidator;
+use App\Commands\Listing as ListingCommand;
 use App\Commands\Pdf\Validator as PdfValidator;
+use App\Commands\Planning\Create as PlanningCreate;
+use App\Commands\Planning\Input\CreateDefaults as PlanningCreateDefaultInput;
+use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
+use App\Commands\Planning\Validator as PlanningValidator;
+use App\Commands\Schedule\Create as ScheduleCreate;
+use App\Commands\Schedule\Get as ScheduleGet;
+use App\Commands\UpdateSitemap;
+use App\Commands\Validator;
+use Psr\Container\ContainerInterface;
 
 $commands = [
     "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
         return new PlanningCreateDefaultInput($container);
+    },
+    "app:get-schedule" => function (ContainerInterface $container): ScheduleGet {
+        return new ScheduleGet($container);
+    },
+    "app:create-schedule" => function (ContainerInterface $container): ScheduleCreate {
+        return new ScheduleCreate($container);
     },
     "app:create-planning" => function (ContainerInterface $container): PlanningCreate {
         return new PlanningCreate($container);
