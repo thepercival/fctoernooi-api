@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Commands;
@@ -7,9 +6,11 @@ namespace App\Commands;
 use App\Command;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
+use SportsHelpers\GameMode;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
+use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
+use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
 use SportsPlanning\Combinations\GamePlaceStrategy;
-use SportsPlanning\Schedule\Name as ScheduleName;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -51,60 +52,54 @@ class Schedule extends Command
         return $gamePlaceStrategy;
     }
 
-    protected function getSportsConfigName(InputInterface $input): string
+    /**
+     * @param InputInterface $input
+     * @return int
+     * @throws \Exception
+     */
+    protected function getGameMode(InputInterface $input): int
     {
-        $sportsConfigName = $input->getOption('sportsConfigName');
-        if (!is_string($sportsConfigName) || strlen($sportsConfigName) === 0) {
-            return (string)(new ScheduleName([
-                                                 new AgainstSportVariant(
-                                                     1,
-                                                     1,
-                                                     1,
-                                                     0
-                                                 )
-                                             ]));
+        $nrOfHomePlaces = $this->getIntParam($input, 'nrOfHomePlaces', 0);
+        if ($nrOfHomePlaces > 0) {
+            return GameMode::AGAINST;
         }
-        return $sportsConfigName;
+        $nrOfGamePlaces = $this->getIntParam($input, 'nrOfGamePlaces', 0);
+        if ($nrOfGamePlaces > 0) {
+            return GameMode::SINGLE;
+        }
+        return GameMode::ALL_IN_ONE_GAME;
     }
 
-//    protected function createSchedules(Input $planningInput): void
-//    {
-//        $existingSchedules = $this->scheduleRepos->findByInput($planningInput);
-//        $distinctNrOfPoulePlaces = $this->scheduleRepos->getDistinctNrOfPoulePlaces($planningInput);
-//        if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
-//            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
-//            $scheduleCreatorService->setExistingSchedules($existingSchedules);
-//            $this->getLogger()->info('creating schedules .. ');
-//            $schedules = $scheduleCreatorService->createSchedules($planningInput);
-//            foreach ($schedules as $schedule) {
-//                $this->scheduleRepos->save($schedule);
-//            }
-//        }
-//    }
+    protected function getIntParam(InputInterface $input, string $param, int $default = null): int
+    {
+        $valueAsString = $input->getOption($param);
+        if (!is_string($valueAsString) || strlen($valueAsString) === 0) {
+            if ($default !== null) {
+                return $default;
+            }
+            throw new \Exception('incorrect ' . $param . ' "' . $valueAsString . '"', E_ERROR);
+        }
+        return (int)$valueAsString;
+    }
 
-//    protected function updateSelfReferee(PlanningInput $planningInput)
-//    {
-//        $planning = $planningInput->getBestPlanning();
-//        if ($planning === null) {
-//            throw new \Exception("there should be a best planning", E_ERROR);
-//        }
-//
-//        $firstBatch = new SelfRefereeBatch( $planning->createFirstBatch() );
-//        $refereePlaceService = new RefereePlaceService($planning);
-//        if (!$refereePlaceService->assign($firstBatch)) {
-//            $this->getLogger()->info("refereeplaces could not be equally assigned");
-//            $planning->setValidity( PlanningValidator::UNEQUALLY_ASSIGNED_REFEREEPLACES );
-//
-//            $planningOutput = new PlanningOutput($this->getLogger());
-//            $planningOutput->outputWithGames($planning, false);
-//            $planningOutput->outputWithTotals($planning, false);
-//        }
-//
-//        $planning->setState(PlanningBase::STATE_SUCCESS);
-//        $this->planningRepos->save($planning);
-//
-//        $planningInput->setState(PlanningInput::STATE_ALL_PLANNINGS_TRIED);
-//        $this->planningInputRepos->save($planningInput);
-//        $this->getLogger()->info('   update state => STATE_ALL_PLANNINGS_TRIED');
-//    }
+    protected function getSportVariant(InputInterface $input
+    ): AgainstSportVariant|AllInOneGameSportVariant|SingleSportVariant {
+        $gameMode = $this->getGameMode($input);
+        if ($gameMode === GameMode::AGAINST) {
+            $nrOfH2H = $this->getIntParam($input, 'nrOfH2H', 0);
+            return new AgainstSportVariant(
+                $this->getIntParam($input, 'nrOfHomePlaces'),
+                $this->getIntParam($input, 'nrOfAwayPlaces'),
+                $nrOfH2H,
+                $this->getIntParam($input, 'nrOfGamesPerPlace', $nrOfH2H > 0 ? 0 : null)
+            );
+        }
+        if ($gameMode === GameMode::ALL_IN_ONE_GAME) {
+            return new AllInOneGameSportVariant($this->getIntParam($input, 'nrOfGamesPerPlace'));
+        }
+        return new SingleSportVariant(
+            $this->getIntParam($input, 'nrOfGamePlaces'),
+            $this->getIntParam($input, 'nrOfGamesPerPlace')
+        );
+    }
 }

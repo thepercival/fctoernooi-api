@@ -4,17 +4,12 @@ declare(strict_types=1);
 namespace App;
 
 use Exception;
-use Monolog\Handler\NativeMailerHandler;
-use Psr\Container\ContainerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Planning\Output as PlanningOutput;
 use Symfony\Component\Console\Command\Command as SymCommand;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -72,5 +67,4 @@ class Command extends SymCommand
             )
         );
     }
-
 }

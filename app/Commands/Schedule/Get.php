@@ -7,6 +7,7 @@ namespace App\Commands\Schedule;
 use App\Commands\Schedule as ScheduleCommand;
 use Psr\Container\ContainerInterface;
 use SportsPlanning\Combinations\GamePlaceStrategy;
+use SportsPlanning\Schedule\Name as ScheduleName;
 use SportsPlanning\Schedule\Output as ScheduleOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,7 +43,7 @@ class Get extends ScheduleCommand
     {
         $nrOfPlaces = $this->getNrOfPlaces($input);
         $gamePlaceStrategy = $this->getGamePlaceStrategy($input);
-        $sportsConfigName = $this->getSportsConfigName($input);
+        $sportsConfigName = (string)new ScheduleName([$this->getSportVariant($input)]);
         $existingSchedule = $this->scheduleRepos->findOneBy([
                                                                 "nrOfPlaces" => $nrOfPlaces,
                                                                 "gamePlaceStrategy" => $gamePlaceStrategy,
