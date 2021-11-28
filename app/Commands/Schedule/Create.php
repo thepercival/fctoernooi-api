@@ -32,7 +32,7 @@ class Create extends ScheduleCommand
 
         $this->addOption('nrOfPlaces', null, InputOption::VALUE_REQUIRED, '8');
         $defaultValue = '[{"nrOfHomePlaces":1,"nrOfAwayPlaces":1,"nrOfH2H":1}]';
-        $this->addOption('sportConfigName', null, InputOption::VALUE_OPTIONAL, $defaultValue);
+        $this->addOption('sportsConfigName', null, InputOption::VALUE_OPTIONAL, $defaultValue);
         $defaultValue = (string)GamePlaceStrategy::EquallyAssigned;
         $this->addOption('gamePlaceStrategy', null, InputOption::VALUE_OPTIONAL, $defaultValue);
     }
