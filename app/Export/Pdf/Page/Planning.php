@@ -58,15 +58,15 @@ class Planning extends ToernooiPdfPage
         return $this->getGameLineByGameMode($game->getCompetitionSport()->getGameMode());
     }
 
-    protected function getGameLineByGameMode(int $gameMode): AgainstGameLine|TogetherGameLine
+    protected function getGameLineByGameMode(GameMode $gameMode): AgainstGameLine|TogetherGameLine
     {
-        if ($gameMode === GameMode::AGAINST && $this->againstGameLine !== null) {
+        if ($gameMode === GameMode::Against && $this->againstGameLine !== null) {
             return $this->againstGameLine;
         }
-        if ($gameMode === GameMode::SINGLE && $this->togetherGameLine !== null) {
+        if ($gameMode === GameMode::Single && $this->togetherGameLine !== null) {
             return $this->togetherGameLine;
         }
-        if ($gameMode === GameMode::ALL_IN_ONE_GAME && $this->togetherGameLine !== null) {
+        if ($gameMode === GameMode::AllInOneGame && $this->togetherGameLine !== null) {
             return $this->togetherGameLine;
         }
         throw new \Exception('gameline should be implemented', E_ERROR);
@@ -148,9 +148,9 @@ class Planning extends ToernooiPdfPage
     {
         $this->initGameLines($roundNumber);
         if ($this->hasOnlyAgainstGameMode($roundNumber->getCompetition())) {
-            $gameLine = $this->getGameLineByGameMode(GameMode::AGAINST);
+            $gameLine = $this->getGameLineByGameMode(GameMode::Against);
         } else {
-            $gameLine = $this->getGameLineByGameMode(GameMode::SINGLE);
+            $gameLine = $this->getGameLineByGameMode(GameMode::Single);
         }
         return $gameLine->drawHeader($roundNumber->needsRanking(), $y);
     }

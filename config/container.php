@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Mailer;
 use Doctrine\Common\Cache\Cache;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use FCToernooi\Auth\Settings as AuthSettings;
 use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
@@ -89,6 +90,25 @@ return [
         $connectionParams = $doctrineAppConfig['connection'];
         $em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
         // $em->getConnection()->setAutoCommit(false);
+
+        Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_SelfReferee');
+        Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameMode');
+        Type::addType('enum_AgainstSide', SportsHelpers\Against\SideType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_AgainstSide');
+        Type::addType('enum_GamePlaceStrategy', SportsPlanning\Combinations\GamePlaceStrategyType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GamePlaceStrategy');
+        Type::addType('enum_EditMode', Sports\Planning\EditModeType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_EditMode');
+        Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_QualifyTarget');
+        Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_AgainstRuleSet');
+        Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PointsCalculation');
+
+
         return $em;
     },
     SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {

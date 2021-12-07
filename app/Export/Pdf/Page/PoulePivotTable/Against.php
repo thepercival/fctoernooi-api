@@ -3,22 +3,15 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
-use App\Export\Pdf\Document;
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Document;
+use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
+use Sports\Game\Against as AgainstGame;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
-use Sports\Ranking\Item\Round as RoundRankingItem;
-use SportsHelpers\Against\Side as AgainstSide;
-use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
-use Sports\NameService;
 use Sports\Poule;
-use Sports\Game\Place\Against as AgainstGamePlace;
-use Sports\Game\Against as AgainstGame;
-use Sports\Game\Together as TogetherGame;
 use Sports\State;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
-use Sports\Score\Config\Service as ScoreConfigService;
+use SportsHelpers\Against\Side as AgainstSide;
 use Zend_Pdf_Color_Html;
 
 class Against extends PoulePivotTablesPage
@@ -103,7 +96,10 @@ class Against extends PoulePivotTablesPage
         $foundHomeGames = array_filter(
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
-                return $game->isParticipating($awayPlace, AgainstSide::AWAY) && $game->isParticipating($homePlace, AgainstSide::HOME);
+                return $game->isParticipating($awayPlace, AgainstSide::Away) && $game->isParticipating(
+                        $homePlace,
+                        AgainstSide::Home
+                    );
             }
         );
         if (count($foundHomeGames) > 1) {
@@ -115,7 +111,10 @@ class Against extends PoulePivotTablesPage
         $foundAwayGames = array_filter(
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
-                return $game->isParticipating($homePlace, AgainstSide::AWAY) && $game->isParticipating($awayPlace, AgainstSide::HOME);
+                return $game->isParticipating($homePlace, AgainstSide::Away) && $game->isParticipating(
+                        $awayPlace,
+                        AgainstSide::Home
+                    );
             }
         );
         if (count($foundAwayGames) !== 1) {

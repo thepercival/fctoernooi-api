@@ -59,7 +59,13 @@ class Validator extends Command
         parent::configure();
 
         $this->addOption('pouleStructure', null, InputOption::VALUE_OPTIONAL, '6,6');
-        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, '0,1 or 2');
+        $selfRefereeOptions = join(
+            ',',
+            array_map(function (SelfReferee $selfReferee): string {
+                return $selfReferee->name;
+            }, SelfReferee::cases())
+        );
+        $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, $selfRefereeOptions);
         $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_OPTIONAL, 'false|true');
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
         $this->addOption('resetInvalid', null, InputOption::VALUE_NONE);
@@ -218,19 +224,23 @@ class Validator extends Command
 
     /**
      * @param InputInterface $input
-     * @return int|null
+     * @return SelfReferee|null
      */
-    protected function getSelfReferee(InputInterface $input): ?int
+    protected function getSelfReferee(InputInterface $input): SelfReferee|null
     {
-        $selfReferee = null;
         $optionSelfReferee = $input->getOption('selfReferee');
-        if (is_string($optionSelfReferee) && strlen($optionSelfReferee) > 0 && ctype_digit($optionSelfReferee)) {
-            $selfReferee = (int)$optionSelfReferee;
-            if ($selfReferee !== SelfReferee::OTHERPOULES && $selfReferee !== SelfReferee::SAMEPOULE) {
-                $selfReferee = SelfReferee::DISABLED;
+        if ($optionSelfReferee === SelfReferee::OtherPoules->name) {
+            return SelfReferee::OtherPoules;
+        } else {
+            if ($optionSelfReferee === SelfReferee::SamePoule->name) {
+                return SelfReferee::SamePoule;
+            } else {
+                if ($optionSelfReferee === SelfReferee::Disabled->name) {
+                    return SelfReferee::Disabled;
+                }
             }
         }
-        return $selfReferee;
+        return null;
     }
 
     /**

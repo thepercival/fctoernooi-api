@@ -6,14 +6,10 @@ namespace App\Export\Pdf\Page\GameNotes;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page\GameNotes;
-use FCToernooi\QRService;
 use App\Export\Pdf\Page\GameNotes as GameNotesBase;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use SportsHelpers\Against\Side as AgainstSide;
-use Sports\Score\Config as ScoreConfig;
-use Sports\Score\Config\Service as ScoreConfigService;
-use FCToernooi\TranslationService;
 
 class Against extends GameNotesBase
 {
@@ -28,9 +24,9 @@ class Against extends GameNotesBase
             return;
         }
         $nameService = $this->getParent()->getNameService();
-        $homePlaces = $game->getSidePlaces(AgainstSide::HOME);
+        $homePlaces = $game->getSidePlaces(AgainstSide::Home);
         $home = $nameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
-        $awayPlaces = $game->getSidePlaces(AgainstSide::AWAY);
+        $awayPlaces = $game->getSidePlaces(AgainstSide::Away);
         $away = $nameService->getPlacesFromName($homePlaces, false, count($awayPlaces) === 1);
         $this->drawCell($home . ' - ' . $away, $x, $y, $width, $height);
     }
@@ -73,10 +69,10 @@ class Against extends GameNotesBase
         $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
 
         // COMPETITORS
-        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::HOME), true, true);
+        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
         $this->drawCell($home, $homeStart, $y, $homeWidth, $height, Align::Right);
         $this->drawCell('-', $sepStartX, $y, GameNotesBase::Margin, $height, Align::Center);
-        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::AWAY), true, true);
+        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         $this->drawCell($away, $awayStart, $y, $dotsWidth, $height);
         $y -= 2 * $height;
 

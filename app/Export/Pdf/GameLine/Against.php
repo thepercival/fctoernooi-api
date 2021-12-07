@@ -3,17 +3,16 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\GameLine;
 
-use App\Export\Pdf\GameLine;
-use App\Export\Pdf\Page;
-use App\Export\Pdf\GameLine\Column\Against as AgainstColumn;
-use Sports\Game\Phase as GamePhase;
-use Sports\Game\Against as AgainstGame;
-use Sports\Game\Together as TogetherGame;
-use SportsHelpers\Against\Side as AgainstSide;
 use App\Export\Pdf\Align;
+use App\Export\Pdf\GameLine;
 use App\Export\Pdf\GameLine as GameLineBase;
-use Sports\Round\Number as RoundNumber;
+use App\Export\Pdf\GameLine\Column\Against as AgainstColumn;
+use App\Export\Pdf\Page;
+use Sports\Game\Against as AgainstGame;
+use Sports\Game\Phase as GamePhase;
+use Sports\Game\Together as TogetherGame;
 use Sports\State;
+use SportsHelpers\Against\Side as AgainstSide;
 
 class Against extends GameLineBase
 {
@@ -54,12 +53,12 @@ class Against extends GameLineBase
 
         $nameService = $this->page->getParent()->getNameService();
 
-        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::HOME), true, true);
+        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
         $x = $this->page->drawCell($home, $x, $y, $sideWidth, $height, Align::Right, 'black');
 
         $x = $this->drawCell($this->getScore($game), $x, $y, $scoreWidth, $height);
 
-        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::AWAY), true, true);
+        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         return $this->page->drawCell($away, $x, $y, $sideWidth, $height, Align::Left, 'black');
     }
 

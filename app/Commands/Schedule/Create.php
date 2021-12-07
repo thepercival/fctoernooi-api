@@ -6,6 +6,7 @@ namespace App\Commands\Schedule;
 use App\Commands\Schedule as ScheduleCommand;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PouleStructure;
+use SportsHelpers\SelfReferee;
 use SportsHelpers\Sport\VariantWithFields as SportVariantWithFields;
 use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Input;
@@ -44,7 +45,7 @@ class Create extends ScheduleCommand
         $this->addOption('nrOfH2H', null, InputOption::VALUE_OPTIONAL);
         $this->addOption('nrOfGamesPerPlace', null, InputOption::VALUE_OPTIONAL);
 
-        $defaultValue = (string)GamePlaceStrategy::EquallyAssigned;
+        $defaultValue = GamePlaceStrategy::EquallyAssigned->name;
         $this->addOption('gamePlaceStrategy', null, InputOption::VALUE_OPTIONAL, $defaultValue);
     }
 
@@ -81,13 +82,16 @@ class Create extends ScheduleCommand
 
     /**
      * @param int $nrOfPlaces
-     * @param int $gamePlaceStrategy
+     * @param GamePlaceStrategy $gamePlaceStrategy
      * @param array $sportVariantsWithFields
      * @return Schedule
      * @throws \Exception
      */
-    protected function createSchedule(int $nrOfPlaces, int $gamePlaceStrategy, array $sportVariantsWithFields): Schedule
-    {
+    protected function createSchedule(
+        int $nrOfPlaces,
+        GamePlaceStrategy $gamePlaceStrategy,
+        array $sportVariantsWithFields
+    ): Schedule {
         $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
         $this->getLogger()->info('creating schedule .. ');
         $planningInput = new Input(
@@ -95,7 +99,7 @@ class Create extends ScheduleCommand
             $sportVariantsWithFields,
             $gamePlaceStrategy,
             0,
-            0
+            SelfReferee::Disabled
         );
         $schedules = $scheduleCreatorService->createSchedules($planningInput);
         foreach ($schedules as $schedule) {

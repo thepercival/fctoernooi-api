@@ -39,35 +39,37 @@ class Schedule extends Command
         return $nrOfPlaces;
     }
 
-    protected function getGamePlaceStrategy(InputInterface $input): int
+    protected function getGamePlaceStrategy(InputInterface $input): GamePlaceStrategy
     {
         $gamePlaceStrategy = $input->getOption('gamePlaceStrategy');
         if (!is_string($gamePlaceStrategy) || strlen($gamePlaceStrategy) === 0) {
             return GamePlaceStrategy::EquallyAssigned;
         }
-        $gamePlaceStrategy = (int)$gamePlaceStrategy;
-        if ($gamePlaceStrategy !== GamePlaceStrategy::EquallyAssigned && $gamePlaceStrategy !== GamePlaceStrategy::RandomlyAssigned) {
-            throw new \Exception('incorrect gamePlaceStrategy "' . $gamePlaceStrategy . '"', E_ERROR);
+        if ($gamePlaceStrategy === GamePlaceStrategy::EquallyAssigned->name) {
+            return GamePlaceStrategy::EquallyAssigned;
         }
-        return $gamePlaceStrategy;
+        if ($gamePlaceStrategy === GamePlaceStrategy::RandomlyAssigned->name) {
+            return GamePlaceStrategy::RandomlyAssigned;
+        }
+        throw new \Exception('incorrect gamePlaceStrategy "' . $gamePlaceStrategy . '"', E_ERROR);
     }
 
     /**
      * @param InputInterface $input
-     * @return int
+     * @return GameMode
      * @throws \Exception
      */
-    protected function getGameMode(InputInterface $input): int
+    protected function getGameMode(InputInterface $input): GameMode
     {
         $nrOfHomePlaces = $this->getIntParam($input, 'nrOfHomePlaces', 0);
         if ($nrOfHomePlaces > 0) {
-            return GameMode::AGAINST;
+            return GameMode::Against;
         }
         $nrOfGamePlaces = $this->getIntParam($input, 'nrOfGamePlaces', 0);
         if ($nrOfGamePlaces > 0) {
-            return GameMode::SINGLE;
+            return GameMode::Single;
         }
-        return GameMode::ALL_IN_ONE_GAME;
+        return GameMode::AllInOneGame;
     }
 
     protected function getIntParam(InputInterface $input, string $param, int $default = null): int
@@ -85,7 +87,7 @@ class Schedule extends Command
     protected function getSportVariant(InputInterface $input
     ): AgainstSportVariant|AllInOneGameSportVariant|SingleSportVariant {
         $gameMode = $this->getGameMode($input);
-        if ($gameMode === GameMode::AGAINST) {
+        if ($gameMode === GameMode::Against) {
             $nrOfH2H = $this->getIntParam($input, 'nrOfH2H', 0);
             return new AgainstSportVariant(
                 $this->getIntParam($input, 'nrOfHomePlaces'),
@@ -94,7 +96,7 @@ class Schedule extends Command
                 $this->getIntParam($input, 'nrOfGamesPerPlace', $nrOfH2H > 0 ? 0 : null)
             );
         }
-        if ($gameMode === GameMode::ALL_IN_ONE_GAME) {
+        if ($gameMode === GameMode::AllInOneGame) {
             return new AllInOneGameSportVariant($this->getIntParam($input, 'nrOfGamesPerPlace'));
         }
         return new SingleSportVariant(

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Copiers\TournamentCopier;
 use App\Export\Pdf\Document as PdfDocument;
 use App\QueueService;
 use App\Response\ErrorResponse;
@@ -12,24 +13,23 @@ use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\ExportConfig;
-use FCToernooi\Tournament\Service as TournamentService;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
+use JMS\Serializer\DeserializationContext;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\DeserializationContext;
-use stdClass;
-use Sports\Structure\Repository as StructureRepository;
-use JMS\Serializer\SerializerInterface;
-use App\Copiers\TournamentCopier;
-use Sports\Structure\Copier as StructureCopier;
-use Sports\Round\Number\PlanningCreator;
 use Selective\Config\Configuration;
+use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Validator as CompetitionValidator;
+use Sports\Round\Number\PlanningCreator;
+use Sports\Structure\Copier as StructureCopier;
+use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
+use stdClass;
 
 final class TournamentAction extends Action
 {
@@ -74,6 +74,8 @@ final class TournamentAction extends Action
         try {
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
+//            $r = \Doctrine\DBAL\Types\Type::getTypesMap();
+//            $x = $tournament->getCompetition()->getStartDateTime();
             $json = $this->serializer->serialize(
                 $tournament,
                 'json',
@@ -198,13 +200,12 @@ final class TournamentAction extends Action
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $ruleSet = $tournamentSer->getCompetition()->getAgainstRuleSet();
             $name = $tournamentSer->getCompetition()->getLeague()->getName();
-            $tournamentService = new TournamentService();
-            $tournament = $tournamentService->changeBasics(
-                $tournament,
-                $dateTime,
-                $ruleSet,
-                $tournamentSer->getBreak()
-            );
+
+            $competitionService = new CompetitionService();
+            $competition = $tournament->getCompetition();
+            $competitionService->changeStartDateTime($competition, $dateTime);
+            $competition->setAgainstRuleSet($ruleSet);
+            $tournament->setBreak($tournamentSer->getBreak());
             $tournament->setPublic($tournamentSer->getPublic());
             $tournament->getCompetition()->getLeague()->setName($name);
             $this->tournamentRepos->customPersist($tournament, true);
@@ -361,7 +362,7 @@ final class TournamentAction extends Action
             //if ($format === ExportFormat::Pdf) {
             $subjects = $this->getExportSubjects($queryParams);
             return $this->writePdf($response, $subjects, $tournament, $this->config->getString('www.wwwurl'));
-           // } /*else {
+            // } /*else {
             //    return $this->writeExcel($response, $format, $tournament, $this->config->getString('www.wwwurl'));
             //}
         } catch (Exception $exception) {
