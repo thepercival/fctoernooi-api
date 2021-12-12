@@ -1,17 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
-use SportsHelpers\Repository as BaseRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
-use FCToernooi\Tournament as TournamentBase;
-use FCToernooi\User;
-use FCToernooi\TournamentUser;
 use Doctrine\ORM\Query\Expr;
+use FCToernooi\Tournament as TournamentBase;
+use FCToernooi\TournamentUser;
+use FCToernooi\User;
 use Sports\Competition;
 use Sports\Competition\Repository as CompetitionRepository;
+use SportsHelpers\Repository as BaseRepository;
 
 /**
  * @template-extends EntityRepository<TournamentBase>

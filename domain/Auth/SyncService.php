@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Auth;
@@ -6,13 +7,13 @@ namespace FCToernooi\Auth;
 use App\Mailer;
 use DateTimeImmutable;
 use FCToernooi\Role;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\Invitation as TournamentInvitation;
+use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\TournamentUser;
+use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\Tournament;
-use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
-use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
-use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use Selective\Config\Configuration;
 
 class SyncService

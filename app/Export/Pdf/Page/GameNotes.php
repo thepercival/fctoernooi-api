@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
@@ -30,7 +31,7 @@ abstract class GameNotes extends ToernooiPdfPage
     protected TranslationService $translationService;
     protected QRService $qrService;
     protected string|null $qrCodeUrlPrefix = null;
-    
+
     public function __construct(
         Document $document,
         mixed $param1,

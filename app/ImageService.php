@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App;
@@ -37,25 +38,25 @@ class ImageService
         $logostream->moveTo($newImagePath);
 
         $source_properties = getimagesize($newImagePath);
-        if($source_properties === false ) {
+        if ($source_properties === false) {
             throw new \Exception("could not read img dimensions", E_ERROR);
         }
         $image_type = $source_properties[2];
         if ($image_type == IMAGETYPE_JPEG) {
             $image_resource_id = imagecreatefromjpeg($newImagePath);
-            if( $image_resource_id instanceof GdImage ) {
+            if ($image_resource_id instanceof GdImage) {
                 $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
                 imagejpeg($target_layer, $newImagePath);
             }
         } elseif ($image_type == IMAGETYPE_GIF) {
             $image_resource_id = imagecreatefromgif($newImagePath);
-            if( $image_resource_id instanceof GdImage ) {
+            if ($image_resource_id instanceof GdImage) {
                 $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
                 imagegif($target_layer, $newImagePath);
             }
         } elseif ($image_type == IMAGETYPE_PNG) {
             $image_resource_id = imagecreatefrompng($newImagePath);
-            if( $image_resource_id instanceof GdImage ) {
+            if ($image_resource_id instanceof GdImage) {
                 $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
                 imagepng($target_layer, $newImagePath);
             }
@@ -120,11 +121,10 @@ class ImageService
         int $height,
         int $target_width,
         int $target_height
-    ): GdImage
-    {
+    ): GdImage {
         $target_layer = imagecreatetruecolor($target_width, $target_height);
         if (!($target_layer instanceof GdImage)) {
-            throw new \Exception('could not create image',E_ERROR);
+            throw new \Exception('could not create image', E_ERROR);
         }
         /** @psalm-suppress InvalidArgument */
         imagecopyresampled(

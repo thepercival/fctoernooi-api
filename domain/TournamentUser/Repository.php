@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\TournamentUser;
 
-use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\TournamentUser as TournamentUserBase;
+use SportsHelpers\Repository as BaseRepository;
 
 /**
  * @template-extends EntityRepository<TournamentUserBase>

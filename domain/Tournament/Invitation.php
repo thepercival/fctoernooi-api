@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
 use DateTimeImmutable;
-use FCToernooi\Tournament;
 use FCToernooi\Role;
+use FCToernooi\Tournament;
 use FCToernooi\User;
 use SportsHelpers\Identifiable;
 

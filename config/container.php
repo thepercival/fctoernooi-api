@@ -108,7 +108,6 @@ return [
         Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PointsCalculation');
 
-
         return $em;
     },
     SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {

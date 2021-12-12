@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf;
@@ -328,7 +329,7 @@ abstract class Page extends Zend_Pdf_Page
         return $nNewXPos;
     }
 
-    protected function uniord(string $char):int
+    protected function uniord(string $char): int
     {
         // $sUCS2Char = mb_convert_encoding( $sChar, 'UCS-2LE', 'UTF-8');
         $charCode1 = ord(substr($char, 0, 1));

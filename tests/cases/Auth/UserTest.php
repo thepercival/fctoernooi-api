@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooiTest\Auth;
 
-use \FCToernooi\User as User;
+use FCToernooi\User as User;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

@@ -1,18 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
 use Sports\Competition\Sport as CompetitionSport;
-use Sports\Place;
-use Sports\Poule;
 use Sports\Ranking\Calculator\Round\Sport as SportRankingCalculator;
-use Sports\Ranking\Item\Round as RoundRankingItem;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 
-trait Helper {
-
+trait Helper
+{
     /**
      * @var array<string, int>
      */

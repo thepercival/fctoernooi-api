@@ -4,29 +4,29 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
-use FCToernooi\Tournament;
+use App\Exceptions\PdfOutOfBoundsException;
+use App\Export\Document as ExportDocument;
+use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
+use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
+use App\Export\Pdf\Page\GameNotes\Single as SingleGameNotesPage;
+use App\Export\Pdf\Page\Planning as PagePlanning;
+use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
+use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
+use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
 use FCToernooi\LockerRoom;
-use Sports\Game;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\ExportConfig;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Game;
+use Sports\Game\Against as AgainstGame;
+use Sports\Game\Order as GameOrder;
 use Sports\Game\Together as TogetherGame;
 use Sports\Poule;
 use Sports\Round;
-use Sports\State;
-use Sports\Score\Config as ScoreConfig;
-use Sports\Structure;
-use Sports\Game\Against as AgainstGame;
-use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
-use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
-use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
-use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
-use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
-use App\Export\Pdf\Page\GameNotes\Single as SingleGameNotesPage;
-use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
-use App\Export\Pdf\Page\Planning as PagePlanning;
-use FCToernooi\Tournament\ExportConfig;
-use App\Export\Document as ExportDocument;
-use App\Exceptions\PdfOutOfBoundsException;
+use Sports\Score\Config as ScoreConfig;
+use Sports\State;
+use Sports\Structure;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 use SportsHelpers\Sport\Variant\AllInOneGame;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
@@ -35,7 +35,6 @@ use Zend_Pdf;
 use Zend_Pdf_Exception;
 use Zend_Pdf_Font;
 use Zend_Pdf_Page;
-use Zend_Pdf_Parser;
 use Zend_Pdf_Resource_Font;
 
 /**
@@ -43,6 +42,7 @@ use Zend_Pdf_Resource_Font;
  */
 class Document extends Zend_Pdf
 {
+    use ExportDocument;
 //    protected int $m_nHeaderHeight;
 //    protected int $m_nPageMargin;
 
@@ -50,8 +50,6 @@ class Document extends Zend_Pdf
      * @var array<string, float>
      */
     protected array $widthText = [];
-
-    use ExportDocument;
 
     public function __construct(
         Tournament $tournament,
@@ -408,7 +406,8 @@ class Document extends Zend_Pdf
         }
     }
 
-    protected function drawPoulePivotTablesMultipleSports(RoundNumber $roundNumber): void {
+    protected function drawPoulePivotTablesMultipleSports(RoundNumber $roundNumber): void
+    {
         if (!$roundNumber->needsRanking()) {
             return;
         }

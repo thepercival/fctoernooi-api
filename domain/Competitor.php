@@ -1,19 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi;
 
-use Sports\Association;
 use Sports\Competition;
-use Sports\Competitor\Base;
 use Sports\Competitor as SportsCompetitor;
+use Sports\Competitor\Base;
 use SportsHelpers\Identifiable;
 
 class Competitor extends Identifiable implements SportsCompetitor
 {
-    protected string $name;
-
     use Base;
+    protected string $name;
 
     public function __construct(protected Tournament $tournament, int $pouleNr, int $placeNr, string $name)
     {

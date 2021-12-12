@@ -13,9 +13,9 @@ class Sponsor extends Identifiable
     private string|null $logoUrl = null;
     private int $screenNr = 0;
 
-    const MIN_LENGTH_NAME = 2;
-    const MAX_LENGTH_NAME = 30;
-    const MAX_LENGTH_URL = 100;
+    public const MIN_LENGTH_NAME = 2;
+    public const MAX_LENGTH_NAME = 30;
+    public const MAX_LENGTH_URL = 100;
 
     public function __construct(private Tournament $tournament, string $name)
     {

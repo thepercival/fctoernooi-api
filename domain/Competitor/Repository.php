@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Competitor;
 
-use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor as CompetitorBase;
 use FCToernooi\Tournament;
 use Sports\Place;
 use Sports\Round;
+use SportsHelpers\Repository as BaseRepository;
 
 /**
  * @template-extends EntityRepository<CompetitorBase>

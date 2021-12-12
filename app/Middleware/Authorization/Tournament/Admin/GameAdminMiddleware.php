@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Middleware\Authorization\Tournament\Admin;
@@ -6,10 +7,10 @@ namespace App\Middleware\Authorization\Tournament\Admin;
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
 use FCToernooi\Role;
 use FCToernooi\TournamentUser;
-use Sports\Game;
-use Sports\Game\Repository as GameRepository;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteContext;
+use Sports\Game;
+use Sports\Game\Repository as GameRepository;
 
 class GameAdminMiddleware extends AuthorizationTournamentAdminMiddleware
 {
@@ -30,7 +31,8 @@ class GameAdminMiddleware extends AuthorizationTournamentAdminMiddleware
             throw new \Exception(
                 'je bent geen ' . Role::getName(Role::REFEREE) . " of " . Role::getName(
                     Role::GAMERESULTADMIN
-                ) . " voor dit toernooi", E_ERROR
+                ) . " voor dit toernooi",
+                E_ERROR
             );
         }
         $gameId = $this->getGameId($request);

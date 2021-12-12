@@ -1,23 +1,19 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
 use App\Export\Pdf\GameLine\Column;
+use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
+use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
 use DateTimeImmutable;
 use DateTimeZone;
 use League\Period\Period;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
-use SportsHelpers\Against\Side as AgainstSide;
-use Sports\Score\Config\Service as ScoreConfigService;
-use Sports\Game;
-use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
-use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
-use App\Export\Pdf\GameLine\Column\Against as AgainstColumn;
-
 use Sports\Round\Number as RoundNumber;
-use Sports\State;
+use Sports\Score\Config\Service as ScoreConfigService;
 use Zend_Pdf_Color_GrayScale;
 
 abstract class GameLine
@@ -189,12 +185,12 @@ abstract class GameLine
             $text = '';
             if ($this->showReferee === RefereeColumn::Referee) {
                 $referee = $game->getReferee();
-                if( $referee !== null ) {
+                if ($referee !== null) {
                     $text = $referee->getInitials();
                 }
             } elseif ($this->showReferee === RefereeColumn::SelfReferee) {
                 $refereePlace = $game->getRefereePlace();
-                if( $refereePlace !== null ) {
+                if ($refereePlace !== null) {
                     $text = $nameService->getPlaceName($refereePlace, true, true);
                 }
             }

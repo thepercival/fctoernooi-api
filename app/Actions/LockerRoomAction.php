@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -6,17 +7,14 @@ namespace App\Actions;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Doctrine\Common\Collections\ArrayCollection;
+use FCToernooi\Competitor;
+use FCToernooi\LockerRoom;
+use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Tournament;
-use Selective\Config\Configuration;
-use Slim\Factory\ServerRequestCreatorFactory;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Competitor;
-use FCToernooi\LockerRoom;
 
 /**
  * @template Action<LockerRoom>

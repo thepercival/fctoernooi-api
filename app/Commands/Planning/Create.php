@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands\Planning;
@@ -97,7 +98,7 @@ class Create extends PlanningCommand
 
     protected function getReceiver(QueueService $queueService): callable
     {
-        return function (Message $message, Consumer $consumer) use ($queueService) : void {
+        return function (Message $message, Consumer $consumer) use ($queueService): void {
             // process message
             try {
                 $eventPriority = $message->getHeader('priority');

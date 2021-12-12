@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App;
@@ -22,7 +23,6 @@ final class Mailer
         protected string $adminEmailaddress,
         protected array|null $smtpConfig = null
     ) {
-
     }
 
     public function sendToAdmin(string $subject, string $body, bool $text = null): void

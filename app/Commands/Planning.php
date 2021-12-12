@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands;
@@ -39,7 +40,8 @@ class Planning extends Command
             return $placeRange;
         }
         return new SportRange(
-            PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
+            PlaceRanges::MinNrOfPlacesPerPoule,
+            TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
         );
     }
 

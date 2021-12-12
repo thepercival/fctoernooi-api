@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi;
@@ -15,8 +16,8 @@ class LockerRoom extends Identifiable
      */
     private Collection $competitors;
 
-    const MIN_LENGTH_NAME = 1;
-    const MAX_LENGTH_NAME = 6;
+    public const MIN_LENGTH_NAME = 1;
+    public const MAX_LENGTH_NAME = 6;
 
     public function __construct(protected Tournament $tournament, string $name)
     {

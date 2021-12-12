@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands;
 
 use App\Command;
+use App\Commands\Validator\NoUsersException;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
@@ -16,6 +18,7 @@ use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
 use Sports\Output\Game\Against as AgainstGameOutput;
 use Sports\Output\Game\Together as TogetherGameOutput;
+use Sports\Output\StructureOutput;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\GamesValidator;
@@ -35,12 +38,19 @@ class Validator extends Command
     protected CompetitionValidator $competitionValidator;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
+    private DateTimeImmutable $deprecatedCreatedDateTime;
     private const DEFAULT_START_DAYS_IN_PAST = 7;
     private const DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
-    private const TOURNAMENT_STARTID_VALIDATE_PRIO = 4000;
+    private const TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
 
     public function __construct(ContainerInterface $container)
     {
+        $x = @DateTimeImmutable::createFromFormat('Y-m-d', self::TOURNAMENT_DEPRECATED_CREATED_DATETIME);
+        if ($x === false) {
+            throw new Exception('12', E_ERROR);
+        }
+        $this->deprecatedCreatedDateTime = $x;
+
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
@@ -97,17 +107,17 @@ class Validator extends Command
                 /** @var Structure|null $structure */
                 $structure = null;
                 try {
+                    $structure = $this->checkValidity($tournament);
                     if ($tournament->getUsers()->count() === 0) {
-                        throw new \Exception('no users for tournament ' . (string)$tournament->getId(), E_ERROR);
+                        throw new NoUsersException('toernooi-id(' . ((string)$tournament->getId()) . ') => no users for tournament', E_ERROR);
                     }
-                    $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-                    $this->checkValidity($tournament, $structure);
-                    $this->addStructureToLog($tournament, $structure);
+                } catch (NoUsersException $exception) {
+                    $this->getLogger()->error($exception->getMessage());
+//                    if ($structure !== null) {
+//                        $this->addStructureToLog($tournament, $structure);
+//                    }
                 } catch (Exception $exception) {
                     $this->getLogger()->error($exception->getMessage());
-                    if ($structure !== null) {
-                        $this->addStructureToLog($tournament, $structure);
-                    }
                 }
             }
             $this->getLogger()->info('alle toernooien gevalideerd');
@@ -119,21 +129,24 @@ class Validator extends Command
         return 0;
     }
 
-    protected function checkValidity(Tournament $tournament, Structure $structure): void
+    protected function checkValidity(Tournament $tournament): Structure
     {
         try {
+            $structure = $this->structureRepos->getStructure($tournament->getCompetition());
             $competition = $tournament->getCompetition();
             if (count($competition->getFields()) === 0) {
                 throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
             }
+
             $this->competitionValidator->checkValidity($competition);
             $this->structureValidator->checkValidity($competition, $structure, $tournament->getPlaceRanges());
             $roundNumber = $structure->getFirstRoundNumber();
             $this->validateGames($tournament, $roundNumber, $competition->getReferees()->count());
-        } catch (Exception $exception) {
+        } catch (\Throwable $throwable) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
-            throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
+            throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $throwable->getMessage(), E_ERROR);
         }
+        return $structure;
     }
 
     protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
@@ -143,7 +156,7 @@ class Validator extends Command
                 $this->gamesValidator->validate(
                     $roundNumber,
                     $nrOfReferees,
-                    $tournament->getId() > self::TOURNAMENT_STARTID_VALIDATE_PRIO,
+                    true,
                     $tournament->getBreak()
                 );
             }
@@ -194,7 +207,7 @@ class Validator extends Command
     protected function addStructureToLog(Tournament $tournament, Structure $structure): void
     {
         try {
-            // (new StructureOutput($this->getLogger()))->output($structure);
+            (new StructureOutput($this->getLogger()))->output($structure);
         } catch (Exception $exception) {
             $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
         }
@@ -213,34 +226,46 @@ class Validator extends Command
         }
 
         $start = $this->getStartFromInput($input);
-        $end = $this->getEndFromInput($input);
+        $end = $this->getEndFromInput($input, $start);
         return $this->tournamentRepos->findByFilter(null, $start, $end);
     }
 
     protected function getStartFromInput(InputInterface $input): DateTimeImmutable
     {
-        $startDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_START_DAYS_IN_PAST . ' days');
+        $defaultStartDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_START_DAYS_IN_PAST . ' days');
+        $defaultEndDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
+
         $start = $input->getOption('startdate');
         if (!is_string($start) || strlen($start) === 0) {
-            return $startDate;
+            return $defaultStartDate;
         }
         $startDateFromInput = DateTimeImmutable::createFromFormat('Y-m-d', $start);
         if ($startDateFromInput === false) {
-            return $startDate;
+            return $defaultStartDate;
+        }
+        if ($startDateFromInput->getTimestamp() <= $this->deprecatedCreatedDateTime->getTimestamp()) {
+            return $this->deprecatedCreatedDateTime->modify('+1 days');
+        }
+        if ($startDateFromInput->getTimestamp() >= $defaultEndDate->getTimestamp()) {
+            throw new \Exception('it is not allowed to choose a start in the future', E_ERROR);
         }
         return $startDateFromInput;
     }
 
-    protected function getEndFromInput(InputInterface $input): DateTimeImmutable
+    protected function getEndFromInput(InputInterface $input, DateTimeImmutable $start): DateTimeImmutable
     {
-        $endDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
+        $defaultEndDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
+
         $end = $input->getOption('enddate');
         if (!is_string($end) || strlen($end) === 0) {
-            return $endDate;
+            return $defaultEndDate;
         }
         $endDateFromInput = DateTimeImmutable::createFromFormat('Y-m-d', $end);
         if ($endDateFromInput === false) {
-            return $endDate;
+            return $defaultEndDate;
+        }
+        if ($endDateFromInput->getTimestamp() < $start->getTimestamp()) {
+            return $defaultEndDate;
         }
         return $endDateFromInput;
     }

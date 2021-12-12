@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
@@ -17,6 +18,7 @@ use Sports\State;
 
 class Multiple extends ToernooiPdfPage
 {
+    use Helper;
     protected float $nameColumnWidth;
     protected float $pointsColumnWidth;
     protected float $rankColumnWidth;
@@ -25,8 +27,6 @@ class Multiple extends ToernooiPdfPage
     // protected $placeWidthStructure;
     // protected $pouleMarginStructure;
     protected int $rowHeight;
-
-    use Helper;
 
     public function __construct(Document $document, mixed $param1)
     {
@@ -162,8 +162,9 @@ class Multiple extends ToernooiPdfPage
      * @param Place $place
      * @return SportRoundRankingItem|null
      */
-    protected function getSportRankingItemByPlace(array $sportRankingItems, Place $place): SportRoundRankingItem|null {
-        $filtered = array_filter($sportRankingItems, fn(SportRoundRankingItem $item) => $item->getPerformance()->getPlace() === $place );
+    protected function getSportRankingItemByPlace(array $sportRankingItems, Place $place): SportRoundRankingItem|null
+    {
+        $filtered = array_filter($sportRankingItems, fn (SportRoundRankingItem $item) => $item->getPerformance()->getPlace() === $place);
         $item = reset($filtered);
         return $item === false ? null : $item;
     }

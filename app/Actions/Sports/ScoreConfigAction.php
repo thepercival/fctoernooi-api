@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Sports\Round;
-use Sports\Round\Number as RoundNumber;
-use Sports\Sport;
-use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
-use Sports\Score\Config\Repository as ScoreConfigRepository;
-use Sports\Score\Config\Service as ScoreConfigService;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
+use Psr\Log\LoggerInterface;
 use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Round;
 use Sports\Score\Config as ScoreConfig;
+use Sports\Score\Config\Repository as ScoreConfigRepository;
+use Sports\Structure;
+use Sports\Structure\Repository as StructureRepository;
 
 final class ScoreConfigAction extends Action
 {
@@ -122,7 +119,7 @@ final class ScoreConfigAction extends Action
 
     protected function getRound(Structure $structure, int $roundId): Round
     {
-        $getRound = function (Round $round) use ($roundId, &$getRound) : ?Round {
+        $getRound = function (Round $round) use ($roundId, &$getRound): ?Round {
             if ($round->getId() === $roundId) {
                 return $round;
             }

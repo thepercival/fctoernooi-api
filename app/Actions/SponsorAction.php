@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\ImageService;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use App\ImageService;
-use Slim\Factory\ServerRequestCreatorFactory;
-use \Suin\ImageResizer\ImageResizer;
+use FCToernooi\Sponsor;
+use FCToernooi\Sponsor\Repository as SponsorRepository;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\Repository as TournamentRepository;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Sponsor;
-use FCToernooi\Tournament;
+use Suin\ImageResizer\ImageResizer;
 
 final class SponsorAction extends Action
 {

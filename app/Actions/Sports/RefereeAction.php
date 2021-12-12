@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
-use FCToernooi\Tournament;
-use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
-use Sports\Availability\Checker as AvailabilityChecker;
-use Sports\Competition\Repository as CompetitionRepos;
-use Sports\Competition\Referee;
-use Sports\Competition\Referee\Repository as RefereeRepository;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
-use JMS\Serializer\SerializationContext;
+use FCToernooi\Tournament;
 use JMS\Serializer\DeserializationContext;
-use Sports\Sport\Repository as SportRepository;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
+use Psr\Log\LoggerInterface;
+use Sports\Availability\Checker as AvailabilityChecker;
 use Sports\Competition;
+use Sports\Competition\Referee;
+use Sports\Competition\Referee\Repository as RefereeRepository;
+use Sports\Competition\Repository as CompetitionRepos;
 use Sports\Priority\Service as PriorityService;
+use Sports\Sport\Repository as SportRepository;
 
 final class RefereeAction extends Action
 {
@@ -167,7 +167,7 @@ final class RefereeAction extends Action
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->upgrade($referee);
             foreach ($changedReferees as $changedReferee) {
-                if( $changedReferee instanceof Referee ) {
+                if ($changedReferee instanceof Referee) {
                     $this->refereeRepos->save($changedReferee);
                 }
             }
@@ -201,7 +201,7 @@ final class RefereeAction extends Action
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->validate();
             foreach ($changedReferees as $changedReferee) {
-                if( $changedReferee instanceof Referee ) {
+                if ($changedReferee instanceof Referee) {
                     $this->refereeRepos->save($changedReferee);
                 }
             }

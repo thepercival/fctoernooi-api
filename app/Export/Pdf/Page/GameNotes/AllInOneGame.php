@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\GameNotes;
@@ -9,7 +10,6 @@ use App\Export\Pdf\Page\GameNotes;
 use App\Export\Pdf\Page\GameNotes as GameNotesBase;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
-use Sports\Game\Place\Together as TogetherGamePlace;
 
 class AllInOneGame extends GameNotesBase
 {

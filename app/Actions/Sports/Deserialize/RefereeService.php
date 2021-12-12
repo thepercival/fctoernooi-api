@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports\Deserialize;
 
-use Sports\Round\Number as RoundNumber;
 use Sports\Place;
+use Sports\Round\Number as RoundNumber;
 
 class RefereeService
 {
@@ -35,7 +35,7 @@ class RefereeService
         foreach ($roundNumber->getPoules() as $poule) {
             foreach ($poule->getPlaces() as $place) {
                 $placeId = $place->getId();
-                if($placeId !== null) {
+                if ($placeId !== null) {
                     $roundNumberPlaces[$placeId] = $place;
                 }
             }

@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App;
 
 use Enqueue\AmqpLib\AmqpConnectionFactory;
 use Exception;
-use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpContext;
+use Interop\Amqp\AmqpQueue;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 use Sports\Competition;

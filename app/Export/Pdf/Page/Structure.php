@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
+use App\Exceptions\PdfOutOfBoundsException;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Place;
-use Sports\Round;
 use Sports\Poule;
-use Sports\NameService;
-use App\Exceptions\PdfOutOfBoundsException;
+use Sports\Round;
 
 class Structure extends ToernooiPdfPage
 {
@@ -91,7 +90,7 @@ class Structure extends ToernooiPdfPage
         $pouleMarginsWidth = ($nrOfPoules - 1) * self::PouleMargin;
         $pouleWidth = ($width - $pouleMarginsWidth) / $nrOfPoules;
         $maxNrOfPlaceColumnsPerPoule = (int)floor($pouleWidth / self::PlaceWidth);
-        if( $maxNrOfPlaceColumnsPerPoule === 0 ) {
+        if ($maxNrOfPlaceColumnsPerPoule === 0) {
             $maxNrOfPlaceColumnsPerPoule = 1;
         }
         return $maxNrOfPlaceColumnsPerPoule;

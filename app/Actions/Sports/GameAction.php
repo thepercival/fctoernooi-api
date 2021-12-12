@@ -1,38 +1,34 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
-use App\Response\ErrorResponse;
+use App\Actions\Action;
 use Exception;
-use Psr\Log\LoggerInterface;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use JMS\Serializer\SerializerInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use Sports\Competition;
 use Sports\Competition\Field;
 use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Against as AgainstGame;
-use Sports\Round;
-use Sports\Round\Number as RoundNumber;
-use Sports\Planning\EditMode as PlanningEditMode;
-use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\Score\Against\Repository as AgainstScoreRepository;
-use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Game\Against\Repository as AgainstGameRepository;
-use Sports\Game\Place\Together as TogetherGamePlace;
-use Sports\Place\Repository as PlaceRepository;
-use Sports\Structure\Repository as StructureRepository;
+use Sports\Game\Together as TogetherGame;
+use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Place;
+use Sports\Place\Repository as PlaceRepository;
+use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Poule;
 use Sports\Poule\Repository as PouleRepository;
-use App\Actions\Action;
-use Sports\Competition;
-use Sports\Score\Creator as GameScoreCreator;
-use Sports\Game\Together as TogetherGame;
-use Sports\State;
 use Sports\Qualify\Service as QualifyService;
+use Sports\Round\Number as RoundNumber;
+use Sports\Score\Against\Repository as AgainstScoreRepository;
+use Sports\Score\Together\Repository as TogetherScoreRepository;
+use Sports\State;
+use Sports\Structure\Repository as StructureRepository;
 
 class GameAction extends Action
 {
@@ -212,7 +208,7 @@ class GameAction extends Action
         }
     }
 
-    protected function changeQualifyPlaces(Competition $competition, Poule $poule, int $initialPouleState):void
+    protected function changeQualifyPlaces(Competition $competition, Poule $poule, int $initialPouleState): void
     {
         $changedPlaces = $this->getChangedQualifyPlaces($competition, $poule, $initialPouleState);
         foreach ($changedPlaces as $changedPlace) {

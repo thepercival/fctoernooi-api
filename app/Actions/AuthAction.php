@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Exceptions\DomainRecordNotFoundException;
 use App\Response\ErrorResponse;
 use Exception;
-use JMS\Serializer\SerializerInterface;
-use FCToernooi\User;
-use Psr\Log\LoggerInterface;
-use FCToernooi\User\Repository as UserRepository;
+use FCToernooi\Auth\Item as AuthItem;
 use FCToernooi\Auth\Service as AuthService;
-use \Slim\Middleware\JwtAuthentication;
+use FCToernooi\User;
+use FCToernooi\User\Repository as UserRepository;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use Slim\Middleware\JwtAuthentication;
 use stdClass;
-use FCToernooi\Auth\Item as AuthItem;
 
 final class AuthAction extends Action
 {

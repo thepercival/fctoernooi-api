@@ -1,15 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\GameLine;
 
-use App\Export\Pdf\GameLine;
-use App\Export\Pdf\Page;
-use Sports\Game\Place\Together as TogetherGamePlace;
-use Sports\Game\Against as AgainstGame;
-use Sports\Game\Together as TogetherGame;
 use App\Export\Pdf\Align;
+use App\Export\Pdf\GameLine;
 use App\Export\Pdf\GameLine as GameLineBase;
+use App\Export\Pdf\Page;
+use Sports\Game\Against as AgainstGame;
+use Sports\Game\Place\Together as TogetherGamePlace;
+use Sports\Game\Together as TogetherGame;
 use Sports\State;
 
 class Together extends GameLineBase

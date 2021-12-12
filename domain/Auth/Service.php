@@ -1,24 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
+use App\Mailer;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
-use FCToernooi\TournamentUser;
-use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
-use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\TournamentUser;
+use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
+use FCToernooi\User;
+use FCToernooi\User\Repository as UserRepository;
 use Firebase\JWT\JWT;
 use InvalidArgumentException;
 use Selective\Config\Configuration;
 use Tuupola\Base62;
-use App\Mailer;
 
 class Service
 {
@@ -110,8 +111,8 @@ EOT;
             $bodyMiddle .= '</tbody></table><br/>';
         }
         $bodyEnd = '<p>met vriendelijke groet,<br/><br/>Coen Dunnink<br/>06-14363514<br/><a href="' . $this->config->getString(
-                'www.wwwurl'
-            ) . '">FCToernooi</a></p>';
+            'www.wwwurl'
+        ) . '">FCToernooi</a></p>';
         $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
 

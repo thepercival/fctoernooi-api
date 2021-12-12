@@ -43,11 +43,11 @@ class BackupSponsorImages extends Command
     {
         $this->initLogger($input, 'cron-backup-sponsorimages');
         $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
-                'images.sponsors.pathpostfix'
-            );
+            'images.sponsors.pathpostfix'
+        );
         $backupPath = $this->config->getString('images.sponsors.backuppath') . $this->config->getString(
-                'images.sponsors.pathpostfix'
-            );
+            'images.sponsors.pathpostfix'
+        );
         try {
             if (!is_writable($backupPath)) {
                 throw new \Exception("backuppath " . $backupPath . " is not writable", E_ERROR);
@@ -72,7 +72,7 @@ class BackupSponsorImages extends Command
                 }
             }
         } catch (\Exception $exception) {
-            if($this->logger !== null) {
+            if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
             }
         }

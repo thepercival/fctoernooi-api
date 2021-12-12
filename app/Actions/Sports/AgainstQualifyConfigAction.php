@@ -1,23 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
+use Sports\Competition;
+use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
+use Sports\Qualify\AgainstConfig\Repository as QualifyConfigRepository;
 use Sports\Round;
 use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
-use Sports\Qualify\AgainstConfig\Repository as QualifyConfigRepository;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
-use Sports\Competition;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
 
 final class AgainstQualifyConfigAction extends Action
 {
@@ -149,7 +150,7 @@ final class AgainstQualifyConfigAction extends Action
 
     protected function getRound(Structure $structure, int $roundId): Round
     {
-        $getRound = function (Round $round) use ($roundId, &$getRound) : ?Round {
+        $getRound = function (Round $round) use ($roundId, &$getRound): ?Round {
             if ($round->getId() === $roundId) {
                 return $round;
             }

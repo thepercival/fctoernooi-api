@@ -13,7 +13,7 @@ use JMS\Serializer\SerializerInterface;
 use FCToernooi\User;
 use Psr\Log\LoggerInterface;
 use FCToernooi\User\Repository as UserRepository;
-use \Slim\Middleware\JwtAuthentication;
+use Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 

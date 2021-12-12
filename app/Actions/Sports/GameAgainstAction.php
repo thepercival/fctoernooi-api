@@ -1,28 +1,29 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use Exception;
-use Psr\Log\LoggerInterface;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use JMS\Serializer\SerializerInterface;
-use Sports\Score\Against\Repository as AgainstScoreRepository;
-use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\Game\Against\Repository as AgainstGameRepository;
-use Sports\Place\Repository as PlaceRepository;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
-use Sports\Structure\Repository as StructureRepository;
-use Sports\Game\Place\Against as AgainstGamePlace;
-use Sports\Poule;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Poule\Repository as PouleRepository;
+use Psr\Log\LoggerInterface;
 use Sports\Competition;
-use Sports\Planning\EditMode as PlanningEditMode;
-use Sports\Score\Creator as GameScoreCreator;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Against as AgainstGame;
+use Sports\Game\Against\Repository as AgainstGameRepository;
+use Sports\Game\Place\Against as AgainstGamePlace;
+use Sports\Place\Repository as PlaceRepository;
+use Sports\Planning\EditMode as PlanningEditMode;
+use Sports\Poule;
+use Sports\Poule\Repository as PouleRepository;
+use Sports\Score\Against\Repository as AgainstScoreRepository;
+use Sports\Score\Creator as GameScoreCreator;
+use Sports\Score\Together\Repository as TogetherScoreRepository;
+use Sports\Structure\Repository as StructureRepository;
 
 final class GameAgainstAction extends GameAction
 {

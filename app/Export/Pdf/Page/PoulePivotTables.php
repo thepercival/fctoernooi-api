@@ -1,30 +1,26 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
-use Exception;
-use Sports\Planning\GameAmountConfig;
-use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
-use SportsHelpers\Against\Side as AgainstSide;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Poule;
-use Sports\Place;
-use Sports\Game\Against as AgainstGame;
-use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
-use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
-use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
-use Sports\State;
-use Sports\Round\Number as RoundNumber;
-use Sports\Ranking\Calculator\Round\Sport as SportRankingCalculator;
-use Sports\Score\Config\Service as ScoreConfigService;
 use App\Export\Pdf\Page\PoulePivotTable\Helper;
+use Exception;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Place;
+use Sports\Planning\GameAmountConfig;
+use Sports\Poule;
+use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
+use Sports\Round\Number as RoundNumber;
+use Sports\Score\Config\Service as ScoreConfigService;
+use Sports\State;
 
 abstract class PoulePivotTables extends ToernooiPdfPage
 {
+    use Helper;
     protected ScoreConfigService $scoreConfigService;
     protected float $nameColumnWidth;
     protected float $pointsColumnWidth;
@@ -34,8 +30,6 @@ abstract class PoulePivotTables extends ToernooiPdfPage
     // protected $placeWidthStructure;
     // protected $pouleMarginStructure;
     protected int $rowHeight;
-
-    use Helper;
 
     public function __construct(Document $document, mixed $param1)
     {

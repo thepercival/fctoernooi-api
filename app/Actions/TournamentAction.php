@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions;
@@ -172,6 +173,9 @@ final class TournamentAction extends Action
                 $tournamentSer->getCompetition()->getStartDateTime(),
                 $user
             );
+            if ($tournament->getUsers()->count() === 0) {
+                throw new \Exception('er zijn geen gebruikers gevonden voor het nieuwe toernooi', E_ERROR);
+            }
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);

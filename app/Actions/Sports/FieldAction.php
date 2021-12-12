@@ -1,26 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Sports\Availability\Checker as AvailabilityChecker;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Repository as CompetitionRepos;
-use Sports\Competition\Field;
-use Sports\Competition\Field\Repository as FieldRepository;
-use Sports\Priority\Service as PriorityService;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
+use Psr\Log\LoggerInterface;
+use Sports\Availability\Checker as AvailabilityChecker;
 use Sports\Competition;
+use Sports\Competition\Field;
+use Sports\Competition\Field\Repository as FieldRepository;
+use Sports\Competition\Repository as CompetitionRepos;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Priority\Service as PriorityService;
 
 final class FieldAction extends Action
 {

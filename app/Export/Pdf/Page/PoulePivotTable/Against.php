@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
@@ -97,9 +98,9 @@ class Against extends PoulePivotTablesPage
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
                 return $game->isParticipating($awayPlace, AgainstSide::Away) && $game->isParticipating(
-                        $homePlace,
-                        AgainstSide::Home
-                    );
+                    $homePlace,
+                    AgainstSide::Home
+                );
             }
         );
         if (count($foundHomeGames) > 1) {
@@ -112,9 +113,9 @@ class Against extends PoulePivotTablesPage
             $placeGames,
             function ($game) use ($homePlace, $awayPlace): bool {
                 return $game->isParticipating($homePlace, AgainstSide::Away) && $game->isParticipating(
-                        $awayPlace,
-                        AgainstSide::Home
-                    );
+                    $awayPlace,
+                    AgainstSide::Home
+                );
             }
         );
         if (count($foundAwayGames) !== 1) {

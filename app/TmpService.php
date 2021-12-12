@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use PHPMailer\PHPMailer\PHPMailer;
-use Psr\Log\LoggerInterface;
-
 final class TmpService
 {
     private string $path;
@@ -34,7 +31,7 @@ final class TmpService
                 mkdir($path, 0777);
             }
         }
-        if( $file === null ) {
+        if ($file === null) {
             return $path . DIRECTORY_SEPARATOR;
         }
         return $path . DIRECTORY_SEPARATOR . $file;

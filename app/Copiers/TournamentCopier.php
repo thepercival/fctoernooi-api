@@ -1,28 +1,28 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Copiers;
 
 use DateTimeImmutable;
 use Exception;
-use FCToernooi\LockerRoom;
-use Sports\Association;
 use FCToernooi\Competitor;
-use Sports\Competition;
-use Sports\Sport;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Service as CompetitionSportService;
-use Sports\Sport\Repository as SportRepository;
-use Sports\Season\Repository as SeasonRepository;
-use Sports\League;
+use FCToernooi\LockerRoom;
+use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament as TournamentBase;
+use FCToernooi\TournamentUser;
 use FCToernooi\User;
-use Sports\Competition\Service as CompetitionService;
+use Sports\Association;
+use Sports\Competition;
 use Sports\Competition\Field;
 use Sports\Competition\Referee;
-use FCToernooi\Tournament as TournamentBase;
-use FCToernooi\Tournament;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use FCToernooi\TournamentUser;
+use Sports\Competition\Service as CompetitionService;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\League;
+use Sports\Season\Repository as SeasonRepository;
+use Sports\Sport;
+use Sports\Sport\Repository as SportRepository;
 
 class TournamentCopier
 {

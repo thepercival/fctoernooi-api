@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Response;
@@ -11,7 +12,7 @@ class ErrorResponse extends Response
 {
     public function __construct(string $message, int $status)
     {
-        $headers = new Headers;
+        $headers = new Headers();
         $headers->setHeader("Content-type", "application/json");
 
         $body = null;

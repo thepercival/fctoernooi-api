@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands\Planning\Input;
@@ -6,18 +7,17 @@ namespace App\Commands\Planning\Input;
 use App\Commands\Planning as PlanningCommand;
 use App\QueueService;
 use Doctrine\ORM\EntityManager;
+use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PlaceRanges;
+use SportsHelpers\SportRange;
+use SportsPlanning\Input;
+use SportsPlanning\Input\Iterator as PlanningInputIterator;
+use SportsPlanning\Input\Service as PlanningInputService;
+use SportsPlanning\Planning\Output as PlanningOutput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use SportsPlanning\Input;
-use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
-use SportsPlanning\Input\Service as PlanningInputService;
-use SportsPlanning\Input\Iterator as PlanningInputIterator;
-use SportsPlanning\Planning;
-use SportsHelpers\SportRange;
-use SportsPlanning\Planning\Output as PlanningOutput;
 
 class CreateDefaults extends PlanningCommand
 {

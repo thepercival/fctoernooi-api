@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App;
@@ -29,9 +30,10 @@ class Command extends SymCommand
         $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '' . Logger::INFO);
     }
 
-    protected function getLogger(): LoggerInterface {
-        if( $this->logger === null ) {
-            throw new Exception('define logger first', E_ERROR );
+    protected function getLogger(): LoggerInterface
+    {
+        if ($this->logger === null) {
+            throw new Exception('define logger first', E_ERROR);
         }
         return $this->logger;
     }
@@ -43,7 +45,7 @@ class Command extends SymCommand
         $logLevelParam = $input->getOption('loglevel');
         if (is_string($logLevelParam) && strlen($logLevelParam) > 0) {
             $logLevelTmp = filter_var($logLevelParam, FILTER_VALIDATE_INT);
-            if( $logLevelTmp !== false ) {
+            if ($logLevelTmp !== false) {
                 $logLevel = $logLevelTmp;
             }
         }

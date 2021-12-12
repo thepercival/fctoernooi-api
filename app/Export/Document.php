@@ -1,17 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export;
 
 use FCToernooi\Tournament;
 use Sports\Competitor\Map as CompetitorMap;
-use Sports\Game;
-use Sports\Game\Together as TogetherGame;
-use Sports\Game\Against as AgainstGame;
 use Sports\NameService;
-use Sports\Round;
 use Sports\Round\Number as RoundNumber;
-use Sports\State;
 use Sports\Structure;
 
 trait Document

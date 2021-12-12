@@ -1,14 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FCToernooi\Sponsor;
 
-use Exception;
-use SportsHelpers\Repository\SaveRemove as SaveRemoveRepository;
-use SportsHelpers\Repository as BaseRepository;
 use Doctrine\ORM\EntityRepository;
+use Exception;
 use FCToernooi\Sponsor as SponsorBase;
 use FCToernooi\Tournament;
+use SportsHelpers\Repository as BaseRepository;
 
 /**
  * @template-extends EntityRepository<SponsorBase>

@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\ViewHelpers;
 
-use \Exception;
+use Exception;
 use FCToernooi\Tournament;
 use Sports\Structure;
 use Sports\Structure\Validator as StructureValidator;

@@ -20,7 +20,7 @@ use Tuupola\Middleware\JwtAuthentication;
 
 return function (App $app): void {
     $container = $app->getContainer();
-    if( $container === null ) {
+    if ($container === null) {
         return;
     }
     /** @var Configuration $config */

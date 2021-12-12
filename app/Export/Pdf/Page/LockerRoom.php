@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
@@ -50,7 +51,7 @@ class LockerRoom extends ToernooiPdfPage
             }
         }
 
-        $fncMaxText = function (array $texts) use ($fontHeight) : string {
+        $fncMaxText = function (array $texts) use ($fontHeight): string {
             $maxText = null;
             $maxLength = 0;
             foreach ($texts as $text) {

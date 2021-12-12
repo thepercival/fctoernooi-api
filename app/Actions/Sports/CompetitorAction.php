@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use FCToernooi\Tournament;
-use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
+use FCToernooi\Competitor;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\Tournament;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
-use FCToernooi\Competitor;
+use Psr\Log\LoggerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
 
 final class CompetitorAction extends Action
@@ -61,7 +61,7 @@ final class CompetitorAction extends Action
             $availabilityChecker = new AvailabilityChecker();
             $competitors = array_values($tournament->getCompetitors()->toArray());
             $availabilityChecker->checkCompetitorName($competitors, $competitor->getName());
-            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor );
+            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor);
 
             $newCompetitor = new Competitor(
                 $tournament,
@@ -101,7 +101,7 @@ final class CompetitorAction extends Action
             $availabilityChecker = new AvailabilityChecker();
             $competitors = array_values($tournament->getCompetitors()->toArray());
             $availabilityChecker->checkCompetitorName($competitors, $competitor->getName(), $competitor);
-            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor, $competitor );
+            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor, $competitor);
 
             $competitor->setName($competitorSer->getName());
             $competitor->setRegistered($competitorSer->getRegistered());

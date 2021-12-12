@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands;
@@ -84,7 +85,8 @@ class Schedule extends Command
         return (int)$valueAsString;
     }
 
-    protected function getSportVariant(InputInterface $input
+    protected function getSportVariant(
+        InputInterface $input
     ): AgainstSportVariant|AllInOneGameSportVariant|SingleSportVariant {
         $gameMode = $this->getGameMode($input);
         if ($gameMode === GameMode::Against) {

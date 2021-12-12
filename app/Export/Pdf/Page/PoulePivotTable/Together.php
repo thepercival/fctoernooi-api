@@ -1,16 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
-use App\Export\Pdf\Document;
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Document;
+use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
+use Sports\Competition\Sport as CompetitionSport;
+use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
-use Sports\Competition\Sport as CompetitionSport;
-use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Poule;
-use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\State;
 
 class Together extends PoulePivotTablesPage
