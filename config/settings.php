@@ -10,6 +10,9 @@ $dotenv->load();
 return [
     'environment' => $_ENV['ENVIRONMENT'],
     'displayErrorDetails' => $_ENV['ENVIRONMENT'] === 'development',
+    'tournament' => [
+        'nrOfMonthsBeforeRemoval' => $_ENV['NR_OF_MONTHS_BEFORE_REMOVAL'],
+    ],
     // Renderer settings
     'renderer' => [
         'template_path' => __DIR__ . '/../templates/',

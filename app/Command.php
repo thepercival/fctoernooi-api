@@ -38,7 +38,7 @@ class Command extends SymCommand
         return $this->logger;
     }
 
-    protected function initLogger(InputInterface $input, string $name): void
+    protected function initLogger(InputInterface $input, string $name, MailHandler|null $mailHandler = null): void
     {
         $loggerSettings = $this->config->getArray('logger');
         $logLevel = $loggerSettings['level'];
@@ -60,13 +60,27 @@ class Command extends SymCommand
         $handler = new StreamHandler($path, $logLevel);
         $this->logger->pushHandler($handler);
 
-        $emailSettings = $this->config->getArray('email');
-        $this->logger->pushHandler(
-            new MailHandler(
-                $emailSettings['admin'],
-                ((string)$this->getName()) . ' : error',
-                $emailSettings['from']
-            )
-        );
+        if ($mailHandler === null) {
+            $mailHandler = $this->getMailHandler();
+        }
+        if ($this->mailer !== null) {
+            $mailHandler->setMailer($this->mailer);
+        }
+        $this->logger->pushHandler($mailHandler);
+    }
+
+    protected function getMailHandler(
+        string|null $subject = null,
+        int|null $mailLogLevel = null
+    ): MailHandler {
+        if ($subject === null) {
+            $subject = ((string)$this->getName()) . ' : error';
+        }
+        if ($mailLogLevel === null) {
+            $mailLogLevel = Logger::ERROR;
+        }
+        $toEmailAddress = $this->config->getString('email.admin');
+        $fromEmailAddress = $this->config->getString('email.from');
+        return new MailHandler($toEmailAddress, $subject, $fromEmailAddress, $mailLogLevel);
     }
 }

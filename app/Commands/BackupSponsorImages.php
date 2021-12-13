@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Command;
+use App\Mailer;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
@@ -23,6 +24,7 @@ class BackupSponsorImages extends Command
         $this->sponsorRepos = $container->get(SponsorRepository::class);
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
+        $this->mailer = $container->get(Mailer::class);
         parent::__construct($config);
     }
 

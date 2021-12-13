@@ -84,7 +84,7 @@ class Create extends ScheduleCommand
     /**
      * @param int $nrOfPlaces
      * @param GamePlaceStrategy $gamePlaceStrategy
-     * @param array $sportVariantsWithFields
+     * @param list<SportVariantWithFields> $sportVariantsWithFields
      * @return Schedule
      * @throws \Exception
      */

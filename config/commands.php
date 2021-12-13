@@ -9,6 +9,7 @@ use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\Input\CreateDefaults as PlanningCreateDefaultInput;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Planning\Validator as PlanningValidator;
+use App\Commands\RemoveOld;
 use App\Commands\Schedule\Create as ScheduleCreate;
 use App\Commands\Schedule\Get as ScheduleGet;
 use App\Commands\UpdateSitemap;
@@ -42,6 +43,9 @@ $commands = [
     },
     "app:validate-planning" => function (ContainerInterface $container): PlanningValidator {
         return new PlanningValidator($container);
+    },
+    "app:remove-old-tournaments" => function (ContainerInterface $container): RemoveOld {
+        return new RemoveOld($container);
     },
     "app:validate-pdf" => function (ContainerInterface $container): PdfValidator {
         return new PdfValidator($container);
