@@ -4,27 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Tournament;
 
-use Doctrine\ORM\EntityManager;
-use Exception;
-use FCToernooi\Tournament\Invitation as TournamentInvitation;
-use FCToernooi\Tournament;
-use FCToernooi\TournamentUser;
-use JMS\Serializer\SerializerInterface;
+use App\Actions\Action;
 use App\Response\ErrorResponse;
+use FCToernooi\Auth\SyncService;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\Invitation as TournamentInvitation;
+use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
-use App\Actions\Action;
 use Psr\Log\LoggerInterface;
-use FCToernooi\Auth\SyncService;
 
 final class InvitationAction extends Action
 {
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private TournamentRepository $tournamentRepos,
         private TournamentInvitationRepository $invitationRepos,
         private SyncService $syncService
     ) {

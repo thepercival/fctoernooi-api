@@ -9,6 +9,7 @@ use App\Commands\Validator\NoUsersException;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
@@ -33,6 +34,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Validator extends Command
 {
     protected TournamentRepository $tournamentRepos;
+    protected TournamentInvitationRepository $invitationRepos;
     protected StructureRepository $structureRepos;
     protected StructureValidator $structureValidator;
     protected CompetitionValidator $competitionValidator;
@@ -54,6 +56,10 @@ class Validator extends Command
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
+
+        /** @var TournamentInvitationRepository $invitationRepos */
+        $invitationRepos = $container->get(TournamentInvitationRepository::class);
+        $this->invitationRepos = $invitationRepos;
 
         /** @var StructureRepository $structureRepos */
         $structureRepos = $container->get(StructureRepository::class);
@@ -109,7 +115,13 @@ class Validator extends Command
                 try {
                     $structure = $this->checkValidity($tournament);
                     if ($tournament->getUsers()->count() === 0) {
-                        throw new NoUsersException('toernooi-id(' . ((string)$tournament->getId()) . ') => no users for tournament', E_ERROR);
+                        $invitations = $this->invitationRepos->findBy(['tournament' => $tournament]);
+                        if (count($invitations) === 0) {
+                            throw new NoUsersException(
+                                'toernooi-id(' . ((string)$tournament->getId()) . ') => has no users or invitations',
+                                E_ERROR
+                            );
+                        }
                     }
                 } catch (NoUsersException $exception) {
                     $this->getLogger()->error($exception->getMessage());

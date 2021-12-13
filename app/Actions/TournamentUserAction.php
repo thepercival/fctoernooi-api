@@ -5,27 +5,21 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
-use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Exception;
-use Selective\Config\Configuration;
+use FCToernooi\Tournament;
+use FCToernooi\TournamentUser;
+use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use JMS\Serializer\SerializerInterface;
-use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\TournamentUser;
-use FCToernooi\Tournament;
-use FCToernooi\User;
 
 final class TournamentUserAction extends Action
 {
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private TournamentUserRepository $tournamentUserRepos,
-        private TournamentRepository $tournamentRepos,
-        private Configuration $config
+        private TournamentUserRepository $tournamentUserRepos
     ) {
         parent::__construct($logger, $serializer);
     }
