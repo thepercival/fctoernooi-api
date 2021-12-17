@@ -6,6 +6,7 @@ namespace App\Commands;
 
 use App\Command;
 use App\Commands\Validator\NoUsersException;
+use App\Mailer;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
@@ -49,7 +50,7 @@ class Validator extends Command
     {
         $x = @DateTimeImmutable::createFromFormat('Y-m-d', self::TOURNAMENT_DEPRECATED_CREATED_DATETIME);
         if ($x === false) {
-            throw new Exception('12', E_ERROR);
+            throw new Exception('invalid deprecated createdDateTime', E_ERROR);
         }
         $this->deprecatedCreatedDateTime = $x;
 
@@ -72,6 +73,8 @@ class Validator extends Command
         $this->competitionValidator = new CompetitionValidator();
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
+
+        $this->mailer = $container->get(Mailer::class);
 
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);

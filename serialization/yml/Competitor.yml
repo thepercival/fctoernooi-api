@@ -4,10 +4,6 @@ FCToernooi\Competitor:
   properties:
     name:
       type: string
-    pouleNr:
-      type: integer
-    placeNr:
-      type: integer
     registered:
       type: boolean
     info:

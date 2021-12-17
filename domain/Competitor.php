@@ -7,21 +7,18 @@ namespace FCToernooi;
 use Sports\Competition;
 use Sports\Competitor as SportsCompetitor;
 use Sports\Competitor\Base;
-use SportsHelpers\Identifiable;
 
-class Competitor extends Identifiable implements SportsCompetitor
+class Competitor extends Base implements SportsCompetitor
 {
-    use Base;
     protected string $name;
 
     public function __construct(protected Tournament $tournament, int $pouleNr, int $placeNr, string $name)
     {
+        parent::__construct($pouleNr, $placeNr);
         if (!$tournament->getCompetitors()->contains($this)) {
-            $tournament->getCompetitors()->add($this) ;
+            $tournament->getCompetitors()->add($this);
         }
         $this->setName($name);
-        $this->setPouleNr($pouleNr);
-        $this->setPlaceNr($placeNr);
     }
 
     public function getTournament(): Tournament
