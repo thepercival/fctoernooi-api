@@ -1057,19 +1057,19 @@
             "time": "2020-05-25T17:44:05+00:00"
         },
         {
-            "name": "doctrine/orm",
-            "version": "2.10.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/doctrine/orm.git",
-                "reference": "7b242753466508e1dd10f67c1baee95785f845c1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/7b242753466508e1dd10f67c1baee95785f845c1",
-                "reference": "7b242753466508e1dd10f67c1baee95785f845c1",
-                "shasum": ""
-            },
+          "name": "doctrine/orm",
+          "version": "2.10.4",
+          "source": {
+            "type": "git",
+            "url": "https://github.com/doctrine/orm.git",
+            "reference": "cccb2e2fdfed2969afb3d65c5ea82bafdefbe1a7"
+          },
+          "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/doctrine/orm/zipball/cccb2e2fdfed2969afb3d65c5ea82bafdefbe1a7",
+            "reference": "cccb2e2fdfed2969afb3d65c5ea82bafdefbe1a7",
+            "shasum": ""
+          },
             "require": {
                 "composer/package-versions-deprecated": "^1.8",
                 "doctrine/cache": "^1.12.1 || ^2.1.1",
@@ -1094,15 +1094,15 @@
                 "doctrine/annotations": "<1.13 || >= 2.0"
             },
             "require-dev": {
-                "doctrine/annotations": "^1.13",
-                "doctrine/coding-standard": "^9.0",
-                "phpbench/phpbench": "^0.16.10 || ^1.0",
-                "phpstan/phpstan": "1.2.0",
-                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.4",
-                "squizlabs/php_codesniffer": "3.6.1",
-                "symfony/cache": "^4.4 || ^5.2",
-                "symfony/yaml": "^3.4 || ^4.0 || ^5.0 || ^6.0",
-                "vimeo/psalm": "4.13.1"
+              "doctrine/annotations": "^1.13",
+              "doctrine/coding-standard": "^9.0",
+              "phpbench/phpbench": "^0.16.10 || ^1.0",
+              "phpstan/phpstan": "1.2.0",
+              "phpunit/phpunit": "^7.5 || ^8.5 || ^9.4",
+              "squizlabs/php_codesniffer": "3.6.2",
+              "symfony/cache": "^4.4 || ^5.2",
+              "symfony/yaml": "^3.4 || ^4.0 || ^5.0 || ^6.0",
+              "vimeo/psalm": "4.15.0"
             },
             "suggest": {
                 "symfony/cache": "Provides cache support for Setup Tool with doctrine/cache 2.0",
@@ -1151,9 +1151,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/2.10.3"
+              "source": "https://github.com/doctrine/orm/tree/2.10.4"
             },
-            "time": "2021-12-03T12:27:05+00:00"
+          "time": "2021-12-20T21:23:47+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -1305,20 +1305,20 @@
             ],
             "time": "2020-05-11T07:42:22+00:00"
         },
-        {
-            "name": "endroid/qr-code",
-            "version": "4.4.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/endroid/qr-code.git",
-                "reference": "458745cabee80391408fe7044e4ea0f16a25a4b1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/endroid/qr-code/zipball/458745cabee80391408fe7044e4ea0f16a25a4b1",
-                "reference": "458745cabee80391408fe7044e4ea0f16a25a4b1",
-                "shasum": ""
-            },
+      {
+        "name": "endroid/qr-code",
+        "version": "4.4.4",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/endroid/qr-code.git",
+          "reference": "361b43bbdfa4360442369d0a236e7d8756160523"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/endroid/qr-code/zipball/361b43bbdfa4360442369d0a236e7d8756160523",
+          "reference": "361b43bbdfa4360442369d0a236e7d8756160523",
+          "shasum": ""
+        },
             "require": {
                 "bacon/bacon-qr-code": "^2.0",
                 "php": "^7.4||^8.0"
@@ -1367,7 +1367,7 @@
             ],
             "support": {
                 "issues": "https://github.com/endroid/qr-code/issues",
-                "source": "https://github.com/endroid/qr-code/tree/4.4.3"
+              "source": "https://github.com/endroid/qr-code/tree/4.4.4"
             },
             "funding": [
                 {
@@ -1375,7 +1375,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-12-12T13:37:40+00:00"
+        "time": "2021-12-13T11:01:54+00:00"
         },
         {
             "name": "enqueue/amqp-lib",
@@ -2112,20 +2112,20 @@
             },
             "time": "2021-11-22T12:27:42+00:00"
         },
-        {
-            "name": "jms/serializer",
-            "version": "3.16.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/schmittjoh/serializer.git",
-                "reference": "9b0b5208a6edb20b979c7d95bdda53a46098a7d9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/9b0b5208a6edb20b979c7d95bdda53a46098a7d9",
-                "reference": "9b0b5208a6edb20b979c7d95bdda53a46098a7d9",
-                "shasum": ""
-            },
+      {
+        "name": "jms/serializer",
+        "version": "3.17.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/schmittjoh/serializer.git",
+          "reference": "6e17603abc16c5b6eed41f51844bc51dda51cf94"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/schmittjoh/serializer/zipball/6e17603abc16c5b6eed41f51844bc51dda51cf94",
+          "reference": "6e17603abc16c5b6eed41f51844bc51dda51cf94",
+          "shasum": ""
+        },
             "require": {
                 "doctrine/annotations": "^1.13",
                 "doctrine/instantiator": "^1.0.3",
@@ -2135,25 +2135,25 @@
                 "phpstan/phpdoc-parser": "^0.4 || ^0.5 || ^1.0"
             },
             "require-dev": {
-                "doctrine/coding-standard": "^8.1",
-                "doctrine/orm": "~2.1",
-                "doctrine/persistence": "^1.3.3|^2.0|^3.0",
-                "doctrine/phpcr-odm": "^1.3|^2.0",
-                "ext-pdo_sqlite": "*",
-                "jackalope/jackalope-doctrine-dbal": "^1.1.5",
-                "ocramius/proxy-manager": "^1.0|^2.0",
-                "phpbench/phpbench": "^1.0",
-                "phpstan/phpstan": "^1.0.2",
-                "phpunit/phpunit": "^8.0||^9.0",
-                "psr/container": "^1.0",
-                "symfony/dependency-injection": "^3.0|^4.0|^5.0|^6.0",
-                "symfony/expression-language": "^3.2|^4.0|^5.0|^6.0",
-                "symfony/filesystem": "^3.0|^4.0|^5.0|^6.0",
-                "symfony/form": "^3.0|^4.0|^5.0|^6.0",
-                "symfony/translation": "^3.0|^4.0|^5.0|^6.0",
-                "symfony/validator": "^3.1.9|^4.0|^5.0|^6.0",
-                "symfony/yaml": "^3.3|^4.0|^5.0|^6.0",
-                "twig/twig": "~1.34|~2.4|^3.0"
+              "doctrine/coding-standard": "^8.1",
+              "doctrine/orm": "~2.1",
+              "doctrine/persistence": "^1.3.3|^2.0|^3.0",
+              "doctrine/phpcr-odm": "^1.3|^2.0",
+              "ext-pdo_sqlite": "*",
+              "jackalope/jackalope-doctrine-dbal": "^1.1.5",
+              "ocramius/proxy-manager": "^1.0|^2.0",
+              "phpbench/phpbench": "^1.0",
+              "phpstan/phpstan": "^1.0.2",
+              "phpunit/phpunit": "^8.5.21||^9.0",
+              "psr/container": "^1.0",
+              "symfony/dependency-injection": "^3.0|^4.0|^5.0|^6.0",
+              "symfony/expression-language": "^3.2|^4.0|^5.0|^6.0",
+              "symfony/filesystem": "^3.0|^4.0|^5.0|^6.0",
+              "symfony/form": "^3.0|^4.0|^5.0|^6.0",
+              "symfony/translation": "^3.0|^4.0|^5.0|^6.0",
+              "symfony/validator": "^3.1.9|^4.0|^5.0|^6.0",
+              "symfony/yaml": "^3.3|^4.0|^5.0|^6.0",
+              "twig/twig": "~1.34|~2.4|^3.0"
             },
             "suggest": {
                 "doctrine/collections": "Required if you like to use doctrine collection types as ArrayCollection.",
@@ -2196,7 +2196,7 @@
             ],
             "support": {
                 "issues": "https://github.com/schmittjoh/serializer/issues",
-                "source": "https://github.com/schmittjoh/serializer/tree/3.16.0"
+              "source": "https://github.com/schmittjoh/serializer/tree/3.17.0"
             },
             "funding": [
                 {
@@ -2204,7 +2204,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-11-22T07:03:41+00:00"
+        "time": "2021-12-14T15:01:05+00:00"
         },
         {
             "name": "league/period",
@@ -2823,20 +2823,20 @@
             },
             "time": "2021-12-03T14:55:21+00:00"
         },
-        {
-            "name": "php-di/invoker",
-            "version": "2.3.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/PHP-DI/Invoker.git",
-                "reference": "5214cbe5aad066022cd845dbf313f0e47aed928f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/5214cbe5aad066022cd845dbf313f0e47aed928f",
-                "reference": "5214cbe5aad066022cd845dbf313f0e47aed928f",
-                "shasum": ""
-            },
+      {
+        "name": "php-di/invoker",
+        "version": "2.3.3",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/PHP-DI/Invoker.git",
+          "reference": "cd6d9f267d1a3474bdddf1be1da079f01b942786"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/PHP-DI/Invoker/zipball/cd6d9f267d1a3474bdddf1be1da079f01b942786",
+          "reference": "cd6d9f267d1a3474bdddf1be1da079f01b942786",
+          "shasum": ""
+        },
             "require": {
                 "php": ">=7.3",
                 "psr/container": "^1.0|^2.0"
@@ -2868,7 +2868,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-DI/Invoker/issues",
-                "source": "https://github.com/PHP-DI/Invoker/tree/2.3.2"
+              "source": "https://github.com/PHP-DI/Invoker/tree/2.3.3"
             },
             "funding": [
                 {
@@ -2876,7 +2876,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-07-30T15:05:32+00:00"
+        "time": "2021-12-13T09:22:56+00:00"
         },
         {
             "name": "php-di/php-di",
@@ -5571,20 +5571,20 @@
             ],
             "time": "2021-12-08T15:13:44+00:00"
         },
-        {
-            "name": "thepercival/php-sports",
-            "version": "v1.0.48",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "38cade18c38b2aa7b909a781dd69837206c81798"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/38cade18c38b2aa7b909a781dd69837206c81798",
-                "reference": "38cade18c38b2aa7b909a781dd69837206c81798",
-                "shasum": ""
-            },
+      {
+        "name": "thepercival/php-sports",
+        "version": "v1.0.49",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/thepercival/php-sports.git",
+          "reference": "2d0366fa7e589499de3f09bea4cdbf859d75776e"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/thepercival/php-sports/zipball/2d0366fa7e589499de3f09bea4cdbf859d75776e",
+          "reference": "2d0366fa7e589499de3f09bea4cdbf859d75776e",
+          "shasum": ""
+        },
             "require": {
                 "doctrine/orm": "^2.10",
                 "guzzlehttp/guzzle": "^7.4",
@@ -5643,9 +5643,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.48"
+              "source": "https://github.com/thepercival/php-sports/tree/v1.0.49"
             },
-            "time": "2021-12-12T21:24:04+00:00"
+        "time": "2021-12-24T18:56:04+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -6252,20 +6252,20 @@
             ],
             "time": "2021-11-25T13:46:55+00:00"
         },
-        {
-            "name": "vlucas/phpdotenv",
-            "version": "v5.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/vlucas/phpdotenv.git",
-                "reference": "d4394d044ed69a8f244f3445bcedf8a0d7fe2403"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/d4394d044ed69a8f244f3445bcedf8a0d7fe2403",
-                "reference": "d4394d044ed69a8f244f3445bcedf8a0d7fe2403",
-                "shasum": ""
-            },
+      {
+        "name": "vlucas/phpdotenv",
+        "version": "v5.4.1",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/vlucas/phpdotenv.git",
+          "reference": "264dce589e7ce37a7ba99cb901eed8249fbec92f"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/264dce589e7ce37a7ba99cb901eed8249fbec92f",
+          "reference": "264dce589e7ce37a7ba99cb901eed8249fbec92f",
+          "shasum": ""
+        },
             "require": {
                 "ext-pcre": "*",
                 "graham-campbell/result-type": "^1.0.2",
@@ -6299,14 +6299,16 @@
                 "BSD-3-Clause"
             ],
             "authors": [
-                {
-                    "name": "Graham Campbell",
-                    "email": "hello@gjcampbell.co.uk"
-                },
-                {
-                    "name": "Vance Lucas",
-                    "email": "vance@vancelucas.com"
-                }
+              {
+                "name": "Graham Campbell",
+                "email": "hello@gjcampbell.co.uk",
+                "homepage": "https://github.com/GrahamCampbell"
+              },
+              {
+                "name": "Vance Lucas",
+                "email": "vance@vancelucas.com",
+                "homepage": "https://github.com/vlucas"
+              }
             ],
             "description": "Loads environment variables from `.env` to `getenv()`, `$_ENV` and `$_SERVER` automagically.",
             "keywords": [
@@ -6316,7 +6318,7 @@
             ],
             "support": {
                 "issues": "https://github.com/vlucas/phpdotenv/issues",
-                "source": "https://github.com/vlucas/phpdotenv/tree/v5.4.0"
+              "source": "https://github.com/vlucas/phpdotenv/tree/v5.4.1"
             },
             "funding": [
                 {
@@ -6328,7 +6330,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-11-10T01:08:39+00:00"
+        "time": "2021-12-12T23:22:04+00:00"
         },
         {
             "name": "willdurand/negotiation",

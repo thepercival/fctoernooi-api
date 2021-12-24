@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Actions\Action;
+use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
-use Sports\Structure;
-use Sports\Structure\Copier as StructureCopier;
-use App\Response\ErrorResponse;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Sports\Structure\Repository as StructureRepository;
-use FCToernooi\Competitor\Repository as CompetitorRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
+use Psr\Log\LoggerInterface;
+use Sports\Structure;
+use Sports\Structure\Copier as StructureCopier;
+use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
 
 final class StructureAction extends Action
@@ -37,12 +37,12 @@ final class StructureAction extends Action
      */
     protected function getDeserialzeGroups(): array
     {
-        return ['Default', 'structure'];
+        return ['Default', 'structure', 'games'];
     }
 
     protected function getSerializationContext(): SerializationContext
     {
-        return SerializationContext::create()->setGroups(['Default', 'structure']);
+        return SerializationContext::create()->setGroups(['Default', 'structure', 'games']);
     }
 
     /**
