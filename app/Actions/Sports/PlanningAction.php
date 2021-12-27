@@ -9,6 +9,7 @@ use App\QueueService;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -27,8 +28,6 @@ use SportsPlanning\Planning\Repository as PlanningRepository;
 
 final class PlanningAction extends Action
 {
-//    private DeserializeRefereeService $deserializeRefereeService;
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
@@ -40,7 +39,6 @@ final class PlanningAction extends Action
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-//        $this->deserializeRefereeService = new DeserializeRefereeService();
     }
 
     /**
@@ -53,7 +51,7 @@ final class PlanningAction extends Action
     public function fetch(Request $request, Response $response, array $args): Response
     {
         $roundNumber = $this->getRoundNumberFromRequest($request, $args);
-        $json = $this->serializer->serialize($roundNumber->getPoules(), 'json');
+        $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
         return $this->respondWithJson($response, $json);
     }
 
@@ -194,5 +192,11 @@ final class PlanningAction extends Action
         if ($nextRoundNumber !== null) {
             $this->updatePlanningEditMode($nextRoundNumber);
         }
+    }
+
+    protected function getSerializationContext(): SerializationContext
+    {
+        $serGroups = ['Default', 'games'];
+        return SerializationContext::create()->setGroups($serGroups);
     }
 }

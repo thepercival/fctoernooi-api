@@ -69,24 +69,31 @@
         }
     },
     "scripts": {
-        "start": "php -S localhost:2998 -t public/",
-        "test": [
-            "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
-        ],
-        "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
-        "psalm": "XDEBUG_MODE=off vendor/bin/psalm --output-format=phpstorm --show-info=true --no-diff",
-        "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
-        "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
-        "doctrine-validate": "vendor/bin/doctrine orm:validate-schema",
-        "cs-fix": "php-cs-fixer fix .",
-        "post-install-cmd": [
+      "start": [
+        "Composer\\Config::disableProcessTimeout",
+        "php -S localhost:2998 -t public/"
+      ],
+      "test": [
+        "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
+      ],
+      "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
+      "psalm": "XDEBUG_MODE=off vendor/bin/psalm --output-format=phpstorm --show-info=true --no-diff",
+      "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
+      "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
+      "doctrine-validate": "vendor/bin/doctrine orm:validate-schema",
+      "cs-fix": "php-cs-fixer fix .",
+      "post-install-cmd": [
             "App\\Handlers\\ComposerPostInstall::execute",
             "composer run doctrine-update",
             "php vendor/bin/doctrine orm:generate-proxies --quiet"
         ]
     },
     "config": {
-        "process-timeout": 0
+      "process-timeout": 0,
+      "allow-plugins": {
+        "composer/package-versions-deprecated": true,
+        "phpstan/extension-installer": true
+      }
     },
     "extra": {
         "phpstan": {
