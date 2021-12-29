@@ -256,7 +256,9 @@ class Create extends PlanningCommand
             return 0;
         }
         if ($filter !== null) {
+            (new PlanningOutput($this->getLogger()))->outputInput($planningInput, 'planningInput ');
             $this->processPlanning($planningInput, $filter);
+            $this->getLogger()->info('memory usage: ' . memory_get_usage() . '(' . memory_get_usage(true) . ')');
             return 0;
         }
         $this->planningInputRepos->reset($planningInput);
