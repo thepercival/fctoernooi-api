@@ -107,6 +107,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_AgainstRuleSet');
         Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PointsCalculation');
+        Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PlanningState');
 
         return $em;
     },

@@ -23,8 +23,8 @@ use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as InputRepository;
-use SportsPlanning\Planning;
 use SportsPlanning\Planning\Repository as PlanningRepository;
+use SportsPlanning\Planning\State as PlanningState;
 
 final class PlanningAction extends Action
 {
@@ -70,7 +70,7 @@ final class PlanningAction extends Action
         $input = $this->inputRepos->getFromInput($defaultInput);
         $progressPerc = 0;
         if ($input !== null) {
-            $nrToBeProcessed = $input->getPlanningsWithState(Planning::STATE_TOBEPROCESSED)->count();
+            $nrToBeProcessed = $input->getPlanningsWithState(PlanningState::ToBeProcessed->value)->count();
             $total = $input->getPlannings()->count();
             if ($total > 0) {
                 $progressPerc = (int)((($total - $nrToBeProcessed) / $total) * 100);

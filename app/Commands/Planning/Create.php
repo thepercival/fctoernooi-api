@@ -20,9 +20,9 @@ use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Planning;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Output as PlanningOutput;
+use SportsPlanning\Planning\State as PlanningState;
 use SportsPlanning\Seeker as PlanningSeeker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -311,8 +311,8 @@ class Create extends PlanningCommand
         $schedules = $this->scheduleRepos->findByInput($planning->getInput());
         $planningSeeker->processPlanning($planning, $schedules);
 
-        $this->getLogger()->info('planningstate: ' . $planning->getState());
-        if ($planning->getState() === Planning::STATE_SUCCEEDED && $this->showSuccessful === true) {
+        $this->getLogger()->info('planningstate: ' . $planning->getState()->name);
+        if ($planning->getState() === PlanningState::Succeeded && $this->showSuccessful === true) {
             $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($planning, true);
             $planningOutput->outputWithTotals($planning, false);

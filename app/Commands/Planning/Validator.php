@@ -21,6 +21,7 @@ use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Planning;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Planning\Repository as PlanningRepository;
+use SportsPlanning\Planning\State as PlanningState;
 use SportsPlanning\Planning\Validator as PlanningValidator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -174,7 +175,7 @@ class Validator extends Command
             $this->getLogger()->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
-        $succeededPlannings = $planningInput->getPlanningsWithState(Planning::STATE_SUCCEEDED);
+        $succeededPlannings = $planningInput->getPlanningsWithState(PlanningState::Succeeded->value);
         if ($succeededPlannings->count() === 0) {
             throw new \Exception("input (inputid " . ((string)$planningInput->getId()) . ") has no bestplanning", E_ERROR);
         }

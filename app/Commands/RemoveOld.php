@@ -7,6 +7,7 @@ namespace App\Commands;
 use App\Command;
 use App\Mailer;
 use DateTime;
+use FCToernooi\Tournament\Repository as TournamentRepository;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
@@ -18,10 +19,12 @@ class RemoveOld extends Command
 {
     protected int $nrOfMonthsBeforeRemoval;
     protected CompetitionRepository $competitionRepos;
+    protected TournamentRepository $tournamentRepos;
 
     public function __construct(ContainerInterface $container)
     {
         $this->competitionRepos = $container->get(CompetitionRepository::class);
+        $this->tournamentRepos = $container->get(TournamentRepository::class);
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $this->mailer = $container->get(Mailer::class);
@@ -47,13 +50,21 @@ class RemoveOld extends Command
         $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
         $this->initLogger($input, 'cron-remove-old-tournaments', $mailHandler);
         try {
-            $oldCompetitions = $this->competitionRepos->findByStartDate($this->getRemovalDeadline());
+            $oldTournaments = $this->tournamentRepos->findByFilter(
+                null,
+                null,
+                null,
+                null,
+                null,
+                $this->getRemovalDeadline()
+            );
             // $nrOfCompetitions = count($oldCompetitions);
-            while ($oldCompetition = array_shift($oldCompetitions)) {
-                $msg = 'removed competition with id "' . (string)$oldCompetition->getId() . '" ';
-                $start = $oldCompetition->getStartDateTime()->format(DateTime::ISO8601);
-                $msg .= 'and startDateTime "' . $start . '"';
+            while ($oldTournament = array_shift($oldTournaments)) {
+                $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';
+                $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
+                $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';
                 $this->getLogger()->info($msg);
+                $this->competitionRepos->remove($oldTournament->getCompetition(), true);
             }
         } catch (\Exception $exception) {
             if ($this->logger !== null) {
