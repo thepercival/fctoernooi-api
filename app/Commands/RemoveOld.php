@@ -60,6 +60,9 @@ class RemoveOld extends Command
         $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
         $this->initLogger($input, 'command-remove-old-tournaments', $mailHandler);
         try {
+            if ($this->nrOfMonthsBeforeRemoval <= 11) {
+                throw new \Exception('nrOfMonthsBeforeRemoval must be greater than 11', E_ERROR);
+            }
             $oldTournaments = $this->tournamentRepos->findByFilter(
                 null,
                 null,
