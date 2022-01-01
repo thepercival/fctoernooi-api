@@ -71,6 +71,7 @@ final class TournamentAction extends Action
      */
     public function fetchOneHelper(Request $request, Response $response, array $args, User $user = null): Response
     {
+        /** @var User|null $user */
         $user = $request->getAttribute('user');
         try {
             /** @var Tournament $tournament */
@@ -127,6 +128,7 @@ final class TournamentAction extends Action
         try {
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
+            /** @var User $user */
             $user = $request->getAttribute('user');
 
             $refereeId = 0;
@@ -154,6 +156,7 @@ final class TournamentAction extends Action
     public function add(Request $request, Response $response, array $args): Response
     {
         try {
+            /** @var User $user */
             $user = $request->getAttribute('user');
 
             $deserializationContext = $this->getDeserializationContext($user);
@@ -198,7 +201,7 @@ final class TournamentAction extends Action
             $tournamentSer = $this->serializer->deserialize($this->getRawData($request), Tournament::class, 'json');
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
-
+            /** @var User $user */
             $user = $request->getAttribute('user');
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
@@ -255,7 +258,7 @@ final class TournamentAction extends Action
         try {
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
-
+            /** @var User $user */
             $user = $request->getAttribute('user');
 
             /** @var stdClass $copyData */

@@ -29,8 +29,14 @@ class RetryTimeout extends PlanningCommand
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-        $this->scheduleRepos = $container->get(ScheduleRepository::class);
-        $this->mailer = $container->get(Mailer::class);
+
+        /** @var ScheduleRepository $scheduleRepos */
+        $scheduleRepos = $container->get(ScheduleRepository::class);
+        $this->scheduleRepos = $scheduleRepos;
+
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
     }
 
     protected function configure(): void

@@ -6,6 +6,7 @@ namespace App\Actions\Sports\Planning;
 
 use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
@@ -42,8 +43,10 @@ final class GameAmountConfigAction extends Action
     public function save(Request $request, Response $response, $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             /** @var GameAmountConfig $gameAmountConfigSer */
             $gameAmountConfigSer = $this->serializer->deserialize($this->getRawData($request), GameAmountConfig::class, 'json');

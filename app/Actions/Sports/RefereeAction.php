@@ -30,8 +30,6 @@ final class RefereeAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private RefereeRepository $refereeRepos,
-        private SportRepository $sportRepos,
-        private CompetitionRepos $competitionRepos,
         private AuthSyncService $authSyncService
     ) {
         parent::__construct($logger, $serializer);

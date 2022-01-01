@@ -43,12 +43,30 @@ class Create extends PlanningCommand
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-        $this->mailer = $container->get(Mailer::class);
-        $this->structureRepos = $container->get(StructureRepository::class);
-        $this->roundNumberRepos = $container->get(RoundNumberRepository::class);
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->competitionRepos = $container->get(CompetitionRepository::class);
-        $this->entityManager = $container->get(EntityManager::class);
+
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
+
+        /** @var StructureRepository $structureRepos */
+        $structureRepos = $container->get(StructureRepository::class);
+        $this->structureRepos = $structureRepos;
+
+        /** @var RoundNumberRepository $roundNumberRepos */
+        $roundNumberRepos = $container->get(RoundNumberRepository::class);
+        $this->roundNumberRepos = $roundNumberRepos;
+
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
+
+        /** @var CompetitionRepository $competitionRepos */
+        $competitionRepos = $container->get(CompetitionRepository::class);
+        $this->competitionRepos = $competitionRepos;
+
+        /** @var EntityManager $entityManager */
+        $entityManager = $container->get(EntityManager::class);
+        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -101,17 +119,21 @@ class Create extends PlanningCommand
         return function (Message $message, Consumer $consumer) use ($queueService): void {
             // process message
             try {
-                $eventPriority = $message->getHeader('priority');
+                $eventPriority = $message->getHeader('priority') ?? QueueService::MAX_PRIORITY;
                 $this->getLogger()->info('------ EXECUTING WITH PRIORITY ' . $eventPriority . ' ------');
 
+                /** @var object $content */
                 $content = json_decode($message->getBody());
                 $competition = null;
-                if (property_exists($content, "competitionId")) {
+                if (property_exists($content, 'competitionId')) {
                     $competition = $this->competitionRepos->find((int)$content->competitionId);
                 }
                 $roundNumberAsValue = null;
-                if (property_exists($content, "roundNumber")) {
+                if (property_exists($content, 'roundNumber')) {
                     $roundNumberAsValue = (int)$content->roundNumber;
+                }
+                if (!property_exists($content, "inputId")) {
+                    throw new \Exception('parameter inputId was not given', E_ERROR);
                 }
                 $planningInput = $this->planningInputRepos->find((int)$content->inputId);
                 if ($planningInput !== null) {

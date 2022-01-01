@@ -38,11 +38,24 @@ class Validator extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningRepos = $container->get(PlanningRepository::class);
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
+
+        /** @var PlanningInputRepository $planningInputRepos */
+        $planningInputRepos = $container->get(PlanningInputRepository::class);
+        $this->planningInputRepos = $planningInputRepos;
+
+        /** @var PlanningRepository $planningRepos */
+        $planningRepos = $container->get(PlanningRepository::class);
+        $this->planningRepos = $planningRepos;
+
         $this->planningValidator = new PlanningValidator();
-        $this->mailer = $container->get(Mailer::class);
+
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
+
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);

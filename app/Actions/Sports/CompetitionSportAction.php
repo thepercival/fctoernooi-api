@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
+use FCToernooi\Tournament;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use Psr\Log\LoggerInterface;
@@ -62,8 +63,10 @@ final class CompetitionSportAction extends Action
     public function add(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             /** @var CompetitionSport $compSportSer */
             $compSportSer = $this->deserialize($request, CompetitionSport::class, $this->getDeserializationGroups());
@@ -141,8 +144,10 @@ final class CompetitionSportAction extends Action
     public function remove(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $competitionSport = $this->getCompetitionSportFromInput((int)$args['competitionSportId'], $competition);
 

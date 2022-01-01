@@ -54,8 +54,10 @@ final class FieldAction extends Action
     public function add(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $competitionSport = $this->competitionSportRepos->find((int)$args['competitionSportId']);
             if ($competitionSport === null || $competitionSport->getCompetition() !== $competition) {
@@ -94,8 +96,10 @@ final class FieldAction extends Action
     public function edit(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             /** @var CompetitionSport|null $competitionSport */
             $competitionSport = $this->competitionSportRepos->find((int)$args['competitionSportId']);
@@ -180,8 +184,10 @@ final class FieldAction extends Action
     public function remove(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $competitionSport = $this->competitionSportRepos->find((int)$args['competitionSportId']);
             if ($competitionSport === null || $competitionSport->getCompetition() !== $competition) {

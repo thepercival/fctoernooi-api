@@ -27,8 +27,12 @@ class CreateDefaults extends PlanningCommand
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
+
         $this->planningInputSerivce = new PlanningInputService();
-        $this->entityManager = $container->get(EntityManager::class);
+
+        /** @var EntityManager $entityManager */
+        $entityManager = $container->get(EntityManager::class);
+        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -50,7 +54,7 @@ class CreateDefaults extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'cron-create-default-planning-input');
+        $this->initLogger($input, 'command-create-default-planning-input');
         return $this->createPlanningInputs($input);
     }
 

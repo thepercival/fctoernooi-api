@@ -46,6 +46,7 @@ abstract class Action
      */
     protected function getFormData(Request $request): array|object
     {
+        /** @var array<string|int, mixed>|object|null $input */
         $input = json_decode($this->getRawData($request));
         if ($input === null) {
             return new \stdClass();

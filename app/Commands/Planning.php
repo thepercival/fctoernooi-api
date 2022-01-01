@@ -25,9 +25,18 @@ class Planning extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningRepos = $container->get(PlanningRepository::class);
-        $this->scheduleRepos = $container->get(ScheduleRepository::class);
+        /** @var PlanningInputRepository $planningInputRepos */
+        $planningInputRepos = $container->get(PlanningInputRepository::class);
+        $this->planningInputRepos = $planningInputRepos;
+
+        /** @var PlanningRepository $planningRepos */
+        $planningRepos = $container->get(PlanningRepository::class);
+        $this->planningRepos = $planningRepos;
+
+        /** @var ScheduleRepository $scheduleRepos */
+        $scheduleRepos = $container->get(ScheduleRepository::class);
+        $this->scheduleRepos = $scheduleRepos;
+
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);

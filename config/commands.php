@@ -6,7 +6,7 @@ use App\Commands\BackupSponsorImages;
 use App\Commands\Listing as ListingCommand;
 use App\Commands\Pdf\Validator as PdfValidator;
 use App\Commands\Planning\Create as PlanningCreate;
-use App\Commands\Planning\Input\CreateDefaults as PlanningCreateDefaultInput;
+use App\Commands\Planning\Input\Recalculate as RecalculatePlanningInput;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Planning\Validator as PlanningValidator;
 use App\Commands\RemoveOld;
@@ -17,8 +17,8 @@ use App\Commands\Validator;
 use Psr\Container\ContainerInterface;
 
 $commands = [
-    "app:create-default-planning-input" => function (ContainerInterface $container): PlanningCreateDefaultInput {
-        return new PlanningCreateDefaultInput($container);
+    "app:recalculate-planning-inputs" => function (ContainerInterface $container): RecalculatePlanningInput {
+        return new RecalculatePlanningInput($container);
     },
     "app:get-schedule" => function (ContainerInterface $container): ScheduleGet {
         return new ScheduleGet($container);

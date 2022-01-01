@@ -74,7 +74,9 @@ class Validator extends Command
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
 
-        $this->mailer = $container->get(Mailer::class);
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
 
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);

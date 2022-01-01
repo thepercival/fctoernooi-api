@@ -152,7 +152,11 @@ final class PlanningAction extends Action
      */
     protected function getStructureFromRequest(Request $request, array $args): Structure
     {
-        $competition = $request->getAttribute('tournament')->getCompetition();
+        /** @var Tournament $tournament */
+        $tournament = $request->getAttribute("tournament");
+
+        $competition = $tournament->getCompetition();
+
         if (array_key_exists('roundNumber', $args) === false) {
             throw new Exception('geen rondenummer opgegeven', E_ERROR);
         }
@@ -168,7 +172,10 @@ final class PlanningAction extends Action
      */
     protected function getRoundNumberFromRequest(Request $request, array $args): RoundNumber
     {
-        $competition = $request->getAttribute('tournament')->getCompetition();
+        /** @var Tournament $tournament */
+        $tournament = $request->getAttribute("tournament");
+
+        $competition = $tournament->getCompetition();
         if (array_key_exists('roundNumber', $args) === false) {
             throw new Exception('geen rondenummer opgegeven', E_ERROR);
         }

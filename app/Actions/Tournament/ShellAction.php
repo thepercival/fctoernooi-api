@@ -22,9 +22,7 @@ final class ShellAction extends Action
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private TournamentRepository $tournamentRepos,
-        private AuthService $authService,
-        private EntityManager $em
+        private TournamentRepository $tournamentRepos
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -37,6 +35,7 @@ final class ShellAction extends Action
      */
     public function fetchPublic(Request $request, Response $response, array $args): Response
     {
+        /** @var User $user */
         $user = $request->getAttribute("user");
         try {
             $queryParams = $request->getQueryParams();
@@ -92,6 +91,7 @@ final class ShellAction extends Action
             }
 
             $shells = [];
+            /** @var User $user */
             $user = $request->getAttribute("user");
             $tournamentsByRole = $this->tournamentRepos->findByRoles($user, $roles);
             foreach ($tournamentsByRole as $tournament) {

@@ -37,8 +37,8 @@ class Repository extends EntityRepository
         $qb = $qb->setParameter('tournament', $tournament);
         $qb = $qb->setParameter('screenNr', $newScreenNr);
 
-        $nrOfSponsorsPresent = (int)$qb->getQuery()->getSingleScalarResult();
-        if ($nrOfSponsorsPresent > $max) {
+        $nrOfSponsorsPresent = $qb->getQuery()->getSingleScalarResult();
+        if (!is_int($nrOfSponsorsPresent) || $nrOfSponsorsPresent > $max) {
             throw new Exception(
                 'er kan geen sponsor aan schermnummer ' . $newScreenNr . ' meer worden toegevoegd, het maximum van ' . Repository::MAXNROFSPONSORSPERSCREEN . ' is bereikt',
                 E_ERROR

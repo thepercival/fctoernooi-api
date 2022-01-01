@@ -54,7 +54,10 @@ final class StructureAction extends Action
     public function fetchOne(Request $request, Response $response, array $args): Response
     {
         try {
-            $competition = $request->getAttribute("tournament")->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $structure = $this->structureRepos->getStructure($competition);
             // var_dump($structure); die();

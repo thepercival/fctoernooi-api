@@ -6,6 +6,7 @@ namespace App\Actions\Sports;
 
 use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -60,8 +61,10 @@ final class GameTogetherAction extends GameAction
     public function add(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
 
@@ -108,8 +111,10 @@ final class GameTogetherAction extends GameAction
     public function edit(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
             $initialPouleState = $poule->getState();
@@ -162,8 +167,10 @@ final class GameTogetherAction extends GameAction
     public function remove(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Competition $competition */
-            $competition = $request->getAttribute('tournament')->getCompetition();
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
 

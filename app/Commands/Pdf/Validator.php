@@ -12,6 +12,7 @@ use FCToernooi\Tournament\ExportConfig;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
+use Sports\Output\StructureOutput;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
@@ -30,12 +31,23 @@ class Validator extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
-        $this->structureRepos = $container->get(StructureRepository::class);
-        $this->planningInputRepos = $container->get(PlanningInputRepository::class);
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
+
+        /** @var StructureRepository $structureRepos */
+        $structureRepos = $container->get(StructureRepository::class);
+        $this->structureRepos = $structureRepos;
+
+        /** @var PlanningInputRepository $planningInputRepos */
+        $planningInputRepos = $container->get(PlanningInputRepository::class);
+        $this->planningInputRepos = $planningInputRepos;
+
         $this->gamesValidator = new GamesValidator();
 
-        parent::__construct($container->get(Configuration::class));
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        parent::__construct($config);
     }
 
     protected function configure(): void
@@ -77,7 +89,7 @@ class Validator extends Command
                     try {
                         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
                         $this->createPdf($tournament, $structure, $subject);
-                        $this->addStructureToLog($tournament, $structure);
+                        // $this->addStructureToLog($tournament, $structure);
                     } catch (Exception $exception) {
                         $this->getLogger()->error($exception->getMessage());
                         if ($structure !== null && count($filter) > 0) {
@@ -140,7 +152,7 @@ class Validator extends Command
     protected function addStructureToLog(Tournament $tournament, Structure $structure): void
     {
         try {
-            // (new StructureOutput($this->getLogger()))->output($structure);
+            (new StructureOutput($this->getLogger()))->output($structure);
         } catch (Exception $exception) {
             $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
         }

@@ -14,17 +14,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class BackupSponsorImages extends Command
 {
-    /**
-     * @var SponsorRepository
-     */
-    protected $sponsorRepos;
+    protected SponsorRepository $sponsorRepos;
 
     public function __construct(ContainerInterface $container)
     {
-        $this->sponsorRepos = $container->get(SponsorRepository::class);
+        /** @var SponsorRepository $sponsorRepos */
+        $sponsorRepos = $container->get(SponsorRepository::class);
+        $this->sponsorRepos = $sponsorRepos;
+
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
+
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        $this->mailer = $container->get(Mailer::class);
         parent::__construct($config);
     }
 

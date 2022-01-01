@@ -21,7 +21,10 @@ class Schedule extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        $this->scheduleRepos = $container->get(ScheduleRepository::class);
+        /** @var ScheduleRepository $scheduleRepos */
+        $scheduleRepos = $container->get(ScheduleRepository::class);
+        $this->scheduleRepos = $scheduleRepos;
+
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);

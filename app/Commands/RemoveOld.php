@@ -23,11 +23,21 @@ class RemoveOld extends Command
 
     public function __construct(ContainerInterface $container)
     {
-        $this->competitionRepos = $container->get(CompetitionRepository::class);
-        $this->tournamentRepos = $container->get(TournamentRepository::class);
+        /** @var CompetitionRepository $competitionRepos */
+        $competitionRepos = $container->get(CompetitionRepository::class);
+        $this->competitionRepos = $competitionRepos;
+
+        /** @var TournamentRepository $tournamentRepos */
+        $tournamentRepos = $container->get(TournamentRepository::class);
+        $this->tournamentRepos = $tournamentRepos;
+
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        $this->mailer = $container->get(Mailer::class);
+
+        /** @var Mailer|null $mailer */
+        $mailer = $container->get(Mailer::class);
+        $this->mailer = $mailer;
+
         $this->nrOfMonthsBeforeRemoval = $config->getInt('tournament.nrOfMonthsBeforeRemoval');
         parent::__construct($config);
     }
@@ -48,7 +58,7 @@ class RemoveOld extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
-        $this->initLogger($input, 'cron-remove-old-tournaments', $mailHandler);
+        $this->initLogger($input, 'command-remove-old-tournaments', $mailHandler);
         try {
             $oldTournaments = $this->tournamentRepos->findByFilter(
                 null,

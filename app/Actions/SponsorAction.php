@@ -23,7 +23,6 @@ final class SponsorAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private SponsorRepository $sponsorRepos,
-        private TournamentRepository $tournamentRepos,
         private ImageService $imageService
     ) {
         parent::__construct($logger, $serializer);
