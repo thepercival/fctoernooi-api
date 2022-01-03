@@ -31,7 +31,7 @@
       "slim/php-view": "^3.0",
       "symfony/yaml": "^6.0",
       "symfony/property-access": "^6.0",
-      "symfony/console": "^6.0",
+      "symfony/console": "^5.0",
       "thepercival/php-sports": "^1.0",
       "thepercival/php-sports-planning": "^1.0",
       "thepercival/php-sports-helpers": "^1.0",
@@ -45,6 +45,7 @@
       "symfony/cache": "^6.0"
     },
     "require-dev": {
+      "composer/composer": "^2.2",
       "phpunit/phpunit": "^9.5",
       "phpstan/phpstan": "^1.2",
       "phpstan/phpstan-doctrine": "^1.0",
@@ -74,19 +75,19 @@
         "php -S localhost:2998 -t public/"
       ],
       "test": [
-        "vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
+        "XDEBUG_MODE=off vendor/bin/phpunit --configuration tests/phpunit.xml tests/cases/"
       ],
       "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
       "psalm": "XDEBUG_MODE=off vendor/bin/psalm --output-format=phpstorm --show-info=true --no-diff",
-      "doctrine-try": "vendor/bin/doctrine orm:schema-tool:update --dump-sql",
-      "doctrine-update": "vendor/bin/doctrine orm:schema-tool:update --force",
-      "doctrine-validate": "vendor/bin/doctrine orm:validate-schema",
+      "doctrine-try": "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --dump-sql",
+      "doctrine-update": "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --force",
+      "doctrine-validate": "XDEBUG_MODE=off vendor/bin/doctrine orm:validate-schema",
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [
-            "App\\Handlers\\ComposerPostInstall::execute",
-            "composer run doctrine-update",
-            "php vendor/bin/doctrine orm:generate-proxies --quiet"
-        ]
+        "App\\Handlers\\ComposerPostInstall::execute",
+        "composer run doctrine-update",
+        "php vendor/bin/doctrine orm:generate-proxies --quiet"
+      ]
     },
     "config": {
       "process-timeout": 0,
