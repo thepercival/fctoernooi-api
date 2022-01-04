@@ -19,6 +19,7 @@ use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
+use SportsHelpers\Dev\ByteFormatter;
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -280,14 +281,22 @@ class Create extends PlanningCommand
         if ($filter !== null) {
             (new PlanningOutput($this->getLogger()))->outputInput($planningInput, 'planningInput ');
             $this->processPlanning($planningInput, $filter);
-            $this->getLogger()->info('memory usage: ' . memory_get_usage() . '(' . memory_get_usage(true) . ')');
+            $this->getLogger()->info(
+                'memory usage: ' . (new ByteFormatter(memory_get_usage())) . '(' . (new ByteFormatter(
+                    memory_get_usage(true)
+                )) . ')'
+            );
             return 0;
         }
         $this->planningInputRepos->reset($planningInput);
 
         $this->processInput($queueService, $planningInput, null, null, QueueService::MAX_PRIORITY);
         $this->getLogger()->info('planningInput ' . $inputId . ' created');
-        $this->getLogger()->info('memory usage: ' . memory_get_usage() . '(' . memory_get_usage(true) . ')');
+        $this->getLogger()->info(
+            'memory usage: ' . (new ByteFormatter(memory_get_usage())) . '(' . (new ByteFormatter(
+                memory_get_usage(true)
+            )) . ')'
+        );
         return 0;
     }
 
