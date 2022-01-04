@@ -65,8 +65,10 @@ class Create extends ScheduleCommand
         $this->initLogger($input, 'command-schedule-create');
 
         if ($existingSchedule !== null) {
-            (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
-            throw new \Exception('schedule already exists', E_ERROR);
+            // (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
+            throw new \Exception(
+                'schedule(id:' . $existingSchedule->getId() . ') "' . $existingSchedule . '" already exists', E_ERROR
+            );
         }
 
         try {
