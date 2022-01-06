@@ -81,7 +81,7 @@ class Validator extends Command
             }, SelfReferee::cases())
         );
         $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, $selfRefereeOptions);
-        $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_OPTIONAL, 'false|true');
+        $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
         $this->addOption('resetInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('validateInvalid', null, InputOption::VALUE_NONE);
@@ -185,7 +185,7 @@ class Validator extends Command
             return;
         }
         if ($showNrOfPlaces !== null && array_key_exists($planningInput->getNrOfPlaces(), $showNrOfPlaces) === false) {
-            $this->getLogger()->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
+            // $this->getLogger()->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
         $succeededPlannings = $planningInput->getPlanningsWithState(PlanningState::Succeeded->value);

@@ -236,7 +236,8 @@ class Validator extends Command
      */
     protected function getTournamentsFromInput(InputInterface $input): array
     {
-        $tournamentId = (string)$input->getArgument('tournamentId');
+        /** @var string $tournamentId */
+        $tournamentId = $input->getArgument('tournamentId');
         if ((int)$tournamentId > 0) {
             $tournament = $this->tournamentRepos->find($tournamentId);
             return $tournament !== null ? [$tournament] : [];

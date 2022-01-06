@@ -36,7 +36,9 @@ class QueueService implements CreatePlanningsEvent
         if (array_key_exists('suffix', $amqpOptions) === false) {
             throw new Exception('option queue:suffix is missing', E_ERROR);
         }
-        $this->queueSuffix = $amqpOptions['suffix'];
+        /** @var string $queueSuffix */
+        $queueSuffix = $amqpOptions['suffix'];
+        $this->queueSuffix = $queueSuffix;
         unset($amqpOptions['suffix']);
     }
 
