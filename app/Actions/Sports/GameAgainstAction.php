@@ -11,7 +11,6 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Against as AgainstGame;
@@ -123,7 +122,7 @@ final class GameAgainstAction extends GameAction
             $competition = $tournament->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
-            $initialPouleState = $poule->getState();
+            $initialPouleState = $poule->getGamesState();
 
             /** @var AgainstGame $gameSer */
             $gameSer = $this->serializer->deserialize($this->getRawData($request), AgainstGame::class, 'json');

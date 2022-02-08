@@ -10,8 +10,8 @@ use App\Export\Pdf\GameLine as GameLineBase;
 use App\Export\Pdf\Page;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Place\Together as TogetherGamePlace;
+use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
-use Sports\State;
 
 class Together extends GameLineBase
 {
@@ -53,7 +53,7 @@ class Together extends GameLineBase
         $placeWidth = $this->getPlaceWidth($game->getPlaces()->count());
         $placeNameWidth = $placeWidth;
         $scoreWidth = 0;
-        if ($game->getState() === State::Finished) {
+        if ($game->getState() === GameState::Finished) {
             $scoreWidth = 25;
         }
         $placeNameWidth -= $scoreWidth;
@@ -63,7 +63,7 @@ class Together extends GameLineBase
         foreach ($game->getPlaces() as $gamePlace) {
             $placeName = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
             $x = $this->page->drawCell($placeName, $x, $y, $placeNameWidth, $height, Align::Left, 'black');
-            if ($game->getState() === State::Finished) {
+            if ($game->getState() === GameState::Finished) {
                 $score = $this->getScore($gamePlace);
                 $x = $this->page->drawCell($score, $x, $y, $scoreWidth, $height, Align::Right, 'black');
             }
@@ -93,7 +93,7 @@ class Together extends GameLineBase
     private function getScore(TogetherGamePlace $gamePlace): string
     {
         $score = '';
-        if ($gamePlace->getGame()->getState() !== State::Finished) {
+        if ($gamePlace->getGame()->getState() !== GameState::Finished) {
             return $score;
         }
         return (string)$this->scoreConfigService->getFinalTogetherScore($gamePlace);

@@ -16,6 +16,7 @@ use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Against\Repository as AgainstGameRepository;
+use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Place;
@@ -27,7 +28,6 @@ use Sports\Qualify\Service as QualifyService;
 use Sports\Round\Number as RoundNumber;
 use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\State;
 use Sports\Structure\Repository as StructureRepository;
 
 class GameAction extends Action
@@ -165,11 +165,14 @@ class GameAction extends Action
     /**
      * @param Competition $competition
      * @param Poule $poule
-     * @param int $originalPouleState
+     * @param GameState $originalPouleState
      * @return list<Place>
      */
-    protected function getChangedQualifyPlaces(Competition $competition, Poule $poule, int $originalPouleState): array
-    {
+    protected function getChangedQualifyPlaces(
+        Competition $competition,
+        Poule $poule,
+        GameState $originalPouleState
+    ): array {
         if (!$this->shouldQualifiersBeCalculated($poule, $originalPouleState)) {
             return [];
         }
@@ -182,9 +185,9 @@ class GameAction extends Action
         return $qualifyService->setQualifiers($pouleToFilter);
     }
 
-    protected function shouldQualifiersBeCalculated(Poule $poule, int $originalPouleState): bool
+    protected function shouldQualifiersBeCalculated(Poule $poule, GameState $originalPouleState): bool
     {
-        return !($originalPouleState !== State::Finished && $poule->getState() !== State::Finished);
+        return !($originalPouleState !== GameState::Finished && $poule->getGamesState() !== GameState::Finished);
     }
 
     protected function shouldQualifiersBeCalculatedForRound(Poule $poule): bool
@@ -208,13 +211,13 @@ class GameAction extends Action
         }
     }
 
-    protected function changeQualifyPlaces(Competition $competition, Poule $poule, int $initialPouleState): void
+    protected function changeQualifyPlaces(Competition $competition, Poule $poule, GameState $initialPouleState): void
     {
         $changedPlaces = $this->getChangedQualifyPlaces($competition, $poule, $initialPouleState);
         foreach ($changedPlaces as $changedPlace) {
             $this->placeRepos->save($changedPlace);
             foreach ($changedPlace->getGames() as $gameIt) {
-                $gameIt->setState(State::Created);
+                $gameIt->setState(GameState::Created);
                 $this->gameRepos->customSave($gameIt);
                 if ($gameIt instanceof AgainstGame) {
                     $this->againstScoreRepos->removeScores($gameIt);

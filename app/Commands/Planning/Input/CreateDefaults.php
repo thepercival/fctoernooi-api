@@ -6,7 +6,7 @@ namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;
 use App\QueueService;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PlaceRanges;
@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CreateDefaults extends PlanningCommand
 {
     protected PlanningInputService $planningInputSerivce;
-    protected EntityManager $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(ContainerInterface $container)
     {
@@ -30,8 +30,8 @@ class CreateDefaults extends PlanningCommand
 
         $this->planningInputSerivce = new PlanningInputService();
 
-        /** @var EntityManager $entityManager */
-        $entityManager = $container->get(EntityManager::class);
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
         $this->entityManager = $entityManager;
     }
 
@@ -91,7 +91,7 @@ class CreateDefaults extends PlanningCommand
                 $queueService->sendCreatePlannings($planningInputDb);
                 $planningOutput->outputInput($planningInputDb, 'created + message ');
             } elseif ($recreate) {
-                $this->planningInputRepos->reset($planningInputDb);
+                // $this->planningInputRepos->reset($planningInputDb);
                 $queueService->sendCreatePlannings($planningInputDb);
                 $planningOutput->outputInput($planningInputDb, 'reset + message ');
             } /*else {

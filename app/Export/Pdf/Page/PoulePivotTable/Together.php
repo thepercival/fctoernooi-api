@@ -9,10 +9,10 @@ use App\Export\Pdf\Document;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Place\Together as TogetherGamePlace;
+use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
-use Sports\State;
 
 class Together extends PoulePivotTablesPage
 {
@@ -81,7 +81,7 @@ class Together extends PoulePivotTablesPage
         if ($gamePlace === null) {
             return '';
         }
-        if ($gamePlace->getGame()->getState() !== State::Finished) {
+        if ($gamePlace->getGame()->getState() !== GameState::Finished) {
             return '';
         }
         return (string)$this->scoreConfigService->getFinalTogetherScore($gamePlace);

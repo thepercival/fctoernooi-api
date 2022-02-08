@@ -123,7 +123,7 @@ class Validator extends Command
                     return 0;
                 }
                 if ($resetPlanningInputWhenInvalid) {
-                    $this->planningInputRepos->reset($planningInput);
+                    // $this->planningInputRepos->reset($planningInput);
                     $queueService->sendCreatePlannings($planningInput);
                 }
                 $invalidPlanningInputsMessages[] = $errorMsg;
@@ -188,7 +188,7 @@ class Validator extends Command
             // $this->getLogger()->info("TRYING NROFPLACES: " . $planningInput->getNrOfPlaces());
             $showNrOfPlaces[$planningInput->getNrOfPlaces()] = true;
         }
-        $succeededPlannings = $planningInput->getPlanningsWithState(PlanningState::Succeeded->value);
+        $succeededPlannings = $planningInput->getPlanningsWithState(PlanningState::Succeeded);
         if ($succeededPlannings->count() === 0) {
             throw new \Exception("input (inputid " . ((string)$planningInput->getId()) . ") has no bestplanning", E_ERROR);
         }

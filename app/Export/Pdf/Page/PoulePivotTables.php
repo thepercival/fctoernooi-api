@@ -10,13 +10,13 @@ use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Page\PoulePivotTable\Helper;
 use Exception;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
 use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
 use Sports\Round\Number as RoundNumber;
 use Sports\Score\Config\Service as ScoreConfigService;
-use Sports\State;
 
 abstract class PoulePivotTables extends ToernooiPdfPage
 {
@@ -119,10 +119,10 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         // draw first row
         $y = $this->drawPouleHeader($poule, $gameAmountConfig, $y);
         $competitionSport = $gameAmountConfig->getCompetitionSport();
-        $pouleState = $poule->getState($competitionSport);
+        $pouleState = $poule->getGamesState($competitionSport);
 
         $sportRankingItems = null;
-        if ($pouleState === State::Finished) {
+        if ($pouleState === GameState::Finished) {
             $calculator = $this->getSportRankingCalculator($competitionSport);
             $sportRankingItems = $calculator->getItemsForPoule($poule);
         }

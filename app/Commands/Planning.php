@@ -12,6 +12,7 @@ use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
 use SportsPlanning\Input;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
+use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
@@ -80,5 +81,19 @@ class Planning extends Command
                 $this->scheduleRepos->save($schedule);
             }
         }
+    }
+
+    protected function getPlanningFilter(InputInterface $input): PlanningFilter|null
+    {
+        $batchGamesRange = $this->getInputRange($input, 'batchGamesRange');
+        if ($batchGamesRange === null) {
+            return null;
+        }
+        $maxNrOfGamesInARow = 0;
+        $maxNrOfGamesInARowOption = $input->getOption('maxNrOfGamesInARow');
+        if (is_string($maxNrOfGamesInARowOption) && strlen($maxNrOfGamesInARowOption) > 0) {
+            $maxNrOfGamesInARow = (int)$maxNrOfGamesInARowOption;
+        }
+        return new PlanningFilter($batchGamesRange, $maxNrOfGamesInARow);
     }
 }

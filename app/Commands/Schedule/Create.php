@@ -7,10 +7,10 @@ namespace App\Commands\Schedule;
 use App\Commands\Schedule as ScheduleCommand;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PouleStructure;
-use SportsHelpers\SelfReferee;
 use SportsHelpers\Sport\VariantWithFields as SportVariantWithFields;
 use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Input;
+use SportsPlanning\Referee\Info as RefereeInfo;
 use SportsPlanning\Schedule;
 use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
 use SportsPlanning\Schedule\Name as ScheduleName;
@@ -67,7 +67,8 @@ class Create extends ScheduleCommand
         if ($existingSchedule !== null) {
             // (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
             throw new \Exception(
-                'schedule(id:' . $existingSchedule->getId() . ') "' . $existingSchedule . '" already exists', E_ERROR
+                'schedule(id:' . (string)$existingSchedule->getId() . ') "' . $existingSchedule . '" already exists',
+                E_ERROR
             );
         }
 
@@ -101,8 +102,7 @@ class Create extends ScheduleCommand
             new PouleStructure($nrOfPlaces),
             $sportVariantsWithFields,
             $gamePlaceStrategy,
-            0,
-            SelfReferee::Disabled
+            new RefereeInfo(0)
         );
         $schedules = $scheduleCreatorService->createSchedules($planningInput);
         foreach ($schedules as $schedule) {

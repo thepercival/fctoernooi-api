@@ -29,5 +29,6 @@ Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
 Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
 Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
 Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
+Type::addType('enum_GameState', Sports\Game\StateType::class);
 
 return ConsoleRunner::createHelperSet($em);

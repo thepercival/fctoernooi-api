@@ -7,5 +7,5 @@
 /.php_cs.cache
 /tests/.phpunit.result.cache
 /tests/codecoverage/
-/.phpunit.result.cache
+/.php*
 

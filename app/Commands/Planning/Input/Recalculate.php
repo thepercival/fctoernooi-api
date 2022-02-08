@@ -6,14 +6,9 @@ namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;
 use App\QueueService;
-use Doctrine\ORM\EntityManager;
-use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
-use Monolog\Logger;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
-use SportsHelpers\PlaceRanges;
-use SportsHelpers\SportRange;
 use SportsPlanning\Input;
-use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Recalculate extends PlanningCommand
 {
     protected PlanningInputService $planningInputSerivce;
-    protected EntityManager $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(ContainerInterface $container)
     {
@@ -31,8 +26,8 @@ class Recalculate extends PlanningCommand
 
         $this->planningInputSerivce = new PlanningInputService();
 
-        /** @var EntityManager $entityManager */
-        $entityManager = $container->get(EntityManager::class);
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
         $this->entityManager = $entityManager;
     }
 

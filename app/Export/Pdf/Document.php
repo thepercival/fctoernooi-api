@@ -20,12 +20,12 @@ use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
+use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Poule;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use Sports\Score\Config as ScoreConfig;
-use Sports\State;
 use Sports\Structure;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 use SportsHelpers\Sport\Variant\AllInOneGame;
@@ -333,7 +333,7 @@ class Document extends Zend_Pdf
      */
     protected function getAgainstGames(Round $round, CompetitionSport $competitionSport): array
     {
-        $games = $round->getGamesWithState(State::Created);
+        $games = $round->getGamesWithState(GameState::Created);
         $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
             return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
         });
@@ -347,7 +347,7 @@ class Document extends Zend_Pdf
      */
     protected function getSingleGames(Round $round, CompetitionSport $competitionSport): array
     {
-        $games = $round->getGamesWithState(State::Created);
+        $games = $round->getGamesWithState(GameState::Created);
         $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
             return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
         });
@@ -361,7 +361,7 @@ class Document extends Zend_Pdf
      */
     protected function getAllInOneGames(Poule $poule, CompetitionSport $competitionSport): array
     {
-        $games = $poule->getGamesWithState(State::Created);
+        $games = $poule->getGamesWithState(GameState::Created);
         $games = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
             return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
         });

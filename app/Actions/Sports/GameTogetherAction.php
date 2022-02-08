@@ -11,7 +11,6 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Place\Together as TogetherGamePlace;
@@ -117,7 +116,7 @@ final class GameTogetherAction extends GameAction
             $competition = $tournament->getCompetition();
 
             $poule = $this->getPouleFromInput($request, $competition);
-            $initialPouleState = $poule->getState();
+            $initialPouleState = $poule->getGamesState();
 
             /** @var TogetherGame $gameSer */
             $gameSer = $this->serializer->deserialize($this->getRawData($request), TogetherGame::class, 'json');

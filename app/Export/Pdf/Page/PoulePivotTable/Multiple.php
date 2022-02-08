@@ -8,13 +8,13 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Poule;
 use Sports\Ranking\Calculator\Round as RoundRankingCalculator;
 use Sports\Ranking\Item\Round as RoundRankingItem;
 use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
 use Sports\Round\Number as RoundNumber;
-use Sports\State;
 
 class Multiple extends ToernooiPdfPage
 {
@@ -110,9 +110,9 @@ class Multiple extends ToernooiPdfPage
         $competitionSports = $poule->getCompetition()->getSports();
         $sportColumnWidth = $this->versusColumnsWidth / $competitionSports->count();
 
-        $pouleState = $poule->getState();
+        $pouleState = $poule->getGamesState();
         $roundRankingItems = null;
-        if ($pouleState === State::Finished) {
+        if ($pouleState === GameState::Finished) {
             $roundRankingItems = (new RoundRankingCalculator())->getItemsForPoule($poule);
         }
 
@@ -131,7 +131,7 @@ class Multiple extends ToernooiPdfPage
 
             foreach ($poule->getCompetition()->getSports() as $competitionSport) {
                 $sportRoundRankingItem = null;
-                if ($poule->getState($competitionSport) === State::Finished) {
+                if ($poule->getGamesState($competitionSport) === GameState::Finished) {
                     $calculator = $this->getSportRankingCalculator($competitionSport);
                     $sportRankingItems = $calculator->getItemsForPoule($poule);
                     $sportRoundRankingItem = $this->getSportRankingItemByPlace($sportRankingItems, $place);

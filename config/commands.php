@@ -7,6 +7,7 @@ use App\Commands\Listing as ListingCommand;
 use App\Commands\Pdf\Validator as PdfValidator;
 use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\Input\Recalculate as RecalculatePlanningInput;
+use App\Commands\Planning\Recreate as PlanningRecreate;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Planning\Validator as PlanningValidator;
 use App\Commands\RemoveOld;
@@ -28,6 +29,9 @@ $commands = [
     },
     "app:create-planning" => function (ContainerInterface $container): PlanningCreate {
         return new PlanningCreate($container);
+    },
+    "app:recreate-planning" => function (ContainerInterface $container): PlanningRecreate {
+        return new PlanningRecreate($container);
     },
     "app:retry-timeout-planning" => function (ContainerInterface $container): PlanningRetryTimeout {
         return new PlanningRetryTimeout($container);

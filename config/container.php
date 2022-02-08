@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Mailer;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Auth\Settings as AuthSettings;
 use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
 use JMS\Serializer\DeserializationContext;
@@ -69,7 +69,7 @@ return [
 
         return $logger;
     },
-    EntityManager::class => function (ContainerInterface $container): EntityManager {
+    EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $doctrineAppConfig = $config->getArray('doctrine');
@@ -109,6 +109,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PointsCalculation');
         Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PlanningState');
+        Type::addType('enum_GameState', Sports\Game\StateType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameState');
 
         return $em;
     },

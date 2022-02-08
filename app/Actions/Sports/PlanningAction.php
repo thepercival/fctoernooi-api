@@ -24,7 +24,6 @@ use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as InputRepository;
 use SportsPlanning\Planning\Repository as PlanningRepository;
-use SportsPlanning\Planning\State as PlanningState;
 
 final class PlanningAction extends Action
 {
@@ -68,18 +67,14 @@ final class PlanningAction extends Action
         $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
         $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
         $input = $this->inputRepos->getFromInput($defaultInput);
-        $progressPerc = 0;
+        $seekingPerc = 0;
         if ($input !== null) {
-            $nrToBeProcessed = $input->getPlanningsWithState(PlanningState::ToBeProcessed->value)->count();
-            $total = $input->getPlannings()->count();
-            if ($total > 0) {
-                $progressPerc = (int)((($total - $nrToBeProcessed) / $total) * 100);
-                if ($progressPerc === 100 && !$roundNumber->allPoulesHaveGames()) {
-                    $progressPerc--;
-                }
-            }
+            $seekingPerc = $input->getSeekingPercentage();
         }
-        $json = json_encode(['progress' => $progressPerc]);
+        if ($seekingPerc < 0) {
+            $seekingPerc = 0;
+        }
+        $json = json_encode(['progress' => $seekingPerc]);
         return $this->respondWithJson($response, $json === false ? '' : $json);
     }
 

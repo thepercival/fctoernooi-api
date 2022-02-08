@@ -11,8 +11,8 @@ use App\Export\Pdf\GameLine\Column\Against as AgainstColumn;
 use App\Export\Pdf\Page;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Phase as GamePhase;
+use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
-use Sports\State;
 use SportsHelpers\Against\Side as AgainstSide;
 
 class Against extends GameLineBase
@@ -66,7 +66,7 @@ class Against extends GameLineBase
     private function getScore(AgainstGame $game): string
     {
         $score = ' - ';
-        if ($game->getState() !== State::Finished) {
+        if ($game->getState() !== GameState::Finished) {
             return $score;
         }
         $finalScore = $this->scoreConfigService->getFinalAgainstScore($game);

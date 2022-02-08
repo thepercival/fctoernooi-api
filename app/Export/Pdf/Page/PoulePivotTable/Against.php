@@ -8,10 +8,10 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Game\Against as AgainstGame;
+use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
-use Sports\State;
 use SportsHelpers\Against\Side as AgainstSide;
 use Zend_Pdf_Color_Html;
 
@@ -127,7 +127,7 @@ class Against extends PoulePivotTablesPage
     protected function getGameScore(AgainstGame $game, bool $reverse): string
     {
         $score = ' - ';
-        if ($game->getState() !== State::Finished) {
+        if ($game->getState() !== GameState::Finished) {
             return $score;
         }
         $finalScore = $this->scoreConfigService->getFinalAgainstScore($game);

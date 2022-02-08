@@ -7,7 +7,7 @@ namespace App\Commands\Planning;
 use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
 use App\QueueService;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
@@ -24,6 +24,7 @@ use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Planning\State as PlanningState;
+use SportsPlanning\Planning\Type as PlanningType;
 use SportsPlanning\Seeker as PlanningSeeker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,7 +37,7 @@ class Create extends PlanningCommand
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
     protected CompetitionRepository $competitionRepos;
-    protected EntityManager $entityManager;
+    protected EntityManagerInterface $entityManager;
 
     protected bool $showSuccessful = false;
     protected bool $disableThrowOnTimeout = false;
@@ -65,8 +66,8 @@ class Create extends PlanningCommand
         $competitionRepos = $container->get(CompetitionRepository::class);
         $this->competitionRepos = $competitionRepos;
 
-        /** @var EntityManager $entityManager */
-        $entityManager = $container->get(EntityManager::class);
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
         $this->entityManager = $entityManager;
     }
 
@@ -103,7 +104,7 @@ class Create extends PlanningCommand
             $inputId = $input->getArgument('inputId');
             if (is_string($inputId) && strlen($inputId) > 0) {
                 $planningFilter = $this->getPlanningFilter($input);
-                return $this->processSinglePlanningInput((int)$inputId, $queueService, $planningFilter);
+                return $this->processSinglePlanningInput((int)$inputId, $planningFilter);
             }
             $timeoutInSeconds = 295;
             $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
@@ -138,14 +139,15 @@ class Create extends PlanningCommand
                 }
                 $planningInput = $this->planningInputRepos->find((int)$content->inputId);
                 if ($planningInput !== null) {
-                    $this->planningInputRepos->reset($planningInput);
-                    $this->processInput(
-                        $queueService,
-                        $planningInput,
-                        $competition,
-                        $roundNumberAsValue,
-                        $eventPriority
-                    );
+                    $this->processInput($planningInput);
+                    if ($competition !== null and $roundNumberAsValue !== null) {
+                        $this->updateRoundNumberWithPlanning(
+                            $queueService,
+                            $competition,
+                            $roundNumberAsValue,
+                            $eventPriority
+                        );
+                    }
                 } else {
                     $this->getLogger()->info('planningInput ' . $content->inputId . ' not found');
                 }
@@ -159,30 +161,27 @@ class Create extends PlanningCommand
         };
     }
 
-    protected function processInput(
-        QueueService $queueService,
-        PlanningInput $planningInput,
-        Competition|null $competition,
-        int|null $roundNumberAsValue,
-        int $eventPriority
-    ): void {
+    protected function processInput(PlanningInput $planningInput): void
+    {
         // new PlanningOutput($this->getLogger());
 
         $this->createSchedules($planningInput);
-
-        $planningSeeker = new PlanningSeeker($this->getLogger(), $this->planningInputRepos, $this->planningRepos, $this->scheduleRepos);
+        $planningSeeker = new PlanningSeeker(
+            $this->getLogger(),
+            $this->planningInputRepos,
+            $this->planningRepos,
+            $this->scheduleRepos
+        );
         if ($this->disableThrowOnTimeout === true) {
             $planningSeeker->disableThrowOnTimeout();
         }
-        $planningSeeker->processInput($planningInput);
-        $bestPlanning = $planningInput->getBestPlanning();
+        $schedules = $this->scheduleRepos->findByInput($planningInput);
+        $planningSeeker->processInput($planningInput, $schedules);
+        $bestPlanning = $planningInput->getBestPlanning(PlanningType::BatchGames);
         if ($this->showSuccessful === true) {
             $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($bestPlanning, true);
             $planningOutput->outputWithTotals($bestPlanning, false);
-        }
-        if ($competition !== null and $roundNumberAsValue !== null) {
-            $this->updateRoundNumberWithPlanning($queueService, $competition, $roundNumberAsValue, $eventPriority);
         }
     }
 
@@ -268,11 +267,8 @@ class Create extends PlanningCommand
         }
     }
 
-    protected function processSinglePlanningInput(
-        int $inputId,
-        QueueService $queueService,
-        PlanningFilter|null $filter
-    ): int {
+    protected function processSinglePlanningInput(int $inputId, PlanningFilter|null $filter): int
+    {
         $planningInput = $this->planningInputRepos->find($inputId);
         if ($planningInput === null) {
             $this->getLogger()->info('planningInput ' . $inputId . ' not found');
@@ -280,7 +276,7 @@ class Create extends PlanningCommand
         }
         if ($filter !== null) {
             (new PlanningOutput($this->getLogger()))->outputInput($planningInput, 'planningInput ');
-            $this->processPlanning($planningInput, $filter);
+            $this->processFilter($planningInput, $filter);
             $this->getLogger()->info(
                 'memory usage: ' . (new ByteFormatter(memory_get_usage())) . '(' . (new ByteFormatter(
                     memory_get_usage(true)
@@ -288,9 +284,7 @@ class Create extends PlanningCommand
             );
             return 0;
         }
-        $this->planningInputRepos->reset($planningInput);
-
-        $this->processInput($queueService, $planningInput, null, null, QueueService::MAX_PRIORITY);
+        $this->processInput($planningInput);
         $this->getLogger()->info('planningInput ' . $inputId . ' created');
         $this->getLogger()->info(
             'memory usage: ' . (new ByteFormatter(memory_get_usage())) . '(' . (new ByteFormatter(
@@ -300,36 +294,21 @@ class Create extends PlanningCommand
         return 0;
     }
 
-    protected function getPlanningFilter(InputInterface $input): PlanningFilter|null
+    protected function processFilter(PlanningInput $input, PlanningFilter $filter): int
     {
-        $batchGamesRange = $this->getInputRange($input, 'batchGamesRange');
-        if ($batchGamesRange === null) {
-            return null;
-        }
-        $maxNrOfGamesInARow = 0;
-        $maxNrOfGamesInARowOption = $input->getOption('maxNrOfGamesInARow');
-        if (is_string($maxNrOfGamesInARowOption) && strlen($maxNrOfGamesInARowOption) > 0) {
-            $maxNrOfGamesInARow = (int)$maxNrOfGamesInARowOption;
-        }
-        return new PlanningFilter($batchGamesRange, $maxNrOfGamesInARow);
-    }
-
-
-    protected function processPlanning(PlanningInput $input, PlanningFilter $filter): int
-    {
-        $planning = $this->planningRepos->findOneByExt(
-            $input,
-            $filter->getBatchGamesRange(),
-            $filter->getMaxNrOfGamesInARow()
-        );
-        if ($planning === null) {
-            $this->getLogger()->info('planning not found for inputid "' . (string)$input->getId() . '" and ' . $filter);
-            return 0;
-        }
+//        $planning = $this->planningRepos->findOneByExt(
+//            $input,
+//            $filter->getBatchGamesRange(),
+//            $filter->getMaxNrOfGamesInARow()
+//        );
+//        if ($planning === null) {
+//            $this->getLogger()->info('planning not found for inputid "' . (string)$input->getId() . '" and ' . $filter);
+//            return 0;
+//        }
 
         // new PlanningOutput($this->getLogger());
 
-        $this->createSchedules($planning->getInput());
+        $this->createSchedules($input);
         $planningSeeker = new PlanningSeeker(
             $this->getLogger(),
             $this->planningInputRepos,
@@ -339,8 +318,12 @@ class Create extends PlanningCommand
         if ($this->disableThrowOnTimeout === true) {
             $planningSeeker->disableThrowOnTimeout();
         }
-        $schedules = $this->scheduleRepos->findByInput($planning->getInput());
-        $planningSeeker->processPlanning($planning, $schedules);
+        $schedules = $this->scheduleRepos->findByInput($input);
+        $planning = $planningSeeker->processFilter($input, $schedules, $filter);
+
+        if ($planning === null) {
+            throw new \Exception('planning could not be found with filter', E_ERROR);
+        }
 
         $this->getLogger()->info('planningstate: ' . $planning->getState()->name);
         if ($planning->getState() === PlanningState::Succeeded && $this->showSuccessful === true) {
