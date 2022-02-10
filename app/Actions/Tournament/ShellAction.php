@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Tournament;
 
-use Doctrine\ORM\EntityManager;
-use JMS\Serializer\SerializerInterface;
+use App\Actions\Action;
 use App\Response\ErrorResponse;
+use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\Shell as Shell;
+use FCToernooi\User;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\TournamentUser;
-use FCToernooi\User;
-use FCToernooi\Auth\Service as AuthService;
-use App\Actions\Action;
-use FCToernooi\Tournament\Shell as Shell;
 use Psr\Log\LoggerInterface;
 
 final class ShellAction extends Action

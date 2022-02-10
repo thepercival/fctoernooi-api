@@ -6,7 +6,7 @@ namespace FCToernooi\Auth;
 
 use App\Mailer;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
@@ -29,7 +29,7 @@ class Service
         protected TournamentRepository $tournamentRepos,
         protected TournamentInvitationRepository $tournamentInvitationRepos,
         protected AuthSyncService $syncService,
-        protected EntityManager $em,
+        protected EntityManagerInterface $em,
         protected Configuration $config,
         protected Mailer $mailer
     ) {

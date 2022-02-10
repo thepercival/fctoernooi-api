@@ -9,7 +9,7 @@ use App\Export\Pdf\Document as PdfDocument;
 use App\QueueService;
 use App\Response\ErrorResponse;
 use DateTimeImmutable;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
@@ -43,7 +43,7 @@ final class TournamentAction extends Action
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
-        private EntityManager $entityManager,
+        private EntityManagerInterface $entityManager,
         private PlanningCreator $planningCreator,
         private Configuration $config
     ) {

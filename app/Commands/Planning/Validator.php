@@ -215,7 +215,7 @@ class Validator extends Command
     protected function setValidity(Planning $planning, int $validity): void
     {
         $planning->setValidity($validity);
-        $this->planningRepos->save($planning);
+        $this->planningRepos->save($planning, true);
     }
 
     /**
