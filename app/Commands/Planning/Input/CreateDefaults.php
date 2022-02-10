@@ -11,7 +11,6 @@ use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
-use SportsPlanning\Input;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -87,9 +86,9 @@ class CreateDefaults extends PlanningCommand
 
             $planningInputDb = $this->planningInputRepos->getFromInput($planningInputIt);
             if ($planningInputDb === null) {
-                $planningInputDb = $this->createPlanningInput($planningInputIt);
-                $queueService->sendCreatePlannings($planningInputDb);
-                $planningOutput->outputInput($planningInputDb, 'created + message ');
+                $this->planningInputRepos->save($planningInputIt);
+                $queueService->sendCreatePlannings($planningInputIt);
+                $planningOutput->outputInput($planningInputIt, 'created + message ');
             } elseif ($recreate) {
                 // $this->planningInputRepos->reset($planningInputDb);
                 $queueService->sendCreatePlannings($planningInputDb);
@@ -102,12 +101,5 @@ class CreateDefaults extends PlanningCommand
             $this->entityManager->clear();
         }
         return 0;
-    }
-
-    protected function createPlanningInput(Input $planningInput): Input
-    {
-        $this->planningInputRepos->save($planningInput);
-        $this->planningInputRepos->createBatchGamesPlannings($planningInput);
-        return $planningInput;
     }
 }
