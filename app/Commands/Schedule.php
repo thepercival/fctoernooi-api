@@ -8,9 +8,10 @@ use App\Command;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use SportsHelpers\GameMode;
-use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
-use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
-use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
+use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
+use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
+use SportsHelpers\Sport\Variant\AllInOneGame;
+use SportsHelpers\Sport\Variant\Single;
 use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputInterface;
@@ -90,21 +91,27 @@ class Schedule extends Command
 
     protected function getSportVariant(
         InputInterface $input
-    ): AgainstSportVariant|AllInOneGameSportVariant|SingleSportVariant {
+    ): AgainstH2h|AgainstGpp|AllInOneGame|Single {
         $gameMode = $this->getGameMode($input);
         if ($gameMode === GameMode::Against) {
             $nrOfH2H = $this->getIntParam($input, 'nrOfH2H', 0);
-            return new AgainstSportVariant(
+            if( $nrOfH2H > 0 ) {
+                return new AgainstH2h(
+                    $this->getIntParam($input, 'nrOfHomePlaces'),
+                    $this->getIntParam($input, 'nrOfAwayPlaces'),
+                    $nrOfH2H
+                );
+            }
+            return new AgainstGpp(
                 $this->getIntParam($input, 'nrOfHomePlaces'),
                 $this->getIntParam($input, 'nrOfAwayPlaces'),
-                $nrOfH2H,
-                $this->getIntParam($input, 'nrOfGamesPerPlace', $nrOfH2H > 0 ? 0 : null)
+                $this->getIntParam($input, 'nrOfGamesPerPlace')
             );
         }
         if ($gameMode === GameMode::AllInOneGame) {
-            return new AllInOneGameSportVariant($this->getIntParam($input, 'nrOfGamesPerPlace'));
+            return new AllInOneGame($this->getIntParam($input, 'nrOfGamesPerPlace'));
         }
-        return new SingleSportVariant(
+        return new Single(
             $this->getIntParam($input, 'nrOfGamePlaces'),
             $this->getIntParam($input, 'nrOfGamesPerPlace')
         );
