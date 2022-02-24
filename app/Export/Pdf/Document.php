@@ -96,8 +96,11 @@ class Document extends Zend_Pdf
     protected function fillContent(): void
     {
         if (($this->subjects & ExportConfig::Structure) === ExportConfig::Structure) {
-            $page = $this->createPageGrouping();
-            $page->draw();
+            $poules = array_values($this->getStructure()->getRootRound()->getPoules()->toArray());
+            while (count($poules) > 0) {
+                $page = $this->createPageGrouping();
+                $page->draw($poules);
+            }
 
             $this->createAndDrawPageStructure(Zend_Pdf_Page::SIZE_A4);
         }

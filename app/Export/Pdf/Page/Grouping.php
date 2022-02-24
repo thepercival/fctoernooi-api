@@ -7,7 +7,7 @@ namespace App\Export\Pdf\Page;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use Sports\Round;
+use Sports\Poule;
 
 class Grouping extends ToernooiPdfPage
 {
@@ -35,82 +35,115 @@ class Grouping extends ToernooiPdfPage
         return $this->rowHeight;
     }
 
-    public function draw(): void
+    /**
+     * @param list<Poule> $poules
+     */
+    public function draw(array &$poules): void
     {
-        $rooRound = $this->getParent()->getStructure()->getRootRound();
         $y = $this->drawHeader("indeling");
-        $this->drawGrouping($rooRound, $y);
+        $this->drawGrouping($poules, $y);
     }
 
-    public function drawGrouping(Round $round, float $y): float
+    /**
+     * @param list<Poule> $poules
+     */
+    public function drawGrouping(array &$poules, float $y): void
     {
         $y = $this->drawSubHeader("Indeling", $y);
-        $nRowHeight = $this->getRowHeight();
-        $fontHeight = $nRowHeight - 4;
-        $pouleMargin = 20;
-        $poules = $round->getPoules()->toArray();
-        $nrOfPoules = $round->getPoules()->count();
-        $percNumberWidth = 0.1;
-        $nameService = $this->getParent()->getNameService();
+
+        $nrOfPoules = count($poules);
         $yPouleStart = $y;
-        $maxNrOfPlacesPerPoule = $round->getPoule(1)->getPlaces()->count();
-        $nrOfLines = $this->getNrOfLines($nrOfPoules);
-        for ($line = 1; $line <= $nrOfLines; $line++) {
-            $nrOfPoulesForLine = $this->getNrOfPoulesForLine($nrOfPoules, $line === $nrOfLines);
-            $pouleWidth = $this->getPouleWidth($nrOfPoulesForLine, $pouleMargin);
-            $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
-            while ($nrOfPoulesForLine > 0) {
-                $poule = array_shift($poules);
-                if ($poule === null) {
-                    break;
-                }
-                $numberWidth = $pouleWidth * $percNumberWidth;
-                $this->setFont($this->getParent()->getFont(true), $fontHeight);
-                $this->drawCell(
-                    $this->getParent()->getNameService()->getPouleName($poule, true),
-                    $x,
-                    $yPouleStart,
-                    $pouleWidth,
-                    $nRowHeight,
-                    Align::Center,
-                    "black"
-                );
-                $this->setFont($this->getParent()->getFont(), $fontHeight);
-                $y = $yPouleStart - $nRowHeight;
-                foreach ($poule->getPlaces() as $place) {
-                    $this->drawCell(
-                        (string)$place->getPlaceNr(),
-                        $x,
-                        $y,
-                        $numberWidth,
-                        $nRowHeight,
-                        Align::Right,
-                        "black"
-                    );
-                    $name = '';
-                    if ($this->getParent()->getPlaceLocationMap()->getCompetitor($place) !== null) {
-                        $name = $nameService->getPlaceName($place, true);
-                    }
-                    $this->drawCell(
-                        $name,
-                        $x + $numberWidth,
-                        $y,
-                        $pouleWidth - $numberWidth,
-                        $nRowHeight,
-                        Align::Left,
-                        "black"
-                    );
-                    $y -= $nRowHeight;
-                }
-                $x += $pouleMargin + $pouleWidth;
-                $nrOfPoulesForLine--;
+        $rowHeight = $this->getRowHeight();
+
+        $nrOfPouleRows = $this->getNrOfPouleRows($nrOfPoules);
+        for ($pouleRowNr = 1; $pouleRowNr <= $nrOfPouleRows; $pouleRowNr++) {
+            $nrOfPoulesForRow = $this->getNrOfPoulesForRow($nrOfPoules, $pouleRowNr === $nrOfPouleRows);
+            $pouleRowHeight = $this->getPouleRowHeight($poules, $nrOfPoulesForRow);
+            $yPouleEnd = $yPouleStart - $pouleRowHeight;
+            if ($yPouleStart !== $y && $yPouleEnd < $this->getPageMargin()) {
+                break;
             }
-            $yPouleStart -= ($maxNrOfPlacesPerPoule + 2 /* header + empty line */) * $nRowHeight;
+            $yPouleStart = $this->drawPouleRow($poules, $nrOfPoulesForRow, $yPouleStart);
+            $yPouleStart -= $rowHeight;
         }
-        return $y - (2 * $nRowHeight);
     }
 
-    protected function getNrOfLines(int $nrOfPoules): int
+    /**
+     * @param list<Poule> $poules
+     * @param int $nrOfPoulesForRow
+     * @param float $y
+     * @return float
+     */
+    protected function drawPouleRow(array &$poules, int $nrOfPoulesForRow, float $y): float
+    {
+        $pouleMargin = 20;
+        $pouleWidth = $this->getPouleWidth($nrOfPoulesForRow, $pouleMargin);
+        $x = $this->getXLineCentered($nrOfPoulesForRow, $pouleWidth, $pouleMargin);
+        $lowestY = 0;
+
+        while ($nrOfPoulesForRow > 0) {
+            $poule = array_shift($poules);
+            if ($poule === null) {
+                break;
+            }
+            $yEnd = $this->drawPoule($poule, $x, $pouleWidth, $y);
+            if ($lowestY === 0 || $yEnd < $lowestY) {
+                $lowestY = $yEnd;
+            }
+            $x += $pouleMargin + $pouleWidth;
+
+            $nrOfPoulesForRow--;
+        }
+        return $lowestY;
+    }
+
+    protected function drawPoule(Poule $poule, float $x, float $pouleWidth, float $yStart): float
+    {
+        $nRowHeight = $this->getRowHeight();
+        $fontHeight = $nRowHeight - 4;
+
+        $numberWidth = $pouleWidth * 0.1;
+        $this->setFont($this->getParent()->getFont(true), $fontHeight);
+        $this->drawCell(
+            $this->getParent()->getNameService()->getPouleName($poule, true),
+            $x,
+            $yStart,
+            $pouleWidth,
+            $nRowHeight,
+            Align::Center,
+            "black"
+        );
+        $this->setFont($this->getParent()->getFont(), $fontHeight);
+        $y = $yStart - $nRowHeight;
+        foreach ($poule->getPlaces() as $place) {
+            $this->drawCell(
+                (string)$place->getPlaceNr(),
+                $x,
+                $y,
+                $numberWidth,
+                $nRowHeight,
+                Align::Right,
+                "black"
+            );
+            $name = '';
+            if ($this->getParent()->getPlaceLocationMap()->getCompetitor($place) !== null) {
+                $name = $this->getParent()->getNameService()->getPlaceName($place, true);
+            }
+            $this->drawCell(
+                $name,
+                $x + $numberWidth,
+                $y,
+                $pouleWidth - $numberWidth,
+                $nRowHeight,
+                Align::Left,
+                "black"
+            );
+            $y -= $nRowHeight;
+        }
+        return $y;
+    }
+
+    protected function getNrOfPouleRows(int $nrOfPoules): int
     {
         if (($nrOfPoules % 3) !== 0) {
             $nrOfPoules += (3 - ($nrOfPoules % 3));
@@ -118,7 +151,34 @@ class Grouping extends ToernooiPdfPage
         return (int)($nrOfPoules / 3);
     }
 
-    protected function getNrOfPoulesForLine(int $nrOfPoules, bool $lastLine): int
+    /**
+     * @param list<Poule> $poules
+     * @param int $nrOfPoulesForRow
+     * @return float
+     */
+    protected function getPouleRowHeight(array $poules, int $nrOfPoulesForRow): float
+    {
+        $maxPouleHeight = 0;
+        for ($pouleNr = 1; $pouleNr <= $nrOfPoulesForRow; $pouleNr++) {
+            $poule = array_shift($poules);
+            if ($poule === null) {
+                continue;
+            }
+            $pouleHeight = $this->getPouleHeight($poule);
+            if ($pouleHeight > $maxPouleHeight) {
+                $maxPouleHeight = $pouleHeight;
+            }
+        }
+        return $maxPouleHeight;
+    }
+
+    protected function getPouleHeight(Poule $poule): float
+    {
+        $nRowHeight = $this->getRowHeight();
+        return $nRowHeight + (count($poule->getPlaces()) * $nRowHeight);
+    }
+
+    protected function getNrOfPoulesForRow(int $nrOfPoules, bool $lastLine): int
     {
         if ($nrOfPoules === 4) {
             return 2;

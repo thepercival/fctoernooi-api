@@ -98,9 +98,6 @@ class Structure extends ToernooiPdfPage
 
     protected function getNrOfPlaceColumns(Poule $poule, int $maxNrOfPlaceColumnsPerPoule): int
     {
-        if ($maxNrOfPlaceColumnsPerPoule === 0) {
-            $trrrr = 1;
-        }
         $nrOfPlaceColumnsPerPoule = $poule->getPlaces()->count();
         if ($nrOfPlaceColumnsPerPoule > $maxNrOfPlaceColumnsPerPoule) {
             $nrOfPlaceColumnsPerPoule = $maxNrOfPlaceColumnsPerPoule;
@@ -166,6 +163,7 @@ class Structure extends ToernooiPdfPage
     {
         $pouleWidth = $nrOfPlaceColumns * self::PlaceWidth;
         $pouleName = $this->getParent()->getNameService()->getPouleName($poule, $nrOfPlaceColumns > 1);
+        $this->setFont($this->getParent()->getFont(true), self::FontHeight);
         $this->drawCell(
             $pouleName,
             $x,
@@ -175,6 +173,7 @@ class Structure extends ToernooiPdfPage
             Align::Center,
             'black'
         );
+        $this->setFont($this->getParent()->getFont(), self::FontHeight);
         $y -= self::RowHeight;
         $places = $poule->getPlaces()->toArray();
         uasort(
