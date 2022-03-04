@@ -6,7 +6,6 @@ namespace App\Commands\Schedule;
 
 use App\Commands\Schedule as ScheduleCommand;
 use Psr\Container\ContainerInterface;
-use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Schedule\Name as ScheduleName;
 use SportsPlanning\Schedule\Output as ScheduleOutput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,20 +34,15 @@ class Get extends ScheduleCommand
         $this->addOption('nrOfPlaces', null, InputOption::VALUE_REQUIRED, '8');
         $defaultValue = '[{"nrOfHomePlaces":1,"nrOfAwayPlaces":1,"nrOfH2H":1}]';
         $this->addOption('sportsConfigName', null, InputOption::VALUE_OPTIONAL, $defaultValue);
-        $defaultValue = GamePlaceStrategy::EquallyAssigned->name;
-        $this->addOption('gamePlaceStrategy', null, InputOption::VALUE_OPTIONAL, $defaultValue);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $nrOfPlaces = $this->getNrOfPlaces($input);
-        $gamePlaceStrategy = $this->getGamePlaceStrategy($input);
         $sportsConfigName = (string)new ScheduleName([$this->getSportVariant($input)]);
-        $existingSchedule = $this->scheduleRepos->findOneBy([
-                                                                "nrOfPlaces" => $nrOfPlaces,
-                                                                "gamePlaceStrategy" => $gamePlaceStrategy,
-                                                                "sportsConfigName" => $sportsConfigName
-                                                            ]);
+        $existingSchedule = $this->scheduleRepos->findOneBy(
+            ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
+        );
         if ($existingSchedule === null) {
             throw new \Exception('schedule not found', E_ERROR);
         }

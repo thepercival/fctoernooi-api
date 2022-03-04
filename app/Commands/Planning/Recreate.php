@@ -106,8 +106,15 @@ class Recreate extends PlanningCommand
             if ($amount === null) {
                 $amount = '10';
             }
-            $planningInputs = $this->planningInputRepos->findToRecreate((int)$amount);
+            $hour = (int)(new \DateTimeImmutable())->format('H');
+            $sortAsc = ($hour % 2) === 1;
+            $planningInputs = $this->planningInputRepos->findToRecreate((int)$amount, $sortAsc);
+            $counter = 0;
             foreach ($planningInputs as $planningInput) {
+                $msg = '################ ';
+                $msg .= 'recreating planninginput ' . ++$counter . '/' . $amount;
+                $msg .= ' ################';
+                $this->getLogger()->info($msg);
                 $this->processPlanningInput($planningInput);
             }
         } catch (\Exception $exception) {

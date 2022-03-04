@@ -23,12 +23,12 @@ $em = \Doctrine\ORM\EntityManager::create($settings['connection'], $config);
 Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
 Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
 Type::addType('enum_AgainstSide', SportsHelpers\Against\SideType::class);
-Type::addType('enum_GamePlaceStrategy', SportsPlanning\Combinations\GamePlaceStrategyType::class);
 Type::addType('enum_EditMode', Sports\Planning\EditModeType::class);
 Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
 Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
 Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
 Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
+Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateType::class);
 Type::addType('enum_GameState', Sports\Game\StateType::class);
 
 return ConsoleRunner::createHelperSet($em);

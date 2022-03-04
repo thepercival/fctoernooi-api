@@ -8,11 +8,10 @@ use App\Commands\Schedule as ScheduleCommand;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PouleStructure;
 use SportsHelpers\Sport\VariantWithFields as SportVariantWithFields;
-use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Input;
 use SportsPlanning\Referee\Info as RefereeInfo;
 use SportsPlanning\Schedule;
-use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
+use SportsPlanning\Schedule\Creator as ScheduleCreator;
 use SportsPlanning\Schedule\Name as ScheduleName;
 use SportsPlanning\Schedule\Output as ScheduleOutput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -45,22 +44,16 @@ class Create extends ScheduleCommand
         $this->addOption('nrOfGamePlaces', null, InputOption::VALUE_OPTIONAL);
         $this->addOption('nrOfH2H', null, InputOption::VALUE_OPTIONAL);
         $this->addOption('nrOfGamesPerPlace', null, InputOption::VALUE_OPTIONAL);
-
-        $defaultValue = GamePlaceStrategy::EquallyAssigned->name;
-        $this->addOption('gamePlaceStrategy', null, InputOption::VALUE_OPTIONAL, $defaultValue);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $nrOfPlaces = $this->getNrOfPlaces($input);
-        $gamePlaceStrategy = $this->getGamePlaceStrategy($input);
         $sportVariant = $this->getSportVariant($input);
         $sportsConfigName = (new ScheduleName([$sportVariant]));
-        $existingSchedule = $this->scheduleRepos->findOneBy([
-                                                                "nrOfPlaces" => $nrOfPlaces,
-                                                                "gamePlaceStrategy" => $gamePlaceStrategy,
-                                                                "sportsConfigName" => $sportsConfigName
-                                                            ]);
+        $existingSchedule = $this->scheduleRepos->findOneBy(
+            ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
+        );
 
         $this->initLogger($input, 'command-schedule-create');
 
@@ -76,7 +69,7 @@ class Create extends ScheduleCommand
             // against nrOfHomePlaces nrOfAwayPlaces ( nrOfH2H || nrOfGamesPerPlace )
             // together nrOfGamePlaces nrOfGamesPerPlace
             $sportVariantsWithFields = [new SportVariantWithFields($sportVariant, 1)];
-            $newSchedule = $this->createSchedule($nrOfPlaces, $gamePlaceStrategy, $sportVariantsWithFields);
+            $newSchedule = $this->createSchedule($nrOfPlaces, $sportVariantsWithFields);
             (new ScheduleOutput($this->getLogger()))->output([$newSchedule]);
         } catch (\Exception $exception) {
             $this->getLogger()->error($exception->getMessage());
@@ -86,25 +79,22 @@ class Create extends ScheduleCommand
 
     /**
      * @param int $nrOfPlaces
-     * @param GamePlaceStrategy $gamePlaceStrategy
      * @param list<SportVariantWithFields> $sportVariantsWithFields
      * @return Schedule
      * @throws \Exception
      */
     protected function createSchedule(
         int $nrOfPlaces,
-        GamePlaceStrategy $gamePlaceStrategy,
         array $sportVariantsWithFields
     ): Schedule {
-        $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
+        $scheduleCreator = new ScheduleCreator($this->getLogger());
         $this->getLogger()->info('creating schedule .. ');
         $planningInput = new Input(
             new PouleStructure($nrOfPlaces),
             $sportVariantsWithFields,
-            $gamePlaceStrategy,
             new RefereeInfo(0)
         );
-        $schedules = $scheduleCreatorService->createSchedules($planningInput);
+        $schedules = $scheduleCreator->createFromInput($planningInput);
         foreach ($schedules as $schedule) {
             $this->scheduleRepos->save($schedule);
         }

@@ -8,11 +8,10 @@ use App\Command;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use SportsHelpers\GameMode;
-use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
+use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\AllInOneGame;
 use SportsHelpers\Sport\Variant\Single;
-use SportsPlanning\Combinations\GamePlaceStrategy;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -42,21 +41,6 @@ class Schedule extends Command
             throw new \Exception('incorrect nrOfPlaces "' . $nrOfPlaces . '"', E_ERROR);
         }
         return $nrOfPlaces;
-    }
-
-    protected function getGamePlaceStrategy(InputInterface $input): GamePlaceStrategy
-    {
-        $gamePlaceStrategy = $input->getOption('gamePlaceStrategy');
-        if (!is_string($gamePlaceStrategy) || strlen($gamePlaceStrategy) === 0) {
-            return GamePlaceStrategy::EquallyAssigned;
-        }
-        if ($gamePlaceStrategy === GamePlaceStrategy::EquallyAssigned->name) {
-            return GamePlaceStrategy::EquallyAssigned;
-        }
-        if ($gamePlaceStrategy === GamePlaceStrategy::RandomlyAssigned->name) {
-            return GamePlaceStrategy::RandomlyAssigned;
-        }
-        throw new \Exception('incorrect gamePlaceStrategy "' . $gamePlaceStrategy . '"', E_ERROR);
     }
 
     /**
@@ -95,7 +79,7 @@ class Schedule extends Command
         $gameMode = $this->getGameMode($input);
         if ($gameMode === GameMode::Against) {
             $nrOfH2H = $this->getIntParam($input, 'nrOfH2H', 0);
-            if( $nrOfH2H > 0 ) {
+            if ($nrOfH2H > 0) {
                 return new AgainstH2h(
                     $this->getIntParam($input, 'nrOfHomePlaces'),
                     $this->getIntParam($input, 'nrOfAwayPlaces'),

@@ -49,9 +49,13 @@ final class PlanningAction extends Action
      */
     public function fetch(Request $request, Response $response, array $args): Response
     {
-        $roundNumber = $this->getRoundNumberFromRequest($request, $args);
-        $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
-        return $this->respondWithJson($response, $json);
+        try {
+            $roundNumber = $this->getRoundNumberFromRequest($request, $args);
+            $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
+            return $this->respondWithJson($response, $json);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
     }
 
     /**
@@ -63,19 +67,27 @@ final class PlanningAction extends Action
      */
     public function progress(Request $request, Response $response, array $args): Response
     {
-        $roundNumber = $this->getRoundNumberFromRequest($request, $args);
-        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
-        $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
-        $input = $this->inputRepos->getFromInput($defaultInput);
-        $seekingPerc = 0;
-        if ($input !== null) {
+        try {
+            $roundNumber = $this->getRoundNumberFromRequest($request, $args);
+            $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
+            $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
+            $input = $this->inputRepos->getFromInput($defaultInput);
+            if ($input === null) {
+                throw new \Exception(
+                                                                          'de planning "' . $defaultInput->getUniqueString(
+                                                                          ) . '" kan niet gevonden worden, doe een aanpassing',
+                                                                          E_ERROR
+                );
+            }
             $seekingPerc = $input->getSeekingPercentage();
+            if ($seekingPerc < 0) {
+                $seekingPerc = 0;
+            }
+            $json = json_encode(['progress' => $seekingPerc]);
+            return $this->respondWithJson($response, $json === false ? '' : $json);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
         }
-        if ($seekingPerc < 0) {
-            $seekingPerc = 0;
-        }
-        $json = json_encode(['progress' => $seekingPerc]);
-        return $this->respondWithJson($response, $json === false ? '' : $json);
     }
 
     /**

@@ -97,8 +97,6 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameMode');
         Type::addType('enum_AgainstSide', SportsHelpers\Against\SideType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_AgainstSide');
-        Type::addType('enum_GamePlaceStrategy', SportsPlanning\Combinations\GamePlaceStrategyType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GamePlaceStrategy');
         Type::addType('enum_EditMode', Sports\Planning\EditModeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_EditMode');
         Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
@@ -109,6 +107,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PointsCalculation');
         Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_PlanningState');
+        Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningTimeoutState');
         Type::addType('enum_GameState', Sports\Game\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameState');
 

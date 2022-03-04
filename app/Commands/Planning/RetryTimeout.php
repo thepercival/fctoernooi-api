@@ -13,11 +13,10 @@ use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PouleStructure;
 use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Planning;
-use SportsPlanning\Planning as PlanningBase;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Output as PlanningOutput;
-use SportsPlanning\Planning\State as PlanningState;
+use SportsPlanning\Planning\TimeoutConfig;
+use SportsPlanning\Planning\TimeoutState;
 use SportsPlanning\Planning\Type as PlanningType;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use SportsPlanning\Seeker as PlanningSeeker;
@@ -56,10 +55,14 @@ class RetryTimeout extends PlanningCommand
             ->setHelp('Retries the timeout-plannings');
         parent::configure();
 
+        $default = PlanningType::BatchGames->name;
+        $this->addOption('planningType', null, InputOption::VALUE_REQUIRED, $default);
+        $default = TimeoutState::Time1xNoSort->value;
+        $this->addOption('timeoutState', null, InputOption::VALUE_REQUIRED, $default);
+
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
         $this->addOption('batchGamesRange', null, InputOption::VALUE_OPTIONAL, '1-2');
         $this->addOption('maxNrOfGamesInARow', null, InputOption::VALUE_OPTIONAL, '0');
-        $this->addOption('maxTimeoutSeconds', null, InputOption::VALUE_OPTIONAL, '5');
     }
 
     // waar wil je retry time
@@ -80,8 +83,9 @@ class RetryTimeout extends PlanningCommand
                 return 0;
             }
 
-            $maxTimeOutSeconds = $this->getMaxTimeoutSeconds($input);
-            $planningSeeker->setMaxTimeoutSeconds($maxTimeOutSeconds);
+            $planningType = $this->getPlanningType($input);
+            $timeoutState = $this->getTimeoutState($input);
+            $planningSeeker->setTimeoutState($timeoutState);
 
             $inputId = $input->getArgument('inputId');
             if (is_string($inputId) && strlen($inputId) > 0) {
@@ -89,21 +93,18 @@ class RetryTimeout extends PlanningCommand
                     (int)$inputId,
                     $this->getPlanningFilter($input),
                     $planningSeeker,
-                    $maxTimeOutSeconds
+                    $planningType,
+                    $timeoutState
                 );
             }
 
-            $planningType = PlanningType::BatchGames;
-            $planningInput = $this->planningInputRepos->findTimedout($planningType, $maxTimeOutSeconds);
-            if ($planningInput === null) {
-                $planningType = PlanningType::GamesInARow;
-                $planningInput = $this->planningInputRepos->findTimedout($planningType, $maxTimeOutSeconds);
-            }
+            $planningInput = $this->planningInputRepos->findTimedout($planningType, $timeoutState);
+            $msg = 'type "' . $planningType->name . '" and timeoutState "' . $timeoutState->value . '"';
             if ($planningInput !== null) {
+                $this->getLogger()->info('################ retry for ' . $msg . ' ################');
                 $this->processInput($planningInput, $planningSeeker, $planningType);
             } else {
-                $suffix = 'maxTimeoutSeconds: ' . $this->getMaxTimeoutSeconds($input);
-                $this->getLogger()->warning('no timedout-planning found for ' . $suffix);
+                $this->getLogger()->warning('no planning found for ' . $msg);
             }
 
             $this->setStatusToFinishedProcessing();
@@ -136,14 +137,16 @@ class RetryTimeout extends PlanningCommand
         }
         if ($oldBestPlanning !== $planningInput->getBestPlanning(null)) {
             $this->sendMailWithSuccessfullTimedoutPlanning($planningInput);
-            $planningSeeker = new PlanningSeeker(
-                $this->getLogger(),
-                $this->planningInputRepos,
-                $this->planningRepos,
-                $this->scheduleRepos
-            );
-            $schedules = $this->scheduleRepos->findByInput($planningInput);
-            $planningSeeker->processGamesInARowPlannings($planningInput, $schedules);
+            if ($planningType === PlanningType::BatchGames) {
+                $planningSeeker = new PlanningSeeker(
+                    $this->getLogger(),
+                    $this->planningInputRepos,
+                    $this->planningRepos,
+                    $this->scheduleRepos
+                );
+                $schedules = $this->scheduleRepos->findByInput($planningInput);
+                $planningSeeker->processGamesInARowPlannings($planningInput, $schedules);
+            }
         }
     }
 
@@ -151,7 +154,8 @@ class RetryTimeout extends PlanningCommand
         int $inputId,
         PlanningFilter|null $planningFilter,
         PlanningTimeoutSeeker $planningSeeker,
-        int $maxTimeOutSeconds
+        PlanningType $planningType,
+        TimeoutState $timeoutState
     ): int {
         $planningInput = $this->planningInputRepos->find($inputId);
         if ($planningInput === null) {
@@ -168,33 +172,45 @@ class RetryTimeout extends PlanningCommand
                 return 0;
             }
         }
-
-        $planningType = PlanningType::BatchGames;
-        $timeoutBatchGamePlannings = array_merge(
-            $planningInput->getEqualBatchGamesPlannings(PlanningState::TimedOut),
-            $planningInput->getUnequalBatchGamesPlannings(PlanningState::TimedOut)
-        );
-        $nrOfBatchGamesPlanningsToProcess = count(
-            array_filter($timeoutBatchGamePlannings, function (Planning $planning) use ($maxTimeOutSeconds): bool {
-                return $planning->getTimeoutSeconds() <= $maxTimeOutSeconds;
-            })
-        );
-        if ($nrOfBatchGamesPlanningsToProcess === 0) {
-            $planningType = PlanningType::GamesInARow;
-        }
         $this->processInput($planningInput, $planningSeeker, $planningType);
         $this->setStatusToFinishedProcessing();
         return 0;
     }
 
-
-    protected function getMaxTimeoutSeconds(InputInterface $input): int
+    protected function getPlanningType(InputInterface $input): PlanningType
     {
-        $maxTimeoutSeconds = $input->getOption('maxTimeoutSeconds');
-        if (is_string($maxTimeoutSeconds) && strlen($maxTimeoutSeconds) > 0) {
-            return (int)$maxTimeoutSeconds;
+        $planningType = $input->getOption('planningType');
+        if ($planningType === null) {
+            throw new \Exception('unknown planningtype', E_ERROR);
         }
-        return PlanningBase::MINIMUM_TIMEOUTSECONDS;
+        $planningType = strtolower($planningType);
+        if ($planningType === strtolower(PlanningType::BatchGames->name)) {
+            return PlanningType::BatchGames;
+        } elseif ($planningType === strtolower(PlanningType::GamesInARow->name)) {
+            return PlanningType::GamesInARow;
+        }
+        throw new \Exception('unknown planningtype', E_ERROR);
+    }
+
+    protected function getTimeoutState(InputInterface $input): TimeoutState
+    {
+        $timeoutState = $input->getOption('timeoutState');
+        if ($timeoutState === null) {
+            throw new \Exception('unknown planningtype', E_ERROR);
+        }
+        $timeoutState = strtolower($timeoutState);
+        if ($timeoutState === strtolower(TimeoutState::Time1xNoSort->value)) {
+            return TimeoutState::Time1xNoSort;
+        } elseif ($timeoutState === strtolower(TimeoutState::Time4xSort->value)) {
+            return TimeoutState::Time4xSort;
+        } elseif ($timeoutState === strtolower(TimeoutState::Time4xNoSort->value)) {
+            return TimeoutState::Time4xNoSort;
+        } elseif ($timeoutState === strtolower(TimeoutState::Time10xSort->value)) {
+            return TimeoutState::Time10xSort;
+        } elseif ($timeoutState === strtolower(TimeoutState::Time10xNoSort->value)) {
+            return TimeoutState::Time10xNoSort;
+        }
+        return (new TimeoutConfig())->nextTimeoutState(null);
     }
 
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void

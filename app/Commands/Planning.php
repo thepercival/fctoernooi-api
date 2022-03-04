@@ -14,7 +14,7 @@ use SportsPlanning\Input;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Repository as PlanningRepository;
-use SportsPlanning\Schedule\Creator\Service as ScheduleCreatorService;
+use SportsPlanning\Schedule\Creator as ScheduleCreator;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
 use Symfony\Component\Console\Input\InputInterface;
 
@@ -73,10 +73,10 @@ class Planning extends Command
         $existingSchedules = $this->scheduleRepos->findByInput($planningInput);
         $distinctNrOfPoulePlaces = $this->scheduleRepos->getDistinctNrOfPoulePlaces($planningInput);
         if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
-            $scheduleCreatorService = new ScheduleCreatorService($this->getLogger());
-            $scheduleCreatorService->setExistingSchedules($existingSchedules);
+            $scheduleCreator = new ScheduleCreator($this->getLogger());
+            $scheduleCreator->setExistingSchedules($existingSchedules);
             $this->getLogger()->info('creating schedules .. ');
-            $schedules = $scheduleCreatorService->createSchedules($planningInput);
+            $schedules = $scheduleCreator->createFromInput($planningInput);
             foreach ($schedules as $schedule) {
                 $this->scheduleRepos->save($schedule);
             }

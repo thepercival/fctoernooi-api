@@ -203,15 +203,21 @@ class Create extends PlanningCommand
             $this->roundNumberRepos,
             $this->getLogger()
         );
+        $conn = $this->entityManager->getConnection();
         try {
             if ($tournament === null) {
                 throw new \Exception('no tournament found for competitionid ' . ((string)$roundNumber->getCompetition()->getId()), E_ERROR);
             }
-            $this->entityManager->getConnection()->beginTransaction();
-            $roundNumberPlanningCreator->addFrom($queueService, $roundNumber, $tournament->getBreak(), $eventPriority - 1);
-            $this->entityManager->getConnection()->commit();
+            $conn->beginTransaction();
+            $roundNumberPlanningCreator->addFrom(
+                $queueService,
+                $roundNumber,
+                $tournament->getBreak(),
+                $eventPriority - 1
+            );
+            $conn->commit();
         } catch (Exception $exception) {
-            $this->entityManager->getConnection()->rollBack();
+            $conn->rollBack();
             throw $exception;
         }
     }

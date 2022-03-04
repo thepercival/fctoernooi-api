@@ -74,10 +74,9 @@ class Tournament extends Identifiable
 
     public function getBreak(): ?Period
     {
-        if ($this->getBreakStartDateTime() === null || $this->getBreakEndDateTime() === null) {
-            return null;
-        }
-        return new Period($this->getBreakStartDateTime(), $this->getBreakEndDateTime());
+        $start = $this->getBreakStartDateTime();
+        $end = $this->getBreakEndDateTime();
+        return ($start !== null && $end !== null) ? new Period($start, $end) : null;
     }
 
     public function setBreak(Period $period = null): void
