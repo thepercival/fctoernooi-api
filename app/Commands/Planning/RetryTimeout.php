@@ -85,7 +85,6 @@ class RetryTimeout extends PlanningCommand
 
             $planningType = $this->getPlanningType($input);
             $timeoutState = $this->getTimeoutState($input);
-            $planningSeeker->setTimeoutState($timeoutState);
 
             $inputId = $input->getArgument('inputId');
             if (is_string($inputId) && strlen($inputId) > 0) {
@@ -102,7 +101,7 @@ class RetryTimeout extends PlanningCommand
             $msg = 'type "' . $planningType->name . '" and timeoutState "' . $timeoutState->value . '"';
             if ($planningInput !== null) {
                 $this->getLogger()->info('################ retry for ' . $msg . ' ################');
-                $this->processInput($planningInput, $planningSeeker, $planningType);
+                $this->processInput($planningInput, $planningSeeker, $planningType, $timeoutState);
             } else {
                 $this->getLogger()->warning('no planning found for ' . $msg);
             }
@@ -120,7 +119,8 @@ class RetryTimeout extends PlanningCommand
     protected function processInput(
         PlanningInput $planningInput,
         PlanningTimeoutSeeker $planningSeeker,
-        PlanningType $planningType
+        PlanningType $planningType,
+        TimeoutState $timeoutState,
     ): void {
         $planningOutput = new PlanningOutput($this->getLogger());
         $planningOutput->outputInput(
@@ -131,12 +131,14 @@ class RetryTimeout extends PlanningCommand
         $oldBestPlanning = $planningInput->getBestPlanning(null);
         $this->createSchedules($planningInput);
         if ($planningType === PlanningType::BatchGames) {
-            $planningSeeker->processBatchGames($planningInput);
+            $planningSeeker->processBatchGames($planningInput, $timeoutState);
         } else {
-            $planningSeeker->processGamesInARow($planningInput);
+            $planningSeeker->processGamesInARow($planningInput, $timeoutState);
         }
-        if ($oldBestPlanning !== $planningInput->getBestPlanning(null)) {
+        $newBestPlanning = $planningInput->getBestPlanning(null);
+        if ($oldBestPlanning !== $newBestPlanning) {
             $this->sendMailWithSuccessfullTimedoutPlanning($planningInput);
+
             if ($planningType === PlanningType::BatchGames) {
                 $planningSeeker = new PlanningSeeker(
                     $this->getLogger(),
@@ -172,7 +174,7 @@ class RetryTimeout extends PlanningCommand
                 return 0;
             }
         }
-        $this->processInput($planningInput, $planningSeeker, $planningType);
+        $this->processInput($planningInput, $planningSeeker, $planningType, $timeoutState);
         $this->setStatusToFinishedProcessing();
         return 0;
     }
@@ -215,9 +217,13 @@ class RetryTimeout extends PlanningCommand
 
     protected function sendMailWithSuccessfullTimedoutPlanning(PlanningInput $planningInput): void
     {
-        $msg = 'new planning(timedout) found for inputid: ' . (string)$planningInput->getId();
-        $msg .= '(' . $planningInput->getUniqueString() . ')';
-        $this->getLogger()->info($msg);
+        // CMD OUTPUT
+        $planningOutput = new PlanningOutput($this->getLogger());
+        $msg = 'new planning(timedout) found for ';
+        $bestPlanning = $planningInput->getBestPlanning(null);
+        $planningOutput->outputWithGames($bestPlanning, true, $msg);
+        $planningOutput->outputWithTotals($bestPlanning, false);
+
         $stream = fopen('php://memory', 'r+');
         if ($stream === false || $this->mailer === null) {
             return;
@@ -229,8 +235,6 @@ class RetryTimeout extends PlanningCommand
 
         $planningOutput = new PlanningOutput($loggerOutput);
         $planningOutput->outputInput($planningInput, null, 'is successful');
-
-        $bestPlanning = $planningInput->getBestPlanning(null);
 
         $planningOutput = new PlanningOutput($loggerOutput);
         $planningOutput->outputWithGames($bestPlanning, true);
