@@ -5667,16 +5667,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.68",
+            "version": "v1.0.69",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "656fc4587d6b3cb4c274cc91031c6f55afd942b9"
+                "reference": "e06a47b174e6892e5548016db884dbad27424e54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/656fc4587d6b3cb4c274cc91031c6f55afd942b9",
-                "reference": "656fc4587d6b3cb4c274cc91031c6f55afd942b9",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/e06a47b174e6892e5548016db884dbad27424e54",
+                "reference": "e06a47b174e6892e5548016db884dbad27424e54",
                 "shasum": ""
             },
             "require": {
@@ -5737,9 +5737,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.68"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.69"
             },
-            "time": "2022-03-07T13:55:00+00:00"
+            "time": "2022-03-09T07:56:34+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -5809,16 +5809,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.66",
+            "version": "v1.0.67",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "686dfaf599ac8517b487ace8420b9d6c706f29a8"
+                "reference": "57f4464360bf12870f1f50a5b25844978c89b3dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/686dfaf599ac8517b487ace8420b9d6c706f29a8",
-                "reference": "686dfaf599ac8517b487ace8420b9d6c706f29a8",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/57f4464360bf12870f1f50a5b25844978c89b3dd",
+                "reference": "57f4464360bf12870f1f50a5b25844978c89b3dd",
                 "shasum": ""
             },
             "require": {
@@ -5874,9 +5874,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.66"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.67"
             },
-            "time": "2022-03-07T13:53:03+00:00"
+            "time": "2022-03-09T07:52:29+00:00"
         },
         {
             "name": "thepercival/zend-pdf",
@@ -8986,16 +8986,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.5.17",
+            "version": "9.5.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "5c5abcfaa2cbd44b2203995d7a339ef910fe0c8f"
+                "reference": "1b5856028273bfd855e60a887278857d872ec67a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/5c5abcfaa2cbd44b2203995d7a339ef910fe0c8f",
-                "reference": "5c5abcfaa2cbd44b2203995d7a339ef910fe0c8f",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/1b5856028273bfd855e60a887278857d872ec67a",
+                "reference": "1b5856028273bfd855e60a887278857d872ec67a",
                 "shasum": ""
             },
             "require": {
@@ -9073,7 +9073,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.17"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.5.18"
             },
             "funding": [
                 {
@@ -9085,7 +9085,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-03-05T16:54:31+00:00"
+            "time": "2022-03-08T06:52:28+00:00"
         },
         {
             "name": "psalm/plugin-phpunit",
