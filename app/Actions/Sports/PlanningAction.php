@@ -71,12 +71,13 @@ final class PlanningAction extends Action
             $roundNumber = $this->getRoundNumberFromRequest($request, $args);
             $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
             $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
+
             $input = $this->inputRepos->getFromInput($defaultInput);
             if ($input === null) {
                 throw new \Exception(
-                                                                          'de planning "' . $defaultInput->getUniqueString(
+                    'de planning "' . $defaultInput->getUniqueString(
                                                                           ) . '" kan niet gevonden worden, doe een aanpassing',
-                                                                          E_ERROR
+                    E_ERROR
                 );
             }
             $seekingPerc = $input->getSeekingPercentage();

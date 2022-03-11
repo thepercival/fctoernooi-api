@@ -10,6 +10,7 @@ use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
+use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 use SportsPlanning\Input;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use SportsPlanning\Planning\Filter as PlanningFilter;
@@ -50,7 +51,7 @@ class Planning extends Command
             return $placeRange;
         }
         return new SportRange(
-            PlaceRanges::MinNrOfPlacesPerPoule,
+            MinNrOfPlacesCalculator::MinNrOfPlacesPerPoule,
             TournamentStructureRanges::MaxNrOfPlacesPerRoundSmall
         );
     }

@@ -83,7 +83,6 @@ class Validator extends Command
         $this->addOption('selfReferee', null, InputOption::VALUE_OPTIONAL, $selfRefereeOptions);
         $this->addOption('exitAtFirstInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('maxNrOfInputs', null, InputOption::VALUE_OPTIONAL, '100');
-        $this->addOption('resetInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('validateInvalid', null, InputOption::VALUE_NONE);
         $this->addOption('sendEmailWhenInvalid', null, InputOption::VALUE_NONE);
 
@@ -94,9 +93,6 @@ class Validator extends Command
     {
         $this->initLogger($input, 'command-planning-validate');
 
-        $resetPlanningInputWhenInvalid = $input->getOption('resetInvalid');
-        $resetPlanningInputWhenInvalid = is_bool($resetPlanningInputWhenInvalid) ? $resetPlanningInputWhenInvalid : false;
-
         $sendEmailWhenInvalid = $input->getOption('sendEmailWhenInvalid');
         $sendEmailWhenInvalid = is_bool($sendEmailWhenInvalid) ? $sendEmailWhenInvalid : false;
 
@@ -105,15 +101,13 @@ class Validator extends Command
 
         $this->exitAtFirstInvalid = filter_var($input->getOption("exitAtFirstInvalid"), FILTER_VALIDATE_BOOLEAN);
 
-        $queueService = new QueueService($this->config->getArray('queue'));
-
         $this->getLogger()->info('valideren gestart..');
 
         $planningInputs = $this->getPlanningInputsToValidate($input);
         foreach ($planningInputs as $planningInput) {
             (new PlanningOutput($this->getLogger()))->outputInput($planningInput, 'validating.. ');
             try {
-                $this->validatePlanningInput($planningInput, $resetPlanningInputWhenInvalid, $showNrOfPlaces);
+                $this->validatePlanningInput($planningInput, $showNrOfPlaces);
             } catch (Exception $exception) {
                 $errorMsg = 'inputid: ' . (string)$planningInput->getId() . ' (' . $planningInput->getUniqueString() . ') => ' . $exception->getMessage();
                 if ($this->logger !== null) {
@@ -121,10 +115,6 @@ class Validator extends Command
                 }
                 if ($this->exitAtFirstInvalid) {
                     return 0;
-                }
-                if ($resetPlanningInputWhenInvalid) {
-                    // $this->planningInputRepos->reset($planningInput);
-                    $queueService->sendCreatePlannings($planningInput);
                 }
                 $invalidPlanningInputsMessages[] = $errorMsg;
             }
@@ -170,13 +160,11 @@ class Validator extends Command
 
     /**
      * @param PlanningInput $planningInputParam
-     * @param bool $resetPlanningInputWhenInvalid
      * @param array<int, bool>|null $showNrOfPlaces
      * @throws Exception
      */
     protected function validatePlanningInput(
         PlanningInput $planningInputParam,
-        bool $resetPlanningInputWhenInvalid,
         array &$showNrOfPlaces = null
     ): void {
         $planningInput = $this->planningInputRepos->getFromInput($planningInputParam);

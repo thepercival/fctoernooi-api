@@ -11,6 +11,7 @@ use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
 use SportsHelpers\PlaceRanges;
 use SportsHelpers\SportRange;
+use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -61,7 +62,7 @@ class CreateDefaults extends PlanningCommand
     {
         $planningInputIterator = new PlanningInputIterator(
             $this->getPlacesRange($input),
-            new SportRange(PlaceRanges::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall),
+            new SportRange(MinNrOfPlacesCalculator::MinNrOfPlacesPerPoule, TournamentStructureRanges::MaxNrOfPlacesPerPouleSmall),
             new SportRange(1, 64),
             new SportRange(0, 10),// referees
             new SportRange(1, 10),// fields
