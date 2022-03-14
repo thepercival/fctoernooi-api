@@ -11,6 +11,7 @@ use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\ExportConfig;
@@ -212,7 +213,9 @@ final class TournamentAction extends Action
             $competition = $tournament->getCompetition();
             $competitionService->changeStartDateTime($competition, $dateTime);
             $competition->setAgainstRuleSet($ruleSet);
-            $tournament->setBreak($tournamentSer->getBreak());
+            foreach ($tournamentSer->createRecessPeriods() as $recessPeriod) {
+                new Recess($tournament, $recessPeriod);
+            }
             $tournament->setPublic($tournamentSer->getPublic());
             $tournament->getCompetition()->getLeague()->setName($name);
             $this->tournamentRepos->customPersist($tournament, true);
@@ -296,7 +299,7 @@ final class TournamentAction extends Action
             $this->planningCreator->addFrom(
                 new QueueService($this->config->getArray('queue')),
                 $newStructure->getFirstRoundNumber(),
-                $newTournament->getBreak(),
+                $newTournament->createRecessPeriods(),
                 QueueService::MAX_PRIORITY
             );
 

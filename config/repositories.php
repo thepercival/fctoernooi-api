@@ -9,6 +9,8 @@ use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Sponsor;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
+use FCToernooi\Recess;
+use FCToernooi\Recess\Repository as RecessRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
@@ -96,6 +98,12 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(Sponsor::class);
         return new SponsorRepository($entityManager, $metaData);
+    },
+    RecessRepository::class => function (ContainerInterface $container): RecessRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(Recess::class);
+        return new RecessRepository($entityManager, $metaData);
     },
     CompetitorRepository::class => function (ContainerInterface $container): CompetitorRepository {
         /** @var EntityManagerInterface $entityManager */

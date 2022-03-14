@@ -13,9 +13,12 @@ use App\Export\Pdf\Page\Planning as PagePlanning;
 use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
+use DateTimeImmutable;
 use FCToernooi\LockerRoom;
+use FCToernooi\Recess;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\ExportConfig;
+use League\Period\Period;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game;
 use Sports\Game\Against as AgainstGame;
@@ -151,20 +154,20 @@ class Document extends Zend_Pdf
 //            $y = $page->drawGamesHeader($roundNumber, $y);
 //        }
         $games = $roundNumber->getGames(GameOrder::ByDate);
-        $drewbreak = false;
+        $recessHelper = new RecessHelper($roundNumber);
+        $recesses = $recessHelper->getRecesses($this->tournament);
         foreach ($games as $game) {
             $gameHeight = $page->getRowHeight();
-            $drawBreak = $page->drawBreakBeforeGame($game, $drewbreak);
-            $gameHeight += $drawBreak ? $gameHeight : 0;
+            $recessPeriodToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
+            $gameHeight += $recessPeriodToDraw !== null ? $gameHeight : 0;
             if ($y - $gameHeight < $page->getPageMargin()) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
                 $y = $page->drawHeader($title);
                 $y = $page->drawGamesHeader($roundNumber, $y);
             }
-            if ($drawBreak && !$drewbreak) {
-                $y = $page->drawBreak($roundNumber, $game, $y);
-                $drewbreak = true;
+            if ($recessPeriodToDraw !== null) {
+                $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
             }
             $y = $page->drawGame($game, $y, true);
         }
@@ -220,11 +223,12 @@ class Document extends Zend_Pdf
             $y = $page->drawGamesHeader($roundNumber, $y);
         }
         $games = $roundNumber->getGames(GameOrder::ByDate);
-        $drewbreak = false;
+        $recessHelper = new RecessHelper($roundNumber);
+        $recesses = $recessHelper->getRecesses($this->tournament);
         foreach ($games as $game) {
             $gameHeight = $page->getRowHeight();
-            $drawBreak = $page->drawBreakBeforeGame($game, $drewbreak);
-            $gameHeight += $drawBreak ? $gameHeight : 0;
+            $recessPeriodToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
+            $gameHeight += $recessPeriodToDraw !== null ? $gameHeight : 0;
             if ($y - $gameHeight < $page->getPageMargin()) {
                 // $field = $page->getFieldFilter();
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle() ?? '');
@@ -232,8 +236,8 @@ class Document extends Zend_Pdf
                 $page->setGameFilter($page->getGameFilter());
                 $y = $page->drawGamesHeader($roundNumber, $y);
             }
-            if ($drawBreak && !$drewbreak) {
-                $y = $page->drawBreak($roundNumber, $game, $y);
+            if ($recessPeriodToDraw !== null) {
+                $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
                 $drewbreak = true;
             }
             $y = $page->drawGame($game, $y);
@@ -467,7 +471,6 @@ class Document extends Zend_Pdf
     protected function createPagePlanning(RoundNumber $roundNumber, string $title): PagePlanning
     {
         $page = new PagePlanning($this, $this->getPlanningPageDimension($roundNumber));
-        $page->setTournamentBreak($this->tournament->getBreak());
         $page->setFont($this->getFont(), $this->getFontHeight());
         $page->setTitle($title);
         $this->pages[] = $page;

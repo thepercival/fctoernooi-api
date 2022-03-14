@@ -1,0 +1,11 @@
+FCToernooi\Recess:
+  exclusion_policy: ALL
+  exclude: false
+
+  properties:
+    startDateTime:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+      serialized_name: start
+    endDateTime:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+      serialized_name: end

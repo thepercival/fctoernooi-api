@@ -174,7 +174,7 @@ class Validator extends Command
                     $roundNumber,
                     $nrOfReferees,
                     true,
-                    $tournament->getBreak()
+                    $tournament->createRecessPeriods()
                 );
             }
             $nextRoundNumber = $roundNumber->getNext();

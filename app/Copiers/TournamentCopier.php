@@ -9,10 +9,12 @@ use Exception;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
+use FCToernooi\Recess;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament as TournamentBase;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
+use League\Period\Period;
 use Sports\Association;
 use Sports\Competition;
 use Sports\Competition\Field;
@@ -115,14 +117,18 @@ class TournamentCopier
     ): Tournament {
         $newTournament = new TournamentBase($newCompetition);
         $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
-        $breakStart = $fromTournament->getBreakStartDateTime();
-        $breakEnd = $fromTournament->getBreakEndDateTime();
-        if ($breakStart !== null && $breakEnd !== null) {
-            $diffStart = $fromTournament->getCompetition()->getStartDateTime()->diff($breakStart);
-            $newTournament->setBreakStartDateTime($newStartDateTime->add($diffStart));
-            $diffEnd = $fromTournament->getCompetition()->getStartDateTime()->diff($breakEnd);
-            $newTournament->setBreakEndDateTime($newStartDateTime->add($diffEnd));
+
+        foreach( $fromTournament->createRecessPeriods() as $recessPeriod) {
+            $start = $recessPeriod->getStartDate();
+            $diffStart = $fromTournament->getCompetition()->getStartDateTime()->diff($start);
+            $end = $recessPeriod->getEndDate();
+            $diffEnd = $fromTournament->getCompetition()->getStartDateTime()->diff($end);
+            $period = new Period(
+                $newStartDateTime->add($diffStart), $newStartDateTime->add($diffEnd)
+            );
+            new Recess($newTournament, $period);
         }
+
         $newTournament->setPublic($fromTournament->getPublic());
         return $newTournament;
     }

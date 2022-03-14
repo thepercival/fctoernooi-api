@@ -5,10 +5,6 @@ FCToernooi\Tournament:
   properties:
     competition:
       type: Sports\Competition
-    breakStartDateTime:
-      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
-    breakEndDateTime:
-      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
     public:
       type: boolean
     users:
@@ -21,3 +17,5 @@ FCToernooi\Tournament:
       type: ArrayCollection<FCToernooi\Competitor>
     lockerRooms:
       type: ArrayCollection<FCToernooi\LockerRoom>
+    recesses:
+      type: ArrayCollection<FCToernooi\Recess>

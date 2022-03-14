@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\RecessAction;
 use App\Actions\Sports\ScoreConfigAction;
 use App\Actions\TournamentAction;
 use App\Actions\ReportAction;
@@ -325,6 +326,18 @@ return function (App $app): void {
                                 '/{lockerRoomId}/synccompetitors',
                                 LockerRoomAction::class . ':syncCompetitors'
                             );
+                        }
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'recesses',
+                        function (Group $group): void {
+                            $group->options('', RecessAction::class . ':options');
+                            $group->post('', RecessAction::class . ':add');
+                            $group->options('/{recessId}', RecessAction::class . ':options');
+                            $group->delete('/{recessId}', RecessAction::class . ':remove');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class

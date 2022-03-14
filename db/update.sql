@@ -1,7 +1,8 @@
 -- PRE PRE PRE doctrine-update =============================================================
-
+ALTER TABLE tournaments CHANGE competitionid competitionId INT NOT NULL;
 
 -- POST POST POST doctrine-update ===========================================================
+insert into recesses(tournamentId, startDateTime, endDateTime) (select id, breakStartDateTime, breakEndDateTime from tournaments where breakStartDateTime is not null and breakEndDateTime is not null);
 
 --  php bin/console.php app:create-planning 61533 --loglevel=200
 

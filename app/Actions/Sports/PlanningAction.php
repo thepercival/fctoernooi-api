@@ -114,7 +114,7 @@ final class PlanningAction extends Action
             );
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
             $queueService = new QueueService($this->config->getArray('queue'));
-            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->getBreak(), QueueService::MAX_PRIORITY);
+            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->createRecessPeriods(), QueueService::MAX_PRIORITY);
 
             $this->updatePlanningEditMode($startRoundNumber);
 
@@ -138,7 +138,7 @@ final class PlanningAction extends Action
 
         try {
             $roundNumber = $this->getRoundNumberFromRequest($request, $args);
-            $scheduler = new RoundNumber\PlanningScheduler($tournament->getBreak());
+            $scheduler = new RoundNumber\PlanningScheduler($tournament->createRecessPeriods());
             $dates = $scheduler->rescheduleGames($roundNumber);
 
             $this->roundNumberRepos->savePlanning($roundNumber);

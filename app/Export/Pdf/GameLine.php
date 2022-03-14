@@ -135,7 +135,7 @@ abstract class GameLine
 
     abstract protected function drawPlacesAndScoreHeader(float $x, float $y): float;
 
-    public function drawBreak(RoundNumber $roundNumber, Period $tournamentBreak, float $y): float
+    public function drawRecess(RoundNumber $roundNumber, Period $recess, float $y): float
     {
         $height = $this->page->getRowHeight();
         $pouleWidth = $this->getColumnWidth(Column::Poule);
@@ -145,7 +145,7 @@ abstract class GameLine
         $x = $this->page->getPageMargin() + $pouleWidth;
         $this->page->setFillColor(new Zend_Pdf_Color_GrayScale(1));
         if ($this->shoDateTime !== DateTimeColumn::None) {
-            $text = $this->getDateTime($tournamentBreak->getStartDate());
+            $text = $this->getDateTime($recess->getStartDate());
             $x = $this->drawCell($text, $x, $y, $startWidth, $height, ['top' => 'black']);
         }
         $x += $fieldWidth;

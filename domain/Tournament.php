@@ -17,8 +17,8 @@ use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 class Tournament extends Identifiable
 {
     private DateTimeImmutable $createdDateTime;
-    private DateTimeImmutable|null $breakStartDateTime = null;
-    private DateTimeImmutable|null $breakEndDateTime = null;
+    private DateTimeImmutable|null $breakStartDateTimeDep = null;
+    private DateTimeImmutable|null $breakEndDateTimeDep = null;
     private bool $public = false;
     /**
      * @var Collection<int|string, TournamentUser>
@@ -36,6 +36,10 @@ class Tournament extends Identifiable
      * @var Collection<int|string, LockerRoom>
      */
     private Collection $lockerRooms;
+    /**
+     * @var Collection<int|string, Recess>
+     */
+    private Collection $recesses;
     protected int $exported = 0;
 
     public function __construct(private Competition $competition)
@@ -45,44 +49,12 @@ class Tournament extends Identifiable
         $this->sponsors = new ArrayCollection();
         $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
+        $this->recesses = new ArrayCollection();
     }
 
     public function getCompetition(): Competition
     {
         return $this->competition;
-    }
-
-    public function getBreakStartDateTime(): ?DateTimeImmutable
-    {
-        return $this->breakStartDateTime;
-    }
-
-    public function setBreakStartDateTime(DateTimeImmutable $datetime = null): void
-    {
-        $this->breakStartDateTime = $datetime;
-    }
-
-    public function getBreakEndDateTime(): ?DateTimeImmutable
-    {
-        return $this->breakEndDateTime;
-    }
-
-    public function setBreakEndDateTime(DateTimeImmutable $datetime = null): void
-    {
-        $this->breakEndDateTime = $datetime;
-    }
-
-    public function getBreak(): ?Period
-    {
-        $start = $this->getBreakStartDateTime();
-        $end = $this->getBreakEndDateTime();
-        return ($start !== null && $end !== null) ? new Period($start, $end) : null;
-    }
-
-    public function setBreak(Period $period = null): void
-    {
-        $this->setBreakStartDateTime($period !== null ? $period->getStartDate() : null);
-        $this->setBreakEndDateTime($period !== null ? $period->getEndDate() : null);
     }
 
     public function getPublic(): bool
@@ -136,6 +108,24 @@ class Tournament extends Identifiable
     public function getLockerRooms(): Collection
     {
         return $this->lockerRooms;
+    }
+
+    /**
+     * @return Collection<int|string, Recess>
+     */
+    public function getRecesses(): Collection
+    {
+        return $this->recesses;
+    }
+
+    /**
+     * @return list<Period>
+     */
+    public function createRecessPeriods(): array
+    {
+        return array_values($this->getRecesses()->map(function (Recess $recess): Period {
+            return $recess->getPeriod();
+        })->toArray());
     }
 
     public function getExported(): int

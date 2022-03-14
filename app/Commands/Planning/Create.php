@@ -212,7 +212,7 @@ class Create extends PlanningCommand
             $roundNumberPlanningCreator->addFrom(
                 $queueService,
                 $roundNumber,
-                $tournament->getBreak(),
+                $tournament->createRecessPeriods(),
                 $eventPriority - 1
             );
             $conn->commit();

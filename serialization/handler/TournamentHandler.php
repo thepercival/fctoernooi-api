@@ -43,10 +43,6 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
         $competition = $this->getProperty($visitor, $fieldValue, 'competition', Competition::class);
         $tournament = new Tournament($competition);
         $tournament->setPublic($fieldValue['public']);
-        if (isset($fieldValue['breakStartDateTime']) && isset($fieldValue['breakStartDateTime'])) {
-            $tournament->setBreakStartDateTime(new DateTimeImmutable($fieldValue['breakStartDateTime']));
-            $tournament->setBreakEndDateTime(new DateTimeImmutable($fieldValue['breakEndDateTime']));
-        }
         return $tournament;
     }
 }

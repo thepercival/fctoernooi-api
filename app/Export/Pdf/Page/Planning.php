@@ -22,7 +22,6 @@ use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 
 class Planning extends ToernooiPdfPage
 {
-    protected Period|null $tournamentBreak = null;
     protected AgainstGameLine|null $againstGameLine = null;
     protected TogetherGameLine|null $togetherGameLine = null;
     /**
@@ -37,11 +36,6 @@ class Planning extends ToernooiPdfPage
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
-    }
-
-    public function setTournamentBreak(Period|null $break = null): void
-    {
-        $this->tournamentBreak = $break;
     }
 
     public function getTitle(): ?string
@@ -156,17 +150,6 @@ class Planning extends ToernooiPdfPage
         return $gameLine->drawHeader($roundNumber->needsRanking(), $y);
     }
 
-    public function drawBreakBeforeGame(Game $game, bool $drewbreak): bool
-    {
-        if ($this->tournamentBreak === null) {
-            return false;
-        }
-        if ($drewbreak === true) {
-            return false;
-        }
-        return $game->getStartDateTime()->getTimestamp() === $this->tournamentBreak->getEndDate()->getTimestamp();
-    }
-
     public function drawGame(AgainstGame|TogetherGame $game, float $y, bool $striped = false): float
     {
         $gameFilter = $this->getGameFilter();
@@ -176,12 +159,14 @@ class Planning extends ToernooiPdfPage
         return $this->getGameLine($game)->drawGame($game, $y, $striped);
     }
 
-    public function drawBreak(RoundNumber $roundNumber, AgainstGame|TogetherGame $game, float $y): float
+    public function drawRecess(
+        RoundNumber $roundNumber,
+        AgainstGame|TogetherGame $game,
+        Period $recessPeriod,
+        float $y
+    ): float
     {
-        if ($this->tournamentBreak === null) {
-            return $y;
-        }
-        return $this->getGameLine($game)->drawBreak($roundNumber, $this->tournamentBreak, $y);
+        return $this->getGameLine($game)->drawRecess($roundNumber, $recessPeriod, $y);
     }
 
     /**
