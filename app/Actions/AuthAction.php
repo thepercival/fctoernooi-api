@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Response\ErrorResponse;
+use DateTimeImmutable;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;
 use FCToernooi\Auth\Service as AuthService;
@@ -105,7 +106,7 @@ final class AuthAction extends Action
                 throw new Exception('het wachtwoord is niet opgegeven');
             }
 
-            $user = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
+            $user = $this->userRepos->findOneBy(['emailaddress' => $emailaddress]);
 
             if ($user === null || !password_verify($user->getSalt() . $authData->password, $user->getPassword())) {
                 throw new Exception('ongeldige emailadres en wachtwoord combinatie');
@@ -193,13 +194,16 @@ final class AuthAction extends Action
             /** @var User $user */
             $user = $request->getAttribute('user');
 
-            $code = random_int(100000, 999999);
-            $added = $this->memcached->add('validate-code-' . (string)$user->getId(), $code, 30 * 60);
-            if (!$added) {
+            $expireSeconds = 60 * 30;
+            $code = '' . random_int(100000, 999999);
+            if (!$this->memcached->set('validate-code-' . (string)$user->getId(), $code, $expireSeconds)) {
                 throw new \Exception('de validatie-aanvraag is niet gelukt', E_ERROR);
             }
+            $expireDateTime = (new DateTimeImmutable())->modify('+' . $expireSeconds . ' seconds');
 
-            return $this->respondWithJson($response, json_encode(['code' => $code]));
+            $this->authService->mailValidationCode($user, $code, $expireDateTime);
+
+            return $response->withStatus(200);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
@@ -218,7 +222,7 @@ final class AuthAction extends Action
             $user = $request->getAttribute('user');
 
             $code = $this->memcached->get('validate-code-' . (string)$user->getId());
-            if ($code === Memcached::RES_NOTFOUND) {
+            if ($code === false || $code === Memcached::RES_NOTFOUND) {
                 throw new \Exception('de validatie-code is niet meer geldig', E_ERROR);
             }
 
@@ -230,10 +234,9 @@ final class AuthAction extends Action
             $user->setValidateIn(0); // if earlier validated
             $this->userRepos->save($user, true);
 
-            $this->creditActionRepos->doAction($user, Name::ValidateReward, 5);
+            $this->creditActionRepos->doAction($user, Name::ValidateReward, 3);
 
-            $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
-            return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
+            return $response->withStatus(200);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }

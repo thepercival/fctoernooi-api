@@ -48,8 +48,6 @@ return function (App $app): void {
                 function (Group $group): void {
                     $group->options('/register', AuthAction::class . ':options');
                     $group->post('/register', AuthAction::class . ':register');
-                    $group->options('/validate', AuthAction::class . ':options');
-                    $group->post('/validate', AuthAction::class . ':validate');
                     $group->options('/login', AuthAction::class . ':options');
                     $group->post('/login', AuthAction::class . ':login');
                     $group->options('/passwordreset', AuthAction::class . ':options');
@@ -97,6 +95,10 @@ return function (App $app): void {
             $group->post('/extendtoken', AuthAction::class . ':extendToken');
             $group->options('/profile/{userId}', AuthAction::class . ':options');
             $group->put('/profile/{userId}', AuthAction::class . ':profile');
+            $group->options('/validate/{code}', AuthAction::class . ':options');
+            $group->post('/validate/{code}', AuthAction::class . ':validate');
+            $group->options('/validationrequest', AuthAction::class . ':options');
+            $group->post('/validationrequest', AuthAction::class . ':validatationRequest');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 

@@ -33,7 +33,7 @@ class Repository extends EntityRepository
         }
         $creditAction = new CreditAction($user, $action, $nrOfCredits, $atDateTime);
         $this->save($creditAction, true);
-        if (!$user->getValidated()) {
+        if (!$user->getValidated() && $action === CreditActionName::CreateTournament) {
             $user->setValidateIn($user->getValidateIn() + $nrOfCredits);
         }
         $user->setNrOfCredits($user->getNrOfCredits() + $nrOfCredits);

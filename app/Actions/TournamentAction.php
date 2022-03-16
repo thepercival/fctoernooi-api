@@ -171,10 +171,10 @@ final class TournamentAction extends Action
                 'json',
                 $deserializationContext
             );
-            if (!$user->getValidated() && $user->getValidateIn() === 0) {
+            if (!$user->getValidated() && $user->getValidateIn() < 1) {
                 throw new \Exception('je moet eerst je account validateren', E_ERROR);
             }
-            if ($user->getNrOfCredits() === 0) {
+            if ($user->getNrOfCredits() < 1) {
                 throw new \Exception('je hebt geen credits meer om toernooien aan te maken', E_ERROR);
             }
             // $tournamentSer->setUsers(new ArrayCollection());
@@ -279,6 +279,13 @@ final class TournamentAction extends Action
             $tournament = $request->getAttribute('tournament');
             /** @var User $user */
             $user = $request->getAttribute('user');
+
+            if (!$user->getValidated() && $user->getValidateIn() < 1) {
+                throw new \Exception('je moet eerst je account validateren', E_ERROR);
+            }
+            if ($user->getNrOfCredits() < 1) {
+                throw new \Exception('je hebt geen credits meer om toernooien aan te maken', E_ERROR);
+            }
 
             /** @var stdClass $copyData */
             $copyData = $this->getFormData($request);

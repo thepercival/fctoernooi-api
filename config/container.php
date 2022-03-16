@@ -71,7 +71,7 @@ return [
     },
     Memcached::class => function (ContainerInterface $container): Memcached {
         $memcached = new Memcached();
-        $memcached->addServer('memcache_host', 11211);
+        $memcached->addServer('127.0.0.1', 11211);
         return $memcached;
     },
     EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {

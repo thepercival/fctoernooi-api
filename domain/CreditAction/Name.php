@@ -4,7 +4,8 @@ namespace FCToernooi\CreditAction;
 
 enum Name: string
 {
-    case Buy = 'Buy';
-    case ValidateReward = 'ValidateReward';
+    case CreateAccountReward = 'CreateAccountReward';
     case CreateTournament = 'CreateTournament';
+    case ValidateReward = 'ValidateReward';
+    case Buy = 'Buy';
 }

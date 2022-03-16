@@ -6,9 +6,12 @@ namespace FCToernooi\Auth;
 
 use App\Mailer;
 use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
+use FCToernooi\CreditAction\Name;
+use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Role;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
@@ -25,6 +28,7 @@ class Service
 {
     public function __construct(
         protected UserRepository $userRepos,
+        protected CreditActionRepository $creditActionRepos,
         protected TournamentUserRepository $tournamentUserRepos,
         protected TournamentRepository $tournamentRepos,
         protected TournamentInvitationRepository $tournamentInvitationRepos,
@@ -51,13 +55,13 @@ class Service
             );
         }
         /** @var User|null $userTmp */
-        $userTmp = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
+        $userTmp = $this->userRepos->findOneBy(['emailaddress' => $emailaddress]);
         if ($userTmp !== null) {
             throw new Exception('het emailadres is al in gebruik', E_ERROR);
         }
         if ($name !== null) {
             /** @var User|null $userTmp */
-            $userTmp = $this->userRepos->findOneBy(array('name' => $name));
+            $userTmp = $this->userRepos->findOneBy(['name' => $name]);
             if ($userTmp !== null) {
                 throw new Exception('de gebruikersnaam is al in gebruik', E_ERROR);
             }
@@ -66,6 +70,9 @@ class Service
         $salt = bin2hex(random_bytes(15));
         $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
         $user = new User($emailaddress, $salt, $hashedPassword);
+        $this->userRepos->save($user, true);
+
+        $this->creditActionRepos->doAction($user, Name::CreateAccountReward, 3);
 
         $this->userRepos->save($user);
         $invitations = $this->tournamentInvitationRepos->findBy(['emailaddress' => $user->getEmailaddress()]);
@@ -110,9 +117,8 @@ EOT;
         if (strlen($bodyMiddle) > 0) {
             $bodyMiddle .= '</tbody></table><br/>';
         }
-        $bodyEnd = '<p>met vriendelijke groet,<br/><br/>Coen Dunnink<br/>06-14363514<br/><a href="' . $this->config->getString(
-            'www.wwwurl'
-        ) . '">FCToernooi</a></p>';
+        $url = $this->config->getString('www.wwwurl');
+        $bodyEnd = '<p>met vriendelijke groet,<br/><br/>Coen Dunnink<br/>06-14363514<br/><a href="' . $url . '">FCToernooi</a></p>';
         $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
     }
 
@@ -183,7 +189,7 @@ EOT;
     public function changePassword(string $emailAddress, string $password, string $code): User
     {
         /** @var User|null $user */
-        $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
+        $user = $this->userRepos->findOneBy(['emailaddress' => $emailAddress]);
         if ($user === null) {
             throw new Exception('het wachtwoord kan niet gewijzigd worden');
         }
@@ -202,14 +208,21 @@ EOT;
         return $user;
     }
 
-    protected function mailValidateCode(User $user, int $validateCode): void
+    public function mailValidationCode(User $user, string $code, DateTimeImmutable $expireDateTime): void
     {
         $subject = 'emailadres valideren';
-        $validateCode = 1;
+        $url = $this->config->getString('www.wwwurl') . 'user/validate/' . $code;
+
+        setlocale(LC_ALL, 'nl_NL.UTF-8'); //
+        $localDateTime = $expireDateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+        $date = strtolower(
+            strftime('%a %d %b %Y', $localDateTime->getTimestamp()) . ' ' .
+            $localDateTime->format('H:i')
+        );
         $body = <<<EOT
 <p>Hallo,</p>
 <p>            
-Tot x kun je met deze code je emailadres valideren : <a style="font-size: 200%" href="">$validateCode</a> 
+Tot $date uur kun je met deze code je emailadres valideren : <a style="font-size: 125%" href="$url">$code</a> 
 </p>
 <p>
 met vriendelijke groet,

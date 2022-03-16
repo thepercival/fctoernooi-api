@@ -14,6 +14,9 @@ update users
 set validateIn  = 3,
     nrOfCredits = 3;
 
+insert into creditActions(userId, action, nrOfCredits, atDateTime) (select id, 'CreateAccountReward', 3, CURRENT_TIMESTAMP from users);
+
+
 --  php bin/console.php app:create-planning 61533 --loglevel=200
 
 -- set input MinNrOfBatches
