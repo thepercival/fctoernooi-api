@@ -8,13 +8,15 @@ use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;
 use FCToernooi\Auth\Service as AuthService;
+use FCToernooi\CreditAction\Name;
+use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\SerializerInterface;
+use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Slim\Middleware\JwtAuthentication;
 use stdClass;
 
 final class AuthAction extends Action
@@ -22,8 +24,10 @@ final class AuthAction extends Action
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
+        private Memcached $memcached,
         private AuthService $authService,
-        private UserRepository $userRepository
+        private UserRepository $userRepos,
+        private CreditActionRepository $creditActionRepos
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -101,9 +105,7 @@ final class AuthAction extends Action
                 throw new Exception('het wachtwoord is niet opgegeven');
             }
 
-            $user = $this->userRepository->findOneBy(
-                array('emailaddress' => $emailaddress)
-            );
+            $user = $this->userRepos->findOneBy(array('emailaddress' => $emailaddress));
 
             if ($user === null || !password_verify($user->getSalt() . $authData->password, $user->getPassword())) {
                 throw new Exception('ongeldige emailadres en wachtwoord combinatie');
@@ -171,6 +173,64 @@ final class AuthAction extends Action
             $code = (string)$paswordChangeData->code;
 
             $user = $this->authService->changePassword($emailAddress, $password, $code);
+
+            $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
+            return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function validatationRequest(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $code = random_int(100000, 999999);
+            $added = $this->memcached->add('validate-code-' . (string)$user->getId(), $code, 30 * 60);
+            if (!$added) {
+                throw new \Exception('de validatie-aanvraag is niet gelukt', E_ERROR);
+            }
+
+            return $this->respondWithJson($response, json_encode(['code' => $code]));
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function validate(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $code = $this->memcached->get('validate-code-' . (string)$user->getId());
+            if ($code === Memcached::RES_NOTFOUND) {
+                throw new \Exception('de validatie-code is niet meer geldig', E_ERROR);
+            }
+
+            if ($code !== $args['code']) {
+                throw new \Exception('de validatie-code komt niet overeen', E_ERROR);
+            }
+
+            $user->setValidated(true);
+            $user->setValidateIn(0); // if earlier validated
+            $this->userRepos->save($user, true);
+
+            $this->creditActionRepos->doAction($user, Name::ValidateReward, 5);
 
             $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));

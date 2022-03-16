@@ -11,6 +11,8 @@ use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use FCToernooi\CreditAction\Name as CreditActionName;
+use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
@@ -41,6 +43,7 @@ final class TournamentAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
+        private CreditActionRepository $creditActionRepos,
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
@@ -168,7 +171,12 @@ final class TournamentAction extends Action
                 'json',
                 $deserializationContext
             );
-
+            if (!$user->getValidated() && $user->getValidateIn() === 0) {
+                throw new \Exception('je moet eerst je account validateren', E_ERROR);
+            }
+            if ($user->getNrOfCredits() === 0) {
+                throw new \Exception('je hebt geen credits meer om toernooien aan te maken', E_ERROR);
+            }
             // $tournamentSer->setUsers(new ArrayCollection());
             $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
             // var_dump($tournamentSer->getCompetition()); die();
@@ -181,6 +189,14 @@ final class TournamentAction extends Action
                 throw new \Exception('er zijn geen gebruikers gevonden voor het nieuwe toernooi', E_ERROR);
             }
             $this->tournamentRepos->customPersist($tournament, true);
+
+            $this->creditActionRepos->doAction(
+                $user,
+                CreditActionName::CreateTournament,
+                -1,
+                $tournament->getCreatedDateTime()
+            );
+
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
@@ -292,7 +308,11 @@ final class TournamentAction extends Action
             $competitionValidator->checkValidity($newTournament->getCompetition());
 
             $structureValidator = new StructureValidator();
-            $structureValidator->checkValidity($newTournament->getCompetition(), $newStructure, $newTournament->getPlaceRanges());
+            $structureValidator->checkValidity(
+                $newTournament->getCompetition(),
+                $newStructure,
+                $newTournament->getPlaceRanges()
+            );
 
             $this->structureRepos->add($newStructure);
 
@@ -301,6 +321,13 @@ final class TournamentAction extends Action
                 $newStructure->getFirstRoundNumber(),
                 $newTournament->createRecessPeriods(),
                 QueueService::MAX_PRIORITY
+            );
+
+            $this->creditActionRepos->doAction(
+                $user,
+                CreditActionName::CreateTournament,
+                -1,
+                $tournament->getCreatedDateTime()
             );
 
             $conn->commit();

@@ -4,4 +4,13 @@ FCToernooi\User:
   properties:
     emailaddress:
       type: string
-      groups: [roleadmin]
+      groups: [ roleadmin ]
+    validated:
+      type: bool
+      groups: [ self ]
+    nrOfCredits:
+      type: integer
+      groups: [ self ]
+    validateIn:
+      type: integer
+      groups: [ self ]

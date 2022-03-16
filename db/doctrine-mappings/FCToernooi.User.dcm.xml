@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
   <entity name="FCToernooi\User" table="users" repository-class="FCToernooi\User\Repository">
-    <field name="emailaddress" column="emailaddress" type="string" length="100" nullable="false" unique="false"/>
-    <field name="salt" column="salt" type="string" length="30" nullable="false" unique="false"/>
-    <field name="password" column="password" type="string" length="256" nullable="false" unique="false"/>
-    <field name="name" column="name" type="string" length="15" nullable="true" unique="true"/>
-    <field name="forgetpassword" column="forgetpassword" type="string" length="17" nullable="true" unique="false"/>
-    <field name="validated" column="validated" type="boolean" nullable="false" unique="false"/>
+      <field name="emailaddress" column="emailaddress" type="string" length="100" nullable="false" unique="false"/>
+      <field name="salt" column="salt" type="string" length="30" nullable="false" unique="false"/>
+      <field name="password" column="password" type="string" length="256" nullable="false" unique="false"/>
+      <field name="name" column="name" type="string" length="15" nullable="true" unique="true"/>
+      <field name="forgetpassword" column="forgetpassword" type="string" length="17" nullable="true" unique="false"/>
+      <field name="validated" column="validated" type="boolean" nullable="false" unique="false"/>
+      <field name="validateIn" column="validateIn" type="smallint" nullable="false" unique="false"/>
+      <field name="nrOfCredits" column="nrOfCredits" type="smallint" nullable="false" unique="false"/>
+      <one-to-many field="creditActions" target-entity="FCToernooi\CreditAction" mapped-by="user">
+          <cascade>
+              <cascade-persist/>
+              <cascade-remove/>
+          </cascade>
+      </one-to-many>
   </entity>
 </doctrine-mapping>

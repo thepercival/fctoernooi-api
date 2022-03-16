@@ -5,12 +5,14 @@ declare(strict_types=1);
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Competitor;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\CreditAction;
+use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use FCToernooi\Sponsor;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Recess;
 use FCToernooi\Recess\Repository as RecessRepository;
+use FCToernooi\Sponsor;
+use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
@@ -92,6 +94,12 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(User::class);
         return new UserRepository($entityManager, $metaData);
+    },
+    CreditActionRepository::class => function (ContainerInterface $container): CreditActionRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(CreditAction::class);
+        return new CreditActionRepository($entityManager, $metaData);
     },
     SponsorRepository::class => function (ContainerInterface $container): SponsorRepository {
         /** @var EntityManagerInterface $entityManager */

@@ -7,15 +7,14 @@ namespace App\Actions;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
+use FCToernooi\User;
+use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use FCToernooi\User;
-use Psr\Log\LoggerInterface;
-use FCToernooi\User\Repository as UserRepository;
-use Slim\Middleware\JwtAuthentication;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 
 final class UserAction extends Action
 {
@@ -36,7 +35,7 @@ final class UserAction extends Action
 
     protected function getSerializationContext(): SerializationContext
     {
-        $serGroups = ['Default', 'roleadmin'];
+        $serGroups = ['Default', 'roleadmin', 'self'];
         return SerializationContext::create()->setGroups($serGroups);
     }
 

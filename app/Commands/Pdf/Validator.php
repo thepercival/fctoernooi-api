@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Commands\Pdf;
 
 use App\Command;
+use App\Commands\Validator as ValidatorCommand;
 use App\Export\Pdf\Document as PdfDocument;
+use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\ExportConfig;
@@ -28,9 +30,13 @@ class Validator extends Command
     protected StructureRepository $structureRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
+    protected int $borderTimestamp;
 
     public function __construct(ContainerInterface $container)
     {
+        $dateString = ValidatorCommand::TOURNAMENT_DEPRECATED_CREATED_DATETIME;
+        $this->borderTimestamp = (new DateTimeImmutable($dateString))->getTimestamp();
+
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
@@ -64,6 +70,8 @@ class Validator extends Command
 
         $this->addArgument('tournamentId', InputArgument::OPTIONAL);
         $this->addOption('subjects', null, InputOption::VALUE_OPTIONAL, 'show certain subjects');
+        $this->addOption('amount', null, InputOption::VALUE_OPTIONAL, '10');
+        $this->addOption('startId', null, InputOption::VALUE_OPTIONAL, '1');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -76,12 +84,18 @@ class Validator extends Command
             if (is_string($tournamentId) && (int)$tournamentId > 0) {
                 $filter = ['id' => $tournamentId];
             }
+            $amount = $this->getAmountFromInput($input);
+            $startId = $this->getStartIdFromInput($input);
             $tournaments = $this->tournamentRepos->findBy($filter);
             $subjects = $this->getSubjects($input);
             /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
-                if ($tournament->getId() < 3000) {
+                if ($this->tournamentTooOld($tournament) || $tournament->getId() < $startId) {
                     continue;
+                }
+                if ($amount-- === 0) {
+                    $this->getLogger()->info('max amount reached');
+                    break;
                 }
                 foreach ($subjects as $subject) {
                     $this->getLogger()->info('creating for pdf ' . (string)$tournament->getId() . '-' . $subject);
@@ -107,6 +121,31 @@ class Validator extends Command
         return 0;
     }
 
+    protected function getAmountFromInput(InputInterface $input): int
+    {
+        return $this->getIntFromInput($input, 'amount', 10);
+    }
+
+    protected function getStartIdFromInput(InputInterface $input): int
+    {
+        return $this->getIntFromInput($input, 'startId', 1);
+    }
+
+    protected function getIntFromInput(InputInterface $input, string $key, int $defaultValue): int
+    {
+        /** @var string|null $value */
+        $value = $input->getOption($key);
+        if ($value === null) {
+            return $defaultValue;
+        }
+        return (int)$value;
+    }
+
+    protected function tournamentTooOld(Tournament $tournament): bool
+    {
+        return $tournament->getCreatedDateTime()->getTimestamp() <= $this->borderTimestamp;
+    }
+
     protected function createPdf(Tournament $tournament, Structure $structure, int $subjects): void
     {
         try {
@@ -114,7 +153,7 @@ class Validator extends Command
             $pdf = new PdfDocument($tournament, $structure, $subjects, $url);
             $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fctoernooipdf';
             $file = (string)$tournament->getId() . '-' . $subjects . '.pdf';
-            $pdf->save($dir  . DIRECTORY_SEPARATOR . $file);
+            $pdf->save($dir . DIRECTORY_SEPARATOR . $file);
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);

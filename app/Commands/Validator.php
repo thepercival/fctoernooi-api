@@ -44,7 +44,7 @@ class Validator extends Command
     private DateTimeImmutable $deprecatedCreatedDateTime;
     private const DEFAULT_START_DAYS_IN_PAST = 7;
     private const DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
-    private const TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
+    public const TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
 
     public function __construct(ContainerInterface $container)
     {

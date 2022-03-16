@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
-use App\Exceptions\PdfOutOfBoundsException;
 use App\Export\Document as ExportDocument;
 use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
 use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
@@ -13,12 +12,10 @@ use App\Export\Pdf\Page\Planning as PagePlanning;
 use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
-use DateTimeImmutable;
+use App\Export\Pdf\Structure\DimensionCalculator;
 use FCToernooi\LockerRoom;
-use FCToernooi\Recess;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\ExportConfig;
-use League\Period\Period;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game;
 use Sports\Game\Against as AgainstGame;
@@ -105,7 +102,8 @@ class Document extends Zend_Pdf
                 $page->draw($poules);
             }
 
-            $this->createAndDrawPageStructure(Zend_Pdf_Page::SIZE_A4);
+            $page = $this->createStructurePage();
+            $page->draw();
         }
         if (($this->subjects & ExportConfig::PoulePivotTables) === ExportConfig::PoulePivotTables) {
             $this->drawPoulePivotTables($this->structure->getFirstRoundNumber());
@@ -238,7 +236,6 @@ class Document extends Zend_Pdf
             }
             if ($recessPeriodToDraw !== null) {
                 $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
-                $drewbreak = true;
             }
             $y = $page->drawGame($game, $y);
         }
@@ -448,18 +445,25 @@ class Document extends Zend_Pdf
         return $page;
     }
 
-    protected function createAndDrawPageStructure(string $pageLayout, bool $enableOutOfBoundsException = true): void
+    protected function createDefaultStructurePage(): Page\Structure
     {
-        $page = new Page\Structure($this, $pageLayout, $enableOutOfBoundsException);
+        $page = new Page\Structure($this, new Point(0, 0), false);
         $page->setFont($this->getFont(), $this->getFontHeight());
-        try {
-            $page->draw();
-            $this->pages[] = $page;
-        } catch (PdfOutOfBoundsException $exception) {
-            if ($pageLayout === Zend_Pdf_Page::SIZE_A4) {
-                $this->createAndDrawPageStructure(Zend_Pdf_Page::SIZE_A4_LANDSCAPE, false);
-            }
-        }
+        return $page;
+    }
+
+    protected function createStructurePage(bool $enableOutOfBoundsException = true): Page\Structure
+    {
+        $dimensionCalculator = new DimensionCalculator($this->createDefaultStructurePage());
+        $maxNrOfPoulePlaceColumns = 1;
+        $dimensions = $dimensionCalculator->getDimensions($this->structure, $maxNrOfPoulePlaceColumns);
+        $dimensions = $dimensionCalculator->getMinimalDimensions($dimensions);
+
+        $page = new Page\Structure($this, $dimensions, $enableOutOfBoundsException);
+        $page->setFont($this->getFont(), $this->getFontHeight());
+        $this->pages[] = $page;
+        $page->setMaxNrOfPoulePlaceColumns($maxNrOfPoulePlaceColumns);
+        return $page;
     }
 
     /**

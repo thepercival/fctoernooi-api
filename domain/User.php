@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace FCToernooi;
 
 use DateTimeImmutable;
-use Exception;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use InvalidArgumentException;
 use Sports\Competition\Referee;
 use SportsHelpers\Identifiable;
@@ -16,6 +17,8 @@ class User extends Identifiable
     private string|null $name = null;
     private string|null $forgetpassword = null;
     private bool $validated;
+    private int $validateIn = 3;
+    private int $nrOfCredits = 0;
 
     public const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
     public const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
@@ -24,10 +27,16 @@ class User extends Identifiable
     public const MIN_LENGTH_NAME = 3;
     public const MAX_LENGTH_NAME = 15;
 
+    /**
+     * @var Collection<int|string, CreditAction>
+     */
+    private Collection $creditActions;
+
     public function __construct(string $emailaddress, protected string $salt, protected string $password)
     {
         $this->validated = false;
         $this->setEmailaddress($emailaddress);
+        $this->creditActions = new ArrayCollection();
     }
 
     public function getEmailaddress(): string
@@ -140,5 +149,33 @@ class User extends Identifiable
     public function setValidated(bool $validated): void
     {
         $this->validated = $validated;
+    }
+
+    public function getValidateIn(): int
+    {
+        return $this->validateIn;
+    }
+
+    public function setValidateIn(int $validateIn): void
+    {
+        $this->validateIn = $validateIn;
+    }
+
+    public function getNrOfCredits(): int
+    {
+        return $this->nrOfCredits;
+    }
+
+    public function setNrOfCredits(int $nrOfCredits): void
+    {
+        $this->nrOfCredits = $nrOfCredits;
+    }
+
+    /**
+     * @return Collection<int|string, CreditAction>
+     */
+    public function getCreditActions(): Collection
+    {
+        return $this->creditActions;
     }
 }

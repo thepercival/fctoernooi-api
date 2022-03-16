@@ -13,11 +13,17 @@ class ComposerPostInstall
         if ($event->isDevMode()) {
             echo "devMode is enabled, no post-install-executed for fctoernooi" . PHP_EOL;
         }
-        $pathPrefix = realpath(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR. "..") . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
+        $pathPrefix = realpath(
+                __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . ".."
+            ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
         $routerCache = $pathPrefix . 'router';
         if (file_exists($routerCache)) {
             unlink($routerCache);
         }
+
+        //  php app/console doctrine:cache:clear-metadata
+        //  php app/console doctrine:cache:clear-query
+        //  doctrine:cache:clear-result
 
         $doctrineProxies = $pathPrefix . 'proxies/';
         if (is_dir($doctrineProxies)) {

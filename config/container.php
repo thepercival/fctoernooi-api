@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Mailer;
-use Doctrine\Common\Cache\Cache;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Auth\Settings as AuthSettings;
@@ -22,6 +21,7 @@ use Slim\App;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig as TwigView;
 use Sports\SerializationHandler\DummyCreator;
+use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 
 return [
     // Application settings
@@ -69,6 +69,11 @@ return [
 
         return $logger;
     },
+    Memcached::class => function (ContainerInterface $container): Memcached {
+        $memcached = new Memcached();
+        $memcached->addServer('memcache_host', 11211);
+        return $memcached;
+    },
     EntityManagerInterface::class => function (ContainerInterface $container): EntityManagerInterface {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
@@ -77,19 +82,29 @@ return [
         $doctrineMetaConfig = $doctrineAppConfig['meta'];
         /** @var bool $devMode */
         $devMode = $doctrineMetaConfig['dev_mode'];
-        /** @var string|null $proxyDir */
+
+        $config = new \Doctrine\ORM\Configuration();
+        if (!$devMode) {
+            /** @var Memcached $memcached */
+            $memcached = $container->get(Memcached::class);
+            $cache = new MemcachedAdapter($memcached);
+            $config->setQueryCache($cache);
+
+            $config->setMetadataCache($cache);
+        }
+        /** @var string $proxyDir */
         $proxyDir = $doctrineMetaConfig['proxy_dir'];
-        /** @var Cache|null $cache */
-        $cache = $doctrineMetaConfig['cache'];
-        $doctrineConfig = Doctrine\ORM\Tools\Setup::createConfiguration($devMode, $proxyDir, $cache);
+        $config->setProxyDir($proxyDir);
+        $config->setProxyNamespace('fctoernooi');
+
         /** @var list<string> $entityPath */
         $entityPath = $doctrineMetaConfig['entity_path'];
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($entityPath);
-        $doctrineConfig->setMetadataDriverImpl($driver);
+        $config->setMetadataDriverImpl($driver);
+
         /** @var array<string, mixed> $connectionParams */
         $connectionParams = $doctrineAppConfig['connection'];
-        $em = Doctrine\ORM\EntityManager::create($connectionParams, $doctrineConfig);
-        // $em->getConnection()->setAutoCommit(false);
+        $em = Doctrine\ORM\EntityManager::create($connectionParams, $config);
 
         Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_SelfReferee');
@@ -111,7 +126,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningTimeoutState');
         Type::addType('enum_GameState', Sports\Game\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameState');
-
+        Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
         return $em;
     },
     SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {

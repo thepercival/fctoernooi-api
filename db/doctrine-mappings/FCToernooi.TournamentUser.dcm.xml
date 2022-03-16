@@ -13,13 +13,13 @@
       <many-to-one field="user" target-entity="FCToernooi\User">
           <cascade>
               <cascade-persist/>
-      </cascade>
-      <join-columns>
-        <join-column name="userid" referenced-column-name="id" nullable="false"/>
-      </join-columns>
-    </many-to-one>
-    <unique-constraints>
-        <unique-constraint columns="tournamentId,userid" name="main_u_idx"/>
-    </unique-constraints>
+          </cascade>
+          <join-columns>
+              <join-column name="userId" referenced-column-name="id" nullable="false"/>
+          </join-columns>
+      </many-to-one>
+      <unique-constraints>
+          <unique-constraint columns="tournamentId,userid" name="main_u_idx"/>
+      </unique-constraints>
   </entity>
 </doctrine-mapping>

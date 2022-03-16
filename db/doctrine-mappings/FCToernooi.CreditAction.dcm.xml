@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="FCToernooi\CreditAction" table="creditActions" repository-class="FCToernooi\CreditAction\Repository">
+        <field name="action" column="action" type="enum_CreditAction" length="20" nullable="false" unique="false"/>
+        <field name="atDateTime" column="atDateTime" type="datetime_immutable" nullable="false" unique="false"/>
+        <field name="nrOfCredits" column="nrOfCredits" type="smallint" nullable="false" unique="false"/>
+        <many-to-one field="user" target-entity="FCToernooi\User" inversed-by="creditActions">
+            <join-columns>
+                <join-column name="userId" referenced-column-name="id" nullable="false"/>
+            </join-columns>
+        </many-to-one>
+    </entity>
+</doctrine-mapping>

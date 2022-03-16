@@ -2,42 +2,42 @@
 
 declare(strict_types=1);
 
-use App\Actions\RecessAction;
-use App\Actions\Sports\ScoreConfigAction;
-use App\Actions\TournamentAction;
-use App\Actions\ReportAction;
-use App\Actions\Tournament\ShellAction;
-use App\Actions\TournamentUserAction;
-use App\Actions\Tournament\InvitationAction;
 use App\Actions\AuthAction;
-use App\Actions\UserAction;
-use App\Actions\SponsorAction;
 use App\Actions\LockerRoomAction;
-use App\Actions\Sports\StructureAction;
-use App\Actions\Sports\PlanningAction;
-use App\Actions\Sports\Planning\ConfigAction as PlanningConfigAction;
-use App\Actions\Sports\SportAction;
+use App\Actions\RecessAction;
+use App\Actions\ReportAction;
+use App\Actions\SponsorAction;
+use App\Actions\Sports\AgainstQualifyConfigAction;
+use App\Actions\Sports\CompetitionSportAction;
+use App\Actions\Sports\CompetitorAction;
 use App\Actions\Sports\FieldAction;
 use App\Actions\Sports\GameAgainstAction;
 use App\Actions\Sports\GameTogetherAction;
-use App\Actions\Sports\RefereeAction;
-use App\Actions\Sports\CompetitorAction;
-use App\Actions\Sports\CompetitionSportAction;
-use App\Actions\Sports\AgainstQualifyConfigAction;
+use App\Actions\Sports\Planning\ConfigAction as PlanningConfigAction;
 use App\Actions\Sports\Planning\GameAmountConfigAction;
+use App\Actions\Sports\PlanningAction;
+use App\Actions\Sports\RefereeAction;
+use App\Actions\Sports\ScoreConfigAction;
+use App\Actions\Sports\SportAction;
+use App\Actions\Sports\StructureAction;
+use App\Actions\Tournament\InvitationAction;
+use App\Actions\Tournament\ShellAction;
+use App\Actions\TournamentAction;
+use App\Actions\TournamentUserAction;
+use App\Actions\UserAction;
+use App\Middleware\Authorization\Tournament\Admin\AdminMiddleware as TournamentAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\Admin\GameAdminMiddleware as TournamentGameAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\Admin\RoleAdminMiddleware as TournamentRoleAdminAuthMiddleware;
+use App\Middleware\Authorization\Tournament\PublicMiddleware as TournamentPublicAuthMiddleware;
+use App\Middleware\Authorization\Tournament\UserMiddleware as TournamentUserAuthMiddleware;
+use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
 use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
-use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
-use App\Middleware\Authorization\Tournament\UserMiddleware as TournamentUserAuthMiddleware;
-use App\Middleware\Authorization\Tournament\Admin\AdminMiddleware as TournamentAdminAuthMiddleware;
-use App\Middleware\Authorization\Tournament\Admin\RoleAdminMiddleware as TournamentRoleAdminAuthMiddleware;
-use App\Middleware\Authorization\Tournament\Admin\GameAdminMiddleware as TournamentGameAdminAuthMiddleware;
-use App\Middleware\Authorization\Tournament\PublicMiddleware as TournamentPublicAuthMiddleware;
 use App\Middleware\VersionMiddleware;
 use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-use Slim\Views\TwigMiddleware;
 use Slim\Views\Twig as TwigView;
+use Slim\Views\TwigMiddleware;
 
 return function (App $app): void {
     $app->group(
@@ -48,6 +48,8 @@ return function (App $app): void {
                 function (Group $group): void {
                     $group->options('/register', AuthAction::class . ':options');
                     $group->post('/register', AuthAction::class . ':register');
+                    $group->options('/validate', AuthAction::class . ':options');
+                    $group->post('/validate', AuthAction::class . ':validate');
                     $group->options('/login', AuthAction::class . ':options');
                     $group->post('/login', AuthAction::class . ':login');
                     $group->options('/passwordreset', AuthAction::class . ':options');
