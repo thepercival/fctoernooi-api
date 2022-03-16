@@ -201,4 +201,22 @@ EOT;
         $this->userRepos->save($user);
         return $user;
     }
+
+    protected function mailValidateCode(User $user, int $validateCode): void
+    {
+        $subject = 'emailadres valideren';
+        $validateCode = 1;
+        $body = <<<EOT
+<p>Hallo,</p>
+<p>            
+Tot x kun je met deze code je emailadres valideren : <a style="font-size: 200%" href="">$validateCode</a> 
+</p>
+<p>
+met vriendelijke groet,
+<br>
+FCToernooi
+</p>
+EOT;
+        $this->mailer->send($subject, $body, $user->getEmailaddress());
+    }
 }

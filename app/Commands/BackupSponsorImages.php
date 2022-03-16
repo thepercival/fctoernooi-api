@@ -46,14 +46,20 @@ class BackupSponsorImages extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'cron-backup-sponsorimages');
-        $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
-            'images.sponsors.pathpostfix'
-        );
-        $backupPath = $this->config->getString('images.sponsors.backuppath') . $this->config->getString(
-            'images.sponsors.pathpostfix'
-        );
+
         try {
+            $logger = $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-backup-sponsorimages.log'
+            );
+            $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
+                    'images.sponsors.pathpostfix'
+                );
+            $backupPath = $this->config->getString('images.sponsors.backuppath') . $this->config->getString(
+                    'images.sponsors.pathpostfix'
+                );
+
             if (!is_writable($backupPath)) {
                 throw new \Exception("backuppath " . $backupPath . " is not writable", E_ERROR);
             }
@@ -73,7 +79,7 @@ class BackupSponsorImages extends Command
 
                 $newPath = str_replace($path, $backupPath, $logoLocalPath);
                 if (!copy($logoLocalPath, $newPath)) {
-                    $this->getLogger()->error("failed to copy  " . $logoLocalPath);
+                    $logger->error("failed to copy  " . $logoLocalPath);
                 }
             }
         } catch (\Exception $exception) {

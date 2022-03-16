@@ -47,7 +47,12 @@ class Recalculate extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'command-recalculate-planning-input');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-recalculate-planning-input.log'
+        );
+
         try {
             $this->recalculatePlanningInputs($input);
         } catch (\Exception $exception) {

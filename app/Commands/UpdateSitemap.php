@@ -41,7 +41,12 @@ class UpdateSitemap extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'cron-update-sitemap');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-update-sitemap.log'
+        );
+
         try {
             $url = $this->config->getString('www.wwwurl');
             $distPath = $this->config->getString('www.wwwurl-localpath');

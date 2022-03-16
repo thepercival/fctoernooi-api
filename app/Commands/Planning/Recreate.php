@@ -84,7 +84,12 @@ class Recreate extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->initLogger($input, 'command-planning-recreate');
+            $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-planning-recreate.log'
+            );
+
             $this->getLogger()->info('starting command app:planning-recreate');
             $showSuccessful = $input->getOption('showSuccessful');
             $this->showSuccessful = is_bool($showSuccessful) ? $showSuccessful : false;

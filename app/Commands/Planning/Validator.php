@@ -6,7 +6,6 @@ namespace App\Commands\Planning;
 
 use App\Command;
 use App\Mailer;
-use App\QueueService;
 use Exception;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Monolog\Handler\StreamHandler;
@@ -91,7 +90,11 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->initLogger($input, 'command-planning-validate');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-planning-validate.log'
+        );
 
         $sendEmailWhenInvalid = $input->getOption('sendEmailWhenInvalid');
         $sendEmailWhenInvalid = is_bool($sendEmailWhenInvalid) ? $sendEmailWhenInvalid : false;

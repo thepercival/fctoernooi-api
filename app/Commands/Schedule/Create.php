@@ -55,7 +55,11 @@ class Create extends ScheduleCommand
             ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
         );
 
-        $this->initLogger($input, 'command-schedule-create');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-schedule-create.log'
+        );
 
         if ($existingSchedule !== null) {
             // (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);

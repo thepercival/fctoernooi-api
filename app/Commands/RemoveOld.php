@@ -57,9 +57,15 @@ class RemoveOld extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
-        $this->initLogger($input, 'command-remove-old-tournaments', $mailHandler);
         try {
+            $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
+            $logger = $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-remove-old-tournaments.log',
+                $mailHandler
+            );
+
             if ($this->nrOfMonthsBeforeRemoval <= 11) {
                 throw new \Exception('nrOfMonthsBeforeRemoval must be greater than 11', E_ERROR);
             }
@@ -76,7 +82,7 @@ class RemoveOld extends Command
                 $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';
                 $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
                 $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';
-                $this->getLogger()->info($msg);
+                $logger->info($msg);
                 $this->competitionRepos->remove($oldTournament->getCompetition(), true);
             }
         } catch (\Exception $exception) {

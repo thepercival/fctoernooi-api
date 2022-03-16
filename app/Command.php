@@ -38,26 +38,17 @@ class Command extends SymCommand
         return $this->logger;
     }
 
-    protected function initLogger(InputInterface $input, string $name, MailHandler|null $mailHandler = null): void
-    {
-        $loggerSettings = $this->config->getArray('logger');
-        $logLevel = $loggerSettings['level'];
-        $logLevelParam = $input->getOption('loglevel');
-        if (is_string($logLevelParam) && strlen($logLevelParam) > 0) {
-            $logLevelTmp = filter_var($logLevelParam, FILTER_VALIDATE_INT);
-            if ($logLevelTmp !== false) {
-                $logLevel = $logLevelTmp;
-            }
-        }
-
+    protected function initLogger(
+        int $logLevel,
+        string $streamDef,
+        string $name,
+        MailHandler|null $mailHandler = null
+    ): Logger {
         $this->logger = new Logger($name);
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
 
-        $logToFile = $input->getOption('logtofile');
-        $logToFile = is_bool($logToFile) ? $logToFile : false;
-        $path = $logToFile ? ($loggerSettings['path'] . $name . '.log') : 'php://stdout';
-        $handler = new StreamHandler($path, $logLevel);
+        $handler = new StreamHandler($streamDef, $logLevel);
         $this->logger->pushHandler($handler);
 
         if ($mailHandler === null) {
@@ -67,6 +58,7 @@ class Command extends SymCommand
             $mailHandler->setMailer($this->mailer);
         }
         $this->logger->pushHandler($mailHandler);
+        return $this->logger;
     }
 
     protected function getMailHandler(
@@ -82,5 +74,33 @@ class Command extends SymCommand
         $toEmailAddress = $this->config->getString('email.admin');
         $fromEmailAddress = $this->config->getString('email.from');
         return new MailHandler($toEmailAddress, $subject, $fromEmailAddress, $mailLogLevel);
+    }
+
+    protected function getLogLevel(InputInterface $input, int|null $defaultLogLevel = null): int
+    {
+        if ($defaultLogLevel === null) {
+            $loggerSettings = $this->config->getArray('logger');
+            $defaultLogLevel = $loggerSettings['level'];
+        }
+
+        $logLevelParam = $input->getOption('loglevel');
+        if (is_string($logLevelParam) && strlen($logLevelParam) > 0) {
+            $logLevelTmp = filter_var($logLevelParam, FILTER_VALIDATE_INT);
+            if ($logLevelTmp !== false) {
+                return $logLevelTmp;
+            }
+        }
+        return $defaultLogLevel;
+    }
+
+    protected function getStreamDef(InputInterface $input, string|null $fileName = null): string
+    {
+        $logToFile = $input->getOption('logtofile');
+        $logToFile = is_bool($logToFile) ? $logToFile : false;
+        if ($logToFile === false) {
+            return 'php://stdout';
+        }
+        $loggerSettings = $this->config->getArray('logger');
+        return ($loggerSettings['path'] . $fileName . '.log');
     }
 }

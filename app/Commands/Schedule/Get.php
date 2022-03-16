@@ -48,7 +48,11 @@ class Get extends ScheduleCommand
         }
 
         try {
-            $this->initLogger($input, 'command-schedule-get');
+            $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-schedule-get.log'
+            );
             (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
         } catch (\Exception $exception) {
             if ($this->logger !== null) {

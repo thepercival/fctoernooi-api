@@ -7,6 +7,7 @@ namespace App\Commands\Pdf;
 use App\Command;
 use App\Commands\Validator as ValidatorCommand;
 use App\Export\Pdf\Document as PdfDocument;
+use App\TmpService;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
@@ -76,9 +77,14 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->initLogger($input, 'command-pdf-validator');
         try {
-            $this->getLogger()->info('pdf-en aan het genereren..');
+            $logger = $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-pdf-validator.log'
+            );
+
+            $logger->info('pdf-en aan het genereren..');
             $filter = [];
             $tournamentId = $input->getArgument('tournamentId');
             if (is_string($tournamentId) && (int)$tournamentId > 0) {
@@ -94,25 +100,25 @@ class Validator extends Command
                     continue;
                 }
                 if ($amount-- === 0) {
-                    $this->getLogger()->info('max amount reached');
+                    $logger->info('max amount reached');
                     break;
                 }
                 foreach ($subjects as $subject) {
-                    $this->getLogger()->info('creating for pdf ' . (string)$tournament->getId() . '-' . $subject);
+                    $logger->info('creating for pdf ' . (string)$tournament->getId() . '-' . $subject);
                     $structure = null;
                     try {
                         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
                         $this->createPdf($tournament, $structure, $subject);
                         // $this->addStructureToLog($tournament, $structure);
                     } catch (Exception $exception) {
-                        $this->getLogger()->error($exception->getMessage());
+                        $logger->error($exception->getMessage());
                         if ($structure !== null && count($filter) > 0) {
                             $this->addStructureToLog($tournament, $structure);
                         }
                     }
                 }
             }
-            $this->getLogger()->info('alle pdf-en zijn gegenereerd');
+            $logger->info('alle pdf-en zijn gegenereerd');
         } catch (Exception $exception) {
             if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
@@ -151,9 +157,9 @@ class Validator extends Command
         try {
             $url = $this->config->getString('www.wwwurl');
             $pdf = new PdfDocument($tournament, $structure, $subjects, $url);
-            $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fctoernooipdf';
+            $tmpService = new TmpService();
             $file = (string)$tournament->getId() . '-' . $subjects . '.pdf';
-            $pdf->save($dir . DIRECTORY_SEPARATOR . $file);
+            $pdf->save($tmpService->getPath(['pdf'], $file));
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);

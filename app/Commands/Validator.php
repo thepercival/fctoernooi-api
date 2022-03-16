@@ -103,18 +103,21 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->initLogger($input, 'command-validate');
-
         try {
+            $logger = $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-lidate.log'
+            );
             $tournaments = $this->getTournamentsFromInput($input);
 
-            $this->getLogger()->info('aan het valideren..');
+            $logger->info('aan het valideren..');
 
             foreach ($tournaments as $tournament) {
                 $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
                 $description .= $tournament->getCreatedDateTime()->format(DATE_ISO8601);
 
-                $this->getLogger()->info($description);
+                $logger->info($description);
                 /** @var Structure|null $structure */
                 $structure = null;
                 try {
@@ -129,15 +132,15 @@ class Validator extends Command
                         }
                     }
                 } catch (NoUsersException $exception) {
-                    $this->getLogger()->error($exception->getMessage());
+                    $logger->error($exception->getMessage());
 //                    if ($structure !== null) {
 //                        $this->addStructureToLog($tournament, $structure);
 //                    }
                 } catch (Exception $exception) {
-                    $this->getLogger()->error($exception->getMessage());
+                    $logger->error($exception->getMessage());
                 }
             }
-            $this->getLogger()->info('alle toernooien gevalideerd');
+            $logger->info('alle toernooien gevalideerd');
         } catch (Exception $exception) {
             if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());

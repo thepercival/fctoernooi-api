@@ -68,7 +68,12 @@ class RetryTimeout extends PlanningCommand
     // waar wil je retry time
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->initLogger($input, 'command-planning-retry-timeout');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-planning-retry-timeout.log'
+        );
+
         $planningSeeker = new PlanningTimeoutSeeker(
             $this->getLogger(),
             $this->planningInputRepos,

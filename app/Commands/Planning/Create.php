@@ -93,7 +93,11 @@ class Create extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->initLogger($input, 'command-planning-create');
+            $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input),
+                'command-planning-create.log'
+            );
             $this->getLogger()->info('starting command app:planning-create');
             $showSuccessful = $input->getOption('showSuccessful');
             $this->showSuccessful = is_bool($showSuccessful) ? $showSuccessful : false;

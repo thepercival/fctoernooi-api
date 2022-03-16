@@ -9,9 +9,8 @@ use App\QueueService;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
-use SportsHelpers\PlaceRanges;
-use SportsHelpers\SportRange;
 use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
+use SportsHelpers\SportRange;
 use SportsPlanning\Input\Iterator as PlanningInputIterator;
 use SportsPlanning\Input\Service as PlanningInputService;
 use SportsPlanning\Planning\Output as PlanningOutput;
@@ -54,7 +53,11 @@ class CreateDefaults extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger($input, 'command-create-default-planning-input');
+        $this->initLogger(
+            $this->getLogLevel($input),
+            $this->getStreamDef($input),
+            'command-create-default-planning-input.log'
+        );
         return $this->createPlanningInputs($input);
     }
 
