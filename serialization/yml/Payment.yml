@@ -1,0 +1,14 @@
+FCToernooi\Payment:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    user:
+      type: FCToernooi\User
+    nrOfCredits:
+      type: integer
+    type:
+      type: string
+      access_type: public_method
+      accessor:
+        getter: getTypeNative
+        setter: setTypeNative

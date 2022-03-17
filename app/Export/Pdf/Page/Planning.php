@@ -13,7 +13,6 @@ use App\Export\Pdf\GameLine\Together as TogetherGameLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use League\Period\Period;
 use Sports\Competition;
-use Sports\Game;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round\Number as RoundNumber;
@@ -87,7 +86,7 @@ class Planning extends ToernooiPdfPage
         $this->gameFilter = $gameFilter;
     }
 
-    protected function initGameLines(RoundNumber $roundNumber): void
+    public function initGameLines(RoundNumber $roundNumber): void
     {
         $showDateTime = $this->getShowDateTime($roundNumber);
         $showReferee = $this->getShowReferee($roundNumber);
@@ -141,7 +140,6 @@ class Planning extends ToernooiPdfPage
 
     public function drawGamesHeader(RoundNumber $roundNumber, float $y): float
     {
-        $this->initGameLines($roundNumber);
         if ($this->hasOnlyAgainstGameMode($roundNumber->getCompetition())) {
             $gameLine = $this->getGameLineByGameMode(GameMode::Against);
         } else {

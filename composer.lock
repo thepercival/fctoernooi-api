@@ -4,7 +4,7 @@
     "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
     "This file is @generated automatically"
   ],
-  "content-hash": "a97c7654d2ca0bdebd5396713b081416",
+  "content-hash": "294226467e24129fed1ec502e1dd15bc",
   "packages": [
     {
       "name": "bacon/bacon-qr-code",
@@ -40,16 +40,16 @@
           "BaconQrCode\\": "src/"
         }
       },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Ben Scholzen 'DASPRiD'",
-                    "email": "mail@dasprids.de",
-                    "homepage": "https://dasprids.de/",
-                    "role": "Developer"
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "BSD-2-Clause"
+      ],
+      "authors": [
+        {
+          "name": "Ben Scholzen 'DASPRiD'",
+          "email": "mail@dasprids.de",
+          "homepage": "https://dasprids.de/",
+          "role": "Developer"
                 }
             ],
             "description": "BaconQrCode is a QR code generator for PHP.",
@@ -110,26 +110,102 @@
             "keywords": [
                 "date",
                 "datetime",
-                "time"
+              "time"
             ],
-            "support": {
-                "irc": "irc://irc.freenode.org/cakephp",
-                "issues": "https://github.com/cakephp/chronos/issues",
-                "source": "https://github.com/cakephp/chronos"
-            },
-            "time": "2021-10-17T02:44:05+00:00"
+          "support": {
+            "irc": "irc://irc.freenode.org/cakephp",
+            "issues": "https://github.com/cakephp/chronos/issues",
+            "source": "https://github.com/cakephp/chronos"
+          },
+          "time": "2021-10-17T02:44:05+00:00"
+        },
+    {
+      "name": "composer/ca-bundle",
+      "version": "1.3.1",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/composer/ca-bundle.git",
+        "reference": "4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/composer/ca-bundle/zipball/4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b",
+        "reference": "4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b",
+        "shasum": ""
+      },
+      "require": {
+        "ext-openssl": "*",
+        "ext-pcre": "*",
+        "php": "^5.3.2 || ^7.0 || ^8.0"
+      },
+      "require-dev": {
+        "phpstan/phpstan": "^0.12.55",
+        "psr/log": "^1.0",
+        "symfony/phpunit-bridge": "^4.2 || ^5",
+        "symfony/process": "^2.5 || ^3.0 || ^4.0 || ^5.0 || ^6.0"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
+          "dev-main": "1.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Composer\\CaBundle\\": "src"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Jordi Boggiano",
+          "email": "j.boggiano@seld.be",
+          "homepage": "http://seld.be"
+        }
+      ],
+      "description": "Lets you find a path to the system CA bundle, and includes a fallback to the Mozilla CA bundle.",
+      "keywords": [
+        "cabundle",
+        "cacert",
+        "certificate",
+        "ssl",
+        "tls"
+      ],
+      "support": {
+        "irc": "irc://irc.freenode.org/composer",
+        "issues": "https://github.com/composer/ca-bundle/issues",
+        "source": "https://github.com/composer/ca-bundle/tree/1.3.1"
+      },
+      "funding": [
+        {
+          "url": "https://packagist.com",
+          "type": "custom"
         },
         {
-            "name": "dasprid/enum",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/DASPRiD/Enum.git",
-                "reference": "5abf82f213618696dda8e3bf6f64dd042d8542b2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/DASPRiD/Enum/zipball/5abf82f213618696dda8e3bf6f64dd042d8542b2",
+          "url": "https://github.com/composer",
+          "type": "github"
+        },
+        {
+          "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+          "type": "tidelift"
+        }
+      ],
+      "time": "2021-10-28T20:44:15+00:00"
+    },
+    {
+      "name": "dasprid/enum",
+      "version": "1.0.3",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/DASPRiD/Enum.git",
+        "reference": "5abf82f213618696dda8e3bf6f64dd042d8542b2"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/DASPRiD/Enum/zipball/5abf82f213618696dda8e3bf6f64dd042d8542b2",
                 "reference": "5abf82f213618696dda8e3bf6f64dd042d8542b2",
                 "shasum": ""
             },
@@ -1052,16 +1128,16 @@
                 },
                 {
                     "name": "Roman Borschel",
-                    "email": "roman@code-factory.org"
+                  "email": "roman@code-factory.org"
                 },
-                {
-                    "name": "Benjamin Eberlei",
-                    "email": "kontakt@beberlei.de"
-                },
-                {
-                  "name": "Jonathan Wage",
-                  "email": "jonwage@gmail.com"
-                },
+              {
+                "name": "Benjamin Eberlei",
+                "email": "kontakt@beberlei.de"
+              },
+              {
+                "name": "Jonathan Wage",
+                "email": "jonwage@gmail.com"
+              },
               {
                 "name": "Marco Pivetta",
                 "email": "ocramius@gmail.com"
@@ -1115,16 +1191,16 @@
         "symfony/cache": "^4.4 || ^5.4 || ^6.0",
         "vimeo/psalm": "4.21.0"
       },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                  "Doctrine\\Common\\": "src/Common",
-                  "Doctrine\\Persistence\\": "src/Persistence"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
+      "type": "library",
+      "autoload": {
+        "psr-4": {
+          "Doctrine\\Common\\": "src/Common",
+          "Doctrine\\Persistence\\": "src/Persistence"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
             ],
             "authors": [
                 {
@@ -2309,16 +2385,16 @@
                 "sunrise/stream": "^1.0.15",
                 "sunrise/uri": "^1.0.15"
             },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Middlewares\\Utils\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
+          "type": "library",
+          "autoload": {
+            "psr-4": {
+              "Middlewares\\Utils\\": "src/"
+            }
+          },
+          "notification-url": "https://packagist.org/downloads/",
+          "license": [
+            "MIT"
+          ],
           "description": "Common utils for PSR-15 middleware packages",
           "homepage": "https://github.com/middlewares/utils",
           "keywords": [
@@ -2335,6 +2411,97 @@
           },
           "time": "2021-07-04T17:56:23+00:00"
         },
+    {
+      "name": "mollie/mollie-api-php",
+      "version": "v2.40.2",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/mollie/mollie-api-php.git",
+        "reference": "ac3e079bbc86e95dc77d4f33965a62e9e6b95ed8"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/mollie/mollie-api-php/zipball/ac3e079bbc86e95dc77d4f33965a62e9e6b95ed8",
+        "reference": "ac3e079bbc86e95dc77d4f33965a62e9e6b95ed8",
+        "shasum": ""
+      },
+      "require": {
+        "composer/ca-bundle": "^1.2",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "php": ">=5.6"
+      },
+      "require-dev": {
+        "eloquent/liberator": "^2.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "guzzlehttp/guzzle": "^6.3 || ^7.0",
+        "phpunit/phpunit": "^5.7 || ^6.5 || ^7.1 || ^8.5 || ^9.5"
+      },
+      "suggest": {
+        "mollie/oauth2-mollie-php": "Use OAuth to authenticate with the Mollie API. This is needed for some endpoints. Visit https://docs.mollie.com/ for more information."
+      },
+      "type": "library",
+      "autoload": {
+        "psr-4": {
+          "Mollie\\Api\\": "src/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "BSD-2-Clause"
+      ],
+      "authors": [
+        {
+          "name": "Mollie B.V.",
+          "email": "info@mollie.com"
+        }
+      ],
+      "description": "Mollie API client library for PHP. Mollie is a European Payment Service provider and offers international payment methods such as Mastercard, VISA, American Express and PayPal, and local payment methods such as iDEAL, Bancontact, SOFORT Banking, SEPA direct debit, Belfius Direct Net, KBC Payment Button and various gift cards such as Podiumcadeaukaart and fashioncheque.",
+      "homepage": "https://www.mollie.com/en/developers",
+      "keywords": [
+        "Apple Pay",
+        "CBC",
+        "Przelewy24",
+        "api",
+        "bancontact",
+        "banktransfer",
+        "belfius",
+        "belfius direct net",
+        "charges",
+        "creditcard",
+        "direct debit",
+        "fashioncheque",
+        "gateway",
+        "gift cards",
+        "ideal",
+        "inghomepay",
+        "intersolve",
+        "kbc",
+        "klarna",
+        "mistercash",
+        "mollie",
+        "paylater",
+        "payment",
+        "payments",
+        "paypal",
+        "paysafecard",
+        "podiumcadeaukaart",
+        "recurring",
+        "refunds",
+        "sepa",
+        "service",
+        "sliceit",
+        "sofort",
+        "sofortbanking",
+        "subscriptions"
+      ],
+      "support": {
+        "issues": "https://github.com/mollie/mollie-api-php/issues",
+        "source": "https://github.com/mollie/mollie-api-php/tree/v2.40.2"
+      },
+      "time": "2022-02-08T08:53:18+00:00"
+    },
     {
       "name": "monolog/monolog",
       "version": "2.4.0",
@@ -2382,16 +2549,16 @@
         "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
         "ext-openssl": "Required to send log messages using SSL",
         "ext-sockets": "Allow sending log messages to a Syslog server (via UDP driver)",
-                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
-                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
-                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
-                "php-console/php-console": "Allow sending log messages to Google Chrome",
-                "rollbar/rollbar": "Allow sending log messages to Rollbar",
-                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
+        "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+        "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
+        "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+        "php-console/php-console": "Allow sending log messages to Google Chrome",
+        "rollbar/rollbar": "Allow sending log messages to Rollbar",
+        "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+      },
+      "type": "library",
+      "extra": {
+        "branch-alias": {
                     "dev-main": "2.x-dev"
                 }
             },
@@ -3997,15 +4164,15 @@
                     "homepage": "http://silentworks.co.uk"
                 },
                 {
-                    "name": "Rob Allen",
-                    "email": "rob@akrabat.com",
-                    "homepage": "http://akrabat.com"
+                  "name": "Rob Allen",
+                  "email": "rob@akrabat.com",
+                  "homepage": "http://akrabat.com"
                 },
-                {
-                    "name": "Pierre Berube",
-                    "email": "pierre@lgse.com",
-                  "homepage": "http://www.lgse.com"
-                }
+              {
+                "name": "Pierre Berube",
+                "email": "pierre@lgse.com",
+                "homepage": "http://www.lgse.com"
+              }
             ],
           "description": "Strict PSR-7 implementation",
           "homepage": "https://www.slimframework.com",
@@ -4062,16 +4229,16 @@
         "slim/psr7": "^1.5",
         "squizlabs/php_codesniffer": "^3.6"
       },
-            "suggest": {
-                "ext-simplexml": "Needed to support XML format in BodyParsingMiddleware",
-                "ext-xml": "Needed to support XML format in BodyParsingMiddleware",
-                "php-di/php-di": "PHP-DI is the recommended container library to be used with Slim",
-                "slim/psr7": "Slim PSR-7 implementation. See https://www.slimframework.com/docs/v4/start/installation.html for more information."
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Slim\\": "Slim"
+      "suggest": {
+        "ext-simplexml": "Needed to support XML format in BodyParsingMiddleware",
+        "ext-xml": "Needed to support XML format in BodyParsingMiddleware",
+        "php-di/php-di": "PHP-DI is the recommended container library to be used with Slim",
+        "slim/psr7": "Slim PSR-7 implementation. See https://www.slimframework.com/docs/v4/start/installation.html for more information."
+      },
+      "type": "library",
+      "autoload": {
+        "psr-4": {
+          "Slim\\": "Slim"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -5700,16 +5867,16 @@
         "phpstan/phpstan-phpunit": "^1.0",
         "phpstan/phpstan-strict-rules": "^1.1",
         "phpunit/phpunit": "^9.5",
-                "psalm/plugin-phpunit": "^0.16",
-                "vimeo/psalm": "^4.15",
-                "weirdan/doctrine-psalm-plugin": "^2.0"
-            },
-            "type": "library",
-            "extra": {
-                "phpstan": {
-                    "includes": [
-                        "extension.neon"
-                    ]
+        "psalm/plugin-phpunit": "^0.16",
+        "vimeo/psalm": "^4.15",
+        "weirdan/doctrine-psalm-plugin": "^2.0"
+      },
+      "type": "library",
+      "extra": {
+        "phpstan": {
+          "includes": [
+            "extension.neon"
+          ]
                 }
             },
             "autoload": {
@@ -6860,82 +7027,6 @@
             ],
             "time": "2021-03-30T17:13:30+00:00"
         },
-        {
-            "name": "composer/ca-bundle",
-            "version": "1.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/composer/ca-bundle.git",
-                "reference": "4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b",
-                "reference": "4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b",
-                "shasum": ""
-            },
-            "require": {
-                "ext-openssl": "*",
-                "ext-pcre": "*",
-                "php": "^5.3.2 || ^7.0 || ^8.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^0.12.55",
-                "psr/log": "^1.0",
-                "symfony/phpunit-bridge": "^4.2 || ^5",
-                "symfony/process": "^2.5 || ^3.0 || ^4.0 || ^5.0 || ^6.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Composer\\CaBundle\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jordi Boggiano",
-                    "email": "j.boggiano@seld.be",
-                    "homepage": "http://seld.be"
-                }
-            ],
-            "description": "Lets you find a path to the system CA bundle, and includes a fallback to the Mozilla CA bundle.",
-            "keywords": [
-                "cabundle",
-                "cacert",
-                "certificate",
-                "ssl",
-                "tls"
-            ],
-            "support": {
-                "irc": "irc://irc.freenode.org/composer",
-                "issues": "https://github.com/composer/ca-bundle/issues",
-                "source": "https://github.com/composer/ca-bundle/tree/1.3.1"
-            },
-            "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                  "url": "https://github.com/composer",
-                  "type": "github"
-                },
-              {
-                "url": "https://tidelift.com/funding/github/packagist/composer/composer",
-                "type": "tidelift"
-              }
-            ],
-          "time": "2021-10-28T20:44:15+00:00"
-        },
       {
         "name": "composer/composer",
         "version": "2.2.9",
@@ -6960,16 +7051,16 @@
           "justinrainbow/json-schema": "^5.2.11",
           "php": "^5.3.2 || ^7.0 || ^8.0",
           "psr/log": "^1.0 || ^2.0",
-                "react/promise": "^1.2 || ^2.7",
-                "seld/jsonlint": "^1.4",
-                "seld/phar-utils": "^1.0",
-                "symfony/console": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0",
-                "symfony/filesystem": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
-                "symfony/finder": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
-                "symfony/process": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0"
-            },
-            "require-dev": {
-                "phpspec/prophecy": "^1.10",
+          "react/promise": "^1.2 || ^2.7",
+          "seld/jsonlint": "^1.4",
+          "seld/phar-utils": "^1.0",
+          "symfony/console": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0",
+          "symfony/filesystem": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
+          "symfony/finder": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0",
+          "symfony/process": "^2.8.52 || ^3.4.35 || ^4.4 || ^5.0 || ^6.0"
+        },
+        "require-dev": {
+          "phpspec/prophecy": "^1.10",
                 "symfony/phpunit-bridge": "^4.2 || ^5.0 || ^6.0"
             },
             "suggest": {
@@ -7233,14 +7324,14 @@
                 "source": "https://github.com/composer/pcre/tree/1.0.1"
             },
             "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                  "url": "https://github.com/composer",
-                  "type": "github"
-                },
+              {
+                "url": "https://packagist.com",
+                "type": "custom"
+              },
+              {
+                "url": "https://github.com/composer",
+                "type": "github"
+              },
               {
                 "url": "https://tidelift.com/funding/github/packagist/composer/composer",
                 "type": "tidelift"
@@ -7272,16 +7363,16 @@
         "type": "library",
         "extra": {
           "branch-alias": {
-                    "dev-main": "3.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Composer\\Semver\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
+            "dev-main": "3.x-dev"
+          }
+        },
+        "autoload": {
+          "psr-4": {
+            "Composer\\Semver\\": "src"
+          }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
                 "MIT"
             ],
             "authors": [
@@ -8396,16 +8487,16 @@
                 "shasum": ""
             },
             "require": {
-                "composer-plugin-api": "^1.1 || ^2.0",
-                "php": "^7.1 || ^8.0",
-                "phpstan/phpstan": ">=0.11.6"
+              "composer-plugin-api": "^1.1 || ^2.0",
+              "php": "^7.1 || ^8.0",
+              "phpstan/phpstan": ">=0.11.6"
             },
-            "require-dev": {
-                "composer/composer": "^1.8",
-                "phing/phing": "^2.16.3",
-                "php-parallel-lint/php-parallel-lint": "^1.2.0",
-                "phpstan/phpstan-strict-rules": "^0.11 || ^0.12"
-            },
+          "require-dev": {
+            "composer/composer": "^1.8",
+            "phing/phing": "^2.16.3",
+            "php-parallel-lint/php-parallel-lint": "^1.2.0",
+            "phpstan/phpstan-strict-rules": "^0.11 || ^0.12"
+          },
           "type": "composer-plugin",
           "extra": {
             "class": "PHPStan\\ExtensionInstaller\\Plugin"
@@ -8460,16 +8551,16 @@
         "license": [
           "MIT"
         ],
-            "description": "PHPStan - PHP Static Analysis Tool",
-            "support": {
-                "issues": "https://github.com/phpstan/phpstan/issues",
-              "source": "https://github.com/phpstan/phpstan/tree/1.4.10"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/ondrejmirtes",
-                    "type": "github"
-                },
+        "description": "PHPStan - PHP Static Analysis Tool",
+        "support": {
+          "issues": "https://github.com/phpstan/phpstan/issues",
+          "source": "https://github.com/phpstan/phpstan/tree/1.4.10"
+        },
+        "funding": [
+          {
+            "url": "https://github.com/ondrejmirtes",
+            "type": "github"
+          },
                 {
                     "url": "https://github.com/phpstan",
                     "type": "github"
@@ -8963,15 +9054,15 @@
                     "role": "lead"
                 }
             ],
-            "description": "Utility class for timing",
-            "homepage": "https://github.com/sebastianbergmann/php-timer/",
-            "keywords": [
-                "timer"
-            ],
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/php-timer/issues",
-              "source": "https://github.com/sebastianbergmann/php-timer/tree/5.0.3"
-            },
+          "description": "Utility class for timing",
+          "homepage": "https://github.com/sebastianbergmann/php-timer/",
+          "keywords": [
+            "timer"
+          ],
+          "support": {
+            "issues": "https://github.com/sebastianbergmann/php-timer/issues",
+            "source": "https://github.com/sebastianbergmann/php-timer/tree/5.0.3"
+          },
           "funding": [
             {
               "url": "https://github.com/sebastianbergmann",
@@ -9024,16 +9115,16 @@
           "sebastian/type": "^3.0",
           "sebastian/version": "^3.0.2"
         },
-            "require-dev": {
-                "ext-pdo": "*",
-                "phpspec/prophecy-phpunit": "^2.0.1"
-            },
-            "suggest": {
-                "ext-soap": "*",
-                "ext-xdebug": "*"
-            },
-            "bin": [
-                "phpunit"
+        "require-dev": {
+          "ext-pdo": "*",
+          "phpspec/prophecy-phpunit": "^2.0.1"
+        },
+        "suggest": {
+          "ext-soap": "*",
+          "ext-xdebug": "*"
+        },
+        "bin": [
+          "phpunit"
             ],
             "type": "library",
             "extra": {
@@ -10106,16 +10197,16 @@
             ],
             "authors": [
                 {
-                    "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de"
+                  "name": "Sebastian Bergmann",
+                  "email": "sebastian@phpunit.de"
                 }
             ],
-            "description": "Provides a list of PHP built-in functions that operate on resources",
-            "homepage": "https://www.github.com/sebastianbergmann/resource-operations",
-            "support": {
-                "issues": "https://github.com/sebastianbergmann/resource-operations/issues",
-              "source": "https://github.com/sebastianbergmann/resource-operations/tree/3.0.3"
-            },
+          "description": "Provides a list of PHP built-in functions that operate on resources",
+          "homepage": "https://www.github.com/sebastianbergmann/resource-operations",
+          "support": {
+            "issues": "https://github.com/sebastianbergmann/resource-operations/issues",
+            "source": "https://github.com/sebastianbergmann/resource-operations/tree/3.0.3"
+          },
           "funding": [
             {
               "url": "https://github.com/sebastianbergmann",
@@ -10148,16 +10239,16 @@
         "extra": {
           "branch-alias": {
             "dev-master": "3.0-dev"
-                }
-            },
-            "autoload": {
-                "classmap": [
-                    "src/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
+          }
+        },
+        "autoload": {
+          "classmap": [
+            "src/"
+          ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+          "BSD-3-Clause"
             ],
             "authors": [
                 {

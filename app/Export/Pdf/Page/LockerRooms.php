@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
-use App\Exceptions\PdfOutOfBoundsException;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Point;
+use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 
 class LockerRooms extends ToernooiPdfPage
 {
-    protected float $rowHeight = 18;
+    private const RowHeight = 18;
+    private const FontHeight = self::RowHeight - 4;
+    private const LockerRoomMargin = 20;
 
     public function __construct(Document $document, mixed $param1)
     {
@@ -36,16 +39,14 @@ class LockerRooms extends ToernooiPdfPage
         return $nrOfLines;
     }
 
-    protected function getLockerRoomHeight(LockerRoom $lockerRoom): float
+    protected function getLockerRoomHeight(int $nrOfCompetitors): float
     {
-        $nrOfLines = 1; // header
-        $nrOfLines += $lockerRoom->getCompetitors()->count();
-        return $nrOfLines * $this->getRowHeight();
+        return (1 + $nrOfCompetitors) * self::RowHeight;
     }
 
     protected function getLinesAvailable(float $y): int
     {
-        return (int)floor(($y - $this->getPageMargin()) / $this->getRowHeight());
+        return (int)floor(($y - $this->getPageMargin()) / self::RowHeight);
     }
 
     /**
@@ -69,7 +70,7 @@ class LockerRooms extends ToernooiPdfPage
         if ($nrOfColumns === 1 || $nrOfColumns === 2) {
             return $this->getMaxColumnWidth();
         }
-        return ($this->getDisplayWidth() - (($nrOfColumns - 1) * $this->getPageMargin())) / $nrOfColumns;
+        return ($this->getDisplayWidth() - (($nrOfColumns - 1) * self::LockerRoomMargin)) / $nrOfColumns;
     }
 
     public function getMaxColumnWidth(): float
@@ -87,67 +88,79 @@ class LockerRooms extends ToernooiPdfPage
         return 0;
     }
 
-    public function getRowHeight(): float
-    {
-        return $this->rowHeight;
-    }
-
     public function draw(): void
     {
         $y = $this->drawHeader('kleedkamers');
-        $y = $this->drawSubHeader('Kleedkamer-indeling', $y);
+        $yStart = $this->drawSubHeader('indeling kleedkamers', $y);
         $lockerRooms = array_values($this->getParent()->getTournament()->getLockerRooms()->toArray());
         if (count($lockerRooms) === 0) {
             return;
         }
+        $point = new Point($this->getPageMargin(), $yStart);
         $columnWidth = $this->getColumnWidth($y, $lockerRooms);
-        $yStart = $y;
-        $x = $this->getPageMargin();
         while (count($lockerRooms) > 0) {
             $lockerRoom = array_shift($lockerRooms);
-            try {
-                $y = $this->drawLockerRoom($lockerRoom, $x, $y, $columnWidth);
-            } catch (PdfOutOfBoundsException $exception) {
-                $y = $yStart;
-                $x += $columnWidth + $this->getPageMargin();
-                $y = $this->drawLockerRoom($lockerRoom, $x, $y, $columnWidth);
+            $competitors = array_values($lockerRoom->getCompetitors()->toArray());
+            while (count($competitors) > 0) {
+                $point = $this->drawLockerRoom($lockerRoom, $competitors, $point, $yStart, $columnWidth);
             }
+            $point = $point->addY(-self::RowHeight);
         }
     }
 
-    public function drawLockerRoom(LockerRoom $lockerRoom, float $x, float $y, float $columnWidth): float
-    {
-        if (($y - $this->getLockerRoomHeight($lockerRoom)) < $this->getPageMargin()) {
-            throw new PdfOutOfBoundsException('Y', E_ERROR);
+    /**
+     * @param LockerRoom $lockerRoom
+     * @param list<Competitor> $competitors
+     * @param Point $point
+     * @param float $yStart
+     * @param float $columnWidth
+     * @return Point
+     * @throws \Zend_Pdf_Exception
+     */
+    public function drawLockerRoom(
+        LockerRoom $lockerRoom,
+        array &$competitors,
+        Point $point,
+        float $yStart,
+        float $columnWidth,
+    ): Point {
+        $startAtTop = $point->getY() === $yStart;
+        $height = $this->getLockerRoomHeight(count($competitors));
+        $lockerRoomBeneathPage = ($point->getY() - $height) < $this->getPageMargin();
+        if ($lockerRoomBeneathPage && !$startAtTop) {
+            $newPoint = new Point($point->getX() + $columnWidth + self::LockerRoomMargin, $yStart);
+            return $this->drawLockerRoom($lockerRoom, $competitors, $newPoint, $yStart, $columnWidth);
         }
-        $nRowHeight = $this->getRowHeight();
-        $fontHeight = $nRowHeight - 4;
+
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
-        $this->setFont($this->getParent()->getFont(true), $fontHeight);
+        $this->setFont($this->getParent()->getFont(true), self::FontHeight);
         $this->drawCell(
             'kleedkamer ' . $lockerRoom->getName(),
-            $x,
-            $y,
+            $point->getX(),
+            $point->getY(),
             $columnWidth,
-            $nRowHeight,
+            self::RowHeight,
             Align::Center,
             'black'
         );
-        $this->setFont($this->getParent()->getFont(), $fontHeight);
-        $y -= $nRowHeight;
-        foreach ($lockerRoom->getCompetitors() as $competitor) {
+        $this->setFont($this->getParent()->getFont(), self::FontHeight);
+        $point = $point->addY(-self::RowHeight);
+        while ($competitor = array_shift($competitors)) {
             $this->drawCell(
                 $competitor->getName(),
-                $x,
-                $y,
+                $point->getX(),
+                $point->getY(),
                 $columnWidth,
-                $nRowHeight,
+                self::RowHeight,
                 Align::Center,
                 'black'
             );
-            $y -= $nRowHeight;
+            $point = $point->addY(-self::RowHeight);
+            if ($lockerRoomBeneathPage && ($point->getY() - self::RowHeight) <= $this->getPageMargin()) {
+                return new Point($point->getX() + $columnWidth + self::LockerRoomMargin, $yStart);
+            }
         }
-        return $y - $nRowHeight;
+        return $point;
     }
 
 

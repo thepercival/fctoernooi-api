@@ -129,21 +129,33 @@ class Document extends Zend_Pdf
             $page->draw();
         }
         if (($this->subjects & ExportConfig::LockerRooms) === ExportConfig::LockerRooms) {
-            $page = $this->createPageLockerRooms();
+            $page = $this->createLockerRoomsPage();
             $page->draw();
 
-            foreach ($this->getTournament()->getLockerRooms() as $lockerRoom) {
-                $page = $this->createPageLockerRoom($lockerRoom);
-                $page->draw();
+            $this->drawLockerRoomLabels(array_values($this->getTournament()->getLockerRooms()->toArray()));
+        }
+    }
+
+    /**
+     * @param list<LockerRoom> $lockerRooms
+     */
+    protected function drawLockerRoomLabels(array $lockerRooms): void
+    {
+        while ($lockerRoom = array_shift($lockerRooms)) {
+            $competitors = array_values($lockerRoom->getCompetitors()->toArray());
+            while (count($competitors) > 0) {
+                $page = $this->createLockerRoomLabelPage($lockerRoom);
+                $page->draw($competitors);
             }
         }
     }
 
-    protected function drawPlanning(RoundNumber $roundNumber, PagePlanning $page, float$y): void
+    protected function drawPlanning(RoundNumber $roundNumber, PagePlanning $page, float $y): void
     {
         $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
             $y = $page->drawRoundNumberHeader($roundNumber, $y);
+            $page->initGameLines($roundNumber);
             $y = $page->drawGamesHeader($roundNumber, $y);
         }
 
@@ -162,9 +174,11 @@ class Document extends Zend_Pdf
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
                 $y = $page->drawHeader($title);
+                $page->initGameLines($roundNumber);
                 $y = $page->drawGamesHeader($roundNumber, $y);
             }
             if ($recessPeriodToDraw !== null) {
+                $page->initGameLines($roundNumber);
                 $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
             }
             $y = $page->drawGame($game, $y, true);
@@ -218,6 +232,7 @@ class Document extends Zend_Pdf
         $y = $page->drawRoundNumberHeader($roundNumber, $y);
         $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
+            $page->initGameLines($roundNumber);
             $y = $page->drawGamesHeader($roundNumber, $y);
         }
         $games = $roundNumber->getGames(GameOrder::ByDate);
@@ -232,9 +247,11 @@ class Document extends Zend_Pdf
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle() ?? '');
                 $y = $page->drawHeader($page->getTitle());
                 $page->setGameFilter($page->getGameFilter());
+                $page->initGameLines($roundNumber);
                 $y = $page->drawGamesHeader($roundNumber, $y);
             }
             if ($recessPeriodToDraw !== null) {
+                $page->initGameLines($roundNumber);
                 $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
             }
             $y = $page->drawGame($game, $y);
@@ -589,7 +606,7 @@ class Document extends Zend_Pdf
         return $page;
     }
 
-    protected function createPageLockerRooms(): Page\LockerRooms
+    protected function createLockerRoomsPage(): Page\LockerRooms
     {
         $page = new Page\LockerRooms($this, Zend_Pdf_Page::SIZE_A4);
         $page->setFont($this->getFont(), $this->getFontHeight());
@@ -597,9 +614,9 @@ class Document extends Zend_Pdf
         return $page;
     }
 
-    protected function createPageLockerRoom(LockerRoom $lockerRoom): Page\LockerRoom
+    protected function createLockerRoomLabelPage(LockerRoom $lockerRoom): Page\LockerRoomLabel
     {
-        $page = new Page\LockerRoom($this, Zend_Pdf_Page::SIZE_A4, $lockerRoom);
+        $page = new Page\LockerRoomLabel($this, Zend_Pdf_Page::SIZE_A4, $lockerRoom);
         $page->setFont($this->getFont(), $this->getFontHeight());
         $this->pages[] = $page;
         return $page;

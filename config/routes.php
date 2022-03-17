@@ -109,6 +109,9 @@ return function (App $app): void {
             $group->get('', UserAction::class . ':fetchOne');
             $group->put('', UserAction::class . ':edit');
             $group->delete('', UserAction::class . ':remove');
+            $group->delete('', UserAction::class . ':remove');
+            $group->options('/buycredits', UserAction::class . ':options');
+            $group->post('/buycredits', UserAction::class . ':buyCredits');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 

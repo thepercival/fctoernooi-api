@@ -7,13 +7,17 @@ namespace App\Export\Pdf\Page;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use FCToernooi\Competitor;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use FCToernooi\QRService;
 use Zend_Pdf_Resource_Image;
 
-class LockerRoom extends ToernooiPdfPage
+class LockerRoomLabel extends ToernooiPdfPage
 {
-    protected float $rowHeight = 18;
+    private const InfoHeight = 150;
+    private const StartFontSize = 40;
+    private const MaxFontSize = 50;
+    private const InfoFontSize = 20;
 
     protected QRService $qrService;
 
@@ -34,14 +38,9 @@ class LockerRoom extends ToernooiPdfPage
         return 0;
     }
 
-    public function getRowHeight(): float
-    {
-        return $this->rowHeight;
-    }
-
     protected function getCompetitorFontHeight(float $columnWidth): float
     {
-        $fontHeight = 40;
+        $fontHeight = self::StartFontSize;
 
         $texts = [];
         {
@@ -65,19 +64,24 @@ class LockerRoom extends ToernooiPdfPage
         };
         $maxText = $fncMaxText($texts);
 
-        $maxFontSize = 60;
-        while ($fontHeight < $maxFontSize && $this->getTextWidth($maxText, $fontHeight + 1) <= $columnWidth) {
+        while ($fontHeight < self::MaxFontSize
+            && $this->getTextWidth($maxText, $fontHeight + 1) <= $columnWidth) {
             $fontHeight++;
         }
         return $fontHeight;
     }
 
-    public function draw(): void
+    /**
+     * @param list<Competitor> $competitors
+     */
+    public function draw(array &$competitors): void
     {
         $y = $this->drawHeader("kleedkamer");
         $y = $this->drawLockerRoom($y);
+        $infoHeight = $this->getParent()->getTournament()->getPublic() ? self::InfoHeight : 0;
+        $this->drawCompetitors($competitors, $y, $this->getPageMargin() + $infoHeight);
         if ($this->getParent()->getTournament()->getPublic()) {
-            $this->drawInfo($y);
+            $this->drawInfo();
         }
     }
 
@@ -87,7 +91,7 @@ class LockerRoom extends ToernooiPdfPage
         $columnWidth = $this->getDisplayWidth();
 
         $fontHeight = $this->getCompetitorFontHeight($columnWidth);
-        $nRowHeight = $fontHeight + ((int)(floor($fontHeight / 2)));
+        $rowHeight = $fontHeight + ((int)(floor($fontHeight / 2)));
 
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
         $this->setFont($this->getParent()->getFont(true), $fontHeight);
@@ -96,54 +100,65 @@ class LockerRoom extends ToernooiPdfPage
             $x,
             $y,
             $columnWidth,
-            $nRowHeight,
+            $rowHeight,
             Align::Center,
             "black"
         );
         $this->setFont($this->getParent()->getFont(), $fontHeight);
-        $y -= $nRowHeight;
-        foreach ($this->lockerRoom->getCompetitors() as $competitor) {
+        return $y - $rowHeight;
+    }
+
+    /**
+     * @param list<Competitor> $competitors
+     * @param float $yStart
+     * @param float $yEnd
+     * @throws \Zend_Pdf_Exception
+     */
+    protected function drawCompetitors(array &$competitors, float $yStart, float $yEnd): void
+    {
+        $x = $this->getPageMargin();
+        $columnWidth = $this->getDisplayWidth();
+
+        $fontHeight = $this->getCompetitorFontHeight($columnWidth);
+        $rowHeight = $fontHeight + ((int)(floor($fontHeight / 2)));
+
+        $y = $yStart;
+        while (($y - $rowHeight) >= $yEnd && $competitor = array_shift($competitors)) {
             $this->drawCell(
                 $competitor->getName(),
                 $x,
                 $y,
                 $columnWidth,
-                $nRowHeight,
+                $rowHeight,
                 Align::Center,
                 "black"
             );
-            $y -= $nRowHeight;
+            $y -= $rowHeight;
         }
-        return $y - $nRowHeight;
     }
 
-    protected function drawInfo(float $y): void
+    protected function drawInfo(): void
     {
-        $infoHeight = 150;
-        if (($y - $infoHeight) < $this->getPageMargin()) {
-            return;
-        }
-
         $center = $this->getWidth() / 2;
 
         $centerLeft = $center - ($this->getPageMargin() / 2);
 
-        $this->setFont($this->getParent()->getFont(), 20);
+        $this->setFont($this->getParent()->getFont(), self::InfoFontSize);
         $x = $this->getPageMargin();
         $maxWidth = (int)($centerLeft - $x);
-        $y = $this->getPageMargin() + $infoHeight * 2 / 3;
+        $y = $this->getPageMargin() + (self::InfoHeight * 2 / 3);
         $this->drawString("toernooi informatie:", $x, $y, $maxWidth, Align::Right);
 
-        $y = $this->getPageMargin() + $infoHeight * 1 / 3;
+        $y = $this->getPageMargin() + (self::InfoHeight * 1 / 3);
         $url = $this->getParent()->getUrl() . (string)$this->getParent()->getTournament()->getId();
         $this->drawString($url, $x, $y, $maxWidth, Align::Right);
 
         $centerRight = $center + ($this->getPageMargin() / 2);
 
-        $y = $this->getPageMargin() + $infoHeight;
-        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $infoHeight);
+        $y = $this->getPageMargin() + self::InfoHeight;
+        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, self::InfoHeight);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
-        $this->drawImage($img, $centerRight, $y - $infoHeight, $centerRight + $infoHeight, $y);
+        $this->drawImage($img, $centerRight, $y - self::InfoHeight, $centerRight + self::InfoHeight, $y);
     }
 }

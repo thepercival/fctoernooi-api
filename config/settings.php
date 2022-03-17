@@ -35,6 +35,9 @@ return [
     'router' => [
         'cache_file' => __DIR__ . '/../cache/router',
     ],
+    'payment' => [
+        'redirect_url' => $_ENV['WWW_URL'] . '/user/buycredits/'
+    ],
     // Doctrine settings
     'doctrine' => [
         'meta' => [
