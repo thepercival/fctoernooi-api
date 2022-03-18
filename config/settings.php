@@ -36,7 +36,10 @@ return [
         'cache_file' => __DIR__ . '/../cache/router',
     ],
     'payment' => [
-        'redirect_url' => $_ENV['WWW_URL'] . '/user/buycredits/'
+        'redirectUrl' => $_ENV['WWW_URL'] . '/user/buycredits/',
+        // // "https://webshop.example.org/order/12345/"
+        'webhookUrl' => $_ENV['WWW_URL'] . '/user/buycredits/'
+        // "https://webshop.example.org/mollie-webhook/",
     ],
     // Doctrine settings
     'doctrine' => [

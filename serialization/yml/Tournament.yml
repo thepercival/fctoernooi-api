@@ -9,7 +9,7 @@ FCToernooi\Tournament:
       type: boolean
     users:
       type: ArrayCollection<FCToernooi\TournamentUser>
-      groups: [users]
+      #groups: [users]
       read_only: true
     sponsors:
       type: ArrayCollection<FCToernooi\Sponsor>

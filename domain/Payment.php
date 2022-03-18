@@ -8,6 +8,8 @@ use FCToernooi\Payment\Type as PaymentType;
 
 class Payment
 {
+    public const EurosPerCredit = 0.5;
+
     public function __construct(
         private User $user,
         private PaymentType $type,

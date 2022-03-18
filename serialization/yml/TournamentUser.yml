@@ -2,7 +2,8 @@ FCToernooi\TournamentUser:
   exclusion_policy: ALL
   exclude: false
   properties:
-    user:
-      type: FCToernooi\User
     roles:
       type: integer
+    user:
+      type: FCToernooi\User
+      read_only: true

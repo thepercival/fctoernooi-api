@@ -16,18 +16,12 @@ class Role
     {
         if ($role === self::ADMIN) {
             return 'algemeen-beheerder';
-        } else {
-            if ($role === self::GAMERESULTADMIN) {
-                return 'uitslagen-invoerder';
-            } else {
-                if ($role === self::ROLEADMIN) {
-                    return 'rollen-beheerder';
-                } else {
-                    if ($role === self::REFEREE) {
-                        return 'scheidsrechter';
-                    }
-                }
-            }
+        } elseif ($role === self::GAMERESULTADMIN) {
+            return 'uitslagen-invoerder';
+        } elseif ($role === self::ROLEADMIN) {
+            return 'rollen-beheerder';
+        } elseif ($role === self::REFEREE) {
+            return 'scheidsrechter';
         }
         return 'onbekend';
     }

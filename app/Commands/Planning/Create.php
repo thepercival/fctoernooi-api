@@ -6,12 +6,14 @@ namespace App\Commands\Planning;
 
 use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
+use App\Middleware\JsonCacheMiddleware;
 use App\QueueService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
+use Memcached;
 use Psr\Container\ContainerInterface;
 use Sports\Competition;
 use Sports\Competition\Repository as CompetitionRepository;
@@ -38,6 +40,7 @@ class Create extends PlanningCommand
     protected TournamentRepository $tournamentRepos;
     protected CompetitionRepository $competitionRepos;
     protected EntityManagerInterface $entityManager;
+    private Memcached $memcached;
 
     protected bool $showSuccessful = false;
     protected bool $disableThrowOnTimeout = false;
@@ -49,6 +52,10 @@ class Create extends PlanningCommand
         /** @var Mailer|null $mailer */
         $mailer = $container->get(Mailer::class);
         $this->mailer = $mailer;
+
+        /** @var Memcached $memcached */
+        $memcached = $container->get(Memcached::class);
+        $this->memcached = $memcached;
 
         /** @var StructureRepository $structureRepos */
         $structureRepos = $container->get(StructureRepository::class);
@@ -220,6 +227,7 @@ class Create extends PlanningCommand
                 $eventPriority - 1
             );
             $conn->commit();
+            $this->memcached->delete(JsonCacheMiddleware::StructureCacheIdPrefix . (string)$tournament->getId());
         } catch (Exception $exception) {
             $conn->rollBack();
             throw $exception;

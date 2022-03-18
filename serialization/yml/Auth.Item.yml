@@ -5,4 +5,4 @@ FCToernooi\Auth\Item:
     token:
       type: string
     userId:
-      type: int
+      type: integer

@@ -15,7 +15,6 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Selective\Config\Configuration;
 
 final class UserAction extends Action
 {
@@ -23,21 +22,20 @@ final class UserAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private UserRepository $userRepos,
-        private AuthSyncService $syncService,
-        private Configuration $config
+        private AuthSyncService $syncService
     ) {
         parent::__construct($logger, $serializer);
     }
 
     protected function getDeserializationContext(): DeserializationContext
     {
-        $serGroups = ['Default', 'roleadmin'];
+        $serGroups = ['Default'];
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
     protected function getSerializationContext(): SerializationContext
     {
-        $serGroups = ['Default', 'roleadmin', 'self'];
+        $serGroups = ['Default', 'self'];
         return SerializationContext::create()->setGroups($serGroups);
     }
 
@@ -62,6 +60,28 @@ final class UserAction extends Action
             return new ErrorResponse($exception->getMessage(), 400);
         }
     }
+
+//    /**
+//     * @param Request $request
+//     * @param Response $response
+//     * @param array<string, int|string> $args
+//     * @return Response
+//     */
+//    public function fetchEmailaddress(Request $request, Response $response, array $args): Response
+//    {
+//        try {
+//            /** @var User $user */
+//            $user = $request->getAttribute('user');
+//
+//            if ($user->getId() !== (int)$args['userId']) {
+//                throw new Exception('de ingelogde gebruiker en de op te halen gebruiker zijn verschillend', E_ERROR);
+//            }
+//            $json = $this->serializer->serialize($user, 'json', $this->getSerializationContext());
+//            return $this->respondWithJson($response, $json);
+//        } catch (Exception $exception) {
+//            return new ErrorResponse($exception->getMessage(), 400);
+//        }
+//    }
 
     /**
      * @param Request $request
@@ -97,57 +117,6 @@ final class UserAction extends Action
                     $this->getSerializationContext()
                 )
             );
-        } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array<string, int|string> $args
-     * @return Response
-     */
-    public function buyCredits(Request $request, Response $response, array $args): Response
-    {
-        try {
-//            /** @var User $userAuth */
-//            $userAuth = $request->getAttribute('user');
-//
-//            if ($userAuth->getId() !== $args['userId']) {
-//                throw new Exception('de ingelogde gebruiker en de aan te passen gebruiker zijn verschillend', E_ERROR);
-//            }
-//
-//            /** @var Payment $payment */
-//            $payment = $this->serializer->deserialize(
-//                $this->getRawData($request),
-//                Payment::class,
-//                'json'
-//            );
-//
-//            $payment
-//
-//            $mollie = new MollieApiClient();
-//            $mollie->setApiKey( $this->config->getString('payment.apikey') );
-//
-//            $payment = $mollie->payments->create([
-//                 "amount" => [
-//                     "currency" => "EUR",
-//                     "value" => "10.00"
-//                 ],
-//                 "description" => "My first API payment",
-//                 "redirectUrl" => "https://webshop.example.org/order/12345/",
-//                 "webhookUrl"  => "https://webshop.example.org/mollie-webhook/",
-//            ]);
-//
-//            return $this->respondWithJson(
-//                $response,
-//                $this->serializer->serialize(
-//                    $userAuth,
-//                    'json',
-//                    $this->getSerializationContext()
-//                )
-//            );
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }

@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Copiers\TournamentCopier;
 use App\Export\Pdf\Document as PdfDocument;
+use App\Middleware\JsonCacheMiddleware;
 use App\QueueService;
 use App\Response\ErrorResponse;
 use DateTimeImmutable;
@@ -23,6 +24,7 @@ use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -44,6 +46,7 @@ final class TournamentAction extends Action
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private CreditActionRepository $creditActionRepos,
+        private Memcached $memcached,
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
@@ -78,15 +81,22 @@ final class TournamentAction extends Action
         /** @var User|null $user */
         $user = $request->getAttribute('user');
         try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute('tournament');
-//            $r = \Doctrine\DBAL\Types\Type::getTypesMap();
-//            $x = $tournament->getCompetition()->getStartDateTime();
-            $json = $this->serializer->serialize(
-                $tournament,
-                'json',
-                $this->getSerializationContext($tournament, $user)
-            );
+            $tournamentId = (int)$args['tournamentId'];
+            $cacheId = JsonCacheMiddleware::TournamentCacheIdPrefix . $tournamentId;
+
+            $json = $this->memcached->get($cacheId);
+            if ($json === false || $json === Memcached::RES_NOTFOUND) {
+                $tournament = $this->tournamentRepos->find($tournamentId);
+                if ($tournament === null) {
+                    throw new \Exception('unknownn tournamentId', E_ERROR);
+                }
+                $json = $this->serializer->serialize(
+                    $tournament,
+                    'json',
+                    $this->getSerializationContext($tournament, $user)
+                );
+                $this->memcached->set($cacheId, $json, 60 * 60 * 24);
+            }
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400);
@@ -95,7 +105,7 @@ final class TournamentAction extends Action
 
     protected function getDeserializationContext(User $user = null): DeserializationContext
     {
-        $serGroups = ['Default','noReference'];
+        $serGroups = ['Default', 'noReference'];
 
         if ($user !== null) {
             $serGroups[] = 'privacy';
@@ -103,21 +113,27 @@ final class TournamentAction extends Action
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
+    // admin
+//    object authmatrix
+
+    // roleadmin: provides fctoernooi\user::emailaddress, logisch
+
+    // privacy: Sports\Competition\Referee::emailaddress
     protected function getSerializationContext(Tournament $tournament, User $user = null): SerializationContext
     {
-        $serGroups = ['Default','noReference'];
-        if ($user !== null) {
-            $tournamentUser = $tournament->getUser($user);
-            if ($tournamentUser !== null) {
-                $serGroups[] = 'users';
-                if ($tournamentUser->hasRoles(Role::ADMIN)) {
-                    $serGroups[] = 'privacy';
-                }
-                if ($tournamentUser->hasRoles(Role::ROLEADMIN)) {
-                    $serGroups[] = 'roleadmin';
-                }
-            }
-        }
+        $serGroups = ['Default', 'noReference'];
+//        if ($user !== null) {
+//            $tournamentUser = $tournament->getUser($user);
+//            if ($tournamentUser !== null) {
+//                $serGroups[] = 'users';
+//                if ($tournamentUser->hasRoles(Role::ADMIN)) {
+//                    $serGroups[] = 'privacy';
+//                }
+//                if ($tournamentUser->hasRoles(Role::ROLEADMIN)) {
+//                    $serGroups[] = 'roleadmin';
+//                }
+//            }
+//        }
         return SerializationContext::create()->setGroups($serGroups);
     }
 

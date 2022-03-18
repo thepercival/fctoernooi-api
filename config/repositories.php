@@ -30,10 +30,8 @@ use Sports\Competition\Referee\Repository as RefereeRepository;
 use Sports\Competition\Repository as CompetitionRepository;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
-use Sports\Game as Game;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Against\Repository as AgainstGameRepository;
-use Sports\Game\Repository as GameRepository;
 use Sports\Game\Together as TogetherGame;
 use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\League;
@@ -176,12 +174,6 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(Schedule::class);
         return new ScheduleRepository($entityManager, $metaData);
-    },
-    GameRepository::class => function (ContainerInterface $container): GameRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Game::class);
-        return new GameRepository($entityManager, $metaData);
     },
     AgainstGameRepository::class => function (ContainerInterface $container): AgainstGameRepository {
         /** @var EntityManagerInterface $entityManager */

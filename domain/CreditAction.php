@@ -10,8 +10,7 @@ use SportsHelpers\Identifiable;
 
 class CreditAction extends Identifiable
 {
-    public const MIN_LENGTH_NAME = 1;
-    public const MAX_LENGTH_NAME = 6;
+    protected string|null $paymentId = null;
 
     public function __construct(
         protected User $user,
@@ -39,5 +38,15 @@ class CreditAction extends Identifiable
     public function getAtDateTime(): DateTimeImmutable
     {
         return $this->atDateTime;
+    }
+
+    public function getPaymentId(): string|null
+    {
+        return $this->paymentId;
+    }
+
+    public function setPaymentId(string $paymentId): void
+    {
+        $this->paymentId = $paymentId;
     }
 }

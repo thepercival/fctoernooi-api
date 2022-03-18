@@ -13,6 +13,7 @@ use FCToernooi\CreditAction\Name;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
+use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -101,7 +102,7 @@ final class AuthAction extends Action
             if ($emailaddress === false) {
                 throw new Exception("het emailadres \"" . $authData->emailaddress . "\" is onjuist");
             }
-            $emailAddress = strtolower(trim($emailaddress));
+            $emailaddress = strtolower(trim($emailaddress));
             if (!property_exists($authData, 'password') || strlen($authData->password) === 0) {
                 throw new Exception('het wachtwoord is niet opgegeven');
             }
@@ -236,9 +237,16 @@ final class AuthAction extends Action
 
             $this->creditActionRepos->doAction($user, Name::ValidateReward, 3);
 
-            return $response->withStatus(200);
+            $json = $this->serializer->serialize($user, 'json', $this->getSerializationContext());
+            return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
+    }
+
+    protected function getSerializationContext(): SerializationContext
+    {
+        $serGroups = ['Default', 'self'];
+        return SerializationContext::create()->setGroups($serGroups);
     }
 }

@@ -6,6 +6,7 @@
         <field name="action" column="action" type="enum_CreditAction" length="20" nullable="false" unique="false"/>
         <field name="nrOfCredits" column="nrOfCredits" type="smallint" nullable="false" unique="false"/>
         <field name="atDateTime" column="atDateTime" type="datetime_immutable" nullable="false" unique="false"/>
+        <field name="paymentId" column="paymentId" type="string" length="32" nullable="true" unique="false"/>
         <many-to-one field="user" target-entity="FCToernooi\User" inversed-by="creditActions">
             <join-columns>
                 <join-column name="userId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>

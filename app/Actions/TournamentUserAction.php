@@ -6,9 +6,11 @@ namespace App\Actions;
 
 use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\TournamentUser;
 use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
+use FCToernooi\User;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -89,6 +91,38 @@ final class TournamentUserAction extends Action
             $this->tournamentUserRepos->remove($tournamentUser);
 
             return $response->withStatus(200);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function getEmailaddress(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $roleAdmin = $tournament->getUser($user);
+            if ($roleAdmin === null || !$roleAdmin->hasRoles(Role::ROLEADMIN)) {
+                throw new \Exception('no permission to get emailaddress', E_ERROR);
+            }
+
+            $tournamentUser = $this->tournamentUserRepos->find($args['tournamentUserId']);
+            if ($tournamentUser === null) {
+                throw new \Exception('no user could be found', E_ERROR);
+            }
+
+            $emailaddress = $tournamentUser->getUser()->getEmailaddress();
+            $json = $this->serializer->serialize($emailaddress, 'json');
+            return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }

@@ -4,7 +4,7 @@ FCToernooi\User:
   properties:
     emailaddress:
       type: string
-      groups: [ roleadmin ]
+      groups: [ self ]
     validated:
       type: bool
       groups: [ self ]

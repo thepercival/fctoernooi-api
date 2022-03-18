@@ -31,6 +31,7 @@ use App\Middleware\Authorization\Tournament\Admin\RoleAdminMiddleware as Tournam
 use App\Middleware\Authorization\Tournament\PublicMiddleware as TournamentPublicAuthMiddleware;
 use App\Middleware\Authorization\Tournament\UserMiddleware as TournamentUserAuthMiddleware;
 use App\Middleware\Authorization\UserMiddleware as UserAuthMiddleware;
+use App\Middleware\JsonCacheMiddleware;
 use App\Middleware\TournamentMiddleware;
 use App\Middleware\UserMiddleware;
 use App\Middleware\VersionMiddleware;
@@ -109,9 +110,16 @@ return function (App $app): void {
             $group->get('', UserAction::class . ':fetchOne');
             $group->put('', UserAction::class . ':edit');
             $group->delete('', UserAction::class . ':remove');
-            $group->delete('', UserAction::class . ':remove');
-            $group->options('/buycredits', UserAction::class . ':options');
-            $group->post('/buycredits', UserAction::class . ':buyCredits');
+        }
+    )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
+
+    $app->group(
+        '/payment/',
+        function (Group $group): void {
+            $group->options('idealmethods', UserAction::class . ':options');
+            $group->get('idealmethods', UserAction::class . ':fetchIDealMethods');
+            $group->options('buycredits', UserAction::class . ':options');
+            $group->post('buycredits', UserAction::class . ':buyCredits');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 
@@ -122,17 +130,14 @@ return function (App $app): void {
             $group->post('', TournamentAction::class . ':add')->add(UserMiddleware::class);
             $group->options('/{tournamentId}', TournamentAction::class . ':options');
             $group->get('/{tournamentId}', TournamentAction::class . ':fetchOne')
-                ->add(UserMiddleware::class)->add(
-                    TournamentMiddleware::class
-                );
+                ->add(UserMiddleware::class)->add(TournamentMiddleware::class);
             $group->put('/{tournamentId}', TournamentAction::class . ':edit')
-                ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                    TournamentMiddleware::class
-                );
+                ->add(TournamentAdminAuthMiddleware::class)
+                ->add(UserMiddleware::class)
+                ->add(TournamentMiddleware::class);
             $group->delete('/{tournamentId}', TournamentAction::class . ':remove')
-                ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                    TournamentMiddleware::class
-                );
+                ->add(TournamentAdminAuthMiddleware::class)
+                ->add(UserMiddleware::class)->add(TournamentMiddleware::class);
 
             $group->group(
                 '/{tournamentId}/',
@@ -289,16 +294,22 @@ return function (App $app): void {
                     $group->group(
                         'planning/{roundNumber}',
                         function (Group $group): void {
-                            $group->options('', PlanningAction::class . ':options');
-                            $group->get('', PlanningAction::class . ':fetch');
                             $group->options('/create', PlanningAction::class . ':options');
                             $group->post('/create', PlanningAction::class . ':create');
                             $group->options('/reschedule', PlanningAction::class . ':options');
                             $group->post('/reschedule', PlanningAction::class . ':reschedule');
-                            $group->options('/progress', PlanningAction::class . ':options');
-                            $group->get('/progress', PlanningAction::class . ':progress');
                         }
-                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                    )
+                        ->add(TournamentAdminAuthMiddleware::class)
+                        ->add(UserMiddleware::class)
+                        ->add(TournamentMiddleware::class);
+
+                    $group->options('planning/{roundNumber}', PlanningAction::class . ':options');
+                    $group->get('planning/{roundNumber}', PlanningAction::class . ':fetch')->add(
+                        TournamentMiddleware::class
+                    );
+                    $group->options('planning/{roundNumber}/progress', PlanningAction::class . ':options');
+                    $group->get('planning/{roundNumber}/progress', PlanningAction::class . ':progress')->add(
                         TournamentMiddleware::class
                     );
 
@@ -356,6 +367,15 @@ return function (App $app): void {
                             $group->options('/{tournamentUserId}', TournamentUserAction::class . ':options');
                             $group->put('/{tournamentUserId}', TournamentUserAction::class . ':edit');
                             $group->delete('/{tournamentUserId}', TournamentUserAction::class . ':remove');
+
+                            $group->options(
+                                '/{tournamentUserId}/emailaddress',
+                                TournamentUserAction::class . ':options'
+                            );
+                            $group->get(
+                                '/{tournamentUserId}/emailaddress',
+                                TournamentUserAction::class . ':getEmailaddress'
+                            );
                         }
                     )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
@@ -399,7 +419,7 @@ return function (App $app): void {
                 }
             );
         }
-    )->add(VersionMiddleware::class);
+    )->add(VersionMiddleware::class)->add(JsonCacheMiddleware::class);
 
     $app->group(
         '',

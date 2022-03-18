@@ -36,7 +36,7 @@ class SyncService
         if ($emailaddress === null) {
             return null;
         }
-        $user = $this->userRepos->findOneBy(["emailaddress" => $emailaddress]);
+        $user = $this->userRepos->findOneBy(['emailaddress' => $emailaddress]);
 
         if ($user !== null) {
             $tournamentUser = $tournament->getUser($user);
@@ -55,10 +55,10 @@ class SyncService
         }
 
         $invitation = $this->tournamentInvitationRepos->findOneBy(
-            ["tournament" => $tournament, "emailaddress" => $emailaddress]
+            ['tournament' => $tournament, 'emailaddress' => $emailaddress]
         );
         $newInvitation = false;
-        ;
+
         if ($invitation === null) {
             $invitation = new TournamentInvitation($tournament, $emailaddress, $roles);
             $invitation->setCreatedDateTime(new DateTimeImmutable());
@@ -78,7 +78,7 @@ class SyncService
         if ($emailaddress === null) {
             return;
         }
-        $user = $this->userRepos->findOneBy(["emailaddress" => $emailaddress]);
+        $user = $this->userRepos->findOneBy(['emailaddress' => $emailaddress]);
 
         if ($user !== null) {
             $tournamentUser = $tournament->getUser($user);
@@ -97,7 +97,7 @@ class SyncService
         }
 
         $invitation = $this->tournamentInvitationRepos->findOneBy(
-            ["tournament" => $tournament, "emailaddress" => $emailaddress]
+            ['tournament' => $tournament, 'emailaddress' => $emailaddress]
         );
         if ($invitation === null) {
             return;
