@@ -70,6 +70,9 @@ class Service
         $salt = bin2hex(random_bytes(15));
         $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
         $user = new User($emailaddress, $salt, $hashedPassword);
+        // @TODO CDK REMOVE LINE
+        $user->setNrOfCredits(3);
+
         $this->userRepos->save($user, true);
 
         $this->creditActionRepos->doAction($user, Name::CreateAccountReward, 3);

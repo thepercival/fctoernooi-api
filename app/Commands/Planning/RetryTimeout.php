@@ -131,7 +131,7 @@ class RetryTimeout extends PlanningCommand
         $planningOutput->outputInput(
             $planningInput,
             'processing timeouts input(' . ((string)$planningInput->getId()) . '): ',
-            " .."
+            '..'
         );
         $oldBestPlanning = $planningInput->getBestPlanning(null);
         $this->createSchedules($planningInput);

@@ -19,7 +19,7 @@
           </join-columns>
       </many-to-one>
       <unique-constraints>
-          <unique-constraint columns="tournamentId,userid" name="main_u_idx"/>
+          <unique-constraint columns="tournamentId,userId" name="main_u_idx"/>
       </unique-constraints>
   </entity>
 </doctrine-mapping>

@@ -6,6 +6,7 @@ namespace FCToernooi\Auth;
 
 use App\Mailer;
 use DateTimeImmutable;
+use FCToernooi\CacheService;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
@@ -23,6 +24,7 @@ class SyncService
         private TournamentUserRepository $tournamentUserRepos,
         private TournamentInvitationRepository $tournamentInvitationRepos,
         private Mailer $mailer,
+        private CacheService $cacheService,
         private Configuration $config
     ) {
     }
@@ -48,6 +50,8 @@ class SyncService
                 $tournamentUser->setRoles($tournamentUser->getRoles() | $roles);
             }
             $this->tournamentUserRepos->save($tournamentUser);
+            $this->cacheService->resetTournament((int)$tournament->getId());
+
             if ($sendMail && $newUser) {
                 $this->sendEmailTournamentUser($tournamentUser);
             }
@@ -93,6 +97,7 @@ class SyncService
                 $tournamentUser->setRoles($tournamentUser->getRoles() - $rolesToRemove);
                 $this->tournamentUserRepos->save($tournamentUser);
             }
+            $this->cacheService->resetTournament((int)$tournament->getId());
             return;
         }
 

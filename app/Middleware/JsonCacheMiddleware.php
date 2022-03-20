@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use FCToernooi\CacheService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,11 +14,10 @@ use Slim\Routing\RouteContext;
 
 class JsonCacheMiddleware implements MiddlewareInterface
 {
-    public const TournamentCacheIdPrefix = 'json-tournament-';
-    public const StructureCacheIdPrefix = 'json-structure-';
+
 
     public function __construct(
-        protected \Memcached $memcached,
+        private CacheService $cacheService,
         protected TournamentRepository $tournamentRepos
     ) {
     }
@@ -35,10 +35,10 @@ class JsonCacheMiddleware implements MiddlewareInterface
 
         $ignoreCacheReset = $request->getHeaderLine('X-Ignore-Cache-Reset');
         if ($ignoreCacheReset !== 'tournament') {
-            $this->memcached->delete(self::TournamentCacheIdPrefix . $tournamentId);
+            $this->cacheService->resetTournament($tournamentId);
         }
         if ($ignoreCacheReset !== 'structure') {
-            $this->memcached->delete(self::StructureCacheIdPrefix . $tournamentId);
+            $this->cacheService->resetStructure($tournamentId);
         }
 
         return $handler->handle($request);

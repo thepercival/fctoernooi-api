@@ -15,7 +15,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
-use Sports\Competition;
 use Sports\Competition\Field;
 use Sports\Competition\Field\Repository as FieldRepository;
 use Sports\Competition\Repository as CompetitionRepos;

@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
-use App\Middleware\JsonCacheMiddleware;
 use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -27,7 +26,7 @@ final class StructureAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
-        private Memcached $memcached,
+        private CacheService $cacheService,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos
     ) {
@@ -61,17 +60,16 @@ final class StructureAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $cacheId = JsonCacheMiddleware::StructureCacheIdPrefix . (string)$tournament->getId();
-
-            $json = $this->memcached->get($cacheId);
-            if ($json === false || $json === Memcached::RES_NOTFOUND) {
+            $tournamentId = (int)$tournament->getId();
+            $json = $this->cacheService->getStructure($tournamentId);
+            if ($json === false) {
                 $structure = $this->structureRepos->getStructure($competition);
                 $json = $this->serializer->serialize(
                     $structure,
                     'json',
                     $this->getSerializationContext()
                 );
-                $this->memcached->set($cacheId, $json, 60 * 60 * 24);
+                $this->cacheService->setStructure($tournamentId, $json);
             }
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {

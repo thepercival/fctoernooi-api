@@ -9,7 +9,6 @@ use Doctrine\ORM\EntityRepository;
 use FCToernooi\CreditAction;
 use FCToernooi\CreditAction\Name as CreditActionName;
 use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use SportsHelpers\Repository as BaseRepository;
 
 /**
@@ -31,17 +30,19 @@ class Repository extends EntityRepository
         if ($atDateTime === null) {
             $atDateTime = new DateTimeImmutable();
         }
+        // @TODO CDK PAYMENT
         $creditAction = new CreditAction($user, $action, $nrOfCredits, $atDateTime);
-        $this->save($creditAction, true);
-        if (!$user->getValidated() && $action === CreditActionName::CreateTournament) {
-            $user->setValidateIn($user->getValidateIn() + $nrOfCredits);
-        }
-        $user->setNrOfCredits($user->getNrOfCredits() + $nrOfCredits);
+//        $this->save($creditAction, true);
 
-        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
-        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+//        if (!$user->getValidated() && $action === CreditActionName::CreateTournament) {
+//            $user->setValidateIn($user->getValidateIn() + $nrOfCredits);
+//        }
+        // $user->setNrOfCredits($user->getNrOfCredits() + $nrOfCredits);
 
-        $userRepos->save($user, true);
+//        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+//        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+//
+//        $userRepos->save($user, true);
         return $creditAction;
     }
 }

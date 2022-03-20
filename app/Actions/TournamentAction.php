@@ -6,12 +6,12 @@ namespace App\Actions;
 
 use App\Copiers\TournamentCopier;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Middleware\JsonCacheMiddleware;
 use App\QueueService;
 use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use FCToernooi\CacheService;
 use FCToernooi\CreditAction\Name as CreditActionName;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Recess;
@@ -24,7 +24,6 @@ use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -46,7 +45,7 @@ final class TournamentAction extends Action
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private CreditActionRepository $creditActionRepos,
-        private Memcached $memcached,
+        private CacheService $cacheService,
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
@@ -82,10 +81,8 @@ final class TournamentAction extends Action
         $user = $request->getAttribute('user');
         try {
             $tournamentId = (int)$args['tournamentId'];
-            $cacheId = JsonCacheMiddleware::TournamentCacheIdPrefix . $tournamentId;
-
-            $json = $this->memcached->get($cacheId);
-            if ($json === false || $json === Memcached::RES_NOTFOUND) {
+            $json = $this->cacheService->getTournament($tournamentId);
+            if ($json === false) {
                 $tournament = $this->tournamentRepos->find($tournamentId);
                 if ($tournament === null) {
                     throw new \Exception('unknownn tournamentId', E_ERROR);
@@ -95,7 +92,7 @@ final class TournamentAction extends Action
                     'json',
                     $this->getSerializationContext($tournament, $user)
                 );
-                $this->memcached->set($cacheId, $json, 60 * 60 * 24);
+                $this->cacheService->setTournament($tournamentId, $json);
             }
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
@@ -136,36 +133,6 @@ final class TournamentAction extends Action
 //        }
         return SerializationContext::create()->setGroups($serGroups);
     }
-
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array<string, int|string> $args
-     * @return Response
-     */
-    public function getUserRefereeId(Request $request, Response $response, array $args): Response
-    {
-        try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute('tournament');
-            /** @var User $user */
-            $user = $request->getAttribute('user');
-
-            $refereeId = 0;
-            if (strlen($user->getEmailaddress()) > 0) {
-                $referee = $tournament->getReferee($user->getEmailaddress());
-                if ($referee !== null) {
-                    $refereeId = $referee->getId();
-                }
-            }
-
-            $json = $this->serializer->serialize($refereeId, 'json');
-            return $this->respondWithJson($response, $json);
-        } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
-        }
-    }
-
 
     /**
      * @param Request $request
@@ -359,6 +326,35 @@ final class TournamentAction extends Action
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             $conn->rollBack();
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function getUserRefereeId(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $refereeId = 0;
+            if (strlen($user->getEmailaddress()) > 0) {
+                $referee = $tournament->getReferee($user->getEmailaddress());
+                if ($referee !== null) {
+                    $refereeId = $referee->getId();
+                }
+            }
+
+            $json = $this->serializer->serialize($refereeId, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422);
         }
     }

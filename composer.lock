@@ -50,16 +50,16 @@
           "email": "mail@dasprids.de",
           "homepage": "https://dasprids.de/",
           "role": "Developer"
-                }
-            ],
-            "description": "BaconQrCode is a QR code generator for PHP.",
-            "homepage": "https://github.com/Bacon/BaconQrCode",
-            "support": {
-                "issues": "https://github.com/Bacon/BaconQrCode/issues",
-              "source": "https://github.com/Bacon/BaconQrCode/tree/2.0.7"
-            },
+        }
+      ],
+      "description": "BaconQrCode is a QR code generator for PHP.",
+      "homepage": "https://github.com/Bacon/BaconQrCode",
+      "support": {
+        "issues": "https://github.com/Bacon/BaconQrCode/issues",
+        "source": "https://github.com/Bacon/BaconQrCode/tree/2.0.7"
+      },
       "time": "2022-03-14T02:02:36+00:00"
-        },
+    },
         {
             "name": "cakephp/chronos",
             "version": "2.3.0",
@@ -102,16 +102,16 @@
                 },
                 {
                     "name": "The CakePHP Team",
-                    "homepage": "http://cakephp.org"
+                  "homepage": "http://cakephp.org"
                 }
             ],
-            "description": "A simple API extension for DateTime.",
-            "homepage": "http://cakephp.org",
-            "keywords": [
-                "date",
-                "datetime",
-              "time"
-            ],
+          "description": "A simple API extension for DateTime.",
+          "homepage": "http://cakephp.org",
+          "keywords": [
+            "date",
+            "datetime",
+            "time"
+          ],
           "support": {
             "irc": "irc://irc.freenode.org/cakephp",
             "issues": "https://github.com/cakephp/chronos/issues",
@@ -206,16 +206,16 @@
       "dist": {
         "type": "zip",
         "url": "https://api.github.com/repos/DASPRiD/Enum/zipball/5abf82f213618696dda8e3bf6f64dd042d8542b2",
-                "reference": "5abf82f213618696dda8e3bf6f64dd042d8542b2",
-                "shasum": ""
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^7 | ^8 | ^9",
-                "squizlabs/php_codesniffer": "^3.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
+        "reference": "5abf82f213618696dda8e3bf6f64dd042d8542b2",
+        "shasum": ""
+      },
+      "require-dev": {
+        "phpunit/phpunit": "^7 | ^8 | ^9",
+        "squizlabs/php_codesniffer": "^3.4"
+      },
+      "type": "library",
+      "autoload": {
+        "psr-4": {
                     "DASPRiD\\Enum\\": "src/"
                 }
             },
@@ -1122,14 +1122,14 @@
                 "MIT"
             ],
             "authors": [
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
-                },
-                {
-                    "name": "Roman Borschel",
-                  "email": "roman@code-factory.org"
-                },
+              {
+                "name": "Guilherme Blanco",
+                "email": "guilhermeblanco@gmail.com"
+              },
+              {
+                "name": "Roman Borschel",
+                "email": "roman@code-factory.org"
+              },
               {
                 "name": "Benjamin Eberlei",
                 "email": "kontakt@beberlei.de"
@@ -1201,16 +1201,16 @@
       "notification-url": "https://packagist.org/downloads/",
       "license": [
         "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
-                },
-                {
-                    "name": "Roman Borschel",
-                    "email": "roman@code-factory.org"
-                },
+      ],
+      "authors": [
+        {
+          "name": "Guilherme Blanco",
+          "email": "guilhermeblanco@gmail.com"
+        },
+        {
+          "name": "Roman Borschel",
+          "email": "roman@code-factory.org"
+        },
                 {
                     "name": "Benjamin Eberlei",
                     "email": "kontakt@beberlei.de"
@@ -1726,20 +1726,20 @@
             ],
             "time": "2021-11-21T21:41:47+00:00"
         },
-        {
-            "name": "guzzlehttp/guzzle",
-            "version": "7.4.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "ee0a041b1760e6a53d2a39c8c34115adc2af2c79"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ee0a041b1760e6a53d2a39c8c34115adc2af2c79",
-                "reference": "ee0a041b1760e6a53d2a39c8c34115adc2af2c79",
-                "shasum": ""
-            },
+    {
+      "name": "guzzlehttp/guzzle",
+      "version": "7.4.2",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/guzzle/guzzle.git",
+        "reference": "ac1ec1cd9b5624694c3a40be801d94137afb12b4"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ac1ec1cd9b5624694c3a40be801d94137afb12b4",
+        "reference": "ac1ec1cd9b5624694c3a40be801d94137afb12b4",
+        "shasum": ""
+      },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/promises": "^1.5",
@@ -1832,7 +1832,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/7.4.1"
+              "source": "https://github.com/guzzle/guzzle/tree/7.4.2"
             },
             "funding": [
                 {
@@ -1848,7 +1848,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-12-06T18:43:05+00:00"
+      "time": "2022-03-20T14:16:28+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -1934,20 +1934,20 @@
             ],
             "time": "2021-10-22T20:56:57+00:00"
         },
-        {
-            "name": "guzzlehttp/psr7",
-            "version": "2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/guzzle/psr7.git",
-                "reference": "089edd38f5b8abba6cb01567c2a8aaa47cec4c72"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/089edd38f5b8abba6cb01567c2a8aaa47cec4c72",
-                "reference": "089edd38f5b8abba6cb01567c2a8aaa47cec4c72",
-                "shasum": ""
-            },
+    {
+      "name": "guzzlehttp/psr7",
+      "version": "2.2.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/guzzle/psr7.git",
+        "reference": "6565c7e0db3231e92dd5ca3bed448b30fbc89eb1"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/guzzle/psr7/zipball/6565c7e0db3231e92dd5ca3bed448b30fbc89eb1",
+        "reference": "6565c7e0db3231e92dd5ca3bed448b30fbc89eb1",
+        "shasum": ""
+      },
             "require": {
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-factory": "^1.0",
@@ -1969,7 +1969,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.1-dev"
+                  "dev-master": "2.2-dev"
                 }
             },
             "autoload": {
@@ -2031,7 +2031,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/2.1.0"
+              "source": "https://github.com/guzzle/psr7/tree/2.2.0"
             },
             "funding": [
                 {
@@ -2047,7 +2047,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-10-06T17:43:30+00:00"
+      "time": "2022-03-20T13:51:08+00:00"
         },
         {
             "name": "jms/metadata",
@@ -2375,15 +2375,15 @@
                 "guzzlehttp/psr7": "^2.0",
                 "laminas/laminas-diactoros": "^2.4",
                 "nyholm/psr7": "^1.0",
-                "oscarotero/php-cs-fixer-config": "^1.0",
-                "phpstan/phpstan": "^0.12",
-                "phpunit/phpunit": "^8|^9",
-                "slim/psr7": "^1.4",
-                "squizlabs/php_codesniffer": "^3.5",
-                "sunrise/http-message": "^1.0",
-                "sunrise/http-server-request": "^1.0",
-                "sunrise/stream": "^1.0.15",
-                "sunrise/uri": "^1.0.15"
+              "oscarotero/php-cs-fixer-config": "^1.0",
+              "phpstan/phpstan": "^0.12",
+              "phpunit/phpunit": "^8|^9",
+              "slim/psr7": "^1.4",
+              "squizlabs/php_codesniffer": "^3.5",
+              "sunrise/http-message": "^1.0",
+              "sunrise/http-server-request": "^1.0",
+              "sunrise/stream": "^1.0.15",
+              "sunrise/uri": "^1.0.15"
             },
           "type": "library",
           "autoload": {
@@ -2559,16 +2559,16 @@
       "type": "library",
       "extra": {
         "branch-alias": {
-                    "dev-main": "2.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Monolog\\": "src/Monolog"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
+          "dev-main": "2.x-dev"
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Monolog\\": "src/Monolog"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
                 "MIT"
             ],
             "authors": [
@@ -4158,16 +4158,16 @@
                     "email": "hello@joshlockhart.com",
                     "homepage": "http://joshlockhart.com"
                 },
-                {
-                    "name": "Andrew Smith",
-                    "email": "a.smith@silentworks.co.uk",
-                    "homepage": "http://silentworks.co.uk"
-                },
-                {
-                  "name": "Rob Allen",
-                  "email": "rob@akrabat.com",
-                  "homepage": "http://akrabat.com"
-                },
+              {
+                "name": "Andrew Smith",
+                "email": "a.smith@silentworks.co.uk",
+                "homepage": "http://silentworks.co.uk"
+              },
+              {
+                "name": "Rob Allen",
+                "email": "rob@akrabat.com",
+                "homepage": "http://akrabat.com"
+              },
               {
                 "name": "Pierre Berube",
                 "email": "pierre@lgse.com",
@@ -4239,16 +4239,16 @@
       "autoload": {
         "psr-4": {
           "Slim\\": "Slim"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Josh Lockhart",
-                    "email": "hello@joshlockhart.com",
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
+        {
+          "name": "Josh Lockhart",
+          "email": "hello@joshlockhart.com",
                     "homepage": "https://joshlockhart.com"
                 },
                 {
@@ -5835,16 +5835,16 @@
         },
     {
       "name": "thepercival/php-sports",
-      "version": "v1.0.71",
+      "version": "v1.0.76",
       "source": {
         "type": "git",
         "url": "https://github.com/thepercival/php-sports.git",
-        "reference": "f423356da1497fadab9ae9b17dbe103d2a58817c"
+        "reference": "18d19711db23926dcf4877adcd9dc22a85c456d8"
       },
       "dist": {
         "type": "zip",
-        "url": "https://api.github.com/repos/thepercival/php-sports/zipball/f423356da1497fadab9ae9b17dbe103d2a58817c",
-        "reference": "f423356da1497fadab9ae9b17dbe103d2a58817c",
+        "url": "https://api.github.com/repos/thepercival/php-sports/zipball/18d19711db23926dcf4877adcd9dc22a85c456d8",
+        "reference": "18d19711db23926dcf4877adcd9dc22a85c456d8",
         "shasum": ""
       },
       "require": {
@@ -5877,16 +5877,16 @@
           "includes": [
             "extension.neon"
           ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Sports\\": "domain/",
-                    "Sports\\SerializationHandler\\": "serialization/handler",
-                    "Sports\\SerializationSubscriberEvent\\": "serialization/subscriberevent"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
+        }
+      },
+      "autoload": {
+        "psr-4": {
+          "Sports\\": "domain/",
+          "Sports\\SerializationHandler\\": "serialization/handler",
+          "Sports\\SerializationSubscriberEvent\\": "serialization/subscriberevent"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-2.0-or-later"
             ],
@@ -5905,9 +5905,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-              "source": "https://github.com/thepercival/php-sports/tree/v1.0.71"
+              "source": "https://github.com/thepercival/php-sports/tree/v1.0.76"
             },
-      "time": "2022-03-14T23:42:27+00:00"
+      "time": "2022-03-20T20:35:37+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -5975,20 +5975,20 @@
             },
             "time": "2022-03-11T13:03:09+00:00"
         },
-        {
-            "name": "thepercival/php-sports-planning",
-            "version": "v1.0.68",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "3eb62d807e1adc3053e99103db470459b64da9b2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/3eb62d807e1adc3053e99103db470459b64da9b2",
-                "reference": "3eb62d807e1adc3053e99103db470459b64da9b2",
-                "shasum": ""
-            },
+    {
+      "name": "thepercival/php-sports-planning",
+      "version": "v1.0.71",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/thepercival/php-sports-planning.git",
+        "reference": "f8984c2a2b54d574742c6b56b500d51d17220727"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/f8984c2a2b54d574742c6b56b500d51d17220727",
+        "reference": "f8984c2a2b54d574742c6b56b500d51d17220727",
+        "shasum": ""
+      },
             "require": {
                 "doctrine/orm": "^2.10",
                 "drupol/phpermutations": "^1.4",
@@ -6042,9 +6042,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.68"
+              "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.71"
             },
-            "time": "2022-03-11T13:05:37+00:00"
+      "time": "2022-03-20T18:41:20+00:00"
         },
         {
             "name": "thepercival/zend-pdf",
@@ -7017,15 +7017,15 @@
             "support": {
                 "irc": "irc://irc.freenode.org/amphp",
                 "issues": "https://github.com/amphp/byte-stream/issues",
-                "source": "https://github.com/amphp/byte-stream/tree/v1.8.1"
+              "source": "https://github.com/amphp/byte-stream/tree/v1.8.1"
             },
-            "funding": [
-                {
-                    "url": "https://github.com/amphp",
-                    "type": "github"
-                }
-            ],
-            "time": "2021-03-30T17:13:30+00:00"
+          "funding": [
+            {
+              "url": "https://github.com/amphp",
+              "type": "github"
+            }
+          ],
+          "time": "2021-03-30T17:13:30+00:00"
         },
       {
         "name": "composer/composer",
@@ -7061,16 +7061,16 @@
         },
         "require-dev": {
           "phpspec/prophecy": "^1.10",
-                "symfony/phpunit-bridge": "^4.2 || ^5.0 || ^6.0"
-            },
-            "suggest": {
-                "ext-openssl": "Enabling the openssl extension allows you to access https URLs for repositories and packages",
-                "ext-zip": "Enabling the zip extension allows you to unzip archives",
-                "ext-zlib": "Allow gzip compression of HTTP requests"
-            },
-            "bin": [
-                "bin/composer"
-            ],
+          "symfony/phpunit-bridge": "^4.2 || ^5.0 || ^6.0"
+        },
+        "suggest": {
+          "ext-openssl": "Enabling the openssl extension allows you to access https URLs for repositories and packages",
+          "ext-zip": "Enabling the zip extension allows you to unzip archives",
+          "ext-zlib": "Allow gzip compression of HTTP requests"
+        },
+        "bin": [
+          "bin/composer"
+        ],
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -7373,16 +7373,16 @@
         },
         "notification-url": "https://packagist.org/downloads/",
         "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nils Adermann",
-                    "email": "naderman@naderman.de",
-                    "homepage": "http://www.naderman.de"
-                },
-                {
-                    "name": "Jordi Boggiano",
+          "MIT"
+        ],
+        "authors": [
+          {
+            "name": "Nils Adermann",
+            "email": "naderman@naderman.de",
+            "homepage": "http://www.naderman.de"
+          },
+          {
+            "name": "Jordi Boggiano",
                     "email": "j.boggiano@seld.be",
                     "homepage": "http://seld.be"
                 },
@@ -7704,20 +7704,20 @@
             },
             "time": "2021-02-22T14:02:09+00:00"
         },
-        {
-            "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.7.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer.git",
-                "reference": "7705d5a985132a40282d18a176eb9a4a0497747c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfPHP/PHP-CS-Fixer/zipball/7705d5a985132a40282d18a176eb9a4a0497747c",
-                "reference": "7705d5a985132a40282d18a176eb9a4a0497747c",
-                "shasum": ""
-            },
+      {
+        "name": "friendsofphp/php-cs-fixer",
+        "version": "v3.8.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer.git",
+          "reference": "cbad1115aac4b5c3c5540e7210d3c9fba2f81fa3"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/FriendsOfPHP/PHP-CS-Fixer/zipball/cbad1115aac4b5c3c5540e7210d3c9fba2f81fa3",
+          "reference": "cbad1115aac4b5c3c5540e7210d3c9fba2f81fa3",
+          "shasum": ""
+        },
             "require": {
                 "composer/semver": "^3.2",
                 "composer/xdebug-handler": "^3.0.3",
@@ -7783,7 +7783,7 @@
             "description": "A tool to automatically fix PHP code style",
             "support": {
                 "issues": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/issues",
-                "source": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/tree/v3.7.0"
+              "source": "https://github.com/FriendsOfPHP/PHP-CS-Fixer/tree/v3.8.0"
             },
             "funding": [
                 {
@@ -7791,7 +7791,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-03-07T16:59:59+00:00"
+        "time": "2022-03-18T17:20:59+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
@@ -8481,16 +8481,16 @@
                 "reference": "66c7adc9dfa38b6b5838a9fb728b68a7d8348051"
             },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/extension-installer/zipball/66c7adc9dfa38b6b5838a9fb728b68a7d8348051",
-                "reference": "66c7adc9dfa38b6b5838a9fb728b68a7d8348051",
-                "shasum": ""
+              "type": "zip",
+              "url": "https://api.github.com/repos/phpstan/extension-installer/zipball/66c7adc9dfa38b6b5838a9fb728b68a7d8348051",
+              "reference": "66c7adc9dfa38b6b5838a9fb728b68a7d8348051",
+              "shasum": ""
             },
-            "require": {
-              "composer-plugin-api": "^1.1 || ^2.0",
-              "php": "^7.1 || ^8.0",
-              "phpstan/phpstan": ">=0.11.6"
-            },
+          "require": {
+            "composer-plugin-api": "^1.1 || ^2.0",
+            "php": "^7.1 || ^8.0",
+            "phpstan/phpstan": ">=0.11.6"
+          },
           "require-dev": {
             "composer/composer": "^1.8",
             "phing/phing": "^2.16.3",
@@ -8561,16 +8561,16 @@
             "url": "https://github.com/ondrejmirtes",
             "type": "github"
           },
-                {
-                    "url": "https://github.com/phpstan",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/phpstan",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
+          {
+            "url": "https://github.com/phpstan",
+            "type": "github"
+          },
+          {
+            "url": "https://www.patreon.com/phpstan",
+            "type": "patreon"
+          },
+          {
+            "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
                     "type": "tidelift"
                 }
             ],
@@ -9044,16 +9044,16 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
-                }
-            ],
+          "license": [
+            "BSD-3-Clause"
+          ],
+          "authors": [
+            {
+              "name": "Sebastian Bergmann",
+              "email": "sebastian@phpunit.de",
+              "role": "lead"
+            }
+          ],
           "description": "Utility class for timing",
           "homepage": "https://github.com/sebastianbergmann/php-timer/",
           "keywords": [
@@ -9125,16 +9125,16 @@
         },
         "bin": [
           "phpunit"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "9.5-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/Framework/Assert/Functions.php"
+        ],
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "9.5-dev"
+          }
+        },
+        "autoload": {
+          "files": [
+            "src/Framework/Assert/Functions.php"
                 ],
                 "classmap": [
                     "src/"
@@ -10191,16 +10191,16 @@
                     "src/"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                  "name": "Sebastian Bergmann",
-                  "email": "sebastian@phpunit.de"
-                }
-            ],
+          "notification-url": "https://packagist.org/downloads/",
+          "license": [
+            "BSD-3-Clause"
+          ],
+          "authors": [
+            {
+              "name": "Sebastian Bergmann",
+              "email": "sebastian@phpunit.de"
+            }
+          ],
           "description": "Provides a list of PHP built-in functions that operate on resources",
           "homepage": "https://www.github.com/sebastianbergmann/resource-operations",
           "support": {
@@ -10249,16 +10249,16 @@
         "notification-url": "https://packagist.org/downloads/",
         "license": [
           "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de",
-                    "role": "lead"
-                }
-            ],
-            "description": "Collection of value objects that represent the types of the PHP type system",
-            "homepage": "https://github.com/sebastianbergmann/type",
+        ],
+        "authors": [
+          {
+            "name": "Sebastian Bergmann",
+            "email": "sebastian@phpunit.de",
+            "role": "lead"
+          }
+        ],
+        "description": "Collection of value objects that represent the types of the PHP type system",
+        "homepage": "https://github.com/sebastianbergmann/type",
             "support": {
                 "issues": "https://github.com/sebastianbergmann/type/issues",
               "source": "https://github.com/sebastianbergmann/type/tree/3.0.0"

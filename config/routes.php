@@ -164,6 +164,8 @@ return function (App $app): void {
                             $group->delete('/{refereeId}', RefereeAction::class . ':remove');
                             $group->options('/{refereeId}/priorityup', RefereeAction::class . ':options');
                             $group->post('/{refereeId}/priorityup', RefereeAction::class . ':priorityUp');
+                            $group->options('/{refereeId}/rolestate', RefereeAction::class . ':options');
+                            $group->get('/{refereeId}/rolestate', RefereeAction::class . ':getRoleState');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
@@ -401,9 +403,9 @@ return function (App $app): void {
                             $group->options('', TournamentAction::class . ':options');
                             $group->get('', TournamentAction::class . ':getUserRefereeId');
                         }
-                    )->add(TournamentUserAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
+                    )->add(TournamentUserAuthMiddleware::class)
+                        ->add(UserMiddleware::class)
+                        ->add(TournamentMiddleware::class);
 
                     $group->group(
                         '',

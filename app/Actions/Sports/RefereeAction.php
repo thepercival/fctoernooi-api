@@ -10,6 +10,8 @@ use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Invitation\Repository as InvitationRepository;
+use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -20,9 +22,7 @@ use Sports\Availability\Checker as AvailabilityChecker;
 use Sports\Competition;
 use Sports\Competition\Referee;
 use Sports\Competition\Referee\Repository as RefereeRepository;
-use Sports\Competition\Repository as CompetitionRepos;
 use Sports\Priority\Service as PriorityService;
-use Sports\Sport\Repository as SportRepository;
 
 final class RefereeAction extends Action
 {
@@ -30,6 +30,8 @@ final class RefereeAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private RefereeRepository $refereeRepos,
+        private UserRepository $userRepos,
+        private InvitationRepository $invitationRepos,
         private AuthSyncService $authSyncService
     ) {
         parent::__construct($logger, $serializer);
@@ -182,6 +184,51 @@ final class RefereeAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
+    public function getRoleState(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+
+            $roleState = null;
+            try {
+                $referee = $this->getRefereeFromInput((int)$args["refereeId"], $tournament->getCompetition());
+                $emailaddress = $referee->getEmailaddress();
+                if ($emailaddress !== null && mb_strlen($emailaddress) > 0) {
+                    $user = $this->userRepos->findOneBy(['emailaddress' => $emailaddress]);
+                    if ($user !== null) {
+                        $tournamentUser = $tournament->getUser($user);
+                        if ($tournamentUser !== null && $tournamentUser->hasARole(Role::REFEREE)) {
+                            $roleState = Role\State::Role;
+                        }
+                    }
+                    if ($roleState === null) {
+                        $invitation = $this->invitationRepos->findOneByCustom(
+                            $tournament,
+                            $emailaddress,
+                            Role::REFEREE
+                        );
+                        if ($invitation !== null) {
+                            $roleState = Role\State::Invitation;
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+            }
+
+            $json = $this->serializer->serialize($roleState === null ? 0 : $roleState->value, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
     public function remove(Request $request, Response $response, array $args): Response
     {
         try {
@@ -214,11 +261,11 @@ final class RefereeAction extends Action
     {
         $referee = $this->refereeRepos->find($id);
         if ($referee === null) {
-            throw new Exception("de scheidsrechter kon niet gevonden worden o.b.v. de invoer", E_ERROR);
+            throw new Exception('de scheidsrechter kon niet gevonden worden o.b.v. de invoer', E_ERROR);
         }
         if ($referee->getCompetition() !== $competition) {
             throw new Exception(
-                "de competitie van de scheidsrechter komt niet overeen met de verstuurde competitie",
+                'de competitie van de scheidsrechter komt niet overeen met de verstuurde competitie',
                 E_ERROR
             );
         }
