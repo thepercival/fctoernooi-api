@@ -421,7 +421,7 @@ return function (App $app): void {
                 }
             );
         }
-    )->add(VersionMiddleware::class)->add(JsonCacheMiddleware::class);
+    )->add(JsonCacheMiddleware::class)->add(VersionMiddleware::class);
 
     $app->group(
         '',

@@ -24,7 +24,7 @@ class JsonCacheMiddleware implements MiddlewareInterface
 
     public function process(Request $request, RequestHandler $handler): Response
     {
-        if ($request->getMethod() !== 'PUT' && $request->getMethod() !== 'POST') {
+        if ($request->getMethod() !== 'PUT' && $request->getMethod() !== 'POST' && $request->getMethod() !== 'DELETE') {
             return $handler->handle($request);
         }
 

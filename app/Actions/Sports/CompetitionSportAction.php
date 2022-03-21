@@ -94,7 +94,8 @@ final class CompetitionSportAction extends Action
             if (!$competition->hasMultipleSports()) {
                 $firstCompetitionSport = $competition->getSingleSport();
                 if ($firstCompetitionSport->createVariant() instanceof AgainstH2h) {
-                    $this->convertFirstSport($firstCompetitionSport, $structure);
+                    $firstCompetitionSport->convertAgainst();
+                    $this->competitionSportRepos->save($firstCompetitionSport);
                 }
             }
 
@@ -240,7 +241,8 @@ final class CompetitionSportAction extends Action
                 $firstCompetitionSport = $competition->getSingleSport();
                 $variant = $firstCompetitionSport->createVariant();
                 if ($variant instanceof AgainstGpp && !$variant->hasMultipleSidePlaces()) {
-                    $this->convertFirstSport($firstCompetitionSport, $structure);
+                    $firstCompetitionSport->convertAgainst();
+                    $this->competitionSportRepos->save($firstCompetitionSport, true);
                 }
             }
 
@@ -263,34 +265,6 @@ final class CompetitionSportAction extends Action
             );
         }
         return $competitionSport;
-    }
-
-    protected function convertFirstSport(CompetitionSport $competitionSport, Structure $structure): void
-    {
-        $sport = $competitionSport->getSport();
-        $sportPersistVariant = $competitionSport->createVariant()->toPersistVariant();
-        $fieldNames = $this->createFieldNames($competitionSport);
-        $this->removeHelper($competitionSport, $structure);
-        if ($sportPersistVariant->getNrOfH2H() > 0) {
-            $sportPersistVariant = new PersistVariant(
-                $sportPersistVariant->getGameMode(),
-                $sportPersistVariant->getNrOfHomePlaces(),
-                $sportPersistVariant->getNrOfAwayPlaces(),
-                $sportPersistVariant->getNrOfGamePlaces(),
-                0,
-                1
-            );
-        } else {
-            $sportPersistVariant = new PersistVariant(
-                $sportPersistVariant->getGameMode(),
-                $sportPersistVariant->getNrOfHomePlaces(),
-                $sportPersistVariant->getNrOfAwayPlaces(),
-                $sportPersistVariant->getNrOfGamePlaces(),
-                1,
-                0
-            );
-        }
-        $this->addHelper($sportPersistVariant, $fieldNames, $sport, $competitionSport->getCompetition(), $structure);
     }
 
     protected function removeHelper(CompetitionSport $competitionSport, Structure $structure): void

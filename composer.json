@@ -86,10 +86,16 @@
       "doctrine-try": "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --dump-sql",
       "doctrine-update": "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --force",
       "doctrine-validate": "XDEBUG_MODE=off vendor/bin/doctrine orm:validate-schema",
+      "doctrine-clearcache": [
+        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:query --flush",
+        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:metadata --flush",
+        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:result --flush"
+      ],
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [
         "App\\Handlers\\ComposerPostInstall::execute",
         "composer run doctrine-update",
+        "composer run doctrine-clearcache",
         "php vendor/bin/doctrine orm:generate-proxies --quiet"
       ]
     },
