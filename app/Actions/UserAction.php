@@ -29,7 +29,7 @@ final class UserAction extends Action
 
     protected function getDeserializationContext(): DeserializationContext
     {
-        $serGroups = ['Default'];
+        $serGroups = ['Default', 'self'];
         return DeserializationContext::create()->setGroups($serGroups);
     }
 
