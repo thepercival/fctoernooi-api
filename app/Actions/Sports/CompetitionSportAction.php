@@ -230,6 +230,10 @@ final class CompetitionSportAction extends Action
 
             $competitionSport = $this->getCompetitionSportFromInput((int)$args['competitionSportId'], $competition);
 
+            if (count($competition->getSports()) <= 1) {
+                throw new \Exception('er moet minimaal 1 sport zijn', E_ERROR);
+            }
+
             $this->removeHelper($competitionSport, $structure);
 
             if (!$competition->hasMultipleSports()) {
