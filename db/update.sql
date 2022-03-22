@@ -1,5 +1,5 @@
 -- PRE PRE PRE doctrine-update =============================================================
-
+update tournaments set exported = 0
 
 -- POST POST POST doctrine-update ===========================================================
 

@@ -5,19 +5,22 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 
+/**
+ * @template-extends ToernooiPdfPage<LockerRoomsDocument>
+ */
 class LockerRooms extends ToernooiPdfPage
 {
     private const RowHeight = 18;
     private const FontHeight = self::RowHeight - 4;
     private const LockerRoomMargin = 20;
 
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(LockerRoomsDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -92,7 +95,7 @@ class LockerRooms extends ToernooiPdfPage
     {
         $y = $this->drawHeader('kleedkamers');
         $yStart = $this->drawSubHeader('indeling kleedkamers', $y);
-        $lockerRooms = array_values($this->getParent()->getTournament()->getLockerRooms()->toArray());
+        $lockerRooms = array_values($this->parent->getTournament()->getLockerRooms()->toArray());
         if (count($lockerRooms) === 0) {
             return;
         }
@@ -133,7 +136,7 @@ class LockerRooms extends ToernooiPdfPage
         }
 
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
-        $this->setFont($this->getParent()->getFont(true), self::FontHeight);
+        $this->setFont($this->parent->getFont(true), self::FontHeight);
         $this->drawCell(
             'kleedkamer ' . $lockerRoom->getName(),
             $point->getX(),
@@ -143,7 +146,7 @@ class LockerRooms extends ToernooiPdfPage
             Align::Center,
             'black'
         );
-        $this->setFont($this->getParent()->getFont(), self::FontHeight);
+        $this->setFont($this->parent->getFont(), self::FontHeight);
         $point = $point->addY(-self::RowHeight);
         while ($competitor = array_shift($competitors)) {
             $this->drawCell(

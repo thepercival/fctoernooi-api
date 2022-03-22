@@ -24,7 +24,7 @@ class Against extends GameNotesBase
         if ($game instanceof TogetherGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $homePlaces = $game->getSidePlaces(AgainstSide::Home);
         $home = $nameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
         $awayPlaces = $game->getSidePlaces(AgainstSide::Away);
@@ -47,7 +47,7 @@ class Against extends GameNotesBase
         if ($game instanceof TogetherGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
@@ -66,7 +66,7 @@ class Against extends GameNotesBase
 //        $x2 = $this->getXSecondBorder() + ($margin * 0.5);
 
         // 2x font thuis - uit
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight() * $larger);
         $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
 
         // COMPETITORS
@@ -77,7 +77,7 @@ class Against extends GameNotesBase
         $this->drawCell($away, $awayStart, $y, $dotsWidth, $height);
         $y -= 2 * $height;
 
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight() * $larger);
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight() * $larger);
 
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
 

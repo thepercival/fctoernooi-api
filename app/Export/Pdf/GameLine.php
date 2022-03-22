@@ -7,6 +7,7 @@ namespace App\Export\Pdf;
 use App\Export\Pdf\GameLine\Column;
 use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
+use App\Export\Pdf\Page\Planning as PlanningPage;
 use DateTimeImmutable;
 use DateTimeZone;
 use League\Period\Period;
@@ -25,7 +26,7 @@ abstract class GameLine
     protected array $columnWidths = [];
     protected ScoreConfigService $scoreConfigService;
 
-    public function __construct(protected Page\Planning $page, protected int $shoDateTime, protected int $showReferee)
+    public function __construct(protected PlanningPage $page, protected int $shoDateTime, protected int $showReferee)
     {
         $this->scoreConfigService = new ScoreConfigService();
     }

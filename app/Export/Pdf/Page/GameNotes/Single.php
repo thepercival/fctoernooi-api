@@ -24,7 +24,7 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $places = array_values($game->getPlaces()->toArray());
         $description = $nameService->getPlacesFromName($places, false, count($places) <= 3);
         $this->drawCell($description, $x, $y, $width, $height);
@@ -53,13 +53,13 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
-        $fontSize = $this->getParent()->getFontHeight();
+        $fontSize = $this->parent->getFontHeight();
         $larger = 1.2;
-        $largerFontSize = $this->getParent()->getFontHeight() * $larger;
+        $largerFontSize = $this->parent->getFontHeight() * $larger;
         $height = GameNotes::RowHeight * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
         $placesStart = $this->getStartDetailLabel();
@@ -71,12 +71,12 @@ class Single extends GameNotesBase
         }
 
         // 2x font thuis - uit
-        $this->setFont($this->getParent()->getFont(), $largerFontSize);
+        $this->setFont($this->parent->getFont(), $largerFontSize);
         $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
 
         // COMPETITORS
         $competitorFontSize = $game->getPlaces()->count() > 3 ? $fontSize : $largerFontSize;
-        $this->setFont($this->getParent()->getFont(), $competitorFontSize);
+        $this->setFont($this->parent->getFont(), $competitorFontSize);
         $placesX = $placesStart;
         foreach ($game->getPlaces() as $gamePlace) {
             $name = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
@@ -85,7 +85,7 @@ class Single extends GameNotesBase
         $y -= 2 * $height;
 
 
-        $this->setFont($this->getParent()->getFont(), $largerFontSize);
+        $this->setFont($this->parent->getFont(), $largerFontSize);
 
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
         $nrOfScoreLines = $this->getNrOfScoreLines($game->getRound(), $game->getCompetitionSport());

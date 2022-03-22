@@ -6,15 +6,19 @@ namespace App\Commands\Pdf;
 
 use App\Command;
 use App\Commands\Validator as ValidatorCommand;
-use App\Export\Pdf\Document as PdfDocument;
+use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
+use App\Export\PdfService;
+use App\Export\PdfSubject;
 use App\TmpService;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\ExportConfig;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use Memcached;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Spatie\Async\Pool;
 use Sports\Output\StructureOutput;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
@@ -31,6 +35,7 @@ class Validator extends Command
     protected StructureRepository $structureRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
+    protected PdfService $pdfService;
     protected int $borderTimestamp;
 
     public function __construct(ContainerInterface $container)
@@ -49,6 +54,20 @@ class Validator extends Command
         /** @var PlanningInputRepository $planningInputRepos */
         $planningInputRepos = $container->get(PlanningInputRepository::class);
         $this->planningInputRepos = $planningInputRepos;
+
+        /** @var Memcached $memcached */
+        $memcached = $container->get(Memcached::class);
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        /** @var LoggerInterface $logger */
+        $logger = $container->get(LoggerInterface::class);
+        $this->pdfService = new PdfService(
+            $config,
+            new TmpService(),
+            new PdfDocumentFactory($config),
+            $memcached,
+            $logger
+        );
 
         $this->gamesValidator = new GamesValidator();
 
@@ -103,12 +122,12 @@ class Validator extends Command
                     $logger->info('max amount reached');
                     break;
                 }
-                foreach ($subjects as $subject) {
-                    $logger->info('creating for pdf ' . (string)$tournament->getId() . '-' . $subject);
+
+                    $logger->info('creating pdf for ' . (string)$tournament->getId());
                     $structure = null;
                     try {
                         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-                        $this->createPdf($tournament, $structure, $subject);
+                        $this->createPdf($tournament, $structure, $subjects);
                         // $this->addStructureToLog($tournament, $structure);
                     } catch (Exception $exception) {
                         $logger->error($exception->getMessage());
@@ -116,7 +135,7 @@ class Validator extends Command
                             $this->addStructureToLog($tournament, $structure);
                         }
                     }
-                }
+
             }
             $logger->info('alle pdf-en zijn gegenereerd');
         } catch (Exception $exception) {
@@ -152,14 +171,16 @@ class Validator extends Command
         return $tournament->getCreatedDateTime()->getTimestamp() <= $this->borderTimestamp;
     }
 
-    protected function createPdf(Tournament $tournament, Structure $structure, int $subjects): void
+    /**
+     * @param Tournament $tournament
+     * @param Structure $structure
+     * @param non-empty-list<PdfSubject> $subjects
+     * @throws Exception
+     */
+    protected function createPdf(Tournament $tournament, Structure $structure, array $subjects): void
     {
         try {
-            $url = $this->config->getString('www.wwwurl');
-            $pdf = new PdfDocument($tournament, $structure, $subjects, $url);
-            $tmpService = new TmpService();
-            $file = (string)$tournament->getId() . '-' . $subjects . '.pdf';
-            $pdf->save($tmpService->getPath(['pdf'], $file));
+            $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, true);
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
@@ -168,30 +189,30 @@ class Validator extends Command
 
     /**
      * @param InputInterface $input
-     * @return list<int>
+     * @return non-empty-list<PdfSubject>
      * @throws Exception
      */
     protected function getSubjects(InputInterface $input): array
     {
-        $subjects = $input->getOption('subjects');
-        if (is_string($subjects) && (int)$subjects > 0) {
-            return [(int)$subjects];
-        }
-        $all = ExportConfig::GameNotes + ExportConfig::Structure + ExportConfig::GamesPerPoule +
-            ExportConfig::GamesPerField + ExportConfig::Planning + ExportConfig::PoulePivotTables +
-            ExportConfig::LockerRooms + ExportConfig::QrCode;
+        $inputSubjects = $input->getOption('subjects');
+        $summedUpInputSubjects = (int)$inputSubjects;
 
-        return [
-            ExportConfig::GameNotes,
-            ExportConfig::Structure,
-            ExportConfig::GamesPerPoule,
-            ExportConfig::GamesPerField,
-            ExportConfig::Planning,
-            ExportConfig::PoulePivotTables,
-            ExportConfig::LockerRooms,
-            ExportConfig::QrCode,
-            $all
-        ];
+        $filteredSubjects = PdfSubject::toFilteredArray($summedUpInputSubjects);
+        if (count($filteredSubjects) === 0) {
+            return PdfSubject::cases();
+        }
+        return $filteredSubjects;
+    }
+
+    /**
+     * @param non-empty-list<PdfSubject> $subjects
+     * @return non-empty-list<non-empty-list<PdfSubject>>
+     */
+    protected function toSubjectsLists(array $subjects): array
+    {
+        return array_map(function (PdfSubject $subject): array {
+            return [$subject];
+        }, $subjects);
     }
 
     protected function addStructureToLog(Tournament $tournament, Structure $structure): void

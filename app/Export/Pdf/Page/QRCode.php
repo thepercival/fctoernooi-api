@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Page;
 
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\QRCode as QRCodeDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use FCToernooi\QRService;
 use Zend_Pdf_Resource_Image;
 
+/**
+ * @template-extends ToernooiPdfPage<QRCodeDocument>
+ */
 class QRCode extends ToernooiPdfPage
 {
     protected float $rowHeight = 18;
     protected QRService $qrService;
 
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(QRCodeDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -40,12 +43,12 @@ class QRCode extends ToernooiPdfPage
     {
         $y = $this->drawHeader("qrcode");
 
-        $url = $this->getParent()->getUrl() . (string)$this->getParent()->getTournament()->getId();
+        $url = $this->parent->getUrl() . (string)$this->parent->getTournament()->getId();
 
         $y = $this->drawSubHeader($url, $y);
 
         $imgWidth = 300;
-        $qrPath = $this->qrService->writeTournamentToJpg($this->getParent()->getTournament(), $url, $imgWidth);
+        $qrPath = $this->qrService->writeTournamentToJpg($this->parent->getTournament(), $url, $imgWidth);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $xLeft = $this->getPageMargin() + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);

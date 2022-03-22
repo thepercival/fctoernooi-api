@@ -11,6 +11,9 @@ use Zend_Pdf_Page;
 use Zend_Pdf_Resource_Image;
 use Zend_Pdf_Resource_ImageFactory;
 
+/**
+ * @template T
+ */
 abstract class Page extends Zend_Pdf_Page
 {
     protected Zend_Pdf_Color $textColor;
@@ -18,10 +21,22 @@ abstract class Page extends Zend_Pdf_Page
     protected Zend_Pdf_Color|null $fillColorTmp = null;
     protected float $lineWidth;
     protected float $padding;
+    /**
+     * @var T
+     */
+    protected mixed $parent;
 
-    public function __construct(protected Document $parent, mixed $param1, mixed $param2 = null, mixed $param3 = null)
+    /**
+     * @param mixed $parent
+     * @param mixed $param1
+     * @param mixed|null $param2
+     * @param mixed|null $param3
+     * @throws Zend_Pdf_Exception
+     */
+    public function __construct(mixed $parent, mixed $param1, mixed $param2 = null, mixed $param3 = null)
     {
         parent::__construct($param1, $param2, $param3);
+        $this->parent = $parent;
         $this->setFillColor(new Zend_Pdf_Color_Html('white'));
         $this->textColor = new Zend_Pdf_Color_Html('black');
         $this->setLineWidth(1);
@@ -35,11 +50,6 @@ abstract class Page extends Zend_Pdf_Page
     abstract public function getHeaderHeight(): float;
 
     abstract public function getPageMargin(): float;
-
-    public function getParent(): Document
-    {
-        return $this->parent;
-    }
 
     public function getFillColor(): Zend_Pdf_Color
     {
@@ -84,7 +94,7 @@ abstract class Page extends Zend_Pdf_Page
         if ($y === null) {
             $y = $this->getHeight() - $this->getPageMargin();
         }
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
         $title = 'FCToernooi';
         $subTitle = $subTitle === null ? '' : $subTitle;
 
@@ -105,7 +115,7 @@ abstract class Page extends Zend_Pdf_Page
         $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../logo.jpg');
         $this->drawImage($img, $xLeft, $y - $imgSize, $xLeft + $imgSize, $y);
 
-        $arrLineColors = array('b' => 'black');
+        $arrLineColors = ['b' => 'black'];
         $this->drawCell(
             'FCToernooi',
             $xLeft + $imgSize,
@@ -117,7 +127,7 @@ abstract class Page extends Zend_Pdf_Page
         );
 
 
-        $name = $this->getParent()->getTournament()->getCompetition()->getLeague()->getName();
+        $name = $this->parent->getTournament()->getCompetition()->getLeague()->getName();
         $this->drawCell($name, $xCenter, $y, $widthCenter, $nRowHeight, Align::Left, $arrLineColors);
 
         if (strlen($subTitle) > 0) {
@@ -129,8 +139,8 @@ abstract class Page extends Zend_Pdf_Page
 
     public function drawSubHeader(string $subHeader, float $y): float
     {
-        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
+        $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
+        $this->setFont($this->parent->getFont(true), $this->parent->getFontHeightSubHeader());
         $x = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
         $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
@@ -244,7 +254,7 @@ abstract class Page extends Zend_Pdf_Page
         } else { // if ($vtLineColors instanceof Zend_Pdf_Color) {
             $oColor = $vtLineColors;
         }
-        return array('l' => $oColor, 't' => $oColor, 'r' => $oColor, 'b' => $oColor);
+        return ['l' => $oColor, 't' => $oColor, 'r' => $oColor, 'b' => $oColor];
     }
 
     public function drawString(

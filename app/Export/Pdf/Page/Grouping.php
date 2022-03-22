@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\Structure as StructureDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use Sports\Poule;
 
+/**
+ * @template-extends ToernooiPdfPage<StructureDocument>
+ */
 class Grouping extends ToernooiPdfPage
 {
     protected int $maxPoulesPerLine = 3;
     protected float $rowHeight = 18;
 
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(StructureDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -103,9 +106,9 @@ class Grouping extends ToernooiPdfPage
         $fontHeight = $nRowHeight - 4;
 
         $numberWidth = $pouleWidth * 0.1;
-        $this->setFont($this->getParent()->getFont(true), $fontHeight);
+        $this->setFont($this->parent->getFont(true), $fontHeight);
         $this->drawCell(
-            $this->getParent()->getNameService()->getPouleName($poule, true),
+            $this->parent->getNameService()->getPouleName($poule, true),
             $x,
             $yStart,
             $pouleWidth,
@@ -113,7 +116,7 @@ class Grouping extends ToernooiPdfPage
             Align::Center,
             "black"
         );
-        $this->setFont($this->getParent()->getFont(), $fontHeight);
+        $this->setFont($this->parent->getFont(), $fontHeight);
         $y = $yStart - $nRowHeight;
         foreach ($poule->getPlaces() as $place) {
             $this->drawCell(
@@ -126,8 +129,8 @@ class Grouping extends ToernooiPdfPage
                 "black"
             );
             $name = '';
-            if ($this->getParent()->getPlaceLocationMap()->getCompetitor($place) !== null) {
-                $name = $this->getParent()->getNameService()->getPlaceName($place, true);
+            if ($this->parent->getPlaceLocationMap()->getCompetitor($place) !== null) {
+                $name = $this->parent->getNameService()->getPlaceName($place, true);
             }
             $this->drawCell(
                 $name,

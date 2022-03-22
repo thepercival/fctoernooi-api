@@ -25,7 +25,7 @@ class AllInOneGame extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $places = array_values($game->getPlaces()->toArray());
         $description = $nameService->getPlacesFromName($places, false, count($places) <= 3);
         $this->drawCell($description, $x, $y, $width, $height);
@@ -55,15 +55,15 @@ class AllInOneGame extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
         $nrOfScoreLines = $this->getNrOfScoreLines($game->getRound(), $game->getCompetitionSport());
-        $fontSize = $this->getParent()->getFontHeight();
+        $fontSize = $this->parent->getFontHeight();
         $larger = 1.2;
-        $largerFontSize = $this->getParent()->getFontHeight() * $larger;
+        $largerFontSize = $this->parent->getFontHeight() * $larger;
         $height = GameNotes::RowHeight * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
         $placesStart = $this->getPageMargin();
@@ -72,7 +72,7 @@ class AllInOneGame extends GameNotesBase
         $unitStart = $this->getStartDetailLabel();
 
         // 2x font thuis - uit
-        $this->setFont($this->getParent()->getFont(), $largerFontSize);
+        $this->setFont($this->parent->getFont(), $largerFontSize);
         $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
 
         // SCOREUNITS
@@ -89,7 +89,7 @@ class AllInOneGame extends GameNotesBase
         $y -= 2 * $height;
 
         // COMPETITORS
-        $this->setFont($this->getParent()->getFont(), $fontSize);
+        $this->setFont($this->parent->getFont(), $fontSize);
         $dots = '...............';
         foreach ($game->getPlaces() as $gamePlace) {
             $name = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);

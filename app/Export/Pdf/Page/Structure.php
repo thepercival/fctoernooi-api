@@ -6,13 +6,16 @@ namespace App\Export\Pdf\Page;
 
 use App\Exceptions\PdfOutOfBoundsException;
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\Structure as StructureDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use Sports\Place;
 use Sports\Poule;
 use Sports\Round;
 
+/**
+ * @template-extends ToernooiPdfPage<StructureDocument>
+ */
 class Structure extends ToernooiPdfPage
 {
     public const RowHeight = 18;
@@ -24,13 +27,18 @@ class Structure extends ToernooiPdfPage
     private bool $enableOutOfBoundsException;
     private int $maxNrOfPoulePlaceColumns = 1;
 
-    public function __construct(Document $document, Point $point, bool $enableOutOfBoundsException)
+    public function __construct(StructureDocument $document, Point $point, bool $enableOutOfBoundsException)
     {
         $dimensions = $point->getX() . ':' . $point->getY();
         parent::__construct($document, $dimensions);
         $this->setLineWidth(0.5);
         $this->enableOutOfBoundsException = $enableOutOfBoundsException;
     }
+
+//    public function getParent(): StructureDocument
+//    {
+//        return $this->parent;
+//    }
 
     public function getPageMargin(): float
     {
@@ -74,7 +82,7 @@ class Structure extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $rooRound = $this->getParent()->getStructure()->getRootRound();
+        $rooRound = $this->parent->getStructure()->getRootRound();
         $y = $this->drawHeader('opzet');
         $y = $this->drawSubHeader('Opzet', $y);
         $this->drawRound($rooRound, $y, $this->getPageMargin(), $this->getDisplayWidth());
@@ -86,17 +94,17 @@ class Structure extends ToernooiPdfPage
 //            throw new PdfOutOfBoundsException('X', E_ERROR);
 //        }
 
-        $this->setFont($this->getParent()->getFont(true), self::FontHeight);
+        $this->setFont($this->parent->getFont(true), self::FontHeight);
 
         $arrLineColors = !$round->isRoot() ? ['t' => 'black'] : null;
-        $roundName = $this->getParent()->getNameService()->getRoundName($round);
+        $roundName = $this->parent->getNameService()->getRoundName($round);
         $this->drawCell($roundName, $x, $y, $width, self::RowHeight, Align::Center, $arrLineColors);
         $y -= self::RowHeight;
 
         if ($round->getPoules()->count() === 1 && $round->getPoule(1)->getPlaces()->count() < 3) {
             return;
         }
-        $this->setFont($this->getParent()->getFont(), self::FontHeight);
+        $this->setFont($this->parent->getFont(), self::FontHeight);
 
         $poules = array_values($round->getPoules()->toArray());
         $y = $this->drawPoules($poules, $x, $y, $width);
@@ -193,8 +201,8 @@ class Structure extends ToernooiPdfPage
     protected function drawPoule(Poule $poule, float $x, float $y, int $nrOfPlaceColumns): void
     {
         $pouleWidth = $nrOfPlaceColumns * self::PlaceWidth;
-        $pouleName = $this->getParent()->getNameService()->getPouleName($poule, $nrOfPlaceColumns > 1);
-        $this->setFont($this->getParent()->getFont(true), self::FontHeight);
+        $pouleName = $this->parent->getNameService()->getPouleName($poule, $nrOfPlaceColumns > 1);
+        $this->setFont($this->parent->getFont(true), self::FontHeight);
         $this->drawCell(
             $pouleName,
             $x,
@@ -204,7 +212,7 @@ class Structure extends ToernooiPdfPage
             Align::Center,
             'black'
         );
-        $this->setFont($this->getParent()->getFont(), self::FontHeight);
+        $this->setFont($this->parent->getFont(), self::FontHeight);
         $y -= self::RowHeight;
         $places = $poule->getPlaces()->toArray();
         uasort(
@@ -215,7 +223,7 @@ class Structure extends ToernooiPdfPage
         );
         $xStart = $x;
         foreach ($places as $place) {
-            $placeName = $this->getParent()->getNameService()->getPlaceFromName($place, false);
+            $placeName = $this->parent->getNameService()->getPlaceFromName($place, false);
             $this->drawCell(
                 $placeName,
                 $x,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use DateTimeZone;
 use FCToernooi\QRService;
@@ -22,6 +22,9 @@ use Zend_Pdf_Page;
 use Zend_Pdf_Resource_Image;
 use Zend_Pdf_Resource_ImageFactory;
 
+/**
+ * @template-extends ToernooiPdfPage<GameNotesDocument>
+ */
 abstract class GameNotes extends ToernooiPdfPage
 {
     public const Margin = 15;
@@ -33,17 +36,22 @@ abstract class GameNotes extends ToernooiPdfPage
     protected string|null $qrCodeUrlPrefix = null;
 
     public function __construct(
-        Document $document,
+        mixed $parent,
         mixed $param1,
         protected AgainstGame|TogetherGame $gameOne,
         protected AgainstGame|TogetherGame|null $gameTwo
     ) {
-        parent::__construct($document, $param1);
+        parent::__construct($parent, $param1);
         $this->setLineWidth(0.5);
         $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
     }
+
+//    public function getParent(): GameNotesDocument
+//    {
+//        return $this->parent;
+//    }
 
     public function getPageMargin(): float
     {
@@ -83,8 +91,8 @@ abstract class GameNotes extends ToernooiPdfPage
     protected function getQrCodeUrlPrefix(): string
     {
         if ($this->qrCodeUrlPrefix === null) {
-            $this->qrCodeUrlPrefix = $this->getParent()->getUrl() . 'admin/game/' .
-                (string)$this->getParent()->getTournament()->getId() .
+            $this->qrCodeUrlPrefix = $this->parent->getUrl() . 'admin/game/' .
+                (string)$this->parent->getTournament()->getId() .
                 '/';
         }
         return $this->qrCodeUrlPrefix;
@@ -120,7 +128,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawGame(AgainstGame|TogetherGame $game, float $y): void
     {
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
         $rowHeight = GameNotes::RowHeight;
         $yNext = $this->drawGameDetail($game, $y);
         $this->drawQRCode($game, $y);
@@ -134,7 +142,7 @@ abstract class GameNotes extends ToernooiPdfPage
         $url = $this->getQrCodeUrlPrefix() . (string)$game->getId();
 
         $imgSize = $this->getLeftPartWidth() * 1.5;
-        $qrPath = $this->qrService->writeGameToJpg($this->getParent()->getTournament(), $game, $url, (int)$imgSize);
+        $qrPath = $this->qrService->writeGameToJpg($this->parent->getTournament(), $game, $url, (int)$imgSize);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory($qrPath);
         $this->drawImage($img, $this->getPageMargin(), $y - $imgSize, ($this->getPageMargin() + $imgSize), $y);
@@ -142,7 +150,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawGameDetail(AgainstGame|TogetherGame $game, float $y): float
     {
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
 
         $height = GameNotes::RowHeight;
         $margin = GameNotes::Margin;
@@ -150,7 +158,7 @@ abstract class GameNotes extends ToernooiPdfPage
         $sportVariant = $game->getCompetitionSport()->createVariant();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
         $labelStartX = $this->getStartDetailLabel();
         $sepStartX = $this->getStartDetailValue() - GameNotes::Margin;
         $valueStartX = $this->getStartDetailValue();
@@ -294,6 +302,6 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function getNrOfScoreLines(Round $round, CompetitionSport $competitionSport): int
     {
-        return $this->getParent()->getNrOfGameNoteScoreLines($round, $competitionSport);
+        return $this->parent->getNrOfGameNoteScoreLines($round, $competitionSport);
     }
 }

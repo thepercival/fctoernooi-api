@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\State as GameState;
@@ -17,7 +17,7 @@ use Zend_Pdf_Color_Html;
 
 class Against extends PoulePivotTablesPage
 {
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
     }
@@ -56,12 +56,12 @@ class Against extends PoulePivotTablesPage
         $nVersus = 0;
         foreach ($poule->getPlaces() as $place) {
             $placeName = $place->getPlaceNr() . ". ";
-            $placeName .= $this->getParent()->getNameService()->getPlaceFromName($place, true);
-            $this->setFont($this->getParent()->getFont(), $this->getPlaceFontHeight($placeName));
+            $placeName .= $this->parent->getNameService()->getPlaceFromName($place, true);
+            $this->setFont($this->parent->getFont(), $this->getPlaceFontHeight($placeName));
             $x = $this->drawHeaderCustom($placeName, $x, $y, $versusColumnWidth, $height, $degrees);
             $nVersus++;
         }
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
         return $x;
     }
 

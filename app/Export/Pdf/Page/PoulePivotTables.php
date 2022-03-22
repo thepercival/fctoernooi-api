@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Page\PoulePivotTable\Helper;
 use Exception;
@@ -18,6 +18,9 @@ use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
 use Sports\Round\Number as RoundNumber;
 use Sports\Score\Config\Service as ScoreConfigService;
 
+/**
+ * @template-extends ToernooiPdfPage<PoulePivotTablesDocument>
+ */
 abstract class PoulePivotTables extends ToernooiPdfPage
 {
     use Helper;
@@ -31,7 +34,7 @@ abstract class PoulePivotTables extends ToernooiPdfPage
     // protected $pouleMarginStructure;
     protected int $rowHeight;
 
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -58,14 +61,14 @@ abstract class PoulePivotTables extends ToernooiPdfPage
 
     public function drawPageStartHeader(RoundNumber $roundNumber, CompetitionSport $competitionSport, float $y): float
     {
-        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
+        $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
+        $this->setFont($this->parent->getFont(true), $this->parent->getFontHeightSubHeader());
         $x = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $subHeader = $this->parent->getNameService()->getRoundNumberName($roundNumber);
         $subHeader .= ' - ' . $competitionSport->getSport()->getName();
         $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
         return $y - (2 * $fontHeightSubHeader);
     }
 
@@ -94,7 +97,7 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         $x = $this->getPageMargin();
-        $pouleName = $this->getParent()->getNameService()->getPouleName($poule, true);
+        $pouleName = $this->parent->getNameService()->getPouleName($poule, true);
         $x = $this->drawHeaderCustom($pouleName, $x, $y, $this->nameColumnWidth, $height);
         $x = $this->drawVersusHeader($poule, $gameAmountConfig, $x, $y);
 
@@ -128,16 +131,16 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         }
 
         $height = $this->rowHeight;
-        $nameService = $this->getParent()->getNameService();
+        $nameService = $this->parent->getNameService();
 
         foreach ($poule->getPlaces() as $place) {
             $x = $this->getPageMargin();
             // placename
             {
                 $placeName = $place->getPlaceNr() . '. ' . $nameService->getPlaceFromName($place, true);
-                $this->setFont($this->getParent()->getFont(), $this->getPlaceFontHeight($placeName));
+                $this->setFont($this->parent->getFont(), $this->getPlaceFontHeight($placeName));
                 $x = $this->drawCellCustom($placeName, $x, $y, $this->nameColumnWidth, $height, Align::Left);
-                $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+                $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
             }
 
             $x = $this->drawVersusCell($place, $gameAmountConfig, $x, $y);

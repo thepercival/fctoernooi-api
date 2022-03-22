@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Place\Together as TogetherGamePlace;
@@ -16,7 +16,7 @@ use Sports\Poule;
 
 class Together extends PoulePivotTablesPage
 {
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
     }

@@ -31,7 +31,7 @@ trait Helper
         if (array_key_exists($placeName, $this->fontSizeMap)) {
             return $this->fontSizeMap[$placeName];
         }
-        $fontHeight = $this->getParent()->getFontHeight();
+        $fontHeight = $this->parent->getFontHeight();
         if ($this->getTextWidth($placeName) > $this->nameColumnWidth) {
             $fontHeight -= 2;
         }

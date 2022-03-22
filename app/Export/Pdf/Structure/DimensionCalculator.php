@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Structure;
 
-use App\Export\Pdf\Page\Planning as PlanningPage;
 use App\Export\Pdf\Page\Structure as StructurePage;
 use App\Export\Pdf\Point;
 use Doctrine\Common\Collections\Collection;
@@ -61,8 +60,8 @@ final class DimensionCalculator
 
     protected function convertZendLayoutToPoint(string $layout): Point
     {
-        $page = new PlanningPage($this->defaultPage->getParent(), $layout);
-        return new Point($page->getWidth(), $page->getHeight());
+        $dimensions = explode(':', $layout);
+        return new Point((int)$dimensions[0], (int)$dimensions[1]);
     }
 
 

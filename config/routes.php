@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\AuthAction;
 use App\Actions\LockerRoomAction;
+use App\Actions\PdfAction;
 use App\Actions\RecessAction;
 use App\Actions\ReportAction;
 use App\Actions\SponsorAction;
@@ -73,10 +74,6 @@ return function (App $app): void {
                         ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                             VersionMiddleware::class
                         );
-
-                    $group->options('/export', TournamentAction::class . ':options');
-                    $group->get('/export', TournamentAction::class . ':export')->setName('tournament-export')
-                        ->add(TournamentMiddleware::class);
                 }
             );
 
@@ -410,14 +407,26 @@ return function (App $app): void {
                     $group->group(
                         '',
                         function (Group $group): void {
-                            $group->options('exportgeneratehash', TournamentAction::class . ':options');
-                            $group->get('exportgeneratehash', TournamentAction::class . ':exportGenerateHash');
                             $group->options('copy', TournamentAction::class . ':options');
                             $group->post('copy', TournamentAction::class . ':copy');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
+
+                    $group->group(
+                        'pdf',
+                        function (Group $group): void {
+                            $group->options('', PdfAction::class . ':options');
+                            $group->post('', PdfAction::class . ':create');
+                            $group->options('/progress/{hash}', PdfAction::class . ':options');
+                            $group->get('/progress/{hash}', PdfAction::class . ':progress');
+                            $group->options('/{hash}', PdfAction::class . ':options');
+                            $group->get('/{hash}', PdfAction::class . ':fetchOne');
+                        }
+                    )   ->add(TournamentRoleAdminAuthMiddleware::class)
+                        ->add(UserMiddleware::class)
+                        ->add(TournamentMiddleware::class);
                 }
             );
         }

@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Export;
+
+enum PdfSubject: int
+{
+    case GameNotes = 1;
+    case Structure = 2;
+    case GamesPerPoule = 4;
+    case GamesPerField = 8;
+    case Planning = 16;
+    case PoulePivotTables = 32;
+    case LockerRooms = 64;
+    case QrCode = 128;
+
+    public static function all(): int
+    {
+        return 255;
+    }
+
+    /**
+     * @param int $subjects
+     * @return list<self>
+     */
+    public static function toFilteredArray(int $subjects): array
+    {
+        return array_values(array_filter(self::cases(), function (PdfSubject $subject) use ($subjects): bool {
+            return (($subject->value & $subjects) === $subject->value);
+        }));
+    }
+
+    /**
+     * @param non-empty-list<self> $subjects
+     * @return int
+     */
+    public static function sum(array $subjects): int
+    {
+        return array_sum(
+            array_map(function (PdfSubject $subject): int {
+                return $subject->value;
+            }, $subjects)
+        );
+    }
+}

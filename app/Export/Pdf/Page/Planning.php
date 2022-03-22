@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document;
+use App\Export\Pdf\Document\Planning as PlanningDocument;
 use App\Export\Pdf\GameLine\Against as AgainstGameLine;
 use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
@@ -31,10 +31,14 @@ class Planning extends ToernooiPdfPage
 
     protected float $rowHeight = 18;
 
-    public function __construct(Document $document, mixed $param1)
+    public function __construct(PlanningDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
+    }
+
+    public function getParent(): PlanningDocument {
+        return $this->parent;
     }
 
     public function getTitle(): ?string
@@ -132,7 +136,7 @@ class Planning extends ToernooiPdfPage
         if (!$planningConfig->getEnableTime()) {
             return DateTimeColumn::None;
         }
-        if ($this->getParent()->gamesOnSameDay($roundNumber)) {
+        if ($this->parent->gamesOnSameDay($roundNumber)) {
             return DateTimeColumn::Time;
         }
         return DateTimeColumn::DateTime;
@@ -195,13 +199,13 @@ class Planning extends ToernooiPdfPage
     public function drawRoundNumberHeader(RoundNumber $roundNumber, float $y): float
     {
         $this->setFillColor(new \Zend_Pdf_Color_GrayScale(1));
-        $fontHeightSubHeader = $this->getParent()->getFontHeightSubHeader();
-        $this->setFont($this->getParent()->getFont(true), $this->getParent()->getFontHeightSubHeader());
+        $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
+        $this->setFont($this->parent->getFont(true), $this->parent->getFontHeightSubHeader());
         $x = $this->getPageMargin();
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->getParent()->getNameService()->getRoundNumberName($roundNumber);
+        $subHeader = $this->parent->getNameService()->getRoundNumberName($roundNumber);
         $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
-        $this->setFont($this->getParent()->getFont(), $this->getParent()->getFontHeight());
+        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
         return $y - (2 * $fontHeightSubHeader);
     }
 
