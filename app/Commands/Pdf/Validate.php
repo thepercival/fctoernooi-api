@@ -9,6 +9,7 @@ use App\Commands\Validator as ValidatorCommand;
 use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
 use App\Export\PdfService;
 use App\Export\PdfSubject;
+use App\QueueService\Pdf as PdfQueueService;
 use App\TmpService;
 use DateTimeImmutable;
 use Exception;
@@ -18,7 +19,6 @@ use Memcached;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use Spatie\Async\Pool;
 use Sports\Output\StructureOutput;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
@@ -29,13 +29,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Validator extends Command
+class Validate extends Command
 {
     protected TournamentRepository $tournamentRepos;
     protected StructureRepository $structureRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
     protected PdfService $pdfService;
+    protected PdfQueueService $queueService;
     protected int $borderTimestamp;
 
     public function __construct(ContainerInterface $container)
@@ -68,6 +69,8 @@ class Validator extends Command
             $memcached,
             $logger
         );
+
+        $this->queueService = new PdfQueueService($config->getArray('queue'));
 
         $this->gamesValidator = new GamesValidator();
 
@@ -180,7 +183,14 @@ class Validator extends Command
     protected function createPdf(Tournament $tournament, Structure $structure, array $subjects): void
     {
         try {
-            $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, true);
+            $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, $this->queueService);
+            $progress = $this->pdfService->getProgress((string)$tournament->getId());
+            while (!$progress->isFinished()) {
+                sleep(1);
+            }
+            $pdf = $this->pdfService->getPdf($tournament);
+            $path = $this->pdfService->getPath($tournament);
+            $pdf->save($path);
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);

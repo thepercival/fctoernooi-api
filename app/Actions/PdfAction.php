@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Export\PdfService;
 use App\Export\PdfSubject;
+use App\QueueService\Pdf as PdfQueueService;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\CacheService;
@@ -20,14 +21,13 @@ use Sports\Structure\Repository as StructureRepository;
 
 final class PdfAction extends Action
 {
-
-
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private StructureRepository $structureRepos,
         private PdfService $pdfService,
+        private PdfQueueService $pdfQueueService,
         private CacheService $cacheService,
         Configuration $config
     ) {
@@ -46,18 +46,20 @@ final class PdfAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $progressValue = $this->pdfService->getProgressValue((string)$tournament->getId(), $args['hash']);
-            if( $progressValue < 0) {
+            $this->pdfService->validateHash($tournament, $args['hash']);
+
+            $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
+            if ($progressValue < 0) {
                 throw new Exception('de pdf-aanvraag is verlopen', E_ERROR);
             }
-            if( $progressValue < 100) {
+            if ($progressValue < 100) {
                 throw new Exception('de pdf-aanvraag is nog in behandeling', E_ERROR);
             }
 
-            $pdf = $this->pdfService->getFromDisk((string)$tournament->getId(), $args['hash']);
+            $pdf = $this->pdfService->getPdf($tournament);
             $vtData = $pdf->render();
 
-            $fileName = $this->pdfService->getFileNameFromCache((string)$tournament->getId(), $args['hash']);
+            $fileName = $this->pdfService->getFileName($tournament);
             $response->getBody()->write($vtData);
 
             return $response
@@ -93,12 +95,13 @@ final class PdfAction extends Action
 
             $structure = $this->structureRepos->getStructure($tournament->getCompetition());
 
-            if( $this->pdfService->isStarted((string)$tournament->getId(), $args['hash']) ) {
+            if ($this->pdfService->isStarted((string)$tournament->getId())) {
                 throw new Exception('er loopt nog een pdf-aanvraag voor dit toernooi', E_ERROR);
             }
 
             // do async
-            $hash = $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, false);
+
+            $hash = $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, $this->pdfQueueService);
 
             // hoe kun je nu hierkomen, zodat het proces toch verder gaat?
 
@@ -123,9 +126,11 @@ final class PdfAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $progressValue = $this->pdfService->getProgressValue((string)$tournament->getId(), $args['hash']);
+            $this->pdfService->validateHash($tournament, $args['hash']);
 
-            if( $progressValue < 0 ) {
+            $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
+
+            if ($progressValue < 0) {
                 throw new Exception('de pdf-aanvraag voor dit toernooi is niet gestart', E_ERROR);
             }
 

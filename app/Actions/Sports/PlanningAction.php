@@ -6,6 +6,7 @@ namespace App\Actions\Sports;
 
 use App\Actions\Action;
 use App\QueueService;
+use App\QueueService\Planning as PlanningQueueService;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
@@ -113,8 +114,13 @@ final class PlanningAction extends Action
                 $this->roundNumberRepos
             );
             $roundNumberPlanningCreator->removeFrom($startRoundNumber);
-            $queueService = new QueueService($this->config->getArray('queue'));
-            $roundNumberPlanningCreator->addFrom($queueService, $startRoundNumber, $tournament->createRecessPeriods(), QueueService::MAX_PRIORITY);
+            $queueService = new PlanningQueueService($this->config->getArray('queue'));
+            $roundNumberPlanningCreator->addFrom(
+                $queueService,
+                $startRoundNumber,
+                $tournament->createRecessPeriods(),
+                QueueService::MAX_PRIORITY
+            );
 
             $this->updatePlanningEditMode($startRoundNumber);
 

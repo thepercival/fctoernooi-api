@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;
-use App\QueueService;
+use App\QueueService\Planning as PlanningQueueService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerInterface;
 use SportsPlanning\Input\Service as PlanningInputService;
@@ -69,7 +69,7 @@ class Recalculate extends PlanningCommand
         if ($idRange === null) {
             throw new \Exception('no id-range found', E_ERROR);
         }
-        $queueService = new QueueService($this->config->getArray('queue'));
+        $queueService = new PlanningQueueService($this->config->getArray('queue'));
         $planningOutput = new PlanningOutput($this->getLogger());
 
         foreach ($idRange->toArray() as $id) {

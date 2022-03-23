@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Copiers\TournamentCopier;
 use App\QueueService;
+use App\QueueService\Planning as PlanningQueueService;
 use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,6 @@ use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\ExportConfig;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
@@ -306,7 +306,7 @@ final class TournamentAction extends Action
             $this->structureRepos->add($newStructure);
 
             $this->planningCreator->addFrom(
-                new QueueService($this->config->getArray('queue')),
+                new PlanningQueueService($this->config->getArray('queue')),
                 $newStructure->getFirstRoundNumber(),
                 $newTournament->createRecessPeriods(),
                 QueueService::MAX_PRIORITY

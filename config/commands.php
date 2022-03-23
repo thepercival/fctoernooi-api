@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 use App\Commands\BackupSponsorImages;
 use App\Commands\Listing as ListingCommand;
-use App\Commands\Pdf\Validator as PdfValidator;
+use App\Commands\Pdf\Create as PdfCreate;
+use App\Commands\Pdf\Validate as PdfValidate;
 use App\Commands\Planning\Create as PlanningCreate;
 use App\Commands\Planning\Input\Recalculate as RecalculatePlanningInput;
 use App\Commands\Planning\Recreate as PlanningRecreate;
@@ -55,8 +56,11 @@ $commands = [
     "app:remove-old-tournaments" => function (ContainerInterface $container): RemoveOld {
         return new RemoveOld($container);
     },
-    "app:validate-pdf" => function (ContainerInterface $container): PdfValidator {
-        return new PdfValidator($container);
+    "app:create-pdf" => function (ContainerInterface $container): PdfCreate {
+        return new PdfCreate($container);
+    },
+    "app:validate-pdf" => function (ContainerInterface $container): PdfValidate {
+        return new PdfValidate($container);
     }
 ];
 

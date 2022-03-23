@@ -7,6 +7,7 @@ namespace App\Commands\Planning;
 use App\Commands\Planning as PlanningCommand;
 use App\Mailer;
 use App\QueueService;
+use App\QueueService\Planning as PlanningQueueService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\CacheService;
@@ -111,7 +112,7 @@ class Create extends PlanningCommand
             $disableThrowOnTimeout = $input->getOption('disableThrowOnTimeout');
             $this->disableThrowOnTimeout = is_bool($disableThrowOnTimeout) ? $disableThrowOnTimeout : false;
 
-            $queueService = new QueueService($this->config->getArray('queue'));
+            $queueService = new PlanningQueueService($this->config->getArray('queue'));
             $inputId = $input->getArgument('inputId');
             if (is_string($inputId) && strlen($inputId) > 0) {
                 $planningFilter = $this->getPlanningFilter($input);
@@ -127,7 +128,7 @@ class Create extends PlanningCommand
         return 0;
     }
 
-    protected function getReceiver(QueueService $queueService): callable
+    protected function getReceiver(PlanningQueueService $queueService): callable
     {
         return function (Message $message, Consumer $consumer) use ($queueService): void {
             // process message
@@ -197,7 +198,7 @@ class Create extends PlanningCommand
     }
 
     protected function updateRoundNumberWithPlanning(
-        QueueService $queueService,
+        PlanningQueueService $queueService,
         Competition $competition,
         int $roundNumberAsValue,
         int $eventPriority,

@@ -104,6 +104,8 @@ return [
         'user' => 'guest',
         'pass' => 'guest',
         'persisted' => false,
+        'prefix' => $_ENV['QUEUE_NAME_PREFIX'],
         'suffix' => $_ENV['QUEUE_NAME_SUFFIX']
+
     ]
 ];

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Commands\Planning\Input;
 
 use App\Commands\Planning as PlanningCommand;
-use App\QueueService;
+use App\QueueService\Planning as PlanningQueueService;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament\CustomPlaceRanges as TournamentStructureRanges;
 use Psr\Container\ContainerInterface;
@@ -75,7 +75,7 @@ class CreateDefaults extends PlanningCommand
         $recreate = is_bool($recreate) ? $recreate : false;
         $onlySelfReferee = $input->getOption('onlySelfReferee');
         $onlySelfReferee = is_bool($onlySelfReferee) ? $onlySelfReferee : false;
-        $queueService = new QueueService($this->config->getArray('queue'));
+        $queueService = new PlanningQueueService($this->config->getArray('queue'));
         $showNrOfPlaces = [];
         $planningOutput = new PlanningOutput($this->getLogger());
         while ($planningInputIt = $planningInputIterator->current()) {
