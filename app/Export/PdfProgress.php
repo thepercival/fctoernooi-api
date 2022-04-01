@@ -15,7 +15,7 @@ final class PdfProgress
     ) {
         if ($startProgress !== null) {
             $this->validate($startProgress);
-            $this->memcached->set($this->name, $startProgress);
+            $this->setProgress($startProgress);
         } else {
             $this->getProgress();
         }
@@ -24,34 +24,39 @@ final class PdfProgress
     protected function validate(float $progress): void
     {
         if ($progress < 0.0 || $progress > 100.0) {
-            throw new \Exception('pdf-progress out of bounds', E_ERROR);
+            throw new \Exception('pdf-progress(' . round($progress, 1) . ') out of bounds', E_ERROR);
         }
     }
 
     public function getProgress(): float
     {
-        /** @var float|false $progress */
+        /** @var string|false $progress */
         $progress = $this->memcached->get($this->name);
         if ($progress === false) {
             throw new \Exception('pdf-progress not found in cache', E_ERROR);
         }
-        return $progress;
+        return (float)$progress;
+    }
+
+    private function setProgress(float $progress): void
+    {
+        $this->memcached->set($this->name, '' . $progress, PdfService::CACHE_EXPIRATION);
     }
 
     public function addProgression(float $progress): float
     {
         $totalProgress = $this->getProgress() + $progress;
         $this->validate($totalProgress);
-        $this->memcached->set($this->name, $totalProgress);
+        $this->setProgress($totalProgress);
         return $totalProgress;
     }
 
     public function finish(): void
     {
-        $this->memcached->set($this->name, 100.0);
+        $this->setProgress(100.0);
     }
 
-    public function isFinished(): bool
+    public function hasFinished(): bool
     {
         return $this->getProgress() === 100.0;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\PdfProgress;
 use FCToernooi\Tournament;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competitor\Map as CompetitorMap;
@@ -35,7 +36,9 @@ class Document extends Zend_Pdf
     public function __construct(
         protected Tournament $tournament,
         protected Structure $structure,
-        protected string $url
+        protected string $url,
+        protected PdfProgress $progress,
+        protected float $maxSubjectProgress
     ) {
         parent::__construct();
     }
@@ -53,7 +56,9 @@ class Document extends Zend_Pdf
     public function render($newSegmentOnly = false, $outputStream = null): string
     {
         $this->fillContent();
-        return parent::render($newSegmentOnly, $outputStream);
+        $retVal = parent::render($newSegmentOnly, $outputStream);
+        $this->updateProgress();
+        return $retVal;
     }
 
     public function getFont(bool $bBold = false, bool $bItalic = false): Zend_Pdf_Resource_Font
@@ -72,10 +77,13 @@ class Document extends Zend_Pdf
 
     protected function fillContent(): void
     {
-       throw new \Exception('should be implemented', E_ERROR);
+        throw new \Exception('should be implemented', E_ERROR);
     }
 
-
+    protected function updateProgress(): void
+    {
+        $this->progress->addProgression($this->maxSubjectProgress);
+    }
 
     /**
      * @param Round $round

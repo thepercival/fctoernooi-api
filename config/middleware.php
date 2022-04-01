@@ -25,6 +25,8 @@ return function (App $app): void {
     }
     /** @var Configuration $config */
     $config = $container->get(Configuration::class);
+    /** @var LoggerInterface $logger */
+    $logger = $container->get(LoggerInterface::class);
 
     $app->add(
         function (Request $request, RequestHandler $handler): Response {
@@ -48,10 +50,10 @@ return function (App $app): void {
                     ),
                     new JwtAuthentication\RequestMethodRule(['ignore' => ['OPTIONS']])
                 ],
-                'error' => function (Response $response, array $args): UnauthorizedResponse {
+                'error' => function (Response $response, array $args) use ($container): UnauthorizedResponse {
                     /** @var string $message */
                     $message = $args['message'];
-                    return new UnauthorizedResponse($message);
+                    return new UnauthorizedResponse($container->get(LoggerInterface::class), $message);
                 },
                 'before' => function (Request $request, array $args): Request {
                     if (is_array($args['decoded']) && count($args['decoded']) > 0) {
@@ -76,12 +78,17 @@ return function (App $app): void {
     $app->addRoutingMiddleware();
 
 //    // always last, so it is called first!
-    $errorMiddleware = $app->addErrorMiddleware($config->getString('environment') === 'development', true, true);
+    $errorMiddleware = $app->addErrorMiddleware(
+        $config->getString('environment') === 'development',
+        true,
+        true,
+        $container->get(LoggerInterface::class)
+    );
 
     // Set the Not Found Handler
     $errorMiddleware->setErrorHandler(
         HttpNotFoundException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($logger): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 404);
         }
     );
@@ -89,7 +96,7 @@ return function (App $app): void {
     // Set the Not Allowed Handler
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($logger): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 405);
         }
     );

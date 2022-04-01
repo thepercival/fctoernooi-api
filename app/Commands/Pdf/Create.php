@@ -10,11 +10,10 @@ use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
 use App\Export\PdfService;
 use App\Export\PdfSubject;
 use App\Mailer;
-use App\QueueService;
 use App\QueueService\Pdf as PdfQueueService;
+use App\QueueService\Pdf\CreateMessage as PdfCreateMessage;
 use App\TmpService;
 use FCToernooi\CacheService;
-use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
@@ -122,28 +121,12 @@ class Create extends PlanningCommand
         return function (Message $message, Consumer $consumer) use ($queueService): void {
             // process message
             try {
-                $eventPriority = $message->getHeader('priority') ?? QueueService::MAX_PRIORITY;
-                $this->getLogger()->info('------ EXECUTING WITH PRIORITY ' . $eventPriority . ' ------');
-
-                /** @var object $content */
-                $content = json_decode($message->getBody());
-                $tournament = null;
-                if (property_exists($content, 'tournamentId')) {
-                    $tournament = $this->tournamentRepos->find((int)$content->tournamentId);
-                }
-                $subject = null;
-                if (property_exists($content, 'subject')) {
-                    $subject = PdfSubject::from((int)$content->subject);
-                }
-                $hash = null;
-                if (property_exists($content, 'hash')) {
-                    $hash = (string)$hash;
-                }
-                if ($tournament === null || $subject === null || $hash === null) {
-                    throw new \Exception('incorrect input params for queue-pdf-command', E_ERROR);
-                }
-
-                $this->createPdf($tournament, $subject, $hash);
+                $createMessage = $this->getMessage($message->getBody());
+                $tournamentId = (string)$createMessage->getTournament()->getId();
+                $logMessage = 'creating pdf for tournamentid "' . $tournamentId . '"';
+                $logMessage .= ' with subject "' . $createMessage->getSubject()->name . '"';
+                $this->getLogger()->info($logMessage);
+                $this->createPdf($createMessage);
 
                 $consumer->acknowledge($message);
             } catch (\Exception $exception) {
@@ -155,10 +138,54 @@ class Create extends PlanningCommand
         };
     }
 
-    protected function createPdf(Tournament $tournament, PdfSubject $subject, string $hash): void
+    protected function getMessage(string $messageContent): PdfCreateMessage
     {
+        /** @var object $content */
+        $content = json_decode($messageContent);
+        $tournament = null;
+        if (property_exists($content, 'tournamentId')) {
+            $tournament = $this->tournamentRepos->find((int)$content->tournamentId);
+        }
+
+        if ($tournament === null ||
+            !property_exists($content, 'totalNrOfSubjects') || !property_exists($content, 'subject')
+        ) {
+            throw new \Exception('incorrect input params for queue-pdf-command', E_ERROR);
+        }
+
+        $subject = PdfSubject::from((int)$content->subject);
+        $totalNrOfSubjects = (int)$content->totalNrOfSubjects;
+
+        return new PdfCreateMessage($tournament, $subject, $totalNrOfSubjects);
+    }
+
+    protected function createPdf(PdfCreateMessage $message): void
+    {
+        $time_start = microtime(true);
+        $tournament = $message->getTournament();
+        $tournamentId = (string)$tournament->getId();
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-        $pdf = $this->documentFactory->createDocument($tournament, $structure, $subject);
-        // werk progress level bij
+        $progressPerSubject = $this->pdfService->getProgressPerSubject($message->getTotalNrOfSubjects());
+        $subject = $message->getSubject();
+        $progress = $this->pdfService->getProgress($tournamentId);
+        $pdf = $this->documentFactory->createSubject(
+            $tournament,
+            $structure,
+            $subject,
+            $progress,
+            $progressPerSubject
+        );
+        $path = $this->pdfService->getSubjectPath($tournamentId, $subject);
+        $pdf->save($path);
+        $duration = round(microtime(true) - $time_start, 1);
+        $this->getLogger()->info('     executed in ' . $duration . ' seconds');
+
+        if ($this->pdfService->creationCompleted($progress->getProgress())) {
+            $this->getLogger()->info('merging pdf for tournamentid "' . $tournamentId . '"');
+            $time_start = microtime(true);
+            $this->pdfService->mergePdfs($tournament);
+            $duration = round(microtime(true) - $time_start, 1);
+            $this->getLogger()->info('     executed in ' . $duration . ' seconds');
+        }
     }
 }

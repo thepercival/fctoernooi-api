@@ -36,4 +36,15 @@ final class TmpService
         }
         return $path . DIRECTORY_SEPARATOR . $file;
     }
+
+    /**
+     * @param list<string> $subDirs
+     * @param string|null $file
+     * @return bool
+     */
+    public function removeFile(array $subDirs, string $fileName): bool
+    {
+        $path = $this->getPath($subDirs, $fileName);
+        return file_exists($path) && unlink($path);
+    }
 }

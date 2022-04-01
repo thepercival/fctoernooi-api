@@ -10,7 +10,6 @@ use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
-use FCToernooi\CreditAction\Name;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Role;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
@@ -22,6 +21,7 @@ use FCToernooi\User\Repository as UserRepository;
 use Firebase\JWT\JWT;
 use InvalidArgumentException;
 use Selective\Config\Configuration;
+use Slim\Views\Twig as TwigView;
 use Tuupola\Base62;
 
 class Service
@@ -35,7 +35,8 @@ class Service
         protected AuthSyncService $syncService,
         protected EntityManagerInterface $em,
         protected Configuration $config,
-        protected Mailer $mailer
+        protected Mailer $mailer,
+        private TwigView $view
     ) {
     }
 
@@ -70,14 +71,10 @@ class Service
         $salt = bin2hex(random_bytes(15));
         $hashedPassword = password_hash($salt . $password, PASSWORD_DEFAULT);
         $user = new User($emailaddress, $salt, $hashedPassword);
-        // @TODO CDK REMOVE LINE
-        $user->setNrOfCredits(3);
-
         $this->userRepos->save($user, true);
 
-        $this->creditActionRepos->doAction($user, Name::CreateAccountReward, 3);
+        $this->creditActionRepos->addCreateAccountCredits($user);
 
-        $this->userRepos->save($user);
         $invitations = $this->tournamentInvitationRepos->findBy(['emailaddress' => $user->getEmailaddress()]);
         $tournamentUsers = $this->syncService->processInvitations($user, $invitations);
         $this->sendRegisterEmail($emailaddress, $tournamentUsers);
@@ -91,38 +88,39 @@ class Service
      */
     protected function sendRegisterEmail(string $emailAddress, array $tournamentUsers): void
     {
-        $subject = 'welkom bij FCToernooi';
-        $bodyBegin = <<<EOT
-<p>Hallo,</p>
-<p>Welkom bij FCToernooi! Wij wensen je veel plezier met het gebruik van de FCToernooi. Mocht je vragen hebben dan kun je <a href="https://drive.google.com/open?id=1HLwhbH4YXEbV7osGmFUt24gk_zxGjnVilTG0MpkkPUI">de handleiding</a> lezen, bellen of deze mail beantwoorden.</p>
-EOT;
-        $bodyMiddle = '';
-        foreach ($tournamentUsers as $tournamentUser) {
-            if ($tournamentUser->getRoles() === 0) {
-                continue;
-            }
-            if (strlen($bodyMiddle) === 0) {
-                $bodyMiddle = '<p>Je hebt voor de volgende toernooien rollen gekregen:</p>';
-                $bodyMiddle .= '<table cellpadding="2" cellspacing="2" border="1"';
-                $bodyMiddle .= '<thead><tr><th>toernooinaam</th><th>rolnaam</th><th>rolomschrijving</th></tr></thead>';
-                $bodyMiddle .= '<tbody>';
-            }
+        $content = $this->view->fetch(
+            'register.twig',
+            [
+                'subject' => 'welkom',
+                'wwwUrl' => $this->config->getString('www.wwwurl'),
+                'tournamentRoles' => $this->getTournamentRoles($tournamentUsers)
+            ]
+        );
+
+        $this->mailer->send('welkom', $content, $emailAddress, false);
+    }
+
+    /**
+     * @param list<TournamentUser> $tournamentUsers
+     * @return list<array<string, string>>
+     */
+    protected function getTournamentRoles(array $tournamentUsers): array
+    {
+        $roles = [];
+        $filteredTournamentUsers = array_filter($tournamentUsers, function (TournamentUser $tournamentUser): bool {
+            return $tournamentUser->getRoles() > 0;
+        });
+        foreach ($filteredTournamentUsers as $tournamentUser) {
             $roleDefinitions = Role::getDefinitions($tournamentUser->getRoles());
             foreach ($roleDefinitions as $roleDefinition) {
-                $bodyMiddle .= '<tr>';
-                $name = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
-                $bodyMiddle .= '<td>' . $name . '</td>';
-                $bodyMiddle .= '<td>' . $roleDefinition['name'] . '</td>';
-                $bodyMiddle .= '<td>' . $roleDefinition['description'] . '</td>';
-                $bodyMiddle .= '</tr>';
+                $roles[] = [
+                    'tournamentName' => $tournamentUser->getTournament()->getCompetition()->getLeague()->getName(),
+                    'roleName' => $roleDefinition['name'],
+                    'roleDescription' => $roleDefinition['description']
+                ];
             }
         }
-        if (strlen($bodyMiddle) > 0) {
-            $bodyMiddle .= '</tbody></table><br/>';
-        }
-        $url = $this->config->getString('www.wwwurl');
-        $bodyEnd = '<p>met vriendelijke groet,<br/><br/>Coen Dunnink<br/>06-14363514<br/><a href="' . $url . '">FCToernooi</a></p>';
-        $this->mailer->send($subject, $bodyBegin . $bodyMiddle . $bodyEnd, $emailAddress);
+        return $roles;
     }
 
     public function sendPasswordCode(string $emailAddress): bool
@@ -219,13 +217,13 @@ EOT;
         setlocale(LC_ALL, 'nl_NL.UTF-8'); //
         $localDateTime = $expireDateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
         $date = strtolower(
-            strftime('%a %d %b %Y', $localDateTime->getTimestamp()) . ' ' .
+            strftime('%A %d %b %Y', $localDateTime->getTimestamp()) . ' ' .
             $localDateTime->format('H:i')
         );
         $body = <<<EOT
 <p>Hallo,</p>
 <p>            
-Tot $date uur kun je met deze code je emailadres valideren : <a style="font-size: 125%" href="$url">$code</a> 
+Tot $date uur kun je met de volgende link je emailadres valideren : <a style="font-size: 125%" href="$url">$url</a> 
 </p>
 <p>
 met vriendelijke groet,
@@ -234,5 +232,14 @@ FCToernooi
 </p>
 EOT;
         $this->mailer->send($subject, $body, $user->getEmailaddress());
+    }
+
+    public function validate(User $user): void
+    {
+        $user->setValidated(true);
+        $user->setValidateIn(0); // if earlier validated
+        $this->userRepos->save($user, true);
+
+        $this->creditActionRepos->addValidateCredits($user);
     }
 }

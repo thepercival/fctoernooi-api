@@ -1,12 +1,10 @@
-FCToernooi\Payment:
+FCToernooi\Payment\IDealIssuer:
   exclusion_policy: ALL
   exclude: false
   properties:
     id:
       type: string
-    method:
+    name:
       type: string
-    amount:
-      type: float
-    state:
+    imgUrl:
       type: string

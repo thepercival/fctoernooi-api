@@ -1,0 +1,6 @@
+FCToernooi\Payment\IDeal:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    issuer:
+      type: FCToernooi\Payment\IDealIssuer

@@ -9,6 +9,8 @@ use FCToernooi\CreditAction;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
+use FCToernooi\Payment;
+use FCToernooi\Payment\Repository as PaymentRepository;
 use FCToernooi\Recess;
 use FCToernooi\Recess\Repository as RecessRepository;
 use FCToernooi\Sponsor;
@@ -104,6 +106,12 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(Sponsor::class);
         return new SponsorRepository($entityManager, $metaData);
+    },
+    PaymentRepository::class => function (ContainerInterface $container): PaymentRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(Payment::class);
+        return new PaymentRepository($entityManager, $metaData);
     },
     RecessRepository::class => function (ContainerInterface $container): RecessRepository {
         /** @var EntityManagerInterface $entityManager */

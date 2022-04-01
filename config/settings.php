@@ -36,10 +36,12 @@ return [
         'cache_file' => __DIR__ . '/../cache/router',
     ],
     'payment' => [
-        'redirectUrl' => $_ENV['WWW_URL'] . '/user/buycredits/',
-        // // "https://webshop.example.org/order/12345/"
-        'webhookUrl' => $_ENV['WWW_URL'] . '/user/buycredits/'
-        // "https://webshop.example.org/mollie-webhook/",
+        'redirectUrl' => $_ENV['WWW_URL'] . 'user/awaitpayment',
+        // 'webhookUrl' => $_ENV['API_URL'] . 'public/payments',
+        'webhookUrl' => ' http://f9ca-2001-1c06-1e02-6100-6c54-314e-86eb-f52c.ngrok.io/public/payments',
+        'mollie' => [
+            'apikey' => $_ENV['MOLLIE_APIKEY']
+        ],
     ],
     // Doctrine settings
     'doctrine' => [

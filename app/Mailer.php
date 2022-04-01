@@ -44,7 +44,8 @@ final class Mailer
             $mailer->isHTML(false);
             $mailer->Body = $body;
         } else {
-            $mailer->Body = $this->getStyle() . $body;
+            $mailer->Body = /*$this->getStyle() .*/
+                $body;
         }
 
         if (!$mailer->send()) {

@@ -195,7 +195,6 @@ return [
     AuthSettings::class => function (ContainerInterface $container): AuthSettings {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        $authSettings = $config->getArray('auth');
         return new AuthSettings(
             $config->getString('auth.jwtsecret'),
             $config->getString('auth.jwtalgorithm'),

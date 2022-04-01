@@ -1,0 +1,28 @@
+<table class="table" border="0" cellpadding="0" cellspacing="0"
+       style="width: 100%; max-width: 100%; font-family: Archivo, Helvetica, Arial, sans-serif !important;">
+    <thead class="cusgray" style="background-color: #3e3f3a; color: white;">
+    <tr>
+        <th style="line-height: 24px; font-size: 16px; border-bottom-width: 2px; border-bottom-color: #e2e8f0; border-bottom-style: solid; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; margin: 0; padding: 12px;"
+            align="left" valign="top">naam
+        </th>
+        <th style="line-height: 24px; font-size: 16px; border-bottom-width: 2px; border-bottom-color: #e2e8f0; border-bottom-style: solid; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; margin: 0; padding: 12px;"
+            align="left" valign="top">rol
+        </th>
+        <th style="line-height: 24px; font-size: 16px; border-bottom-width: 2px; border-bottom-color: #e2e8f0; border-bottom-style: solid; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; margin: 0; padding: 12px;"
+            align="left" valign="top">omschrijving
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for tournamentRole in tournamentRoles %}
+        <tr>
+            <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; font-family: Archivo, Helvetica, Arial, sans-serif !important; margin: 0; padding: 12px;"
+                align="left" valign="top">{{ tournamentRole['tournamentName'] }}</td>
+            <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; font-family: Archivo, Helvetica, Arial, sans-serif !important; margin: 0; padding: 12px;"
+                align="left" valign="top">{{ tournamentRole['roleName'] }}</td>
+            <td style="line-height: 24px; font-size: 16px; border-top-width: 1px; border-top-color: #e2e8f0; border-top-style: solid; font-family: Archivo, Helvetica, Arial, sans-serif !important; margin: 0; padding: 12px;"
+                align="left" valign="top">{{ tournamentRole['roleDescription'] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

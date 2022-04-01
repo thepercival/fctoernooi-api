@@ -9,7 +9,6 @@ use DateTimeImmutable;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;
 use FCToernooi\Auth\Service as AuthService;
-use FCToernooi\CreditAction\Name;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
@@ -231,11 +230,7 @@ final class AuthAction extends Action
                 throw new \Exception('de validatie-code komt niet overeen', E_ERROR);
             }
 
-            $user->setValidated(true);
-            $user->setValidateIn(0); // if earlier validated
-            $this->userRepos->save($user, true);
-
-            $this->creditActionRepos->doAction($user, Name::ValidateReward, 3);
+            $this->authService->validate($user);
 
             $json = $this->serializer->serialize($user, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);

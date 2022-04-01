@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\AuthAction;
 use App\Actions\LockerRoomAction;
+use App\Actions\PaymentAction;
 use App\Actions\PdfAction;
 use App\Actions\RecessAction;
 use App\Actions\ReportAction;
@@ -74,6 +75,11 @@ return function (App $app): void {
                         ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                             VersionMiddleware::class
                         );
+
+                    $group->options('/pdf', PdfAction::class . ':options');
+                    $group->get('/pdf', PdfAction::class . ':fetchOne')
+                        ->setName('tournament-export')
+                        ->add(TournamentMiddleware::class);
                 }
             );
 
@@ -83,6 +89,10 @@ return function (App $app): void {
             $group->get('/usagereport', ReportAction::class . ':usage')->add(
                 TwigMiddleware::createFromContainer($app, TwigView::class)
             );
+
+            $group->options('/payments', PaymentAction::class . ':options');
+            $group->get('/payments', PaymentAction::class . ':update');
+            $group->post('/payments', PaymentAction::class . ':update');
         }
     );
 
@@ -111,12 +121,14 @@ return function (App $app): void {
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 
     $app->group(
-        '/payment/',
+        '/payments',
         function (Group $group): void {
-            $group->options('idealmethods', UserAction::class . ':options');
-            $group->get('idealmethods', UserAction::class . ':fetchIDealMethods');
-            $group->options('buycredits', UserAction::class . ':options');
-            $group->post('buycredits', UserAction::class . ':buyCredits');
+            $group->options('/methods', PaymentAction::class . ':options');
+            $group->get('/methods', PaymentAction::class . ':fetchMethods');
+            $group->options('/idealissuers', PaymentAction::class . ':options');
+            $group->get('/idealissuers', PaymentAction::class . ':fetchIDealIssuers');
+            $group->options('/buycredits', PaymentAction::class . ':options');
+            $group->post('/buycredits', PaymentAction::class . ':buyCredits');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 
@@ -421,10 +433,9 @@ return function (App $app): void {
                             $group->post('', PdfAction::class . ':create');
                             $group->options('/progress/{hash}', PdfAction::class . ':options');
                             $group->get('/progress/{hash}', PdfAction::class . ':progress');
-                            $group->options('/{hash}', PdfAction::class . ':options');
-                            $group->get('/{hash}', PdfAction::class . ':fetchOne');
                         }
-                    )   ->add(TournamentRoleAdminAuthMiddleware::class)
+                    )
+                        ->add(TournamentRoleAdminAuthMiddleware::class)
                         ->add(UserMiddleware::class)
                         ->add(TournamentMiddleware::class);
                 }

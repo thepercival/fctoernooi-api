@@ -30,7 +30,7 @@ class GamesPerField extends PdfPlanningDocument
                     return $game->getField() === $field;
                 }
             );
-            $this->drawPlanningPerHelper($roundNumber, $page, $y, true);
+            $this->drawPlanningPerFieldOrPouleHelper($roundNumber, $page, $y, true);
         }
     }
 }

@@ -6,11 +6,19 @@
         <field name="action" column="action" type="enum_CreditAction" length="20" nullable="false" unique="false"/>
         <field name="nrOfCredits" column="nrOfCredits" type="smallint" nullable="false" unique="false"/>
         <field name="atDateTime" column="atDateTime" type="datetime_immutable" nullable="false" unique="false"/>
-        <field name="paymentId" column="paymentId" type="string" length="32" nullable="true" unique="false"/>
         <many-to-one field="user" target-entity="FCToernooi\User" inversed-by="creditActions">
             <join-columns>
                 <join-column name="userId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
             </join-columns>
         </many-to-one>
+        <one-to-one field="payment" target-entity="FCToernooi\Payment">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <join-columns>
+                <join-column name="paymentId" referenced-column-name="id" nullable="true" on-delete="RESTRICT"/>
+            </join-columns>
+        </one-to-one>
     </entity>
 </doctrine-mapping>

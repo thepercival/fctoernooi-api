@@ -16,9 +16,11 @@ declare(strict_types=1);
 
 namespace App\Response;
 
+use Psr\Log\LoggerInterface;
+
 class UnauthorizedResponse extends ErrorResponse
 {
-    public function __construct(string $message)
+    public function __construct(LoggerInterface $logger, string $message)
     {
         parent::__construct($message, 401);
     }

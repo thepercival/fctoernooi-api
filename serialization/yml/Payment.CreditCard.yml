@@ -1,0 +1,8 @@
+FCToernooi\Payment\CreditCard:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    cardNumber:
+      type: string
+    cvc:
+      type: string

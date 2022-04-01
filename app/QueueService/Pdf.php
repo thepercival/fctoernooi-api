@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\QueueService;
 
-use App\Export\PdfSubject;
 use App\QueueService;
-use FCToernooi\Tournament;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 
@@ -20,12 +18,8 @@ class Pdf extends QueueService
         parent::__construct($amqpOptions, 'pdf-create');
     }
 
-    public function sendCreatePdf(
-        Tournament $tournament,
-        PdfSubject $subject,
-        int $totalNrOfSubjects,
-        int|null $priority = null
-    ): void {
+    public function sendCreatePdf(Pdf\CreateMessage $message, int|null $priority = null): void
+    {
         $context = $this->getContext();
         /** @var AmqpTopic $exchange */
         $exchange = $context->createTopic('amq.direct');
@@ -38,13 +32,7 @@ class Pdf extends QueueService
 
         $context->bind(new AmqpBind($exchange, $queue));
 
-        $content = [
-            'tournamentId' => $tournament->getId(),
-            'subject' => $subject->value,
-            'totalNrOfSubjects' => $totalNrOfSubjects
-        ];
-
-        $message = $context->createMessage(json_encode($content));
-        $context->createProducer()->setPriority($priority)->send($queue, $message);
+        $amqpMessage = $context->createMessage($message->toJson());
+        $context->createProducer()->setPriority($priority)->send($queue, $amqpMessage);
     }
 }

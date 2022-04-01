@@ -13,6 +13,7 @@ use App\Export\Pdf\Document\Planning\GamesPerPoule as GamesPerPouleDocument;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Document\QRCode as QRCodeDocument;
 use App\Export\Pdf\Document\Structure as StructureDocument;
+use App\Export\PdfProgress;
 use App\Export\PdfSubject;
 use FCToernooi\Tournament;
 use Selective\Config\Configuration;
@@ -31,29 +32,45 @@ class DocumentFactory
 {
     protected string $wwwUrl;
 
-    public function __construct(Configuration $config) {
+    public function __construct(Configuration $config)
+    {
         $this->wwwUrl = $config->getString('www.wwwurl');
     }
 
-    public function createDocument(Tournament $tournament, Structure $structure, PdfSubject $subject): PdfDocument
-    {
+    public function createSubject(
+        Tournament $tournament,
+        Structure $structure,
+        PdfSubject $subject,
+        PdfProgress $progress,
+        float $maxSubjectProgress
+    ): PdfDocument {
         switch ($subject) {
             case PdfSubject::Structure:
-                return new StructureDocument($tournament, $structure, $this->wwwUrl);
+                return new StructureDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
             case PdfSubject::PoulePivotTables:
-                return new PoulePivotTablesDocument($tournament, $structure, $this->wwwUrl);
+                return new PoulePivotTablesDocument(
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress
+                );
             case PdfSubject::Planning:
-                return new GamesDocument($tournament, $structure, $this->wwwUrl);
+                return new GamesDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
             case PdfSubject::GamesPerPoule:
-                return new GamesPerPouleDocument($tournament, $structure, $this->wwwUrl);
+                return new GamesPerPouleDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress
+                );
             case PdfSubject::GamesPerField:
-                return new GamesPerFieldDocument($tournament, $structure, $this->wwwUrl);
+                return new GamesPerFieldDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress
+                );
             case PdfSubject::GameNotes:
-                return new GameNotesDocument($tournament, $structure, $this->wwwUrl);
+                return new GameNotesDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
             case PdfSubject::QrCode:
-                return new QRCodeDocument($tournament, $structure, $this->wwwUrl);
+                return new QRCodeDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
             case PdfSubject::LockerRooms:
-                return new LockerRoomsDocument($tournament, $structure, $this->wwwUrl);
+                return new LockerRoomsDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
         }
         throw new \Exception('unknown subject', E_ERROR);
     }

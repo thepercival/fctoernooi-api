@@ -25,8 +25,69 @@ class GameNotes extends PdfDocument
 {
     protected function fillContent(): void
     {
-        $this->drawGameNotes($this->structure->getFirstRoundNumber());
+        $nrOfGameNotes = $this->getNrOfGameNotes($this->structure->getFirstRoundNumber());
+        $nrOfProgressPerGameNote = $this->maxSubjectProgress / $nrOfGameNotes;
+        $this->drawGameNotes($this->structure->getFirstRoundNumber(), $nrOfProgressPerGameNote);
     }
+
+    /**
+     * do not remove, progress is done while drawing, when remove, progress will be out of bounds
+     */
+    protected function updateProgress(): void
+    {
+    }
+
+    protected function getNrOfGameNotes(RoundNumber $roundNumber): int
+    {
+        $nrOfGameNotes = 0;
+        foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
+            $sportVariant = $competitionSport->createVariant();
+            if ($sportVariant instanceof AgainstSportVariant) {
+                $nrOfGameNotes += $this->getNrOfAgainstGameNotes($roundNumber, $competitionSport);
+            } elseif ($sportVariant instanceof SingleSportVariant) {
+                $nrOfGameNotes += $this->getNrOfSingleGameNotes($roundNumber, $competitionSport);
+            } else {
+                $nrOfGameNotes += $this->getNrOfAllInOneGameGameNotes($roundNumber, $competitionSport);
+            }
+        }
+
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            return $nrOfGameNotes + $this->getNrOfGameNotes($nextRoundNumber);
+        }
+        return $nrOfGameNotes;
+    }
+
+    protected function getNrOfAgainstGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
+    {
+        $nrOfGameNotes = 0;
+        foreach ($roundNumber->getRounds() as $round) {
+            $games = $this->getAgainstGames($round, $competitionSport); // per poule
+            $nrOfGameNotes += (int)ceil(count($games) / 2);
+        }
+        return $nrOfGameNotes;
+    }
+
+    protected function getNrOfSingleGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
+    {
+        $nrOfGameNotes = 0;
+        foreach ($roundNumber->getRounds() as $round) {
+            $games = $this->getSingleGames($round, $competitionSport); // per poule
+            $nrOfGameNotes += (int)ceil(count($games) / 2);
+        }
+        return $nrOfGameNotes;
+    }
+
+    protected function getNrOfAllInOneGameGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
+    {
+        $nrOfGameNotes = 0;
+        foreach ($roundNumber->getPoules() as $poule) {
+            $games = $this->getAllInOneGames($poule, $competitionSport); // per poule
+            $nrOfGameNotes += (int)ceil(count($games) / 2);
+        }
+        return $nrOfGameNotes;
+    }
+
 
     protected function createAgainstGameNotesPage(AgainstGame $gameA, AgainstGame|null $gameB): AgainstGameNotesPage
     {
@@ -52,27 +113,30 @@ class GameNotes extends PdfDocument
         return $page;
     }
 
-    protected function drawGameNotes(RoundNumber $roundNumber): void
+    protected function drawGameNotes(RoundNumber $roundNumber, float $nrOfProgressPerGameNote): void
     {
         foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
             $sportVariant = $competitionSport->createVariant();
             if ($sportVariant instanceof AgainstSportVariant) {
-                $this->drawAgainstGameNotes($roundNumber, $competitionSport);
+                $this->drawAgainstGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
             } elseif ($sportVariant instanceof SingleSportVariant) {
-                $this->drawSingleGameNotes($roundNumber, $competitionSport);
+                $this->drawSingleGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
             } else {
-                $this->drawAllInOneGameNotes($roundNumber, $competitionSport);
+                $this->drawAllInOneGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
             }
         }
 
         $nextRoundNumber = $roundNumber->getNext();
         if ($nextRoundNumber !== null) {
-            $this->drawGameNotes($nextRoundNumber);
+            $this->drawGameNotes($nextRoundNumber, $nrOfProgressPerGameNote);
         }
     }
 
-    protected function drawAgainstGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
-    {
+    protected function drawAgainstGameNotes(
+        RoundNumber $roundNumber,
+        CompetitionSport $competitionSport,
+        float $nrOfProgressPerGameNote
+    ): void {
         foreach ($roundNumber->getRounds() as $round) {
             $games = $this->getAgainstGames($round, $competitionSport); // per poule
             $oneGamePerPage = $this->getNrOfGameNoteScoreLines($round, $competitionSport) > 5;
@@ -80,12 +144,16 @@ class GameNotes extends PdfDocument
                 $gameTwo = $oneGamePerPage ? null : array_shift($games);
                 $page = $this->createAgainstGameNotesPage($gameOne, $gameTwo);
                 $page->draw($oneGamePerPage);
+                $this->progress->addProgression($nrOfProgressPerGameNote);
             }
         }
     }
 
-    protected function drawSingleGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
-    {
+    protected function drawSingleGameNotes(
+        RoundNumber $roundNumber,
+        CompetitionSport $competitionSport,
+        float $nrOfProgressPerGameNote
+    ): void {
         foreach ($roundNumber->getRounds() as $round) {
             $games = $this->getSingleGames($round, $competitionSport); // per poule
             $oneGamePerPage = $this->getNrOfGameNoteScoreLines($round, $competitionSport) > 5;
@@ -93,12 +161,16 @@ class GameNotes extends PdfDocument
                 $gameTwo = $oneGamePerPage ? null : array_shift($games);
                 $page = $this->createSingleGameNotesPage($gameOne, $gameTwo);
                 $page->draw($oneGamePerPage);
+                $this->progress->addProgression($nrOfProgressPerGameNote);
             }
         }
     }
 
-    protected function drawAllInOneGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): void
-    {
+    protected function drawAllInOneGameNotes(
+        RoundNumber $roundNumber,
+        CompetitionSport $competitionSport,
+        float $nrOfProgressPerGameNote
+    ): void {
         foreach ($roundNumber->getPoules() as $poule) {
             $oneGamePerPage = $poule->getPlaces()->count() > 5;
             $games = $this->getAllInOneGames($poule, $competitionSport); // per poule
@@ -106,6 +178,7 @@ class GameNotes extends PdfDocument
                 $gameTwo = $oneGamePerPage ? null : array_shift($games);
                 $page = $this->createAllInOneGameNotesPage($gameOne, $gameTwo);
                 $page->draw($oneGamePerPage);
+                $this->progress->addProgression($nrOfProgressPerGameNote);
             }
         }
     }

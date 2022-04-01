@@ -30,7 +30,7 @@ class GamesPerPoule extends PdfPlanningDocument
                     return $game->getPoule() === $poule;
                 }
             );
-            $this->drawPlanningPerHelper($roundNumber, $page, $y, false);
+            $this->drawPlanningPerFieldOrPouleHelper($roundNumber, $page, $y, false);
         }
 
         $nextRoundNumber = $roundNumber->getNext();

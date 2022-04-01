@@ -6,12 +6,12 @@ namespace App\Export;
 
 enum PdfSubject: int
 {
-    case GameNotes = 1;
-    case Structure = 2;
-    case GamesPerPoule = 4;
-    case GamesPerField = 8;
-    case Planning = 16;
-    case PoulePivotTables = 32;
+    case Structure = 1;
+    case PoulePivotTables = 2;
+    case Planning = 4;
+    case GamesPerPoule = 8;
+    case GamesPerField = 16;
+    case GameNotes = 32;
     case LockerRooms = 64;
     case QrCode = 128;
 

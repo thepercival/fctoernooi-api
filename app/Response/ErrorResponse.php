@@ -10,8 +10,9 @@ use Slim\Psr7\Stream;
 
 class ErrorResponse extends Response
 {
-    public function __construct(string $message, int $status)
+    public function __construct(string $message, int $status/*, LoggerInterface $logger*/)
     {
+        // logger->error('HTTPSTATUS: ' . $status . ' => ' . $message);
         $headers = new Headers();
         $headers->setHeader("Content-type", "application/json");
 

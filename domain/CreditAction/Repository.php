@@ -8,7 +8,9 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityRepository;
 use FCToernooi\CreditAction;
 use FCToernooi\CreditAction\Name as CreditActionName;
+use FCToernooi\Payment;
 use FCToernooi\User;
+use FCToernooi\User\Repository as UserRepository;
 use SportsHelpers\Repository as BaseRepository;
 
 /**
@@ -21,28 +23,129 @@ class Repository extends EntityRepository
      */
     use BaseRepository;
 
-    public function doAction(
-        User $user,
-        CreditActionName $action,
-        int $nrOfCredits,
+    public const CREATE_ACCOUNT_CREDITS = 3;
+    public const VALIDATE_ACCOUNT_CREDITS = 3;
+    public const NR_OF_CREDITS_PER_TOURNAMENT = 1;
+
+    public function addCreateAccountCredits(User $user): CreditAction
+    {
+        $creditAction = new CreditAction(
+            $user,
+            CreditActionName::CreateAccountReward,
+            self::CREATE_ACCOUNT_CREDITS,
+            new DateTimeImmutable(),
+            null
+        );
+        $this->save($creditAction, true);
+
+        $user->setNrOfCredits(self::CREATE_ACCOUNT_CREDITS);
+
+        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+        $userRepos->save($user, true);
+
+        return $creditAction;
+    }
+
+    //                $creditAction = new CreditAction() $this->creditActionRepos->doAction(
+//                    $payment->getUser(), Name::Buy, $payment->calculateNrOfCredits());
+//                $creditAction->approve($payment);
+
+    public function addValidateCredits(User $user, DateTimeImmutable|null $atDateTime = null): CreditAction
+    {
+        if ($atDateTime === null) {
+            $atDateTime = new DateTimeImmutable();
+        }
+
+        $creditAction = new CreditAction(
+            $user,
+            CreditActionName::ValidateReward,
+            self::VALIDATE_ACCOUNT_CREDITS,
+            $atDateTime,
+            null
+        );
+        $this->save($creditAction, true);
+
+        $user->setNrOfCredits(self::VALIDATE_ACCOUNT_CREDITS);
+        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+        $userRepos->save($user, true);
+
+        return $creditAction;
+    }
+
+    public function buyCredits(
+        Payment $payment,
         DateTimeImmutable|null $atDateTime = null
     ): CreditAction {
         if ($atDateTime === null) {
             $atDateTime = new DateTimeImmutable();
         }
-        // @TODO CDK PAYMENT
-        $creditAction = new CreditAction($user, $action, $nrOfCredits, $atDateTime);
-//        $this->save($creditAction, true);
+        $user = $payment->getUser();
 
-//        if (!$user->getValidated() && $action === CreditActionName::CreateTournament) {
-//            $user->setValidateIn($user->getValidateIn() + $nrOfCredits);
-//        }
-        // $user->setNrOfCredits($user->getNrOfCredits() + $nrOfCredits);
+        $creditAction = new CreditAction(
+            $user,
+            CreditActionName::Buy,
+            $payment->calculateNrOfCredits(),
+            $atDateTime,
+            $payment
+        );
+        $this->save($creditAction, true);
 
-//        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
-//        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
-//
-//        $userRepos->save($user, true);
+        $user->setNrOfCredits($user->getNrOfCredits() + $payment->calculateNrOfCredits());
+
+        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+
+        $userRepos->save($user, true);
+
+        return $creditAction;
+    }
+
+    public function cancelCredits(
+        Payment $payment,
+        DateTimeImmutable|null $atDateTime = null
+    ): void {
+        if ($atDateTime === null) {
+            $atDateTime = new DateTimeImmutable();
+        }
+        $user = $payment->getUser();
+
+        $creditAction = $this->findOneBy(['payment', $payment]);
+        if ($creditAction !== null) {
+            $this->remove($creditAction, true);
+        }
+
+        $user->setNrOfCredits($user->getNrOfCredits() - $payment->calculateNrOfCredits());
+        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+        $userRepos->save($user, true);
+    }
+
+    public function removeCreateTournamentCredits(
+        User $user,
+        DateTimeImmutable|null $atDateTime = null
+    ): CreditAction {
+        if ($atDateTime === null) {
+            $atDateTime = new DateTimeImmutable();
+        }
+
+        $creditAction = new CreditAction(
+            $user,
+            CreditActionName::CreateTournament,
+            self::NR_OF_CREDITS_PER_TOURNAMENT,
+            $atDateTime
+        );
+        $this->save($creditAction, true);
+
+        if (!$user->getValidated()) {
+            $user->setValidateIn($user->getValidateIn() - self::NR_OF_CREDITS_PER_TOURNAMENT);
+        }
+        $user->setNrOfCredits($user->getNrOfCredits() - self::NR_OF_CREDITS_PER_TOURNAMENT);
+        $metaData = $this->getEntityManager()->getClassMetadata(User::class);
+        $userRepos = new UserRepository($this->getEntityManager(), $metaData);
+        $userRepos->save($user, true);
+
         return $creditAction;
     }
 }

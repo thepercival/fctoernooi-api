@@ -17,21 +17,22 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use Sports\Structure\Repository as StructureRepository;
+use stdClass;
 
 final class PdfAction extends Action
 {
+    private PdfQueueService $pdfQueueService;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
-        private StructureRepository $structureRepos,
         private PdfService $pdfService,
-        private PdfQueueService $pdfQueueService,
         private CacheService $cacheService,
         Configuration $config
     ) {
         parent::__construct($logger, $serializer);
+        $this->pdfQueueService = new PdfQueueService($config->getArray('queue'));
     }
 
     /**
@@ -46,7 +47,11 @@ final class PdfAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $this->pdfService->validateHash($tournament, $args['hash']);
+            $queryParams = $request->getQueryParams();
+            if (!isset($queryParams['hash'])) {
+                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
+            }
+            $this->pdfService->validateHash($tournament, $queryParams['hash']);
 
             $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
             if ($progressValue < 0) {
@@ -56,7 +61,7 @@ final class PdfAction extends Action
                 throw new Exception('de pdf-aanvraag is nog in behandeling', E_ERROR);
             }
 
-            $pdf = $this->pdfService->getPdf($tournament);
+            $pdf = $this->pdfService->getPdfOnce($tournament);
             $vtData = $pdf->render();
 
             $fileName = $this->pdfService->getFileName($tournament);
@@ -88,24 +93,18 @@ final class PdfAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $subjects = $this->getSubjects($request->getQueryParams());
+            /** @var stdClass $postData */
+            $postData = $this->getFormData($request);
+            if (property_exists($postData, 'subjects') === false) {
+                throw new Exception('geen subjects ingevoerd');
+            }
+
+            $subjects = $this->getSubjects($postData->subjects);
 
             $tournament->setExported($tournament->getExported() | PdfSubject::sum($subjects));
             $this->tournamentRepos->save($tournament);
 
-            $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-
-            if ($this->pdfService->isStarted((string)$tournament->getId())) {
-                throw new Exception('er loopt nog een pdf-aanvraag voor dit toernooi', E_ERROR);
-            }
-
-            // do async
-
-            $hash = $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, $this->pdfQueueService);
-
-            // hoe kun je nu hierkomen, zodat het proces toch verder gaat?
-
-            // return $this->writePdf($response, $subjects, $tournament, $this->config->getString('www.wwwurl'));
+            $hash = $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->pdfQueueService);
 
             $json = json_encode(['hash' => $hash]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
@@ -134,7 +133,7 @@ final class PdfAction extends Action
                 throw new Exception('de pdf-aanvraag voor dit toernooi is niet gestart', E_ERROR);
             }
 
-            $json = json_encode(['progressValue' => $progressValue]);
+            $json = json_encode(['progress' => (int)$progressValue]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400);
@@ -142,20 +141,14 @@ final class PdfAction extends Action
     }
 
 
-
     /**
-     * @param array<string, int|string> $queryParams
+     * @param int $subjects
      * @return non-empty-list<PdfSubject>
      * @throws Exception
      */
-    protected function getSubjects(array $queryParams): array
+    protected function getSubjects(int $subjects): array
     {
-        $inputSubjects = 0;
-        if (isset($queryParams['subjects'])) {
-            $inputSubjects = (int)$queryParams['subjects'];
-        }
-
-        $subjects = PdfSubject::toFilteredArray($inputSubjects);
+        $subjects = PdfSubject::toFilteredArray($subjects);
         if (count($subjects) === 0) {
             throw new Exception('kies minimaal 1 exportoptie', E_ERROR);
         }

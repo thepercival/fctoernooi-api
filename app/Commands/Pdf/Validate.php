@@ -22,7 +22,6 @@ use Selective\Config\Configuration;
 use Sports\Output\StructureOutput;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,7 +31,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Validate extends Command
 {
     protected TournamentRepository $tournamentRepos;
-    protected StructureRepository $structureRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
     protected PdfService $pdfService;
@@ -47,10 +45,6 @@ class Validate extends Command
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
-
-        /** @var StructureRepository $structureRepos */
-        $structureRepos = $container->get(StructureRepository::class);
-        $this->structureRepos = $structureRepos;
 
         /** @var PlanningInputRepository $planningInputRepos */
         $planningInputRepos = $container->get(PlanningInputRepository::class);
@@ -129,8 +123,7 @@ class Validate extends Command
                     $logger->info('creating pdf for ' . (string)$tournament->getId());
                     $structure = null;
                     try {
-                        $structure = $this->structureRepos->getStructure($tournament->getCompetition());
-                        $this->createPdf($tournament, $structure, $subjects);
+                        $this->createPdf($tournament, $subjects);
                         // $this->addStructureToLog($tournament, $structure);
                     } catch (Exception $exception) {
                         $logger->error($exception->getMessage());
@@ -176,24 +169,19 @@ class Validate extends Command
 
     /**
      * @param Tournament $tournament
-     * @param Structure $structure
      * @param non-empty-list<PdfSubject> $subjects
      * @throws Exception
      */
-    protected function createPdf(Tournament $tournament, Structure $structure, array $subjects): void
+    protected function createPdf(Tournament $tournament, array $subjects): void
     {
         try {
-            $this->pdfService->createASyncOnDisk($tournament, $structure, $subjects, $this->queueService);
-            $progress = $this->pdfService->getProgress((string)$tournament->getId());
-            while (!$progress->isFinished()) {
-                sleep(1);
-            }
-            $pdf = $this->pdfService->getPdf($tournament);
-            $path = $this->pdfService->getPath($tournament);
-            $pdf->save($path);
+            $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->queueService);
         } catch (Exception $exception) {
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
-            throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(), E_ERROR);
+            throw new Exception(
+                'toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(),
+                E_ERROR
+            );
         }
     }
 

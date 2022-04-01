@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports\Planning;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use App\Actions\Action;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 use Sports\Planning\Config as PlanningConfig;
-use Sports\Competition;
 use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\Config\Service as PlanningConfigService;
 use Sports\Round\Number as RoundNumber;
@@ -59,10 +58,14 @@ final class ConfigAction extends Action
                 throw new Exception('geen rondenummer gevonden', E_ERROR);
             }
 
+            $oldPlanningConfig = $roundNumber->getPlanningConfig();
             $planningConfig = $this->planningConfigService->copy($planningConfigSer, $roundNumber);
 
             $this->planningConfigRepos->save($planningConfig);
 
+            if ($oldPlanningConfig !== null) {
+                $this->planningConfigRepos->remove($oldPlanningConfig);
+            }
             $this->removeNext($roundNumber);
 
             $json = $this->serializer->serialize(true, 'json');

@@ -12,7 +12,6 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\CacheService;
-use FCToernooi\CreditAction\Name as CreditActionName;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Recess;
 use FCToernooi\Role;
@@ -153,7 +152,8 @@ final class TournamentAction extends Action
                 'json',
                 $deserializationContext
             );
-            if (!$user->getValidated() && $user->getValidateIn() < 1) {
+            if (!$user->getValidated()
+                && $user->getValidateIn() < CreditActionRepository::NR_OF_CREDITS_PER_TOURNAMENT) {
                 throw new \Exception('je moet eerst je account validateren', E_ERROR);
             }
             if ($user->getNrOfCredits() < 1) {
@@ -172,12 +172,7 @@ final class TournamentAction extends Action
             }
             $this->tournamentRepos->customPersist($tournament, true);
 
-            $this->creditActionRepos->doAction(
-                $user,
-                CreditActionName::CreateTournament,
-                -1,
-                $tournament->getCreatedDateTime()
-            );
+            $this->creditActionRepos->removeCreateTournamentCredits($user);
 
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
@@ -262,7 +257,8 @@ final class TournamentAction extends Action
             /** @var User $user */
             $user = $request->getAttribute('user');
 
-            if (!$user->getValidated() && $user->getValidateIn() < 1) {
+            if (!$user->getValidated() && $user->getValidateIn(
+                ) < CreditActionRepository::NR_OF_CREDITS_PER_TOURNAMENT) {
                 throw new \Exception('je moet eerst je account validateren', E_ERROR);
             }
             if ($user->getNrOfCredits() < 1) {
@@ -312,12 +308,7 @@ final class TournamentAction extends Action
                 QueueService::MAX_PRIORITY
             );
 
-            $this->creditActionRepos->doAction(
-                $user,
-                CreditActionName::CreateTournament,
-                -1,
-                $tournament->getCreatedDateTime()
-            );
+            $this->creditActionRepos->removeCreateTournamentCredits($user);
 
             $conn->commit();
 

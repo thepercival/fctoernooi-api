@@ -338,6 +338,7 @@ class Create extends PlanningCommand
             $planningSeeker->disableThrowOnTimeout();
         }
         $schedules = $this->scheduleRepos->findByInput($input);
+        $planningSeeker->showHighestCompletedBatchNr();
         $planning = $planningSeeker->processFilter($input, $schedules, $filter);
 
         if ($planning === null) {
