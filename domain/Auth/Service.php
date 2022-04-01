@@ -125,7 +125,7 @@ class Service
 
     public function sendPasswordCode(string $emailAddress): bool
     {
-        $user = $this->userRepos->findOneBy(array('emailaddress' => $emailAddress));
+        $user = $this->userRepos->findOneBy(['emailaddress' => $emailAddress]);
         if ($user === null) {
             throw new Exception('kan geen code versturen');
         }
@@ -163,28 +163,24 @@ class Service
 
     protected function mailPasswordCode(User $user): void
     {
-        $subject = 'wachtwoord herstellen';
         $forgetpasswordToken = $user->getForgetpasswordToken();
         $forgetpasswordDeadline = $user->getForgetpasswordDeadline();
         if ($forgetpasswordDeadline === null) {
             throw new Exception('je hebt je wachtwoord al gewijzigd, vraag opnieuw een nieuw wachtwoord aan');
         }
         $forgetpasswordDeadline = $forgetpasswordDeadline->modify('-1 days')->format('Y-m-d');
-        $body = <<<EOT
-<p>Hallo,</p>
-<p>            
-Met deze code kun je je wachtwoord herstellen: $forgetpasswordToken 
-</p>
-<p>            
-Let op : je kunt deze code gebruiken tot en met $forgetpasswordDeadline
-</p>
-<p>
-met vriendelijke groet,
-<br>
-FCToernooi
-</p>
-EOT;
-        $this->mailer->send($subject, $body, $user->getEmailaddress());
+
+        $content = $this->view->fetch(
+            'recoverpassword.twig',
+            [
+                'subject' => 'wachtwoord herstellen',
+                // 'wwwUrl' => $this->config->getString('www.wwwurl'),
+                'forgetpasswordToken' => $forgetpasswordToken,
+                'forgetpasswordDeadline' => $forgetpasswordDeadline
+            ]
+        );
+
+        $this->mailer->send('wachtwoord herstellen', $content, $user->getEmailaddress(), false);
     }
 
     public function changePassword(string $emailAddress, string $password, string $code): User
