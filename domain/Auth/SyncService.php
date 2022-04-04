@@ -16,6 +16,7 @@ use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\User;
 use FCToernooi\User\Repository as UserRepository;
 use Selective\Config\Configuration;
+use Slim\Views\Twig as TwigView;
 
 class SyncService
 {
@@ -24,6 +25,7 @@ class SyncService
         private TournamentUserRepository $tournamentUserRepos,
         private TournamentInvitationRepository $tournamentInvitationRepos,
         private Mailer $mailer,
+        private TwigView $view,
         private CacheService $cacheService,
         private Configuration $config
     ) {
@@ -53,7 +55,7 @@ class SyncService
             $this->cacheService->resetTournament((int)$tournament->getId());
 
             if ($sendMail && $newUser) {
-                $this->sendEmailTournamentUser($tournamentUser);
+                $this->sendTournamentUserEmail($tournamentUser);
             }
             return $tournamentUser;
         }
@@ -72,7 +74,7 @@ class SyncService
         }
         $this->tournamentInvitationRepos->save($invitation);
         if ($sendMail && $newInvitation) {
-            $this->sendEmailTournamentInvitation($invitation);
+            $this->sendTournamentInvitationEmail($invitation);
         }
         return $invitation;
     }
@@ -162,56 +164,87 @@ class SyncService
         return $invitations;
     }
 
-    protected function sendEmailTournamentUser(TournamentUser $tournamentUser): void
+    protected function sendTournamentUserEmail(TournamentUser $tournamentUser): void
     {
-        $url = $this->config->getString('www.wwwurl');
         $tournamentName = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
-        $suffix = "<p>Wanneer je <a href=\"" . $url . "user/login\">inlogt</a> op " . $url . " staat toernooi \"" . $tournamentName . "\"  bij je toernooien. </a></p>";
-        $this->sendEmailForAuthorization(
-            $tournamentUser->getUser()->getEmailaddress(),
-            $tournamentName,
-            $tournamentUser->getRoles(),
-            $suffix
-        );
-    }
 
-    protected function sendEmailTournamentInvitation(TournamentInvitation $invitation): void
-    {
-        $url = $this->config->getString('www.wwwurl');
-        $tournamentName = $invitation->getTournament()->getCompetition()->getLeague()->getName();
-        $suffix = "<p>Wanneer je je <a href=\"" . $url . "user/register\">registreert</a> op " . $url . " staat toernooi \"" . $tournamentName . "\"  bij je toernooien. </a></p>";
-        $this->sendEmailForAuthorization(
-            $invitation->getEmailaddress(),
-            $tournamentName,
-            $invitation->getRoles(),
-            $suffix
-        );
-    }
-
-    protected function sendEmailForAuthorization(
-        string $emailadress,
-        string $tournamentName,
-        int $roles,
-        string $suffix
-    ): void {
         $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
         $url = $this->config->getString('www.wwwurl');
 
-        $body = "<p>Hallo,</p>" .
-            "<p>Je bent uitgenodigd op " . $url . " voor toernooi \"" . $tournamentName . "\" door de beheerder van dit toernooi.<br/>" .
-            "Je hebt de volgende rollen gekregen:</p>" .
-            $this->getRoleDefinitions($roles) .
-            $suffix .
-            "<p>met vriendelijke groet,<br/>FCToernooi</p>";
-        $this->mailer->send($subject, $body, $emailadress);
+        $content = $this->view->fetch(
+            'tournamentuser.twig',
+            [
+                'subject' => $subject,
+                // 'wwwUrl' => $this->config->getString('www.wwwurl'),
+                'url' => $url,
+                'tournamentName' => $tournamentName,
+                'tournamentRoles' => $this->getTournamentRoles([$tournamentUser])
+            ]
+        );
+
+        $this->mailer->send($subject, $content, $tournamentUser->getUser()->getEmailaddress(), false);
     }
 
-    protected function getRoleDefinitions(int $roles): string
+    /**
+     * @param list<TournamentUser> $tournamentUsers
+     * @return list<array<string, string>>
+     */
+    protected function getTournamentRoles(array $tournamentUsers): array
     {
-        $retVal = "<table>";
-        foreach (Role::getDefinitions($roles) as $definition) {
-            $retVal .= "<tr><td>" . $definition["name"] . "</td><td>" . $definition["description"] . "</td></tr>";
+        $roles = [];
+        $filteredTournamentUsers = array_filter($tournamentUsers, function (TournamentUser $tournamentUser): bool {
+            return $tournamentUser->getRoles() > 0;
+        });
+        foreach ($filteredTournamentUsers as $tournamentUser) {
+            $roleDefinitions = Role::getDefinitions($tournamentUser->getRoles());
+            foreach ($roleDefinitions as $roleDefinition) {
+                $roles[] = [
+                    'tournamentName' => $tournamentUser->getTournament()->getCompetition()->getLeague()->getName(),
+                    'roleName' => $roleDefinition['name'],
+                    'roleDescription' => $roleDefinition['description']
+                ];
+            }
         }
-        return $retVal . "</table>";
+        return $roles;
     }
+
+    protected function sendTournamentInvitationEmail(TournamentInvitation $invitation): void
+    {
+        $tournamentName = $invitation->getTournament()->getCompetition()->getLeague()->getName();
+
+        $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
+        $url = $this->config->getString('www.wwwurl');
+
+        $content = $this->view->fetch(
+            'tournamentinvitation.twig',
+            [
+                'subject' => $subject,
+                // 'wwwUrl' => $this->config->getString('www.wwwurl'),
+                'url' => $url,
+                'tournamentName' => $tournamentName,
+                'tournamentRoles' => $this->getTournamentRolesByInvitation($invitation)
+            ]
+        );
+
+        $this->mailer->send($subject, $content, $invitation->getEmailaddress(), false);
+    }
+
+    /**
+     * @param TournamentInvitation $invitation
+     * @return list<array<string, string>>
+     */
+    protected function getTournamentRolesByInvitation(TournamentInvitation $invitation): array
+    {
+        $roles = [];
+        $roleDefinitions = Role::getDefinitions($invitation->getRoles());
+        foreach ($roleDefinitions as $roleDefinition) {
+            $roles[] = [
+                'tournamentName' => $invitation->getTournament()->getCompetition()->getLeague()->getName(),
+                'roleName' => $roleDefinition['name'],
+                'roleDescription' => $roleDefinition['description']
+            ];
+        }
+        return $roles;
+    }
+
 }

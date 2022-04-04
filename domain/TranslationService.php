@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
-use Sports\Sport\Custom as SportCustom;
 use Sports\Score\Config as ScoreConfig;
 use Sports\Sport;
+use Sports\Sport\Custom as SportCustom;
 
 /**
  * Class TranslationService, translates certain sports-terms
@@ -74,6 +74,10 @@ class TranslationService
             case SportCustom::Padel:
             {
                 return 'padel';
+            }
+            case SportCustom::Rugby:
+            {
+                return 'rugby';
             }
         }
         return '';
@@ -206,6 +210,7 @@ class TranslationService
             case SportCustom::Korfball:
             case SportCustom::Volleyball:
             case SportCustom::Football:
+            case SportCustom::Rugby:
                 return 'veld';
             case SportCustom::Darts:
             case SportCustom::Chess:
@@ -232,6 +237,7 @@ class TranslationService
             case SportCustom::Korfball:
             case SportCustom::Volleyball:
             case SportCustom::Football:
+            case SportCustom::Rugby:
                 return 'velden';
             case SportCustom::Darts:
             case SportCustom::Chess:

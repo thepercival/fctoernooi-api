@@ -54,9 +54,9 @@ return function (App $app): void {
                     $group->options('/login', AuthAction::class . ':options');
                     $group->post('/login', AuthAction::class . ':login');
                     $group->options('/passwordreset', AuthAction::class . ':options');
-                    $group->post('/passwordreset', AuthAction::class . ':passwordreset');
+                    $group->post('/passwordreset', AuthAction::class . ':resetPassword');
                     $group->options('/passwordchange', AuthAction::class . ':options');
-                    $group->post('/passwordchange', AuthAction::class . ':passwordchange');
+                    $group->post('/passwordchange', AuthAction::class . ':changePassword');
                 }
             )->add(VersionMiddleware::class);
 
@@ -168,8 +168,8 @@ return function (App $app): void {
                         function (Group $group): void {
                             $group->options('/invite/{invite}', RefereeAction::class . ':options');
                             $group->post('/invite/{invite}', RefereeAction::class . ':add');
-                            $group->options('/{refereeId}', RefereeAction::class . ':options');
-                            $group->put('/{refereeId}', RefereeAction::class . ':edit');
+                            $group->options('/{refereeId}/{invite}', RefereeAction::class . ':options');
+                            $group->put('/{refereeId}/{invite}', RefereeAction::class . ':edit');
                             $group->delete('/{refereeId}', RefereeAction::class . ':remove');
                             $group->options('/{refereeId}/priorityup', RefereeAction::class . ':options');
                             $group->post('/{refereeId}/priorityup', RefereeAction::class . ':priorityUp');

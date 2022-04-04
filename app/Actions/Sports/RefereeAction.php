@@ -80,8 +80,8 @@ final class RefereeAction extends Action
             $this->refereeRepos->save($newReferee);
 
             $sendMail = false;
-            if (array_key_exists("invite", $args)) {
-                $sendMail = filter_var($args["invite"], FILTER_VALIDATE_BOOLEAN);
+            if (array_key_exists('invite', $args)) {
+                $sendMail = filter_var($args['invite'], FILTER_VALIDATE_BOOLEAN);
             }
             $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress(), $sendMail);
 
@@ -138,7 +138,11 @@ final class RefereeAction extends Action
 
             if ($emailaddressOld !== $referee->getEmailaddress()) {
                 $this->authSyncService->remove($tournament, Role::REFEREE, $emailaddressOld);
-                // $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress());
+                $sendMail = false;
+                if (array_key_exists('invite', $args)) {
+                    $sendMail = filter_var($args['invite'], FILTER_VALIDATE_BOOLEAN);
+                }
+                $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress(), $sendMail);
             }
 
             $json = $this->serializer->serialize($referee, 'json', $this->getSerializationContext());

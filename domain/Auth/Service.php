@@ -123,7 +123,7 @@ class Service
         return $roles;
     }
 
-    public function sendPasswordCode(string $emailAddress): bool
+    public function resetPasswordCodeAndSend(string $emailAddress): bool
     {
         $user = $this->userRepos->findOneBy(['emailaddress' => $emailAddress]);
         if ($user === null) {
@@ -134,7 +134,7 @@ class Service
         try {
             $user->resetForgetpassword();
             $this->userRepos->save($user);
-            $this->mailPasswordCode($user);
+            $this->sendPasswordCodeMail($user);
             $conn->commit();
         } catch (Exception $exception) {
             $conn->rollBack();
@@ -161,14 +161,14 @@ class Service
         return JWT::encode($payload, $this->config->getString('auth.jwtsecret'));
     }
 
-    protected function mailPasswordCode(User $user): void
+    protected function sendPasswordCodeMail(User $user): void
     {
         $forgetpasswordToken = $user->getForgetpasswordToken();
         $forgetpasswordDeadline = $user->getForgetpasswordDeadline();
         if ($forgetpasswordDeadline === null) {
             throw new Exception('je hebt je wachtwoord al gewijzigd, vraag opnieuw een nieuw wachtwoord aan');
         }
-        $forgetpasswordDeadline = $forgetpasswordDeadline->modify('-1 days')->format('Y-m-d');
+        $forgetpasswordDeadline = $forgetpasswordDeadline->modify('-1 days');
 
         $content = $this->view->fetch(
             'recoverpassword.twig',
@@ -176,7 +176,7 @@ class Service
                 'subject' => 'wachtwoord herstellen',
                 // 'wwwUrl' => $this->config->getString('www.wwwurl'),
                 'forgetpasswordToken' => $forgetpasswordToken,
-                'forgetpasswordDeadline' => $forgetpasswordDeadline
+                'forgetpasswordDeadline' => $this->getDateTimeAsStringForEmail($forgetpasswordDeadline)
             ]
         );
 
@@ -205,30 +205,34 @@ class Service
         return $user;
     }
 
-    public function mailValidationCode(User $user, string $code, DateTimeImmutable $expireDateTime): void
+    public function sendValidationCodeMail(User $user, string $code, DateTimeImmutable $expireDateTime): void
     {
         $subject = 'emailadres valideren';
-        $url = $this->config->getString('www.wwwurl') . 'user/validate/' . $code;
+        $validateUrl = $this->config->getString('www.wwwurl') . 'user/validate/' . $code;
 
+        $content = $this->view->fetch(
+            'validate.twig',
+            [
+                'subject' => $subject,
+                // 'wwwUrl' => $this->config->getString('www.wwwurl'),
+                'expireDateTime' => $this->getDateTimeAsStringForEmail($expireDateTime),
+                'validateUrl' => $validateUrl
+            ]
+        );
+
+        $this->mailer->send($subject, $content, $user->getEmailaddress(), false);
+    }
+
+    protected function getDateTimeAsStringForEmail(DateTimeImmutable $dateTimeImmutable): string
+    {
         setlocale(LC_ALL, 'nl_NL.UTF-8'); //
-        $localDateTime = $expireDateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
-        $date = strtolower(
-            strftime('%A %d %b %Y', $localDateTime->getTimestamp()) . ' ' .
+        $localDateTime = $dateTimeImmutable->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+        return mb_strtolower(
+            strftime('%A %e %b %Y', $localDateTime->getTimestamp()) . ' ' .
             $localDateTime->format('H:i')
         );
-        $body = <<<EOT
-<p>Hallo,</p>
-<p>            
-Tot $date uur kun je met de volgende link je emailadres valideren : <a style="font-size: 125%" href="$url">$url</a> 
-</p>
-<p>
-met vriendelijke groet,
-<br>
-FCToernooi
-</p>
-EOT;
-        $this->mailer->send($subject, $body, $user->getEmailaddress());
     }
+
 
     public function validate(User $user): void
     {

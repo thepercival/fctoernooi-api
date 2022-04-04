@@ -129,7 +129,7 @@ final class AuthAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
-    public function passwordreset(Request $request, Response $response, array $args): Response
+    public function resetPassword(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $paswordResetData */
@@ -139,7 +139,7 @@ final class AuthAction extends Action
             }
             $emailAddress = strtolower(trim($paswordResetData->emailaddress));
 
-            $retVal = $this->authService->sendPasswordCode($emailAddress);
+            $retVal = $this->authService->resetPasswordCodeAndSend($emailAddress);
 
             $data = ['retval' => $retVal];
             $json = $this->serializer->serialize($data, 'json');
@@ -155,7 +155,7 @@ final class AuthAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
-    public function passwordchange(Request $request, Response $response, array $args): Response
+    public function changePassword(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var stdClass $paswordChangeData */
@@ -201,7 +201,7 @@ final class AuthAction extends Action
             }
             $expireDateTime = (new DateTimeImmutable())->modify('+' . $expireSeconds . ' seconds');
 
-            $this->authService->mailValidationCode($user, $code, $expireDateTime);
+            $this->authService->sendValidationCodeMail($user, $code, $expireDateTime);
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
