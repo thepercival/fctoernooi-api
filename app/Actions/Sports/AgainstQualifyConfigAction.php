@@ -12,7 +12,6 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
@@ -67,14 +66,17 @@ final class AgainstQualifyConfigAction extends Action
             }
             $qualifyConfig = $round->getAgainstQualifyConfig($competitionSport);
             if ($qualifyConfig === null) {
-                $qualifyConfig = new AgainstQualifyConfig($competitionSport, $round, $qualifyConfigSer->getPointsCalculation());
+                $qualifyConfig = new AgainstQualifyConfig(
+                    $competitionSport,
+                    $round,
+                    $qualifyConfigSer->getPointsCalculation(),
+                    $qualifyConfigSer->getWinPoints(),
+                    $qualifyConfigSer->getDrawPoints(),
+                    $qualifyConfigSer->getWinPointsExt(),
+                    $qualifyConfigSer->getDrawPointsExt(),
+                    $qualifyConfigSer->getLosePointsExt()
+                );
             }
-
-            $qualifyConfig->setWinPoints($qualifyConfigSer->getWinPoints());
-            $qualifyConfig->setDrawPoints($qualifyConfigSer->getDrawPoints());
-            $qualifyConfig->setWinPointsExt($qualifyConfigSer->getWinPointsExt());
-            $qualifyConfig->setDrawPointsExt($qualifyConfigSer->getDrawPointsExt());
-            $qualifyConfig->setLosePointsExt($qualifyConfigSer->getLosePointsExt());
 
             $this->qualifyConfigRepos->save($qualifyConfig);
 

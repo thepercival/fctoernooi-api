@@ -28,7 +28,7 @@ class Against extends GameNotesBase
         $homePlaces = $game->getSidePlaces(AgainstSide::Home);
         $home = $nameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
         $awayPlaces = $game->getSidePlaces(AgainstSide::Away);
-        $away = $nameService->getPlacesFromName($homePlaces, false, count($awayPlaces) === 1);
+        $away = $nameService->getPlacesFromName($awayPlaces, false, count($awayPlaces) === 1);
         $this->drawCell($home . ' - ' . $away, $x, $y, $width, $height);
     }
 

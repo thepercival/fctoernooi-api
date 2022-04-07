@@ -170,6 +170,7 @@ return function (App $app): void {
                             $group->post('/invite/{invite}', RefereeAction::class . ':add');
                             $group->options('/{refereeId}/{invite}', RefereeAction::class . ':options');
                             $group->put('/{refereeId}/{invite}', RefereeAction::class . ':edit');
+                            $group->options('/{refereeId}', RefereeAction::class . ':options');
                             $group->delete('/{refereeId}', RefereeAction::class . ':remove');
                             $group->options('/{refereeId}/priorityup', RefereeAction::class . ':options');
                             $group->post('/{refereeId}/priorityup', RefereeAction::class . ':priorityUp');

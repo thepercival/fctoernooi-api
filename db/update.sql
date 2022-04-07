@@ -2,6 +2,10 @@
 update tournaments
 set exported = 0;
 
+update sports
+set customId = 18
+where name = 'rugby';
+
 delete
 from planningConfigs
 where not exists(select * from roundNumbers rn where rn.planningConfigId = planningConfigs.id);
