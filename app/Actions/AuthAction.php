@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;
@@ -18,6 +17,7 @@ use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 use stdClass;
 
 final class AuthAction extends Action
@@ -47,7 +47,7 @@ final class AuthAction extends Action
             $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -79,7 +79,7 @@ final class AuthAction extends Action
             $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -119,7 +119,7 @@ final class AuthAction extends Action
             $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -145,7 +145,7 @@ final class AuthAction extends Action
             $json = $this->serializer->serialize($data, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -178,7 +178,7 @@ final class AuthAction extends Action
             $authItem = new AuthItem($this->authService->createToken($user), (int)$user->getId());
             return $this->respondWithJson($response, $this->serializer->serialize($authItem, 'json'));
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -205,7 +205,7 @@ final class AuthAction extends Action
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -235,7 +235,7 @@ final class AuthAction extends Action
             $json = $this->serializer->serialize($user, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 

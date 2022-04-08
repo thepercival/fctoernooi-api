@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
@@ -15,6 +14,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 
 final class TournamentUserAction extends Action
 {
@@ -61,7 +61,7 @@ final class TournamentUserAction extends Action
             $json = $this->serializer->serialize($tournamentUser, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -92,7 +92,7 @@ final class TournamentUserAction extends Action
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -124,7 +124,7 @@ final class TournamentUserAction extends Action
             $json = $this->serializer->serialize($emailaddress, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 }

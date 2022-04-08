@@ -7,7 +7,6 @@ namespace App\Actions;
 use App\Export\PdfService;
 use App\Export\PdfSubject;
 use App\QueueService\Pdf as PdfQueueService;
-use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\CacheService;
 use FCToernooi\Tournament;
@@ -17,6 +16,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Slim\Exception\HttpException;
 use stdClass;
 
 final class PdfAction extends Action
@@ -77,7 +77,7 @@ final class PdfAction extends Action
                 )
                 ->withHeader('Content-Length', '' . strlen($vtData));
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 400);
         }
     }
 
@@ -109,7 +109,7 @@ final class PdfAction extends Action
             $json = json_encode(['hash' => $hash]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -136,7 +136,7 @@ final class PdfAction extends Action
             $json = json_encode(['progress' => (int)$progressValue]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 400);
         }
     }
 

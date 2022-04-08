@@ -7,7 +7,6 @@ namespace App\Actions;
 use App\Copiers\TournamentCopier;
 use App\QueueService;
 use App\QueueService\Planning as PlanningQueueService;
-use App\Response\ErrorResponse;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -26,6 +25,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Slim\Exception\HttpException;
 use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Validator as CompetitionValidator;
 use Sports\Round\Number\PlanningCreator;
@@ -75,9 +75,10 @@ final class TournamentAction extends Action
      */
     public function fetchOneHelper(Request $request, Response $response, array $args, User $user = null): Response
     {
-        /** @var User|null $user */
-        $user = $request->getAttribute('user');
         try {
+            /** @var User|null $user */
+            $user = $request->getAttribute('user');
+
             $tournamentId = (int)$args['tournamentId'];
             $json = $this->cacheService->getTournament($tournamentId);
             if ($json === false) {
@@ -94,7 +95,7 @@ final class TournamentAction extends Action
             }
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 400);
         }
     }
 
@@ -159,9 +160,8 @@ final class TournamentAction extends Action
             if ($user->getNrOfCredits() < 1) {
                 throw new \Exception('je hebt geen credits meer om toernooien aan te maken', E_ERROR);
             }
-            // $tournamentSer->setUsers(new ArrayCollection());
-            $creator = new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
-            // var_dump($tournamentSer->getCompetition()); die();
+            new TournamentUser($tournamentSer, $user, Role::ADMIN + Role::GAMERESULTADMIN + Role::ROLEADMIN);
+
             $tournament = $this->tournamentCopier->copy(
                 $tournamentSer,
                 $tournamentSer->getCompetition()->getStartDateTime(),
@@ -171,14 +171,14 @@ final class TournamentAction extends Action
                 throw new \Exception('er zijn geen gebruikers gevonden voor het nieuwe toernooi', E_ERROR);
             }
             $this->tournamentRepos->customPersist($tournament, true);
-
-            $this->creditActionRepos->removeCreateTournamentCredits($user);
+// @TODO CDK PAYMENT
+//            $this->creditActionRepos->removeCreateTournamentCredits($user);
 
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -217,7 +217,7 @@ final class TournamentAction extends Action
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -237,7 +237,7 @@ final class TournamentAction extends Action
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse('het toernooi is niet verwijdered : ' . $exception->getMessage(), 404);
+            throw new HttpException($request, 'het toernooi is niet verwijdered : ' . $exception->getMessage(), 404);
         }
     }
 
@@ -316,7 +316,7 @@ final class TournamentAction extends Action
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             $conn->rollBack();
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -345,7 +345,7 @@ final class TournamentAction extends Action
             $json = $this->serializer->serialize($refereeId, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 }

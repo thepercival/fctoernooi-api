@@ -73,7 +73,8 @@ class Service
         $user = new User($emailaddress, $salt, $hashedPassword);
         $this->userRepos->save($user, true);
 
-        $this->creditActionRepos->addCreateAccountCredits($user);
+        // @TODO CDK PAYMENT
+        // $this->creditActionRepos->addCreateAccountCredits($user);
 
         $invitations = $this->tournamentInvitationRepos->findBy(['emailaddress' => $user->getEmailaddress()]);
         $tournamentUsers = $this->syncService->processInvitations($user, $invitations);
@@ -236,10 +237,12 @@ class Service
 
     public function validate(User $user): void
     {
-        $user->setValidated(true);
-        $user->setValidateIn(0); // if earlier validated
-        $this->userRepos->save($user, true);
-
-        $this->creditActionRepos->addValidateCredits($user);
+        // @TODO CDK PAYMENT
+//        $user->setValidated(true);
+//        $user->setValidateIn(0); // if earlier validated
+//        $this->userRepos->save($user, true);
+//
+//
+//        $this->creditActionRepos->addValidateCredits($user);
     }
 }

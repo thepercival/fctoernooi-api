@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Recess;
 use FCToernooi\Recess\Repository as RecessRepository;
@@ -13,6 +12,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 use Sports\Structure\Repository as StructureRepository;
 
 final class RecessAction extends Action
@@ -50,7 +50,7 @@ final class RecessAction extends Action
             $json = $this->serializer->serialize($newRecess, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -76,7 +76,7 @@ final class RecessAction extends Action
             $this->recessRepos->remove($recess);
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 }

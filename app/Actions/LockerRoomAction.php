@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use FCToernooi\Competitor;
@@ -15,6 +14,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 
 /**
  * @template Action<LockerRoom>
@@ -50,7 +50,7 @@ final class LockerRoomAction extends Action
             $json = $this->serializer->serialize($newLockerRoom, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -82,7 +82,7 @@ final class LockerRoomAction extends Action
             $json = $this->serializer->serialize($lockerRoom, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -110,7 +110,7 @@ final class LockerRoomAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -147,7 +147,7 @@ final class LockerRoomAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 }

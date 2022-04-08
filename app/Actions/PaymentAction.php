@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
@@ -25,6 +24,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Slim\Exception\HttpException;
 use stdClass;
 
 final class PaymentAction extends Action
@@ -61,7 +61,7 @@ final class PaymentAction extends Action
             // $json = $this->serializer->serialize($tournament->getSponsors(), 'json');
             return $this->respondWithJson($response, $methods);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -91,7 +91,7 @@ final class PaymentAction extends Action
             $json = $this->serializer->serialize($issuers, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 400);
         }
     }
 
@@ -124,7 +124,8 @@ final class PaymentAction extends Action
                 $payment->setState($molliePayment->status);
                 $this->paymentRepos->save($payment, true);
 
-                $this->creditActionRepos->buyCredits($payment);
+                // @TODO CDK PAYMENT
+//                $this->creditActionRepos->buyCredits($payment);
 
                 $this->paymentLogger->info(
                     'payment to state ' . $molliePayment->status . ' for user ' . $logUserId . ' with amount ' . $logAmount
@@ -132,7 +133,8 @@ final class PaymentAction extends Action
             }
 
             if ($payment->getState() === 'paid' && $molliePayment->status !== 'paid') {
-                $this->creditActionRepos->cancelCredits($payment);
+                // @TODO CDK PAYMENT
+                // $this->creditActionRepos->cancelCredits($payment);
 
                 $payment->setState($molliePayment->status);
                 $this->paymentRepos->save($payment, true);
@@ -231,7 +233,7 @@ final class PaymentAction extends Action
                 )
             );
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -260,7 +262,7 @@ final class PaymentAction extends Action
             $this->userRepos->remove($user);
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 

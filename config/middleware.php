@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Handlers\DefaultErrorHandler as AppDefaultErrorHandler;
 use App\Middleware\CorsMiddleware;
+use App\Renderer\ErrorRenderer as AppErrorRenderer;
 use App\Response\ErrorResponse;
 use App\Response\UnauthorizedResponse;
 use FCToernooi\Auth\Token as AuthToken;
@@ -77,6 +79,12 @@ return function (App $app): void {
     // Add Routing Middleware
     $app->addRoutingMiddleware();
 
+    $appDefaultErrorHandler = new AppDefaultErrorHandler(
+        $app->getCallableResolver(),
+        $app->getResponseFactory(),
+        $container->get(LoggerInterface::class)
+    );
+
 //    // always last, so it is called first!
     $errorMiddleware = $app->addErrorMiddleware(
         $config->getString('environment') === 'development',
@@ -84,6 +92,9 @@ return function (App $app): void {
         true,
         $container->get(LoggerInterface::class)
     );
+    $appDefaultErrorHandler->forceContentType('plain/text');
+    $appDefaultErrorHandler->registerErrorRenderer('plain/text', AppErrorRenderer::class);
+    $errorMiddleware->setDefaultErrorHandler($appDefaultErrorHandler);
 
     // Set the Not Found Handler
     $errorMiddleware->setErrorHandler(

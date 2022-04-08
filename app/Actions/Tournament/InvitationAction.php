@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Tournament;
 
 use App\Actions\Action;
-use App\Response\ErrorResponse;
 use FCToernooi\Auth\SyncService;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
@@ -14,6 +13,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpException;
 
 final class InvitationAction extends Action
 {
@@ -42,7 +42,7 @@ final class InvitationAction extends Action
             $json = $this->serializer->serialize($invitations, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -75,7 +75,7 @@ final class InvitationAction extends Action
             $json = $this->serializer->serialize($authorization, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -113,7 +113,7 @@ final class InvitationAction extends Action
             $json = $this->serializer->serialize($invitation, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 
@@ -144,7 +144,7 @@ final class InvitationAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
 }

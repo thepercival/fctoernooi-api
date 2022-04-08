@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Response\ErrorResponse;
 use App\ViewHelpers\TournamentReport;
 use App\ViewHelpers\TournamentReport as TournamentReportHelper;
 use DateTimeImmutable;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Repository as TournamentRepository;
+use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Log\LoggerInterface;
-use Sports\Structure\Repository as StructureRepository;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepistory;
-use JMS\Serializer\SerializerInterface;
-use App\Copiers\TournamentCopier;
 use Selective\Config\Configuration;
+use Slim\Exception\HttpException;
 use Slim\Views\Twig as TwigView;
+use Sports\Structure\Repository as StructureRepository;
 
 final class ReportAction extends Action
 {
@@ -53,7 +51,7 @@ final class ReportAction extends Action
                 ]
             );
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            throw new HttpException($request, $exception->getMessage(), 400);
         }
     }
 

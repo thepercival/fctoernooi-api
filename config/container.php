@@ -54,19 +54,20 @@ return [
     LoggerInterface::class => function (ContainerInterface $container): LoggerInterface {
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        $loggerSettings = $config->getArray('logger');
+
         $name = 'application';
         $logger = new Logger($name);
-
-        $processor = new UidProcessor();
-        $logger->pushProcessor($processor);
-
-        $loggerPath = $config->getString('logger.path') . $name . '.log';
-        $path = $config->getString('environment') === 'development' ? 'php://stdout' : $loggerPath;
-
+        if ($config->getString('environment') !== 'development') {
+            $path = 'php://stdout';
+        } else {
+            $processor = new UidProcessor();
+            $logger->pushProcessor($processor);
+            $loggerPath = $config->getString('logger.path') . $name . '.log';
+            $path = $loggerPath;
+        }
+        $loggerSettings = $config->getArray('logger');
         $handler = new StreamHandler($path, $loggerSettings['level']);
         $logger->pushHandler($handler);
-
         return $logger;
     },
     Memcached::class => function (ContainerInterface $container): Memcached {
