@@ -35,7 +35,7 @@ from planningConfigs pcbase
                                join planningConfigs pcsub
                                     on rnsub.planningConfigId = pcsub.id and rnsub.number < rn.number and
                                        rnsub.competitionId = rn.competitionId
-                      where csub.enableTime = pc.enableTime
+                      where pcsub.enableTime = pc.enableTime
                         and pcsub.minutesPerGame = pc.minutesPerGame
                         and pcsub.minutesPerGameExt = pc.minutesPerGameExt
                         and pcsub.minutesInBetween = pc.minutesInBetween

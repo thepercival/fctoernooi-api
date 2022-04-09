@@ -88,8 +88,7 @@
       "doctrine-validate": "XDEBUG_MODE=off vendor/bin/doctrine orm:validate-schema",
       "doctrine-clearcache": [
         "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:query --flush",
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:metadata --flush",
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:result --flush"
+        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:metadata"
       ],
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [

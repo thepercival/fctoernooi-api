@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 
 require 'vendor/autoload.php';
 
@@ -16,10 +17,19 @@ $entityPath = $settings['meta']['entity_path'];
 $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($entityPath);
 $config->setMetadataDriverImpl($driver);
 
+$memcached = new Memcached();
+$memcached->addServer('127.0.0.1', 11211);
+
+$cache = new MemcachedAdapter($memcached);
+$config->setQueryCache($cache);
+
+$config->setMetadataCache($cache);
+
 /** @var string $proxyDir */
 $proxyDir = $settings['meta']['proxy_dir'];
 $config->setProxyDir($proxyDir);
 $config->setProxyNamespace('fctoernooi');
+
 
 $em = \Doctrine\ORM\EntityManager::create($settings['connection'], $config);
 
