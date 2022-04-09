@@ -8,7 +8,7 @@ use Composer\Script\Event;
 
 class ComposerPostInstall
 {
-    public static function execute(Event $event): int
+    public static function execute(Event $event)//: int
     {
         if ($event->isDevMode()) {
             echo "devMode is enabled, no post-install-executed for fctoernooi" . PHP_EOL;
@@ -18,18 +18,19 @@ class ComposerPostInstall
             ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
         $routerCache = $pathPrefix . 'router';
         if (file_exists($routerCache)) {
+            echo "router cached emptied" . PHP_EOL;
             unlink($routerCache);
+        } else {
+            echo "no router cache found" . PHP_EOL;
         }
-
-        //  php app/console doctrine:cache:clear-metadata
-        //  php app/console doctrine:cache:clear-query
-        //  doctrine:cache:clear-result
 
         $doctrineProxies = $pathPrefix . 'proxies/';
         if (is_dir($doctrineProxies)) {
             static::rrmdir($doctrineProxies);
         }
         mkdir($doctrineProxies);
+        chmod($doctrineProxies, 0775);
+        chgrp($doctrineProxies, 'www-data');
 
         $serializer = $pathPrefix . 'serializer';
         if (is_dir($serializer)) {
@@ -46,7 +47,7 @@ class ComposerPostInstall
         mkdir($serializer);
         chmod($serializer, 0775);
         chgrp($serializer, 'www-data');
-        return 0;
+        // return 0;
     }
 
     public static function rrmdir(string $src): void
