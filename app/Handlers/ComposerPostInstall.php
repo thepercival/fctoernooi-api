@@ -8,11 +8,11 @@ use Composer\Script\Event;
 
 class ComposerPostInstall
 {
-    public static function execute(Event $event)//: int
+    public static function execute(Event $event): int
     {
-        if ($event->isDevMode()) {
-            echo "devMode is enabled, no post-install-executed for fctoernooi" . PHP_EOL;
-        }
+//        if ($event->isDevMode()) {
+//            echo "devMode is enabled, no post-install-executed for fctoernooi" . PHP_EOL;
+//        }
         $pathPrefix = realpath(
                 __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . ".."
             ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
@@ -47,7 +47,7 @@ class ComposerPostInstall
         mkdir($serializer);
         chmod($serializer, 0775);
         chgrp($serializer, 'www-data');
-        // return 0;
+        return 0;
     }
 
     public static function rrmdir(string $src): void

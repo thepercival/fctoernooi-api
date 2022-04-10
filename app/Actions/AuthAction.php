@@ -97,11 +97,11 @@ final class AuthAction extends Action
             if (!property_exists($authData, 'emailaddress') || strlen($authData->emailaddress) === 0) {
                 throw new Exception('het emailadres is niet opgegeven');
             }
-            $emailaddress = filter_var($authData->emailaddress, FILTER_VALIDATE_EMAIL);
+            $emailaddress = filter_var(strtolower(trim($authData->emailaddress)), FILTER_VALIDATE_EMAIL);
             if ($emailaddress === false) {
-                throw new Exception("het emailadres \"" . $authData->emailaddress . "\" is onjuist");
+                throw new Exception('het emailadres ' . $authData->emailaddress . ' is onjuist');
             }
-            $emailaddress = strtolower(trim($emailaddress));
+
             if (!property_exists($authData, 'password') || strlen($authData->password) === 0) {
                 throw new Exception('het wachtwoord is niet opgegeven');
             }
@@ -169,7 +169,7 @@ final class AuthAction extends Action
             if (property_exists($paswordChangeData, 'code') === false) {
                 throw new Exception('geen code ingevoerd');
             }
-            $emailAddress = $emailAddress = strtolower(trim($paswordChangeData->emailaddress));
+            $emailAddress = strtolower(trim($paswordChangeData->emailaddress));
             $password = $paswordChangeData->password;
             $code = (string)$paswordChangeData->code;
 
