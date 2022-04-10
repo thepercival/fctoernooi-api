@@ -107,7 +107,7 @@ class Validator extends Command
             $logger = $this->initLogger(
                 $this->getLogLevel($input),
                 $this->getStreamDef($input),
-                'command-lidate.log'
+                'command-validate.log'
             );
             $tournaments = $this->getTournamentsFromInput($input);
 
