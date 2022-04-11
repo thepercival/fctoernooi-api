@@ -20,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CreateDefaults extends PlanningCommand
 {
+    private string $customName = 'create-default-planning-input';
     protected PlanningInputService $planningInputSerivce;
     protected EntityManagerInterface $entityManager;
 
@@ -38,7 +39,7 @@ class CreateDefaults extends PlanningCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:create-default-planning-input')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Creates the default planning-inputs')
             // the full command description shown when running the command with
@@ -53,10 +54,11 @@ class CreateDefaults extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-create-default-planning-input.log'
+            $this->getStreamDef($input, $loggerName),
+            $loggerName,
         );
         return $this->createPlanningInputs($input);
     }

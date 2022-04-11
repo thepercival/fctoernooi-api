@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Recalculate extends PlanningCommand
 {
+    private string $customName = 'recalculate-planning-inputs';
     protected PlanningInputService $planningInputSerivce;
     protected EntityManagerInterface $entityManager;
 
@@ -34,7 +35,7 @@ class Recalculate extends PlanningCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:recalculate-planning-inputs')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Recalculates the planning-inputs')
             // the full command description shown when running the command with
@@ -47,10 +48,11 @@ class Recalculate extends PlanningCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-recalculate-planning-input.log'
+            $this->getStreamDef($input, $loggerName),
+            $loggerName,
         );
 
         try {

@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RemoveOld extends Command
 {
+    private string $customName = 'remove-old-tournaments';
     protected int $nrOfMonthsBeforeRemoval;
     protected CompetitionRepository $competitionRepos;
     protected TournamentRepository $tournamentRepos;
@@ -46,7 +47,7 @@ class RemoveOld extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:remove-old-tournaments')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('removes tournaments with a start before x months in the past')
             // the full command description shown when running the command with
@@ -58,11 +59,12 @@ class RemoveOld extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $loggerName = 'command-' . $this->customName;
             $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
             $logger = $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-remove-old-tournaments.log',
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
                 $mailHandler
             );
 

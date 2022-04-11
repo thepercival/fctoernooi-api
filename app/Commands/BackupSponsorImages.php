@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class BackupSponsorImages extends Command
 {
+    private string $customName = 'backup-sponsorimages';
     protected SponsorRepository $sponsorRepos;
 
     public function __construct(ContainerInterface $container)
@@ -35,7 +36,7 @@ class BackupSponsorImages extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:backup-sponsorimages')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Backups the sponsorimages')
             // the full command description shown when running the command with
@@ -46,12 +47,12 @@ class BackupSponsorImages extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         try {
+            $loggerName = 'command-' . $this->customName;
             $logger = $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-backup-sponsorimages.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
             $path = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
                     'images.sponsors.pathpostfix'

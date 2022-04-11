@@ -28,6 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends PlanningCommand
 {
+    private string $customName = 'create-pdf';
     protected StructureRepository $structureRepos;
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
@@ -85,7 +86,7 @@ class Create extends PlanningCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:create-pdf')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Creates the pdf from the inputs')
             // the full command description shown when running the command with
@@ -97,10 +98,11 @@ class Create extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $loggerName = 'command-' . $this->customName;
             $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-pdf-create.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
             $this->getLogger()->info('starting command app:pdf-create');
 

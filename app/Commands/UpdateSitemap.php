@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UpdateSitemap extends Command
 {
+    private string $customName = 'update-sitemap';
     protected TournamentRepository $tournamentRepos;
 
     public function __construct(ContainerInterface $container)
@@ -30,7 +31,7 @@ class UpdateSitemap extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:update-sitemap')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Updates the sitemap')
             // the full command description shown when running the command with
@@ -41,13 +42,14 @@ class UpdateSitemap extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->initLogger(
-            $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-update-sitemap.log'
-        );
-
         try {
+            $loggerName = 'command-' . $this->customName;
+            $this->initLogger(
+                $this->getLogLevel($input),
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
+            );
+
             $url = $this->config->getString('www.wwwurl');
             $distPath = $this->config->getString('www.wwwurl-localpath');
 

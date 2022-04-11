@@ -30,6 +30,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Validate extends Command
 {
+    private string $customName = 'validate-pdf';
     protected TournamentRepository $tournamentRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
@@ -77,7 +78,7 @@ class Validate extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:validate-pdf')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('validates the tournament-pdfs')
             // the full command description shown when running the command with
@@ -94,10 +95,11 @@ class Validate extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+            $loggerName = 'command-' . $this->customName;
             $logger = $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-pdf-validator.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
 
             $logger->info('pdf-en aan het genereren..');

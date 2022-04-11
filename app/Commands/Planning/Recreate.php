@@ -23,6 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Recreate extends PlanningCommand
 {
+    private string $customName = 'recreate-planning';
     protected StructureRepository $structureRepos;
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
@@ -65,7 +66,7 @@ class Recreate extends PlanningCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:recreate-planning')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Recreates the plannings from the inputs')
             // the full command description shown when running the command with
@@ -84,10 +85,11 @@ class Recreate extends PlanningCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $loggerName = 'command-' . $this->customName;
             $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-planning-recreate.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
 
             $this->getLogger()->info('starting command app:planning-recreate');

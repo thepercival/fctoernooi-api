@@ -29,6 +29,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Validator extends Command
 {
+    private string $customName = 'validate-planning';
     protected TournamentRepository $tournamentRepos;
     protected PlanningInputRepository $planningInputRepos;
     protected PlanningRepository $planningRepos;
@@ -64,7 +65,7 @@ class Validator extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:validate-planning')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('validates the created plaining')
             // the full command description shown when running the command with
@@ -90,6 +91,7 @@ class Validator extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
             $this->getStreamDef($input),

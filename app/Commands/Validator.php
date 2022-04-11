@@ -45,6 +45,7 @@ class Validator extends Command
     private const DEFAULT_START_DAYS_IN_PAST = 7;
     private const DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
     public const TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
+    private string $customName = 'validate';
 
     public function __construct(ContainerInterface $container)
     {
@@ -87,7 +88,7 @@ class Validator extends Command
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:validate')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('validates the tournaments')
             // the full command description shown when running the command with
@@ -104,10 +105,11 @@ class Validator extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
+            $loggerName = 'command-' . $this->customName;
             $logger = $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-validate.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
             $tournaments = $this->getTournamentsFromInput($input);
 

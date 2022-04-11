@@ -28,6 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RetryTimeout extends PlanningCommand
 {
+    private string $customName = 'retry-timeout-planning';
     protected ScheduleRepository $scheduleRepos;
 
     public function __construct(ContainerInterface $container)
@@ -47,7 +48,7 @@ class RetryTimeout extends PlanningCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:retry-timeout-planning')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Retries the timeout-plannings')
             // the full command description shown when running the command with
@@ -68,10 +69,11 @@ class RetryTimeout extends PlanningCommand
     // waar wil je retry time
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-planning-retry-timeout.log'
+            $this->getStreamDef($input, $loggerName),
+            $loggerName,
         );
 
         $planningSeeker = new PlanningTimeoutSeeker(

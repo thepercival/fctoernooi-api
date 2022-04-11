@@ -20,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends ScheduleCommand
 {
+    private string $customName = 'create-schedule';
+
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
@@ -29,7 +31,7 @@ class Create extends ScheduleCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:create-schedule')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Creates the schedule for the nrOfPlaces')
             // the full command description shown when running the command with
@@ -55,10 +57,11 @@ class Create extends ScheduleCommand
             ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
         );
 
+        $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-schedule-create.log'
+            $this->getStreamDef($input, $loggerName),
+            $loggerName,
         );
 
         if ($existingSchedule !== null) {

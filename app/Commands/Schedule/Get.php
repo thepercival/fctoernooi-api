@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Get extends ScheduleCommand
 {
+    private string $customName = 'get-schedule';
+
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
@@ -23,7 +25,7 @@ class Get extends ScheduleCommand
     {
         $this
             // the name of the command (the part after "bin/console")
-            ->setName('app:get-schedule')
+            ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
             ->setDescription('Gets the schedule for the nrOfPlaces')
             // the full command description shown when running the command with
@@ -41,17 +43,18 @@ class Get extends ScheduleCommand
         $nrOfPlaces = $this->getNrOfPlaces($input);
         $sportsConfigName = (string)new ScheduleName([$this->getSportVariant($input)]);
         $existingSchedule = $this->scheduleRepos->findOneBy(
-            ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
+            ['nrOfPlaces' => $nrOfPlaces, 'sportsConfigName' => $sportsConfigName]
         );
         if ($existingSchedule === null) {
             throw new \Exception('schedule not found', E_ERROR);
         }
 
         try {
+            $loggerName = 'command-' . $this->customName;
             $this->initLogger(
                 $this->getLogLevel($input),
-                $this->getStreamDef($input),
-                'command-schedule-get.log'
+                $this->getStreamDef($input, $loggerName),
+                $loggerName,
             );
             (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
         } catch (\Exception $exception) {
