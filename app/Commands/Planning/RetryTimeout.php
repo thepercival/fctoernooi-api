@@ -175,11 +175,14 @@ class RetryTimeout extends PlanningCommand
 
         if ($planningFilter !== null) {
             $planning = $planningInput->getPlanning($planningFilter);
-            if ($planning !== null) {
-                $planningSeeker->processPlanning($planning);
-                $this->setStatusToFinishedProcessing();
-                return 0;
+
+            if ($planning === null || $planningType !== $planning->getType(
+                ) || $timeoutState !== $planning->getTimeoutState()) {
+                throw new \Exception('no planning found', E_ERROR);
             }
+            $planningSeeker->processPlanning($planning);
+            $this->setStatusToFinishedProcessing();
+            return 0;
         }
         $this->processInput($planningInput, $planningSeeker, $planningType, $timeoutState);
         $this->setStatusToFinishedProcessing();
