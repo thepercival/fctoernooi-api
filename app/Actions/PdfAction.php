@@ -70,11 +70,8 @@ final class PdfAction extends Action
             return $response
                 ->withHeader('Cache-Control', 'must-revalidate')
                 ->withHeader('Pragma', 'public')
-                ->withHeader('Content-Disposition', 'inline; filename="' . $fileName . ';')
-                ->withHeader(
-                    'Content-Type',
-                    'application/pdf;charset=utf-8'
-                )
+                ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
+                ->withHeader('Content-Disposition', 'attachment;filename="' . $fileName . '"')
                 ->withHeader('Content-Length', '' . strlen($vtData));
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 400);

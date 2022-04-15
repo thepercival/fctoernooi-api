@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Mailer;
+use App\UTCDateTimeType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Auth\Settings as AuthSettings;
@@ -129,6 +130,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameState');
         Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
+
+        Type::overrideType('datetime_immutable', UTCDateTimeType::class);
         return $em;
     },
     SerializerInterface::class => function (ContainerInterface $container): SerializerInterface {

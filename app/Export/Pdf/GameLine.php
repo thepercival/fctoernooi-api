@@ -205,15 +205,33 @@ abstract class GameLine
 
     protected function getDateTime(DateTimeImmutable $dateTime): string
     {
-        $localDateTime = $dateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
-        $text = $localDateTime->format('H:i');
-        if ($this->shoDateTime === DateTimeColumn::Time) {
-            return $text;
-        }
 //        $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
 //        $dateElements = explode(" ", $df->format($game->getStartDateTime()));
 //        $month = strtolower( substr( $dateElements[1], 0, 3 ) );
 //        $text = $game->getStartDateTime()->format("d") . " " . $month . " ";
-        return $localDateTime->format('d-m ') . $text;
+//        return $localDateTime->format('d-m ') . $text;
+
+        setlocale(LC_ALL, 'nl_NL.UTF-8'); //
+        $localDateTime = $dateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+
+        $text = $localDateTime->format('H:i');
+        if ($this->shoDateTime === DateTimeColumn::Time) {
+            return $text;
+        }
+        return mb_strtolower(
+            strftime('%d-%m', $localDateTime->getTimestamp()) . ' ' .
+            $text
+        );
     }
+
+    protected function getDateTimeAsStringForEmail(DateTimeImmutable $dateTimeImmutable): string
+    {
+        setlocale(LC_ALL, 'nl_NL.UTF-8'); //
+        $localDateTime = $dateTimeImmutable->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+        return mb_strtolower(
+            strftime('%A %e %b %Y', $localDateTime->getTimestamp()) . ' ' .
+            $localDateTime->format('H:i')
+        );
+    }
+
 }

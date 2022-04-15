@@ -18,7 +18,7 @@ class User extends Identifiable
     private string|null $forgetpassword = null;
     private bool $validated;
     private int $validateIn = 3;
-    private int $nrOfCredits = 0;
+    private int $nrOfCredits = 3;
 
     public const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
     public const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;

@@ -308,7 +308,7 @@ final class TournamentAction extends Action
                 QueueService::MAX_PRIORITY
             );
 
-            $this->creditActionRepos->removeCreateTournamentCredits($user);
+            // $this->creditActionRepos->removeCreateTournamentCredits($user);
 
             $conn->commit();
 
