@@ -36,7 +36,6 @@ use stdClass;
 
 final class TournamentAction extends Action
 {
-    protected string $exportSecret;
 
     public function __construct(
         LoggerInterface $logger,
@@ -52,7 +51,6 @@ final class TournamentAction extends Action
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
-        $this->exportSecret = $config->getString('renderer.export_secret');
     }
 
     /**

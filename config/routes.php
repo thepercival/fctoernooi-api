@@ -75,11 +75,6 @@ return function (App $app): void {
                         ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                             VersionMiddleware::class
                         );
-
-                    $group->options('/pdf', PdfAction::class . ':options');
-                    $group->get('/pdf', PdfAction::class . ':fetchOne')
-                        ->setName('tournament-export')
-                        ->add(TournamentMiddleware::class);
                 }
             );
 
@@ -432,8 +427,8 @@ return function (App $app): void {
                         function (Group $group): void {
                             $group->options('', PdfAction::class . ':options');
                             $group->post('', PdfAction::class . ':create');
-                            $group->options('/progress/{hash}', PdfAction::class . ':options');
-                            $group->get('/progress/{hash}', PdfAction::class . ':progress');
+                            $group->options('/progress', PdfAction::class . ':options');
+                            $group->get('/progress', PdfAction::class . ':progress');
                         }
                     )
                         ->add(TournamentRoleAdminAuthMiddleware::class)

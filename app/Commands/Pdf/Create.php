@@ -13,7 +13,6 @@ use App\Mailer;
 use App\QueueService\Pdf as PdfQueueService;
 use App\QueueService\Pdf\CreateMessage as PdfCreateMessage;
 use App\TmpService;
-use FCToernooi\CacheService;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
@@ -37,7 +36,6 @@ class Create extends PlanningCommand
     protected DocumentFactory $documentFactory;
     protected bool $showSuccessful = false;
     protected bool $disableThrowOnTimeout = false;
-    private CacheService $cacheService;
 
     public function __construct(ContainerInterface $container)
     {
@@ -46,10 +44,6 @@ class Create extends PlanningCommand
         /** @var Mailer|null $mailer */
         $mailer = $container->get(Mailer::class);
         $this->mailer = $mailer;
-
-        /** @var Memcached $memcached */
-        $memcached = $container->get(Memcached::class);
-        $this->cacheService = new CacheService($memcached);
 
         /** @var StructureRepository $structureRepos */
         $structureRepos = $container->get(StructureRepository::class);
@@ -106,6 +100,8 @@ class Create extends PlanningCommand
             );
             $this->getLogger()->info('starting command app:pdf-create');
 
+            $this->removeOldFiles();
+
             $queueService = new PdfQueueService($this->config->getArray('queue'));
 
             $timeoutInSeconds = 240;
@@ -149,6 +145,10 @@ class Create extends PlanningCommand
             $tournament = $this->tournamentRepos->find((int)$content->tournamentId);
         }
 
+        if (!property_exists($content, 'fileName')) {
+            throw new \Exception('incorrect input params for queue-pdf-command', E_ERROR);
+        }
+
         if ($tournament === null ||
             !property_exists($content, 'totalNrOfSubjects') || !property_exists($content, 'subject')
         ) {
@@ -158,7 +158,7 @@ class Create extends PlanningCommand
         $subject = PdfSubject::from((int)$content->subject);
         $totalNrOfSubjects = (int)$content->totalNrOfSubjects;
 
-        return new PdfCreateMessage($tournament, $subject, $totalNrOfSubjects);
+        return new PdfCreateMessage($tournament, $content->fileName, $subject, $totalNrOfSubjects);
     }
 
     protected function createPdf(PdfCreateMessage $message): void
@@ -177,7 +177,7 @@ class Create extends PlanningCommand
             $progress,
             $progressPerSubject
         );
-        $path = $this->pdfService->getSubjectPath($tournamentId, $subject);
+        $path = $this->pdfService->getTmpSubjectPath($tournamentId, $subject);
         $pdf->save($path);
         $duration = round(microtime(true) - $time_start, 1);
         $this->getLogger()->info('     executed in ' . $duration . ' seconds');
@@ -185,9 +185,21 @@ class Create extends PlanningCommand
         if ($this->pdfService->creationCompleted($progress->getProgress())) {
             $this->getLogger()->info('merging pdf for tournamentid "' . $tournamentId . '"');
             $time_start = microtime(true);
-            $this->pdfService->mergePdfs($tournament);
+            $this->pdfService->mergePdfs($tournament, $message->getFileName());
             $duration = round(microtime(true) - $time_start, 1);
             $this->getLogger()->info('     executed in ' . $duration . ' seconds');
         }
+    }
+
+    private function removeOldFiles(): void
+    {
+        if (random_int(1, 25) !== 5) {
+            return;
+        }
+        $this->getLogger()->info('removing pdfs older than an hour');
+        $tmpService = new TmpService();
+        $expireDateTime = (new \DateTimeImmutable())->modify('-1 hours');
+        $tmpService->removeOldFiles($this->pdfService->getTmpDir(), $expireDateTime);
+        $tmpService->removeOldFiles($this->pdfService->getPublicDir(), $expireDateTime);
     }
 }

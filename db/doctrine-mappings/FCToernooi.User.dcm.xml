@@ -15,5 +15,8 @@
               <cascade-remove/>
           </cascade>
       </one-to-many>
+      <unique-constraints>
+          <unique-constraint columns="emailaddress" name="main_u_idx"/>
+      </unique-constraints>
   </entity>
 </doctrine-mapping>

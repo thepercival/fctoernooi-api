@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App;
 
+use DateTimeImmutable;
+
 final class TmpService
 {
     private string $path;
@@ -47,4 +49,33 @@ final class TmpService
         $path = $this->getPath($subDirs, $fileName);
         return file_exists($path) && unlink($path);
     }
+
+    /**
+     * @param string $dir
+     * @param DateTimeImmutable $expireDateTime
+     */
+    public function removeOldFiles(string $dir, DateTimeImmutable $expireDateTime): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $dh = opendir($dir);
+        if ($dh === false) {
+            return;
+        }
+
+        while (($file = readdir($dh)) !== false) {
+            $file = $dir . '/' . $file;
+            if (!is_file($file)) {
+                continue;
+            }
+
+            if (filemtime($file) < $expireDateTime->getTimestamp()) {
+                unlink($file);
+            }
+        }
+        closedir($dh);
+    }
 }
+

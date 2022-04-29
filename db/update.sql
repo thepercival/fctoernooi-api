@@ -1,4 +1,14 @@
 -- PRE PRE PRE doctrine-update =============================================================
+insert into tournamentUsers(tournamentId, userId, roles) (select tournamentId, 4005, roles
+                                                          from tournamentUsers
+                                                          where userId = 3816)
+delete
+from users
+where id = 3816;
+
+delete
+from users
+where id = 5955
 
 -- POST POST POST doctrine-update ===========================================================
 

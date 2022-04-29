@@ -76,8 +76,14 @@ final class AgainstQualifyConfigAction extends Action
                     $qualifyConfigSer->getDrawPointsExt(),
                     $qualifyConfigSer->getLosePointsExt()
                 );
+            } else {
+                $qualifyConfig->setWinPoints($qualifyConfigSer->getWinPoints());
+                $qualifyConfig->setDrawPoints($qualifyConfigSer->getDrawPoints());
+                $qualifyConfig->setWinPointsExt($qualifyConfigSer->getWinPointsExt());
+                $qualifyConfig->setDrawPointsExt($qualifyConfigSer->getDrawPointsExt());
+                $qualifyConfig->setLosePointsExt($qualifyConfigSer->getLosePointsExt());
+                $qualifyConfig->setPointsCalculation($qualifyConfigSer->getPointsCalculation());
             }
-
             $this->qualifyConfigRepos->save($qualifyConfig);
 
             $this->removeNext($round, $competitionSport);

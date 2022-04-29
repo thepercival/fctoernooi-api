@@ -8,7 +8,6 @@ use App\Export\PdfService;
 use App\Export\PdfSubject;
 use App\QueueService\Pdf as PdfQueueService;
 use Exception;
-use FCToernooi\CacheService;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use JMS\Serializer\SerializerInterface;
@@ -28,55 +27,53 @@ final class PdfAction extends Action
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private PdfService $pdfService,
-        private CacheService $cacheService,
         Configuration $config
     ) {
         parent::__construct($logger, $serializer);
         $this->pdfQueueService = new PdfQueueService($config->getArray('queue'));
     }
 
-    /**
-     * @param Request $request
-     * @param Response $response
-     * @param array<string, string> $args
-     * @return Response
-     */
-    public function fetchOne(Request $request, Response $response, array $args): Response
-    {
-        try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute('tournament');
-
-            $queryParams = $request->getQueryParams();
-            if (!isset($queryParams['hash'])) {
-                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
-            }
-            $this->pdfService->validateHash($tournament, $queryParams['hash']);
-
-            $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
-            if ($progressValue < 0) {
-                throw new Exception('de pdf-aanvraag is verlopen', E_ERROR);
-            }
-            if ($progressValue < 100) {
-                throw new Exception('de pdf-aanvraag is nog in behandeling', E_ERROR);
-            }
-
-            $pdf = $this->pdfService->getPdfOnce($tournament);
-            $vtData = $pdf->render();
-
-            $fileName = $this->pdfService->getFileName($tournament);
-            $response->getBody()->write($vtData);
-
-            return $response
-                ->withHeader('Cache-Control', 'must-revalidate')
-                ->withHeader('Pragma', 'public')
-                ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
-                ->withHeader('Content-Disposition', 'attachment;filename="' . $fileName . '"')
-                ->withHeader('Content-Length', '' . strlen($vtData));
-        } catch (Exception $exception) {
-            throw new HttpException($request, $exception->getMessage(), 400);
-        }
-    }
+//    /**
+//     * @param Request $request
+//     * @param Response $response
+//     * @param array<string, string> $args
+//     * @return Response
+//     */
+//    public function fetchOne(Request $request, Response $response, array $args): Response
+//    {
+//        try {
+//            /** @var Tournament $tournament */
+//            $tournament = $request->getAttribute('tournament');
+//
+//            if (!isset($args['fileName'])) {
+//                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
+//            }
+////            $this->pdfService->validateFileName($tournament, $args['fileName']);
+//
+//            $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
+//            if ($progressValue < 0) {
+//                throw new Exception('de pdf-aanvraag is verlopen', E_ERROR);
+//            }
+//            if ($progressValue < 100) {
+//                throw new Exception('de pdf-aanvraag is nog in behandeling', E_ERROR);
+//            }
+//
+//            $pdf = $this->pdfService->getPdfOnce($tournament);
+//            $vtData = $pdf->render();
+//
+////            $fileName = $this->pdfService->getFileName($tournament);
+//            $response->getBody()->write($vtData);
+//
+//            return $response
+//                ->withHeader('Cache-Control', 'must-revalidate')
+//                ->withHeader('Pragma', 'public')
+//                ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
+//                ->withHeader('Content-Disposition', 'attachment;filename="' . $args['fileName'] . '"')
+//                ->withHeader('Content-Length', '' . strlen($vtData));
+//        } catch (Exception $exception) {
+//            throw new HttpException($request, $exception->getMessage(), 400);
+//        }
+//    }
 
     /**
      * @param Request $request
@@ -101,9 +98,9 @@ final class PdfAction extends Action
             $tournament->setExported($tournament->getExported() | PdfSubject::sum($subjects));
             $this->tournamentRepos->save($tournament);
 
-            $hash = $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->pdfQueueService);
+            $fileName = $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->pdfQueueService);
 
-            $json = json_encode(['hash' => $hash]);
+            $json = json_encode(['fileName' => $fileName]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);
@@ -122,7 +119,7 @@ final class PdfAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $this->pdfService->validateHash($tournament, $args['hash']);
+//            $this->pdfService->validateHash($tournament, $args['hash']);
 
             $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
 

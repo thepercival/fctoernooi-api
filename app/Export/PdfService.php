@@ -20,7 +20,7 @@ final class PdfService
     public const CREATE_PERCENTAGE = 1;
     public const MERGE_PERCENTAGE = 10;
 
-    protected string $exportSecret;
+    protected string $pdfLocalDir;
     protected string $wwwUrl;
     /**
      * @var list<string>
@@ -35,8 +35,8 @@ final class PdfService
         protected LoggerInterface $logger
     ) {
         $this->wwwUrl = $config->getString('www.wwwurl');
-        $this->exportSecret = $config->getString('renderer.export_secret');
         $this->tmpSubDir = ['pdf'];
+        $this->pdfLocalDir = $config->getString('www.apiurl-localpath') . 'pdf' . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -50,23 +50,25 @@ final class PdfService
         Tournament $tournament,
         array $subjects,
         PdfQueueService $pdfQueueService,
-    ): string {
+    ): string
+    {
         $tournamentId = (string)$tournament->getId();
-
+//        $this->reset($tournament);
         if ($this->inProgress($tournamentId)) {
             throw new Exception('er loopt nog een pdf-aanvraag voor dit toernooi', E_ERROR);
         }
         $this->reset($tournament);
 
-        $hash = $this->createHash($tournamentId);
-        $this->memcached->set($this->getHashKey($tournamentId), $hash, self::CACHE_EXPIRATION);
+//        $hash = $this->createHash($tournamentId);
+        $fileName = $this->createFileName($tournament);
+        $this->memcached->set($this->getFileNameKey($tournamentId), $fileName, self::CACHE_EXPIRATION);
         new PdfProgress($this->getProgressKey($tournamentId), $this->memcached, self::CREATE_PERCENTAGE);
         foreach ($subjects as $subject) {
             $pdfQueueService->sendCreatePdf(
-                new PdfQueueService\CreateMessage($tournament, $subject, count($subjects))
+                new PdfQueueService\CreateMessage($tournament, $fileName, $subject, count($subjects))
             );
         }
-        return $hash;
+        return $fileName;
     }
 
     private function reset(Tournament $tournament): void
@@ -77,9 +79,9 @@ final class PdfService
         $this->emptyCache($tournamentId);
 
         // clean files from tmp
-        $this->tmpService->removeFile($this->tmpSubDir, $this->getFileName($tournament));
+        $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpPath($tournamentId));
         foreach (PdfSubject::cases() as $subject) {
-            $this->tmpService->removeFile($this->tmpSubDir, $this->getSubjectFileName($tournamentId, $subject));
+            $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpSubjectPath($tournamentId, $subject));
         }
     }
 
@@ -99,15 +101,16 @@ final class PdfService
 
     /**
      * @param Tournament $tournament
+     * @param string $fileName
      * @return Zend_Pdf
      * @throws \Zend_Pdf_Exception
      */
-    public function mergePdfs(Tournament $tournament): Zend_Pdf
+    public function mergePdfs(Tournament $tournament, string $fileName): Zend_Pdf
     {
         $tournamentId = (string)$tournament->getId();
         $pdfDoc = new Zend_Pdf();
         foreach (PdfSubject::cases() as $subject) {
-            $path = $this->getSubjectPath($tournamentId, $subject);
+            $path = $this->getTmpSubjectPath($tournamentId, $subject);
             if (!file_exists($path)) {
                 continue;
             }
@@ -120,7 +123,7 @@ final class PdfService
         if (count($pdfDoc->pages) === 0) {
             throw new \Exception('pdf has no pages', E_ERROR);
         }
-        $pdfDoc->save($this->getPath($tournament));
+        $pdfDoc->save($this->getPublicPath($fileName));
         $this->getProgress($tournamentId)->finish();
         return $pdfDoc;
     }
@@ -132,7 +135,7 @@ final class PdfService
      */
     public function getPdfOnce(Tournament $tournament): Zend_Pdf
     {
-        $path = $this->getPath($tournament);
+        $path = $this->getTmpPath((string)$tournament->getId());
         $pdfDoc = \Zend_Pdf::load($path);
         $this->reset($tournament);
         return $pdfDoc;
@@ -140,34 +143,35 @@ final class PdfService
 
     private function emptyCache(string $tournamentId): void
     {
-        $this->memcached->delete($this->getHashKey($tournamentId));
+        $this->memcached->delete($this->getFileNameKey($tournamentId));
         $this->memcached->delete($this->getProgressKey($tournamentId));
     }
 
-    public function getPath(Tournament $tournament): string
+    public function getPublicPath(string $fileName): string
     {
-        return $this->tmpService->getPath($this->tmpSubDir, $this->getFileName($tournament));
+        return $this->pdfLocalDir . $fileName . '.pdf';
     }
 
-    public function getFileName(Tournament $tournament): string
+    /**
+     * @return string
+     */
+    public function getPublicDir(): string
+    {
+        return $this->pdfLocalDir;
+    }
+
+
+    public function createFileName(Tournament $tournament): string
     {
         $name = $tournament->getCompetition()->getLeague()->getName();
-        $fileName = preg_replace("/[^a-zA-Z0-9]+/", '', $name);
-        return 'fctoernooi-' . $fileName . '.pdf';
+        $tournamentName = strtolower(preg_replace("/[^a-zA-Z0-9]+/", '', $name));
+        $timestamp = (new \DateTimeImmutable())->format('YmdHis');
+        return $tournamentName . '-' . $timestamp;
     }
 
-    private function getHashKey(string $tournamentId): string
+    private function getFileNameKey(string $tournamentId): string
     {
-        return 'fct-pdf-hash-' . $tournamentId;
-    }
-
-    private function getHash(string $tournamentId): string
-    {
-        $hash = $this->memcached->get($this->getHashKey($tournamentId));
-        if ($hash === false) {
-            throw new \Exception('de pdf is na het aanmaken, eenmalig opvraagbaar', E_ERROR);
-        }
-        return $hash;
+        return 'fct-pdf-filename-' . $tournamentId;
     }
 
     private function getProgressKey(string $tournamentId): string
@@ -194,17 +198,24 @@ final class PdfService
         return $percentage / $totalNrOfSubjects;
     }
 
-    private function createHash(string $tournamentId): string
-    {
-        $decoded = $tournamentId . $this->exportSecret . (new \DateTimeImmutable())->getTimestamp();
-        return hash('sha1', $decoded);
-    }
+//    /**
+//     * @param string $tournamentId
+//     * @param PdfSubject $subject
+//     * @return string
+//     */
+//    public function getSubjectPath(string $tournamentId, PdfSubject $subject): string
+//    {
+//        $fileName = $this->getSubjectFileName($tournamentId, $subject);
+//        return $this->tmpService->getPath($this->tmpSubDir, $fileName);
+//    }
 
-    public function validateHash(Tournament $tournament, string $hash): void
+    /**
+     * @param PdfSubject $subject
+     * @return string
+     */
+    public function getTmpDir(): string
     {
-        if ($this->getHash((string)$tournament->getId()) !== $hash) {
-            throw new \Exception('de aanvraag is verlopen, vraag een nieuwe pdf aan ', E_ERROR);
-        }
+        return $this->tmpService->getPath($this->tmpSubDir);
     }
 
     /**
@@ -212,10 +223,10 @@ final class PdfService
      * @param PdfSubject $subject
      * @return string
      */
-    public function getSubjectPath(string $tournamentId, PdfSubject $subject): string
+    public function getTmpPath(string $tournamentId): string
     {
-        $fileName = $this->getSubjectFileName($tournamentId, $subject);
-        return $this->tmpService->getPath($this->tmpSubDir, $fileName);
+        $fileName = $tournamentId;
+        return $this->tmpService->getPath($this->tmpSubDir, $fileName . '.pdf');
     }
 
     /**
@@ -223,16 +234,17 @@ final class PdfService
      * @param PdfSubject $subject
      * @return string
      */
-    public function getSubjectFileName(string $tournamentId, PdfSubject $subject): string
+    public function getTmpSubjectPath(string $tournamentId, PdfSubject $subject): string
     {
-        return 'fctoernooi-' . $tournamentId . '-' . $this->getSubjectFileSuffix($subject) . '.pdf';
+        $fileName = $tournamentId . '-' . $this->getTmpSubjectFileSuffix($subject);
+        return $this->tmpService->getPath($this->tmpSubDir, $fileName . '.pdf');
     }
 
     /**
      * @param list<PdfSubject> $subjects
      * @return string
      */
-    private function getSubjectFileSuffix(PdfSubject $subject): string
+    private function getTmpSubjectFileSuffix(PdfSubject $subject): string
     {
         switch ($subject) {
             case PdfSubject::GameNotes:
