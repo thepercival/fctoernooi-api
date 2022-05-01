@@ -164,9 +164,12 @@ final class PdfService
     public function createFileName(Tournament $tournament): string
     {
         $name = $tournament->getCompetition()->getLeague()->getName();
-        $tournamentName = strtolower(preg_replace("/[^a-zA-Z0-9]+/", '', $name));
+        $fileName = preg_replace("/[^a-zA-Z0-9]+/", '', $name);
+        if (!is_string($fileName)) {
+            $fileName = 'invalidname';
+        }
         $timestamp = (new \DateTimeImmutable())->format('YmdHis');
-        return $tournamentName . '-' . $timestamp;
+        return strtolower($fileName) . '-' . $timestamp;
     }
 
     private function getFileNameKey(string $tournamentId): string
@@ -198,52 +201,23 @@ final class PdfService
         return $percentage / $totalNrOfSubjects;
     }
 
-//    /**
-//     * @param string $tournamentId
-//     * @param PdfSubject $subject
-//     * @return string
-//     */
-//    public function getSubjectPath(string $tournamentId, PdfSubject $subject): string
-//    {
-//        $fileName = $this->getSubjectFileName($tournamentId, $subject);
-//        return $this->tmpService->getPath($this->tmpSubDir, $fileName);
-//    }
-
-    /**
-     * @param PdfSubject $subject
-     * @return string
-     */
     public function getTmpDir(): string
     {
         return $this->tmpService->getPath($this->tmpSubDir);
     }
 
-    /**
-     * @param string $tournamentId
-     * @param PdfSubject $subject
-     * @return string
-     */
     public function getTmpPath(string $tournamentId): string
     {
         $fileName = $tournamentId;
         return $this->tmpService->getPath($this->tmpSubDir, $fileName . '.pdf');
     }
 
-    /**
-     * @param string $tournamentId
-     * @param PdfSubject $subject
-     * @return string
-     */
     public function getTmpSubjectPath(string $tournamentId, PdfSubject $subject): string
     {
         $fileName = $tournamentId . '-' . $this->getTmpSubjectFileSuffix($subject);
         return $this->tmpService->getPath($this->tmpSubDir, $fileName . '.pdf');
     }
 
-    /**
-     * @param list<PdfSubject> $subjects
-     * @return string
-     */
     private function getTmpSubjectFileSuffix(PdfSubject $subject): string
     {
         switch ($subject) {

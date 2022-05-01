@@ -41,7 +41,7 @@ final class TmpService
 
     /**
      * @param list<string> $subDirs
-     * @param string|null $file
+     * @param string $fileName
      * @return bool
      */
     public function removeFile(array $subDirs, string $fileName): bool

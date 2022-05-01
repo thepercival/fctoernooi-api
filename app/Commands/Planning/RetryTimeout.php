@@ -191,6 +191,7 @@ class RetryTimeout extends PlanningCommand
 
     protected function getPlanningType(InputInterface $input): PlanningType
     {
+        /** @var string|null $planningType */
         $planningType = $input->getOption('planningType');
         if ($planningType === null) {
             throw new \Exception('unknown planningtype', E_ERROR);
@@ -206,6 +207,7 @@ class RetryTimeout extends PlanningCommand
 
     protected function getTimeoutState(InputInterface $input): TimeoutState
     {
+        /** @var string|null $timeoutState */
         $timeoutState = $input->getOption('timeoutState');
         if ($timeoutState === null) {
             throw new \Exception('unknown planningtype', E_ERROR);
