@@ -88,9 +88,9 @@ final class StructureAction extends Action
         try {
             /** @var Structure|false $structureSer */
             $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
-            // if ($structureSer === false) {
+            if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
-            // }
+            }
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
