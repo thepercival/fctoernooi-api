@@ -43,7 +43,7 @@ class TournamentCopier
         $fromLeague = $fromCompetition->getLeague();
         $league = new League($association, $fromLeague->getName());
 
-        $season = $this->seasonRepos->findOneBy(array('name' => '9999'));
+        $season = $this->seasonRepos->findOneBy(['name' => '9999']);
         if ($season === null) {
             throw new \Exception('season 9999 not found', E_ERROR);
         }
@@ -94,6 +94,7 @@ class TournamentCopier
             $newCompetitionSport = new CompetitionSport(
                 $sport,
                 $newCompetition,
+                $competitionSportSer->getDefaultPointsCalculation(),
                 $competitionSportSer
             );
             /** @var Field $fieldSer */

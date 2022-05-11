@@ -21,6 +21,7 @@ use Sports\Competition\Field\Repository as FieldRepository;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Competition\Sport\Service as CompetitionSportService;
+use Sports\Ranking\PointsCalculation;
 use Sports\Round;
 use Sports\Sport;
 use Sports\Sport\Repository as SportRepository;
@@ -101,7 +102,13 @@ final class CompetitionSportAction extends Action
 
             $sportPersistVariant = $serializedCompSport->createVariant()->toPersistVariant();
             $fieldNames = $this->createFieldNames($serializedCompSport, $competition->getSports());
-            $newCompSport = $this->addHelper($sportPersistVariant, $fieldNames, $sport, $competition, $structure);
+            $newCompSport = $this->addHelper(
+                $sportPersistVariant,
+                $serializedCompSport->getDefaultPointsCalculation(),
+                $fieldNames,
+                $sport,
+                $competition,
+                $structure);
 
             $json = $this->serializer->serialize($newCompSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
@@ -275,6 +282,7 @@ final class CompetitionSportAction extends Action
 
     /**
      * @param PersistVariant $sportPersistVariant
+     * @param PointsCalculation $defaultPointsCalculation
      * @param list<string> $fieldNames
      * @param Sport $sport
      * @param Competition $competition
@@ -284,6 +292,7 @@ final class CompetitionSportAction extends Action
      */
     protected function addHelper(
         PersistVariant $sportPersistVariant,
+        PointsCalculation $defaultPointsCalculation,
         array $fieldNames,
         Sport $sport,
         Competition $competition,
@@ -292,6 +301,7 @@ final class CompetitionSportAction extends Action
         $newCompetitionSport = new CompetitionSport(
             $sport,
             $competition,
+            $defaultPointsCalculation,
             $sportPersistVariant
         );
         $smallestNrOfPoulePlaces = $this->getSmallestNrOfPoulePlaces($structure->getRootRound());

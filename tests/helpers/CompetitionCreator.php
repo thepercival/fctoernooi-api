@@ -13,6 +13,7 @@ use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\League;
 use Sports\Season;
+use Sports\Ranking\PointsCalculation;
 use Sports\Sport;
 use Sports\Sport\Custom as SportCustom;
 use SportsHelpers\GameMode;
@@ -83,7 +84,7 @@ trait CompetitionCreator
             );
         }
         $persistVariant = $sportVariantWithFields->getSportVariant()->toPersistVariant();
-        $competitionSport = new CompetitionSport($sport, $competition, $persistVariant);
+        $competitionSport = new CompetitionSport($sport, $competition, PointsCalculation::AgainstGamePoints, $persistVariant);
         for ($fieldNr = 1; $fieldNr <= $sportVariantWithFields->getNrOfFields(); $fieldNr++) {
             $field = new Field($competitionSport);
             $field->setName((string)$fieldNr);
