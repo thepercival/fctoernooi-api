@@ -58,7 +58,7 @@ return [
 
         $name = 'application';
         $logger = new Logger($name);
-        if ($config->getString('environment') === 'development') {
+        if ($config->getString('environment') !== 'development') {
             $path = 'php://stdout';
         } else {
             $processor = new UidProcessor();
