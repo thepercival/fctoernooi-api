@@ -87,7 +87,7 @@ final class GameAgainstAction extends GameAction
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -146,7 +146,7 @@ final class GameAgainstAction extends GameAction
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -182,7 +182,7 @@ final class GameAgainstAction extends GameAction
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 }

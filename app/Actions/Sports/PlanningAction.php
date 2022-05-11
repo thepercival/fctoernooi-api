@@ -55,7 +55,7 @@ final class PlanningAction extends Action
             $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -88,7 +88,7 @@ final class PlanningAction extends Action
             $json = json_encode(['progress' => $seekingPerc]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -127,7 +127,7 @@ final class PlanningAction extends Action
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -154,7 +154,7 @@ final class PlanningAction extends Action
             $json = $this->serializer->serialize($dates, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

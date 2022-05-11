@@ -40,7 +40,7 @@ final class CompetitorAction extends Action
             $json = $this->serializer->serialize($tournament->getCompetitors(), 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            return new ErrorResponse($exception->getMessage(), 400, $this->logger);
         }
     }
 
@@ -77,7 +77,7 @@ final class CompetitorAction extends Action
             $json = $this->serializer->serialize($newCompetitor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -111,7 +111,7 @@ final class CompetitorAction extends Action
             $json = $this->serializer->serialize($competitor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -141,7 +141,7 @@ final class CompetitorAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -166,7 +166,7 @@ final class CompetitorAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
     protected function getCompetitorFromInput(int $id, Tournament $tournament): Competitor

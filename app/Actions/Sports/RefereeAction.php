@@ -88,7 +88,7 @@ final class RefereeAction extends Action
             $json = $this->serializer->serialize($newReferee, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -148,7 +148,7 @@ final class RefereeAction extends Action
             $json = $this->serializer->serialize($referee, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -178,7 +178,7 @@ final class RefereeAction extends Action
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -223,7 +223,7 @@ final class RefereeAction extends Action
             $json = $this->serializer->serialize($roleState === null ? 0 : $roleState->value, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -257,7 +257,7 @@ final class RefereeAction extends Action
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

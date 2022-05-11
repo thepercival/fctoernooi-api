@@ -73,7 +73,7 @@ final class StructureAction extends Action
             }
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 500);
+            return new ErrorResponse($exception->getMessage(), 500, $this->logger);
         }
     }
 
@@ -88,9 +88,9 @@ final class StructureAction extends Action
         try {
             /** @var Structure|false $structureSer */
             $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
-            if ($structureSer === false) {
+            // if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
-            }
+            // }
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
@@ -116,7 +116,7 @@ final class StructureAction extends Action
             $json = $this->serializer->serialize($structure, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 }

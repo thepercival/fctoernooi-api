@@ -12,7 +12,6 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Round;
@@ -103,7 +102,7 @@ final class ScoreConfigAction extends Action
             $json = $this->serializer->serialize($scoreConfig, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

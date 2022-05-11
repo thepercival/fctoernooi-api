@@ -10,7 +10,6 @@ use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Sponsor;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -42,7 +41,7 @@ final class SponsorAction extends Action
             $json = $this->serializer->serialize($tournament->getSponsors(), 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            return new ErrorResponse($exception->getMessage(), 400, $this->logger);
         }
     }
 
@@ -68,7 +67,7 @@ final class SponsorAction extends Action
             $json = $this->serializer->serialize($sponsor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 400);
+            return new ErrorResponse($exception->getMessage(), 400, $this->logger);
         }
     }
 
@@ -98,7 +97,7 @@ final class SponsorAction extends Action
             $json = $this->serializer->serialize($newSponsor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -136,7 +135,7 @@ final class SponsorAction extends Action
             $json = $this->serializer->serialize($sponsor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -164,7 +163,7 @@ final class SponsorAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -201,7 +200,7 @@ final class SponsorAction extends Action
             $json = $this->serializer->serialize($sponsor, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 }

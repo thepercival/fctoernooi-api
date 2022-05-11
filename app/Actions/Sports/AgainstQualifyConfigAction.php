@@ -91,7 +91,7 @@ final class AgainstQualifyConfigAction extends Action
             $json = $this->serializer->serialize($qualifyConfig, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 //
@@ -142,7 +142,7 @@ final class AgainstQualifyConfigAction extends Action
 //            $json = $this->serializer->serialize($qualifyConfig, 'json');
 //            return $this->respondWithJson($response, $json);
 //        } catch (\Exception $exception) {
-//            return new ErrorResponse($exception->getMessage(), 422);
+//            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
 //        }
 //    }
 

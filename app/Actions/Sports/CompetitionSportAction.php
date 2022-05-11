@@ -113,7 +113,7 @@ final class CompetitionSportAction extends Action
             $json = $this->serializer->serialize($newCompSport, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
@@ -216,7 +216,7 @@ final class CompetitionSportAction extends Action
 //            $json = $this->serializer->serialize($competitionSport, 'json', $this->getSerializationContext());
 //            return $this->respondWithJson($response, $json);
 //        } catch (\Exception $exception) {
-//            return new ErrorResponse($exception->getMessage(), 422);
+//            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
 //        }
 //    }
 
@@ -255,7 +255,7 @@ final class CompetitionSportAction extends Action
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

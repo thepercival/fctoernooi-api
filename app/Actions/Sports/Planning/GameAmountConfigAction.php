@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports\Planning;
 
+use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Exception;
 use FCToernooi\Tournament;
-use Psr\Log\LoggerInterface;
 use JMS\Serializer\SerializerInterface;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
-use Sports\Round\Number as RoundNumber;
-use Sports\Sport;
-use Sports\Structure\Repository as StructureRepository;
-use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
-use Sports\Planning\GameAmountConfig;
-use Sports\Sport\Repository as SportRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use App\Actions\Action;
-use Sports\Competition;
+use Psr\Log\LoggerInterface;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Planning\GameAmountConfig;
+use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
+use Sports\Round\Number as RoundNumber;
+use Sports\Structure\Repository as StructureRepository;
 
 final class GameAmountConfigAction extends Action
 {
@@ -87,7 +84,7 @@ final class GameAmountConfigAction extends Action
             $json = $this->serializer->serialize($gameAmountConfig, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 
