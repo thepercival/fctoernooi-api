@@ -12,12 +12,13 @@ use Sports\Competition\Field;
 use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\League;
+use Sports\Ranking\PointsCalculation;
 use Sports\Season;
 use Sports\Sport;
-use Sports\Sport\Custom as SportCustom;
+use Sports\Sport\Custom as CustomSport;
 use SportsHelpers\GameMode;
-use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
+use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\VariantWithFields as SportVariantWithFields;
 
 trait TournamentCreator
@@ -57,7 +58,7 @@ trait TournamentCreator
         }
 
         $this->sport = new Sport("voetbal", true, 2, GameMode::Against);
-        $this->sport->setCustomId(SportCustom::Football);
+        $this->sport->setCustomId(CustomSport::Football);
         return $this->sport;
     }*/
 
@@ -66,7 +67,7 @@ trait TournamentCreator
         SportVariantWithFields|null $sportVariantWithFields
     ): void {
         $sport = new Sport("voetbal", true, GameMode::Against, 1);
-        $sport->setCustomId(SportCustom::Football);
+        $sport->setCustomId(CustomSport::Football);
 
         if ($sportVariantWithFields === null) {
             $sportVariantWithFields = new SportVariantWithFields(
@@ -75,7 +76,12 @@ trait TournamentCreator
             );
         }
         $persistVariant = $sportVariantWithFields->getSportVariant()->toPersistVariant();
-        $competitionSport = new CompetitionSport($sport, $competition, $persistVariant);
+        $competitionSport = new CompetitionSport(
+            $sport,
+            $competition,
+            PointsCalculation::AgainstGamePoints,
+            $persistVariant
+        );
         for ($fieldNr = 1; $fieldNr <= $sportVariantWithFields->getNrOfFields(); $fieldNr++) {
             $field = new Field($competitionSport);
             $field->setName((string)$fieldNr);
