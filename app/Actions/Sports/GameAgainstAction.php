@@ -133,6 +133,8 @@ final class GameAgainstAction extends GameAction
             $this->againstScoreRepos->removeScores($game);
 
             $game->setState($gameSer->getState());
+            $game->setHomeExtraPoints($gameSer->getHomeExtraPoints());
+            $game->setAwayExtraPoints($gameSer->getAwayExtraPoints());
 
             $gameScoreCreator = new GameScoreCreator();
             $gameScoreCreator->addAgainstScores($game, array_values($gameSer->getScores()->toArray()));
