@@ -173,10 +173,12 @@ final class AgainstQualifyConfigAction extends Action
             }
             return null;
         };
-        $round = $getRound($structure->getRootRound());
-        if ($round === null) {
-            throw new Exception('de ronde kan niet gevonden worden', E_ERROR);
+        foreach ($structure->getCategories() as $category) {
+            $round = $getRound($category->getRootRound());
+            if ($round !== null) {
+                return $round;
+            }
         }
-        return $round;
+        throw new Exception('de ronde kan niet gevonden worden', E_ERROR);
     }
 }

@@ -1,22 +1,66 @@
 {
-    "_readme": [
-        "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
-        "This file is @generated automatically"
-    ],
-    "content-hash": "294226467e24129fed1ec502e1dd15bc",
-    "packages": [
+  "_readme": [
+    "This file locks the dependencies of your project to a known state",
+    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+    "This file is @generated automatically"
+  ],
+  "content-hash": "d2a06dc549de2c5c34e8b3d7e04d7600",
+  "packages": [
+    {
+      "name": "ahamed/jsphp",
+      "version": "v0.5",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/ahamed/JsPhp.git",
+        "reference": "0071efbfa4234fbf782d0fc4ac3837a422cc7a39"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/ahamed/JsPhp/zipball/0071efbfa4234fbf782d0fc4ac3837a422cc7a39",
+        "reference": "0071efbfa4234fbf782d0fc4ac3837a422cc7a39",
+        "shasum": ""
+      },
+      "require": {
+        "php": "^7.0|^8.0"
+      },
+      "require-dev": {
+        "phpunit/phpunit": "^9.2",
+        "squizlabs/php_codesniffer": "*"
+      },
+      "type": "library",
+      "autoload": {
+        "psr-4": {
+          "Ahamed\\JsPhp\\": "src/"
+        }
+      },
+      "notification-url": "https://packagist.org/downloads/",
+      "license": [
+        "MIT"
+      ],
+      "authors": [
         {
-            "name": "bacon/bacon-qr-code",
-            "version": "2.0.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Bacon/BaconQrCode.git",
-                "reference": "d70c840f68657ce49094b8d91f9ee0cc07fbf66c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Bacon/BaconQrCode/zipball/d70c840f68657ce49094b8d91f9ee0cc07fbf66c",
+          "name": "Sajeeb Ahamed",
+          "email": "sajeeb07ahamed@gmail.com"
+        }
+      ],
+      "description": "A php library for implementing Array, Object, String methods in JavaScript way.",
+      "support": {
+        "issues": "https://github.com/ahamed/JsPhp/issues",
+        "source": "https://github.com/ahamed/JsPhp/tree/v0.5"
+      },
+      "time": "2021-05-18T16:44:38+00:00"
+    },
+    {
+      "name": "bacon/bacon-qr-code",
+      "version": "2.0.7",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/Bacon/BaconQrCode.git",
+        "reference": "d70c840f68657ce49094b8d91f9ee0cc07fbf66c"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/Bacon/BaconQrCode/zipball/d70c840f68657ce49094b8d91f9ee0cc07fbf66c",
                 "reference": "d70c840f68657ce49094b8d91f9ee0cc07fbf66c",
                 "shasum": ""
             },
@@ -5841,30 +5885,30 @@
             ],
             "time": "2022-01-26T17:23:29+00:00"
         },
-        {
-          "name": "thepercival/php-sports",
-          "version": "v1.0.94",
-          "source": {
-            "type": "git",
-            "url": "https://github.com/thepercival/php-sports.git",
-            "reference": "57024d217f7ed525bd61626c2e32b7abc78ded4e"
-          },
-          "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/thepercival/php-sports/zipball/57024d217f7ed525bd61626c2e32b7abc78ded4e",
-            "reference": "57024d217f7ed525bd61626c2e32b7abc78ded4e",
-            "shasum": ""
-          },
-            "require": {
-                "doctrine/orm": "^2.10",
-                "ext-intl": "*",
-                "guzzlehttp/guzzle": "^7.4",
-                "jms/serializer": "^3.16",
-                "league/period": "^4.9",
-                "monolog/monolog": "^2.0",
-                "php": ">=8.1",
-                "phplucidframe/console-table": "^1.2",
-                "symfony/yaml": "^6.0",
+    {
+      "name": "thepercival/php-sports",
+      "version": "v1.0.95",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/thepercival/php-sports.git",
+        "reference": "a1f494c371a59ce23e0a53e2ea5eb8e3c1d382d6"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/thepercival/php-sports/zipball/a1f494c371a59ce23e0a53e2ea5eb8e3c1d382d6",
+        "reference": "a1f494c371a59ce23e0a53e2ea5eb8e3c1d382d6",
+        "shasum": ""
+      },
+      "require": {
+        "doctrine/orm": "^2.10",
+        "ext-intl": "*",
+        "guzzlehttp/guzzle": "^7.4",
+        "jms/serializer": "^3.16",
+        "league/period": "^4.9",
+        "monolog/monolog": "^2.0",
+        "php": ">=8.1",
+        "phplucidframe/console-table": "^1.2",
+        "symfony/yaml": "^6.0",
                 "thepercival/php-sports-helpers": "^1.0",
                 "thepercival/php-sports-planning": "^1.0"
             },
@@ -5914,9 +5958,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-              "source": "https://github.com/thepercival/php-sports/tree/v1.0.94"
+              "source": "https://github.com/thepercival/php-sports/tree/v1.0.95"
             },
-          "time": "2022-05-11T11:33:33+00:00"
+      "time": "2022-05-13T07:12:53+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -6447,20 +6491,20 @@
             ],
             "time": "2022-01-12T11:15:02+00:00"
         },
-        {
-            "name": "twig/twig",
-            "version": "v3.3.10",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twigphp/Twig.git",
-                "reference": "8442df056c51b706793adf80a9fd363406dd3674"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/8442df056c51b706793adf80a9fd363406dd3674",
-                "reference": "8442df056c51b706793adf80a9fd363406dd3674",
-                "shasum": ""
-            },
+    {
+      "name": "twig/twig",
+      "version": "v3.4.0",
+      "source": {
+        "type": "git",
+        "url": "https://github.com/twigphp/Twig.git",
+        "reference": "ed19f4bf9d19c4ef920b5d8243910bd32e85b9ba"
+      },
+      "dist": {
+        "type": "zip",
+        "url": "https://api.github.com/repos/twigphp/Twig/zipball/ed19f4bf9d19c4ef920b5d8243910bd32e85b9ba",
+        "reference": "ed19f4bf9d19c4ef920b5d8243910bd32e85b9ba",
+        "shasum": ""
+      },
             "require": {
                 "php": ">=7.2.5",
                 "symfony/polyfill-ctype": "^1.8",
@@ -6473,7 +6517,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.3-dev"
+                  "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -6509,7 +6553,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.3.10"
+              "source": "https://github.com/twigphp/Twig/tree/v3.4.0"
             },
             "funding": [
                 {
@@ -6521,7 +6565,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-06T06:47:41+00:00"
+      "time": "2022-05-15T06:25:28+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

@@ -7,6 +7,7 @@ namespace App\Export\Pdf\Structure;
 use App\Export\Pdf\Page\Structure as StructurePage;
 use App\Export\Pdf\Point;
 use Doctrine\Common\Collections\Collection;
+use Sports\Category;
 use Sports\NameService;
 use Sports\Poule;
 use Sports\Round;
@@ -124,10 +125,23 @@ final class DimensionCalculator
 
     private function getPageWidth(Structure $structure, int $maxNrOfPoulePlaceColumns): float
     {
+        $width = 0;
+        foreach ($structure->getCategories() as $category) {
+            if ($width > 0) {
+                $width += $this->pouleMargin;
+            }
+            $width += $this->getCategoryWidth($category, $maxNrOfPoulePlaceColumns);
+        }
+        return $width;
+    }
+
+    private function getCategoryWidth(Category $category, int $maxNrOfPoulePlaceColumns): float
+    {
         return $this->pageMargin
-            + $this->getMaxRoundsWidth($structure->getRootRound(), $maxNrOfPoulePlaceColumns)
+            + $this->getMaxRoundsWidth($category->getRootRound(), $maxNrOfPoulePlaceColumns)
             + $this->pageMargin;
     }
+
 
     private function getMaxRoundsWidth(Round $round, int $maxNrOfPoulePlaceColumns): float
     {
@@ -165,9 +179,10 @@ final class DimensionCalculator
         $y = $this->defaultPage->drawHeader('tmp');
         $headerHeight = -$this->defaultPage->drawSubHeader('tmp', $y);
         return $headerHeight
-            + $this->getMaxChildrenHeight([$structure->getRootRound()], $maxNrOfPoulePlaceColumns)
+            + $this->getMaxChildrenHeight($structure->getRootRounds(), $maxNrOfPoulePlaceColumns)
             + $this->pageMargin;
     }
+
 
     /**
      * @param list<Round> $children

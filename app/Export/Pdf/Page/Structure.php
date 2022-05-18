@@ -82,10 +82,12 @@ class Structure extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $rooRound = $this->parent->getStructure()->getRootRound();
-        $y = $this->drawHeader('opzet');
-        $y = $this->drawSubHeader('Opzet', $y);
-        $this->drawRound($rooRound, $y, $this->getPageMargin(), $this->getDisplayWidth());
+        foreach ($this->parent->getStructure()->getCategories() as $category) {
+            $rooRound = $category->getRootRound();
+            $y = $this->drawHeader('opzet');
+            $y = $this->drawSubHeader('Opzet', $y);
+            $this->drawRound($rooRound, $y, $this->getPageMargin(), $this->getDisplayWidth());
+        }
     }
 
     protected function drawRound(Round $round, float $y, float $x, float $width): void

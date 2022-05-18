@@ -15,6 +15,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Sports\Category;
 use Sports\Competition;
 use Sports\Competition\Field;
 use Sports\Competition\Field\Repository as FieldRepository;
@@ -304,7 +305,8 @@ final class CompetitionSportAction extends Action
             $defaultPointsCalculation,
             $sportPersistVariant
         );
-        $smallestNrOfPoulePlaces = $this->getSmallestNrOfPoulePlaces($structure->getRootRound());
+
+        $smallestNrOfPoulePlaces = $this->getSmallestNrOfPoulePlaces($structure);
         if ($this->tooFewPoulePlaces($smallestNrOfPoulePlaces, $sportPersistVariant->createVariant())) {
             throw new Exception(
                 'te weinig poule-plekken om wedstrijden te kunnen plannen, maak de poule(s) groter',
@@ -322,15 +324,24 @@ final class CompetitionSportAction extends Action
         return $newCompetitionSport;
     }
 
-    protected function getSmallestNrOfPoulePlaces(Round $round, int $smallestNrOfPoulePlaces = 0): int
+    protected function getSmallestNrOfPoulePlaces(Structure $structure): int
+    {
+        return min(
+            array_map(function (Category $category): int {
+                return $this->getSmallestNrOfPoulePlacesHelper($category->getRootRound());
+            }, $structure->getCategories())
+        );
+    }
+
+    protected function getSmallestNrOfPoulePlacesHelper(Round $round, int|null $smallestNrOfPoulePlaces = null): int
     {
         $smallestNrOfRoundPoulePlaces = min($round->createPouleStructure()->toArray());
 
-        if ($smallestNrOfPoulePlaces === 0 || $smallestNrOfRoundPoulePlaces < $smallestNrOfPoulePlaces) {
+        if ($smallestNrOfPoulePlaces === null || $smallestNrOfRoundPoulePlaces < $smallestNrOfPoulePlaces) {
             $smallestNrOfPoulePlaces = $smallestNrOfRoundPoulePlaces;
         }
         foreach ($round->getChildren() as $childRound) {
-            $smallestNrOfPoulePlaces = $this->getSmallestNrOfPoulePlaces($childRound, $smallestNrOfPoulePlaces);
+            $smallestNrOfPoulePlaces = $this->getSmallestNrOfPoulePlacesHelper($childRound, $smallestNrOfPoulePlaces);
         }
         return $smallestNrOfPoulePlaces;
     }

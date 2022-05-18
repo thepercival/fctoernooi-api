@@ -18,13 +18,15 @@ class Structure extends PdfDocument
 {
     protected function fillContent(): void
     {
-        $poules = array_values($this->getStructure()->getRootRound()->getPoules()->toArray());
-        while (count($poules) > 0) {
-            $page = $this->createPageGrouping();
-            $page->draw($poules);
+        foreach ($this->getStructure()->getCategories() as $category) {
+            $poules = array_values($category->getRootRound()->getPoules()->toArray());
+            while (count($poules) > 0) {
+                $page = $this->createPageGrouping();
+                $page->draw($poules);
+            }
+            $page = $this->createStructurePage();
+            $page->draw();
         }
-        $page = $this->createStructurePage();
-        $page->draw();
     }
 
     protected function createPageGrouping(): GroupingPage

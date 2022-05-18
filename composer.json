@@ -45,7 +45,8 @@
       "slim/twig-view": "^3.1",
       "enqueue/amqp-lib": "^0.10",
       "symfony/cache": "^6.0",
-      "mollie/mollie-api-php": "^2.0"
+      "mollie/mollie-api-php": "^2.0",
+      "ahamed/jsphp": "^0.5.0"
     },
     "require-dev": {
       "composer/composer": "^2.2",

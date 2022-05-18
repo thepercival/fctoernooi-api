@@ -6,7 +6,7 @@ namespace App\Actions\Sports;
 
 use App\Actions\Action;
 use App\Response\ErrorResponse;
-use Exception;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Tournament;
@@ -28,7 +28,8 @@ final class StructureAction extends Action
         protected StructureRepository $structureRepos,
         private CacheService $cacheService,
         private StructureCopier $structureCopier,
-        protected CompetitorRepository $competitorRepos
+        protected CompetitorRepository $competitorRepos,
+        protected EntityManagerInterface $em
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -85,6 +86,8 @@ final class StructureAction extends Action
      */
     public function edit(Request $request, Response $response, array $args): Response
     {
+        $conn = $this->em->getConnection();
+        $conn->beginTransaction();
         try {
             /** @var Structure|false $structureSer */
             $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
@@ -97,25 +100,34 @@ final class StructureAction extends Action
 
             $competition = $tournament->getCompetition();
 
+            if ($this->structureRepos->hasStructure($competition)) {
+                $this->structureRepos->remove($competition);
+            }
             $newStructure = $this->structureCopier->copy($structureSer, $competition);
+            $this->structureRepos->add($newStructure/*, $roundNumberAsValue*/);
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($competition, $newStructure, $tournament->getPlaceRanges());
 
-            $roundNumberAsValue = 1;
-            try {
-                $this->structureRepos->getStructure($competition);
-                $this->structureRepos->removeAndAdd($competition, $newStructure, $roundNumberAsValue);
-            } catch (Exception $e) {
-                $this->structureRepos->add($newStructure, $roundNumberAsValue);
-            }
+            // $roundNumberAsValue = 1;
+//            try {
+//                $this->structureRepos->getStructure($competition);
+//                $this->structureRepos->removeAndAdd($competition, $newStructure/*, $roundNumberAsValue*/);
+//            } catch (NoStructureException $e) {
+//                $this->structureRepos->add($newStructure/*, $roundNumberAsValue*/);
+//            } catch (Exception $e) {
+//                throw new \Exception($e->getMessage(), E_ERROR);
+//            }
 
             $structure = $this->structureRepos->getStructure($competition);
-            $this->competitorRepos->syncCompetitors($tournament, $structure->getRootRound());
-
+            foreach ($structure->getCategories() as $category) {
+                $this->competitorRepos->syncCompetitors($tournament, $category->getRootRound());
+            }
+            $conn->commit();
             $json = $this->serializer->serialize($structure, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
+            $conn->rollBack();
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
