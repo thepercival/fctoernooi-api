@@ -2,6 +2,8 @@ FCToernooi\Competitor:
   exclusion_policy: ALL
   exclude: false
   properties:
+    id:
+      type: integer
     name:
       type: string
     registered:

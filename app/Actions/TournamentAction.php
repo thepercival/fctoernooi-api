@@ -79,7 +79,7 @@ final class TournamentAction extends Action
 
             $tournamentId = (int)$args['tournamentId'];
             $json = $this->cacheService->getTournament($tournamentId);
-            if ($json === false) {
+            if ($json === false || $this->config->getString('environment') === 'development') {
                 $tournament = $this->tournamentRepos->find($tournamentId);
                 if ($tournament === null) {
                     throw new \Exception('unknownn tournamentId', E_ERROR);
@@ -198,17 +198,16 @@ final class TournamentAction extends Action
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $ruleSet = $tournamentSer->getCompetition()->getAgainstRuleSet();
-            $name = $tournamentSer->getCompetition()->getLeague()->getName();
 
             $competitionService = new CompetitionService();
             $competition = $tournament->getCompetition();
             $competitionService->changeStartDateTime($competition, $dateTime);
             $competition->setAgainstRuleSet($ruleSet);
-            foreach ($tournamentSer->createRecessPeriods() as $recessPeriod) {
-                new Recess($tournament, $recessPeriod);
+            foreach ($tournamentSer->getRecesses() as $recessSer) {
+                new Recess($tournament, $recessSer->getName(), $recessSer->getPeriod());
             }
             $tournament->setPublic($tournamentSer->getPublic());
-            $tournament->getCompetition()->getLeague()->setName($name);
+            $tournament->getCompetition()->getLeague()->setName($tournamentSer->getName());
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
 

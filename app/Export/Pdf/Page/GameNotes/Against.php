@@ -24,11 +24,11 @@ class Against extends GameNotesBase
         if ($game instanceof TogetherGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $homePlaces = $game->getSidePlaces(AgainstSide::Home);
-        $home = $nameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
+        $home = $structureNameService->getPlacesFromName($homePlaces, false, count($homePlaces) === 1);
         $awayPlaces = $game->getSidePlaces(AgainstSide::Away);
-        $away = $nameService->getPlacesFromName($awayPlaces, false, count($awayPlaces) === 1);
+        $away = $structureNameService->getPlacesFromName($awayPlaces, false, count($awayPlaces) === 1);
         $this->drawCell($home . ' - ' . $away, $x, $y, $width, $height);
     }
 
@@ -47,7 +47,7 @@ class Against extends GameNotesBase
         if ($game instanceof TogetherGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
@@ -66,18 +66,18 @@ class Against extends GameNotesBase
 //        $x2 = $this->getXSecondBorder() + ($margin * 0.5);
 
         // 2x font thuis - uit
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight() * $larger);
-        $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight() * $larger);
+        $this->drawCell('wedstrijd', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
 
         // COMPETITORS
-        $home = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
+        $home = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
         $this->drawCell($home, $homeStart, $y, $homeWidth, $height, Align::Right);
         $this->drawCell('-', $sepStartX, $y, GameNotesBase::Margin, $height, Align::Center);
-        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
+        $away = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         $this->drawCell($away, $awayStart, $y, $dotsWidth, $height);
         $y -= 2 * $height;
 
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight() * $larger);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight() * $larger);
 
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
 
@@ -89,14 +89,14 @@ class Against extends GameNotesBase
             $yDelta = 0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
-                $this->drawCell($descr, $this->getPageMargin(), $y - $yDelta, $leftPartWidth, $height, Align::Right);
+                $this->drawCell($descr, self::PAGEMARGIN, $y - $yDelta, $leftPartWidth, $height, Align::Right);
                 $this->drawCell($dots, $homeStart, $y - $yDelta, $homeWidth, $height, Align::Right);
                 $this->drawCell('-', $sepStartX, $y - $yDelta, $margin, $height, Align::Center);
                 $this->drawCell($dots, $awayStart, $y - $yDelta, $dotsWidth, $height);
                 $yDelta += $height;
             }
         } else {
-            $this->drawCell('score', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+            $this->drawCell('score', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
             $this->drawCell($dots, $homeStart, $y, $homeWidth, $height, Align::Right);
             $this->drawCell('-', $sepStartX, $y, $margin, $height, Align::Center);
             $this->drawCell($dots, $awayStart, $y, $dotsWidth, $height);
@@ -118,7 +118,7 @@ class Against extends GameNotesBase
         $y -= $height; // extra lege regel
 
         if ($planningConfig->getExtension()) {
-            $this->drawCell('na verleng.', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+            $this->drawCell('na verleng.', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
             $this->drawCell($dots, $homeStart, $y, $homeWidth, $height, Align::Right);
             $this->drawCell('-', $sepStartX, $y, $margin, $height, Align::Center);
             $this->drawCell($dots, $awayStart, $y, $dotsWidth, $height);

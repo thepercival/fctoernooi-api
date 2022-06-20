@@ -6,13 +6,11 @@ namespace FCToernooiTest\Recess;
 
 use DateTimeImmutable;
 use FCToernooi\Recess;
-use FCToernooiTest\TestHelper\StructureEditorCreator;
 use FCToernooi\Tournament;
-use FCToernooi\User as User;
+use FCToernooiTest\TestHelper\CompetitionCreator;
+use FCToernooiTest\TestHelper\StructureEditorCreator;
 use League\Period\Period;
 use PHPUnit\Framework\TestCase;
-use FCToernooiTest\TestHelper\CompetitionCreator;
-use FCToernooiTest\TestHelper\GamesCreator;
 use Sports\Season;
 
 final class ValidatorTest extends TestCase
@@ -64,7 +62,7 @@ final class ValidatorTest extends TestCase
         $competition = $this->createCompetition(null, $season, $startDateTime);
         $tournament = new Tournament($competition);
         $recessPeriod1 = new Period($startDateTime->modify('+10 minutes'), $startDateTime->modify('+20 minutes'));
-        new Recess($tournament, $recessPeriod1);
+        new Recess($tournament, 'pauze', $recessPeriod1);
 
         $recessPeriod2 = new Period($startDateTime->modify('+15 minutes'), $startDateTime->modify('+25 minutes'));
 

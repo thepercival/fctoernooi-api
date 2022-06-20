@@ -25,9 +25,9 @@ class AllInOneGame extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $places = array_values($game->getPlaces()->toArray());
-        $description = $nameService->getPlacesFromName($places, false, count($places) <= 3);
+        $description = $structureNameService->getPlacesFromName($places, false, count($places) <= 3);
         $this->drawCell($description, $x, $y, $width, $height);
     }
 
@@ -55,7 +55,7 @@ class AllInOneGame extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
@@ -66,14 +66,14 @@ class AllInOneGame extends GameNotesBase
         $largerFontSize = $this->parent->getFontHeight() * $larger;
         $height = GameNotes::RowHeight * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
-        $placesStart = $this->getPageMargin();
+        $placesStart = self::PAGEMARGIN;
         $placeWidth = $this->getPlaceWidth($game);
         $unitWidth = $this->getPartWidth();
         $unitStart = $this->getStartDetailLabel();
 
         // 2x font thuis - uit
-        $this->setFont($this->parent->getFont(), $largerFontSize);
-        $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+        $this->setFont($this->helper->getTimesFont(), $largerFontSize);
+        $this->drawCell('wedstrijd', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
 
         // SCOREUNITS
         $descr = $this->getInputScoreConfigDescription($firstScoreConfig);
@@ -89,10 +89,10 @@ class AllInOneGame extends GameNotesBase
         $y -= 2 * $height;
 
         // COMPETITORS
-        $this->setFont($this->parent->getFont(), $fontSize);
+        $this->setFont($this->helper->getTimesFont(), $fontSize);
         $dots = '...............';
         foreach ($game->getPlaces() as $gamePlace) {
-            $name = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
+            $name = $structureNameService->getPlaceFromName($gamePlace->getPlace(), true, true);
             $x = $this->drawCell($name, $placesStart, $y, $leftPartWidth, $height, Align::Right);
             $x += GameNotes::Margin;
 
@@ -102,7 +102,7 @@ class AllInOneGame extends GameNotesBase
 //
 //                for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
 //                    $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
-//                    $this->drawCell($descr, $this->getPageMargin(), $y - $yDelta, $leftPartWidth, $height, Align::Right);
+//                    $this->drawCell($descr, self::PAGEMARGIN, $y - $yDelta, $leftPartWidth, $height, Align::Right);
 //
 //                    $placesX = $placesStart;
 //                    foreach ($game->getPlaces() as $gamePlace) {
@@ -118,7 +118,7 @@ class AllInOneGame extends GameNotesBase
                     $unitX += $unitWidth + GameNotes::Margin;
                 }
             } else {
-//                $this->drawCell('score', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+//                $this->drawCell('score', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
 //                $placesX = $placesStart;
 //                // loop door de scoreunits heen
 
@@ -129,7 +129,7 @@ class AllInOneGame extends GameNotesBase
 
 //
 //        if ($planningConfig->getExtension()) {
-//            $this->drawCell('na verleng.', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+//            $this->drawCell('na verleng.', self::PAGEMARGIN, $y, $leftPartWidth, $height, Align::Right);
 //            $placesX = $placesStart;
 //            foreach ($game->getPlaces() as $gamePlace) {
 //                $placesX = $this->drawCell($dots, $placesX, $y, $placeWidth, $height);

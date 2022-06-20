@@ -5,56 +5,97 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Document;
 
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\Grouping as GroupingPage;
+use App\Export\Pdf\Drawers\Structure\CellDrawer;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Page as FCToernooiPdfPage;
 use App\Export\Pdf\Page\Structure as StructurePage;
 use App\Export\Pdf\Point;
-use App\Export\Pdf\Structure\DimensionCalculator;
-use Zend_Pdf_Page;
+use Sports\Category;
 
 /**
+ * PageDimensions counts for all structureCells within Page
+ *
  * @psalm-suppress PropertyNotSetInConstructor
  */
 class Structure extends PdfDocument
 {
     protected function fillContent(): void
     {
+        $horLine = null;
+        $cellDrawer = new CellDrawer();
         foreach ($this->getStructure()->getCategories() as $category) {
-            $poules = array_values($category->getRootRound()->getPoules()->toArray());
-            while (count($poules) > 0) {
-                $page = $this->createPageGrouping();
-                $page->draw($poules);
+            if( $horLine === null) {
+                $page = $this->createStructurePage( $this->calculatePageDimensions($category) );
+                $y = $page->drawHeader($this->getTournament()->getName(), 'opzet & indeling');
+                $y = $page->drawTitle($category->getName(), $y);
+                $horLine = new HorizontalLine( new Point( StructurePage::PAGEMARGIN, $y), $page->getDisplayWidth());
             }
-            $page = $this->createStructurePage();
-            $page->draw();
+            $roundNumberAsValue = 1;
+            while( $structureCell = $category->getStructureCellByValue($roundNumberAsValue++) ) {
+                if( $horLine === null) {
+                    $page = $this->createStructurePage( $this->calculatePageDimensions($category) );
+                    $horLine = $page->drawHeader($this->getTournament()->getName(), 'opzet & indeling');
+                }
+                $horLine = $cellDrawer->draw($page, $structureCell, $horLine);
+            }
+//            $rounds = $category->getStructureCell(1)->getRounds();
+//
+//            $bottom = $roundCardDrawer->drawRoundCardsHorizontal(
+//                $page,
+//                $rounds
+//            );
+            // if       bottom - nextstructurecellheight > pagemargin
+            // than     createnewpage
+
+
+//            $y = $page->drawCategory2($category, $this->getStructure()->getFirstRoundNumber());
+//            if( $verticalStartLine === null ) {
+//
+//            }
+
+//            $categoryHeight = $calculator->calculateHeight($category, $dimensions->getX() );
+//            if( $page === null || ( $nY - $categoryHeight) > StructurePage::PAGEMARGIN ) {
+//                $dimensions = $calculator->getDimensions($category->getRootRound());
+//
+//                $nY = StructurePage::PAGEMARGIN;
+//            }
+//            $page->draw($category); // new page when at end
         }
     }
 
-    protected function createPageGrouping(): GroupingPage
+//    protected function createDefaultStructurePage(): StructurePage
+//    {
+//        $page = new StructurePage($this, new Point(0, 0), false);
+//        $page->setFont($this->getFont(), $this->getFontHeight());
+//        return $page;
+//    }
+
+    public function createStructurePage(Point $dimensions): StructurePage
     {
-        $page = new GroupingPage($this, Zend_Pdf_Page::SIZE_A4);
+        $page = new StructurePage($this, $dimensions);
         $page->setFont($this->getFont(), $this->getFontHeight());
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createDefaultStructurePage(): StructurePage
-    {
-        $page = new StructurePage($this, new Point(0, 0), false);
-        $page->setFont($this->getFont(), $this->getFontHeight());
-        return $page;
+
+
+    private function calculatePageDimensions(Category $category): Point {
+        $minimalWidth = $this->calculateMininimalWidth($category);
+        $aspectRatio = FCToernooiPdfPage::A4_PORTRET_HEIGHT / FCToernooiPdfPage::A4_PORTRET_WIDTH;
+        return new Point($minimalWidth, $minimalWidth * $aspectRatio);
     }
 
-    protected function createStructurePage(bool $enableOutOfBoundsException = true): StructurePage
-    {
-        $dimensionCalculator = new DimensionCalculator($this->createDefaultStructurePage());
-        $maxNrOfPoulePlaceColumns = 1;
-        $dimensions = $dimensionCalculator->getDimensions($this->structure, $maxNrOfPoulePlaceColumns);
-        $dimensions = $dimensionCalculator->getMinimalDimensions($dimensions);
-
-        $page = new StructurePage($this, $dimensions, $enableOutOfBoundsException);
-        $page->setFont($this->getFont(), $this->getFontHeight());
-        $this->pages[] = $page;
-        $page->setMaxNrOfPoulePlaceColumns($maxNrOfPoulePlaceColumns);
-        return $page;
+    private function calculateMininimalWidth(Category $category): float {
+        $minimalWidth = FCToernooiPdfPage::A4_PORTRET_WIDTH;
+        $roundNumberAsValue = 1;
+        $structureCellDrawer = new StructureCellDrawer();
+        while( $structureCell = $category->getStructureCellByValue($roundNumberAsValue++) ) {
+            $minimalWidthCell = $structureCellDrawer->getMinimalWidth();
+            if( $minimalWidthCell > $minimalWidth ) {
+                $minimalWidth = $minimalWidthCell;
+            }
+        }
+        return $minimalWidth;
     }
 }

@@ -50,6 +50,10 @@ class Tournament extends Identifiable
         $this->recesses = new ArrayCollection();
     }
 
+    public function getName(): string {
+        return $this->getCompetition()->getLeague()->getName();
+    }
+
     public function getCompetition(): Competition
     {
         return $this->competition;

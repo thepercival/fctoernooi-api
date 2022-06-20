@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Document\Planning as PlanningDocument;
-use App\Export\Pdf\GameLine\Against as AgainstGameLine;
-use App\Export\Pdf\GameLine\Column\DateTime as DateTimeColumn;
-use App\Export\Pdf\GameLine\Column\Referee as RefereeColumn;
-use App\Export\Pdf\GameLine\Together as TogetherGameLine;
+use App\Export\Pdf\Drawers\GameLine\Against as AgainstGameLine;
+use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
+use App\Export\Pdf\Drawers\GameLine\Column\Referee as RefereeColumn;
+use App\Export\Pdf\Drawers\GameLine\Together as TogetherGameLine;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use League\Period\Period;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
+use FCToernooi\Recess;
 use Sports\Competition;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
@@ -29,16 +33,19 @@ class Planning extends ToernooiPdfPage
     protected mixed $gameFilter = null;
     protected string|null $title = null;
 
-    protected float $rowHeight = 18;
-
     public function __construct(PlanningDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
     }
 
-    public function getParent(): PlanningDocument {
+    public function getParent(): PlanningDocument
+    {
         return $this->parent;
+    }
+
+    public function getRowHeight(): int {
+        return (new GameLineConfig(DateTimeColumn::None, RefereeColumn::None))->getRowHeight();
     }
 
     public function getTitle(): ?string
@@ -70,16 +77,6 @@ class Planning extends ToernooiPdfPage
         throw new \Exception('gameline should be implemented', E_ERROR);
     }
 
-    public function getPageMargin(): float
-    {
-        return 20;
-    }
-
-    public function getHeaderHeight(): float
-    {
-        return 0;
-    }
-
     public function getGameFilter(): callable|null
     {
         return $this->gameFilter;
@@ -92,18 +89,20 @@ class Planning extends ToernooiPdfPage
 
     public function initGameLines(RoundNumber $roundNumber): void
     {
-        $showDateTime = $this->getShowDateTime($roundNumber);
-        $showReferee = $this->getShowReferee($roundNumber);
+        $config = new GameLineConfig(
+            $this->getShowDateTime($roundNumber),
+            $this->getShowReferee($roundNumber)
+        );
         $competitionSports = $roundNumber->getCompetitionSports();
         foreach ($competitionSports as $competitionSport) {
             $sportVariant = $competitionSport->createVariant();
             if ($sportVariant instanceof AgainstSportVariant) {
                 if ($this->againstGameLine === null) {
-                    $this->againstGameLine = new AgainstGameLine($this, $showDateTime, $showReferee);
+                    $this->againstGameLine = new AgainstGameLine($this, $config);
                 }
             } else {
                 if ($this->togetherGameLine === null) {
-                    $this->togetherGameLine = new TogetherGameLine($this, $showDateTime, $showReferee);
+                    $this->togetherGameLine = new TogetherGameLine($this, $config);
                 }
             }
         }
@@ -119,7 +118,7 @@ class Planning extends ToernooiPdfPage
         return true;
     }
 
-    protected function getShowReferee(RoundNumber $roundNumber): int
+    protected function getShowReferee(RoundNumber $roundNumber): RefereeColumn
     {
         $planningConfig = $roundNumber->getValidPlanningConfig();
         if ($planningConfig->selfRefereeEnabled()) {
@@ -130,7 +129,7 @@ class Planning extends ToernooiPdfPage
         return RefereeColumn::None;
     }
 
-    protected function getShowDateTime(RoundNumber $roundNumber): int
+    protected function getShowDateTime(RoundNumber $roundNumber): DateTimeColumn
     {
         $planningConfig = $roundNumber->getValidPlanningConfig();
         if (!$planningConfig->getEnableTime()) {
@@ -149,7 +148,17 @@ class Planning extends ToernooiPdfPage
         } else {
             $gameLine = $this->getGameLineByGameMode(GameMode::Single);
         }
-        return $gameLine->drawHeader($roundNumber->needsRanking(), $y);
+        return $gameLine->drawHeader($this->someStructureCellNeedsRanking($roundNumber), $y);
+    }
+
+    protected function someStructureCellNeedsRanking(RoundNumber $roundNumber): bool
+    {
+        foreach ($roundNumber->getStructureCells() as $cell) {
+            if ($cell->needsRanking()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function drawGame(AgainstGame|TogetherGame $game, float $y, bool $striped = false): float
@@ -158,17 +167,15 @@ class Planning extends ToernooiPdfPage
         if ($gameFilter !== null && !$gameFilter($game)) {
             return $y;
         }
-        return $this->getGameLine($game)->drawGame($game, $y, $striped);
+        return $this->getGameLine($game)->drawGame($game, new Point(self::PAGEMARGIN, $y), $striped);
     }
 
     public function drawRecess(
-        RoundNumber $roundNumber,
         AgainstGame|TogetherGame $game,
-        Period $recessPeriod,
-        float $y
-    ): float
-    {
-        return $this->getGameLine($game)->drawRecess($roundNumber, $recessPeriod, $y);
+        Recess $recess,
+        Point $start
+    ): Point {
+        return $this->getGameLine($game)->drawRecess($recess, $start);
     }
 
     /**
@@ -191,21 +198,18 @@ class Planning extends ToernooiPdfPage
         return $games;
     }
 
-    public function getRowHeight(): float
-    {
-        return $this->rowHeight;
-    }
-
     public function drawRoundNumberHeader(RoundNumber $roundNumber, float $y): float
     {
         $this->setFillColor(new \Zend_Pdf_Color_GrayScale(1));
         $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
-        $this->setFont($this->parent->getFont(true), $this->parent->getFontHeightSubHeader());
-        $x = $this->getPageMargin();
-        $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->parent->getNameService()->getRoundNumberName($roundNumber);
-        $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(true), $this->parent->getFontHeightSubHeader());
+        $subHeader = $this->parent->getStructureNameService()->getRoundNumberName($roundNumber);
+        $cell = new Rectangle(
+            new HorizontalLine(new Point(self::PAGEMARGIN, $y), $this->getDisplayWidth()),
+            $fontHeightSubHeader
+        );
+        $this->drawCell($subHeader, $cell, Align::Center);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
         return $y - (2 * $fontHeightSubHeader);
     }
 

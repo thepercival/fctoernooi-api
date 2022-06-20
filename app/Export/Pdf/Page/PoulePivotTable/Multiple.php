@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\State as GameState;
 use Sports\Place;
@@ -19,6 +23,7 @@ use Sports\Round\Number as RoundNumber;
 class Multiple extends ToernooiPdfPage
 {
     use Helper;
+
     protected float $nameColumnWidth;
     protected float $pointsColumnWidth;
     protected float $rankColumnWidth;
@@ -26,9 +31,8 @@ class Multiple extends ToernooiPdfPage
     // protected $maxPoulesPerLine;
     // protected $placeWidthStructure;
     // protected $pouleMarginStructure;
-    protected int $rowHeight;
 
-    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1, protected PoulePivotConfig $config)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -36,20 +40,6 @@ class Multiple extends ToernooiPdfPage
         $this->versusColumnsWidth = $this->getDisplayWidth() * 0.62;
         $this->pointsColumnWidth = $this->getDisplayWidth() * 0.08;
         $this->rankColumnWidth = $this->getDisplayWidth() * 0.05;
-        /*$this->maxPoulesPerLine = 3;
-        $this->placeWidthStructure = 30;
-        $this->pouleMarginStructure = 10;*/
-        $this->rowHeight = 18;
-    }
-
-    public function getPageMargin(): float
-    {
-        return 20;
-    }
-
-    public function getHeaderHeight(): float
-    {
-        return 0;
     }
 
     /*public function draw()
@@ -73,13 +63,17 @@ class Multiple extends ToernooiPdfPage
     public function drawPageStartHeader(RoundNumber $roundNumber, float $y): float
     {
         $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
-        $this->setFont($this->parent->getFont(true), $this->parent->getFontHeightSubHeader());
-        $x = $this->getPageMargin();
+        $this->setFont($this->helper->getTimesFont(true), $this->parent->getFontHeightSubHeader());
+        $x = self::PAGEMARGIN;
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->parent->getNameService()->getRoundNumberName($roundNumber);
+        $subHeader = $this->parent->getStructureNameService()->getRoundNumberName($roundNumber);
         $subHeader .= ' - totaalstand';
-        $this->drawCell($subHeader, $x, $y, $displayWidth, $fontHeightSubHeader, Align::Center);
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+        $cell = new Rectangle(
+            new HorizontalLine(new Point($x, $y), $displayWidth),
+            $fontHeightSubHeader
+        );
+        $this->drawCell($subHeader, $cell, Align::Center);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
         return $y - (2 * $fontHeightSubHeader);
     }
 
@@ -95,7 +89,7 @@ class Multiple extends ToernooiPdfPage
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         // places
-        $height += $this->rowHeight * $nrOfPlaces;
+        $height += $this->config->getRowHeight() * $nrOfPlaces;
 
         return $height;
     }
@@ -116,17 +110,17 @@ class Multiple extends ToernooiPdfPage
             $roundRankingItems = (new RoundRankingCalculator())->getItemsForPoule($poule);
         }
 
-        $height = $this->rowHeight;
-        $nameService = $this->parent->getNameService();
+        $height = $this->config->getRowHeight();
+        $nameService = $this->parent->getStructureNameService();
 
         foreach ($poule->getPlaces() as $place) {
-            $x = $this->getPageMargin();
+            $x = self::PAGEMARGIN;
             // placename
             {
                 $placeName = $place->getPlaceNr() . '. ' . $nameService->getPlaceFromName($place, true);
-                $this->setFont($this->parent->getFont(), $this->getPlaceFontHeight($placeName));
+                $this->setFont($this->helper->getTimesFont(), $this->getPlaceFontHeight($placeName));
                 $x = $this->drawCellCustom($placeName, $x, $y, $this->nameColumnWidth, $height, Align::Left);
-                $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+                $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
             }
 
             foreach ($poule->getCompetition()->getSports() as $competitionSport) {
@@ -176,8 +170,8 @@ class Multiple extends ToernooiPdfPage
         $degrees = $this->getVersusHeaderDegrees($nrOfSports);
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
-        $x = $this->getPageMargin();
-        $pouleName = $this->parent->getNameService()->getPouleName($poule, true);
+        $x = self::PAGEMARGIN;
+        $pouleName = $this->parent->getStructureNameService()->getPouleName($poule, true);
         $x = $this->drawHeaderCustom($pouleName, $x, $y, $this->nameColumnWidth, $height);
         $x = $this->drawVersusHeader($poule, $x, $y, $degrees);
 

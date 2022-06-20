@@ -3,6 +3,8 @@ FCToernooi\Recess:
   exclude: false
 
   properties:
+    name:
+      type: string
     startDateTime:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
       serialized_name: start

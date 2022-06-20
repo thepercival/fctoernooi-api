@@ -61,7 +61,7 @@ class Games extends PdfPlanningDocument
             $gameHeight = $page->getRowHeight();
             $recessPeriodToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
             $gameHeight += $recessPeriodToDraw !== null ? $gameHeight : 0;
-            if ($y - $gameHeight < $page->getPageMargin()) {
+            if ($y - $gameHeight < PagePlanning::PAGEMARGIN) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
                 $y = $page->drawHeader($title);

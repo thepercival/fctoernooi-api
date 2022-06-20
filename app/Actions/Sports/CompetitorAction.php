@@ -60,13 +60,13 @@ final class CompetitorAction extends Action
 
             $availabilityChecker = new AvailabilityChecker();
             $competitors = array_values($tournament->getCompetitors()->toArray());
-            $availabilityChecker->checkCompetitorName($competitors, $competitor->getName());
-            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor);
+            $categoryNr = $competitor->getCategoryNr();
+            $availabilityChecker->checkCompetitorName($categoryNr, $competitors, $competitor->getName());
+            $availabilityChecker->checkCompetitorStartLocation($competitors, $competitor);
 
             $newCompetitor = new Competitor(
                 $tournament,
-                $competitor->getPouleNr(),
-                $competitor->getPlaceNr(),
+                $competitor,
                 $competitor->getName()
             );
             $newCompetitor->setRegistered($competitor->getRegistered());
@@ -100,8 +100,9 @@ final class CompetitorAction extends Action
 
             $availabilityChecker = new AvailabilityChecker();
             $competitors = array_values($tournament->getCompetitors()->toArray());
-            $availabilityChecker->checkCompetitorName($competitors, $competitor->getName(), $competitor);
-            $availabilityChecker->checkCompetitorPlaceLocation($competitors, $competitor, $competitor);
+            $categoryNr = $competitorSer->getCategoryNr();
+            $availabilityChecker->checkCompetitorName($categoryNr, $competitors, $competitor->getName(), $competitor);
+            $availabilityChecker->checkCompetitorStartLocation($competitors, $competitor, $competitor);
 
             $competitor->setName($competitorSer->getName());
             $competitor->setRegistered($competitorSer->getRegistered());

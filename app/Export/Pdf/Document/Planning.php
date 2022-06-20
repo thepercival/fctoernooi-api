@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Document;
 
 use App\Export\Pdf\Document as PdfDocument;
+use App\Export\Pdf\Page as PdfPage;
 use App\Export\Pdf\Page\Planning as PagePlanning;
 use App\Export\Pdf\RecessHelper;
 use Sports\Game\Order as GameOrder;
@@ -82,10 +83,10 @@ abstract class Planning extends PdfDocument
             $gameHeight = $page->getRowHeight();
             $recessPeriodToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
             $gameHeight += $recessPeriodToDraw !== null ? $gameHeight : 0;
-            if ($y - $gameHeight < $page->getPageMargin()) {
+            if ($y - $gameHeight < PdfPage::PAGEMARGIN) {
                 // $field = $page->getFieldFilter();
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle() ?? '');
-                $y = $page->drawHeader($page->getTitle());
+                $y = $page->drawHeader($page->getTitle(), );
                 $page->setGameFilter($page->getGameFilter());
                 $page->initGameLines($roundNumber);
                 $y = $page->drawGamesHeader($roundNumber, $y);

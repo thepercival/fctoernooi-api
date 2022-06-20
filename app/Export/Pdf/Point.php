@@ -2,7 +2,7 @@
 
 namespace App\Export\Pdf;
 
-final class Point
+final class Point implements \Stringable
 {
     public function __construct(protected float $x, protected float $y)
     {
@@ -30,11 +30,16 @@ final class Point
 
     public function add(float $x, float $y): self
     {
-        return new self($this->getX() + $x, $this->getY() + $y);
+        return new self($this->getX() + $x, $this->getY() - $y);
     }
 
     public function enlarge(float $multiplier): Point
     {
         return new Point($this->getX() * $multiplier, $this->getY() * $multiplier);
+    }
+
+    public function __toString()
+    {
+        return $this->getX() . ',' . $this->getY();
     }
 }

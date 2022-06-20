@@ -2,44 +2,42 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\GameLine;
+namespace App\Export\Pdf\Drawers\GameLine;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\GameLine;
-use App\Export\Pdf\GameLine as GameLineBase;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Configs\GameLineConfig;
+use App\Export\Pdf\Drawers\GameLine;
+use App\Export\Pdf\Line\Vertical as VerticalLine;
+use App\Export\Pdf\Page as PdfPage;
+use App\Export\Pdf\Page\Traits\GameLine\Column;
+use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 
-class Together extends GameLineBase
+class Together extends GameLine
 {
-    public function __construct(Page\Planning $page, int $shoDateTime, int $showReferee)
+    public function __construct(PdfPage $page, GameLineConfig $config)
     {
-        parent::__construct($page, $shoDateTime, $showReferee);
-        $this->initColumnWidths();
-    }
-
-    protected function initColumnWidths(): void
-    {
-        parent::initColumnWidths();
+        parent::__construct($page, $config);
+        $this->initColumnWidths($config);
     }
 
     protected function getPlaceWidth(int $nrOfGamePlaces): float
     {
-        if ($nrOfGamePlaces > GameLine::MaxNrOfPlacesPerLine) {
-            $nrOfGamePlaces = GameLine::MaxNrOfPlacesPerLine;
+        if ($nrOfGamePlaces > $this->config->getMaxNrOfPlacesPerLine()) {
+            $nrOfGamePlaces = $this->config->getMaxNrOfPlacesPerLine();
         }
         $width = $this->getColumnWidth(Column::PlacesAndScore);
         return $width / $nrOfGamePlaces;
     }
 
-    protected function drawPlacesAndScoreHeader(float $x, float $y): float
+    protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine
     {
-        $height = $this->page->getRowHeight();
         $width = $this->getColumnWidth(Column::PlacesAndScore);
-        return $this->page->drawCell('deelnemers & score', $x, $y, $width, $height, Align::Center, 'black');
+        $this->page->drawCell('deelnemers & score', new Rectangle($left, $width), Align::Center, 'black');
+        return $left->addX($width);
     }
 
     protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, float $x, float $y): float
@@ -48,7 +46,7 @@ class Together extends GameLineBase
         if ($game instanceof AgainstGame) {
             return $x;
         }
-        $nameService = $this->page->getParent()->getNameService();
+        $structureNameService = $this->page->getParent()->getStructureNameService();
         $height = $this->page->getRowHeight();
         $placeWidth = $this->getPlaceWidth($game->getPlaces()->count());
         $placeNameWidth = $placeWidth;
@@ -61,13 +59,13 @@ class Together extends GameLineBase
         $placeCounter = 1;
         $xStart = $x;
         foreach ($game->getPlaces() as $gamePlace) {
-            $placeName = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
+            $placeName = $structureNameService->getPlaceFromName($gamePlace->getPlace(), true, true);
             $x = $this->page->drawCell($placeName, $x, $y, $placeNameWidth, $height, Align::Left, 'black');
             if ($game->getState() === GameState::Finished) {
                 $score = $this->getScore($gamePlace);
                 $x = $this->page->drawCell($score, $x, $y, $scoreWidth, $height, Align::Right, 'black');
             }
-            if ($placeCounter++ % GameLine::MaxNrOfPlacesPerLine === 0) {
+            if ($placeCounter++ % $this->config->getMaxNrOfPlacesPerLine() === 0) {
                 $x = $xStart;
                 $y -= $height;
             }

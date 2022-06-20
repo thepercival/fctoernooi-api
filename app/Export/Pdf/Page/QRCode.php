@@ -24,16 +24,6 @@ class QRCode extends ToernooiPdfPage
         $this->qrService = new QRService();
     }
 
-    public function getPageMargin(): float
-    {
-        return 20;
-    }
-
-    public function getHeaderHeight(): float
-    {
-        return 0;
-    }
-
     public function getRowHeight(): float
     {
         return $this->rowHeight;
@@ -41,17 +31,17 @@ class QRCode extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $y = $this->drawHeader("qrcode");
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), "qrcode");
 
         $url = $this->parent->getUrl() . (string)$this->parent->getTournament()->getId();
 
-        $y = $this->drawSubHeader($url, $y);
+        $y = $this->drawTitle($url, $y);
 
         $imgWidth = 300;
         $qrPath = $this->qrService->writeTournamentToJpg($this->parent->getTournament(), $url, $imgWidth);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
-        $xLeft = $this->getPageMargin() + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
+        $xLeft = self::PAGEMARGIN + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
         $this->drawImage($img, $xLeft, $y - $imgWidth, $xLeft + $imgWidth, $y);
     }
 }

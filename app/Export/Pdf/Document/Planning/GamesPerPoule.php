@@ -22,7 +22,7 @@ class GamesPerPoule extends PdfPlanningDocument
     {
         $poules = $roundNumber->getPoules();
         foreach ($poules as $poule) {
-            $title = $this->getNameService()->getPouleName($poule, true);
+            $title = $this->getStructureNameService()->getPouleName($poule, true);
             $page = $this->createPagePlanning($roundNumber, $title);
             $y = $page->drawHeader($title);
             $page->setGameFilter(

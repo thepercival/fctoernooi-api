@@ -166,7 +166,7 @@ class SyncService
 
     protected function sendTournamentUserEmail(TournamentUser $tournamentUser): void
     {
-        $tournamentName = $tournamentUser->getTournament()->getCompetition()->getLeague()->getName();
+        $tournamentName = $tournamentUser->getTournament()->getName();
 
         $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
         $url = $this->config->getString('www.wwwurl');
@@ -199,7 +199,7 @@ class SyncService
             $roleDefinitions = Role::getDefinitions($tournamentUser->getRoles());
             foreach ($roleDefinitions as $roleDefinition) {
                 $roles[] = [
-                    'tournamentName' => $tournamentUser->getTournament()->getCompetition()->getLeague()->getName(),
+                    'tournamentName' => $tournamentUser->getTournament()->getName(),
                     'roleName' => $roleDefinition['name'],
                     'roleDescription' => $roleDefinition['description']
                 ];
@@ -210,7 +210,7 @@ class SyncService
 
     protected function sendTournamentInvitationEmail(TournamentInvitation $invitation): void
     {
-        $tournamentName = $invitation->getTournament()->getCompetition()->getLeague()->getName();
+        $tournamentName = $invitation->getTournament()->getName();
 
         $subject = 'uitnodiging voor toernooi "' . $tournamentName . '"';
         $url = $this->config->getString('www.wwwurl');
@@ -239,7 +239,7 @@ class SyncService
         $roleDefinitions = Role::getDefinitions($invitation->getRoles());
         foreach ($roleDefinitions as $roleDefinition) {
             $roles[] = [
-                'tournamentName' => $invitation->getTournament()->getCompetition()->getLeague()->getName(),
+                'tournamentName' => $invitation->getTournament()->getName(),
                 'roleName' => $roleDefinition['name'],
                 'roleDescription' => $roleDefinition['description']
             ];

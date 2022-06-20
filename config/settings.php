@@ -62,13 +62,13 @@ return [
             'user' => $_ENV['DB_USERNAME'],
             'password' => $_ENV['DB_PASSWORD'],
             'charset' => 'utf8mb4',
-            'driverOptions' => array(
+            'driverOptions' => [
                 1002 => "SET NAMES 'utf8mb4' COLLATE 'utf8mb4_general_ci'"
-            )
+            ]
         ],
-        'serializer' => array(
+        'serializer' => [
             'enabled' => true
-        ),
+        ],
     ],
     'auth' => [
         'jwtsecret' => $_ENV['JWT_SECRET'],

@@ -7,26 +7,24 @@ namespace App\Export\Pdf;
 use App\Export\PdfProgress;
 use FCToernooi\Tournament;
 use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competitor\Map as CompetitorMap;
+use Sports\Competitor\StartLocationMap;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
-use Sports\NameService;
 use Sports\Poule;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use Sports\Structure;
+use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf;
-use Zend_Pdf_Font;
-use Zend_Pdf_Resource_Font;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
 class Document extends Zend_Pdf
 {
-    protected NameService|null $nameService = null;
-    protected CompetitorMap|null $competitorMap = null;
+    protected StructureNameService|null $structureNameService = null;
+    protected StartLocationMap|null $startLocationMap = null;
 
     /**
      * @var array<string, float>
@@ -43,36 +41,12 @@ class Document extends Zend_Pdf
         parent::__construct();
     }
 
-    public function getFontHeight(): int
-    {
-        return 14;
-    }
-
-    public function getFontHeightSubHeader(): int
-    {
-        return 16;
-    }
-
     public function render($newSegmentOnly = false, $outputStream = null): string
     {
         $this->fillContent();
         $retVal = parent::render($newSegmentOnly, $outputStream);
         $this->updateProgress();
         return $retVal;
-    }
-
-    public function getFont(bool $bBold = false, bool $bItalic = false): Zend_Pdf_Resource_Font
-    {
-        $suffix = 'times.ttf';
-        if ($bBold === true and $bItalic === false) {
-            $suffix = 'timesbd.ttf';
-        } elseif ($bBold === false and $bItalic === true) {
-            $suffix = 'timesi.ttf';
-        } elseif ($bBold === true and $bItalic === true) {
-            $suffix = 'timesbi.ttf';
-        }
-        $sFontDir = __DIR__ . '/../../../fonts/';
-        return Zend_Pdf_Font::fontWithPath($sFontDir . $suffix);
     }
 
     protected function fillContent(): void
@@ -168,20 +142,20 @@ class Document extends Zend_Pdf
         return $dateOne->format('Y-m-d') === $dateTwo->format('Y-m-d');
     }
 
-    public function getNameService(): NameService
+    public function getStructureNameService(): StructureNameService
     {
-        if ($this->nameService === null) {
-            $this->nameService = new NameService($this->getPlaceLocationMap());
+        if ($this->structureNameService === null) {
+            $this->structureNameService = new StructureNameService($this->getStartLocationMap());
         }
-        return $this->nameService;
+        return $this->structureNameService;
     }
 
-    public function getPlaceLocationMap(): CompetitorMap
+    public function getStartLocationMap(): StartLocationMap
     {
-        if ($this->competitorMap === null) {
+        if ($this->startLocationMap === null) {
             $competitors = array_values($this->tournament->getCompetitors()->toArray());
-            $this->competitorMap = new CompetitorMap($competitors);
+            $this->startLocationMap = new StartLocationMap($competitors);
         }
-        return $this->competitorMap;
+        return $this->startLocationMap;
     }
 }

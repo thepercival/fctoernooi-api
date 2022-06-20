@@ -8,8 +8,8 @@ FCToernooi\Tournament\Shell:
     name: # league
       type: string
       read_only: true
-    sportName:
-      type: string
+    singleCustomSport:
+      type: integer
       read_only: true
     startDateTime: # competition
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>

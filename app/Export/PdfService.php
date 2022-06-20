@@ -81,7 +81,8 @@ final class PdfService
         // clean files from tmp
         $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpPath($tournamentId));
         foreach (PdfSubject::cases() as $subject) {
-            $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpSubjectPath($tournamentId, $subject));
+            $fileName = $this->getTmpSubjectFileName($tournamentId, $subject);
+            $this->tmpService->removeFile($this->tmpSubDir, $fileName);
         }
     }
 
@@ -163,7 +164,7 @@ final class PdfService
 
     public function createFileName(Tournament $tournament): string
     {
-        $name = $tournament->getCompetition()->getLeague()->getName();
+        $name = $tournament->getName();
         $fileName = preg_replace("/[^a-zA-Z0-9]+/", '', $name);
         if (!is_string($fileName)) {
             $fileName = 'invalidname';
@@ -214,8 +215,13 @@ final class PdfService
 
     public function getTmpSubjectPath(string $tournamentId, PdfSubject $subject): string
     {
-        $fileName = $tournamentId . '-' . $this->getTmpSubjectFileSuffix($subject);
-        return $this->tmpService->getPath($this->tmpSubDir, $fileName . '.pdf');
+        $fileName = $this->getTmpSubjectFileName($tournamentId, $subject);
+        return $this->tmpService->getPath($this->tmpSubDir, $fileName);
+    }
+
+    public function getTmpSubjectFileName(string $tournamentId, PdfSubject $subject): string
+    {
+        return $tournamentId . '-' . $this->getTmpSubjectFileSuffix($subject)  . '.pdf';
     }
 
     private function getTmpSubjectFileSuffix(PdfSubject $subject): string

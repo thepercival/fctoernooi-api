@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="FCToernooi\Competitor" table="competitors" repository-class="FCToernooi\Competitor\Repository">
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
         <field name="registered" column="registered" type="boolean" nullable="false" unique="false"/>
         <field name="info" column="info" type="string" length="200" nullable="true" unique="false"/>
         <field name="name" column="name" type="string" length="30" unique="false"/>
@@ -10,7 +13,7 @@
             </join-columns>
         </many-to-one>
         <unique-constraints>
-            <unique-constraint columns="tournamentId,name" name="main_u_idx"/>
+            <unique-constraint columns="tournamentId,categoryNr,name" name="main_u_idx"/>
         </unique-constraints>
     </entity>
 </doctrine-mapping>

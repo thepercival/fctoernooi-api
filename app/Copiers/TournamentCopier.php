@@ -119,15 +119,15 @@ class TournamentCopier
         $newTournament = new TournamentBase($newCompetition);
         $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
 
-        foreach( $fromTournament->createRecessPeriods() as $recessPeriod) {
-            $start = $recessPeriod->getStartDate();
+        foreach( $fromTournament->getRecesses() as $fromRecess) {
+            $start = $fromRecess->getStartDateTime();
             $diffStart = $fromTournament->getCompetition()->getStartDateTime()->diff($start);
-            $end = $recessPeriod->getEndDate();
+            $end = $fromRecess->getEndDateTime();
             $diffEnd = $fromTournament->getCompetition()->getStartDateTime()->diff($end);
             $period = new Period(
                 $newStartDateTime->add($diffStart), $newStartDateTime->add($diffEnd)
             );
-            new Recess($newTournament, $period);
+            new Recess($newTournament, $fromRecess->getName(), $period);
         }
 
         $newTournament->setPublic($fromTournament->getPublic());

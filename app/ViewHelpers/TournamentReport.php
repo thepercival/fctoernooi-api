@@ -6,13 +6,13 @@ namespace App\ViewHelpers;
 
 use Exception;
 use FCToernooi\Tournament;
-use Sports\Structure;
-use Sports\Structure\Validator as StructureValidator;
 use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Round\Number\GamesValidator;
-use Sports\Round\Number as RoundNumber;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\GamesValidator;
+use Sports\Structure;
+use Sports\Structure\Validator as StructureValidator;
 
 class TournamentReport
 {
@@ -34,7 +34,7 @@ class TournamentReport
         $firstRoundNumber = $structure->getFirstRoundNumber();
         $competition = $tournament->getCompetition();
         $nrOfPlaces = $firstRoundNumber->getNrOfPlaces();
-        $this->name = $competition->getLeague()->getName();
+        $this->name = $tournament->getName();
         $this->publicUrl = $publicUrl;
         $this->firstRoundStructure = $nrOfPlaces . '(' . count($firstRoundNumber->getPoules()) . ')';
         ;

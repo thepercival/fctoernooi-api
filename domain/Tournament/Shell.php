@@ -11,7 +11,7 @@ use FCToernooi\User;
 class Shell
 {
     private int $tournamentId;
-    private string $sportName;
+    private int $singleCustomSport;
     private string $name;
     private DateTimeImmutable $startDateTime;
     private int $roles;
@@ -22,9 +22,9 @@ class Shell
         $this->tournamentId = (int)$tournament->getId();
         $competition = $tournament->getCompetition();
         $league = $competition->getLeague();
-        $this->sportName = 'multi';
+        $this->singleCustomSport = 0;
         if (!$competition->hasMultipleSports()) {
-            $this->sportName = $competition->getSingleSport()->getSport()->getName();
+            $this->singleCustomSport = $competition->getSingleSport()->getSport()->getCustomId();
         }
         $this->name = $league->getName();
         $this->startDateTime = $competition->getStartDateTime();
@@ -44,9 +44,9 @@ class Shell
         return $this->tournamentId;
     }
 
-    public function getSportName(): string
+    public function getSingleCustomSport(): int
     {
-        return $this->sportName;
+        return $this->singleCustomSport;
     }
 
     public function getName(): string

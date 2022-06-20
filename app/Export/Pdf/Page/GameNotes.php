@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use DateTimeZone;
@@ -27,41 +28,30 @@ use Zend_Pdf_Resource_ImageFactory;
  */
 abstract class GameNotes extends ToernooiPdfPage
 {
-    public const Margin = 15;
-    public const RowHeight = 20;
-
     protected ScoreConfigService $scoreConfigService;
     protected TranslationService $translationService;
     protected QRService $qrService;
-    protected string|null $qrCodeUrlPrefix = null;
+    protected GameNotesConfig $config;
 
     public function __construct(
         mixed $parent,
         mixed $param1,
         protected AgainstGame|TogetherGame $gameOne,
-        protected AgainstGame|TogetherGame|null $gameTwo
+        protected AgainstGame|TogetherGame|null $gameTwo,
+        GameNotesConfig|null $config = null
     ) {
         parent::__construct($parent, $param1);
         $this->setLineWidth(0.5);
         $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
+        $this->config = $config !== null ? $config : new GameNotesConfig();
     }
 
 //    public function getParent(): GameNotesDocument
 //    {
 //        return $this->parent;
 //    }
-
-    public function getPageMargin(): float
-    {
-        return 20;
-    }
-
-    public function getHeaderHeight(): float
-    {
-        return 0;
-    }
 
     protected function getPartWidth(): float
     {
@@ -80,7 +70,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function getStartDetailLabel(): float
     {
-        return $this->getPageMargin() + $this->getLeftPartWidth() + GameNotes::Margin;
+        return self::PAGEMARGIN + $this->getLeftPartWidth() + GameNotes::Margin;
     }
 
     protected function getStartDetailValue(): float
@@ -88,14 +78,11 @@ abstract class GameNotes extends ToernooiPdfPage
         return $this->getStartDetailLabel() + $this->getDetailPartWidth() + GameNotes::Margin;
     }
 
-    protected function getQrCodeUrlPrefix(): string
+    protected function getQrCodeUrlPrefix(AgainstGame|TogetherGame $game): string
     {
-        if ($this->qrCodeUrlPrefix === null) {
-            $this->qrCodeUrlPrefix = $this->parent->getUrl() . 'admin/game/' .
-                (string)$this->parent->getTournament()->getId() .
-                '/';
-        }
-        return $this->qrCodeUrlPrefix;
+        $suffix = ($game instanceof AgainstGame) ? 'against' : 'together';
+        return $this->parent->getUrl() . 'admin/game' . $suffix . '/' .
+                (string)$this->parent->getTournament()->getId() . '/';
     }
 
     public function draw(bool $oneGamePerPage = false): void
@@ -107,15 +94,15 @@ abstract class GameNotes extends ToernooiPdfPage
         if ($oneGamePerPage !== true) {
             $this->setLineDashingPattern([10, 10]);
             $this->drawLine(
-                $this->getPageMargin(),
+                self::PAGEMARGIN,
                 $this->getHeight() / 2,
-                $this->getWidth() - $this->getPageMargin(),
+                $this->getWidth() - self::PAGEMARGIN,
                 $this->getHeight() / 2
             );
             $this->setLineDashingPattern(Zend_Pdf_Page::LINE_DASHING_SOLID);
         }
         if ($this->gameTwo !== null) {
-            $y = $this->drawHeader('wedstrijdbriefje', ($this->getHeight() / 2) - $this->getPageMargin());
+            $y = $this->drawHeader('wedstrijdbriefje', ($this->getHeight() / 2) - self::PAGEMARGIN);
             $this->drawGame($this->gameTwo, $y);
         }
     }
@@ -128,7 +115,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawGame(AgainstGame|TogetherGame $game, float $y): void
     {
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
         $rowHeight = GameNotes::RowHeight;
         $yNext = $this->drawGameDetail($game, $y);
         $this->drawQRCode($game, $y);
@@ -139,18 +126,18 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawQRCode(AgainstGame|TogetherGame $game, float $y): void
     {
-        $url = $this->getQrCodeUrlPrefix() . (string)$game->getId();
+        $url = $this->getQrCodeUrlPrefix($game) . (string)$game->getId();
 
         $imgSize = $this->getLeftPartWidth() * 1.5;
         $qrPath = $this->qrService->writeGameToJpg($this->parent->getTournament(), $game, $url, (int)$imgSize);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory($qrPath);
-        $this->drawImage($img, $this->getPageMargin(), $y - $imgSize, ($this->getPageMargin() + $imgSize), $y);
+        $this->drawImage($img, self::PAGEMARGIN, $y - $imgSize, (self::PAGEMARGIN + $imgSize), $y);
     }
 
     protected function drawGameDetail(AgainstGame|TogetherGame $game, float $y): float
     {
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
 
         $height = GameNotes::RowHeight;
         $margin = GameNotes::Margin;
@@ -158,21 +145,21 @@ abstract class GameNotes extends ToernooiPdfPage
         $sportVariant = $game->getCompetitionSport()->createVariant();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $labelStartX = $this->getStartDetailLabel();
         $sepStartX = $this->getStartDetailValue() - GameNotes::Margin;
         $valueStartX = $this->getStartDetailValue();
 
         $bNeedsRanking = $game->getPoule()->needsRanking();
 
-        $roundNumberName = $nameService->getRoundNumberName($roundNumber);
+        $roundNumberName = $structureNameService->getRoundNumberName($roundNumber);
         $this->drawCell('ronde', $labelStartX, $y, $width, $height, Align::Right);
         $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
         $this->drawCell($roundNumberName, $valueStartX, $y, $width, $height);
         $y -= $height;
 
         // game-name
-        $sGame = $nameService->getPouleName($game->getPoule(), false);
+        $sGame = $structureNameService->getPouleName($game->getPoule(), false);
         $gameLabel = $bNeedsRanking ? 'poule' : 'wedstrijd';
         $this->drawCell($gameLabel, $labelStartX, $y, $width, $height, Align::Right);
         $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
@@ -240,7 +227,7 @@ abstract class GameNotes extends ToernooiPdfPage
             if ($referee !== null) {
                 $refName = $referee->getInitials();
             } else {
-                $refName = $nameService->getPlaceName($refereePlace, true, true);
+                $refName = $structureNameService->getPlaceName($refereePlace, true, true);
             }
             $this->drawCell('scheidsrechter', $labelStartX, $y, $width, $height, Align::Right);
             $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);

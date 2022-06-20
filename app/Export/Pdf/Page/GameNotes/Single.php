@@ -6,15 +6,22 @@ namespace App\Export\Pdf\Page\GameNotes;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page\GameNotes;
 use App\Export\Pdf\Page\GameNotes as GameNotesBase;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\Together as TogetherGame;
 
 class Single extends GameNotesBase
 {
-    public function __construct(Document $document, mixed $param1, TogetherGame $gameOne, TogetherGame|null $gameTwo)
+    public function __construct(
+        Document $document,
+        mixed $param1,
+        TogetherGame $gameOne,
+        TogetherGame|null $gameTwo)
     {
         parent::__construct($document, $param1, $gameOne, $gameTwo);
     }
@@ -24,10 +31,11 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $structureNameService = $this->parent->getStructureNameService();
         $places = array_values($game->getPlaces()->toArray());
-        $description = $nameService->getPlacesFromName($places, false, count($places) <= 3);
-        $this->drawCell($description, $x, $y, $width, $height);
+        $description = $structureNameService->getPlacesFromName($places, false, count($places) <= 3);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $this->drawCell($description, $rectangle);
     }
 
     protected function drawGameRoundNumber(AgainstGame|TogetherGame $game, float $x, float $y, float $width, float $height): float
@@ -36,15 +44,17 @@ class Single extends GameNotesBase
             return $y;
         }
         $grs = array_map(fn (TogetherGamePlace $gp): string => (string)$gp->getGameRoundNumber(), $game->getPlaces()->toArray());
-        $this->drawCell(implode(' & ', $grs), $x, $y, $width, $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $this->drawCell(implode(' & ', $grs), $rectangle);
         return $y - $height;
     }
 
     protected function getPlaceWidth(TogetherGame $game): float
     {
-        $placesWidth = $this->getDetailPartWidth() + GameNotes::Margin + $this->getDetailPartWidth();
-        $placesWidth -=  (GameNotes::Margin + $this->getPartWidth()); // unit(right side)
-        $placesWidth -= ($game->getPlaces()->count() - 1) * GameNotes::Margin;
+        $margin = $this->config->getMargin();
+        $placesWidth = $this->getDetailPartWidth() + $margin + $this->getDetailPartWidth();
+        $placesWidth -=  ($margin + $this->getPartWidth()); // unit(right side)
+        $placesWidth -= ($game->getPlaces()->count() - 1) * $margin;
         return $placesWidth / $game->getPlaces()->count();
     }
 
@@ -53,39 +63,42 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $nameService = $this->parent->getNameService();
+        $margin = $this->config->getMargin();
+        $structureNameService = $this->parent->getStructureNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
-        $fontSize = $this->parent->getFontHeight();
+        $fontSize = $this->config->getFontHeight();
         $larger = 1.2;
-        $largerFontSize = $this->parent->getFontHeight() * $larger;
-        $height = GameNotes::RowHeight * $larger;
+        $largerFontSize = $this->config->getFontHeight() * $larger;
+        $height = $this->config->getRowHeight() * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
         $placesStart = $this->getStartDetailLabel();
         $placeWidth = $this->getPlaceWidth($game);
         $unitWidth = $this->getPartWidth();
         $unitStart = $placesStart;
         foreach ($game->getPlaces() as $gamePlace) {
-            $unitStart += $placeWidth + GameNotes::Margin;
+            $unitStart += $placeWidth + $this->config->getMargin();
         }
 
         // 2x font thuis - uit
-        $this->setFont($this->parent->getFont(), $largerFontSize);
-        $this->drawCell('wedstrijd', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+        $this->setFont($this->helper->getTimesFont(), $largerFontSize);
+        $rectangle = new Rectangle(new HorizontalLine(new Point(self::PAGEMARGIN, $y), $leftPartWidth), $height);
+        $this->drawCell('wedstrijd', $rectangle, Align::Right);
 
         // COMPETITORS
         $competitorFontSize = $game->getPlaces()->count() > 3 ? $fontSize : $largerFontSize;
-        $this->setFont($this->parent->getFont(), $competitorFontSize);
+        $this->setFont($this->helper->getTimesFont(), $competitorFontSize);
         $placesX = $placesStart;
         foreach ($game->getPlaces() as $gamePlace) {
-            $name = $nameService->getPlaceFromName($gamePlace->getPlace(), true, true);
-            $placesX = $this->drawCell($name, $placesX, $y, $placeWidth + GameNotes::Margin, $height);
+            $name = $structureNameService->getPlaceFromName($gamePlace->getPlace(), true, true);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y), $placeWidth + $margin), $height);
+            $this->drawCell($name, $rectangle);
+            $placesX = $rectangle->getRight()->getX() + $margin;
         }
         $y -= 2 * $height;
 
-
-        $this->setFont($this->parent->getFont(), $largerFontSize);
+        $this->setFont($this->helper->getTimesFont(), $largerFontSize);
 
         $calculateScoreConfig = $firstScoreConfig->getCalculate();
         $nrOfScoreLines = $this->getNrOfScoreLines($game->getRound(), $game->getCompetitionSport());
@@ -97,22 +110,25 @@ class Single extends GameNotesBase
 
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
-                $this->drawCell($descr, $this->getPageMargin(), $y - $yDelta, $leftPartWidth, $height, Align::Right);
+                $rectangle = new Rectangle(new HorizontalLine(new Point(self::PAGEMARGIN, $y - $yDelta), $leftPartWidth), $height);
+                $this->drawCell($descr, $rectangle, Align::Right);
 
                 $placesX = $placesStart;
                 foreach ($game->getPlaces() as $gamePlace) {
-                    $placesX = $this->drawCell($dots, $placesX, $y - $yDelta, $placeWidth, $height);
-                    $placesX += GameNotes::Margin;
+                    $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y - $yDelta), $placeWidth), $height);
+                    $this->drawCell($dots, $rectangle);
+                    $placesX = $rectangle->getRight()->getX() + $margin;
                 }
-
                 $yDelta += $height;
             }
         } else {
-            $this->drawCell('score', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point(self::PAGEMARGIN, $y), $leftPartWidth), $height);
+            $this->drawCell('score', $rectangle, Align::Right);
             $placesX = $placesStart;
             foreach ($game->getPlaces() as $gamePlace) {
-                $placesX = $this->drawCell($dots, $placesX, $y, $placeWidth, $height, Align::Left);
-                $placesX += GameNotes::Margin;
+                $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y), $placeWidth), $height);
+                $this->drawCell($dots, $rectangle, Align::Left);
+                $placesX = $rectangle->getRight()->getX() + $margin;
             }
         }
 
@@ -121,26 +137,31 @@ class Single extends GameNotesBase
         if ($firstScoreConfig !== $calculateScoreConfig) {
             $yDelta = 0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
-                $this->drawCell($descr, $unitStart, $y - $yDelta, $unitWidth, $height, Align::Right);
+                $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y - $yDelta), $unitWidth), $height);
+                $this->drawCell($descr, $rectangle, Align::Right);
                 $yDelta += $height;
             }
             $y -= $yDelta;
         } else {
-            $this->drawCell($descr, $unitStart, $y, $unitWidth, $height, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y), $unitWidth), $height);
+            $this->drawCell($descr, $rectangle, Align::Right);
         }
 
         $y -= $height; // extra lege regel
 
         if ($planningConfig->getExtension()) {
-            $this->drawCell('na verleng.', $this->getPageMargin(), $y, $leftPartWidth, $height, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point(self::PAGEMARGIN, $y), $leftPartWidth), $height);
+            $this->drawCell('na verleng.', $rectangle, Align::Right);
             $placesX = $placesStart;
             foreach ($game->getPlaces() as $gamePlace) {
-                $placesX = $this->drawCell($dots, $placesX, $y, $placeWidth, $height);
-                $placesX += GameNotes::Margin;
+                $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y), $placeWidth), $height);
+                $this->drawCell($dots, $rectangle);
+                $placesX = $rectangle->getRight()->getX() + $margin;
             }
 
             $name = $this->translationService->getScoreNamePlural($firstScoreConfig);
-            $this->drawCell($name, $unitStart, $y, $unitWidth, $height, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y), $unitWidth), $height);
+            $this->drawCell($name, $rectangle, Align::Right);
         }
     }
 }

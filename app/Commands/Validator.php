@@ -15,7 +15,7 @@ use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Competitor\Map as CompetitorMap;
+use Sports\Competitor\StartLocationMap;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
 use Sports\Output\Game\Against as AgainstGameOutput;
@@ -194,7 +194,7 @@ class Validator extends Command
 
     protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
     {
-        $map = new CompetitorMap(array_values($tournament->getCompetitors()->toArray()));
+        $map = new StartLocationMap(array_values($tournament->getCompetitors()->toArray()));
         $againstGameOutput = new AgainstGameOutput($map, $this->getLogger());
         $togetherGameOutput = new TogetherGameOutput($map, $this->getLogger());
         foreach ($roundNumber->getGames(GameOrder::ByBatch) as $game) {

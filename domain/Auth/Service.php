@@ -115,7 +115,7 @@ class Service
             $roleDefinitions = Role::getDefinitions($tournamentUser->getRoles());
             foreach ($roleDefinitions as $roleDefinition) {
                 $roles[] = [
-                    'tournamentName' => $tournamentUser->getTournament()->getCompetition()->getLeague()->getName(),
+                    'tournamentName' => $tournamentUser->getTournament()->getName(),
                     'roleName' => $roleDefinition['name'],
                     'roleDescription' => $roleDefinition['description']
                 ];

@@ -21,7 +21,9 @@ class CacheService
         if ($tournamentId === null) {
             return false;
         }
-        return $this->memCached->get($this->getTournamentCacheId($tournamentId));
+        /** @var string|false $memCachedItem */
+        $memCachedItem = $this->memCached->get($this->getTournamentCacheId($tournamentId));
+        return $memCachedItem;
     }
 
     private function getTournamentCacheId(string|int $tournamentId): string
@@ -44,7 +46,9 @@ class CacheService
         if ($structureId === null) {
             return false;
         }
-        return $this->memCached->get($this->getStructureCacheId($structureId));
+        /** @var string|false $memCachedItem */
+        $memCachedItem = $this->memCached->get($this->getStructureCacheId($structureId));
+        return $memCachedItem;
     }
 
     private function getStructureCacheId(string|int $structureId): string

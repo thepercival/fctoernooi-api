@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Ranking\Calculator\Round\Sport as SportRankingCalculator;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
@@ -18,12 +21,16 @@ trait Helper
 
     protected function drawHeaderCustom(string $text, float $x, float $y, float $width, float $height, int $degrees = 0): float
     {
-        return $this->drawCell($text, $x, $y, $width, $height, Align::Center, 'black', $degrees);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $this->drawCell($text, $rectangle, Align::Center, 'black', $degrees);
+        return $rectangle->getRight()->getX();
     }
 
     protected function drawCellCustom(string $text, float $x, float $y, float $width, float $height, int $align): float
     {
-        return $this->drawCell($text, $x, $y, $width, $height, $align, 'black');
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $this->drawCell($text, $rectangle, $align, 'black');
+        return $rectangle->getRight()->getX();
     }
 
     protected function getPlaceFontHeight(string $placeName): int
@@ -31,8 +38,8 @@ trait Helper
         if (array_key_exists($placeName, $this->fontSizeMap)) {
             return $this->fontSizeMap[$placeName];
         }
-        $fontHeight = $this->parent->getFontHeight();
-        if ($this->getTextWidth($placeName) > $this->nameColumnWidth) {
+        $fontHeight = $this->config->getFontHeight();
+        if ($this->helper->getTextWidth($placeName, $this->helper->getTimesFont(), $fontHeight) > $this->nameColumnWidth) {
             $fontHeight -= 2;
         }
         $this->fontSizeMap[$placeName] = $fontHeight;
@@ -53,7 +60,7 @@ trait Helper
     public function getVersusHeight(float $versusColumnWidth, int $degrees = 0): float
     {
         if ($degrees === 0) {
-            return $this->rowHeight;
+            return $this->config->getRowHeight();
         }
         if ($degrees === 90) {
             return $versusColumnWidth * 2;

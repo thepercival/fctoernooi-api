@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
+use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Game\Against as AgainstGame;
@@ -17,9 +18,9 @@ use Zend_Pdf_Color_Html;
 
 class Against extends PoulePivotTablesPage
 {
-    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1, PoulePivotConfig $config)
     {
-        parent::__construct($document, $param1);
+        parent::__construct($document, $param1, $config);
     }
 
     /*public function draw()
@@ -55,13 +56,13 @@ class Against extends PoulePivotTablesPage
 
         $nVersus = 0;
         foreach ($poule->getPlaces() as $place) {
-            $placeName = $place->getPlaceNr() . ". ";
-            $placeName .= $this->parent->getNameService()->getPlaceFromName($place, true);
-            $this->setFont($this->parent->getFont(), $this->getPlaceFontHeight($placeName));
+            $placeName = $place->getPlaceNr() . '. ';
+            $placeName .= $this->parent->getStructureNameService()->getPlaceFromName($place, true);
+            $this->setFont($this->helper->getTimesFont(), $this->getPlaceFontHeight($placeName));
             $x = $this->drawHeaderCustom($placeName, $x, $y, $versusColumnWidth, $height, $degrees);
             $nVersus++;
         }
-        $this->setFont($this->parent->getFont(), $this->parent->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
         return $x;
     }
 
@@ -77,7 +78,7 @@ class Against extends PoulePivotTablesPage
                 $this->setFillColor(new Zend_Pdf_Color_Html('lightgrey'));
             }
             $score = $this->getScore($place, $poule->getPlace($placeNr), $games);
-            $x = $this->drawCellCustom($score, $x, $y, $columnWidth, $this->rowHeight, Align::Center);
+            $x = $this->drawCellCustom($score, $x, $y, $columnWidth, $this->config->getRowHeight(), Align::Center);
             if ($poule->getPlace($placeNr) === $place) {
                 $this->setFillColor(new Zend_Pdf_Color_Html('white'));
             }
@@ -151,7 +152,7 @@ class Against extends PoulePivotTablesPage
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         // places
-        $height += $this->rowHeight * $nrOfPlaces;
+        $height += $this->config->getRowHeight() * $nrOfPlaces;
 
         return $height;
     }

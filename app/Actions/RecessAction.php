@@ -44,7 +44,7 @@ final class RecessAction extends Action
             $validator = new Recess\Validator();
             $validator->validateNewPeriod($serRecess->getPeriod(), $tournament);
 
-            $newRecess = new Recess($tournament, $serRecess->getPeriod());
+            $newRecess = new Recess($tournament, $serRecess->getName(), $serRecess->getPeriod());
             $this->recessRepos->save($newRecess);
 
             $json = $this->serializer->serialize($newRecess, 'json');
