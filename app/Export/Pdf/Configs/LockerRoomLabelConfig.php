@@ -11,7 +11,8 @@ class LockerRoomLabelConfig
         private int $startFontSize = 40,
         private int $maxFontSize = 50,
         private int $infoFontSize = 20
-    ){}
+    ) {
+    }
 
     public function getInfoHeight(): int
     {

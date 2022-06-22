@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
+use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Configs\StructureConfig;
 use App\Export\Pdf\Drawers\Helper;
 use Sports\Round;
@@ -15,20 +16,22 @@ class RoundDrawer
 
     public function __construct(
         protected StructureNameService $structureNameService,
-        protected StructureConfig $config
-    )
-    {
+        protected RoundConfig $config
+    ) {
         $this->helper = new Helper();
     }
+
     // protected int $maxPoulesPerLine = 3;
 
     public function getMinimalWidth(Round $round): float
     {
-        $padding = $this->config->getRoundConfig()->getPadding();
-        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config);
+        $showPouleNamePrefix = $round->isRoot();
+        $showCompetitor = $round->isRoot();
+        $padding = $this->config->getPadding();
+        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
         $minimalWidth = $padding;
         foreach ($round->getPoules() as $poule) {
-            $minimalWidth += $pouleDrawer->getMinimalWidth($poule);
+            $minimalWidth += $pouleDrawer->getMinimalWidth($poule, $showPouleNamePrefix, $showCompetitor);
             $minimalWidth += $padding;
         }
         return $minimalWidth;
@@ -114,7 +117,7 @@ class RoundDrawer
 //        $numberWidth = $pouleWidth * 0.1;
 //        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
 //        $this->drawCell(
-//            $this->parent->getStructureNameService()->getPouleName($poule, true),
+//            $this->getStructureNameService()->getPouleName($poule, true),
 //            $x,
 //            $yStart,
 //            $pouleWidth,
@@ -137,7 +140,7 @@ class RoundDrawer
 //            $name = '';
 //            $startLocation = $place->getStartLocation();
 //            if ($startLocation !== null && $this->parent->getStartLocationMap()->getCompetitor($startLocation) !== null) {
-//                $name = $this->parent->getStructureNameService()->getPlaceName($place, true);
+//                $name = $this->getStructureNameService()->getPlaceName($place, true);
 //            }
 //            $this->drawCell(
 //                $name,

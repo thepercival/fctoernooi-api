@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\Pdf\Configs\GameLineConfig;
+use App\Export\Pdf\Configs\GameNotesConfig;
+use App\Export\Pdf\Configs\GamesConfig;
+use App\Export\Pdf\Configs\LockerRoomConfig;
+use App\Export\Pdf\Configs\LockerRoomLabelConfig;
+use App\Export\Pdf\Configs\PoulePivotConfig;
+use App\Export\Pdf\Configs\QRCodeConfig;
+use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
 use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
@@ -46,31 +54,49 @@ class DocumentFactory
     ): PdfDocument {
         switch ($subject) {
             case PdfSubject::Structure:
-                return new StructureDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
+                $config = new RoundConfig();
+                return new StructureDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                );
             case PdfSubject::PoulePivotTables:
+                $config = new PoulePivotConfig();
                 return new PoulePivotTablesDocument(
-                    $tournament,
-                    $structure,
-                    $this->wwwUrl,
-                    $progress,
-                    $maxSubjectProgress
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
                 );
             case PdfSubject::Planning:
-                return new GamesDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
+                $gamesCfg = new GamesConfig();
+                $gameLineCfg = new GameLineConfig();
+                return new GamesDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
+                );
             case PdfSubject::GamesPerPoule:
+                $gamesCfg = new GamesConfig();
+                $gameLineCfg = new GameLineConfig();
                 return new GamesPerPouleDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
                 );
             case PdfSubject::GamesPerField:
+                $gamesCfg = new GamesConfig();
+                $gameLineCfg = new GameLineConfig();
                 return new GamesPerFieldDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
                 );
             case PdfSubject::GameNotes:
-                return new GameNotesDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
+                $config = new GameNotesConfig();
+                return new GameNotesDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                );
             case PdfSubject::QrCode:
-                return new QRCodeDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
+                $config = new QRCodeConfig();
+                return new QRCodeDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                );
             case PdfSubject::LockerRooms:
-                return new LockerRoomsDocument($tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress);
+                $config = new LockerRoomConfig();
+                $labelConfig = new LockerRoomLabelConfig();
+                return new LockerRoomsDocument(
+                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config, $labelConfig
+                );
         }
         throw new \Exception('unknown subject', E_ERROR);
     }

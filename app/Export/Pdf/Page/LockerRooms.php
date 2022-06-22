@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Configs\LockerRoomConfig;
 use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
@@ -19,7 +18,7 @@ use FCToernooi\LockerRoom;
  */
 class LockerRooms extends ToernooiPdfPage
 {
-    public function __construct(LockerRoomsDocument $document, mixed $param1, protected LockerRoomConfig $config)
+    public function __construct(LockerRoomsDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
@@ -43,12 +42,12 @@ class LockerRooms extends ToernooiPdfPage
 
     protected function getLockerRoomHeight(int $nrOfCompetitors): float
     {
-        return (1 + $nrOfCompetitors) * $this->config->getRowHeight();
+        return (1 + $nrOfCompetitors) * $this->parent->getConfig()->getRowHeight();
     }
 
     protected function getLinesAvailable(float $y): int
     {
-        return (int)floor(($y - self::PAGEMARGIN) / $this->config->getRowHeight());
+        return (int)floor(($y - self::PAGEMARGIN) / $this->parent->getConfig()->getRowHeight());
     }
 
     /**
@@ -72,7 +71,8 @@ class LockerRooms extends ToernooiPdfPage
         if ($nrOfColumns === 1 || $nrOfColumns === 2) {
             return $this->getMaxColumnWidth();
         }
-        return ($this->getDisplayWidth() - (($nrOfColumns - 1) * $this->config->getLockerRoomMargin())) / $nrOfColumns;
+        return ($this->getDisplayWidth() - (($nrOfColumns - 1) * $this->parent->getConfig()->getLockerRoomMargin(
+                    ))) / $nrOfColumns;
     }
 
     public function getMaxColumnWidth(): float
@@ -96,7 +96,7 @@ class LockerRooms extends ToernooiPdfPage
             while (count($competitors) > 0) {
                 $point = $this->drawLockerRoom($lockerRoom, $competitors, $point, $yStart, $columnWidth);
             }
-            $point = $point->addY(-$this->config->getRowHeight());
+            $point = $point->addY(-$this->parent->getConfig()->getRowHeight());
         }
     }
 
@@ -115,9 +115,10 @@ class LockerRooms extends ToernooiPdfPage
         Point $point,
         float $yStart,
         float $columnWidth,
-    ): Point {
-        $rowHeight = $this->config->getRowHeight();
-        $lockerRoomMargin = $this->config->getLockerRoomMargin();
+    ): Point
+    {
+        $rowHeight = $this->parent->getConfig()->getRowHeight();
+        $lockerRoomMargin = $this->parent->getConfig()->getLockerRoomMargin();
 
         $startAtTop = $point->getY() === $yStart;
         $height = $this->getLockerRoomHeight(count($competitors));
@@ -128,11 +129,11 @@ class LockerRooms extends ToernooiPdfPage
         }
 
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
-        $this->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(true), $this->parent->getConfig()->getFontHeight());
         $this->drawCell(
             'kleedkamer ' . $lockerRoom->getName(),
             new Rectangle(
-                new HorizontalLine( $point, $columnWidth),
+                new HorizontalLine($point, $columnWidth),
                 $rowHeight
             ),
             Align::Center,

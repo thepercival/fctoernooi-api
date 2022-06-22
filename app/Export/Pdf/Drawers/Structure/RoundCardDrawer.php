@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Drawers\Structure;
 
 use App\Export\Pdf\Configs\Structure\RoundConfig;
+use App\Export\Pdf\Configs\StructureConfig;
 use App\Export\Pdf\Drawers\Helper;
 use Sports\Round;
 use Sports\Structure\NameService as StructureNameService;
@@ -12,11 +13,15 @@ use Sports\Structure\NameService as StructureNameService;
 class RoundCardDrawer
 {
     protected Helper $helper;
+    protected RoundDrawer $roundDrawer;
+
 
     public function __construct(
         protected StructureNameService $structureNameService,
-        protected RoundConfig $config) {
+        protected RoundConfig $config
+    ) {
         $this->helper = new Helper();
+        $this->roundDrawer = new RoundDrawer($structureNameService, $config);
     }
 
     // protected int $maxPoulesPerLine = 3;
@@ -63,10 +68,7 @@ class RoundCardDrawer
     public function getMinimalWidth( Round $round ): float
     {
         $minimalWidthHeader = $this->getHeaderMinimalWidth($round);
-
-        $roundDrawer = new RoundDrawer();
-        $minimalWidthPoules = $roundDrawer->getMinimalWidth($round);
-
+        $minimalWidthPoules = $this->roundDrawer->getMinimalWidth($round);
         return max($minimalWidthHeader, $minimalWidthPoules);
     }
 

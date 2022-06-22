@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Configs\GameNotesConfig;
+use App\Export\Pdf\Configs\HeaderConfig;
 use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
 use DateTimeZone;
 use FCToernooi\QRService;
 use FCToernooi\TranslationService;
@@ -31,21 +34,19 @@ abstract class GameNotes extends ToernooiPdfPage
     protected ScoreConfigService $scoreConfigService;
     protected TranslationService $translationService;
     protected QRService $qrService;
-    protected GameNotesConfig $config;
 
     public function __construct(
         mixed $parent,
         mixed $param1,
         protected AgainstGame|TogetherGame $gameOne,
-        protected AgainstGame|TogetherGame|null $gameTwo,
-        GameNotesConfig|null $config = null
+        protected AgainstGame|TogetherGame|null $gameTwo
     ) {
         parent::__construct($parent, $param1);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
         $this->setLineWidth(0.5);
         $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
-        $this->config = $config !== null ? $config : new GameNotesConfig();
     }
 
 //    public function getParent(): GameNotesDocument
@@ -55,7 +56,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function getPartWidth(): float
     {
-        return ($this->getDisplayWidth() - (4 * GameNotes::Margin)) / 5;
+        return ($this->getDisplayWidth() - (4 * $this->parent->getConfig()->getMargin())) / 5;
     }
 
     protected function getLeftPartWidth(): float
@@ -65,17 +66,17 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function getDetailPartWidth(): float
     {
-        return $this->getPartWidth() + GameNotes::Margin  + $this->getPartWidth();
+        return $this->getPartWidth() + $this->parent->getConfig()->getMargin() + $this->getPartWidth();
     }
 
     protected function getStartDetailLabel(): float
     {
-        return self::PAGEMARGIN + $this->getLeftPartWidth() + GameNotes::Margin;
+        return self::PAGEMARGIN + $this->getLeftPartWidth() + $this->parent->getConfig()->getMargin();
     }
 
     protected function getStartDetailValue(): float
     {
-        return $this->getStartDetailLabel() + $this->getDetailPartWidth() + GameNotes::Margin;
+        return $this->getStartDetailLabel() + $this->getDetailPartWidth() + $this->parent->getConfig()->getMargin();
     }
 
     protected function getQrCodeUrlPrefix(AgainstGame|TogetherGame $game): string
@@ -87,7 +88,7 @@ abstract class GameNotes extends ToernooiPdfPage
 
     public function draw(bool $oneGamePerPage = false): void
     {
-        $y = $this->drawHeader('wedstrijdbriefje');
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), 'wedstrijdbriefje');
         $this->drawGame($this->gameOne, $y);
 
         $this->setLineColor(new Zend_Pdf_Color_Html('black'));
@@ -102,7 +103,13 @@ abstract class GameNotes extends ToernooiPdfPage
             $this->setLineDashingPattern(Zend_Pdf_Page::LINE_DASHING_SOLID);
         }
         if ($this->gameTwo !== null) {
-            $y = $this->drawHeader('wedstrijdbriefje', ($this->getHeight() / 2) - self::PAGEMARGIN);
+            $y = $this->drawHeader(
+                $this->parent->getTournament()->getName(),
+                'wedstrijdbriefje',
+                new HeaderConfig(
+                    ($this->getHeight() / 2) - self::PAGEMARGIN
+                )
+            );
             $this->drawGame($this->gameTwo, $y);
         }
     }
@@ -115,8 +122,8 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawGame(AgainstGame|TogetherGame $game, float $y): void
     {
-        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
-        $rowHeight = GameNotes::RowHeight;
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
+        $rowHeight = $this->parent->getConfig()->getRowHeight();
         $yNext = $this->drawGameDetail($game, $y);
         $this->drawQRCode($game, $y);
         $yNext -= $rowHeight;
@@ -137,45 +144,55 @@ abstract class GameNotes extends ToernooiPdfPage
 
     protected function drawGameDetail(AgainstGame|TogetherGame $game, float $y): float
     {
-        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
 
-        $height = GameNotes::RowHeight;
-        $margin = GameNotes::Margin;
+        $height = $this->parent->getConfig()->getRowHeight();
+        $margin = $this->parent->getConfig()->getMargin();
         $width = $this->getDetailPartWidth();
         $sportVariant = $game->getCompetitionSport()->createVariant();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
-        $structureNameService = $this->parent->getStructureNameService();
+        $structureNameService = $this->getStructureNameService();
         $labelStartX = $this->getStartDetailLabel();
-        $sepStartX = $this->getStartDetailValue() - GameNotes::Margin;
+        $sepStartX = $this->getStartDetailValue() - $margin;
         $valueStartX = $this->getStartDetailValue();
 
         $bNeedsRanking = $game->getPoule()->needsRanking();
 
         $roundNumberName = $structureNameService->getRoundNumberName($roundNumber);
-        $this->drawCell('ronde', $labelStartX, $y, $width, $height, Align::Right);
-        $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
-        $this->drawCell($roundNumberName, $valueStartX, $y, $width, $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+        $this->drawCell('ronde', $rectangle, Align::Right);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+        $this->drawCell(':', $rectangle, Align::Center);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+        $this->drawCell($roundNumberName, $rectangle);
         $y -= $height;
 
         // game-name
         $sGame = $structureNameService->getPouleName($game->getPoule(), false);
         $gameLabel = $bNeedsRanking ? 'poule' : 'wedstrijd';
-        $this->drawCell($gameLabel, $labelStartX, $y, $width, $height, Align::Right);
-        $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
-        $this->drawCell($sGame, $valueStartX, $y, $width, $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+        $this->drawCell($gameLabel, $rectangle, Align::Right);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+        $this->drawCell(':', $rectangle, Align::Center);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+        $this->drawCell($sGame, $rectangle);
         $y -= $height;
 
         // places
         if (!($sportVariant instanceof AllInOneGameSportVariant)) { // gameRoundNumber
-            $this->drawCell('plekken', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('plekken', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
             $this->drawPlaces($game, $valueStartX, $y, $width, $height);
             $y -= $height;
         }
         if ($bNeedsRanking) { // gameRoundNumber
-            $this->drawCell('speelronde', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('speelronde', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
             $y = $this->drawGameRoundNumber($game, $valueStartX, $y, $width, $height);
         }
 
@@ -190,22 +207,29 @@ abstract class GameNotes extends ToernooiPdfPage
             if ($planningConfig->getExtension()) {
                 $duration .= ' (' . $planningConfig->getMinutesPerGameExt() . ' min.)';
             }
-
-            $this->drawCell('tijdstip', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
-            $this->drawCell($dateTime, $valueStartX, $y, $width, $height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('tijdstip', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+            $this->drawCell($dateTime, $rectangle);
             $y -= $height;
 
-            $this->drawCell('duur', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
-            $this->drawCell($duration, $valueStartX, $y, $width, $height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('duur', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+            $this->drawCell($duration, $rectangle);
             $y -= $height;
         }
 
         // field
         {
-            $this->drawCell('veld', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('veld', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
             $fieldDescription = '';
             $field = $game->getField();
             if ($field !== null) {
@@ -217,7 +241,8 @@ abstract class GameNotes extends ToernooiPdfPage
             if ($roundNumber->getCompetition()->hasMultipleSports()) {
                 $fieldDescription .= ' - ' . $game->getCompetitionSport()->getSport()->getName();
             }
-            $this->drawCell($fieldDescription, $valueStartX, $y, $width, $height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+            $this->drawCell($fieldDescription, $rectangle);
             $y -= $height;
         }
 
@@ -229,17 +254,23 @@ abstract class GameNotes extends ToernooiPdfPage
             } else {
                 $refName = $structureNameService->getPlaceName($refereePlace, true, true);
             }
-            $this->drawCell('scheidsrechter', $labelStartX, $y, $width, $height, Align::Right);
-            $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
-            $this->drawCell($refName, $valueStartX, $y, $width, $height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+            $this->drawCell('scheidsrechter', $rectangle, Align::Right);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+            $this->drawCell(':', $rectangle, Align::Center);
+            $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+            $this->drawCell($refName, $rectangle);
             $y -= $height;
         }
         $firstScoreConfig = $game->getScoreConfig();
 
-        $this->drawCell('score', $labelStartX, $y, $width, $height, Align::Right);
-        $this->drawCell(':', $sepStartX, $y, $margin, $height, Align::Center);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($labelStartX, $y), $width), $height);
+        $this->drawCell('score', $rectangle, Align::Right);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), $height);
+        $this->drawCell(':', $rectangle, Align::Center);
         $descr = $this->getScoreConfigDescription($firstScoreConfig);
-        $this->drawCell($descr, $valueStartX, $y, $width, $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($valueStartX, $y), $width), $height);
+        $this->drawCell($descr, $rectangle);
         $y -= $height;
 
         return $y;

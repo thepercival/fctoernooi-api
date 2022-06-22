@@ -10,18 +10,19 @@ use App\Export\Pdf\Drawers\GameLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
 use App\Export\Pdf\Page\Traits\GameLine\Column;
+use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
+use Sports\Round\Number as RoundNumber;
 
 class Together extends GameLine
 {
-    public function __construct(PdfPage $page, GameLineConfig $config)
+    public function __construct(PdfPage $page, GameLineConfig $config, RoundNumber $roundNumber)
     {
-        parent::__construct($page, $config);
-        $this->initColumnWidths($config);
+        parent::__construct($page, $config, $roundNumber);
     }
 
     protected function getPlaceWidth(int $nrOfGamePlaces): float
@@ -40,14 +41,14 @@ class Together extends GameLine
         return $left->addX($width);
     }
 
-    protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, float $x, float $y): float
+    protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, VerticalLine $left): VerticalLine
     {
         // HIER MOETEN DE SCORES OOK VERWERKT WORDEN IN DE PLACES!!!
         if ($game instanceof AgainstGame) {
-            return $x;
+            return $left;
         }
-        $structureNameService = $this->page->getParent()->getStructureNameService();
-        $height = $this->page->getRowHeight();
+        $structureNameService = $this->page->getStructureNameService();
+        $height = $this->config->getRowHeight();
         $placeWidth = $this->getPlaceWidth($game->getPlaces()->count());
         $placeNameWidth = $placeWidth;
         $scoreWidth = 0;
@@ -57,17 +58,20 @@ class Together extends GameLine
         $placeNameWidth -= $scoreWidth;
 
         $placeCounter = 1;
-        $xStart = $x;
+        $xStart = $left->getX();
         foreach ($game->getPlaces() as $gamePlace) {
             $placeName = $structureNameService->getPlaceFromName($gamePlace->getPlace(), true, true);
-            $x = $this->page->drawCell($placeName, $x, $y, $placeNameWidth, $height, Align::Left, 'black');
+            $rectangle = new Rectangle($left, $placeNameWidth);
+            $this->page->drawCell($placeName, $rectangle, Align::Left, 'black');
+            $left = $rectangle->getRight();
             if ($game->getState() === GameState::Finished) {
                 $score = $this->getScore($gamePlace);
-                $x = $this->page->drawCell($score, $x, $y, $scoreWidth, $height, Align::Right, 'black');
+                $rectangle = new Rectangle($left, $scoreWidth);
+                $this->page->drawCell($score, $rectangle, Align::Right, 'black');
+                $left = $rectangle->getRight();
             }
             if ($placeCounter++ % $this->config->getMaxNrOfPlacesPerLine() === 0) {
-                $x = $xStart;
-                $y -= $height;
+                $left = new VerticalLine(new Point($xStart, $left->getEnd()->getY() - $height), $left->getHeight());
             }
         }
 
@@ -85,7 +89,7 @@ class Together extends GameLine
 //
 //        $away = $nameService->getPlacesFromName($game->getSidePlaces(AgainstSide::AWAY), true, true);
 //        return $this->page->drawCell($away, $x, $y, $sideWidth, $height, Align::Left, 'black');
-        return $x;
+        return $left;
     }
 
     private function getScore(TogetherGamePlace $gamePlace): string

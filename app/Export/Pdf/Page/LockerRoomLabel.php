@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Configs\LockerRoomLabelConfig;
 use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
@@ -22,23 +21,22 @@ use Zend_Pdf_Resource_Image;
 class LockerRoomLabel extends ToernooiPdfPage
 {
     protected QRService $qrService;
-    protected LockerRoomLabelConfig $config;
 
     public function __construct(
         LockerRoomsDocument $document,
         mixed $param1,
-        protected LockerRoomBase $lockerRoom,
-        LockerRoomLabelConfig|null $config)
-    {
+        protected LockerRoomBase $lockerRoom
+    ) {
         parent::__construct($document, $param1);
+        // $this->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+
         $this->setLineWidth(0.5);
         $this->qrService = new QRService();
-        $this->config = $config !== null ? $config : new LockerRoomLabelConfig();
     }
 
     protected function getCompetitorFontHeight(float $columnWidth): float
     {
-        $fontHeight = $this->config->getStartFontSize();
+        $fontHeight = $this->parent->getLabelConfig()->getStartFontSize();
 
         $texts = [];
         {
@@ -62,7 +60,7 @@ class LockerRoomLabel extends ToernooiPdfPage
         };
         $maxText = $fncMaxText($texts);
 
-        while ($fontHeight < $this->config->getMaxFontSize()
+        while ($fontHeight < $this->parent->getLabelConfig()->getMaxFontSize()
             && $this->getTextWidth($maxText, $fontHeight + 1) <= $columnWidth) {
             $fontHeight++;
         }
@@ -76,7 +74,8 @@ class LockerRoomLabel extends ToernooiPdfPage
     {
         $y = $this->drawHeader($this->parent->getTournament()->getName(), "kleedkamer");
         $y = $this->drawLockerRoom($y);
-        $infoHeight = $this->parent->getTournament()->getPublic() ? $this->config->getInfoHeight() : 0;
+        $infoHeight = $this->parent->getTournament()->getPublic() ? $this->parent->getLabelConfig()->getInfoHeight(
+        ) : 0;
         $this->drawCompetitors($competitors, $y, self::PAGEMARGIN + $infoHeight);
         if ($this->parent->getTournament()->getPublic()) {
             $this->drawInfo();
@@ -138,10 +137,10 @@ class LockerRoomLabel extends ToernooiPdfPage
     protected function drawInfo(): void
     {
         $center = $this->getWidth() / 2;
-        $infoHeight = $this->config->getInfoHeight();
+        $infoHeight = $this->parent->getLabelConfig()->getInfoHeight();
         $centerLeft = $center - (self::PAGEMARGIN / 2);
 
-        $this->setFont($this->helper->getTimesFont(), $this->config->getInfoFontSize());
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getLabelConfig()->getInfoFontSize());
         $x = self::PAGEMARGIN;
         $maxWidth = (int)($centerLeft - $x);
         $y = self::PAGEMARGIN + ($infoHeight * 2 / 3);

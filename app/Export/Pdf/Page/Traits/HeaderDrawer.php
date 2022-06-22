@@ -20,7 +20,7 @@ trait HeaderDrawer
         HeaderConfig $config = null
     ): float {
         if ($config === null) {
-            $config = new HeaderConfig();
+            $config = new HeaderConfig(null);
         }
         $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
 
@@ -39,7 +39,10 @@ trait HeaderDrawer
         }
         /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../../../../logo.jpg');
-        $y = $this->getHeight() - self::PAGEMARGIN;
+        $y = $config->getYStart();
+        if ($y === null) {
+            $y = $this->getHeight() - self::PAGEMARGIN;
+        }
         $this->drawImage($img, $xLeft, $y - $imgSize, $xLeft + $imgSize, $y);
 
         $arrLineColors = ['b' => 'black'];
@@ -68,7 +71,7 @@ trait HeaderDrawer
         if (strlen($subTitle) > 0) {
             $rectangle = new Rectangle(
                 new HorizontalLine(
-                    new Point($xRight , $y),
+                    new Point($xRight, $y),
                     $widthRight
                 ),
                 $rowHeight

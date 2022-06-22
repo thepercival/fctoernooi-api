@@ -6,11 +6,13 @@ namespace App\Export\Pdf\Document;
 
 use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
 use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
+use App\Export\PdfProgress;
+use FCToernooi\Tournament;
 use Sports\Round\Number as RoundNumber;
+use Sports\Structure;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
 use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
@@ -21,21 +23,20 @@ use Zend_Pdf_Page;
  */
 class PoulePivotTables extends PdfDocument
 {
-    protected Helper|null $helper = null;
-    protected PoulePivotConfig|null $config = null;
-
-    private function getConfig(): PoulePivotConfig {
-        if( $this->config === null ) {
-            $this->config = new PoulePivotConfig();
-        }
-        return $this->config;
+    public function __construct(
+        protected Tournament $tournament,
+        protected Structure $structure,
+        protected string $url,
+        protected PdfProgress $progress,
+        protected float $maxSubjectProgress,
+        protected PoulePivotConfig $config
+    ) {
+        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
     }
 
-    private function getHelper(): Helper {
-        if( $this->helper === null ) {
-            $this->helper = new Helper();
-        }
-        return $this->helper;
+    public function getConfig(): PoulePivotConfig
+    {
+        return $this->config;
     }
 
     protected function fillContent(): void
@@ -67,7 +68,7 @@ class PoulePivotTables extends PdfDocument
                         if ($y - $pouleHeight < AgainstPoulePivotTablePage::PAGEMARGIN) {
                             $nrOfPlaces = $poule->getPlaces()->count();
                             $page = $this->createPagePoulePivotTables($gameAmountConfig->createVariant(), $nrOfPlaces);
-                            $y = $page->drawHeader($this->getTournament()->getName(),'pouledraaitabel');
+                            $y = $page->drawHeader($this->getTournament()->getName(), 'pouledraaitabel');
                             $y = $page->drawPageStartHeader($roundNumber, $gameAmountConfig->getCompetitionSport(), $y);
                         }
                         $y = $page->draw($poule, $gameAmountConfig, $y);
@@ -81,9 +82,10 @@ class PoulePivotTables extends PdfDocument
         }
     }
 
-    protected function someStructureCellNeedsRanking(RoundNumber $roundNumber): bool {
-        foreach( $roundNumber->getStructureCells() as $cell ) {
-            if( $cell->needsRanking() ) {
+    protected function someStructureCellNeedsRanking(RoundNumber $roundNumber): bool
+    {
+        foreach ($roundNumber->getStructureCells() as $cell) {
+            if ($cell->needsRanking()) {
                 return true;
             }
         }
@@ -97,7 +99,7 @@ class PoulePivotTables extends PdfDocument
         }
         $biggestPoule = $roundNumber->createPouleStructure()->getBiggestPoule();
         $page = $this->createPagePoulePivotTablesMultipleSports($biggestPoule);
-        $y = $page->drawHeader($this->getTournament()->getName(),'pouledraaitabel');
+        $y = $page->drawHeader($this->getTournament()->getName(), 'pouledraaitabel');
         $y = $page->drawPageStartHeader($roundNumber, $y);
 
         foreach ($roundNumber->getRounds() as $round) {
@@ -127,8 +129,8 @@ class PoulePivotTables extends PdfDocument
         int $maxNrOfPlaces
     ): MultipleSportsPoulePivotTablePage {
         $dimension = $this->getPoulePivotPageDimension(null, $maxNrOfPlaces);
-        $page = new MultipleSportsPoulePivotTablePage($this, $dimension, $this->config);
-        $page->setFont($this->getHelper()->getTimesFont(), $this->getConfig()->getFontHeight());
+        $page = new MultipleSportsPoulePivotTablePage($this, $dimension);
+
         $this->pages[] = $page;
         return $page;
     }
@@ -144,11 +146,10 @@ class PoulePivotTables extends PdfDocument
     ): AgainstPoulePivotTablePage | TogetherPoulePivotTablePage {
         $dimension = $this->getPoulePivotPageDimension($sportVariant, $maxNrOfPlaces);
         if ($sportVariant instanceof AgainstSportVariant) {
-            $page = new AgainstPoulePivotTablePage($this, $dimension, $this->getConfig());
+            $page = new AgainstPoulePivotTablePage($this, $dimension);
         } else {
-            $page = new TogetherPoulePivotTablePage($this, $dimension, $this->getConfig());
+            $page = new TogetherPoulePivotTablePage($this, $dimension);
         }
-        $page->setFont($this->getHelper()->getTimesFont(), $this->getConfig()->getFontHeight());
         $this->pages[] = $page;
         return $page;
     }

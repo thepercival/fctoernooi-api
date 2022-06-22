@@ -12,7 +12,6 @@ class GameNotesConfig
         private int $margin = 15
     )
     {
-
         if( $fontHeight < 10 || $fontHeight > 30) {
             throw new \Exception('fontHeight should be between 10 and 30');
         }

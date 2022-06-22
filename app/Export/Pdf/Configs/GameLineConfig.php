@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
-use App\Export\Pdf\Drawers\GameLine\Column\Referee as RefereeColumn;
-
 class GameLineConfig
 {
     public function __construct(
-        private DateTimeColumn $dateTimeColumn,
-        private RefereeColumn $refereeColumn,
+//        private DateTimeColumn $dateTimeColumn,
+//        private RefereeColumn $refereeColumn,
         private int $rowHeight = 18,
         private int $maxNrOfPlacesPerLine = 4
     ) {
@@ -25,15 +22,15 @@ class GameLineConfig
         return $this->rowHeight;
     }
 
-    public function getDateTimeColumn(): DateTimeColumn
-    {
-        return $this->dateTimeColumn;
-    }
-
-    public function getRefereeColumn(): RefereeColumn
-    {
-        return $this->refereeColumn;
-    }
+//    public function getDateTimeColumn(): DateTimeColumn
+//    {
+//        return $this->dateTimeColumn;
+//    }
+//
+//    public function getRefereeColumn(): RefereeColumn
+//    {
+//        return $this->refereeColumn;
+//    }
 
     public function getMaxNrOfPlacesPerLine(): int
     {

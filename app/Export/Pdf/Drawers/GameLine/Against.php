@@ -6,28 +6,29 @@ namespace App\Export\Pdf\Drawers\GameLine;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameLineConfig;
-use App\Export\Pdf\Drawers\Gameline;
+use App\Export\Pdf\Drawers\GameLine as GameLineBase;
 use App\Export\Pdf\Drawers\GameLine\Column\Against as AgainstColumn;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
+use App\Export\Pdf\Page\Traits\GameLine\Column;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Phase as GamePhase;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
+use Sports\Round\Number as RoundNumber;
 use SportsHelpers\Against\Side as AgainstSide;
 
-class Against extends GameLine
+class Against extends GameLineBase
 {
-    public function __construct(PdfPage $page, GameLineConfig $config)
+    public function __construct(PdfPage $page, GameLineConfig $config, RoundNumber $roundNumber)
     {
-        parent::__construct($page, $config);
-        $this->initAgainstGameLineColumnWidths($config);
+        parent::__construct($page, $config, $roundNumber);
+        $this->initAgainstColumnWidths();
     }
 
-    private function initAgainstGameLineColumnWidths(GameLineConfig $config): void
+    private function initAgainstColumnWidths(): void
     {
-        $this->initColumnWidths($config);
         $this->columnWidths[AgainstColumn::Score->value] = 0.11;
 
         $this->columnWidths[AgainstColumn::SidePlaces->value] = $this->columnWidths[Column::PlacesAndScore->value];
@@ -35,7 +36,7 @@ class Against extends GameLine
         $this->columnWidths[AgainstColumn::SidePlaces->value] /= 2;
     }
 
-    protected function drawPlacesAndScoreHeader(VerticalLine $left, GameLineConfig $config): VerticalLine
+    protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine
     {
         $sideWidth = $this->getColumnWidth(AgainstColumn::SidePlaces);
         $scoreWidth = $this->getColumnWidth(AgainstColumn::Score);
@@ -56,7 +57,7 @@ class Against extends GameLine
         $sideWidth = $this->getColumnWidth(AgainstColumn::SidePlaces);
         $scoreWidth = $this->getColumnWidth(AgainstColumn::Score);
 
-        $structureNameService = $this->getParent()->getStructureNameService();
+        $structureNameService = $this->page->getStructureNameService();
 
         $home = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
         $homeCell = new Rectangle($left, $sideWidth);

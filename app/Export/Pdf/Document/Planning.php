@@ -4,12 +4,21 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Document;
 
+use App\Export\Pdf\Configs\GameLineConfig;
+use App\Export\Pdf\Configs\GamesConfig;
 use App\Export\Pdf\Document as PdfDocument;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Page;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\Planning as PagePlanning;
+use App\Export\Pdf\Page\Planning as PlanningPage;
+use App\Export\Pdf\Point;
 use App\Export\Pdf\RecessHelper;
+use App\Export\Pdf\Rectangle;
+use App\Export\PdfProgress;
+use FCToernooi\Tournament;
 use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
+use Sports\Structure;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
 use Zend_Pdf_Exception;
 use Zend_Pdf_Page;
@@ -19,17 +28,38 @@ use Zend_Pdf_Page;
  */
 abstract class Planning extends PdfDocument
 {
+    public function __construct(
+        protected Tournament $tournament,
+        protected Structure $structure,
+        protected string $url,
+        protected PdfProgress $progress,
+        protected float $maxSubjectProgress,
+        protected GamesConfig $gameConfig,
+        protected GameLineConfig $gameLineConfig
+    ) {
+        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+    }
+
+
+    protected function getGamesConfig(): GamesConfig
+    {
+        return $this->gameConfig;
+    }
+
+    protected function getGameLineConfig(): GameLineConfig
+    {
+        return $this->gameLineConfig;
+    }
+
     /**
      * @param RoundNumber $roundNumber
      * @param string $title
-     * @return PagePlanning
+     * @return PlanningPage
      * @throws Zend_Pdf_Exception
      */
-    protected function createPagePlanning(RoundNumber $roundNumber, string $title): PagePlanning
+    protected function createPagePlanning(RoundNumber $roundNumber, string $title): PlanningPage
     {
-        $page = new PagePlanning($this, $this->getPlanningPageDimension($roundNumber));
-        $page->setFont($this->getFont(), $this->getFontHeight());
-        $page->setTitle($title);
+        $page = new PlanningPage($this, $this->getPlanningPageDimension($roundNumber), $title);
         $this->pages[] = $page;
         return $page;
     }
@@ -66,42 +96,54 @@ abstract class Planning extends PdfDocument
 
     protected function drawPlanningPerFieldOrPouleHelper(
         RoundNumber $roundNumber,
-        PagePlanning $page,
-        float $y,
+        PlanningPage $page,
+        HorizontalLine $horLine,
         bool $recursive
     ): void {
-        $y = $page->drawRoundNumberHeader($roundNumber, $y);
+        $gameHorStartLine = $page->drawRoundNumberHeader($roundNumber, $horLine);
         $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
             $page->initGameLines($roundNumber);
-            $y = $page->drawGamesHeader($roundNumber, $y);
+            $rectangle = new Rectangle($gameHorStartLine, $this->getGameLineConfig()->getRowHeight());
+            $page->drawGamesHeader($roundNumber, $rectangle);
+            $gameHorStartLine = $rectangle->getBottom();
         }
         $games = $roundNumber->getGames(GameOrder::ByDate);
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
         foreach ($games as $game) {
             $gameHeight = $page->getRowHeight();
-            $recessPeriodToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
-            $gameHeight += $recessPeriodToDraw !== null ? $gameHeight : 0;
-            if ($y - $gameHeight < PdfPage::PAGEMARGIN) {
+            $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
+            $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
+            if ($gameHorStartLine->getY() - $gameHeight < PdfPage::PAGEMARGIN) {
                 // $field = $page->getFieldFilter();
-                $page = $this->createPagePlanning($roundNumber, $page->getTitle() ?? '');
-                $y = $page->drawHeader($page->getTitle(), );
+                $page = $this->createPagePlanning($roundNumber, $page->getTitle());
+                $y = $page->drawHeader($this->getTournament()->getName(), $page->getTitle());
                 $page->setGameFilter($page->getGameFilter());
                 $page->initGameLines($roundNumber);
-                $y = $page->drawGamesHeader($roundNumber, $y);
+                $rectangle = new Rectangle(
+                    new HorizontalLine(
+                        new Point(Page::PAGEMARGIN, $y),
+                        $horLine->getWidth()
+                    ),
+                    $this->getGameLineConfig()->getRowHeight()
+                );
+                $page->drawGamesHeader($roundNumber, $rectangle);
+                $gameHorStartLine = $rectangle->getBottom();
             }
-            if ($recessPeriodToDraw !== null) {
-                $page->initGameLines($roundNumber);
-                $y = $page->drawRecess($roundNumber, $game, $recessPeriodToDraw, $y);
+            if ($recessToDraw !== null) {
+                // $page->initGameLines($roundNumber);
+                $rectangle = new Rectangle($gameHorStartLine, $this->getGameLineConfig()->getRowHeight());
+                $page->drawRecess($game, $recessToDraw, $rectangle);
+                $gameHorStartLine = $rectangle->getBottom();
             }
-            $y = $page->drawGame($game, $y);
+            $gameHorStartLine = $page->drawGame($game, $gameHorStartLine);
         }
 
         $nextRoundNumber = $roundNumber->getNext();
         if ($nextRoundNumber !== null && $recursive) {
-            $y -= 20;
-            $this->drawPlanningPerFieldOrPouleHelper($nextRoundNumber, $page, $y, $recursive);
+            $gameHorStartLine = $gameHorStartLine->addY(-20);
+            $this->drawPlanningPerFieldOrPouleHelper($nextRoundNumber, $page, $gameHorStartLine, $recursive);
         }
     }
 }

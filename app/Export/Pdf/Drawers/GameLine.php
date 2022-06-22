@@ -7,18 +7,20 @@ namespace App\Export\Pdf\Drawers;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Drawers\GameLine\Column\Against as AgainstColumn;
+use App\Export\Pdf\Drawers\GameLine\Column\DateTime;
 use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\Drawers\GameLine\Column\Referee as RefereeColumn;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
 use App\Export\Pdf\Page\Traits\GameLine\Column;
-use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use DateTimeImmutable;
 use DateTimeZone;
 use FCToernooi\Recess;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
+use Sports\Round\Number as RoundNumber;
 use Sports\Score\Config\Service as ScoreConfigService;
 use Zend_Pdf_Color_GrayScale;
 use Zend_Pdf_Exception;
@@ -26,35 +28,46 @@ use Zend_Pdf_Exception;
 abstract class GameLine
 {
     /**
-     * @var array<Column|AgainstColumn|DateTimeColumn|RefereeColumn, float>
+     * @var array<int, float>
      */
     protected array $columnWidths = [];
+    protected float $totalWidth;
     protected ScoreConfigService $scoreConfigService;
+    protected DateTimeColumn $dateTimeColumn;
+    protected RefereeColumn $refereeColumn;
 
-    public function __construct(protected PdfPage $page, protected GameLineConfig $config)
-    {
+    public function __construct(
+        protected PdfPage $page,
+        protected GameLineConfig $config,
+        RoundNumber $roundNumber,
+        float $totalWidth = null
+    ) {
         $this->scoreConfigService = new ScoreConfigService();
+        $this->totalWidth = $totalWidth !== null ? $totalWidth : $this->page->getWidth();
+        $this->initColumnWidths($roundNumber);
     }
 
-    protected function initColumnWidths(GameLineConfig $config): void
+    private function initColumnWidths(RoundNumber $roundNumber): void
     {
         $this->columnWidths[Column::Poule->value] = 0.05;
         $this->columnWidths[Column::Field->value] = 0.05;
         $this->columnWidths[Column::PlacesAndScore->value] = 0.90;
 
-        if ($config->getDateTimeColumn() !== DateTimeColumn::None) {
-            if ($config->getDateTimeColumn() === DateTimeColumn::DateTime) {
+        $this->dateTimeColumn = DateTimeColumn::getValue($roundNumber);
+        if ($this->dateTimeColumn !== DateTimeColumn::None) {
+            if ($this->dateTimeColumn === DateTimeColumn::DateTime) {
                 $this->columnWidths[Column::Start->value] = 0.15;
-            } elseif ($config->getDateTimeColumn() === DateTimeColumn::Time) {
+            } else /*if ($this->dateTimeColumn === DateTimeColumn::Time)*/ {
                 $this->columnWidths[Column::Start->value] = 0.075;
             }
             $this->columnWidths[Column::PlacesAndScore->value] -= $this->columnWidths[Column::Start->value];
         }
 
-        if ($config->getRefereeColumn() !== RefereeColumn::None) {
-            if ($config->getRefereeColumn() === RefereeColumn::Referee) {
+        $this->refereeColumn = RefereeColumn::getValue($roundNumber);
+        if ($this->refereeColumn !== RefereeColumn::None) {
+            if ($this->refereeColumn === RefereeColumn::Referee) {
                 $this->columnWidths[Column::Referee->value] = 0.08;
-            } elseif ($config->getRefereeColumn() === RefereeColumn::SelfReferee) {
+            } else /* if ($this->refereeColumn === RefereeColumn::SelfReferee)*/ {
                 $this->columnWidths[Column::Referee->value] = 0.22;
             }
             $this->columnWidths[Column::PlacesAndScore->value] -= $this->columnWidths[Column::Referee->value];
@@ -72,34 +85,33 @@ abstract class GameLine
         if (!isset($this->columnWidths[$column->value])) {
             return 0;
         }
-        return $this->columnWidths[$column->value] * $this->page->getDisplayWidth();
+        return $this->columnWidths[$column->value] * $this->totalWidth;
     }
 
-    protected function getGameWidth(): float
-    {
-        return $this->getColumnWidth(Column::Poule) +
-            $this->getColumnWidth(Column::Start) +
-            $this->getColumnWidth(Column::Field) +
-            $this->getColumnWidth(Column::PlacesAndScore) +
-            $this->getColumnWidth(Column::Referee);
-    }
+//    protected function getGameWidth(): float
+//    {
+//        return $this->getColumnWidth(Column::Poule) +
+//            $this->getColumnWidth(Column::Start) +
+//            $this->getColumnWidth(Column::Field) +
+//            $this->getColumnWidth(Column::PlacesAndScore) +
+//            $this->getColumnWidth(Column::Referee);
+//    }
 
-    public function drawHeader(bool $needsRanking, float $y): float
+    public function drawHeader(bool $needsRanking, Rectangle $rectangle): void
     {
-        $height = $this->config->getRowHeight();
         $pouleWidth = $this->getColumnWidth(Column::Poule);
         $startWidth = $this->getColumnWidth(Column::Start);
         $refereeWidth = $this->getColumnWidth(Column::Referee);
         $fieldWidth = $this->getColumnWidth(Column::Field);
 
-        $rankingLeft = new VerticalLine(new Point(PdfPage::PAGEMARGIN, $y), $height);
+        $rankingLeft = $rectangle->getLeft();
         $rankingCell = new Rectangle($rankingLeft, $pouleWidth);
         $this->drawCell($needsRanking ? 'p.' : 'vs', $rankingCell, 'black');
 
         $fieldLft = $rankingCell->getRight();
-        if ($this->config->getDateTimeColumn() !== DateTimeColumn::None) {
+        if ($this->dateTimeColumn !== DateTimeColumn::None) {
             $text = 'tijd';
-            if ($this->config->getDateTimeColumn() === DateTimeColumn::DateTime) {
+            if ($this->dateTimeColumn === DateTimeColumn::DateTime) {
                 $text = 'datum tijd';
             }
             $dateCell = new Rectangle($rankingCell->getRight(), $startWidth);
@@ -110,16 +122,13 @@ abstract class GameLine
         $this->drawCell('v.', $fieldCell);
 
         $refereeLeft = $this->drawPlacesAndScoreHeader($fieldCell->getRight());
-
-        if ($this->config->getRefereeColumn() !== RefereeColumn::None) {
+        if ($this->refereeColumn !== RefereeColumn::None) {
             $title = 'scheidsrechter';
-            if ($this->config->getRefereeColumn() === RefereeColumn::Referee) {
+            if ($this->refereeColumn === RefereeColumn::Referee) {
                 $title = 'sch.';
             }
             $this->drawCell($title, new Rectangle($refereeLeft, $refereeWidth), 'black');
         }
-
-        return $y - $height;
     }
 
 //    /**
@@ -138,13 +147,14 @@ abstract class GameLine
 
     abstract protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine;
 
-    public function drawRecess(Recess $recess, Point $start): Point
+    public function drawRecess(Recess $recess, Rectangle $rectangle, DateTimeColumn $dateTimeColumn): void
     {
-        $startVertLine = new VerticalLine($start, $this->config->getRowHeight() );
+        $startVertLine = $rectangle->getLeft();
+        $width = $rectangle->getWidth();
         $vertLine = $startVertLine->addX($this->getColumnWidth(Column::Poule));
         $this->page->setFillColor(new Zend_Pdf_Color_GrayScale(1));
-        if ($this->config->getDateTimeColumn() !== DateTimeColumn::None) {
-            $text = $this->getDateTime($recess->getStartDateTime());
+        if ($dateTimeColumn !== DateTimeColumn::None) {
+            $text = $this->getDateTime($recess->getStartDateTime(), $dateTimeColumn);
             $rectangle = new Rectangle($vertLine, $this->getColumnWidth(Column::Start));
             $this->drawCell($text, $rectangle, ['top' => 'black']);
             $vertLine = $rectangle->getRight();
@@ -153,12 +163,15 @@ abstract class GameLine
 
         $rectangle = new Rectangle($vertLine, $this->getColumnWidth(Column::PlacesAndScore));
         $this->drawCell($recess->getName(), $rectangle, ['top' => 'black']);
-        return $startVertLine->getEnd();
     }
 
-    public function drawGame(AgainstGame|TogetherGame $game, Point $start, bool $striped = false): float
-    {
-        $height = $this->getGameHeight($game);
+    public function drawGame(
+        AgainstGame|TogetherGame $game,
+        HorizontalLine $horStartLine,
+        bool $striped = false
+    ): HorizontalLine {
+        $gameHeight = $this->getGameHeight($game);
+        $left = new VerticalLine($horStartLine->getStart(), -$gameHeight);
         $pouleWidth = $this->getColumnWidth(Column::Poule);
         $startWidth = $this->getColumnWidth(Column::Start);
         $fieldWidth = $this->getColumnWidth(Column::Field);
@@ -167,45 +180,47 @@ abstract class GameLine
         $grayScale = (($game->getBatchNr() % 2) === 0 && $striped === true) ? 0.9 : 1;
         $this->page->setFillColor(new Zend_Pdf_Color_GrayScale($grayScale));
 
-        $structureNameService = $this->page->getParent()->getStructureNameService();
+        $structureNameService = $this->page->getStructureNameService();
         $pouleName = $structureNameService->getPouleName($game->getPoule(), false);
-        $rectangle = new Rectangle($left, $pouleWidth );
-        $x = $this->page->drawCell($pouleName, $rectangle);
+        $this->page->drawCell($pouleName, new Rectangle($left, $pouleWidth));
+        $left = $left->addX($pouleWidth);
 
-        if ($this->config->getDateTimeColumn() !== DateTimeColumn::None) {
-            $text = $this->getDateTime($game->getStartDateTime());
-            $x = $this->page->drawCell($text, $x, $y, $startWidth, $height);
+        if ($this->dateTimeColumn !== DateTimeColumn::None) {
+            $text = $this->getDateTime($game->getStartDateTime(), $this->dateTimeColumn);
+            $this->page->drawCell($text, new Rectangle($left, $startWidth));
+            $left = $left->addX($pouleWidth);
         }
 
         $field = $game->getField();
         $fieldName = $field === null ? '' : $field->getName();
         $fieldDescription = $fieldName === null ? '' : $fieldName;
-        $x = $this->page->drawCell($fieldDescription, $x, $y, $fieldWidth, $height);
+        $this->page->drawCell($fieldDescription, new Rectangle($left, $fieldWidth));
+        $left = $left->addX($fieldWidth);
 
-        $x = $this->drawPlacesAndScoreCell($game, $fieldCell->getRight());
+        $left = $this->drawPlacesAndScoreCell($game, $left);
 
-        if ($this->config->getRefereeColumn() !== RefereeColumn::None) {
+        if ($this->refereeColumn !== RefereeColumn::None) {
             $text = '';
-            if ($this->config->getRefereeColumn() === RefereeColumn::Referee) {
+            if ($this->refereeColumn === RefereeColumn::Referee) {
                 $referee = $game->getReferee();
                 if ($referee !== null) {
                     $text = $referee->getInitials();
                 }
-            } elseif ($this->config->getRefereeColumn() === RefereeColumn::SelfReferee) {
+            } else /*if ($this->refereeColumn === RefereeColumn::SelfReferee)*/ {
                 $refereePlace = $game->getRefereePlace();
                 if ($refereePlace !== null) {
                     $text = $structureNameService->getPlaceName($refereePlace, true, true);
                 }
             }
-            $this->page->drawCell($text, $x, $y, $refereeWidth, $height);
+            $this->page->drawCell($text, new Rectangle($left, $refereeWidth));
         }
 
-        return $y - $height;
+        return $horStartLine->addY(-$gameHeight);
     }
 
     abstract protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, VerticalLine $left): VerticalLine;
 
-    protected function getDateTime(DateTimeImmutable $dateTime): string
+    protected function getDateTime(DateTimeImmutable $dateTime, DateTimeColumn $dateTimeColumn): string
     {
 //        $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
 //        $dateElements = explode(" ", $df->format($game->getStartDateTime()));
@@ -217,7 +232,7 @@ abstract class GameLine
         $localDateTime = $dateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
 
         $text = $localDateTime->format('H:i');
-        if ($this->config->getDateTimeColumn() === DateTimeColumn::Time) {
+        if ($dateTimeColumn === DateTimeColumn::Time) {
             return $text;
         }
         return mb_strtolower(
@@ -239,7 +254,7 @@ abstract class GameLine
     /**
      * @param string $sText
      * @param Rectangle $rectangle
-     * @param string | null $vtLineColors
+     * @param array<string, string>| string | null $vtLineColors
      * @throws Zend_Pdf_Exception
      */
     public function drawCell(

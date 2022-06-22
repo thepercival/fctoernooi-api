@@ -22,7 +22,13 @@ class Vertical extends Line
         return new self($this->start->addX($y), $this->getHeight());
     }
 
-    public function getHeight(): float {
+//    public function moveDown(): self
+//    {
+//        return new self($this->end, $this->getHeight());
+//    }
+
+    public function getHeight(): float
+    {
         return $this->start->getY() - $this->end->getY();
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\Pdf\Drawers\Helper;
 use App\Export\PdfProgress;
 use FCToernooi\Tournament;
 use Sports\Competition\Sport as CompetitionSport;
@@ -13,7 +14,6 @@ use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Poule;
 use Sports\Round;
-use Sports\Round\Number as RoundNumber;
 use Sports\Structure;
 use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf;
@@ -25,6 +25,7 @@ class Document extends Zend_Pdf
 {
     protected StructureNameService|null $structureNameService = null;
     protected StartLocationMap|null $startLocationMap = null;
+    protected Helper $helper;
 
     /**
      * @var array<string, float>
@@ -39,6 +40,12 @@ class Document extends Zend_Pdf
         protected float $maxSubjectProgress
     ) {
         parent::__construct();
+        $this->helper = new Helper();
+    }
+
+    protected function getHelper(): Helper
+    {
+        return $this->helper;
     }
 
     public function render($newSegmentOnly = false, $outputStream = null): string
@@ -130,16 +137,6 @@ class Document extends Zend_Pdf
     public function getUrl(): string
     {
         return $this->url;
-    }
-
-    public function gamesOnSameDay(RoundNumber $roundNumber): bool
-    {
-        $dateOne = $roundNumber->getFirstStartDateTime();
-        $dateTwo = $roundNumber->getLastStartDateTime();
-//        if ($dateOne === null && $dateTwo === null) {
-//            return true;
-//        }
-        return $dateOne->format('Y-m-d') === $dateTwo->format('Y-m-d');
     }
 
     public function getStructureNameService(): StructureNameService

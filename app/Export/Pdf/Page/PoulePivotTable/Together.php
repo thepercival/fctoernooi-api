@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
 use Sports\Competition\Sport as CompetitionSport;
@@ -17,9 +16,9 @@ use Sports\Poule;
 
 class Together extends PoulePivotTablesPage
 {
-    public function __construct(PoulePivotTablesDocument $document, mixed $param1, PoulePivotConfig $config)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
-        parent::__construct($document, $param1, $config);
+        parent::__construct($document, $param1);
     }
 
     /*public function draw()
@@ -43,9 +42,9 @@ class Together extends PoulePivotTablesPage
     // t/m 3 places 0g, t/m 8 places 45g, hoger 90g
     public function getPouleHeight(Poule $poule): float
     {
-        $height = $this->config->getRowHeight();
+        $height = $this->parent->getConfig()->getRowHeight();
         // places
-        $height += $this->config->getRowHeight() * $poule->getPlaces()->count();
+        $height += $this->parent->getConfig()->getRowHeight() * $poule->getPlaces()->count();
 
         return $height;
     }
@@ -71,7 +70,14 @@ class Together extends PoulePivotTablesPage
         $columnWidth = $this->versusColumnsWidth / $gameAmountConfig->getAmount();
         for ($gameRoundNumber = 1 ; $gameRoundNumber <= $gameAmountConfig->getAmount() ; $gameRoundNumber++) {
             $score = $this->getScore($place, $gameAmountConfig->getCompetitionSport(), $gameRoundNumber);
-            $x = $this->drawCellCustom($score, $x, $y, $columnWidth, $this->config->getRowHeight(), Align::Center);
+            $x = $this->drawCellCustom(
+                $score,
+                $x,
+                $y,
+                $columnWidth,
+                $this->parent->getConfig()->getRowHeight(),
+                Align::Center
+            );
         }
         return $x;
     }

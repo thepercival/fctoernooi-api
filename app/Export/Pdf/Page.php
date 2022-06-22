@@ -7,6 +7,7 @@ namespace App\Export\Pdf;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Page\Traits\HeaderDrawer;
 use App\Export\Pdf\Page\Traits\TitleDrawer;
+use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
 use Zend_Pdf_Exception;
@@ -55,6 +56,11 @@ abstract class Page extends Zend_Pdf_Page
         $this->helper = new Helper();
     }
 
+    public function getStructureNameService(): StructureNameService
+    {
+        return $this->parent->getStructureNameService();
+    }
+
     public function getFillColor(): Zend_Pdf_Color
     {
         return $this->fillColor;
@@ -91,7 +97,7 @@ abstract class Page extends Zend_Pdf_Page
     /**
      * @param string $sText
      * @param Rectangle $rectangle
-     * @param int $nAlign
+     * @param Align $nAlign
      * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
      * @param int|null $degrees
      * @throws Zend_Pdf_Exception
@@ -99,7 +105,7 @@ abstract class Page extends Zend_Pdf_Page
     public function drawCell(
         string $sText,
         Rectangle $rectangle,
-        int $nAlign = Align::Left,
+        Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
         int $degrees = null
     ): void {
@@ -161,8 +167,8 @@ abstract class Page extends Zend_Pdf_Page
 
     public function drawRectangleExt(
         Rectangle $rectangle/*x1, $y1, $x2, $y2*/,
-        $fillType = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE
-    ) {
+        int $fillType = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE
+    ): void {
     }
 
     /**
@@ -198,7 +204,7 @@ abstract class Page extends Zend_Pdf_Page
         string|null $sText,
         Point $start,
         float $nMaxWidth = null,
-        int $nAlign = Align::Left,
+        Align $nAlign = Align::Left,
         int $nRotationDegree = 0
     ): float {
         $font = $this->getFont();
@@ -283,7 +289,7 @@ abstract class Page extends Zend_Pdf_Page
     private function getTextStartPosition(
         float $xPos,
         string $text,
-        int $nAlign,
+        Align $nAlign,
         float $width,
         float $fontSize
     ): float {
@@ -310,22 +316,22 @@ abstract class Page extends Zend_Pdf_Page
     }
 
     /**
-     * @param string $sText
+     * @param string $text
      * @param Rectangle $rectangle
-     * @param int $nAlign
+     * @param Align $align
      * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColor
      * @throws Zend_Pdf_Exception
      */
     public function drawTableHeader(
-        string $sText,
+        string $text,
         Rectangle $rectangle,
-        int $nAlign = Align::Center,
+        Align $align = Align::Center,
         array|string|null $vtLineColor = 'black'
-    ) {
-        $arrLines = explode('<br>', $sText);
+    ): void {
+        $arrLines = explode('<br>', $text);
         $nNrOfLines = count($arrLines);
 
-        $this->drawCell('', $rectangle, $nAlign, $vtLineColor);
+        $this->drawCell('', $rectangle, $align, $vtLineColor);
 
         $nLineHeight = ($rectangle->getHeight() / $nNrOfLines);
         $yDelta = 0;
@@ -334,7 +340,7 @@ abstract class Page extends Zend_Pdf_Page
             $rectangle = new Rectangle(
                 $rectangle->getTop(), $rectangle->getHeight() - ($nLineHeight + $yDelta)
             );
-            $this->drawCell($sText, $rectangle, $nAlign, $vtLineColor);
+            $this->drawCell($text, $rectangle, $align, $vtLineColor);
         } else {
             $oFillColor = $this->getFillColor();
             $arrTopLineColors = [];
@@ -395,7 +401,7 @@ abstract class Page extends Zend_Pdf_Page
 //                    $rectangle->getStart()->addY(- $yDelta),
 //                    new Point($rectangle->getWidth(), $nLineHeight)
 //                );
-                $this->drawCell($sLine, $rectangle, $nAlign, $arrLineColors);
+                $this->drawCell($sLine, $rectangle, $align, $arrLineColors);
                 $yDelta += $nLineHeight;
 
                 $bTop = false;

@@ -6,21 +6,25 @@ namespace App\Export\Pdf\Configs\Structure;
 
 class PouleConfig
 {
+    private int $fontHeight;
 
     public function __construct(
+        private int $paddingX = 2,
         private int $rowHeight = 18,
-        private int|null $fontHeight = null
+        int|null $fontHeight = null
     ) {
         if ($rowHeight < 10 || $rowHeight > 30) {
             throw new \Exception('rowHeight should be between 10 and 30');
         }
-        if( $fontHeight === null ) {
+        if ($fontHeight === null) {
             $fontHeight = $this->rowHeight - 4;
         }
 
         if ($fontHeight < 10 || $fontHeight > 30) {
             throw new \Exception('fontHeight should be between 10 and 30');
         }
+        $this->fontHeight = $fontHeight;
+
 //        if ($fontHeight < 10 || $fontHeight > 20) {
 //            throw new \Exception('placeWidth should be between 0 and 100');
 //        }
@@ -39,6 +43,11 @@ class PouleConfig
 //        }
     }
 
+    public function getPaddingX(): int
+    {
+        return $this->paddingX;
+    }
+
     public function getRowHeight(): int
     {
         return $this->rowHeight;
@@ -49,4 +58,3 @@ class PouleConfig
         return $this->fontHeight;
     }
 }
-

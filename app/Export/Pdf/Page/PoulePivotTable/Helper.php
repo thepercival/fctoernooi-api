@@ -26,8 +26,14 @@ trait Helper
         return $rectangle->getRight()->getX();
     }
 
-    protected function drawCellCustom(string $text, float $x, float $y, float $width, float $height, int $align): float
-    {
+    protected function drawCellCustom(
+        string $text,
+        float $x,
+        float $y,
+        float $width,
+        float $height,
+        Align $align
+    ): float {
         $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
         $this->drawCell($text, $rectangle, $align, 'black');
         return $rectangle->getRight()->getX();
@@ -38,8 +44,13 @@ trait Helper
         if (array_key_exists($placeName, $this->fontSizeMap)) {
             return $this->fontSizeMap[$placeName];
         }
-        $fontHeight = $this->config->getFontHeight();
-        if ($this->helper->getTextWidth($placeName, $this->helper->getTimesFont(), $fontHeight) > $this->nameColumnWidth) {
+        /** @var int $fontHeight */
+        $fontHeight = $this->parent->getConfig()->getFontHeight();
+        if ($this->helper->getTextWidth(
+                $placeName,
+                $this->helper->getTimesFont(),
+                $fontHeight
+            ) > $this->nameColumnWidth) {
             $fontHeight -= 2;
         }
         $this->fontSizeMap[$placeName] = $fontHeight;
@@ -60,7 +71,7 @@ trait Helper
     public function getVersusHeight(float $versusColumnWidth, int $degrees = 0): float
     {
         if ($degrees === 0) {
-            return $this->config->getRowHeight();
+            return $this->parent->getConfig()->getRowHeight();
         }
         if ($degrees === 90) {
             return $versusColumnWidth * 2;

@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
+use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Configs\StructureConfig;
 use App\Export\Pdf\Drawers\Helper;
+use Sports\Structure\Cell;
+use Sports\Structure\NameService as StructureNameService;
 
 final class CellDrawer
 {
     private Helper $helper;
-    private RoundDrawer $roundDrawer;
+    private RoundCardDrawer $roundCardDrawer;
+
     // protected int $maxPoulesPerLine = 3;
 
     public function __construct(
-        ) {
-        $this->roundDrawer = new RoundDrawer();
+        protected StructureNameService $structureNameService
+    ) {
+        $this->helper = new Helper();
+        $this->roundCardDrawer = new RoundCardDrawer($structureNameService, new RoundConfig());
     }
 
 //    public function drawCategory(
@@ -43,12 +49,11 @@ final class CellDrawer
 //        return new Rectangle(new Point(0,0),new Point(1,1));
 //    }
 
-    public function getMinimalWidth( StructureCell $structureCell, StructureConfig $config): float
+    public function getMinimalWidth(Cell $structureCell): float
     {
-        $roundCardDrawer = new RoundCardDrawer();
         $minimalWidth = 0;
-        foreach( $structureCell->getRounds() as $round ) {
-            $minimalWidth += $roundCardDrawer->getMinimalWidth();
+        foreach ($structureCell->getRounds() as $round) {
+            $minimalWidth += $this->roundCardDrawer->getMinimalWidth($round);
         }
         return $minimalWidth;
     }
@@ -128,7 +133,7 @@ final class CellDrawer
 //        $numberWidth = $pouleWidth * 0.1;
 //        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
 //        $this->drawCell(
-//            $this->parent->getStructureNameService()->getPouleName($poule, true),
+//            $this->getStructureNameService()->getPouleName($poule, true),
 //            $x,
 //            $yStart,
 //            $pouleWidth,
@@ -151,7 +156,7 @@ final class CellDrawer
 //            $name = '';
 //            $startLocation = $place->getStartLocation();
 //            if ($startLocation !== null && $this->parent->getStartLocationMap()->getCompetitor($startLocation) !== null) {
-//                $name = $this->parent->getStructureNameService()->getPlaceName($place, true);
+//                $name = $this->getStructureNameService()->getPlaceName($place, true);
 //            }
 //            $this->drawCell(
 //                $name,

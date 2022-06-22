@@ -7,5 +7,5 @@ namespace App\Export\Pdf\Drawers\GameLine\Column;
 enum Against: int
 {
     case SidePlaces = 10;
-    case Score= 11;
+    case Score = 11;
 }

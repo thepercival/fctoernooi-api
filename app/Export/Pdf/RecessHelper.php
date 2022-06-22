@@ -5,7 +5,6 @@ namespace App\Export\Pdf;
 use DateTimeImmutable;
 use FCToernooi\Recess;
 use FCToernooi\Tournament;
-use League\Period\Period;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Sports\Planning\Config as PlanningConfig;
@@ -25,7 +24,7 @@ class RecessHelper
 
     /**
      * @param Tournament $tournament
-     * @return list<Period>
+     * @return list<Recess>
      * @throws \Exception
      */
     public function getRecesses(Tournament $tournament): array
@@ -33,13 +32,7 @@ class RecessHelper
         $filteredRecesses = $tournament->getRecesses()->filter(function (Recess $recess): bool {
             return $recess->getEndDateTime()->getTimestamp() >= $this->previousLastEndDateTime->getTimestamp();
         })->toArray();
-        return array_values(
-            array_map(function (Recess $recess): Period {
-                $startDateTime = $recess->getStartDateTime()->getTimestamp() < $this->previousLastEndDateTime->getTimestamp()
-                ? $this->previousLastEndDateTime : $recess->getStartDateTime();
-                return new Period($startDateTime, $recess->getEndDateTime());
-            }, $filteredRecesses)
-        );
+        return array_values($filteredRecesses);
     }
 
     private function getPreviousEndDateTime(RoundNumber $roundNumber): DateTimeImmutable
@@ -54,16 +47,17 @@ class RecessHelper
 
     /**
      * @param AgainstGame|TogetherGame $game
-     * @param list<Period> $recesses
-     * @return Period|null
+     * @param list<Recess> $recesses
+     * @return Recess|null
      */
-    public function removeRecessBeforeGame(AgainstGame|TogetherGame $game, array& $recesses): Period | null
+    public function removeRecessBeforeGame(AgainstGame|TogetherGame $game, array &$recesses): Recess|null
     {
         if (!$this->planningConfig->getEnableTime()) {
             return null;
         }
-        $filteredRecesses = array_filter($recesses, function (Period $recess) use ($game): bool {
-            return $game->getStartDateTime()->getTimestamp() === $recess->getEndDate()->getTimestamp();
+
+        $filteredRecesses = array_filter($recesses, function (Recess $recess) use ($game): bool {
+            return $game->getStartDateTime()->getTimestamp() === $recess->getPeriod()->getEndDate()->getTimestamp();
         });
         $filteredRecess = reset($filteredRecesses);
         if ($filteredRecess === false) {

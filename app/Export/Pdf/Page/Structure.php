@@ -24,10 +24,11 @@ class Structure extends ToernooiPdfPage
    // private bool $enableOutOfBoundsException;
     private int $maxNrOfPoulePlaceColumns = 1;
 
-    public function __construct(StructureDocument $document, Point $point, bool $enableOutOfBoundsException)
+    public function __construct(StructureDocument $document, Point $point)
     {
         $dimensions = $point->getX() . ':' . $point->getY();
         parent::__construct($document, $dimensions);
+        $this->setFont($this->helper->getTimesFont(), $document->getConfig()->getFontHeight());
         $this->setLineWidth(0.5);
 //        $this->enableOutOfBoundsException = $enableOutOfBoundsException;
     }
@@ -83,7 +84,7 @@ class Structure extends ToernooiPdfPage
 //        $this->setFont($this->helper->getTimesFont(true), self::FontHeight);
 //
 //        $arrLineColors = !$round->isRoot() ? ['t' => 'black'] : null;
-//        $roundName = $this->parent->getStructureNameService()->getRoundName($round);
+//        $roundName = $this->getStructureNameService()->getRoundName($round);
 //        if( !$this->parent->getStructure()->hasSingleCategory() ) {
 //            $roundName .= ' - ' . $round->getCategory()->getName();
 //        }
@@ -125,7 +126,7 @@ class Structure extends ToernooiPdfPage
 //        $this->setFont($this->helper->getTimesFont(true), self::FontHeight);
 //
 //        $arrLineColors = !$round->isRoot() ? ['t' => 'black'] : null;
-//        $roundName = $this->parent->getStructureNameService()->getRoundName($round);
+//        $roundName = $this->getStructureNameService()->getRoundName($round);
 //        if( !$this->parent->getStructure()->hasSingleCategory() ) {
 //            $roundName .= ' - ' . $round->getCategory()->getName();
 //        }

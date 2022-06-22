@@ -6,11 +6,15 @@ namespace App\Export\Pdf\Configs\Structure;
 
 class RoundConfig
 {
+    private PouleConfig $pouleConfig;
+
     public function __construct(
+        PouleConfig|null $pouleConfig = null,
         private int $headerHeight = 18,
         private int $fontHeight = 14,
         private int $padding = 15
     ) {
+        $this->pouleConfig = $pouleConfig !== null ? $pouleConfig : new PouleConfig();
         if ($headerHeight < 10 || $headerHeight > 20) {
             throw new \Exception('headerHeight should be between 10 and 20');
         }
@@ -21,6 +25,11 @@ class RoundConfig
         if ($fontHeight < 10 || $fontHeight > 20) {
             throw new \Exception('placeWidth should be between 0 and 100');
         }
+    }
+
+    public function getPouleConfig(): PouleConfig
+    {
+        return $this->pouleConfig;
     }
 
     public function getHeaderHeight(): int
@@ -38,4 +47,3 @@ class RoundConfig
         return $this->fontHeight;
     }
 }
-

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
@@ -38,9 +37,10 @@ abstract class PoulePivotTables extends ToernooiPdfPage
     // protected $placeWidthStructure;
     // protected $pouleMarginStructure;
 
-    public function __construct(PoulePivotTablesDocument $document, mixed $param1, protected PoulePivotConfig $config)
+    public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
         $this->setLineWidth(0.5);
         $this->nameColumnWidth = $this->getDisplayWidth() * 0.25;
         $this->versusColumnsWidth = $this->getDisplayWidth() * 0.62;
@@ -51,19 +51,19 @@ abstract class PoulePivotTables extends ToernooiPdfPage
 
     public function drawPageStartHeader(RoundNumber $roundNumber, CompetitionSport $competitionSport, float $y): float
     {
-        $fontHeightSubHeader = $this->config->getFontHeight();
-        $this->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
+        $fontHeight = $this->parent->getConfig()->getFontHeight();
+        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
         $x = self::PAGEMARGIN;
         $displayWidth = $this->getDisplayWidth();
-        $subHeader = $this->parent->getStructureNameService()->getRoundNumberName($roundNumber);
+        $subHeader = $this->getStructureNameService()->getRoundNumberName($roundNumber);
         $subHeader .= ' - ' . $competitionSport->getSport()->getName();
         $rectangle = new Rectangle(
             new HorizontalLine(new Point($x, $y), $displayWidth),
-            $fontHeightSubHeader
+            $fontHeight
         );
         $this->drawCell($subHeader, $rectangle, Align::Center);
-        $this->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
-        return $y - (2 * $fontHeightSubHeader);
+        $this->setFont($this->helper->getTimesFont(), $fontHeight);
+        return $y - (2 * $fontHeight);
     }
 
     /*public function draw()
@@ -91,7 +91,7 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         $x = self::PAGEMARGIN;
-        $pouleName = $this->parent->getStructureNameService()->getPouleName($poule, true);
+        $pouleName = $this->getStructureNameService()->getPouleName($poule, true);
         $x = $this->drawHeaderCustom($pouleName, $x, $y, $this->nameColumnWidth, $height);
         $x = $this->drawVersusHeader($poule, $gameAmountConfig, $x, $y);
 
@@ -124,8 +124,8 @@ abstract class PoulePivotTables extends ToernooiPdfPage
             $sportRankingItems = $calculator->getItemsForPoule($poule);
         }
 
-        $height = $this->config->getRowHeight();
-        $structureNameService = $this->parent->getStructureNameService();
+        $height = $this->parent->getConfig()->getRowHeight();
+        $structureNameService = $this->getStructureNameService();
 
         foreach ($poule->getPlaces() as $place) {
             $x = self::PAGEMARGIN;
@@ -134,7 +134,7 @@ abstract class PoulePivotTables extends ToernooiPdfPage
                 $placeName = $place->getPlaceNr() . '. ' . $structureNameService->getPlaceFromName($place, true);
                 $this->setFont($this->helper->getTimesFont(), $this->getPlaceFontHeight($placeName));
                 $x = $this->drawCellCustom($placeName, $x, $y, $this->nameColumnWidth, $height, Align::Left);
-                $this->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+                $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
             }
 
             $x = $this->drawVersusCell($place, $gameAmountConfig, $x, $y);

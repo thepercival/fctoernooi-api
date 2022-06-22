@@ -4,33 +4,92 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
-use App\Export\Pdf\Configs\StructureConfig;
+use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Drawers\Helper;
-use Sports\Round;
+use Sports\Place;
+use Sports\Poule;
 use Sports\Structure\NameService as StructureNameService;
 
 final class PouleDrawer
 {
     protected Helper $helper;
+    private float|null $numberColumnWidth = null;
 
     public function __construct(
         protected StructureNameService $structureNameService,
-        protected StructureConfig $config
-    )
-    {
+        protected PouleConfig $config
+    ) {
         $this->helper = new Helper();
     }
 
-    public function getMinimalWidth(Round $round): float
+    public function getMinimalWidth(Poule $poule, bool $showPouleNamePrefix, bool $showCompetitor): float
     {
-        $padding = $this->config->getRoundConfig()->getPadding();
-        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config);
-        $minimalWidth = $padding;
-        foreach ($round->getPoules() as $poule) {
-            $minimalWidth += $pouleDrawer->getMinimalWidth($poule);
-            $minimalWidth += $padding;
+        $minimalPouleNameWidth = $this->getMinimalPouleNameWidth($poule, $showPouleNamePrefix);
+        $minimalPlacesWidth = $this->getMinimalPlacesWidth($poule, $showCompetitor);
+        return max($minimalPouleNameWidth, $minimalPlacesWidth);
+    }
+
+    public function getMinimalPouleNameWidth(Poule $poule, bool $showPouleNamePrefix): float
+    {
+        $pouleName = $this->structureNameService->getPouleName($poule, $showPouleNamePrefix);
+        return $this->getTextWidth($pouleName);
+    }
+
+    // could be extended with maxNrOfRows, maxNrOfColumns
+    public function getMinimalPlacesWidth(Poule $poule, bool $showCompetitor): float
+    {
+        $minimalWidth = 0;
+        foreach ($poule->getPlaces() as $place) {
+            $placeWidth = $this->getMinimalPlaceWidth($place, $showCompetitor);
+            if ($placeWidth > $minimalWidth) {
+                $minimalWidth = $placeWidth;
+            }
         }
         return $minimalWidth;
+    }
+
+    // could be extended with maxNrOfRows, maxNrOfColumns
+    public function getMinimalPlaceWidth(Place $place, bool $showCompetitor): float
+    {
+        $minimalWidth = 0;
+        $startLocationMap = $this->structureNameService->getStartLocationMap();
+        if ($showCompetitor) {
+            $minimalWidth += $this->getNumberColumnWidth();
+            if ($startLocationMap !== null) {
+                $startLocation = $place->getStartLocation();
+                if ($startLocation !== null) {
+                    $competitor = $startLocationMap->getCompetitor($startLocation);
+                    if ($competitor !== null) {
+                        $minimalWidth += $this->getTextWidth($competitor->getName());
+                    }
+                }
+            }
+        } else {
+            $placeFromName = $this->structureNameService->getPlaceFromName($place, false);
+            $minimalWidth += $this->getTextWidth($placeFromName);
+        }
+        return $minimalWidth;
+    }
+
+    private function getNumberColumnWidth(): float
+    {
+        if ($this->numberColumnWidth === null) {
+            $this->numberColumnWidth = $this->getTextWidth('88');
+        }
+        return $this->numberColumnWidth;
+    }
+
+    private function getTextWidth(string $text, bool $withPadding = true): float
+    {
+        $textWidth = $this->helper->getTextWidth(
+            $text,
+            $this->helper->getTimesFont(),
+            $this->config->getFontHeight()
+        );
+        if ($withPadding === true) {
+            return $this->config->getPaddingX() + $textWidth + $this->config->getPaddingX();
+        }
+        return $textWidth;
     }
 
 //    // protected int $maxPoulesPerLine = 3;
@@ -111,7 +170,7 @@ final class PouleDrawer
 //        $numberWidth = $pouleWidth * 0.1;
 //        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
 //        $this->drawCell(
-//            $this->parent->getStructureNameService()->getPouleName($poule, true),
+//            $this->getStructureNameService()->getPouleName($poule, true),
 //            $x,
 //            $yStart,
 //            $pouleWidth,
@@ -134,7 +193,7 @@ final class PouleDrawer
 //            $name = '';
 //            $startLocation = $place->getStartLocation();
 //            if ($startLocation !== null && $this->parent->getStartLocationMap()->getCompetitor($startLocation) !== null) {
-//                $name = $this->parent->getStructureNameService()->getPlaceName($place, true);
+//                $name = $this->getStructureNameService()->getPlaceName($place, true);
 //            }
 //            $this->drawCell(
 //                $name,

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Document;
 
+use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
 use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
 use App\Export\Pdf\Page\GameNotes\Single as SingleGameNotesPage;
+use App\Export\PdfProgress;
+use FCToernooi\Tournament;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round;
 use Sports\Round\Number as RoundNumber;
 use Sports\Score\Config as ScoreConfig;
+use Sports\Structure;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
 use Zend_Pdf_Page;
@@ -23,6 +27,22 @@ use Zend_Pdf_Page;
  */
 class GameNotes extends PdfDocument
 {
+    public function __construct(
+        protected Tournament $tournament,
+        protected Structure $structure,
+        protected string $url,
+        protected PdfProgress $progress,
+        protected float $maxSubjectProgress,
+        protected GameNotesConfig $config
+    ) {
+        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+    }
+
+    public function getConfig(): GameNotesConfig
+    {
+        return $this->config;
+    }
+
     protected function fillContent(): void
     {
         $nrOfGameNotes = $this->getNrOfGameNotes($this->structure->getFirstRoundNumber());
@@ -92,7 +112,6 @@ class GameNotes extends PdfDocument
     protected function createAgainstGameNotesPage(AgainstGame $gameA, AgainstGame|null $gameB): AgainstGameNotesPage
     {
         $page = new AgainstGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $page->setFont($this->getFont(), $this->getFontHeight());
         $this->pages[] = $page;
         return $page;
     }
@@ -100,7 +119,6 @@ class GameNotes extends PdfDocument
     protected function createSingleGameNotesPage(TogetherGame $gameA, TogetherGame|null $gameB): SingleGameNotesPage
     {
         $page = new SingleGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $page->setFont($this->getFont(), $this->getFontHeight());
         $this->pages[] = $page;
         return $page;
     }
@@ -108,7 +126,6 @@ class GameNotes extends PdfDocument
     protected function createAllInOneGameNotesPage(TogetherGame $gameA, TogetherGame|null $gameB): AllInOneGameNotesPage
     {
         $page = new AllInOneGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $page->setFont($this->getFont(), $this->getFontHeight());
         $this->pages[] = $page;
         return $page;
     }

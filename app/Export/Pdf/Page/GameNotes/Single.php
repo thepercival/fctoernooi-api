@@ -31,7 +31,7 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $structureNameService = $this->parent->getStructureNameService();
+        $structureNameService = $this->getStructureNameService();
         $places = array_values($game->getPlaces()->toArray());
         $description = $structureNameService->getPlacesFromName($places, false, count($places) <= 3);
         $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
@@ -51,7 +51,7 @@ class Single extends GameNotesBase
 
     protected function getPlaceWidth(TogetherGame $game): float
     {
-        $margin = $this->config->getMargin();
+        $margin = $this->parent->getConfig()->getMargin();
         $placesWidth = $this->getDetailPartWidth() + $margin + $this->getDetailPartWidth();
         $placesWidth -=  ($margin + $this->getPartWidth()); // unit(right side)
         $placesWidth -= ($game->getPlaces()->count() - 1) * $margin;
@@ -63,22 +63,22 @@ class Single extends GameNotesBase
         if ($game instanceof AgainstGame) {
             return;
         }
-        $margin = $this->config->getMargin();
-        $structureNameService = $this->parent->getStructureNameService();
+        $margin = $this->parent->getConfig()->getMargin();
+        $structureNameService = $this->getStructureNameService();
         $roundNumber = $game->getRound()->getNumber();
         $planningConfig = $roundNumber->getValidPlanningConfig();
         $firstScoreConfig = $game->getScoreConfig();
-        $fontSize = $this->config->getFontHeight();
+        $fontSize = $this->parent->getConfig()->getFontHeight();
         $larger = 1.2;
-        $largerFontSize = $this->config->getFontHeight() * $larger;
-        $height = $this->config->getRowHeight() * $larger;
+        $largerFontSize = $this->parent->getConfig()->getFontHeight() * $larger;
+        $height = $this->parent->getConfig()->getRowHeight() * $larger;
         $leftPartWidth = $this->getLeftPartWidth();
         $placesStart = $this->getStartDetailLabel();
         $placeWidth = $this->getPlaceWidth($game);
         $unitWidth = $this->getPartWidth();
         $unitStart = $placesStart;
         foreach ($game->getPlaces() as $gamePlace) {
-            $unitStart += $placeWidth + $this->config->getMargin();
+            $unitStart += $placeWidth + $this->parent->getConfig()->getMargin();
         }
 
         // 2x font thuis - uit
