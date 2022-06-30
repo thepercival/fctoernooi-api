@@ -41,7 +41,7 @@ class GamesPerField extends PdfPlanningDocument
         );
     }
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $this->drawPlanningPerField($this->structure->getFirstRoundNumber());
     }

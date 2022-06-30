@@ -15,6 +15,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
+use Selective\Config\Configuration;
 use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
@@ -29,7 +30,8 @@ final class StructureAction extends Action
         private CacheService $cacheService,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
-        protected EntityManagerInterface $em
+        protected EntityManagerInterface $em,
+        protected Configuration $config
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -63,7 +65,7 @@ final class StructureAction extends Action
 
             $tournamentId = (int)$tournament->getId();
             $json = $this->cacheService->getStructure($tournamentId);
-            if ($json === false) {
+            if ($json === false || $this->config->getString('environment') === 'development') {
                 $structure = $this->structureRepos->getStructure($competition);
                 $json = $this->serializer->serialize(
                     $structure,

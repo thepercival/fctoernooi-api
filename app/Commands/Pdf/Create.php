@@ -23,6 +23,7 @@ use Selective\Config\Configuration;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Create extends PlanningCommand
@@ -87,6 +88,8 @@ class Create extends PlanningCommand
             // the "--help" option
             ->setHelp('Creates the pdf from the inputs');
         parent::configure();
+
+        $this->addOption('singleRun', null, InputOption::VALUE_NONE, 'not waiting..');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -104,7 +107,9 @@ class Create extends PlanningCommand
 
             $queueService = new PdfQueueService($this->config->getArray('queue'));
 
-            $timeoutInSeconds = 240;
+            $singleRun = $input->getOption('singleRun');
+            $singleRun = is_bool($singleRun) ? $singleRun : false;
+            $timeoutInSeconds = $singleRun ? 1 : 240;
             $queueService->receive($this->getReceiver($queueService), $timeoutInSeconds);
         } catch (\Exception $exception) {
             if ($this->logger !== null) {

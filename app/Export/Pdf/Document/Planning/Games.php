@@ -45,7 +45,7 @@ class Games extends PdfPlanningDocument
         );
     }
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $firstRoundNumber = $this->structure->getFirstRoundNumber();
         $title = 'wedstrijden';

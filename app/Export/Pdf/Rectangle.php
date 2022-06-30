@@ -34,8 +34,9 @@ final class Rectangle
             $this->top = $horLine->addY($height);
         }
 
-        $this->right = new VerticalLine($this->bottom->getEnd(), $height);
-        $this->left = new VerticalLine($this->bottom->getStart(), $height);
+        $calcHeight = $this->top->getY() - $this->bottom->getY();
+        $this->left = new VerticalLine($this->bottom->getStart(), $calcHeight);
+        $this->right = new VerticalLine($this->bottom->getEnd(), $calcHeight);
     }
 
     private function initByVerticalLine(VerticalLine $vertLine, float $width): void
@@ -61,10 +62,10 @@ final class Rectangle
         return $this->right->getX() - $this->left->getX();
     }
 
-    public function getStart(): Point
-    {
-        return $this->top->getStart();
-    }
+//    public function getStart(): Point
+//    {
+//        return $this->top->getStart();
+//    }
 
     public function getTop(): HorizontalLine
     {
@@ -90,6 +91,10 @@ final class Rectangle
         return $this->left;
     }
 
+    public function getAspectRatio(): float
+    {
+        return $this->getWidth() / $this->getHeight();
+    }
 
 //    public function enlarge(float $multiplier): Rectangle
 //    {

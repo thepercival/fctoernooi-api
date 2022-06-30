@@ -39,7 +39,7 @@ class PoulePivotTables extends PdfDocument
         return $this->config;
     }
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $this->drawPoulePivotTables($this->structure->getFirstRoundNumber());
     }

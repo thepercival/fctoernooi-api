@@ -43,7 +43,7 @@ class GameNotes extends PdfDocument
         return $this->config;
     }
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $nrOfGameNotes = $this->getNrOfGameNotes($this->structure->getFirstRoundNumber());
         $nrOfProgressPerGameNote = $this->maxSubjectProgress / $nrOfGameNotes;

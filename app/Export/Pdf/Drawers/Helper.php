@@ -23,7 +23,7 @@ class Helper
         } elseif ($bBold === true and $bItalic === true) {
             $suffix = 'timesbi.ttf';
         }
-        $sFontDir = __DIR__ . '/../../../../../fonts/';
+        $sFontDir = __DIR__ . '/../../../../fonts/';
         return Zend_Pdf_Font::fontWithPath($sFontDir . $suffix);
     }
 

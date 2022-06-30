@@ -43,7 +43,7 @@ class LockerRooms extends PdfDocument
     }
 
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $page = $this->createLockerRoomsPage();
         $page->draw();

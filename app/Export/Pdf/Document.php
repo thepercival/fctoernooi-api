@@ -21,7 +21,7 @@ use Zend_Pdf;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class Document extends Zend_Pdf
+abstract class Document extends Zend_Pdf
 {
     protected StructureNameService|null $structureNameService = null;
     protected StartLocationMap|null $startLocationMap = null;
@@ -50,16 +50,16 @@ class Document extends Zend_Pdf
 
     public function render($newSegmentOnly = false, $outputStream = null): string
     {
-        $this->fillContent();
+        $this->renderCustom();
         $retVal = parent::render($newSegmentOnly, $outputStream);
         $this->updateProgress();
         return $retVal;
     }
 
-    protected function fillContent(): void
-    {
-        throw new \Exception('should be implemented', E_ERROR);
-    }
+    abstract protected function renderCustom(): void;
+//    {
+//        throw new \Exception('should be implemented', E_ERROR);
+//    }
 
     protected function updateProgress(): void
     {

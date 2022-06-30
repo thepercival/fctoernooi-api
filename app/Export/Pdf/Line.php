@@ -6,10 +6,15 @@ class Line
 {
     public function __construct(protected Point $start, protected Point $end)
     {
-        if($start->getX() == $end->getX() && $start->getX() == $end->getX()) {
+        if ($start->getX() == $end->getX() && $start->getY() == $end->getY()) {
             throw new \Exception('the points("' . $start . '" & "' . $end . '") form a dot instead of a line', E_ERROR);
-        } else if($start->getX() != $end->getX() && $start->getY() != $end->getY()) {
-            throw new \Exception('the points("' . $start . '" & "' . $end . '") form a rectangle instead of a line', E_ERROR);
+        } else {
+            if ($start->getX() != $end->getX() && $start->getY() != $end->getY()) {
+                throw new \Exception(
+                    'the points("' . $start . '" & "' . $end . '") form a rectangle instead of a line',
+                    E_ERROR
+                );
+            }
         }
     }
 

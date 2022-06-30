@@ -38,43 +38,32 @@ trait HeaderDrawer
             $widthCenter -= ($margin + $widthRight);
         }
         /** @var Zend_Pdf_Resource_Image $img */
-        $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../../../../logo.jpg');
+        $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../../../logo.jpg');
         $y = $config->getYStart();
         if ($y === null) {
             $y = $this->getHeight() - self::PAGEMARGIN;
         }
-        $this->drawImage($img, $xLeft, $y - $imgSize, $xLeft + $imgSize, $y);
+
+        $imgRectangle = new Rectangle(new HorizontalLine(new Point($xLeft, $y), $imgSize), -$imgSize);
+        $this->drawImageExt($img, $imgRectangle);
 
         $arrLineColors = ['b' => 'black'];
-        $this->drawCell(
-            'FCToernooi',
-            new Rectangle(
-                new HorizontalLine(
-                    new Point($xLeft + $imgSize, $y),
-                    $widthLeft - $imgSize
-                ),
-                $rowHeight
-            ),
-            Align::Left,
-            $arrLineColors
+        $rectangle = new Rectangle(
+            new HorizontalLine(new Point($xLeft + $imgSize, $y), $widthLeft),
+            -$rowHeight
         );
+        $this->drawCell('FCToernooi', $rectangle, Align::Left, $arrLineColors);
 
         $rectangle = new Rectangle(
-            new HorizontalLine(
-                new Point($xLeft + $imgSize, $y),
-                $widthCenter
-            ),
-            $rowHeight
+            new HorizontalLine(new Point($xCenter, $y), $widthCenter),
+            -$rowHeight
         );
-        $this->drawCell($tournamentName, $rectangle, Align::Left, $arrLineColors);
+        $this->drawCell($tournamentName, $rectangle, Align::Center, $arrLineColors);
 
         if (strlen($subTitle) > 0) {
             $rectangle = new Rectangle(
-                new HorizontalLine(
-                    new Point($xRight, $y),
-                    $widthRight
-                ),
-                $rowHeight
+                new HorizontalLine(new Point($xRight, $y), $widthRight),
+                -$rowHeight
             );
             $this->drawCell($subTitle, $rectangle, Align::Right, $arrLineColors);
         }

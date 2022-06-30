@@ -23,14 +23,17 @@ class RoundDrawer
 
     // protected int $maxPoulesPerLine = 3;
 
-    public function getMinimalWidth(Round $round): float
+    public function getMinimalWidth(Round $round, int $maxNrOfPouleRows): float
     {
+        $poules = $round->getPoules()->toArray();
+        $nrOfPoulesBiggestRow = (int)ceil(count($poules) / $maxNrOfPouleRows);
+        $poulesBiggestRow = array_splice($poules, 0, $nrOfPoulesBiggestRow);
         $showPouleNamePrefix = $round->isRoot();
         $showCompetitor = $round->isRoot();
         $padding = $this->config->getPadding();
         $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
         $minimalWidth = $padding;
-        foreach ($round->getPoules() as $poule) {
+        foreach ($poulesBiggestRow as $poule) {
             $minimalWidth += $pouleDrawer->getMinimalWidth($poule, $showPouleNamePrefix, $showCompetitor);
             $minimalWidth += $padding;
         }

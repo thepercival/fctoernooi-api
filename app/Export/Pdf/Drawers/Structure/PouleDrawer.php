@@ -6,6 +6,8 @@ namespace App\Export\Pdf\Drawers\Structure;
 
 use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Drawers\Helper;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Page;
 use Sports\Place;
 use Sports\Poule;
 use Sports\Structure\NameService as StructureNameService;
@@ -20,6 +22,14 @@ final class PouleDrawer
         protected PouleConfig $config
     ) {
         $this->helper = new Helper();
+    }
+
+    public function drawPoule(Page $page, Poule $poule, HorizontalLine $horLine): HorizontalLine
+    {
+        // $this->config->getPaddingX()
+        // $this->config->getRowHeight()
+
+        return $horLine->addY(-$this->getHeight($poule));
     }
 
     public function getMinimalWidth(Poule $poule, bool $showPouleNamePrefix, bool $showCompetitor): float
@@ -92,18 +102,22 @@ final class PouleDrawer
         return $textWidth;
     }
 
-//    // protected int $maxPoulesPerLine = 3;
-//
-//    public function drawRound(Round $round, Rectangle $rectangle, StructureConfig $config ): void
-//    {
-//        $withCompetitors = $round->isRoot();
-//        // $y = $this->drawHeader("indeling");
-//        $this->drawGrouping($round->getPoules()->toArray(), $rectangle, $config, $withCompetitors);
-//    }
-//
-//    public function getHeight(): float {
-//
-//    }
+
+    public function getHeight(Poule $poule): float
+    {
+        $nrOfColumns = $this->getNrOfColumnsNeeded($poule);
+        $nrOfPlaces = count($poule->getPlaces());
+        $nrOfRows = ceil($nrOfPlaces / $nrOfColumns);
+        return $this->config->getRowHeight() * (1 + $nrOfRows);
+    }
+
+    public function getNrOfColumnsNeeded(Poule $poule): float
+    {
+        $rest = count($poule->getPlaces()) % 10;
+        $nrOfColumns = (count($poule->getPlaces()) - $rest) / 10;
+        return $rest === 0 ? $nrOfColumns : $nrOfColumns + 1;
+    }
+
 //
 //    /**
 //     * @param list<Poule> $poules

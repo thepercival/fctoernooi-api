@@ -1,16 +1,29 @@
 -- PRE PRE PRE doctrine-update =============================================================
+-- DO SQL WITH HAND
+-- ALTER TABLE rounds CHANGE numberid structureCellId INT NOT NULL;
+-- TO
+-- ALTER TABLE rounds ADD structureCellId INT  NULL;
 
 -- POST POST POST doctrine-update ===========================================================
+
 insert into categories(number, name, competitionId) (select 1, 'standaard', competitionId
                                                      from roundNumbers
-                                                     where previousId is null)
+                                                     where previousId is null);
 
-update rounds join roundNumbers rn on rn.id = rounds.numberId
-set rounds.categoryId = (select id from categories where competitionId = rn.competitionId);
+insert into structureCells(categoryId, roundNumberId) (select c.id, rn.id
+                                                       from roundNumbers rn
+                                                                join categories c on c.competitionId = rn.competitionId);
 
-update competitors set categoryNr = 1;
+update rounds r
+    join roundNumbers rn on r.numberId = rn.id
+    join categories c on c.competitionId = rn.competitionId
+set structureCellId = (select id from structureCells where roundNumberId = rn.id and categoryId = c.id);
 
-update recesses set name = 'pauze';
+update competitors
+set categoryNr = 1;
+
+update recesses
+set name = 'pauze';
 
 -- insert into creditActions(userId, action, nrOfCredits, atDateTime) (select id, 'CreateAccountReward', 3, CURRENT_TIMESTAMP from users);
 

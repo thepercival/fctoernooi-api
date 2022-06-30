@@ -33,7 +33,7 @@ class QRCode extends PdfDocument
         return $this->config;
     }
 
-    protected function fillContent(): void
+    protected function renderCustom(): void
     {
         $page = $this->createPageQRCode();
         $page->draw();

@@ -9,7 +9,7 @@ class Vertical extends Line
 {
     public function __construct(protected Point $start, float $height)
     {
-        parent::__construct($start, $start->addY(-$height));
+        parent::__construct($start, $start->addY($height));
     }
 
     public function getX(): float

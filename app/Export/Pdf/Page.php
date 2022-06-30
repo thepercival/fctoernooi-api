@@ -12,6 +12,7 @@ use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
 use Zend_Pdf_Exception;
 use Zend_Pdf_Page;
+use Zend_Pdf_Resource_Image;
 
 /**
  * @template T
@@ -108,12 +109,13 @@ abstract class Page extends Zend_Pdf_Page
         Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
         int $degrees = null
-    ): void {
+    ): void
+    {
         $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
 
         $arrLineColors = $this->getLineColorsFromInput($vtLineColors);
-        $xPos = $rectangle->getStart()->getX();
-        $yPos = $rectangle->getStart()->getY();
+        $xPos = $rectangle->getLeft()->getX();
+        $yPos = $rectangle->getTop()->getY();
         if ($arrLineColors !== null) {
             $nLineWidth = $this->getLineWidth();
             $this->setLineColor($this->getFillColor());
@@ -163,6 +165,19 @@ abstract class Page extends Zend_Pdf_Page
             $stringXPos -= ($rectangle->getHeight() - $rectangle->getWidth()) / 2;
         }
         $this->drawString($sText, new Point($stringXPos, $nTextY), $maxLength, $nAlign, $degrees);
+    }
+
+    public function drawImageExt(Zend_Pdf_Resource_Image $image, Rectangle $rectangle): void
+    {
+        $bottomLeft = $rectangle->getLeft()->getStart();
+        $upperRight = $rectangle->getRight()->getEnd();
+        $this->drawImage(
+            $image,
+            $bottomLeft->getX(),
+            $bottomLeft->getY(),
+            $upperRight->getX(),
+            $upperRight->getY()
+        );
     }
 
     public function drawRectangleExt(
@@ -264,10 +279,10 @@ abstract class Page extends Zend_Pdf_Page
             if ($nMaxWidth !== null and ($nCharPosition + $nCharWidth + $nDotDotWidth) > $nMaxWidth
                 and $nCharIndex < (count($chrArray) - 2)
             ) {
-                $this->drawText('..', $nNewXPos + $nCharPosition, $start->getX(), 'UTF-8');
+                $this->drawText('..', $nNewXPos + $nCharPosition, $start->getY(), 'UTF-8');
                 break;
             }
-            $this->drawText($chrArray[$nCharIndex], $nNewXPos + $nCharPosition, $start->getX(), 'UTF-8');
+            $this->drawText($chrArray[$nCharIndex], $nNewXPos + $nCharPosition, $start->getY(), 'UTF-8');
 
             $nCharPosition += $nCharWidth;
         }
@@ -338,7 +353,8 @@ abstract class Page extends Zend_Pdf_Page
         $nNrOfLines = count($arrLines);
         if ($nNrOfLines === 1) {
             $rectangle = new Rectangle(
-                $rectangle->getTop(), $rectangle->getHeight() - ($nLineHeight + $yDelta)
+                $rectangle->getTop(),
+                $rectangle->getHeight() - ($nLineHeight + $yDelta)
             );
             $this->drawCell($text, $rectangle, $align, $vtLineColor);
         } else {
