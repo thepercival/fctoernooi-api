@@ -35,7 +35,9 @@ class Structure extends PdfDocument
     ) {
         parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
         $drawCategoryHeader = !$this->getStructure()->hasSingleCategory();
-        $this->categoryDrawer = new CategoryDrawer($this->getStructureNameService(), $drawCategoryHeader);
+        $this->categoryDrawer = new CategoryDrawer(
+            $this->getStructureNameService(), $drawCategoryHeader, $config->getCategoryConfig()
+        );
     }
 
     public function getConfig(): StructureConfig
@@ -57,13 +59,7 @@ class Structure extends PdfDocument
             $rectangle = new Rectangle($horLine, -($horLine->getY() - Page::PAGEMARGIN));
             if ($nextCategory != null) {
                 if ($this->canRenderBesideEachOther($category, $nextCategory, $rectangle)) {
-                    $bottomRight = $this->categoryDrawer->drawCategory($page, $category, $horLine->getStart(), 1);
-                    $topLeftTwo = new Point($bottomRight->getX() + $this->config->getPadding(), $horLine->getY());
-                    $bottomRightTwo = $this->categoryDrawer->drawCategory($page, $category, $topLeftTwo, 1);
-                    $bottom = $bottomRight->getY() < $bottomRightTwo->getY() ? $bottomRight : $bottomRightTwo->getY();
-                    $horLine = new HorizontalLine(
-                        new Point(Page::PAGEMARGIN, $bottom->getY()), $page->getDisplayWidth()
-                    );
+                    $horLine = $this->renderBesideEachOther($page, $category, $nextCategory, $horLine);
                     continue;
                 } else {
                     array_unshift($categories, $category);
@@ -78,18 +74,18 @@ class Structure extends PdfDocument
                 // will create new page and better dimensions
             }
 
+            $top = $rectangle->getTop();
+            $bottom = $this->categoryDrawer->drawCategory($page, $category, $top);
 
-            $topLeft = $rectangle->getTop()->getStart();
-            $bottomRight = $this->categoryDrawer->drawCategory($page, $category, $topLeft, $maxNrOfPouleRows);
-            $horLine = new HorizontalLine($bottomRight, $topLeft->getX() - $bottomRight->getX());
-            $horLine = $horLine->addY(-$this->getConfig()->getPadding());
+            // $horLine = new HorizontalLine($bottomRight, $topLeft->getX() - $bottomRight->getX());
+            $horLine = $bottom->addY(-$this->getConfig()->getPadding());
         }
     }
 
     private function canRenderBesideEachOther(Category $category, Category $nextCategory, Rectangle $rectangle): bool
     {
-        $categoryOneRectangle = $this->categoryDrawer->calculateRectangle($category, 1, $rectangle->getWidth());
-        $categoryTwoRectangle = $this->categoryDrawer->calculateRectangle($nextCategory, 1, $rectangle->getWidth());
+        $categoryOneRectangle = $this->categoryDrawer->calculateRectangle($category, 1);
+        $categoryTwoRectangle = $this->categoryDrawer->calculateRectangle($nextCategory, 1);
         if ($categoryOneRectangle->getHeight() < $rectangle->getHeight()
             && $categoryTwoRectangle->getHeight() < $rectangle->getHeight()
         ) {
@@ -102,6 +98,27 @@ class Structure extends PdfDocument
         return false;
     }
 
+    private function renderBesideEachOther(
+        Page $page,
+        Category $category,
+        Category $nextCategory,
+        HorizontalLine $top
+    ): HorizontalLine {
+        $width = $this->categoryDrawer->calculateRectangle($category, 1)->getWidth();
+        $top = new HorizontalLine($top->getStart(), $width);
+        $bottom = $this->categoryDrawer->drawCategory($page, $category, $top);
+
+        $widthNext = $this->categoryDrawer->calculateRectangle($nextCategory, 1)->getWidth();
+        $topLeftNext = new Point($top->getEnd()->getX() + $this->config->getPadding(), $top->getY());
+        $topNext = new HorizontalLine($topLeftNext, $widthNext);
+        $bottomNext = $this->categoryDrawer->drawCategory($page, $category, $topNext);
+        return new HorizontalLine(
+            new Point(Page::PAGEMARGIN, min($bottom->getY(), $bottomNext->getY())),
+            $top->getWidth()
+        );
+    }
+
+
     // draw category
     // width between A4 and bigger
     // bereken de minimale maxNrOfPouleRows binnen A4 breedte,($horLine)
@@ -112,12 +129,11 @@ class Structure extends PdfDocument
     private function getLowestNrOfPouleRows(Category $category, Rectangle $outerRectangle): int|null
     {
         $nrOfPouleRows = 1;
-        $rectangle = $this->categoryDrawer->calculateRectangle($category, $nrOfPouleRows, $outerRectangle->getWidth());
+        $rectangle = $this->categoryDrawer->calculateRectangle($category, $nrOfPouleRows);
         while ($rectangle->getWidth() > $outerRectangle->getWidth()) {
             $rectangle = $this->categoryDrawer->calculateRectangle(
                 $category,
-                ++$nrOfPouleRows,
-                $outerRectangle->getWidth()
+                ++$nrOfPouleRows
             );
         }
         if ($rectangle->getHeight() > $outerRectangle->getHeight()) {
@@ -142,7 +158,7 @@ class Structure extends PdfDocument
         if ($lowestNrOfPouleRows !== null) {
             return new Point(Page::A4_PORTRET_WIDTH, Page::A4_PORTRET_HEIGHT);
         }
-        $rectangle = $this->categoryDrawer->calculateRectangle($category, 1, $rectangle->getWidth());
+        $rectangle = $this->categoryDrawer->calculateRectangle($category, 1);
         $portretAspectRatio = Page::A4_PORTRET_WIDTH / Page::A4_PORTRET_HEIGHT;
         if ($rectangle->getAspectRatio() > $portretAspectRatio) {
             return new Point($rectangle->getWidth(), $rectangle->getWidth() * $portretAspectRatio);

@@ -164,6 +164,9 @@ abstract class Page extends Zend_Pdf_Page
             $maxLength = $rectangle->getHeight();
             $stringXPos -= ($rectangle->getHeight() - $rectangle->getWidth()) / 2;
         }
+        if ($nAlign === Align::Left) {
+            $stringXPos += 1;
+        }
         $this->drawString($sText, new Point($stringXPos, $nTextY), $maxLength, $nAlign, $degrees);
     }
 

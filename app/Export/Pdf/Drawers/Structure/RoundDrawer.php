@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Drawers\Structure;
 
 use App\Export\Pdf\Configs\Structure\RoundConfig;
-use App\Export\Pdf\Configs\StructureConfig;
 use App\Export\Pdf\Drawers\Helper;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Page;
+use Sports\Poule;
 use Sports\Round;
 use Sports\Structure\NameService as StructureNameService;
 
 class RoundDrawer
 {
+    protected PouleDrawer $pouleDrawer;
     protected Helper $helper;
 
     public function __construct(
@@ -19,25 +22,94 @@ class RoundDrawer
         protected RoundConfig $config
     ) {
         $this->helper = new Helper();
+        $this->pouleDrawer = new PouleDrawer($structureNameService, $config->getPouleConfig());
     }
 
-    // protected int $maxPoulesPerLine = 3;
+    public function renderPoules(Round $round, HorizontalLine $startHorLine, Page|null $page): HorizontalLine
+    {
+        $showPouleNamePrefix = $round->isRoot();
+        $showCompetitor = $round->isRoot();
 
-    public function getMinimalWidth(Round $round, int $maxNrOfPouleRows): float
+        $poulesRowTop = $startHorLine;
+        $pouleTopLeft = $poulesRowTop->getStart();
+        $drawnPoules = [];
+
+        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
+        $poules = $round->getPoules()->toArray();
+        while ($poule = array_shift($poules)) {
+            $pouleWidth = $pouleDrawer->calculateWidth($poule, $showPouleNamePrefix, $showCompetitor);
+            if (($pouleTopLeft->getX() + $pouleWidth) > $poulesRowTop->getEnd()->getX()) {
+                $poulesRowTop = $poulesRowTop->addY(-$this->calculateMaximumHeight($drawnPoules));
+                if (!empty($poules)) {
+                    $poulesRowTop = $poulesRowTop->addY(-$this->config->getPadding());
+                }
+                $pouleTopLeft = $poulesRowTop->getStart();
+                $drawnPoules = [];
+            }
+            if ($page) {
+                $pouleTop = new HorizontalLine($pouleTopLeft, $pouleWidth);
+                $this->pouleDrawer->renderPoule($poule, $showPouleNamePrefix, $showCompetitor, $pouleTop, $page);
+            }
+            $drawnPoules[] = $poule;
+        }
+        return $poulesRowTop->addY(-$this->calculateMaximumHeight($drawnPoules));
+        //        $nrOfPoules = count($poules);
+//        $yPouleStart = $y;
+//
+//        $nrOfPouleRows = $this->getNrOfPouleRows($nrOfPoules);
+//        for ($pouleRowNr = 1; $pouleRowNr <= $nrOfPouleRows; $pouleRowNr++) {
+//            $nrOfPoulesForRow = $this->getNrOfPoulesForRow($nrOfPoules, $pouleRowNr === $nrOfPouleRows);
+//            $pouleRowHeight = $this->getPouleRowHeight($poules, $nrOfPoulesForRow, $config->getRowHeight());
+//            $yPouleEnd = $yPouleStart - $pouleRowHeight;
+//            if ($yPouleStart !== $y && $yPouleEnd < self::PAGEMARGIN) {
+//                break;
+//            }
+//            $yPouleStart = $this->drawPouleRow($poules, $nrOfPoulesForRow, $yPouleStart);
+//            $yPouleStart -= $config->getRowHeight();
+//        }
+    }
+
+    public function calculateMinimalWidth(Round $round, int $maxNrOfPouleRows): float
     {
         $poules = $round->getPoules()->toArray();
         $nrOfPoulesBiggestRow = (int)ceil(count($poules) / $maxNrOfPouleRows);
         $poulesBiggestRow = array_splice($poules, 0, $nrOfPoulesBiggestRow);
-        $showPouleNamePrefix = $round->isRoot();
-        $showCompetitor = $round->isRoot();
+
         $padding = $this->config->getPadding();
         $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
-        $minimalWidth = $padding;
-        foreach ($poulesBiggestRow as $poule) {
-            $minimalWidth += $pouleDrawer->getMinimalWidth($poule, $showPouleNamePrefix, $showCompetitor);
-            $minimalWidth += $padding;
+
+        $minimalWidth = 0;
+        if ($round->isRoot()) {
+            foreach ($poulesBiggestRow as $poule) {
+                $minPouleWidth = $pouleDrawer->calculateWidth($poule, true, true);
+                if ($minimalWidth === 0 || $minPouleWidth > $minimalWidth) {
+                    $minimalWidth = $minPouleWidth;
+                }
+            }
+        } else {
+            foreach ($poulesBiggestRow as $poule) {
+                $minimalWidth += $pouleDrawer->calculateWidth($poule, false, false);
+                $minimalWidth += $padding;
+            }
         }
-        return $minimalWidth;
+        return $padding + $minimalWidth + $padding;
+    }
+
+    /**
+     * @param list<Poule> $poules
+     * @return float
+     */
+    private function calculateMaximumHeight(array $poules): float
+    {
+        $maxHeight = 0;
+        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
+        foreach ($poules as $poule) {
+            $height = $pouleDrawer->getHeight($poule);
+            if ($height > $maxHeight) {
+                $maxHeight = $height;
+            }
+        }
+        return $maxHeight;
     }
 
 //    public function drawRound(Round $round, Rectangle $rectangle, StructureConfig $config): void

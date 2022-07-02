@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
-use App\Export\Pdf\Configs\Structure\RoundConfig;
+use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Drawers\Helper;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
@@ -14,25 +15,36 @@ use Sports\Structure\NameService as StructureNameService;
 
 final class CategoryDrawer
 {
-    // private Helper $helper;
+    private Helper $helper;
     private RoundCardDrawer $roundCardDrawer;
-
-    // protected int $maxPoulesPerLine = 3;
 
     public function __construct(
         protected StructureNameService $structureNameService,
-        protected bool $drawCategoryHeader
+        protected bool $drawCategoryHeader,
+        protected CategoryConfig $config
     ) {
         $this->helper = new Helper();
-        $this->roundCardDrawer = new RoundCardDrawer($structureNameService, new RoundConfig());
+        $this->roundCardDrawer = new RoundCardDrawer($structureNameService, $config->getRoundConfig());
     }
 
-    public function drawCategory(Page $page, Category $category, Point $horLine, int $maxNrOfPouleRows): Point
+    // Always fit on page
+    public function drawCategory(Page $page, Category $category, HorizontalLine $top): HorizontalLine
     {
+//        $width = $this->calculateRectangle($category, $maxNrOfPouleRows)->getWidth();
+//        $top = new HorizontalLine($topL, $width);
         if ($this->drawCategoryHeader) {
-            $horLine = $this->drawHeader($category, $horLine);
+            $top = $this->drawHeader($page, $category, $top);
         }
-        $this->roundCardDrawer->drawRoundCard($page, $category->getRootRound(), $horLine);
+        $bottom = $this->roundCardDrawer->renderRoundCard($page, $category->getRootRound(), $top);
+
+        return $bottom;
+    }
+
+    private function drawHeader(Page $page, Category $category, HorizontalLine $top): HorizontalLine
+    {
+        $rectangle = new Rectangle($top, -$this->config->getRoundConfig()->getHeaderHeight());
+        $page->drawCell($category->getName(), $rectangle);
+        return $rectangle->getBottom();
     }
 
 //
@@ -50,31 +62,49 @@ final class CategoryDrawer
 //        return new Rectangle(new Point(0,0),new Point(1,1));
 //    }
 
-    public function calculateRectangle(Category $category, int $maxNrOfPouleRows, float $maxWidth): Rectangle
+    public function calculateRectangle(Category $category, int $maxNrOfPouleRows/*, float|null $maxWidth*/): Rectangle
+    {
+        $minimalWidth = $this->calculateMinWidth($category, $maxNrOfPouleRows);
+
+        $height = $this->calculateHeight($category, $maxNrOfPouleRows, $minimalWidth);
+
+        return new Rectangle(new HorizontalLine(new Point(0, 0), $minimalWidth), $height);
+    }
+
+    private function calculateMinWidth(Category $category, int $maxNrOfPouleRows): float
     {
         $minimalWidth = 0;
-
-        $height = 0;
         if ($this->drawCategoryHeader) {
-            $height += $this->getHeaderHeight() + PADDING;
+            $cellPadding = 2;
+            $minimalWidth = $cellPadding + $this->helper->getTextWidth(
+                    $category->getName(),
+                    $this->helper->getTimesFont(),
+                    $this->config->getFontHeight()
+                ) + $cellPadding;
         }
 
-        // bepaal de maximale width vanaf ronde 2
-        // als geen ronde 2 dan return $maxWidth
-
-        // bepaal daarna de hoogte van ronde 1 en tel deze bij de rectangle op
-
-
-        $firstRoundMinimalWidth = $pouleDrawer->getMinimalWidth + 2xpadding;
-
-        $withCompetitors = $this->drawWithCompetitors($structureCell);
-        foreach ($structureCell->getRounds() as $round) {
-            if ($withCompetitors) {
-                continue;
-            }
-            $minimalWidth += $this->roundCardDrawer->calculateRectangle($round, $maxNrOfPouleRows);
+        $roundsWidth = $this->roundCardDrawer->calculateMinimalCascadingWidth(
+            $category->getRootRound(),
+            $maxNrOfPouleRows
+        );
+        if ($roundsWidth > $minimalWidth) {
+            $minimalWidth = $roundsWidth;
         }
         return $minimalWidth;
+    }
+
+    public function calculateHeight(Category $category, int $maxNrOfPouleRows, float $width): float
+    {
+        $height = 0;
+        if ($this->drawCategoryHeader) {
+            $height += $this->config->getHeaderHeight() + $this->config->getPadding();
+        }
+
+        $height += $this->roundCardDrawer->calculateCascadingHeight(
+            $category->getRootRound(),
+            $width
+        );
+        return $height;
     }
 
 

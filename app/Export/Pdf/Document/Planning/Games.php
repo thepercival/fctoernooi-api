@@ -51,7 +51,7 @@ class Games extends PdfPlanningDocument
         $title = 'wedstrijden';
         $page = $this->createPagePlanning($firstRoundNumber, $title);
         $y = $page->drawHeader($this->getTournament()->getName(), $title);
-        $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getWidth());
+        $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
         $this->drawPlanning($firstRoundNumber, $page, $horLine);
     }
 
@@ -85,7 +85,7 @@ class Games extends PdfPlanningDocument
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
         foreach ($games as $game) {
-            $gameHeight = $page->getRowHeight();
+            $gameHeight = $page->getParent()->getGameLineConfig()->getRowHeight();
             $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
             $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
             if ($gameHorStartLine->getY() - $gameHeight < Page::PAGEMARGIN) {

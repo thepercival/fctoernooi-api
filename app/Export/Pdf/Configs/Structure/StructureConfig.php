@@ -6,17 +6,28 @@ namespace App\Export\Pdf\Configs\Structure;
 
 class StructureConfig
 {
-    private RoundConfig $roundConfig;
-
     public function __construct(
-        private int $padding = 15,
-        RoundConfig|null $roundConfig = null,
-        PouleConfig|null $pouleConfig = null,
+        private int $padding,
+        private CategoryConfig $categoryConfig
     ) {
-        $this->roundConfig = $roundConfig !== null ? $roundConfig : new RoundConfig($pouleConfig);
         if ($padding < 10 || $padding > 30) {
             throw new \Exception('padding should be between 10 and 30');
         }
+    }
+
+    public function getPadding(): int
+    {
+        return $this->padding;
+    }
+
+    public function getCategoryConfig(): CategoryConfig
+    {
+        return $this->categoryConfig;
+    }
+
+    public function getRoundConfig(): RoundConfig
+    {
+        return $this->getCategoryConfig()->getRoundConfig();
     }
 
     public function getPouleConfig(): PouleConfig
@@ -24,13 +35,5 @@ class StructureConfig
         return $this->getRoundConfig()->getPouleConfig();
     }
 
-    public function getRoundConfig(): RoundConfig
-    {
-        return $this->roundConfig;
-    }
 
-    public function getPadding(): int
-    {
-        return $this->padding;
-    }
 }

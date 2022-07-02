@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
+use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
+use App\Export\Pdf\Point;
+use App\Export\Pdf\Rectangle;
 use Sports\Place;
 use Sports\Poule;
 use Sports\Structure\NameService as StructureNameService;
 
 final class PouleDrawer
 {
+    public const MAX_NR_PLACES_IN_COLUMN = 10;
+
     protected Helper $helper;
     private float|null $numberColumnWidth = null;
 
@@ -24,33 +29,100 @@ final class PouleDrawer
         $this->helper = new Helper();
     }
 
-    public function drawPoule(Page $page, Poule $poule, HorizontalLine $horLine): HorizontalLine
-    {
-        // $this->config->getPaddingX()
-        // $this->config->getRowHeight()
+    public function renderPoule(
+        Poule $poule,
+        bool $showPouleNamePrefix,
+        bool $showCompetitor,
+        HorizontalLine $top,
+        Page $page
+    ): void {
+        $rowHeight = $this->config->getRowHeight();
 
-        return $horLine->addY(-$this->getHeight($poule));
+        $pouleName = $this->structureNameService->getPouleName($poule, $showPouleNamePrefix);
+        $pouleNameRectangle = new Rectangle($top, $rowHeight);
+        $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
+        $page->drawCell($pouleName, $pouleNameRectangle, Align::Center, 'black');
+        $placesTop = $pouleNameRectangle->getBottom();
+
+        $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+
+        $left = $top->getStart()->getX();
+        $places = array_values($poule->getPlaces()->toArray());
+        $nrOfPlacesInColumn = $this->getNrOfPlacesInColumn($poule);
+        $placesToRender = array_splice($places, 0, $nrOfPlacesInColumn);
+        while (count($placesToRender) > 0) {
+            $columnWidth = $this->calculatePlacesWidth($placesToRender, $showCompetitor);
+
+            $placeTop = new HorizontalLine(new Point($left, $placesTop->getY()), $columnWidth);
+            foreach ($placesToRender as $placeToRender) {
+                $placeTop = $this->renderPlace($placeToRender, $showCompetitor, $placeTop, $page);
+            }
+
+            $placesToRender = array_splice($places, 0, $nrOfPlacesInColumn);
+            $left += $columnWidth;
+        }
     }
 
-    public function getMinimalWidth(Poule $poule, bool $showPouleNamePrefix, bool $showCompetitor): float
+    public function renderPlace(Place $place, bool $showCompetitor, HorizontalLine $top, Page $page): HorizontalLine
     {
-        $minimalPouleNameWidth = $this->getMinimalPouleNameWidth($poule, $showPouleNamePrefix);
-        $minimalPlacesWidth = $this->getMinimalPlacesWidth($poule, $showCompetitor);
-        return max($minimalPouleNameWidth, $minimalPlacesWidth);
+        $rowHeight = $this->config->getRowHeight();
+        $numberWidth = $this->getNumberColumnWidth();
+
+        $numberTop = new HorizontalLine($top->getStart(), $numberWidth);
+        $numberRectangle = new Rectangle($numberTop, $rowHeight);
+        $page->drawCell((string)$place->getPlaceNr(), $numberRectangle, Align::Right, 'black');
+        if ($showCompetitor) {
+            $name = '';
+            $startLocation = $place->getStartLocation();
+            $startLocationMap = $this->structureNameService->getStartLocationMap();
+            if ($startLocationMap !== null && $startLocation !== null && $startLocationMap->getCompetitor(
+                    $startLocation
+                ) !== null) {
+                $name = $this->structureNameService->getPlaceName($place, true);
+            }
+            $nameTop = new HorizontalLine($numberTop->getEnd(), $top->getWidth() - $numberTop->getWidth());
+            $page->drawCell($name, new Rectangle($nameTop, $rowHeight), Align::Left, 'black');
+        }
+        return $top->addY(-$rowHeight);
     }
 
-    public function getMinimalPouleNameWidth(Poule $poule, bool $showPouleNamePrefix): float
+    public function calculateWidth(Poule $poule, bool $showPouleNamePrefix, bool $showCompetitor): float
+    {
+        $pouleNameWidth = $this->calculatePouleNameWidth($poule, $showPouleNamePrefix);
+        $placesWidth = $this->calculateAllPlacesWidth($poule, $showCompetitor);
+        return max($pouleNameWidth, $placesWidth);
+    }
+
+    private function calculatePouleNameWidth(Poule $poule, bool $showPouleNamePrefix): float
     {
         $pouleName = $this->structureNameService->getPouleName($poule, $showPouleNamePrefix);
         return $this->getTextWidth($pouleName);
     }
 
     // could be extended with maxNrOfRows, maxNrOfColumns
-    public function getMinimalPlacesWidth(Poule $poule, bool $showCompetitor): float
+    public function calculateAllPlacesWidth(Poule $poule, bool $showCompetitor): float
     {
         $minimalWidth = 0;
-        foreach ($poule->getPlaces() as $place) {
-            $placeWidth = $this->getMinimalPlaceWidth($place, $showCompetitor);
+        $places = array_values($poule->getPlaces()->toArray());
+        $nrOfPlacesInColumn = $this->getNrOfPlacesInColumn($poule);
+        $placesToCalculate = array_splice($places, 0, $nrOfPlacesInColumn);
+        while (count($placesToCalculate) > 0) {
+            $minimalWidth += $this->calculatePlacesWidth($places, $showCompetitor);
+            $placesToCalculate = array_splice($places, 0, $nrOfPlacesInColumn);
+        }
+        return $minimalWidth;
+    }
+
+    /**
+     * @param list<Place> $places
+     * @param bool $showCompetitor
+     * @return float
+     */
+    public function calculatePlacesWidth(array $places, bool $showCompetitor): float
+    {
+        $minimalWidth = 0;
+        foreach ($places as $place) {
+            $placeWidth = $this->calculatePlaceWidth($place, $showCompetitor);
             if ($placeWidth > $minimalWidth) {
                 $minimalWidth = $placeWidth;
             }
@@ -59,7 +131,7 @@ final class PouleDrawer
     }
 
     // could be extended with maxNrOfRows, maxNrOfColumns
-    public function getMinimalPlaceWidth(Place $place, bool $showCompetitor): float
+    public function calculatePlaceWidth(Place $place, bool $showCompetitor): float
     {
         $minimalWidth = 0;
         $startLocationMap = $this->structureNameService->getStartLocationMap();
@@ -113,9 +185,15 @@ final class PouleDrawer
 
     public function getNrOfColumnsNeeded(Poule $poule): float
     {
-        $rest = count($poule->getPlaces()) % 10;
-        $nrOfColumns = (count($poule->getPlaces()) - $rest) / 10;
+        $rest = count($poule->getPlaces()) % self::MAX_NR_PLACES_IN_COLUMN;
+        $nrOfColumns = (count($poule->getPlaces()) - $rest) / self::MAX_NR_PLACES_IN_COLUMN;
         return $rest === 0 ? $nrOfColumns : $nrOfColumns + 1;
+    }
+
+    public function getNrOfPlacesInColumn(Poule $poule): int
+    {
+        $nrOfColumns = $this->getNrOfColumnsNeeded($poule);
+        return (int)ceil(count($poule->getPlaces()) / $nrOfColumns);
     }
 
 //
@@ -177,51 +255,6 @@ final class PouleDrawer
 //        return $lowestY;
 //    }
 //
-//    protected function drawPoule(Poule $poule, float $x, float $pouleWidth, float $yStart, int $rowHeight): float
-//    {
-//        $fontHeight = $rowHeight - 4;
-//
-//        $numberWidth = $pouleWidth * 0.1;
-//        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
-//        $this->drawCell(
-//            $this->getStructureNameService()->getPouleName($poule, true),
-//            $x,
-//            $yStart,
-//            $pouleWidth,
-//            $rowHeight,
-//            Align::Center,
-//            "black"
-//        );
-//        $this->setFont($this->helper->getTimesFont(), $fontHeight);
-//        $y = $yStart - $rowHeight;
-//        foreach ($poule->getPlaces() as $place) {
-//            $this->drawCell(
-//                (string)$place->getPlaceNr(),
-//                $x,
-//                $y,
-//                $numberWidth,
-//                $rowHeight,
-//                Align::Right,
-//                "black"
-//            );
-//            $name = '';
-//            $startLocation = $place->getStartLocation();
-//            if ($startLocation !== null && $this->parent->getStartLocationMap()->getCompetitor($startLocation) !== null) {
-//                $name = $this->getStructureNameService()->getPlaceName($place, true);
-//            }
-//            $this->drawCell(
-//                $name,
-//                $x + $numberWidth,
-//                $y,
-//                $pouleWidth - $numberWidth,
-//                $rowHeight,
-//                Align::Left,
-//                "black"
-//            );
-//            $y -= $rowHeight;
-//        }
-//        return $y;
-//    }
 //
 //    protected function getNrOfPouleRows(int $nrOfPoules): int
 //    {

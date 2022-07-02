@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\Traits\GameLine;
+namespace App\Export\Pdf\Drawers\GameLine;
 
 enum Column: int
 {

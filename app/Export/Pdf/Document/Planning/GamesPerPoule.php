@@ -58,7 +58,7 @@ class GamesPerPoule extends PdfPlanningDocument
                     return $game->getPoule() === $poule;
                 }
             );
-            $horLine = new Horizontal(new Point(Page::PAGEMARGIN, $y), $page->getWidth());
+            $horLine = new Horizontal(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
             $this->drawPlanningPerFieldOrPouleHelper($roundNumber, $page, $horLine, false);
         }
 

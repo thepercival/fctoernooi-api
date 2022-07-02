@@ -21,14 +21,14 @@ class Structure extends ToernooiPdfPage
     // public const FontHeight = self::RowHeight - 4;
     private const ROUNDMARGIN = 10;
 
-   // private bool $enableOutOfBoundsException;
+    // private bool $enableOutOfBoundsException;
     private int $maxNrOfPoulePlaceColumns = 1;
 
     public function __construct(StructureDocument $document, Point $point)
     {
         $dimensions = $point->getX() . ':' . $point->getY();
         parent::__construct($document, $dimensions);
-        $this->setFont($this->helper->getTimesFont(), $document->getConfig()->getFontHeight());
+        // $this->setFont($this->helper->getTimesFont(), $document->getConfig()->getFontHeight());
         $this->setLineWidth(0.5);
 //        $this->enableOutOfBoundsException = $enableOutOfBoundsException;
     }

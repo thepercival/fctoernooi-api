@@ -41,12 +41,12 @@ abstract class Planning extends PdfDocument
     }
 
 
-    protected function getGamesConfig(): GamesConfig
+    public function getGamesConfig(): GamesConfig
     {
         return $this->gameConfig;
     }
 
-    protected function getGameLineConfig(): GameLineConfig
+    public function getGameLineConfig(): GameLineConfig
     {
         return $this->gameLineConfig;
     }
@@ -104,7 +104,7 @@ abstract class Planning extends PdfDocument
         $games = $page->getFilteredGames($roundNumber);
         if (count($games) > 0) {
             $page->initGameLines($roundNumber);
-            $rectangle = new Rectangle($gameHorStartLine, $this->getGameLineConfig()->getRowHeight());
+            $rectangle = new Rectangle($gameHorStartLine, -$this->getGameLineConfig()->getRowHeight());
             $page->drawGamesHeader($roundNumber, $rectangle);
             $gameHorStartLine = $rectangle->getBottom();
         }
@@ -112,7 +112,7 @@ abstract class Planning extends PdfDocument
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
         foreach ($games as $game) {
-            $gameHeight = $page->getRowHeight();
+            $gameHeight = $page->getParent()->getGameLineConfig()->getRowHeight();
             $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
             $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
             if ($gameHorStartLine->getY() - $gameHeight < PdfPage::PAGEMARGIN) {
@@ -126,14 +126,14 @@ abstract class Planning extends PdfDocument
                         new Point(Page::PAGEMARGIN, $y),
                         $horLine->getWidth()
                     ),
-                    $this->getGameLineConfig()->getRowHeight()
+                    -$this->getGameLineConfig()->getRowHeight()
                 );
                 $page->drawGamesHeader($roundNumber, $rectangle);
                 $gameHorStartLine = $rectangle->getBottom();
             }
             if ($recessToDraw !== null) {
                 // $page->initGameLines($roundNumber);
-                $rectangle = new Rectangle($gameHorStartLine, $this->getGameLineConfig()->getRowHeight());
+                $rectangle = new Rectangle($gameHorStartLine, -$this->getGameLineConfig()->getRowHeight());
                 $page->drawRecess($game, $recessToDraw, $rectangle);
                 $gameHorStartLine = $rectangle->getBottom();
             }

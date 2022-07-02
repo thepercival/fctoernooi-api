@@ -7,6 +7,7 @@ namespace App\Export\Pdf\Page;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Document\Planning as PlanningDocument;
 use App\Export\Pdf\Drawers\GameLine\Against as AgainstGameLine;
+use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\Drawers\GameLine\Together as TogetherGameLine;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
@@ -31,7 +32,7 @@ class Planning extends ToernooiPdfPage
     public function __construct(PlanningDocument $document, mixed $param1, protected string $title)
     {
         parent::__construct($document, $param1);
-        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
+        // $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
         $this->setLineWidth(0.5);
     }
 
@@ -40,10 +41,10 @@ class Planning extends ToernooiPdfPage
         return $this->parent;
     }
 
-    public function getRowHeight(): int
-    {
-        return $this->parent->getConfig()->getRowHeight();
-    }
+//    public function getRowHeight(): int
+//    {
+//        return $this->parent->getConfig()->getRowHeight();
+//    }
 
     public function getTitle(): string
     {
@@ -119,12 +120,13 @@ class Planning extends ToernooiPdfPage
 
     public function drawGamesHeader(RoundNumber $roundNumber, Rectangle $rectangle): void
     {
+        $this->setFont($this->helper->getTimesFont(), $this->parent->getGameLineConfig()->getFontHeight());
         if ($this->hasOnlyAgainstGameMode($roundNumber->getCompetition())) {
             $gameLine = $this->getGameLineByGameMode(GameMode::Against);
         } else {
             $gameLine = $this->getGameLineByGameMode(GameMode::Single);
         }
-        $gameLine->drawHeader($this->someStructureCellNeedsRanking($roundNumber), $rectangle);
+        $gameLine->drawTableHeader($this->someStructureCellNeedsRanking($roundNumber), $rectangle);
     }
 
     protected function someStructureCellNeedsRanking(RoundNumber $roundNumber): bool
@@ -151,7 +153,7 @@ class Planning extends ToernooiPdfPage
 
     public function drawRecess(AgainstGame|TogetherGame $game, Recess $recess, Rectangle $rectangle): void
     {
-        $dateTimeColumn = $this->$game->getPlanningConfig()->getEnableTime();
+        $dateTimeColumn = DateTimeColumn::getValue($game->getRound()->getNumber());
         $this->getGameLine($game)->drawRecess($recess, $rectangle, $dateTimeColumn);
     }
 
@@ -178,13 +180,14 @@ class Planning extends ToernooiPdfPage
     public function drawRoundNumberHeader(RoundNumber $roundNumber, HorizontalLine $horLine): HorizontalLine
     {
         $this->setFillColor(new \Zend_Pdf_Color_GrayScale(1));
-        $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
-        $this->setFont($this->helper->getTimesFont(true), $this->parent->getFontHeightSubHeader());
-        $subHeader = $this->getStructureNameService()->getRoundNumberName($roundNumber);
-        $cell = new Rectangle($horLine, $fontHeightSubHeader);
-        $this->drawCell($subHeader, $cell, Align::Center);
-        $this->setFont($this->helper->getTimesFont(), $this->parent->getFontHeight());
-        return $horLine->addY(-(2 * $fontHeightSubHeader));
+        $roundNumberHeaderHeight = $this->parent->getGamesConfig()->getRoundNumberHeaderHeight();
+        $roundNumberHeaderFontHeight = $this->parent->getGamesConfig()->getRoundNumberHeaderFontHeight();
+        $this->setFont($this->helper->getTimesFont(true), $roundNumberHeaderFontHeight);
+        $roundNumberName = $this->getStructureNameService()->getRoundNumberName($roundNumber);
+        $cell = new Rectangle($horLine, -$roundNumberHeaderHeight);
+        $this->drawCell($roundNumberName, $cell, Align::Center);
+        // $this->setFont($this->helper->getTimesFont(), $this->getParent()->getConfig()->getFontHeight());
+        return $horLine->addY(-(2 * $roundNumberHeaderHeight));
     }
 
 

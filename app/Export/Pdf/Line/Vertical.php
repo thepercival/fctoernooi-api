@@ -9,7 +9,11 @@ class Vertical extends Line
 {
     public function __construct(protected Point $start, float $height)
     {
-        parent::__construct($start, $start->addY($height));
+        if ($height < 0) {
+            parent::__construct($start->addY($height), $start);
+        } else {
+            parent::__construct($start, $start->addY($height));
+        }
     }
 
     public function getX(): float
@@ -17,9 +21,9 @@ class Vertical extends Line
         return $this->start->getX();
     }
 
-    public function addX(float $y): self
+    public function addX(float $delta): self
     {
-        return new self($this->start->addX($y), $this->getHeight());
+        return new self($this->start->addX($delta), $this->getHeight());
     }
 
 //    public function moveDown(): self
@@ -29,6 +33,6 @@ class Vertical extends Line
 
     public function getHeight(): float
     {
-        return $this->start->getY() - $this->end->getY();
+        return $this->end->getY() - $this->start->getY();
     }
 }

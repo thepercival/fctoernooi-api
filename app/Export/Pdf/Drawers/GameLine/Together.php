@@ -9,7 +9,6 @@ use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Drawers\GameLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\Traits\GameLine\Column;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
@@ -37,7 +36,7 @@ class Together extends GameLine
     protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine
     {
         $width = $this->getColumnWidth(Column::PlacesAndScore);
-        $this->page->drawCell('deelnemers & score', new Rectangle($left, $width), Align::Center, 'black');
+        $this->drawHeaderCell('deelnemers & score', new Rectangle($left, $width), Align::Center);
         return $left->addX($width);
     }
 

@@ -9,8 +9,8 @@ class PouleConfig
     private int $fontHeight;
 
     public function __construct(
-        private int $paddingX = 2,
-        private int $rowHeight = 18,
+        private int $paddingX,
+        private int $rowHeight,
         int|null $fontHeight = null
     ) {
         if ($rowHeight < 10 || $rowHeight > 30) {

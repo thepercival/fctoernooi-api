@@ -96,8 +96,8 @@ class Validator extends Command
             ->setHelp('validates the tournaments');
         parent::configure();
 
-        $this->addOption('startdate', null, InputArgument::OPTIONAL, 'Y-m-d');
-        $this->addOption('enddate', null, InputArgument::OPTIONAL, 'Y-m-d');
+        $this->addOption('startDate', null, InputArgument::OPTIONAL, 'Y-m-d');
+        $this->addOption('endDate', null, InputArgument::OPTIONAL, 'Y-m-d');
 
         $this->addArgument('tournamentId', InputArgument::OPTIONAL);
     }
@@ -258,7 +258,7 @@ class Validator extends Command
         $defaultStartDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_START_DAYS_IN_PAST . ' days');
         $defaultEndDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
 
-        $start = $input->getOption('startdate');
+        $start = $input->getOption('startDate');
         if (!is_string($start) || strlen($start) === 0) {
             return $defaultStartDate;
         }
@@ -279,7 +279,7 @@ class Validator extends Command
     {
         $defaultEndDate = (new DateTimeImmutable('today'))->modify('-' . self::DEFAULT_END_DAYS_IN_PAST . ' days');
 
-        $end = $input->getOption('enddate');
+        $end = $input->getOption('endDate');
         if (!is_string($end) || strlen($end) === 0) {
             return $defaultEndDate;
         }

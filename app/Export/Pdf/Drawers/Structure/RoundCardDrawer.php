@@ -9,8 +9,8 @@ use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
+use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
-use Sports\Poule;
 use Sports\Round;
 use Sports\Structure\NameService as StructureNameService;
 
@@ -18,7 +18,6 @@ class RoundCardDrawer
 {
     protected Helper $helper;
     protected RoundDrawer $roundDrawer;
-
 
     public function __construct(
         protected StructureNameService $structureNameService,
@@ -30,73 +29,50 @@ class RoundCardDrawer
 
     // protected int $maxPoulesPerLine = 3;
 
-    public function drawRoundCard(Page $page, Round $round, HorizontalLine $top): HorizontalLine
+    public function renderRoundCard(Page $page, Round $round, HorizontalLine $top): HorizontalLine
     {
-        $headerBottom = $this->drawRoundCardHeader($page, $round, $top);
+        $headerBottom = $this->renderRoundCardHeader($page, $round, $top);
         // $cardBodyRectangle = new Rectangle($cardHeaderRectangle->getBottom(), $rectangle->getBottom());
 
+        $poulesHeight = $headerBottom->getY() - $this->roundDrawer->renderPoules($round, $headerBottom, null)->getY();
+        $rectangle = new Rectangle($headerBottom, -$poulesHeight);
+        $page->drawCell('', $rectangle, Align::Center, 'green');
+
         $poulesTop = $headerBottom->addY($this->config->getPadding());
-        $poulesBottom = $this->drawPoules($page, $round, $poulesTop);
+        $poulesBottom = $this->roundDrawer->renderPoules($round, $poulesTop, $page);
+
         return $poulesBottom->addY($this->config->getPadding());
     }
 
-    public function drawRoundCardHeader(Page $page, Round $round, HorizontalLine $horLine): HorizontalLine
+    public function renderRoundCardHeader(Page $page, Round $round, HorizontalLine $horLine): HorizontalLine
     {
         $rectangle = new Rectangle($horLine, -$this->config->getHeaderHeight());
-        $roundName = $page->getParent()->getStructureService()->getRoundName($round);
-        $page->drawCell($roundName, $rectangle, Align::Center);
+        $roundName = $this->structureNameService->getRoundName($round);
+        $page->drawCell($roundName, $rectangle, Align::Center, 'blue');
         return $horLine->addY(-$this->config->getHeaderHeight());
     }
 
-    protected function drawPoules(Page $page, Round $round, HorizontalLine $startHorLine): HorizontalLine
+
+    public function calculateMinimalCascadingWidth(Round $round, int $maxNrOfPouleRows): float
     {
-        $showPouleNamePrefix = $round->isRoot();
-        $showCompetitor = $round->isRoot();
-
-        $startPoulesHorLine = $startHorLine;
-        $currentHorLine = $startPoulesHorLine;
-        $drawnPoules = [];
-
-        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
-        $poules = $round->getPoules()->toArray();
-        while ($poule = array_shift($poules)) {
-            $minimalPouleWidth = $pouleDrawer->getMinimalWidth($poule, $showPouleNamePrefix, $showCompetitor);
-            if ($minimalPouleWidth > $currentHorLine->getWidth()) {
-                $startPoulesHorLine = $startPoulesHorLine->addY(-$this->getMaximumHeight($drawnPoules));
-                $drawnPoules = [];
-                if (!empty($poules)) {
-                    $startPoulesHorLine = $startPoulesHorLine->addY(-$this->config->getPadding());
-                }
-                $currentHorLine = $startPoulesHorLine;
-            }
-            $drawnPoules[] = $poule;
+        $selfWidth = $this->calculateMinimalSelfWidth($round, $maxNrOfPouleRows);
+        $childrenWidth = 0;
+        foreach ($round->getChildren() as $childRound) {
+            $childrenWidth += $this->calculateMinimalCascadingWidth($childRound, $maxNrOfPouleRows);
+            $childrenWidth += $this->config->getPadding();
         }
-        return $startPoulesHorLine->addY(-$this->getMaximumHeight($drawnPoules));
-        //        $nrOfPoules = count($poules);
-//        $yPouleStart = $y;
-//
-//        $nrOfPouleRows = $this->getNrOfPouleRows($nrOfPoules);
-//        for ($pouleRowNr = 1; $pouleRowNr <= $nrOfPouleRows; $pouleRowNr++) {
-//            $nrOfPoulesForRow = $this->getNrOfPoulesForRow($nrOfPoules, $pouleRowNr === $nrOfPouleRows);
-//            $pouleRowHeight = $this->getPouleRowHeight($poules, $nrOfPoulesForRow, $config->getRowHeight());
-//            $yPouleEnd = $yPouleStart - $pouleRowHeight;
-//            if ($yPouleStart !== $y && $yPouleEnd < self::PAGEMARGIN) {
-//                break;
-//            }
-//            $yPouleStart = $this->drawPouleRow($poules, $nrOfPoulesForRow, $yPouleStart);
-//            $yPouleStart -= $config->getRowHeight();
-//        }
+        return max($selfWidth, $childrenWidth);
     }
 
 
-    public function getMinimalWidth(Round $round, int $maxNrOfPouleRows): float
+    public function calculateMinimalSelfWidth(Round $round, int $maxNrOfPouleRows): float
     {
-        $minimalWidthHeader = $this->getHeaderMinimalWidth($round);
-        $minimalWidthPoules = $this->roundDrawer->getMinimalWidth($round, $maxNrOfPouleRows);
+        $minimalWidthHeader = $this->calculateHeaderMinimalWidth($round);
+        $minimalWidthPoules = $this->roundDrawer->calculateMinimalWidth($round, $maxNrOfPouleRows);
         return max($minimalWidthHeader, $minimalWidthPoules);
     }
 
-    public function getHeaderMinimalWidth(Round $round): float
+    public function calculateHeaderMinimalWidth(Round $round): float
     {
         $name = $this->structureNameService->getRoundName($round);
         $width = $this->helper->getTextWidth(
@@ -108,20 +84,23 @@ class RoundCardDrawer
         return $width;
     }
 
-    /**
-     * @param list<Poule> $poules
-     * @return float
-     */
-    public function getMaximumHeight(array $poules): float
+    public function calculateCascadingHeight(Round $round, float $width): float
     {
-        $maxHeight = 0;
-        $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
-        foreach ($poules as $poule) {
-            $height = $pouleDrawer->getHeight($poule);
-            if ($height > $maxHeight) {
-                $maxHeight = $height;
+        $selfHeight = $this->calculateSelfHeight($round, $width);
+        $childrenMaxHeight = 0;
+        foreach ($round->getChildren() as $childRound) {
+            $childHeight = $this->calculateCascadingHeight($childRound, $width);
+            if ($childHeight > $childrenMaxHeight) {
+                $childrenMaxHeight = $childHeight;
             }
         }
-        return $maxHeight;
+        return max($selfHeight, $childrenMaxHeight) + ($round->isRoot() ? 0 : $this->config->getPadding());
+    }
+
+    public function calculateSelfHeight(Round $round, float $width): float
+    {
+        $top = new HorizontalLine(new Point(0, 0), $width);
+        $bottom = $this->roundDrawer->renderPoules($round, $top, null);
+        return $top->getY() - $bottom->getY();
     }
 }

@@ -9,7 +9,11 @@ class Horizontal extends Line
 {
     public function __construct(protected Point $start, float $width)
     {
-        parent::__construct($start, $start->addX($width));
+        if ($width < 0) {
+            parent::__construct($start->addX($width), $start);
+        } else {
+            parent::__construct($start, $start->addX($width));
+        }
     }
 
     public function getY(): float

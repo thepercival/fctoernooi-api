@@ -7,8 +7,9 @@ namespace App\Export\Pdf\Configs;
 class GamesConfig
 {
     public function __construct(
-        private int $rowHeight = 18/*; between $fontHeight and 20*/,
-        private int $fontHeight = 14/*; between 10 and 20*/,
+        private int $roundNumberHeaderHeight,
+        private int $rowHeight,
+        private int $fontHeight,
     ) {
         if ($fontHeight < 10 || $fontHeight > 20) {
             throw new \Exception('fontHeight should be between 10 and 20');
@@ -16,6 +17,16 @@ class GamesConfig
         if ($rowHeight <= $fontHeight || $rowHeight > 20) {
             throw new \Exception('rowHeight should be between fontheight and 20');
         }
+    }
+
+    public function getRoundNumberHeaderHeight(): int
+    {
+        return $this->roundNumberHeaderHeight;
+    }
+
+    public function getRoundNumberHeaderFontHeight(): int
+    {
+        return $this->roundNumberHeaderHeight - 4;
     }
 
     public function getRowHeight(): int

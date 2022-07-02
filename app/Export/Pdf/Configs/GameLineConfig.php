@@ -7,9 +7,8 @@ namespace App\Export\Pdf\Configs;
 class GameLineConfig
 {
     public function __construct(
-//        private DateTimeColumn $dateTimeColumn,
-//        private RefereeColumn $refereeColumn,
-        private int $rowHeight = 18,
+        private int $rowHeight,
+        private int $fontHeight,
         private int $maxNrOfPlacesPerLine = 4
     ) {
         if ($maxNrOfPlacesPerLine < 1 || $maxNrOfPlacesPerLine > 6) {
@@ -20,6 +19,11 @@ class GameLineConfig
     public function getRowHeight(): int
     {
         return $this->rowHeight;
+    }
+
+    public function getFontHeight(): int
+    {
+        return $this->fontHeight;
     }
 
 //    public function getDateTimeColumn(): DateTimeColumn

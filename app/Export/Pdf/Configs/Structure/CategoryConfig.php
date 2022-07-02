@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs\Structure;
 
-class RoundConfig
+class CategoryConfig
 {
     public function __construct(
         private int $headerHeight,
         private int $fontHeight,
         private int $padding,
-        private PouleConfig $pouleConfig
+        private RoundConfig $roundConfig
+
     ) {
         if ($headerHeight < 10 || $headerHeight > 20) {
             throw new \Exception('headerHeight should be between 10 and 20');
@@ -39,8 +40,8 @@ class RoundConfig
         return $this->fontHeight;
     }
 
-    public function getPouleConfig(): PouleConfig
+    public function getRoundConfig(): RoundConfig
     {
-        return $this->pouleConfig;
+        return $this->roundConfig;
     }
 }

@@ -48,8 +48,8 @@ final class Rectangle
             $this->left = $vertLine;
             $this->right = $vertLine->addX($width);
         }
-        $this->top = new HorizontalLine($this->left->getStart(), $width);
-        $this->bottom = new HorizontalLine($this->left->getEnd(), $width);
+        $this->top = new HorizontalLine($this->left->getEnd(), $width);
+        $this->bottom = new HorizontalLine($this->left->getStart(), $width);
     }
 
     public function getHeight(): float

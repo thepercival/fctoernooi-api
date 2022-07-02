@@ -10,7 +10,6 @@ use App\Export\Pdf\Drawers\GameLine as GameLineBase;
 use App\Export\Pdf\Drawers\GameLine\Column\Against as AgainstColumn;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\Traits\GameLine\Column;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Phase as GamePhase;
@@ -41,11 +40,11 @@ class Against extends GameLineBase
         $sideWidth = $this->getColumnWidth(AgainstColumn::SidePlaces);
         $scoreWidth = $this->getColumnWidth(AgainstColumn::Score);
         $homeCell = new Rectangle($left, $sideWidth);
-        $this->page->drawCell('thuis', $homeCell, Align::Right, 'black');
+        $this->drawHeaderCell('thuis', $homeCell, Align::Right);
         $scoreCell = new Rectangle($homeCell->getRight(), $scoreWidth);
-        $this->page->drawCell('score', $scoreCell, Align::Center, 'black');
+        $this->drawHeaderCell('score', $scoreCell);
         $awayCell = new Rectangle($scoreCell->getRight(), $sideWidth);
-        $this->page->drawCell('uit', $awayCell, Align::Left, 'black');
+        $this->drawHeaderCell('uit', $awayCell, Align::Left);
         return $awayCell->getRight();
     }
 
@@ -61,14 +60,14 @@ class Against extends GameLineBase
 
         $home = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Home), true, true);
         $homeCell = new Rectangle($left, $sideWidth);
-        $this->page->drawCell($home, $homeCell, Align::Right, 'black');
+        $this->drawTableCell($home, $homeCell, Align::Right);
 
         $scoreCell = new Rectangle($homeCell->getRight(), $scoreWidth);
-        $this->drawCell($this->getScore($game), $scoreCell);
+        $this->drawTableCell($this->getScore($game), $scoreCell);
 
         $away = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         $awayCell = new Rectangle($scoreCell->getRight(), $sideWidth);
-        $this->page->drawCell($away, $awayCell, Align::Left, 'black');
+        $this->drawTableCell($away, $awayCell);
         return $awayCell->getRight();
     }
 

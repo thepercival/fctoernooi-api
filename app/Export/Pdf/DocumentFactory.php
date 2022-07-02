@@ -11,7 +11,10 @@ use App\Export\Pdf\Configs\LockerRoomConfig;
 use App\Export\Pdf\Configs\LockerRoomLabelConfig;
 use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Configs\QRCodeConfig;
+use App\Export\Pdf\Configs\Structure\CategoryConfig;
+use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
+use App\Export\Pdf\Configs\Structure\StructureConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
 use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
@@ -54,7 +57,14 @@ class DocumentFactory
     ): PdfDocument {
         switch ($subject) {
             case PdfSubject::Structure:
-                $config = new RoundConfig();
+                $config = new StructureConfig(
+                    15, new CategoryConfig(
+                          18, 14, 15,
+                          new RoundConfig(
+                              18, 14, 15, new PouleConfig(2, 18)
+                          )
+                      )
+                );
                 return new StructureDocument(
                     $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
                 );
@@ -64,20 +74,20 @@ class DocumentFactory
                     $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
                 );
             case PdfSubject::Planning:
-                $gamesCfg = new GamesConfig();
-                $gameLineCfg = new GameLineConfig();
+                $gamesCfg = new GamesConfig(20, 18, 14);
+                $gameLineCfg = new GameLineConfig(12, 10);
                 return new GamesDocument(
                     $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
                 );
             case PdfSubject::GamesPerPoule:
-                $gamesCfg = new GamesConfig();
-                $gameLineCfg = new GameLineConfig();
+                $gamesCfg = new GamesConfig(20, 18, 14);
+                $gameLineCfg = new GameLineConfig(12, 11);
                 return new GamesPerPouleDocument(
                     $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
                 );
             case PdfSubject::GamesPerField:
-                $gamesCfg = new GamesConfig();
-                $gameLineCfg = new GameLineConfig();
+                $gamesCfg = new GamesConfig(20, 18, 14);
+                $gameLineCfg = new GameLineConfig(12, 10);
                 return new GamesPerFieldDocument(
                     $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
                 );

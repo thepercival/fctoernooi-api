@@ -6,6 +6,7 @@ namespace App\Export\Pdf\Drawers;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameLineConfig;
+use App\Export\Pdf\Drawers\GameLine\Column;
 use App\Export\Pdf\Drawers\GameLine\Column\Against as AgainstColumn;
 use App\Export\Pdf\Drawers\GameLine\Column\DateTime;
 use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
@@ -13,7 +14,6 @@ use App\Export\Pdf\Drawers\GameLine\Column\Referee as RefereeColumn;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\Traits\GameLine\Column;
 use App\Export\Pdf\Rectangle;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -35,6 +35,7 @@ abstract class GameLine
     protected ScoreConfigService $scoreConfigService;
     protected DateTimeColumn $dateTimeColumn;
     protected RefereeColumn $refereeColumn;
+    protected Helper $helper;
 
     public function __construct(
         protected PdfPage $page,
@@ -42,8 +43,9 @@ abstract class GameLine
         RoundNumber $roundNumber,
         float $totalWidth = null
     ) {
+        $this->helper = new Helper();
         $this->scoreConfigService = new ScoreConfigService();
-        $this->totalWidth = $totalWidth !== null ? $totalWidth : $this->page->getWidth();
+        $this->totalWidth = $totalWidth !== null ? $totalWidth : $this->page->getDisplayWidth();
         $this->initColumnWidths($roundNumber);
     }
 
@@ -97,7 +99,7 @@ abstract class GameLine
 //            $this->getColumnWidth(Column::Referee);
 //    }
 
-    public function drawHeader(bool $needsRanking, Rectangle $rectangle): void
+    public function drawTableHeader(bool $needsRanking, Rectangle $rectangle): void
     {
         $pouleWidth = $this->getColumnWidth(Column::Poule);
         $startWidth = $this->getColumnWidth(Column::Start);
@@ -106,7 +108,7 @@ abstract class GameLine
 
         $rankingLeft = $rectangle->getLeft();
         $rankingCell = new Rectangle($rankingLeft, $pouleWidth);
-        $this->drawCell($needsRanking ? 'p.' : 'vs', $rankingCell, 'black');
+        $this->drawHeaderCell($needsRanking ? 'p.' : 'vs', $rankingCell);
 
         $fieldLft = $rankingCell->getRight();
         if ($this->dateTimeColumn !== DateTimeColumn::None) {
@@ -115,11 +117,11 @@ abstract class GameLine
                 $text = 'datum tijd';
             }
             $dateCell = new Rectangle($rankingCell->getRight(), $startWidth);
-            $this->drawCell($text, $dateCell, 'black');
+            $this->drawHeaderCell($text, $dateCell);
             $fieldLft = $dateCell->getRight();
         }
         $fieldCell = new Rectangle($fieldLft, $fieldWidth);
-        $this->drawCell('v.', $fieldCell);
+        $this->drawHeaderCell('v.', $fieldCell);
 
         $refereeLeft = $this->drawPlacesAndScoreHeader($fieldCell->getRight());
         if ($this->refereeColumn !== RefereeColumn::None) {
@@ -127,9 +129,11 @@ abstract class GameLine
             if ($this->refereeColumn === RefereeColumn::Referee) {
                 $title = 'sch.';
             }
-            $this->drawCell($title, new Rectangle($refereeLeft, $refereeWidth), 'black');
+            $this->drawHeaderCell($title, new Rectangle($refereeLeft, $refereeWidth));
         }
     }
+
+
 
 //    /**
 //     * @param string $text
@@ -156,13 +160,15 @@ abstract class GameLine
         if ($dateTimeColumn !== DateTimeColumn::None) {
             $text = $this->getDateTime($recess->getStartDateTime(), $dateTimeColumn);
             $rectangle = new Rectangle($vertLine, $this->getColumnWidth(Column::Start));
-            $this->drawCell($text, $rectangle, ['top' => 'black']);
+            $this->drawHeaderCell($text, $rectangle);
             $vertLine = $rectangle->getRight();
         }
         $vertLine = $vertLine->addX($this->getColumnWidth(Column::Field));
 
         $rectangle = new Rectangle($vertLine, $this->getColumnWidth(Column::PlacesAndScore));
-        $this->drawCell($recess->getName(), $rectangle, ['top' => 'black']);
+        $this->page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
+        $this->drawTableCell($recess->getName(), $rectangle);
+        $this->page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
     }
 
     public function drawGame(
@@ -182,20 +188,20 @@ abstract class GameLine
 
         $structureNameService = $this->page->getStructureNameService();
         $pouleName = $structureNameService->getPouleName($game->getPoule(), false);
-        $this->page->drawCell($pouleName, new Rectangle($left, $pouleWidth));
-        $left = $left->addX($pouleWidth);
+        $this->drawTableCell($pouleName, new Rectangle($left, $pouleWidth));
+        $leftNext = $left->addX($pouleWidth);
 
         if ($this->dateTimeColumn !== DateTimeColumn::None) {
             $text = $this->getDateTime($game->getStartDateTime(), $this->dateTimeColumn);
-            $this->page->drawCell($text, new Rectangle($left, $startWidth));
-            $left = $left->addX($pouleWidth);
+            $this->drawTableCell($text, new Rectangle($leftNext, $startWidth));
+            $leftNext = $leftNext->addX($startWidth);
         }
 
         $field = $game->getField();
         $fieldName = $field === null ? '' : $field->getName();
         $fieldDescription = $fieldName === null ? '' : $fieldName;
-        $this->page->drawCell($fieldDescription, new Rectangle($left, $fieldWidth));
-        $left = $left->addX($fieldWidth);
+        $this->drawTableCell($fieldDescription, new Rectangle($leftNext, $fieldWidth));
+        $left = $leftNext->addX($fieldWidth);
 
         $left = $this->drawPlacesAndScoreCell($game, $left);
 
@@ -212,7 +218,7 @@ abstract class GameLine
                     $text = $structureNameService->getPlaceName($refereePlace, true, true);
                 }
             }
-            $this->page->drawCell($text, new Rectangle($left, $refereeWidth));
+            $this->drawTableCell($text, new Rectangle($left, $refereeWidth));
         }
 
         return $horStartLine->addY(-$gameHeight);
@@ -251,6 +257,18 @@ abstract class GameLine
         );
     }
 
+    protected function drawHeaderCell(string $val, Rectangle $cell, Align|null $align = Align::Center): void
+    {
+        $this->page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
+        $this->drawCell($val, $cell, ['b' => 'black'], $align);
+        $this->page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+    }
+
+    protected function drawTableCell(string $val, Rectangle $cell, Align|null $align = Align::Center): void
+    {
+        $this->drawCell($val, $cell, ['b' => 'gray'], $align);
+    }
+
     /**
      * @param string $sText
      * @param Rectangle $rectangle
@@ -261,7 +279,11 @@ abstract class GameLine
         string $text,
         Rectangle $rectangle,
         array|string|null $vtLineColors = null,
+        Align|null $align = null
     ): void {
-        $this->page->drawCell($text, $rectangle, Align::Center, $vtLineColors);
+        if ($align === null) {
+            $align = Align::Center;
+        }
+        $this->page->drawCell($text, $rectangle, $align, $vtLineColors);
     }
 }

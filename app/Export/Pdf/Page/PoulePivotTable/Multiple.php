@@ -62,19 +62,20 @@ class Multiple extends ToernooiPdfPage
 
     public function drawPageStartHeader(RoundNumber $roundNumber, float $y): float
     {
-        $fontHeightSubHeader = $this->parent->getFontHeightSubHeader();
-        $this->setFont($this->helper->getTimesFont(true), $this->parent->getConfig()->getFontHeightSubHeader());
+        $roundNumberHeaderHeight = $this->parent->getGamesConfig()->getRoundNumberHeaderHeight();
+        $roundNumberHeaderFontHeight = $this->parent->getGamesConfig()->getRoundNumberHeaderHeight();
+        $this->setFont($this->helper->getTimesFont(true), $roundNumberHeaderFontHeight);
         $x = self::PAGEMARGIN;
         $displayWidth = $this->getDisplayWidth();
         $subHeader = $this->getStructureNameService()->getRoundNumberName($roundNumber);
         $subHeader .= ' - totaalstand';
         $cell = new Rectangle(
             new HorizontalLine(new Point($x, $y), $displayWidth),
-            $fontHeightSubHeader
+            $roundNumberHeaderHeight
         );
         $this->drawCell($subHeader, $cell, Align::Center);
-        $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
-        return $y - (2 * $fontHeightSubHeader);
+        $this->setFont($this->helper->getTimesFont(), $roundNumberHeaderFontHeight);
+        return $y - (2 * $roundNumberHeaderHeight);
     }
 
     // t/m 3 places 0g, t/m 8 places 45g, hoger 90g
