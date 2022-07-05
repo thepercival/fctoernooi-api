@@ -43,7 +43,9 @@ final class CategoryDrawer
     private function drawHeader(Page $page, Category $category, HorizontalLine $top): HorizontalLine
     {
         $rectangle = new Rectangle($top, -$this->config->getRoundConfig()->getHeaderHeight());
+        $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
         $page->drawCell($category->getName(), $rectangle);
+        $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
         return $rectangle->getBottom();
     }
 

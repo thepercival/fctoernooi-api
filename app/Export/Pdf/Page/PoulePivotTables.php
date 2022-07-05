@@ -56,10 +56,12 @@ abstract class PoulePivotTables extends ToernooiPdfPage
         $x = self::PAGEMARGIN;
         $displayWidth = $this->getDisplayWidth();
         $subHeader = $this->getStructureNameService()->getRoundNumberName($roundNumber);
-        $subHeader .= ' - ' . $competitionSport->getSport()->getName();
+        if ($this->parent->getTournament()->getCompetition()->hasMultipleSports()) {
+            $subHeader .= ' - ' . $competitionSport->getSport()->getName();
+        }
         $rectangle = new Rectangle(
             new HorizontalLine(new Point($x, $y), $displayWidth),
-            $fontHeight
+            -$fontHeight
         );
         $this->drawCell($subHeader, $rectangle, Align::Center);
         $this->setFont($this->helper->getTimesFont(), $fontHeight);

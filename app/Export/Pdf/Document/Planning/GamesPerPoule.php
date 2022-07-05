@@ -13,6 +13,7 @@ use App\Export\Pdf\Point;
 use App\Export\PdfProgress;
 use FCToernooi\Tournament;
 use Sports\Game;
+use Sports\Poule;
 use Sports\Round\Number as RoundNumber;
 use Sports\Structure;
 
@@ -48,7 +49,9 @@ class GamesPerPoule extends PdfPlanningDocument
 
     protected function drawPlanningPerPoule(RoundNumber $roundNumber): void
     {
-        $poules = $roundNumber->getPoules();
+        $poules = array_filter($roundNumber->getPoules(), function (Poule $poule): bool {
+            return $poule->needsRanking();
+        });
         foreach ($poules as $poule) {
             $title = $this->getStructureNameService()->getPouleName($poule, true);
             $page = $this->createPagePlanning($roundNumber, $title);

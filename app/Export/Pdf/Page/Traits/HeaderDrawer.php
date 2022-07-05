@@ -25,18 +25,19 @@ trait HeaderDrawer
         $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
 
         $displayWidth = $this->getDisplayWidth();
-        $margin = $displayWidth / 25;
+        $padding = 10;
         $rowHeight = $config->getRowHeight();
         $imgSize = $rowHeight;
-        $widthLeft = $imgSize + $this->getTextWidth('FCToernooi', $config->getFontHeight());
-        $xLeft = self::PAGEMARGIN;
-        $xCenter = $xLeft + $widthLeft + $margin;
+        $xImage = self::PAGEMARGIN;
+        $xLeft = $xImage + $imgSize;
+        $widthLeft = $this->getTextWidth('FCToernooi', $config->getFontHeight());
+        $xCenter = $xLeft + $widthLeft + $padding;
+        $this->setFont($this->helper->getTimesFont(true), $config->getFontHeight());
         $widthRight = strlen($subTitle) > 0 ? $this->getTextWidth($subTitle, $config->getFontHeight()) : 0;
+        $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
         $xRight = strlen($subTitle) > 0 ? $this->getWidth() - (self::PAGEMARGIN + $widthRight) : 0;
-        $widthCenter = $displayWidth - ($widthLeft + $margin);
-        if (strlen($subTitle) > 0) {
-            $widthCenter -= ($margin + $widthRight);
-        }
+
+        $widthCenter = $displayWidth - ($imgSize + $widthLeft + $padding + $padding + $widthRight);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../../../logo.jpg');
         $y = $config->getYStart();
@@ -44,12 +45,12 @@ trait HeaderDrawer
             $y = $this->getHeight() - self::PAGEMARGIN;
         }
 
-        $imgRectangle = new Rectangle(new HorizontalLine(new Point($xLeft, $y), $imgSize), -$imgSize);
+        $imgRectangle = new Rectangle(new HorizontalLine(new Point($xImage, $y), $imgSize), -$imgSize);
         $this->drawImageExt($img, $imgRectangle);
 
         $arrLineColors = ['b' => 'black'];
         $rectangle = new Rectangle(
-            new HorizontalLine(new Point($xLeft + $imgSize, $y), $widthLeft),
+            new HorizontalLine(new Point($xLeft, $y), $widthLeft),
             -$rowHeight
         );
         $this->drawCell('FCToernooi', $rectangle, Align::Left, $arrLineColors);
@@ -61,11 +62,13 @@ trait HeaderDrawer
         $this->drawCell($tournamentName, $rectangle, Align::Center, $arrLineColors);
 
         if (strlen($subTitle) > 0) {
+            $this->setFont($this->helper->getTimesFont(true), $config->getFontHeight());
             $rectangle = new Rectangle(
                 new HorizontalLine(new Point($xRight, $y), $widthRight),
                 -$rowHeight
             );
             $this->drawCell($subTitle, $rectangle, Align::Right, $arrLineColors);
+            $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
         }
 
         return $y - (2 * $rowHeight);

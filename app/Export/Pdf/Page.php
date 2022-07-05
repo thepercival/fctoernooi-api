@@ -25,6 +25,7 @@ abstract class Page extends Zend_Pdf_Page
     public const A4_PORTRET_WIDTH = 595;
     public const A4_PORTRET_HEIGHT = 842;
     public const PAGEMARGIN = 20;
+    public const CELL_PADDING_X = 1;
     protected Helper $helper;
 
     protected Zend_Pdf_Color $textColor;
@@ -165,7 +166,7 @@ abstract class Page extends Zend_Pdf_Page
             $stringXPos -= ($rectangle->getHeight() - $rectangle->getWidth()) / 2;
         }
         if ($nAlign === Align::Left) {
-            $stringXPos += 1;
+            $stringXPos += self::CELL_PADDING_X;
         }
         $this->drawString($sText, new Point($stringXPos, $nTextY), $maxLength, $nAlign, $degrees);
     }
@@ -299,9 +300,10 @@ abstract class Page extends Zend_Pdf_Page
         return $nNewXPos;
     }
 
-    protected function getTextWidth(string $sText = null, float $fontSize): float
+    protected function getTextWidth(string $sText = null, float $fontSize, bool $withCellPaddingX = true): float
     {
-        return $this->helper->getTextWidth($sText ?? '', $this->getFont(), $fontSize);
+        $cellPaddingX = $withCellPaddingX ? self::CELL_PADDING_X : 0;
+        return $cellPaddingX + $this->helper->getTextWidth($sText ?? '', $this->getFont(), $fontSize) + $cellPaddingX;
     }
 
     private function getTextStartPosition(

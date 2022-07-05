@@ -58,54 +58,104 @@ class DocumentFactory
         switch ($subject) {
             case PdfSubject::Structure:
                 $config = new StructureConfig(
-                    15, new CategoryConfig(
-                          18, 14, 15,
-                          new RoundConfig(
-                              18, 14, 15, new PouleConfig(2, 18)
-                          )
-                      )
+                    15,
+                    new CategoryConfig(
+                        18,
+                        14,
+                        15,
+                        new RoundConfig(
+                            18,
+                            14,
+                            15,
+                            new PouleConfig(2, 14)
+                        )
+                    )
                 );
                 return new StructureDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $config
                 );
             case PdfSubject::PoulePivotTables:
                 $config = new PoulePivotConfig();
                 return new PoulePivotTablesDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $config
                 );
             case PdfSubject::Planning:
                 $gamesCfg = new GamesConfig(20, 18, 14);
                 $gameLineCfg = new GameLineConfig(12, 10);
                 return new GamesDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $gamesCfg,
+                    $gameLineCfg
                 );
             case PdfSubject::GamesPerPoule:
                 $gamesCfg = new GamesConfig(20, 18, 14);
                 $gameLineCfg = new GameLineConfig(12, 11);
                 return new GamesPerPouleDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $gamesCfg,
+                    $gameLineCfg
                 );
             case PdfSubject::GamesPerField:
                 $gamesCfg = new GamesConfig(20, 18, 14);
                 $gameLineCfg = new GameLineConfig(12, 10);
                 return new GamesPerFieldDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $gamesCfg, $gameLineCfg
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $gamesCfg,
+                    $gameLineCfg
                 );
             case PdfSubject::GameNotes:
                 $config = new GameNotesConfig();
                 return new GameNotesDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $config
                 );
             case PdfSubject::QrCode:
                 $config = new QRCodeConfig();
                 return new QRCodeDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $config
                 );
             case PdfSubject::LockerRooms:
-                $config = new LockerRoomConfig();
+                $config = new LockerRoomConfig(20, 16, 12);
                 $labelConfig = new LockerRoomLabelConfig();
                 return new LockerRoomsDocument(
-                    $tournament, $structure, $this->wwwUrl, $progress, $maxSubjectProgress, $config, $labelConfig
+                    $tournament,
+                    $structure,
+                    $this->wwwUrl,
+                    $progress,
+                    $maxSubjectProgress,
+                    $config,
+                    $labelConfig
                 );
         }
         throw new \Exception('unknown subject', E_ERROR);

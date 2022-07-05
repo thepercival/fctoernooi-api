@@ -40,7 +40,7 @@ class LockerRoomLabel extends ToernooiPdfPage
 
         $texts = [];
         {
-            $texts[] = "kleedkamer " . $this->lockerRoom->getName();
+            $texts[] = 'kleedkamer ' . $this->lockerRoom->getName();
             foreach ($this->lockerRoom->getCompetitors() as $competitor) {
                 $texts[] = $competitor->getName();
             }
@@ -95,14 +95,14 @@ class LockerRoomLabel extends ToernooiPdfPage
         $this->drawCell(
             "kleedkamer " . $this->lockerRoom->getName(),
             new Rectangle(
-                new HorizontalLine( new Point($x, $y,), $columnWidth),
-                $rowHeight
+                new HorizontalLine(new Point($x, $y,), $columnWidth),
+                -$rowHeight
             ),
             Align::Center,
             "black"
         );
         $this->setFont($this->helper->getTimesFont(), $fontHeight);
-        return $y - $rowHeight;
+        return $y - (2 * $rowHeight);
     }
 
     /**
@@ -124,7 +124,7 @@ class LockerRoomLabel extends ToernooiPdfPage
             $this->drawCell(
                 $competitor->getName(),
                 new Rectangle(
-                    new HorizontalLine( new Point($x, $y,), $columnWidth),
+                    new HorizontalLine(new Point($x, $y,), $columnWidth),
                     $rowHeight
                 ),
                 Align::Center,

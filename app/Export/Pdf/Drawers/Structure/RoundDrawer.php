@@ -46,10 +46,11 @@ class RoundDrawer
                 $pouleTopLeft = $poulesRowTop->getStart();
                 $drawnPoules = [];
             }
+            $pouleTop = new HorizontalLine($pouleTopLeft, $pouleWidth);
             if ($page) {
-                $pouleTop = new HorizontalLine($pouleTopLeft, $pouleWidth);
                 $this->pouleDrawer->renderPoule($poule, $showPouleNamePrefix, $showCompetitor, $pouleTop, $page);
             }
+            $pouleTopLeft = $pouleTop->getEnd()->addX($this->config->getPadding());
             $drawnPoules[] = $poule;
         }
         return $poulesRowTop->addY(-$this->calculateMaximumHeight($drawnPoules));

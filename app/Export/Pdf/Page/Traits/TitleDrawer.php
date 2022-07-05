@@ -26,7 +26,7 @@ trait TitleDrawer
         $displayWidth = $this->getDisplayWidth();
         $rectangle = new Rectangle(
             // new Point($x, $y), new Point($displayWidth, $config->getFontHeight())
-            new HorizontalLine(new Point($x, $y), $displayWidth), $config->getFontHeight()
+            new HorizontalLine(new Point($x, $y), $displayWidth), -$config->getFontHeight()
         );
         $this->drawCell($title, $rectangle, Align::Center);
         return $y - (2 * $config->getFontHeight());

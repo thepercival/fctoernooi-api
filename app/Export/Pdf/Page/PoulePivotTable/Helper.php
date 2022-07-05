@@ -21,7 +21,7 @@ trait Helper
 
     protected function drawHeaderCustom(string $text, float $x, float $y, float $width, float $height, int $degrees = 0): float
     {
-        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y - $height), $width), $height);
         $this->drawCell($text, $rectangle, Align::Center, 'black', $degrees);
         return $rectangle->getRight()->getX();
     }
@@ -34,7 +34,7 @@ trait Helper
         float $height,
         Align $align
     ): float {
-        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y), $width), $height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($x, $y - $height), $width), $height);
         $this->drawCell($text, $rectangle, $align, 'black');
         return $rectangle->getRight()->getX();
     }

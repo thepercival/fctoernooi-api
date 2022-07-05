@@ -6,20 +6,21 @@ namespace App\Export\Pdf\Document;
 
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\GameNotes\Against as AgainstGameNotesPage;
-use App\Export\Pdf\Page\GameNotes\AllInOneGame as AllInOneGameNotesPage;
-use App\Export\Pdf\Page\GameNotes\Single as SingleGameNotesPage;
+use App\Export\Pdf\Drawers\GameNote\Against as AgainstDrawer;
+use App\Export\Pdf\Drawers\GameNote\AllInOneGame as AllInOneGameDrawer;
+use App\Export\Pdf\Drawers\GameNote\Single as SingleDrawer;
+use App\Export\Pdf\Page\GameNotes as GameNotesPage;
 use App\Export\PdfProgress;
 use FCToernooi\Tournament;
+use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Against as AgainstGame;
+use Sports\Game\Order;
 use Sports\Game\Together as TogetherGame;
-use Sports\Round;
 use Sports\Round\Number as RoundNumber;
-use Sports\Score\Config as ScoreConfig;
 use Sports\Structure;
-use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
-use SportsHelpers\Sport\Variant\Single as SingleSportVariant;
+use SportsHelpers\SelfReferee;
+use SportsHelpers\Sport\Variant\Single;
 use Zend_Pdf_Page;
 
 /**
@@ -45,10 +46,16 @@ class GameNotes extends PdfDocument
 
     protected function renderCustom(): void
     {
-        $nrOfGameNotes = $this->getNrOfGameNotes($this->structure->getFirstRoundNumber());
-        $nrOfProgressPerGameNote = $this->maxSubjectProgress / $nrOfGameNotes;
-        $this->drawGameNotes($this->structure->getFirstRoundNumber(), $nrOfProgressPerGameNote);
+        $nrOfGameNotes = $this->getTotalNrOfGameNotes($this->structure->getFirstRoundNumber());
+        if ($nrOfGameNotes > 0) {
+            $nrOfProgressPerGameNote = $this->maxSubjectProgress / $nrOfGameNotes;
+        } else {
+            $nrOfProgressPerGameNote = 0;
+        }
+
+        $this->renderGameNotes($this->structure->getFirstRoundNumber(), $nrOfProgressPerGameNote);
     }
+
 
     /**
      * do not remove, progress is done while drawing, when remove, progress will be out of bounds
@@ -57,171 +64,216 @@ class GameNotes extends PdfDocument
     {
     }
 
-    protected function getNrOfGameNotes(RoundNumber $roundNumber): int
+    protected function getTotalNrOfGameNotes(RoundNumber $roundNumber): int
     {
         $nrOfGameNotes = 0;
-        foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
-            $sportVariant = $competitionSport->createVariant();
-            if ($sportVariant instanceof AgainstSportVariant) {
-                $nrOfGameNotes += $this->getNrOfAgainstGameNotes($roundNumber, $competitionSport);
-            } elseif ($sportVariant instanceof SingleSportVariant) {
-                $nrOfGameNotes += $this->getNrOfSingleGameNotes($roundNumber, $competitionSport);
-            } else {
-                $nrOfGameNotes += $this->getNrOfAllInOneGameGameNotes($roundNumber, $competitionSport);
+        if ($this->orderedGamesByReferee($roundNumber)) {
+            foreach ($roundNumber->getCompetition()->getReferees() as $referee) {
+                $gamesPerPage = $this->getGamesPerPage($roundNumber, $referee);
+                foreach ($gamesPerPage as $games) {
+                    $nrOfGameNotes += count($games);
+                }
+            }
+        } else {
+            $gamesPerPage = $this->getGamesPerPage($roundNumber, null);
+            foreach ($gamesPerPage as $games) {
+                $nrOfGameNotes += count($games);
             }
         }
 
         $nextRoundNumber = $roundNumber->getNext();
         if ($nextRoundNumber !== null) {
-            return $nrOfGameNotes + $this->getNrOfGameNotes($nextRoundNumber);
-        }
-        return $nrOfGameNotes;
-    }
-
-    protected function getNrOfAgainstGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
-    {
-        $nrOfGameNotes = 0;
-        foreach ($roundNumber->getRounds() as $round) {
-            $games = $this->getAgainstGames($round, $competitionSport); // per poule
-            $nrOfGameNotes += (int)ceil(count($games) / 2);
-        }
-        return $nrOfGameNotes;
-    }
-
-    protected function getNrOfSingleGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
-    {
-        $nrOfGameNotes = 0;
-        foreach ($roundNumber->getRounds() as $round) {
-            $games = $this->getSingleGames($round, $competitionSport); // per poule
-            $nrOfGameNotes += (int)ceil(count($games) / 2);
-        }
-        return $nrOfGameNotes;
-    }
-
-    protected function getNrOfAllInOneGameGameNotes(RoundNumber $roundNumber, CompetitionSport $competitionSport): int
-    {
-        $nrOfGameNotes = 0;
-        foreach ($roundNumber->getPoules() as $poule) {
-            $games = $this->getAllInOneGames($poule, $competitionSport); // per poule
-            $nrOfGameNotes += (int)ceil(count($games) / 2);
+            return $nrOfGameNotes + $this->getTotalNrOfGameNotes($nextRoundNumber);
         }
         return $nrOfGameNotes;
     }
 
 
-    protected function createAgainstGameNotesPage(AgainstGame $gameA, AgainstGame|null $gameB): AgainstGameNotesPage
+    protected function createPage(): GameNotesPage
     {
-        $page = new AgainstGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
+        $page = new GameNotesPage($this, Zend_Pdf_Page::SIZE_A4);
         $this->pages[] = $page;
         return $page;
     }
 
-    protected function createSingleGameNotesPage(TogetherGame $gameA, TogetherGame|null $gameB): SingleGameNotesPage
+    protected function renderGameNotes(RoundNumber $roundNumber, float $nrOfProgressPerGameNote): void
     {
-        $page = new SingleGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $this->pages[] = $page;
-        return $page;
-    }
-
-    protected function createAllInOneGameNotesPage(TogetherGame $gameA, TogetherGame|null $gameB): AllInOneGameNotesPage
-    {
-        $page = new AllInOneGameNotesPage($this, Zend_Pdf_Page::SIZE_A4, $gameA, $gameB);
-        $this->pages[] = $page;
-        return $page;
-    }
-
-    protected function drawGameNotes(RoundNumber $roundNumber, float $nrOfProgressPerGameNote): void
-    {
-        foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
-            $sportVariant = $competitionSport->createVariant();
-            if ($sportVariant instanceof AgainstSportVariant) {
-                $this->drawAgainstGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
-            } elseif ($sportVariant instanceof SingleSportVariant) {
-                $this->drawSingleGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
-            } else {
-                $this->drawAllInOneGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
+        if ($this->orderedGamesByReferee($roundNumber)) {
+            foreach ($roundNumber->getCompetition()->getReferees() as $referee) {
+                $gamesPerPage = $this->getGamesPerPage($roundNumber, $referee);
+                foreach ($gamesPerPage as $games) {
+                    $progression = $nrOfProgressPerGameNote * count($games);
+                    $this->createPage()->renderGames(array_shift($games), array_shift($games));
+                    $this->progress->addProgression($progression);
+                }
+//                    $sportVariant = $competitionSport->createVariant();
+//                    if ($sportVariant instanceof Against) {
+//                        $this->drawAgainstGameNotesPerReferee($roundNumber, $competitionSport, $referee, $nrOfProgressPerGameNote);
+//                    } elseif ($sportVariant instanceof Single) {
+//                        $this->drawSingleGameNotes($roundNumber, $competitionSport, $referee, $nrOfProgressPerGameNote);
+//                    } else {
+//                        $this->drawAllInOneGameNotes($roundNumber, $competitionSport, $referee, $nrOfProgressPerGameNote);
+//                    }
+//                }
             }
+        } else {
+            $gamesPerPage = $this->getGamesPerPage($roundNumber, null);
+            foreach ($gamesPerPage as $games) {
+                $progression = $nrOfProgressPerGameNote * count($games);
+                $this->createPage()->renderGames(array_shift($games), array_shift($games));
+                $this->progress->addProgression($progression);
+            }
+
+
+//            foreach ($roundNumber->getCompetitionSports() as $competitionSport) {
+//                $sportVariant = $competitionSport->createVariant();
+//                //       $games = $this->getOrderedGames($roundNumber)
+//                if ($sportVariant instanceof Against) {
+//                    $this->drawAgainstGameNotesPerPoule($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
+//                } elseif ($sportVariant instanceof Single) {
+//                    $this->drawSingleGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
+//                } else {
+//                    $this->drawAllInOneGameNotes($roundNumber, $competitionSport, $nrOfProgressPerGameNote);
+//                }
+//            }
         }
 
         $nextRoundNumber = $roundNumber->getNext();
         if ($nextRoundNumber !== null) {
-            $this->drawGameNotes($nextRoundNumber, $nrOfProgressPerGameNote);
+            $this->renderGameNotes($nextRoundNumber, $nrOfProgressPerGameNote);
         }
     }
 
-    protected function drawAgainstGameNotes(
-        RoundNumber $roundNumber,
-        CompetitionSport $competitionSport,
-        float $nrOfProgressPerGameNote
-    ): void {
-        foreach ($roundNumber->getRounds() as $round) {
-            $games = $this->getAgainstGames($round, $competitionSport); // per poule
-            $oneGamePerPage = $this->getNrOfGameNoteScoreLines($round, $competitionSport) > 5;
-            while ($gameOne = array_shift($games)) {
-                $gameTwo = $oneGamePerPage ? null : array_shift($games);
-                $page = $this->createAgainstGameNotesPage($gameOne, $gameTwo);
-                $page->draw($oneGamePerPage);
-                $this->progress->addProgression($nrOfProgressPerGameNote);
-            }
-        }
-    }
-
-    protected function drawSingleGameNotes(
-        RoundNumber $roundNumber,
-        CompetitionSport $competitionSport,
-        float $nrOfProgressPerGameNote
-    ): void {
-        foreach ($roundNumber->getRounds() as $round) {
-            $games = $this->getSingleGames($round, $competitionSport); // per poule
-            $oneGamePerPage = $this->getNrOfGameNoteScoreLines($round, $competitionSport) > 5;
-            while ($gameOne = array_shift($games)) {
-                $gameTwo = $oneGamePerPage ? null : array_shift($games);
-                $page = $this->createSingleGameNotesPage($gameOne, $gameTwo);
-                $page->draw($oneGamePerPage);
-                $this->progress->addProgression($nrOfProgressPerGameNote);
-            }
-        }
-    }
-
-    protected function drawAllInOneGameNotes(
-        RoundNumber $roundNumber,
-        CompetitionSport $competitionSport,
-        float $nrOfProgressPerGameNote
-    ): void {
-        foreach ($roundNumber->getPoules() as $poule) {
-            $oneGamePerPage = $poule->getPlaces()->count() > 5;
-            $games = $this->getAllInOneGames($poule, $competitionSport); // per poule
-            while ($gameOne = array_shift($games)) {
-                $gameTwo = $oneGamePerPage ? null : array_shift($games);
-                $page = $this->createAllInOneGameNotesPage($gameOne, $gameTwo);
-                $page->draw($oneGamePerPage);
-                $this->progress->addProgression($nrOfProgressPerGameNote);
-            }
-        }
-    }
-
-    public function getNrOfGameNoteScoreLines(Round $round, CompetitionSport $competitionSport): int
+    protected function orderedGamesByReferee(RoundNumber $roundNumber): bool
     {
-        return $this->getNrOfGameNoteScoreLinesHelper(
-            $round->getValidScoreConfig($competitionSport),
-            $round->getNumber()->getValidPlanningConfig()->getExtension()
-        );
+        return $roundNumber->getValidPlanningConfig()->getSelfReferee() === SelfReferee::Disabled
+            && count($roundNumber->getCompetition()->getReferees()) > 0;
     }
 
-    protected function getNrOfGameNoteScoreLinesHelper(ScoreConfig $firstScoreConfig, bool $extension): int
-    {
-        if ($firstScoreConfig === $firstScoreConfig->getCalculate()) {
-            return 1;
-        }
-
-        $nrOfScoreLines = (($firstScoreConfig->getCalculate()->getMaximum() * 2) - 1) + ($extension ? 1 : 0);
-        if ($nrOfScoreLines < 1) {
-            $nrOfScoreLines = 5;
-        }
-//        $maxNrOfScoreLines = AllInOneGameNotesPage::OnePageMaxNrOfScoreLines - ($extension ? 1 : 0);
-//        if ($nrOfScoreLines > $maxNrOfScoreLines) {
-//            $nrOfScoreLines = $maxNrOfScoreLines;
+//    protected function drawAgainstGameNotesPerPoule(
+//        RoundNumber $roundNumber,
+//        CompetitionSport $competitionSport,
+//        float $nrOfProgressPerGameNote
+//    ): void {
+//        foreach ($roundNumber->getPoules() as $poule) {
+//            $games = $this->getAgainstGames($poule, $competitionSport); // per poule
+//            $oneGamePerPage = $this->getNrOfGameNoteScoreLines($poule->getRound(), $competitionSport) > 5;
+//            while ($gameOne = array_shift($games)) {
+//                $gameTwo = $oneGamePerPage ? null : array_shift($games);
+//                $page = $this->createAgainstGameNotesPage($gameOne, $gameTwo);
+//                $page->draw($oneGamePerPage);
+//                $this->progress->addProgression($nrOfProgressPerGameNote);
+//            }
 //        }
-        return $nrOfScoreLines;
+//    }
+
+    /**
+     * @param RoundNumber $roundNumber
+     * @param Referee|null $referee
+     * @return list<list<AgainstGame|TogetherGame>>
+     */
+    protected function getGamesPerPage(RoundNumber $roundNumber, Referee|null $referee): array
+    {
+        $gamesPerPage = [];
+        $gamesTmp = $roundNumber->getGames(Order::ByBatch);
+        if ($referee === null) {
+            $games = [];
+            foreach ($roundNumber->getPoules() as $poule) {
+                $games = array_merge($games, $poule->getGames());
+            }
+        } else {
+            $games = array_filter($gamesTmp, function ($game) use ($referee): bool {
+                return $game->getReferee() === $referee;
+            });
+        }
+
+        while ($gameOne = array_shift($games)) {
+            $oneGamePerPageGameOne = $this->getNrOfScoreLines($gameOne, $gameOne->getCompetitionSport()) > 5;
+
+            if ($oneGamePerPageGameOne) {
+                $gamesPerPage[] = [$gameOne];
+                continue;
+            }
+
+            $gameTwo = array_shift($games);
+
+            $oneGamePerPageGameTwo = $this->getNrOfScoreLines($gameTwo, $gameTwo->getCompetitionSport()) > 5;
+
+            if ($oneGamePerPageGameTwo) {
+                $gamesPerPage[] = [$gameOne];
+                $gamesPerPage[] = [$gameTwo];
+            } else {
+                $gamesPerPage[] = [$gameOne, $gameTwo];
+            }
+        }
+        return $gamesPerPage;
+    }
+
+//    /**
+//     * @param list<non-empty-list<AgainstGame>> $gamesPerPage
+//     * @param float $nrOfProgressPerGameNote
+//     */
+//    protected function drawAgainstGameNotes(array $gamesPerPage, float $nrOfProgressPerGameNote): void
+//    {
+//        foreach ($gamesPerPage as $games) {
+//            $gameOne = array_shift($games);
+//            $gameTwo = array_shift($games);
+//            $page = $this->createAgainstGameNotesPage($gameOne, $gameTwo);
+//            $page->draw($gameTwo === null);
+//            $this->progress->addProgression($nrOfProgressPerGameNote);
+//        }
+//    }
+//
+//    protected function drawSingleGameNotes(
+//        RoundNumber $roundNumber,
+//        CompetitionSport $competitionSport,
+//        Referee|null $referee,
+//        float $nrOfProgressPerGameNote
+//    ): void {
+//        foreach ($roundNumber->getRounds() as $round) {
+//            $games = $this->getSingleGames($round, $competitionSport, $referee); // per poule
+//            $oneGamePerPage = $this->getNrOfGameNoteScoreLines($round, $competitionSport) > 5;
+//            while ($gameOne = array_shift($games)) {
+//                $gameTwo = $oneGamePerPage ? null : array_shift($games);
+//                $page = $this->createSingleGameNotesPage($gameOne, $gameTwo);
+//                $page->draw($oneGamePerPage);
+//                $this->progress->addProgression($nrOfProgressPerGameNote);
+//            }
+//        }
+//    }
+//
+//    protected function drawAllInOneGameNotes(
+//        RoundNumber $roundNumber,
+//        CompetitionSport $competitionSport,
+//        Referee|null $referee,
+//        float $nrOfProgressPerGameNote
+//    ): void {
+//        foreach ($roundNumber->getPoules() as $poule) {
+//            $oneGamePerPage = $poule->getPlaces()->count() > 5;
+//            $games = $this->getAllInOneGames($poule, $competitionSport, $referee); // per poule
+//            while ($gameOne = array_shift($games)) {
+//                $gameTwo = $oneGamePerPage ? null : array_shift($games);
+//                $page = $this->createAllInOneGameNotesPage($gameOne, $gameTwo);
+//                $page->draw($oneGamePerPage);
+//                $this->progress->addProgression($nrOfProgressPerGameNote);
+//            }
+//        }
+//    }
+
+    public function getNrOfScoreLines(TogetherGame|AgainstGame $game, CompetitionSport $competitionSport): int
+    {
+        return $this->createDrawer($game)->getNrOfScoreLines($game->getRound(), $competitionSport);
+    }
+
+    public function createDrawer(AgainstGame|TogetherGame $game): AgainstDrawer|SingleDrawer|AllInOneGameDrawer
+    {
+        if ($game instanceof AgainstGame) {
+            return new AgainstDrawer($this->config);
+        }
+        $sportVariant = $game->getCompetitionSport()->createVariant();
+        if ($sportVariant instanceof Single) {
+            return new SingleDrawer($this->config);
+        }
+        return new AllInOneGameDrawer($this->config);
     }
 }

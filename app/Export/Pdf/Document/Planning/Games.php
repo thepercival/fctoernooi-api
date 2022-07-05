@@ -104,7 +104,7 @@ class Games extends PdfPlanningDocument
             }
             if ($recessToDraw !== null) {
                 // $page->initGameLines($roundNumber);
-                $rectangle = new Rectangle($gameHorStartLine, $this->getGameLineConfig()->getRowHeight());
+                $rectangle = new Rectangle($gameHorStartLine, -$this->getGameLineConfig()->getRowHeight());
                 $page->drawRecess($game, $recessToDraw, $rectangle);
                 $gameHorStartLine = $rectangle->getBottom();
             }

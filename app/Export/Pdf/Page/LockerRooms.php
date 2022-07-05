@@ -93,8 +93,10 @@ class LockerRooms extends ToernooiPdfPage
         while (count($lockerRooms) > 0) {
             $lockerRoom = array_shift($lockerRooms);
             $competitors = array_values($lockerRoom->getCompetitors()->toArray());
-            while (count($competitors) > 0) {
+            $lockerRoomHeaderDrawn = false;
+            while (count($competitors) > 0 || !$lockerRoomHeaderDrawn) {
                 $point = $this->drawLockerRoom($lockerRoom, $competitors, $point, $yStart, $columnWidth);
+                $lockerRoomHeaderDrawn = true;
             }
             $point = $point->addY(-$this->parent->getConfig()->getRowHeight());
         }
@@ -118,6 +120,7 @@ class LockerRooms extends ToernooiPdfPage
     ): Point
     {
         $rowHeight = $this->parent->getConfig()->getRowHeight();
+        $fontHeight = $this->parent->getConfig()->getFontHeight();
         $lockerRoomMargin = $this->parent->getConfig()->getLockerRoomMargin();
 
         $startAtTop = $point->getY() === $yStart;
@@ -129,24 +132,24 @@ class LockerRooms extends ToernooiPdfPage
         }
 
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
-        $this->setFont($this->helper->getTimesFont(true), $this->parent->getConfig()->getFontHeight());
+        $this->setFont($this->helper->getTimesFont(true), $fontHeight);
         $this->drawCell(
             'kleedkamer ' . $lockerRoom->getName(),
             new Rectangle(
                 new HorizontalLine($point, $columnWidth),
-                $rowHeight
+                -$rowHeight
             ),
             Align::Center,
             'black'
         );
-        $this->setFont($this->helper->getTimesFont(), $rowHeight);
+        $this->setFont($this->helper->getTimesFont(), $fontHeight);
         $point = $point->addY(-$rowHeight);
         while ($competitor = array_shift($competitors)) {
             $this->drawCell(
                 $competitor->getName(),
                 new Rectangle(
                     new HorizontalLine( $point, $columnWidth),
-                    $rowHeight
+                    -$rowHeight
                 ),
                 Align::Center,
                 'black'

@@ -35,10 +35,13 @@ class RoundCardDrawer
         // $cardBodyRectangle = new Rectangle($cardHeaderRectangle->getBottom(), $rectangle->getBottom());
 
         $poulesHeight = $headerBottom->getY() - $this->roundDrawer->renderPoules($round, $headerBottom, null)->getY();
-        $rectangle = new Rectangle($headerBottom, -$poulesHeight);
+        $rectangle = new Rectangle($headerBottom, -($poulesHeight + (2 * $this->config->getPadding())));
         $page->drawCell('', $rectangle, Align::Center, 'green');
 
-        $poulesTop = $headerBottom->addY($this->config->getPadding());
+        $poulesTop = $headerBottom->addY(-$this->config->getPadding());
+        $startTopWithPadding = $poulesTop->getStart()->addX($this->config->getPadding());
+        $widthpWithPadding = $poulesTop->getWidth() - (2 * $this->config->getPadding());
+        $poulesTop = new HorizontalLine($startTopWithPadding, $widthpWithPadding);
         $poulesBottom = $this->roundDrawer->renderPoules($round, $poulesTop, $page);
 
         return $poulesBottom->addY($this->config->getPadding());
@@ -48,7 +51,9 @@ class RoundCardDrawer
     {
         $rectangle = new Rectangle($horLine, -$this->config->getHeaderHeight());
         $roundName = $this->structureNameService->getRoundName($round);
+        $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
         $page->drawCell($roundName, $rectangle, Align::Center, 'blue');
+        $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
         return $horLine->addY(-$this->config->getHeaderHeight());
     }
 

@@ -39,14 +39,14 @@ final class PouleDrawer
         $rowHeight = $this->config->getRowHeight();
 
         $pouleName = $this->structureNameService->getPouleName($poule, $showPouleNamePrefix);
-        $pouleNameRectangle = new Rectangle($top, $rowHeight);
+        $pouleNameRectangle = new Rectangle($top, -$rowHeight);
         $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
         $page->drawCell($pouleName, $pouleNameRectangle, Align::Center, 'black');
         $placesTop = $pouleNameRectangle->getBottom();
 
         $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
 
-        $left = $top->getStart()->getX();
+        $left = $placesTop->getStart()->getX();
         $places = array_values($poule->getPlaces()->toArray());
         $nrOfPlacesInColumn = $this->getNrOfPlacesInColumn($poule);
         $placesToRender = array_splice($places, 0, $nrOfPlacesInColumn);
@@ -69,7 +69,7 @@ final class PouleDrawer
         $numberWidth = $this->getNumberColumnWidth();
 
         $numberTop = new HorizontalLine($top->getStart(), $numberWidth);
-        $numberRectangle = new Rectangle($numberTop, $rowHeight);
+        $numberRectangle = new Rectangle($numberTop, -$rowHeight);
         $page->drawCell((string)$place->getPlaceNr(), $numberRectangle, Align::Right, 'black');
         if ($showCompetitor) {
             $name = '';
@@ -81,7 +81,7 @@ final class PouleDrawer
                 $name = $this->structureNameService->getPlaceName($place, true);
             }
             $nameTop = new HorizontalLine($numberTop->getEnd(), $top->getWidth() - $numberTop->getWidth());
-            $page->drawCell($name, new Rectangle($nameTop, $rowHeight), Align::Left, 'black');
+            $page->drawCell($name, new Rectangle($nameTop, -$rowHeight), Align::Left, 'black');
         }
         return $top->addY(-$rowHeight);
     }
@@ -107,7 +107,7 @@ final class PouleDrawer
         $nrOfPlacesInColumn = $this->getNrOfPlacesInColumn($poule);
         $placesToCalculate = array_splice($places, 0, $nrOfPlacesInColumn);
         while (count($placesToCalculate) > 0) {
-            $minimalWidth += $this->calculatePlacesWidth($places, $showCompetitor);
+            $minimalWidth += $this->calculatePlacesWidth($placesToCalculate, $showCompetitor);
             $placesToCalculate = array_splice($places, 0, $nrOfPlacesInColumn);
         }
         return $minimalWidth;

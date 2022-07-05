@@ -72,9 +72,11 @@ class LockerRooms extends PdfDocument
     {
         while ($lockerRoom = array_shift($lockerRooms)) {
             $competitors = array_values($lockerRoom->getCompetitors()->toArray());
-            while (count($competitors) > 0) {
+            $headerDrawn = false;
+            while (count($competitors) > 0 || !$headerDrawn) {
                 $page = $this->createLockerRoomLabelPage($lockerRoom);
                 $page->draw($competitors);
+                $headerDrawn = true;
             }
         }
     }

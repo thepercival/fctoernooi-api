@@ -154,7 +154,6 @@ abstract class GameLine
     public function drawRecess(Recess $recess, Rectangle $rectangle, DateTimeColumn $dateTimeColumn): void
     {
         $startVertLine = $rectangle->getLeft();
-        $width = $rectangle->getWidth();
         $vertLine = $startVertLine->addX($this->getColumnWidth(Column::Poule));
         $this->page->setFillColor(new Zend_Pdf_Color_GrayScale(1));
         if ($dateTimeColumn !== DateTimeColumn::None) {

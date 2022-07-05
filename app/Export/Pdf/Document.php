@@ -13,7 +13,6 @@ use Sports\Game\Against as AgainstGame;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Poule;
-use Sports\Round;
 use Sports\Structure;
 use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf;
@@ -67,13 +66,13 @@ abstract class Document extends Zend_Pdf
     }
 
     /**
-     * @param Round $round
+     * @param Poule $poule
      * @param CompetitionSport $competitionSport
      * @return list<AgainstGame>
      */
-    protected function getAgainstGames(Round $round, CompetitionSport $competitionSport): array
+    protected function getAgainstGames(Poule $poule, CompetitionSport $competitionSport): array
     {
-        $games = $round->getGamesWithState(GameState::Created);
+        $games = $poule->getGamesWithState(GameState::Created);
         $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
             return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
         });
@@ -81,13 +80,13 @@ abstract class Document extends Zend_Pdf
     }
 
     /**
-     * @param Round $round
+     * @param Poule $poule
      * @param CompetitionSport $competitionSport
      * @return list<TogetherGame>
      */
-    protected function getSingleGames(Round $round, CompetitionSport $competitionSport): array
+    protected function getSingleGames(Poule $poule, CompetitionSport $competitionSport): array
     {
-        $games = $round->getGamesWithState(GameState::Created);
+        $games = $poule->getGamesWithState(GameState::Created);
         $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
             return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
         });

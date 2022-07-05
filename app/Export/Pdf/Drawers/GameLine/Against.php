@@ -67,7 +67,7 @@ class Against extends GameLineBase
 
         $away = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         $awayCell = new Rectangle($scoreCell->getRight(), $sideWidth);
-        $this->drawTableCell($away, $awayCell);
+        $this->drawTableCell($away, $awayCell, Align::Left);
         return $awayCell->getRight();
     }
 
