@@ -26,8 +26,8 @@ enum DateTime: int
 
     private static function gamesOnSameDay(RoundNumber $roundNumber): bool
     {
-        $dateOne = $roundNumber->getFirstStartDateTime();
-        $dateTwo = $roundNumber->getLastStartDateTime();
+        $dateOne = $roundNumber->getFirstGameStartDateTime();
+        $dateTwo = $roundNumber->getLastGameStartDateTime();
         return $dateOne->format('Y-m-d') === $dateTwo->format('Y-m-d');
     }
 }

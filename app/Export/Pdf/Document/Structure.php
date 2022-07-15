@@ -36,7 +36,9 @@ class Structure extends PdfDocument
         parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
         $drawCategoryHeader = !$this->getStructure()->hasSingleCategory();
         $this->categoryDrawer = new CategoryDrawer(
-            $this->getStructureNameService(), $drawCategoryHeader, $config->getCategoryConfig()
+            $this->getStructureNameService(),
+            $drawCategoryHeader,
+            $config->getCategoryConfig()
         );
     }
 
@@ -75,7 +77,7 @@ class Structure extends PdfDocument
             }
 
             $top = $rectangle->getTop();
-            $bottom = $this->categoryDrawer->drawCategory($page, $category, $top);
+            $bottom = $this->categoryDrawer->drawCategory($page, $category, $top, $maxNrOfPouleRows);
 
             // $horLine = new HorizontalLine($bottomRight, $topLeft->getX() - $bottomRight->getX());
             $horLine = $bottom->addY(-$this->getConfig()->getPadding());
@@ -103,15 +105,17 @@ class Structure extends PdfDocument
         Category $category,
         Category $nextCategory,
         HorizontalLine $top
-    ): HorizontalLine {
-        $width = $this->categoryDrawer->calculateRectangle($category, 1)->getWidth();
+    ): HorizontalLine
+    {
+        $maxNrOfPouleRows = 1;
+        $width = $this->categoryDrawer->calculateRectangle($category, $maxNrOfPouleRows)->getWidth();
         $top = new HorizontalLine($top->getStart(), $width);
-        $bottom = $this->categoryDrawer->drawCategory($page, $category, $top);
+        $bottom = $this->categoryDrawer->drawCategory($page, $category, $top, $maxNrOfPouleRows);
 
         $widthNext = $this->categoryDrawer->calculateRectangle($nextCategory, 1)->getWidth();
         $topLeftNext = new Point($top->getEnd()->getX() + $this->config->getPadding(), $top->getY());
         $topNext = new HorizontalLine($topLeftNext, $widthNext);
-        $bottomNext = $this->categoryDrawer->drawCategory($page, $category, $topNext);
+        $bottomNext = $this->categoryDrawer->drawCategory($page, $category, $topNext, $maxNrOfPouleRows);
         return new HorizontalLine(
             new Point(Page::PAGEMARGIN, min($bottom->getY(), $bottomNext->getY())),
             $top->getWidth()
@@ -130,11 +134,19 @@ class Structure extends PdfDocument
     {
         $nrOfPouleRows = 1;
         $rectangle = $this->categoryDrawer->calculateRectangle($category, $nrOfPouleRows);
-        while ($rectangle->getWidth() > $outerRectangle->getWidth()) {
+        $previousWidth = null;
+        while ($rectangle->getWidth() > $outerRectangle->getWidth() && $previousWidth !== $rectangle->getWidth()) {
+            $previousWidth = $rectangle->getWidth();
             $rectangle = $this->categoryDrawer->calculateRectangle(
                 $category,
                 ++$nrOfPouleRows
             );
+        }
+        if ($rectangle->getWidth() > $outerRectangle->getWidth()) {
+            return null;
+        }
+        if ($previousWidth === $rectangle->getWidth()) {
+            $nrOfPouleRows--;
         }
         if ($rectangle->getHeight() > $outerRectangle->getHeight()) {
             return null;
@@ -161,9 +173,11 @@ class Structure extends PdfDocument
         $rectangle = $this->categoryDrawer->calculateRectangle($category, 1);
         $portretAspectRatio = Page::A4_PORTRET_WIDTH / Page::A4_PORTRET_HEIGHT;
         if ($rectangle->getAspectRatio() > $portretAspectRatio) {
-            return new Point($rectangle->getWidth(), $rectangle->getWidth() * $portretAspectRatio);
+            $pageWidth = Page::PAGEMARGIN + $rectangle->getWidth() + Page::PAGEMARGIN;
+            return new Point($pageWidth, $pageWidth / $portretAspectRatio);
         }
-        return new Point($rectangle->getHeight() / $portretAspectRatio, $rectangle->getHeight());
+        $pageHeight = Page::PAGEMARGIN + $rectangle->getHeight() + Page::PAGEMARGIN;
+        return new Point($pageHeight * $portretAspectRatio, $pageHeight);
     }
 
 //    private function calculateRectangle(Category $category, int $maxNrOfPouleRows): Rectangle

@@ -42,7 +42,7 @@ class RecessHelper
             return $roundNumber->getCompetition()->getStartDateTime();
         }
         $nrOfMinutesToAdd = $previous->getValidPlanningConfig()->getMaxNrOfMinutesPerGame();
-        return $previous->getLastStartDateTime()->modify('+' .  $nrOfMinutesToAdd . ' minutes');
+        return $previous->getLastGameStartDateTime()->modify('+' . $nrOfMinutesToAdd . ' minutes');
     }
 
     /**

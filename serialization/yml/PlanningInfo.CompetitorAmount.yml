@@ -1,0 +1,11 @@
+FCToernooi\PlanningInfo\CompetitorAmount:
+  exclusion_policy: ALL
+  exclude: false
+
+  properties:
+    allTheSame:
+      type: bool
+    nrOfGames:
+      type: SportsHelpers\SportRange
+    nrOfMinutes:
+      type: SportsHelpers\SportRange

@@ -24,18 +24,22 @@ final class CategoryDrawer
         protected CategoryConfig $config
     ) {
         $this->helper = new Helper();
-        $this->roundCardDrawer = new RoundCardDrawer($structureNameService, $config->getRoundConfig());
+        $this->roundCardDrawer = new RoundCardDrawer($structureNameService, $config);
     }
 
     // Always fit on page
-    public function drawCategory(Page $page, Category $category, HorizontalLine $top): HorizontalLine
-    {
+    public function drawCategory(
+        Page $page,
+        Category $category,
+        HorizontalLine $top,
+        int $maxNrOfPouleRows
+    ): HorizontalLine {
 //        $width = $this->calculateRectangle($category, $maxNrOfPouleRows)->getWidth();
 //        $top = new HorizontalLine($topL, $width);
         if ($this->drawCategoryHeader) {
             $top = $this->drawHeader($page, $category, $top);
         }
-        $bottom = $this->roundCardDrawer->renderRoundCard($page, $category->getRootRound(), $top);
+        $bottom = $this->roundCardDrawer->renderRoundCard($page, $category->getRootRound(), $top, $maxNrOfPouleRows);
 
         return $bottom;
     }

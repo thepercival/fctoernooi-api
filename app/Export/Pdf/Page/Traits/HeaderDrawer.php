@@ -25,6 +25,8 @@ trait HeaderDrawer
         $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
 
         $displayWidth = $this->getDisplayWidth();
+
+
         $padding = 10;
         $rowHeight = $config->getRowHeight();
         $imgSize = $rowHeight;
@@ -53,7 +55,9 @@ trait HeaderDrawer
             new HorizontalLine(new Point($xLeft, $y), $widthLeft),
             -$rowHeight
         );
+        $this->setFillColor(new \Zend_Pdf_Color_Html('#93c54b'));
         $this->drawCell('FCToernooi', $rectangle, Align::Left, $arrLineColors);
+        $this->setFillColor(new \Zend_Pdf_Color_Html('white'));
 
         $rectangle = new Rectangle(
             new HorizontalLine(new Point($xCenter, $y), $widthCenter),

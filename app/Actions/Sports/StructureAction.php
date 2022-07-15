@@ -9,6 +9,7 @@ use App\Response\ErrorResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\PlanningInfo\Calculator as PlanningInfoCalculator;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -20,6 +21,7 @@ use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
+use SportsPlanning\Input\Repository as InputRepository;
 
 final class StructureAction extends Action
 {
@@ -27,6 +29,7 @@ final class StructureAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
+        protected InputRepository $inputRepos,
         private CacheService $cacheService,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
@@ -37,9 +40,10 @@ final class StructureAction extends Action
     }
 
     /**
+     * @param bool $bWithGames
      * @return list<string>
      */
-    protected function getDeserialzeGroups(): array
+    protected function getDeserialzeGroups(bool $bWithGames = true): array
     {
         return ['Default', 'structure', 'games'];
     }
@@ -130,6 +134,44 @@ final class StructureAction extends Action
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             $conn->rollBack();
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function getPlanningInfo(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Structure|false $structureSer */
+            $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups(false));
+            if ($structureSer === false) {
+                throw new \Exception("de planning-Info kan niet berekend worden o.b.v. de invoergegevens", E_ERROR);
+            }
+
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $competition = $tournament->getCompetition();
+            $nrOfReferees = $competition->getReferees()->count();
+
+            $newStructure = $this->structureCopier->copy($structureSer, $competition);
+            $recesses = array_values($tournament->getRecesses()->toArray());
+
+            $calculator = new PlanningInfoCalculator($this->inputRepos);
+
+            $planningInfo = $calculator->calculate($newStructure, $recesses, $nrOfReferees);
+            if ($planningInfo === null) {
+                throw new \Exception('unknown planning', E_ERROR);
+            }
+
+            $json = $this->serializer->serialize($planningInfo, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }

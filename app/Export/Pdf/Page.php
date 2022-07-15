@@ -100,41 +100,86 @@ abstract class Page extends Zend_Pdf_Page
      * @param string $sText
      * @param Rectangle $rectangle
      * @param Align $nAlign
-     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
-     * @param int|null $degrees
+     * @param array<string, Zend_Pdf_Color | string>| string $vtLineColors
+     * @param array<int>|null $cornerRadius
      * @throws Zend_Pdf_Exception
      */
     public function drawCell(
         string $sText,
         Rectangle $rectangle,
         Align $nAlign = Align::Left,
+        array|string $vtLineColors = null,
+        array|null $cornerRadius = null,
+    ): void {
+        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, $cornerRadius);
+    }
+
+    /**
+     * @param string $sText
+     * @param Rectangle $rectangle
+     * @param Align $nAlign
+     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
+     * @param int|null $degrees
+     * @throws Zend_Pdf_Exception
+     */
+    public function drawAngledCell(
+        string $sText,
+        Rectangle $rectangle,
+        Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
         int $degrees = null
-    ): void
-    {
+    ): void {
+        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, null, $degrees);
+    }
+
+    /**
+     * @param string $sText
+     * @param Rectangle $rectangle
+     * @param Align $nAlign
+     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
+     * @param array<int> | null $cornerRadius
+     * @param int|null $degrees
+     * @throws Zend_Pdf_Exception
+     */
+    private function drawCellHelper(
+        string $sText,
+        Rectangle $rectangle,
+        Align $nAlign = Align::Left,
+        array|string|null $vtLineColors = null,
+        array|null $cornerRadius = null,
+        int $degrees = null
+    ): void {
         $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
 
-        $arrLineColors = $this->getLineColorsFromInput($vtLineColors);
         $xPos = $rectangle->getLeft()->getX();
         $yPos = $rectangle->getTop()->getY();
-        if ($arrLineColors !== null) {
-            $nLineWidth = $this->getLineWidth();
-            $this->setLineColor($this->getFillColor());
+        $arrLineColors = $this->getLineColorsFromInput($vtLineColors);
 
-            $this->drawRectangleExt(
-                $rectangle
-//                new Rectangle(
-//                    $rectangle->getTop()->
-//                    new HorizontalLine($xPos + $nLineWidth, $xPos + ($rectangle->getWidth() - $nLineWidth)),
-//                    $rectangle->getHeight() - $nLineWidth
-//                )
-                ,
+        if ($arrLineColors === null) {
+            $this->drawRectangle(
+                $xPos,
+                $yPos - $rectangle->getHeight(),
+                $xPos + $rectangle->getWidth(),
+                $yPos,
                 $nStyle
             );
-
+        } elseif (is_array($arrLineColors)) {
+            $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL;
+            $this->drawRectangle(
+                $xPos,
+                $yPos - $rectangle->getHeight(),
+                $xPos + $rectangle->getWidth(),
+                $yPos,
+                $nStyle
+            );
             if (array_key_exists('b', $arrLineColors) === true) {
                 $this->setLineColor($arrLineColors['b']);
-                $this->drawLine($xPos + $rectangle->getWidth(), $yPos - $rectangle->getHeight(), $xPos, $yPos - $rectangle->getHeight()); // leftwards
+                $this->drawLine(
+                    $xPos + $rectangle->getWidth(),
+                    $yPos - $rectangle->getHeight(),
+                    $xPos,
+                    $yPos - $rectangle->getHeight()
+                ); // leftwards
             }
             if (array_key_exists('t', $arrLineColors) === true) {
                 $this->setLineColor($arrLineColors['t']);
@@ -147,11 +192,33 @@ abstract class Page extends Zend_Pdf_Page
             }
             if (array_key_exists('r', $arrLineColors) === true) {
                 $this->setLineColor($arrLineColors['r']);
-                $this->drawLine($xPos + $rectangle->getWidth(), $yPos, $xPos + $rectangle->getWidth(), $yPos - $rectangle->getHeight()); // downwards
+                $this->drawLine(
+                    $xPos + $rectangle->getWidth(),
+                    $yPos,
+                    $xPos + $rectangle->getWidth(),
+                    $yPos - $rectangle->getHeight()
+                ); // downwards
             }
-        } else {
-            $this->setLineColor($this->getFillColor());
-            $this->drawRectangle($xPos, $yPos - $rectangle->getHeight(), $xPos + $rectangle->getWidth(), $yPos, $nStyle);
+        } else /* string */ {
+            $this->setLineColor($arrLineColors);
+            if ($cornerRadius !== null) {
+                $this->drawRoundedRectangle(
+                    $xPos,
+                    $yPos - $rectangle->getHeight(),
+                    $xPos + $rectangle->getWidth(),
+                    $yPos,
+                    $cornerRadius,
+                    $nStyle
+                );
+            } else {
+                $this->drawRectangle(
+                    $xPos,
+                    $yPos - $rectangle->getHeight(),
+                    $xPos + $rectangle->getWidth(),
+                    $yPos,
+                    $nStyle
+                );
+            }
         }
 
         $nFontSize = $this->getFontSize();
@@ -192,10 +259,10 @@ abstract class Page extends Zend_Pdf_Page
 
     /**
      * @param array<string, Zend_Pdf_Color | string>| Zend_Pdf_Color | string | null $vtLineColors
-     * @return array<string, Zend_Pdf_Color>| null
+     * @return array<string, Zend_Pdf_Color>| Zend_Pdf_Color | null
      * @throws Zend_Pdf_Exception
      */
-    protected function getLineColorsFromInput(array | Zend_Pdf_Color | string | null $vtLineColors): array | null
+    protected function getLineColorsFromInput(array|Zend_Pdf_Color|string|null $vtLineColors): array|Zend_Pdf_Color|null
     {
         if ($vtLineColors === null) {
             return null;
@@ -212,11 +279,9 @@ abstract class Page extends Zend_Pdf_Page
         }
 
         if (is_string($vtLineColors)) {
-            $oColor = new Zend_Pdf_Color_Html($vtLineColors);
-        } else { // if ($vtLineColors instanceof Zend_Pdf_Color) {
-            $oColor = $vtLineColors;
+            return new Zend_Pdf_Color_Html($vtLineColors);
         }
-        return ['l' => $oColor, 't' => $oColor, 'r' => $oColor, 'b' => $oColor];
+        return $vtLineColors;
     }
 
     public function drawString(

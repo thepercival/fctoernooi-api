@@ -34,13 +34,14 @@ class JsonCacheMiddleware implements MiddlewareInterface
         }
 
         $ignoreCacheReset = $request->getHeaderLine('X-Ignore-Cache-Reset');
-        if ($ignoreCacheReset !== 'tournament') {
-            $this->cacheService->resetTournament($tournamentId);
+        if ($ignoreCacheReset !== '' && $ignoreCacheReset !== 'tournamentAndStructure') {
+            if ($ignoreCacheReset !== 'tournament') {
+                $this->cacheService->resetTournament($tournamentId);
+            }
+            if ($ignoreCacheReset !== 'structure') {
+                $this->cacheService->resetStructure($tournamentId);
+            }
         }
-        if ($ignoreCacheReset !== 'structure') {
-            $this->cacheService->resetStructure($tournamentId);
-        }
-
         return $handler->handle($request);
     }
 
