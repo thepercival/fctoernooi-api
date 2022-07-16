@@ -11,6 +11,7 @@ class PouleConfig
     public function __construct(
         private int $paddingX,
         private int $rowHeight,
+        private int $margin,
         int|null $fontHeight = null
     ) {
         if ($rowHeight < 10 || $rowHeight > 30) {
@@ -29,6 +30,11 @@ class PouleConfig
     public function getPaddingX(): int
     {
         return $this->paddingX;
+    }
+
+    public function getMargin(): int
+    {
+        return $this->margin;
     }
 
     public function getRowHeight(): int

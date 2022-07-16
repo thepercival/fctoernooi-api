@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FCToernooi\PlanningInfo;
 
 use FCToernooi\PlanningInfo;
+use FCToernooi\Recess;
 use League\Period\Period;
 use Sports\Category;
 use Sports\Round;
@@ -23,7 +24,7 @@ use SportsPlanning\Input\Repository as InputRepository;
 
 class Calculator
 {
-    private $sportGamePlaceCalculator;
+    private GamePlaceCalculator $sportGamePlaceCalculator;
 
     public function __construct(private InputRepository $inputRepository)
     {
@@ -42,9 +43,16 @@ class Calculator
         return new PlanningInfo($period, $competitorAmount);
     }
 
+    /**
+     * @param RoundNumber $roundNumber
+     * @param list<Recess> $recesses
+     * @param int $nrOfReferees
+     * @return bool
+     * @throws \SportsPlanning\Exception\NoBestPlanning
+     */
     public function assignGames(RoundNumber $roundNumber, array $recesses, int $nrOfReferees): bool
     {
-        $recessPeriods = array_map(fn($recess) => $recess->getPeriod(), $recesses);
+        $recessPeriods = array_map(fn(Recess $recess) => $recess->getPeriod(), $recesses);
 
         while ($roundNumber) {
             $planningInput = (new PlanningInputCreator())->create($roundNumber, $nrOfReferees);
@@ -74,7 +82,7 @@ class Calculator
 
     private function getCompetitorAmount(Structure $structure): CompetitorAmount
     {
-        $sportVariants = array_values($structure->getFirstRoundNumber()->getCompetition()->createSportVariants());
+        $sportVariants = $structure->getFirstRoundNumber()->getCompetition()->createSportVariants();
 
         $catCompetitorAmounts = array_map(
             fn($category) => $this->getCategoryAmount($category, $sportVariants),
@@ -87,7 +95,7 @@ class Calculator
     /**
      * @param Category $category
      * @param list<AllInOneGame|Single|AgainstH2h|AgainstGpp> $sportVariants ,
-     * @return list<SportRange>
+     * @return CompetitorAmount
      */
     private function getCategoryAmount(Category $category, array $sportVariants): CompetitorAmount
     {
@@ -98,7 +106,7 @@ class Calculator
      * @param Round $round
      * @param list<AllInOneGame|Single|AgainstH2h|AgainstGpp> $sportVariants ,
      * @param CompetitorAmount|null $p_competitorAmount
-     * @return list<SportRange>
+     * @return CompetitorAmount
      */
     private function getRoundAmount(
         Round $round,

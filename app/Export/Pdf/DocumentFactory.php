@@ -58,7 +58,6 @@ class DocumentFactory
         switch ($subject) {
             case PdfSubject::Structure:
                 $config = new StructureConfig(
-                    15,
                     new CategoryConfig(
                         18,
                         14,
@@ -67,7 +66,7 @@ class DocumentFactory
                             18,
                             14,
                             15,
-                            new PouleConfig(2, 14)
+                            new PouleConfig(2, 14, 15)
                         )
                     )
                 );

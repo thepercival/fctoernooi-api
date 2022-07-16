@@ -11,6 +11,7 @@ use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
+use App\Export\Pdf\Poule\RoundWidth;
 use App\Export\Pdf\Rectangle;
 use Sports\Qualify\Target as QualifyTarget;
 use Sports\Round;
@@ -40,6 +41,7 @@ class RoundCardDrawer
         HorizontalLine $top,
         int $maxNrOfPouleRows
     ): HorizontalLine {
+        $pouleMargin = $this->config->getPouleConfig()->getMargin();
         if ($round->isRoot()) {
             $poulesTop = $top;
         } else {
@@ -47,25 +49,35 @@ class RoundCardDrawer
             if ($round->getNrOfPlaces() === 2) {
                 return $headerBottom;
             }
-
             $poulesHeight = $headerBottom->getY() - $this->roundDrawer->renderPoules($round, $headerBottom, null);
-            $rectangle = new Rectangle($headerBottom, -($poulesHeight + (2 * $this->config->getPadding())));
+            $rectangle = new Rectangle($headerBottom, -($poulesHeight + (2 * $pouleMargin)));
             $radius = [0, 0, 10, 10];
             $borderColor = $this->getBorderColor($round);
             $page->drawCell('', $rectangle, Align::Center, $borderColor, $radius);
 
-            $poulesTop = $headerBottom->addY(-$this->config->getPadding());
-            $startTopWithPadding = $poulesTop->getStart()->addX($this->config->getPadding());
-            $widthpWithPadding = $poulesTop->getWidth() - (2 * $this->config->getPadding());
-            $poulesTop = new HorizontalLine($startTopWithPadding, $widthpWithPadding);
+            $poulesTop = $headerBottom->addY(-$pouleMargin);
+            $startTopWithMargin = $poulesTop->getStart()->addX($pouleMargin);
+            $widthWithMargin = $poulesTop->getWidth() - (2 * $pouleMargin);
+            $poulesTop = new HorizontalLine($startTopWithMargin, $widthWithMargin);
         }
         $poulesBottomY = $this->roundDrawer->renderPoules($round, $poulesTop, $page);
 
-        $bottomY = $poulesBottomY - $this->config->getPadding();
+        $bottomY = $poulesBottomY - $pouleMargin;
         $lowestBottomY = $bottomY;
-        $childrenTopY = $bottomY - $this->categoryConfig->getPadding();
+        $childrenTopY = $bottomY - $this->config->getMargin();
 
-        $childX = $top->getStart()->getX();
+
+        // calculateMinimalCascadingWidth(Round $round, int $maxNrOfPouleRows)
+        // bepaal eerst de breedte van alle ronden
+        // doe daarna een marginBerekening
+
+        list($leftMarginX, $marginX) = $this->getRoundMarginX(
+            $round->getChildren(),
+            $maxNrOfPouleRows,
+            $top->getWidth()
+        );
+        $childX = $top->getStart()->getX() + $leftMarginX;
+
         foreach ($round->getChildren() as $childRound) {
             $childWidth = $this->calculateMinimalCascadingWidth($childRound, $maxNrOfPouleRows);
             $childTop = new HorizontalLine(new Point($childX, $childrenTopY), $childWidth);
@@ -74,7 +86,7 @@ class RoundCardDrawer
             if ($childBottom->getY() < $lowestBottomY) {
                 $lowestBottomY = $childBottom->getY();
             }
-            $childX += $childWidth + $this->categoryConfig->getPadding();
+            $childX += $childWidth + $marginX;
         }
         return new HorizontalLine(new Point($top->getStart()->getX(), $lowestBottomY), $top->getWidth());
     }
@@ -137,9 +149,9 @@ class RoundCardDrawer
         $childrenWidth = 0;
         foreach ($round->getChildren() as $childRound) {
             $childrenWidth += $this->calculateMinimalCascadingWidth($childRound, $maxNrOfPouleRows);
-            $childrenWidth += $this->config->getPadding();
+            $childrenWidth += $this->config->getMargin();
         }
-        $childrenWidth -= $this->config->getPadding();
+        $childrenWidth -= $this->config->getMargin();
 
         return max($selfWidth, $childrenWidth);
     }
@@ -174,7 +186,7 @@ class RoundCardDrawer
                 $childrenMaxHeight = $childHeight;
             }
         }
-        return max($selfHeight, $childrenMaxHeight) + ($round->isRoot() ? 0 : $this->config->getPadding());
+        return max($selfHeight, $childrenMaxHeight) + ($round->isRoot() ? 0 : $this->config->getMargin());
     }
 
     public function calculateSelfHeight(Round $round, float $width): float
@@ -182,5 +194,42 @@ class RoundCardDrawer
         $top = new HorizontalLine(new Point(0, 0), $width);
         $bottomY = $this->roundDrawer->renderPoules($round, $top, null);
         return $top->getY() - $bottomY;
+    }
+
+    /**
+     * @param list<Round> $childRounds
+     * @param int $maxNrOfPouleRows
+     * @param float $totalWidth
+     * @return list<float>
+     */
+    private function getRoundMarginX(array $childRounds, int $maxNrOfPouleRows, float $totalWidth): array
+    {
+        $roundsWidth = array_map(
+            function (Round $childRound) use ($maxNrOfPouleRows): RoundWidth {
+                return new RoundWidth(
+                    $this->calculateMinimalCascadingWidth($childRound, $maxNrOfPouleRows),
+                    $childRound
+                );
+            },
+            $childRounds
+        );
+        $roundsWidth = array_sum(array_map(fn(RoundWidth $roundWidth) => $roundWidth->getWidth(), $roundsWidth));
+
+        $totalMarginWidth = $totalWidth - $roundsWidth;
+        $aroundNrOfMargins = count($childRounds) + 1;
+        $aroundMargin = $totalMarginWidth / $aroundNrOfMargins;
+        if ($aroundMargin < $this->config->getMargin() && count($childRounds) > 1) {
+            $betweenNrOfMargins = count($childRounds) - 1;
+            $betweenMargin = $totalMarginWidth / $betweenNrOfMargins;
+            return [0, $betweenMargin];
+        }
+
+//        if ($round->isRoot()) {
+//            if (count($rowPoules) > 1) {
+//                $nrOfPaddings = count($rowPoules) + 1;
+//                return [0, ($totalWidth - $poulesWidth) / $nrOfPaddings];
+//            }
+//        }
+        return [$aroundMargin, $aroundMargin];
     }
 }

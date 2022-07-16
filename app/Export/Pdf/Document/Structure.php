@@ -80,7 +80,7 @@ class Structure extends PdfDocument
             $bottom = $this->categoryDrawer->drawCategory($page, $category, $top, $maxNrOfPouleRows);
 
             // $horLine = new HorizontalLine($bottomRight, $topLeft->getX() - $bottomRight->getX());
-            $horLine = $bottom->addY(-$this->getConfig()->getPadding());
+            $horLine = $bottom->addY(-$this->getConfig()->getCategoryConfig()->getMargin());
         }
     }
 
@@ -93,7 +93,8 @@ class Structure extends PdfDocument
         ) {
             $catOneWidth = $categoryOneRectangle->getWidth();
             $catTwoWidth = $categoryTwoRectangle->getWidth();
-            if (($catOneWidth + $this->config->getPadding() + $catTwoWidth) <= $rectangle->getWidth()) {
+            if (($catOneWidth + $this->config->getCategoryConfig()->getMargin() + $catTwoWidth) <= $rectangle->getWidth(
+                )) {
                 return true;
             }
         }
@@ -113,7 +114,9 @@ class Structure extends PdfDocument
         $bottom = $this->categoryDrawer->drawCategory($page, $category, $top, $maxNrOfPouleRows);
 
         $widthNext = $this->categoryDrawer->calculateRectangle($nextCategory, 1)->getWidth();
-        $topLeftNext = new Point($top->getEnd()->getX() + $this->config->getPadding(), $top->getY());
+        $topLeftNext = new Point(
+            $top->getEnd()->getX() + $this->config->getCategoryConfig()->getMargin(), $top->getY()
+        );
         $topNext = new HorizontalLine($topLeftNext, $widthNext);
         $bottomNext = $this->categoryDrawer->drawCategory($page, $category, $topNext, $maxNrOfPouleRows);
         return new HorizontalLine(

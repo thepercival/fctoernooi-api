@@ -103,7 +103,7 @@ final class CategoryDrawer
     {
         $height = 0;
         if ($this->drawCategoryHeader) {
-            $height += $this->config->getHeaderHeight() + $this->config->getPadding();
+            $height += $this->config->getHeaderHeight() + $this->config->getRoundConfig()->getMargin();
         }
 
         $height += $this->roundCardDrawer->calculateCascadingHeight(

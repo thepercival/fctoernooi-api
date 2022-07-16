@@ -9,7 +9,7 @@ class CategoryConfig
     public function __construct(
         private int $headerHeight,
         private int $fontHeight,
-        private int $padding,
+        private int $margin,
         private RoundConfig $roundConfig
 
     ) {
@@ -17,7 +17,7 @@ class CategoryConfig
             throw new \Exception('headerHeight should be between 10 and 20');
         }
 
-        if ($padding < 10 || $padding > 30) {
+        if ($margin < 10 || $margin > 30) {
             throw new \Exception('padding should be between 10 and 30');
         }
         if ($fontHeight < 10 || $fontHeight > 20) {
@@ -30,9 +30,9 @@ class CategoryConfig
         return $this->headerHeight;
     }
 
-    public function getPadding(): int
+    public function getMargin(): int
     {
-        return $this->padding;
+        return $this->margin;
     }
 
     public function getFontHeight(): int

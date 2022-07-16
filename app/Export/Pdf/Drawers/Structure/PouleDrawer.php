@@ -155,6 +155,7 @@ final class PouleDrawer
         }
 
         $minimalWidth = $this->getNumberColumnWidth();
+
         $startLocationMap = $this->structureNameService->getStartLocationMap();
         if ($startLocationMap === null) {
             return $minimalWidth;
@@ -164,10 +165,8 @@ final class PouleDrawer
             return $minimalWidth;
         }
         $competitor = $startLocationMap->getCompetitor($startLocation);
-        if ($competitor === null) {
-            return $minimalWidth;
-        }
-        return $minimalWidth + $this->getTextWidth($competitor->getName());
+        $name = $competitor === null ? 'onbekend' : $competitor->getName();
+        return $minimalWidth + $this->getTextWidth($name);
     }
 
     private function getNumberColumnWidth(): float
