@@ -10,5 +10,4 @@ FCToernooi\PlanningInfo:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
       serialized_name: end
     competitorAmount:
-      type:
-        FCToernooi\PlanningInfo\CompetitorAmount:
+      type: FCToernooi\PlanningInfo\CompetitorAmount

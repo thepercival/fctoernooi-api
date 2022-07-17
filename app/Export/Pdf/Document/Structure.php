@@ -64,7 +64,7 @@ class Structure extends PdfDocument
                     $horLine = $this->renderBesideEachOther($page, $category, $nextCategory, $horLine);
                     continue;
                 } else {
-                    array_unshift($categories, $category);
+                    array_unshift($categories, $nextCategory);
                 }
             }
 
@@ -106,19 +106,16 @@ class Structure extends PdfDocument
         Category $category,
         Category $nextCategory,
         HorizontalLine $top
-    ): HorizontalLine
-    {
+    ): HorizontalLine {
         $maxNrOfPouleRows = 1;
         $width = $this->categoryDrawer->calculateRectangle($category, $maxNrOfPouleRows)->getWidth();
-        $top = new HorizontalLine($top->getStart(), $width);
-        $bottom = $this->categoryDrawer->drawCategory($page, $category, $top, $maxNrOfPouleRows);
+        $topLeftCategory = new HorizontalLine($top->getStart(), $width);
+        $bottom = $this->categoryDrawer->drawCategory($page, $category, $topLeftCategory, $maxNrOfPouleRows);
 
         $widthNext = $this->categoryDrawer->calculateRectangle($nextCategory, 1)->getWidth();
-        $topLeftNext = new Point(
-            $top->getEnd()->getX() + $this->config->getCategoryConfig()->getMargin(), $top->getY()
-        );
+        $topLeftNext = new Point($top->getEnd()->getX() - $widthNext, $top->getY());
         $topNext = new HorizontalLine($topLeftNext, $widthNext);
-        $bottomNext = $this->categoryDrawer->drawCategory($page, $category, $topNext, $maxNrOfPouleRows);
+        $bottomNext = $this->categoryDrawer->drawCategory($page, $nextCategory, $topNext, $maxNrOfPouleRows);
         return new HorizontalLine(
             new Point(Page::PAGEMARGIN, min($bottom->getY(), $bottomNext->getY())),
             $top->getWidth()

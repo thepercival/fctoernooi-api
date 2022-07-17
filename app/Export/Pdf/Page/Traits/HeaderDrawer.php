@@ -6,6 +6,7 @@ namespace App\Export\Pdf\Page\Traits;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\HeaderConfig;
+use App\Export\Pdf\Document;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
@@ -55,7 +56,7 @@ trait HeaderDrawer
             new HorizontalLine(new Point($xLeft, $y), $widthLeft),
             -$rowHeight
         );
-        $this->setFillColor(new \Zend_Pdf_Color_Html('#93c54b'));
+        $this->setFillColor(new \Zend_Pdf_Color_Html(Document::THEME_BG));
         $this->drawCell('FCToernooi', $rectangle, Align::Left, $arrLineColors);
         $this->setFillColor(new \Zend_Pdf_Color_Html('white'));
 

@@ -99,37 +99,33 @@ class Calculator
      */
     private function getCategoryAmount(Category $category, array $sportVariants): CompetitorAmount
     {
-        return $this->getRoundAmount($category->getRootRound(), $sportVariants, new CompetitorAmount());
+        return $this->getRoundAmount($category->getRootRound(), $sportVariants);
     }
 
     /**
      * @param Round $round
-     * @param list<AllInOneGame|Single|AgainstH2h|AgainstGpp> $sportVariants ,
-     * @param CompetitorAmount|null $p_competitorAmount
+     * @param list<AllInOneGame|Single|AgainstH2h|AgainstGpp> $sportVariants
      * @return CompetitorAmount
      */
     private function getRoundAmount(
         Round $round,
-        array $sportVariants,
-        CompetitorAmount $startCompetitorAmount
+        array $sportVariants
     ): CompetitorAmount {
-//        if ($p_competitorAmount === null) {
-//            $p_competitorAmount = new CompetitorAmount(null, null);
-//        }
-
-        $roundAmount = $this->getRoundAmountSelf($round, $sportVariants);
-        $competitorAmount = $startCompetitorAmount->add($roundAmount);
+        $competitorAmount = $this->getRoundAmountSelf($round, $sportVariants);
         if (count($round->getChildren()) === 0) {
             return $competitorAmount;
         }
 
         // map children to
         $childRoundAmounts = array_map(
-            fn($round) => $this->getRoundAmount($round, $sportVariants, $competitorAmount),
+            fn(Round $childRound) => $this->getRoundAmount($childRound, $sportVariants),
             $round->getChildren()
         );
 
-        return $this->getOuterValues($childRoundAmounts);
+        if ($round->getNrOfDropoutPlaces() > 0) {
+            $childRoundAmounts[] = new CompetitorAmount();
+        }
+        return $competitorAmount->add($this->getOuterValues($childRoundAmounts));
     }
 
     /**

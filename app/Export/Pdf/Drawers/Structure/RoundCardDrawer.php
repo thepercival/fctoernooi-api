@@ -64,8 +64,7 @@ class RoundCardDrawer
 
         $bottomY = $poulesBottomY - $pouleMargin;
         $lowestBottomY = $bottomY;
-        $childrenTopY = $bottomY - $this->config->getMargin();
-
+        $childrenTopY = $bottomY - ($round->isRoot() ? 0 : $this->config->getMargin());
 
         // calculateMinimalCascadingWidth(Round $round, int $maxNrOfPouleRows)
         // bepaal eerst de breedte van alle ronden

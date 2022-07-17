@@ -26,6 +26,7 @@ abstract class Page extends Zend_Pdf_Page
     public const A4_PORTRET_HEIGHT = 842;
     public const PAGEMARGIN = 20;
     public const CELL_PADDING_X = 1;
+    public const DEFAULT_TEXT_COLOR = 'black';
     protected Helper $helper;
 
     protected Zend_Pdf_Color $textColor;
@@ -67,6 +68,17 @@ abstract class Page extends Zend_Pdf_Page
     {
         return $this->fillColor;
     }
+
+    final public function setTextColor(Zend_Pdf_Color $color): void
+    {
+        $this->textColor = $color;
+    }
+
+    final public function resetTextColor(): void
+    {
+        $this->textColor = new Zend_Pdf_Color_Html(self::DEFAULT_TEXT_COLOR);
+    }
+
 
     final public function setFillColor(Zend_Pdf_Color $color): self
     {

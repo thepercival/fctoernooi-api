@@ -22,6 +22,8 @@ use Zend_Pdf;
  */
 abstract class Document extends Zend_Pdf
 {
+    public const THEME_BG = '#93c54b';
+
     protected StructureNameService|null $structureNameService = null;
     protected StartLocationMap|null $startLocationMap = null;
     protected Helper $helper;

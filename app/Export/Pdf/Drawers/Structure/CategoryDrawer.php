@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Drawers\Structure;
 
+use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
@@ -15,6 +16,9 @@ use Sports\Structure\NameService as StructureNameService;
 
 final class CategoryDrawer
 {
+    public const HEADER_BG = '#3e3f3a';
+    public const HEADER_TEXT = '#dfd7ca';
+
     private Helper $helper;
     private RoundCardDrawer $roundCardDrawer;
 
@@ -27,6 +31,7 @@ final class CategoryDrawer
         $this->roundCardDrawer = new RoundCardDrawer($structureNameService, $config);
     }
 
+
     // Always fit on page
     public function drawCategory(
         Page $page,
@@ -34,10 +39,9 @@ final class CategoryDrawer
         HorizontalLine $top,
         int $maxNrOfPouleRows
     ): HorizontalLine {
-//        $width = $this->calculateRectangle($category, $maxNrOfPouleRows)->getWidth();
-//        $top = new HorizontalLine($topL, $width);
         if ($this->drawCategoryHeader) {
             $top = $this->drawHeader($page, $category, $top);
+            $top = $top->addY(-$this->config->getRoundConfig()->getMargin());
         }
         $bottom = $this->roundCardDrawer->renderRoundCard($page, $category->getRootRound(), $top, $maxNrOfPouleRows);
 
@@ -48,25 +52,17 @@ final class CategoryDrawer
     {
         $rectangle = new Rectangle($top, -$this->config->getRoundConfig()->getHeaderHeight());
         $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());
-        $page->drawCell($category->getName(), $rectangle);
+
+        $page->setTextColor(new \Zend_Pdf_Color_Html(self::HEADER_TEXT));
+        $page->setFillColor(new \Zend_Pdf_Color_Html(self::HEADER_BG));
+        $radius = [10, 10, 10, 10];
+        $page->drawCell($category->getName(), $rectangle, Align::Center, 'white', $radius);
+        $page->setFillColor(new \Zend_Pdf_Color_Html('white'));
+        $page->resetTextColor();
+
         $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
         return $rectangle->getBottom();
     }
-
-//
-//    public function getRectangle(
-//        Category $category,
-//        RoundNumber $firstRoundNumer,
-//        StructureConfig $config): Rectangle
-//    {
-//        // bekijk de width per structurecell als dit nog b
-//
-//        $minimalWidth = 0;
-//        foreach( $roundNumberWi)
-//        $minimalRoundWidth = $this->roundDrawer->getMinimalWidth($round);
-//
-//        return new Rectangle(new Point(0,0),new Point(1,1));
-//    }
 
     public function calculateRectangle(Category $category, int $maxNrOfPouleRows/*, float|null $maxWidth*/): Rectangle
     {

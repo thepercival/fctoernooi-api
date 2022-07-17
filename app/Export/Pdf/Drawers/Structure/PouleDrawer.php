@@ -11,6 +11,7 @@ use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
+use Sports\Competitor;
 use Sports\Place;
 use Sports\Poule;
 use Sports\Structure\NameService as StructureNameService;
@@ -156,15 +157,18 @@ final class PouleDrawer
 
         $minimalWidth = $this->getNumberColumnWidth();
 
-        $startLocationMap = $this->structureNameService->getStartLocationMap();
-        if ($startLocationMap === null) {
-            return $minimalWidth;
-        }
-        $startLocation = $place->getStartLocation();
-        if ($startLocation === null) {
-            return $minimalWidth;
-        }
-        $competitor = $startLocationMap->getCompetitor($startLocation);
+        $getCompetitor = function (Place $place): Competitor|null {
+            $startLocationMap = $this->structureNameService->getStartLocationMap();
+            if ($startLocationMap === null) {
+                return null;
+            }
+            $startLocation = $place->getStartLocation();
+            if ($startLocation === null) {
+                return null;
+            }
+            return $startLocationMap->getCompetitor($startLocation);
+        };
+        $competitor = $getCompetitor($place);
         $name = $competitor === null ? 'onbekend' : $competitor->getName();
         return $minimalWidth + $this->getTextWidth($name);
     }
