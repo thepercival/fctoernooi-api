@@ -15,9 +15,9 @@ class UTCDateTimeType extends DateTimeImmutableType
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if ($value instanceof \DateTimeImmutable) {
-            $value->setTimezone(self::getUtc());
-        }
+//        if ($value instanceof \DateTimeImmutable && $value->getTimezone() === ) {
+//            $value = $value->setTimezone(self::getUtc());
+//        }
 
         return parent::convertToDatabaseValue($value, $platform);
     }

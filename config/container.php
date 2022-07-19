@@ -89,7 +89,7 @@ return [
         if (!$devMode) {
             /** @var Memcached $memcached */
             $memcached = $container->get(Memcached::class);
-            $cache = new MemcachedAdapter($memcached);
+            $cache = new MemcachedAdapter($memcached, 'fctoernooi');
             $config->setQueryCache($cache);
 
             $config->setMetadataCache($cache);
