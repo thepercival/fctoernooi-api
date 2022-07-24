@@ -25,6 +25,9 @@ set categoryNr = 1;
 update recesses
 set name = 'pauze';
 
+update tournaments
+set startEditMode = 'EditLongTerm';
+
 -- insert into creditActions(userId, action, nrOfCredits, atDateTime) (select id, 'CreateAccountReward', 3, CURRENT_TIMESTAMP from users);
 
 -- set input MinNrOfBatches

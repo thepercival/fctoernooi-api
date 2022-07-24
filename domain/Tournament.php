@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use FCToernooi\Tournament\CustomPlaceRanges;
+use FCToernooi\Tournament\StartEditMode;
 use League\Period\Period;
 use Sports\Competition;
 use Sports\Competition\Referee;
@@ -18,6 +19,7 @@ class Tournament extends Identifiable
 {
     private DateTimeImmutable $createdDateTime;
     private bool $public = false;
+    private StartEditMode $startEditMode = StartEditMode::EditLongTerm;
     /**
      * @var Collection<int|string, TournamentUser>
      */
@@ -161,5 +163,20 @@ class Tournament extends Identifiable
         $sportVariants = $this->getCompetition()->createSportVariants();
         $minNrOfPlacesPerPoule = (new MinNrOfPlacesCalculator())->getMinNrOfPlacesPerPoule($sportVariants);
         return new CustomPlaceRanges($minNrOfPlacesPerPoule);
+    }
+
+    public function getStartEditMode(): StartEditMode
+    {
+        return $this->startEditMode;
+    }
+
+    public function getStartEditModeNative(): string
+    {
+        return $this->startEditMode->value;
+    }
+
+    public function setStartEditMode(StartEditMode $startEditMode): void
+    {
+        $this->startEditMode = $startEditMode;
     }
 }

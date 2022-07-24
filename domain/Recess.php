@@ -8,7 +8,7 @@ use DateTimeImmutable;
 use League\Period\Period;
 use SportsHelpers\Identifiable;
 
-final class Recess extends Identifiable
+class Recess extends Identifiable
 {
     public const MAX_LENGTH_NAME = 15;
 

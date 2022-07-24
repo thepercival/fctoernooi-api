@@ -44,5 +44,6 @@ Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
 Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateType::class);
 Type::addType('enum_GameState', Sports\Game\StateType::class);
 Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
+Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
 
 return ConsoleRunner::createHelperSet($em);

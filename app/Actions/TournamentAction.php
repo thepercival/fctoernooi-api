@@ -16,6 +16,7 @@ use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\StartEditMode;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
@@ -201,7 +202,17 @@ final class TournamentAction extends Action
 
             $competitionService = new CompetitionService();
             $competition = $tournament->getCompetition();
-            $competitionService->changeStartDateTime($competition, $dateTime);
+            $diff = $competitionService->changeStartDateTime($competition, $dateTime);
+            if (false && $diff !== null) { /* TODO */
+                if ($tournament->getStartEditMode() === StartEditMode::EditLongTerm) {
+                    $tournament->setStartEditMode(StartEditMode::EditShortTerm);
+                } else {
+                    if ($tournament->getStartEditMode() === StartEditMode::EditShortTerm) {
+                        // if more difference
+                        $tournament->setStartEditMode(StartEditMode::EditShortTerm);
+                    }
+                }
+            };
             $competition->setAgainstRuleSet($ruleSet);
             foreach ($tournamentSer->getRecesses() as $recessSer) {
                 new Recess($tournament, $recessSer->getName(), $recessSer->getPeriod());

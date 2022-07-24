@@ -9,6 +9,7 @@ $dotenv->load();
 
 return [
     'environment' => $_ENV['ENVIRONMENT'],
+    'namespace' => 'fctoernooi' . $_ENV['ENVIRONMENT'],
     'displayErrorDetails' => $_ENV['ENVIRONMENT'] === 'development',
     'tournament' => [
         'nrOfMonthsBeforeRemoval' => $_ENV['NR_OF_MONTHS_BEFORE_REMOVAL'],

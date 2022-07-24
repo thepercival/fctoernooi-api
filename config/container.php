@@ -85,28 +85,28 @@ return [
         /** @var bool $devMode */
         $devMode = $doctrineMetaConfig['dev_mode'];
 
-        $config = new \Doctrine\ORM\Configuration();
+        $docConfig = new \Doctrine\ORM\Configuration();
         if (!$devMode) {
             /** @var Memcached $memcached */
             $memcached = $container->get(Memcached::class);
-            $cache = new MemcachedAdapter($memcached, 'fctoernooi');
-            $config->setQueryCache($cache);
+            $cache = new MemcachedAdapter($memcached, $config->getString('namespace'));
+            $docConfig->setQueryCache($cache);
 
-            $config->setMetadataCache($cache);
+            $docConfig->setMetadataCache($cache);
         }
         /** @var string $proxyDir */
         $proxyDir = $doctrineMetaConfig['proxy_dir'];
-        $config->setProxyDir($proxyDir);
-        $config->setProxyNamespace('fctoernooi');
+        $docConfig->setProxyDir($proxyDir);
+        $docConfig->setProxyNamespace($config->getString('namespace'));
 
         /** @var list<string> $entityPath */
         $entityPath = $doctrineMetaConfig['entity_path'];
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($entityPath);
-        $config->setMetadataDriverImpl($driver);
+        $docConfig->setMetadataDriverImpl($driver);
 
         /** @var array<string, mixed> $connectionParams */
         $connectionParams = $doctrineAppConfig['connection'];
-        $em = Doctrine\ORM\EntityManager::create($connectionParams, $config);
+        $em = Doctrine\ORM\EntityManager::create($connectionParams, $docConfig);
 
         Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_SelfReferee');
@@ -130,6 +130,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_GameState');
         Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
+        Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_StartEditMode');
 
         Type::overrideType('datetime_immutable', UTCDateTimeType::class);
         return $em;
