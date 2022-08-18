@@ -36,20 +36,13 @@ abstract class QueueService
         if (array_key_exists('suffix', $amqpOptions) === false) {
             throw new Exception('option queue:suffix is missing', E_ERROR);
         }
-        /** @var string $queuePrefix */
-        $queuePrefix = $amqpOptions['prefix'];
-        unset($amqpOptions['prefix']);
-
-        if (array_key_exists('suffix', $amqpOptions) === false) {
-            throw new Exception('option queue:suffix is missing', E_ERROR);
-        }
         /** @var string $queueSuffix */
         $queueSuffix = $amqpOptions['suffix'];
         unset($amqpOptions['suffix']);
         $queueSuffix = mb_strlen($queueSuffix) > 0 ? '-' . $queueSuffix : $queueSuffix;
 
         $this->amqpOptions = $amqpOptions;
-        $this->queueName = $queuePrefix . '-' . $queueName . $queueSuffix;
+        $this->queueName = $queueName . $queueSuffix;
     }
 
     public function receive(callable $callable, int $timeoutInSeconds): void

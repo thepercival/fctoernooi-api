@@ -34,7 +34,7 @@ class Recess extends Identifiable
         return $this->name;
     }
 
-    protected function setName(string $name): void
+    private function setName(string $name): void
     {
         if (strlen($name) > self::MAX_LENGTH_NAME) {
             throw new \InvalidArgumentException(

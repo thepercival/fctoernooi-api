@@ -11,8 +11,7 @@
         <directory name="config/"/>
         <directory name="domain/"/>
         <directory name="tests/cases/"/>
-
-        <!--        <directory name="serialization/handler/"/>-->
+        <directory name="serialization/handler/"/>
         <ignoreFiles>
             <directory name="vendor"/>
         </ignoreFiles>

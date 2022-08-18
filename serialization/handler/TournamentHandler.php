@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace FCToernooi\SerializationHandler;
 
-use DateTimeImmutable;
 use FCToernooi\Tournament;
+use JMS\Serializer\Context;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonDeserializationVisitor;
-use JMS\Serializer\Context;
 use Sports\Competition;
-use Sports\SerializationHandler\Handler;
 use Sports\SerializationHandler\DummyCreator;
+use Sports\SerializationHandler\Handler;
 
 class TournamentHandler extends Handler implements SubscribingHandlerInterface
 {
@@ -29,7 +28,7 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
 
     /**
      * @param JsonDeserializationVisitor $visitor
-     * @param array<string, bool|array> $fieldValue
+     * @param array{competition: Competition, public: bool} $fieldValue
      * @param array<string, int|string> $type
      * @param Context $context
      * @return Tournament
