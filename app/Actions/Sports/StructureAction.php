@@ -73,7 +73,7 @@ final class StructureAction extends Action
 
             $tournamentId = (int)$tournament->getId();
             $json = $this->cacheService->getStructure($tournamentId);
-            if ($json === false || $this->config->getString('environment') === 'development') {
+            if ($json === false /*|| $this->config->getString('environment') === 'development'*/) {
                 $structure = $this->structureRepos->getStructure($competition);
                 $json = $this->serializer->serialize(
                     $structure,
