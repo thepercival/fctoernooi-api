@@ -34,7 +34,7 @@ return [
         $app = AppFactory::create();
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        if ($config->getString("environment") === "production") {
+        if ($config->getString("environment") !== "development") {
             try {
                 $routeCacheFile = $config->getString('router.cache_file');
                 $app->getRouteCollector()->setCacheFile($routeCacheFile);
@@ -47,7 +47,7 @@ return [
         $cache = [];
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
-        if ($config->getString("environment") === "production") {
+        if ($config->getString("environment") !== "development") {
             $cache['cache'] = __DIR__ . '/../cache';
         }
         return TwigView::create(__DIR__ . '/../templates', $cache);
@@ -141,7 +141,7 @@ return [
         $config = $container->get(Configuration::class);
         $env = $config->getString("environment");
         $serializerBuilder = SerializerBuilder::create()->setDebug($env === "development");
-        if ($env === "production") {
+        if ($env !== "development") {
             $serializerBuilder = $serializerBuilder->setCacheDir($config->getString('serializer.cache_dir'));
         }
         $serializerBuilder->setPropertyNamingStrategy(
