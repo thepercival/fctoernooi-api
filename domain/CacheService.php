@@ -12,7 +12,7 @@ class CacheService
     public const StructureCacheIdPrefix = 'json-structure-';
     public const CacheTime = 86400;
 
-    public function __construct(private MemCached $memCached)
+    public function __construct(private MemCached $memCached, private string $namespace)
     {
     }
 
@@ -28,7 +28,7 @@ class CacheService
 
     private function getTournamentCacheId(string|int $tournamentId): string
     {
-        return self::TournamentCacheIdPrefix . $tournamentId;
+        return $this->namespace . '-' . self::TournamentCacheIdPrefix . $tournamentId;
     }
 
     public function setTournament(string|int $tournamentId, string $json): void
@@ -53,7 +53,7 @@ class CacheService
 
     private function getStructureCacheId(string|int $structureId): string
     {
-        return self::StructureCacheIdPrefix . $structureId;
+        return $this->namespace . '-' . self::StructureCacheIdPrefix . $structureId;
     }
 
     public function setStructure(string|int $structureId, string $json): void

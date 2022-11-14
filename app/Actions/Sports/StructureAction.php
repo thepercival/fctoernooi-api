@@ -7,6 +7,7 @@ namespace App\Actions\Sports;
 use App\Actions\Action;
 use App\Response\ErrorResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\PlanningInfo\Calculator as PlanningInfoCalculator;
@@ -25,18 +26,21 @@ use SportsPlanning\Input\Repository as InputRepository;
 
 final class StructureAction extends Action
 {
+    private CacheService $cacheService;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
         protected InputRepository $inputRepos,
-        private CacheService $cacheService,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
         protected EntityManagerInterface $em,
+        Memcached $memcached,
         protected Configuration $config
     ) {
         parent::__construct($logger, $serializer);
+        $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
     /**

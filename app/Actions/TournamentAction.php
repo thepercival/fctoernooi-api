@@ -10,6 +10,7 @@ use App\QueueService\Planning as PlanningQueueService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Recess;
@@ -37,21 +38,24 @@ use stdClass;
 
 final class TournamentAction extends Action
 {
+    private CacheService $cacheService;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private CreditActionRepository $creditActionRepos,
-        private CacheService $cacheService,
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
         private EntityManagerInterface $entityManager,
         private PlanningCreator $planningCreator,
+        Memcached $memcached,
         private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
+
+        $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
     /**

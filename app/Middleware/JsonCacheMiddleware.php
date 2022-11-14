@@ -10,16 +10,19 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Selective\Config\Configuration;
 use Slim\Routing\RouteContext;
 
 class JsonCacheMiddleware implements MiddlewareInterface
 {
-
+    private CacheService $cacheService;
 
     public function __construct(
-        private CacheService $cacheService,
-        protected TournamentRepository $tournamentRepos
+        \Memcached $memcached,
+        protected TournamentRepository $tournamentRepos,
+        protected Configuration $config
     ) {
+        $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
     public function process(Request $request, RequestHandler $handler): Response

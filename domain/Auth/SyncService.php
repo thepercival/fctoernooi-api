@@ -20,15 +20,18 @@ use Slim\Views\Twig as TwigView;
 
 class SyncService
 {
+    private CacheService $cacheService;
+
     public function __construct(
         private UserRepository $userRepos,
         private TournamentUserRepository $tournamentUserRepos,
         private TournamentInvitationRepository $tournamentInvitationRepos,
         private Mailer $mailer,
         private TwigView $view,
-        private CacheService $cacheService,
+        \Memcached $memcached,
         private Configuration $config
     ) {
+        $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
     public function add(

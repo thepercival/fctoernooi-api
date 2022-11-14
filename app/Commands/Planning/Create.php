@@ -57,7 +57,7 @@ class Create extends PlanningCommand
 
         /** @var Memcached $memcached */
         $memcached = $container->get(Memcached::class);
-        $this->cacheService = new CacheService($memcached);
+        $this->cacheService = new CacheService($memcached, $this->config->getString('namespace'));
 
         /** @var StructureRepository $structureRepos */
         $structureRepos = $container->get(StructureRepository::class);
