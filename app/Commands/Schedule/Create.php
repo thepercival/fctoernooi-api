@@ -46,12 +46,17 @@ class Create extends ScheduleCommand
         $this->addOption('nrOfGamePlaces', null, InputOption::VALUE_OPTIONAL);
         $this->addOption('nrOfH2H', null, InputOption::VALUE_OPTIONAL);
         $this->addOption('nrOfGamesPerPlace', null, InputOption::VALUE_OPTIONAL);
+        $this->addOption('maxGppMargin', null, InputOption::VALUE_OPTIONAL);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $nrOfPlaces = $this->getNrOfPlaces($input);
         $sportVariant = $this->getSportVariant($input);
+        $maxGppMargin = $this->getIntInput($input, 'maxGppMargin', -1 );
+        if( $maxGppMargin === -1 ) {
+            $maxGppMargin = null;
+        }
         $sportsConfigName = (new ScheduleName([$sportVariant]));
         $existingSchedule = $this->scheduleRepos->findOneBy(
             ["nrOfPlaces" => $nrOfPlaces, "sportsConfigName" => $sportsConfigName]
@@ -76,8 +81,10 @@ class Create extends ScheduleCommand
             // against nrOfHomePlaces nrOfAwayPlaces ( nrOfH2H || nrOfGamesPerPlace )
             // together nrOfGamePlaces nrOfGamesPerPlace
             $sportVariantsWithFields = [new SportVariantWithFields($sportVariant, 1)];
-            $newSchedule = $this->createSchedule($nrOfPlaces, $sportVariantsWithFields);
-            (new ScheduleOutput($this->getLogger()))->output([$newSchedule]);
+            $newSchedule = $this->createSchedule($nrOfPlaces, $sportVariantsWithFields, $maxGppMargin);
+            $scheduleOutput = (new ScheduleOutput($this->getLogger()));
+            $scheduleOutput->output([$newSchedule]);
+            $scheduleOutput->outputTotals([$newSchedule]);
         } catch (\Exception $exception) {
             $this->getLogger()->error($exception->getMessage());
         }
@@ -87,21 +94,27 @@ class Create extends ScheduleCommand
     /**
      * @param int $nrOfPlaces
      * @param list<SportVariantWithFields> $sportVariantsWithFields
+     * @param int|null $maxGppMargin
      * @return Schedule
      * @throws \Exception
      */
     protected function createSchedule(
         int $nrOfPlaces,
-        array $sportVariantsWithFields
+        array $sportVariantsWithFields,
+        int|null $maxGppMargin
     ): Schedule {
         $scheduleCreator = new ScheduleCreator($this->getLogger());
         $this->getLogger()->info('creating schedule .. ');
         $planningInput = new Input(
             new PouleStructure($nrOfPlaces),
             $sportVariantsWithFields,
-            new RefereeInfo(0)
+            new RefereeInfo(0),
+            false
         );
-        $schedules = $scheduleCreator->createFromInput($planningInput);
+        if( $maxGppMargin === null) {
+            $maxGppMargin = $scheduleCreator->getMaxGppMargin($planningInput, $planningInput->getPoule(1));
+        }
+        $schedules = $scheduleCreator->createFromInput($planningInput, $maxGppMargin);
         foreach ($schedules as $schedule) {
             $this->scheduleRepos->save($schedule);
         }

@@ -210,7 +210,7 @@ class RetryTimeout extends PlanningCommand
         /** @var string|null $timeoutState */
         $timeoutState = $input->getOption('timeoutState');
         if ($timeoutState === null) {
-            throw new \Exception('unknown planningtype', E_ERROR);
+            throw new \Exception('unknown timeoutState', E_ERROR);
         }
         $timeoutState = strtolower($timeoutState);
         if ($timeoutState === strtolower(TimeoutState::Time1xNoSort->value)) {

@@ -46,7 +46,7 @@ return function (App $app): void {
                 'rules' => [
                     new JwtAuthentication\RequestPathRule(
                         [
-                            'path' => '/',
+                            'path' => ['/'],
                             'ignore' => ['/public']
                         ]
                     ),

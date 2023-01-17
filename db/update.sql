@@ -6,9 +6,7 @@
 
 -- POST POST POST doctrine-update ===========================================================
 
-insert into categories(number, name, competitionId) (select 1, 'standaard', competitionId
-                                                     from roundNumbers
-                                                     where previousId is null);
+insert into categories(number, name, competitionId) (select 1, 'standaard', competitionId from roundNumbers where previousId is null);
 
 insert into structureCells(categoryId, roundNumberId) (select c.id, rn.id
                                                        from roundNumbers rn
@@ -27,6 +25,11 @@ set name = 'pauze';
 
 update tournaments
 set startEditMode = 'EditLongTerm';
+
+update planningSchedules pss set succeededMargin = -1;
+
+-- FROM composer run doctrine-try
+ALTER TABLE rounds DROP numberid, CHANGE structureCellId structureCellId INT NOT NULL;
 
 -- insert into creditActions(userId, action, nrOfCredits, atDateTime) (select id, 'CreateAccountReward', 3, CURRENT_TIMESTAMP from users);
 

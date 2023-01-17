@@ -2,9 +2,14 @@
 
 declare(strict_types=1);
 
+use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
+use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
+use Doctrine\DBAL\DriverManager;
+use Symfony\Component\Console\Helper\HelperSet;
 
 require 'vendor/autoload.php';
 
@@ -30,8 +35,8 @@ $proxyDir = $settings['meta']['proxy_dir'];
 $config->setProxyDir($proxyDir);
 $config->setProxyNamespace('fctoernooi');
 
-
-$em = \Doctrine\ORM\EntityManager::create($settings['connection'], $config);
+$connection = DriverManager::getConnection($settings['connection'], $config, new EventManager());
+$em = new Doctrine\ORM\EntityManager($connection, $config);
 
 Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
 Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
@@ -46,4 +51,4 @@ Type::addType('enum_GameState', Sports\Game\StateType::class);
 Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
 Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
 
-return ConsoleRunner::createHelperSet($em);
+return new SingleManagerProvider($em);

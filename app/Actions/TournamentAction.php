@@ -207,7 +207,7 @@ final class TournamentAction extends Action
             $competitionService = new CompetitionService();
             $competition = $tournament->getCompetition();
             $diff = $competitionService->changeStartDateTime($competition, $dateTime);
-            if (false && $diff !== null) { /* TODO */
+            if (false && $diff !== null) { /* TODO CDK */
                 if ($tournament->getStartEditMode() === StartEditMode::EditLongTerm) {
                     $tournament->setStartEditMode(StartEditMode::EditShortTerm);
                 } else {

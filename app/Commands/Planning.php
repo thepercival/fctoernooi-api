@@ -77,7 +77,8 @@ class Planning extends Command
             $scheduleCreator = new ScheduleCreator($this->getLogger());
             $scheduleCreator->setExistingSchedules($existingSchedules);
             $this->getLogger()->info('creating schedules .. ');
-            $schedules = $scheduleCreator->createFromInput($planningInput);
+            $maxGppMargin = $scheduleCreator->getMaxGppMargin($planningInput, $planningInput->getPoule(1));
+            $schedules = $scheduleCreator->createFromInput($planningInput, $maxGppMargin);
             foreach ($schedules as $schedule) {
                 $this->scheduleRepos->save($schedule);
             }

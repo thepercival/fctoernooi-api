@@ -12,6 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * php bin/console.php app:get-schedule --nrOfPlaces=6 --sportsConfigName='[{"nrOfHomePlaces":2,"nrOfAwayPlaces":2,"nrOfGamesPerPlace":6}]'
+ */
 class Get extends ScheduleCommand
 {
     private string $customName = 'get-schedule';
@@ -41,9 +44,9 @@ class Get extends ScheduleCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $nrOfPlaces = $this->getNrOfPlaces($input);
-        $sportsConfigName = (string)new ScheduleName([$this->getSportVariant($input)]);
+        // $sportsConfigName = (string)new ScheduleName([$this->getSportVariant()]);
         $existingSchedule = $this->scheduleRepos->findOneBy(
-            ['nrOfPlaces' => $nrOfPlaces, 'sportsConfigName' => $sportsConfigName]
+            ['nrOfPlaces' => $nrOfPlaces, 'sportsConfigName' => $input->getOption('sportsConfigName')]
         );
         if ($existingSchedule === null) {
             throw new \Exception('schedule not found', E_ERROR);
@@ -56,7 +59,12 @@ class Get extends ScheduleCommand
                 $this->getStreamDef($input, $loggerName),
                 $loggerName,
             );
-            (new ScheduleOutput($this->getLogger()))->output([$existingSchedule]);
+            $scheduleOutput = new ScheduleOutput($this->getLogger());
+            $this->getLogger()->info('SCHEDULE  MARGIN ( margin: ' . $existingSchedule->getSucceededMargin() .  ')');
+            $this->getLogger()->info('');
+            $scheduleOutput->output([$existingSchedule]);
+            $scheduleOutput->outputTotals([$existingSchedule]);
+
         } catch (\Exception $exception) {
             if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());

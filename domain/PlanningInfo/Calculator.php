@@ -18,6 +18,7 @@ use SportsHelpers\Sport\GamePlaceCalculator;
 use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
 use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\AllInOneGame;
+use SportsHelpers\Sport\Variant\Creator as VariantCreator;
 use SportsHelpers\Sport\Variant\Single;
 use SportsHelpers\SportRange;
 use SportsPlanning\Input\Repository as InputRepository;
@@ -139,12 +140,10 @@ class Calculator
 
         $roundNrOfGames = new SportRange(
             $this->sportGamePlaceCalculator->getMaxNrOfGamesPerPlace(
-                $pouleStructure->getSmallestPoule(),
-                $sportVariants
+                (new VariantCreator())->createWithPoules($pouleStructure->getSmallestPoule(), $sportVariants)
             ),
             $this->sportGamePlaceCalculator->getMaxNrOfGamesPerPlace(
-                $pouleStructure->getBiggestPoule(),
-                $sportVariants
+                (new VariantCreator())->createWithPoules($pouleStructure->getBiggestPoule(), $sportVariants)
             )
         );
         $maxNrOfMinutesPerGame = $round->getNumber()->getValidPlanningConfig()->getMaxNrOfMinutesPerGame();

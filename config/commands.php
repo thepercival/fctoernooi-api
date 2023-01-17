@@ -14,7 +14,9 @@ use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Planning\Validator as PlanningValidator;
 use App\Commands\RemoveOld;
 use App\Commands\Schedule\Create as ScheduleCreate;
+use App\Commands\Schedule\Update as ScheduleUpdate;
 use App\Commands\Schedule\Get as ScheduleGet;
+use App\Commands\Schedule\Enhance as ScheduleEnhance;
 use App\Commands\UpdateSitemap;
 use App\Commands\Validator;
 use Psr\Container\ContainerInterface;
@@ -28,6 +30,12 @@ $commands = [
     },
     "app:create-schedule" => function (ContainerInterface $container): ScheduleCreate {
         return new ScheduleCreate($container);
+    },
+    "app:update-schedule" => function (ContainerInterface $container): ScheduleUpdate {
+        return new ScheduleUpdate($container);
+    },
+    "app:enhance-schedule" => function (ContainerInterface $container): ScheduleEnhance {
+        return new ScheduleEnhance($container);
     },
     "app:create-planning" => function (ContainerInterface $container): PlanningCreate {
         return new PlanningCreate($container);

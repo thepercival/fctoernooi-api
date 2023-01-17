@@ -97,6 +97,6 @@ class RemoveOld extends Command
 
     protected function getRemovalDeadline(): \DateTimeImmutable
     {
-        return (new \DateTimeImmutable())->modify('-' . $this->nrOfMonthsBeforeRemoval . ' months');
+        return (new \DateTimeImmutable())->sub(new \DateInterval('P' . $this->nrOfMonthsBeforeRemoval . 'M'));
     }
 }
