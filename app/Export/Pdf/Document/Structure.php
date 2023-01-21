@@ -50,10 +50,11 @@ class Structure extends PdfDocument
     protected function renderCustom(): void
     {
         $horLine = null;
+        $page = null;
         $categories = $this->getStructure()->getCategories();
         while ($category = array_shift($categories)) {
             $nextCategory = array_shift($categories);
-            if ($horLine === null) {
+            if ($page === null || $horLine === null) {
                 $page = $this->createStructurePage($this->calculatePageDimensions($category));
                 $y = $page->drawHeader($this->getTournament()->getName(), 'opzet & indeling');
                 $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());

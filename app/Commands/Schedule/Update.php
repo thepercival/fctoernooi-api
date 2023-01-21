@@ -75,9 +75,21 @@ class Update extends ScheduleCommand
 
         try {
             $scheduleOutput = new ScheduleOutput($this->getLogger());
+            $this->getLogger()->info('');
+            $this->getLogger()->info('CURRENT SCHEDULE : margin => ' . $schedule->getSucceededMargin() . ' , diff(against/with) => ' . $this->getMaxDifference($schedule) . '(' . $this->getAgainstDifference($schedule) . '/' . $this->getWithDifference($schedule) . ')');
+            $this->getLogger()->info('');
             $scheduleOutput->output([$schedule]);
             $scheduleOutput->outputTotals([$schedule]);
             $newSchedule = $this->replaceWithBetterSchedule($schedule, $margin, $nrOfSecondsBeforeTimeout);
+
+            $inputsRecalculating = $this->recalculateInputs($newSchedule);
+
+            $this->logEnhancement($schedule, $newSchedule, $inputsRecalculating);
+
+//            $this->getLogger()->info('');
+//            $this->getLogger()->info('NEW SCHEDULE : margin => ' . $margin . ' , diff(against/with) => ' . $this->getMaxDifference($newSchedule) . '(' . $this->getAgainstDifference($newSchedule) . '/' . $this->getWithDifference($newSchedule) . ')');
+//            $this->getLogger()->info('');
+
             $scheduleOutput->output([$newSchedule]);
             $scheduleOutput->outputTotals([$newSchedule]);
         } catch (\Exception $exception) {
@@ -93,18 +105,11 @@ class Update extends ScheduleCommand
     ): Schedule {
         $scheduleCreator = new ScheduleCreator($this->getLogger());
         $this->getLogger()->info('updating schedule .. ');
-//        $sportVariantsWithFields = $schedule->createSportVariants()->map( function(Single|AgainstH2h|AgainstGpp|AllInOneGame $sportVariant): SportVariantWithFields{
-//            return new SportVariantWithFields($sportVariant, 1);
-//        });
-//        $planningInput = new Input(
-//            new PouleStructure($schedule->getNrOfPlaces()),
-//            array_values($sportVariantsWithFields->toArray()),
-//            new RefereeInfo(0),
-//            false
-//        );
+
         $newSchedule = $scheduleCreator->createBetterSchedule($schedule, $margin, $nrOfSecondsBeforeTimeout);
 
         $this->scheduleRepos->remove($schedule, true);
+        $newSchedule->setSucceededMargin($margin);
         $this->scheduleRepos->save($newSchedule, true);
 
         return $newSchedule;

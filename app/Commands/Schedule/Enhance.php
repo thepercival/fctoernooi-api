@@ -11,11 +11,13 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 
+use SportsPlanning\Exception\NoSolutionException;
+use SportsPlanning\Input;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Schedule;
 use SportsPlanning\Schedule\Creator as ScheduleCreator;
 use SportsPlanning\Schedule\Output as ScheduleOutput;
-use SportsPlanning\TimeoutException;
+use SportsPlanning\Exception\TimeoutException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -73,15 +75,18 @@ class Enhance extends ScheduleCommand
 
             $schedules = $this->scheduleRepos->findOrderedByNrOfTimeoutSecondsAndMargin($nrToProcess);
             foreach( $schedules as $schedule) {
+                $this->getLogger()->info('PROCSESSING SCHEDULE ' .  $schedule . ' ..');
+                $this->getLogger()->info('');
                 $newSchedule = $this->createWithSmallerMargin($schedule);
                 if( $newSchedule === null ) {
                     continue;
                 }
+                $this->scheduleRepos->remove($schedule,true);
+                $this->scheduleRepos->save($newSchedule,true);
 
-                $this->scheduleRepos->remove($schedule, true);
-                $this->scheduleRepos->save($newSchedule, true);
+                $inputsRecalculating = $this->recalculateInputs($newSchedule);
 
-               $this->logEnhancement($schedule, $newSchedule);
+                $this->logEnhancement($schedule, $newSchedule, $inputsRecalculating);
             }
 
         } catch (\Exception $exception) {
@@ -117,8 +122,13 @@ class Enhance extends ScheduleCommand
         try {
             $newSchedule = $scheduleCreator->createBetterSchedule($schedule, $oldSucceededMargin - 1, $nextNrOfTimeoutSeconds);
         } catch (TimeoutException $timeoutExc) {
-            $this->getLogger()->info('unsuccesfully tried, update nrOfSeconds to ' . $nextNrOfTimeoutSeconds . ' ' . $schedule);
+            $this->getLogger()->info('timeout occured: ' . $timeoutExc->getMessage() . ', update nrOfSeconds to ' . $nextNrOfTimeoutSeconds . ' ' . $schedule);
             $schedule->setNrOfTimeoutSecondsTried($nextNrOfTimeoutSeconds);
+            $this->scheduleRepos->save($schedule, true);
+            return null;
+        } catch (NoSolutionException $noSolutionExp) {
+            $this->getLogger()->info('no solution found: ' . $noSolutionExp->getMessage() . ', update nrOfSeconds to -1 for ' . $schedule . ' with margin ' . ($oldSucceededMargin - 1));
+            $schedule->setNrOfTimeoutSecondsTried(-1);
             $this->scheduleRepos->save($schedule, true);
             return null;
         } catch (\Exception $exception) {
@@ -170,41 +180,5 @@ class Enhance extends ScheduleCommand
 //        return $difference;
 //    }
 
-    protected function logEnhancement(Schedule $schedule, Schedule $newSchedule): void {
-        $stream = fopen('php://memory', 'r+');
-        if ($stream === false || $this->mailer === null) {
-            throw new \Exception('no stream or mailer available');
-        }
 
-        if ($this->config->getString("environment") === "production") {
-            $logger = new Logger('successfully-enhanced-schedule-output-logger');
-            $logger->pushProcessor(new UidProcessor());
-            $handler = new StreamHandler($stream, Logger::INFO);
-            $logger->pushHandler($handler);
-        } else {
-            $logger = $this->getLogger();
-        }
-
-        $scheduleOutput = new ScheduleOutput($logger);
-        $logger->info('OLD SCHEDULE : margin => ' . $schedule->getSucceededMargin() . ' , diff(against/with) => ' . $this->getMaxDifference($schedule) . '(' . $this->getAgainstDifference($schedule) . '/' . $this->getWithDifference($schedule) . ')');
-        $logger->info('');
-        $scheduleOutput->output([$schedule]);
-        $scheduleOutput->outputTotals([$schedule]);
-
-        $logger->info('');
-        $logger->info('NEW SCHEDULE : margin => ' . $newSchedule->getSucceededMargin() . ' , diff(against/with) => ' . $this->getMaxDifference($newSchedule) . '(' . $this->getAgainstDifference($newSchedule) . '/' . $this->getWithDifference($newSchedule) . ')');
-        $logger->info('');
-        $scheduleOutput->output([$newSchedule]);
-        $scheduleOutput->outputTotals([$newSchedule]);
-
-        if ($this->config->getString("environment") === "production") {
-            rewind($stream);
-            $emailBody = stream_get_contents($stream/*$handler->getStream()*/);
-            $this->mailer->sendToAdmin(
-                'schedule enhanced successfully',
-                $emailBody === false ? 'unable to convert stream into string' : $emailBody,
-                true
-            );
-        }
-    }
 }

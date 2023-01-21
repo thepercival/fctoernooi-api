@@ -80,6 +80,7 @@ class Planning extends Command
             $maxGppMargin = $scheduleCreator->getMaxGppMargin($planningInput, $planningInput->getPoule(1));
             $schedules = $scheduleCreator->createFromInput($planningInput, $maxGppMargin);
             foreach ($schedules as $schedule) {
+                $schedule->setSucceededMargin($maxGppMargin);
                 $this->scheduleRepos->save($schedule);
             }
         }

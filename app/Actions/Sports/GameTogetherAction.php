@@ -16,6 +16,7 @@ use Sports\Competition\Sport\Repository as CompetitionSportRepository;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\Together as TogetherGame;
 use Sports\Game\Together\Repository as TogetherGameRepository;
+use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Place\Repository as PlaceRepository;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Poule;
@@ -30,7 +31,8 @@ final class GameTogetherAction extends GameAction
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected TogetherGameRepository $togetherGameRepos,
+        AgainstGameRepository $againstGameRepos,
+        TogetherGameRepository $togetherGameRepos,
         PouleRepository $pouleRepos,
         PlaceRepository $placeRepos,
         StructureRepository $structureRepos,
@@ -41,6 +43,8 @@ final class GameTogetherAction extends GameAction
         parent::__construct(
             $logger,
             $serializer,
+            $togetherGameRepos,
+            $againstGameRepos,
             $togetherGameRepos,
             $pouleRepos,
             $placeRepos,

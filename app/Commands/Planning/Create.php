@@ -94,7 +94,7 @@ class Create extends PlanningCommand
 
         $this->addArgument('inputId', InputArgument::OPTIONAL, 'input-id');
         $this->addOption('showSuccessful', null, InputOption::VALUE_NONE, 'show successful planning');
-        $this->addOption('disableThrowOnTimeout', null, InputOption::VALUE_NONE, 'show successful planning');
+        $this->addOption('disableThrowOnTimeout', null, InputOption::VALUE_NONE, 'false');
         $this->addOption('batchGamesRange', null, InputOption::VALUE_OPTIONAL, '1-2');
         $this->addOption('maxNrOfGamesInARow', null, InputOption::VALUE_OPTIONAL, '0');
     }

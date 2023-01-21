@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Command;
+use App\QueueService\Planning as PlanningQueueService;
+use Doctrine\ORM\EntityManagerInterface;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use SportsHelpers\GameMode;
@@ -12,17 +17,22 @@ use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
 use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\AllInOneGame;
 use SportsHelpers\Sport\Variant\Single;
+use SportsPlanning\Input;
+use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Poule;
-use SportsPlanning\Schedule as BaseSchedule;
+use SportsPlanning\Schedule as ScheduleBase;
 use SportsPlanning\Combinations\AssignedCounter;
+use SportsPlanning\Schedule\Output as ScheduleOutput;
 use SportsPlanning\Schedule\Repository as ScheduleRepository;
+use SportsPlanning\Input\Repository as InputRepository;
 use SportsPlanning\Schedule\Sport as SportSchedule;
-use SportsPlanning\SportVariant\WithPoule\Against\GamesPerPlace as AgainstGppWithPoule;
 use Symfony\Component\Console\Input\InputInterface;
 
 class Schedule extends Command
 {
     protected ScheduleRepository $scheduleRepos;
+    protected InputRepository $inputRepository;
+    protected EntityManagerInterface $entityManager;
 
     use InputHelper;
 
@@ -31,6 +41,14 @@ class Schedule extends Command
         /** @var ScheduleRepository $scheduleRepos */
         $scheduleRepos = $container->get(ScheduleRepository::class);
         $this->scheduleRepos = $scheduleRepos;
+
+        /** @var InputRepository $inputRepos */
+        $inputRepos = $container->get(InputRepository::class);
+        $this->inputRepository = $inputRepos;
+
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $this->entityManager = $entityManager;
 
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
@@ -104,12 +122,12 @@ class Schedule extends Command
         );
     }
 
-    protected function getMaxDifference(BaseSchedule $schedule): int
+    protected function getMaxDifference(ScheduleBase $schedule): int
     {
         return max($this->getAgainstDifference($schedule), $this->getWithDifference($schedule) );
     }
 
-    protected function getAgainstDifference(BaseSchedule $schedule): int
+    protected function getAgainstDifference(ScheduleBase $schedule): int
     {
         $poule = $schedule->getPoule();
 
@@ -124,10 +142,10 @@ class Schedule extends Command
             $homeAways = $sportSchedule->convertGamesToHomeAways();
             $assignedCounter->assignHomeAways($homeAways);
         }
-        return $assignedCounter->getAgainstSportAmountDifference();
+        return $assignedCounter->getAgainstAmountDifference();
     }
 
-    protected function getWithDifference(BaseSchedule $schedule): int
+    protected function getWithDifference(ScheduleBase $schedule): int
     {
         $poule = $schedule->getPoule();
 
@@ -142,14 +160,14 @@ class Schedule extends Command
             $homeAways = $sportSchedule->convertGamesToHomeAways();
             $assignedCounter->assignHomeAways($homeAways);
         }
-        return $assignedCounter->getWithSportAmountDifference();
+        return $assignedCounter->getWithAmountDifference();
     }
 
     /**
-     * @param BaseSchedule $schedule
+     * @param ScheduleBase $schedule
      * @return list<AgainstGpp>
      */
-    protected function getAgainstGppSportVariants(BaseSchedule $schedule): array
+    protected function getAgainstGppSportVariants(ScheduleBase $schedule): array
     {
         $sportVariants = array_values($schedule->createSportVariants()->toArray());
         return array_values(array_filter($sportVariants, function(AgainstGpp|AgainstH2h|Single|AllInOneGame $sportVariant): bool {
@@ -157,22 +175,87 @@ class Schedule extends Command
         }));
     }
 
+    /**
+     * @param ScheduleBase $schedule
+     * @return list<Input>
+     * @throws \Exception
+     */
+    public function recalculateInputs(ScheduleBase $schedule): array {
+        $planningInputs = $this->inputRepository->findByScheduleSports($schedule);
+        // remove and call queue
+        $queueService = new PlanningQueueService($this->config->getArray('queue'));
+        $planningOutput = new PlanningOutput($this->getLogger());
 
-//    protected function getMinimalMargin(BaseSchedule $schedule): int
-//    {
-//        foreach( $schedule->getSportSchedules() as $sportSchedule) {
-//            $sportVariant = $sportSchedule->createVariant();
-//            if (!($sportVariant instanceof AgainstGpp)) {
-//                continue;
-//            }
-//            $againstGppWithPoule = new AgainstGppWithPoule($sportSchedule->getSchedule()->getPoule(), $sportVariant);
-//            if( !$againstGppWithPoule->allAgainstSameNrOfGamesAssignable() ) {
-//                return 1;
-//            }
-//            if( !$againstGppWithPoule->allWithSameNrOfGamesAssignable()) {
-//                return 1;
-//            }
-//        }
-//        return 0;
-//    }
+        $inputsRecalculating = [];
+        foreach ($planningInputs as $planningInput) {
+            if( !$this->hasGroupWithNrOfPlaces($planningInput, $schedule) ) {
+                continue;
+            }
+            $inputsRecalculating[] = $planningInput;
+            $queueService->sendCreatePlannings($planningInput);
+            $planningOutput->outputInput($planningInput, 'send recalculate-message to queue for');
+//            $this->entityManager->clear();
+        }
+        return $inputsRecalculating;
+    }
+
+    protected function hasGroupWithNrOfPlaces(Input $planningInput, ScheduleBase $schedule): bool {
+        foreach( $planningInput->getPoules() as $poule ) {
+            if( $poule->getPlaces()->count() === $schedule->getPoule()->getPlaces()->count() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param ScheduleBase $schedule
+     * @param ScheduleBase $newSchedule
+     * @param list<Input> $inputs
+     * @return void
+     * @throws \Exception
+     */
+    protected function logEnhancement(ScheduleBase $schedule, ScheduleBase $newSchedule, array $inputs): void {
+        $stream = fopen('php://memory', 'r+');
+        if ($stream === false && $this->mailer === null) {
+            throw new \Exception('no stream or mailer available');
+        }
+
+        if ($this->config->getString("environment") === "production") {
+            $logger = new Logger('successfully-enhanced-schedule-output-logger');
+            $logger->pushProcessor(new UidProcessor());
+            $handler = new StreamHandler($stream, Logger::INFO);
+            $logger->pushHandler($handler);
+        } else {
+            $logger = $this->getLogger();
+        }
+
+        $scheduleOutput = new ScheduleOutput($logger);
+        $logger->info('OLD SCHEDULE : margin => ' . $schedule->getSucceededMargin() . ' , diff(against/with) => ' . $this->getMaxDifference($schedule) . '(' . $this->getAgainstDifference($schedule) . '/' . $this->getWithDifference($schedule) . ')');
+        $logger->info('');
+        $scheduleOutput->output([$schedule]);
+        $scheduleOutput->outputTotals([$schedule]);
+
+        $logger->info('');
+        $logger->info('NEW SCHEDULE : margin => ' . $newSchedule->getSucceededMargin() . ' , diff(against/with) => ' . $this->getMaxDifference($newSchedule) . '(' . $this->getAgainstDifference($newSchedule) . '/' . $this->getWithDifference($newSchedule) . ')');
+        $logger->info('');
+        $scheduleOutput->output([$newSchedule]);
+        $scheduleOutput->outputTotals([$newSchedule]);
+
+        $logger->info('');
+        $logger->info('INPUTS RECALCULATING : ' );
+        foreach ($inputs as $input) {
+            $logger->info('     ' . $input->getUniqueString());
+        }
+
+        if ($this->mailer !== null && $this->config->getString("environment") === "production") {
+            rewind($stream);
+            $emailBody = stream_get_contents($stream/*$handler->getStream()*/);
+            $this->mailer->sendToAdmin(
+                'schedule enhanced successfully',
+                $emailBody === false ? 'unable to convert stream into string' : $emailBody,
+                true
+            );
+        }
+    }
 }

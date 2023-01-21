@@ -36,6 +36,8 @@ class GameAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected TogetherGameRepository|AgainstGameRepository $gameRepos,
+        protected AgainstGameRepository $againstGameRepos,
+        protected TogetherGameRepository $togetherGameRepos,
         protected PouleRepository $pouleRepos,
         protected PlaceRepository $placeRepos,
         protected StructureRepository $structureRepos,
@@ -221,8 +223,11 @@ class GameAction extends Action
                 if ($gameIt instanceof AgainstGame) {
                     $gameIt->setHomeExtraPoints(0);
                     $gameIt->setAwayExtraPoints(0);
+                    $this->againstGameRepos->customSave($gameIt);
+                } else {
+                    $this->togetherGameRepos->customSave($gameIt);
                 }
-                $this->gameRepos->customSave($gameIt);
+
                 if ($gameIt instanceof AgainstGame) {
                     $this->againstScoreRepos->removeScores($gameIt);
                 } else {
