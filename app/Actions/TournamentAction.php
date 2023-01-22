@@ -207,14 +207,14 @@ final class TournamentAction extends Action
             $competitionService = new CompetitionService();
             $competition = $tournament->getCompetition();
             $diff = $competitionService->changeStartDateTime($competition, $dateTime);
-            if (false && $diff !== null) { /* TODO CDK */
+            if ($diff !== null) {
                 if ($tournament->getStartEditMode() === StartEditMode::EditLongTerm) {
                     $tournament->setStartEditMode(StartEditMode::EditShortTerm);
-                } else {
-                    if ($tournament->getStartEditMode() === StartEditMode::EditShortTerm) {
-                        // if more difference
-                        $tournament->setStartEditMode(StartEditMode::EditShortTerm);
-                    }
+                } else if ($tournament->getStartEditMode() === StartEditMode::EditShortTerm) {
+                    $tournament->setStartEditMode(StartEditMode::ReadOnly);
+                }
+                else {
+                    throw new HttpException($request, 'de startdatum kan niet meer gewijzigd worden, maak een nieuwe editie van het toernooi aan', 422);
                 }
             };
             $competition->setAgainstRuleSet($ruleSet);
