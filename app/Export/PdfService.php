@@ -76,13 +76,17 @@ final class PdfService
         $tournamentId = (string)$tournament->getId();
 
         // remove cache items
+        $this->logger->info("clean files from cache" );
         $this->emptyCache($tournamentId);
 
         // clean files from tmp
-        $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpPath($tournamentId));
+        $this->logger->info("clean files from " . $this->getTmpDir() );
+        $retVal = $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpPath($tournamentId));
+        $this->logger->info("   clean file " . $this->getTmpPath($tournamentId) . ' : ' . $retVal);
         foreach (PdfSubject::cases() as $subject) {
             $fileName = $this->getTmpSubjectFileName($tournamentId, $subject);
-            $this->tmpService->removeFile($this->tmpSubDir, $fileName);
+            $retVal = $this->tmpService->removeFile($this->tmpSubDir, $fileName);
+            $this->logger->info("   clean file " . $fileName . ' : ' . $retVal);
         }
     }
 

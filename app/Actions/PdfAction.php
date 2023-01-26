@@ -33,48 +33,6 @@ final class PdfAction extends Action
         $this->pdfQueueService = new PdfQueueService($config->getArray('queue'));
     }
 
-//    /**
-//     * @param Request $request
-//     * @param Response $response
-//     * @param array<string, string> $args
-//     * @return Response
-//     */
-//    public function fetchOne(Request $request, Response $response, array $args): Response
-//    {
-//        try {
-//            /** @var Tournament $tournament */
-//            $tournament = $request->getAttribute('tournament');
-//
-//            if (!isset($args['fileName'])) {
-//                throw new Exception('de link om het toernooi te exporteren is niet correct', E_ERROR);
-//            }
-////            $this->pdfService->validateFileName($tournament, $args['fileName']);
-//
-//            $progressValue = $this->pdfService->getProgress((string)$tournament->getId())->getProgress();
-//            if ($progressValue < 0) {
-//                throw new Exception('de pdf-aanvraag is verlopen', E_ERROR);
-//            }
-//            if ($progressValue < 100) {
-//                throw new Exception('de pdf-aanvraag is nog in behandeling', E_ERROR);
-//            }
-//
-//            $pdf = $this->pdfService->getPdfOnce($tournament);
-//            $vtData = $pdf->render();
-//
-////            $fileName = $this->pdfService->getFileName($tournament);
-//            $response->getBody()->write($vtData);
-//
-//            return $response
-//                ->withHeader('Cache-Control', 'must-revalidate')
-//                ->withHeader('Pragma', 'public')
-//                ->withHeader('Content-Type', 'application/pdf;charset=utf-8')
-//                ->withHeader('Content-Disposition', 'attachment;filename="' . $args['fileName'] . '"')
-//                ->withHeader('Content-Length', '' . strlen($vtData));
-//        } catch (Exception $exception) {
-//            throw new HttpException($request, $exception->getMessage(), 400);
-//        }
-//    }
-
     /**
      * @param Request $request
      * @param Response $response
