@@ -197,7 +197,10 @@ class GameNotes extends PdfDocument
 
             $gameTwo = array_shift($games);
 
-            $oneGamePerPageGameTwo = $this->getNrOfScoreLines($gameTwo, $gameTwo->getCompetitionSport()) > 5;
+            $oneGamePerPageGameTwo = false;
+            if( $gameTwo !== null ) {
+                $oneGamePerPageGameTwo = $this->getNrOfScoreLines($gameTwo, $gameTwo->getCompetitionSport()) > 5;
+            }
 
             if ($oneGamePerPageGameTwo) {
                 $gamesPerPage[] = [$gameOne];

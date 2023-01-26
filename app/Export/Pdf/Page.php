@@ -166,63 +166,9 @@ abstract class Page extends Zend_Pdf_Page
         $xPos = $rectangle->getLeft()->getX();
         $yPos = $rectangle->getTop()->getY();
         $arrLineColors = $this->getLineColorsFromInput($vtLineColors);
-
-        if ($arrLineColors === null) {
-            $this->drawRectangle(
-                $xPos,
-                $yPos - $rectangle->getHeight(),
-                $xPos + $rectangle->getWidth(),
-                $yPos,
-                $nStyle
-            );
-        } elseif (is_array($arrLineColors)) {
-            $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL;
-            $this->drawRectangle(
-                $xPos,
-                $yPos - $rectangle->getHeight(),
-                $xPos + $rectangle->getWidth(),
-                $yPos,
-                $nStyle
-            );
-            if (array_key_exists('b', $arrLineColors) === true) {
-                $this->setLineColor($arrLineColors['b']);
-                $this->drawLine(
-                    $xPos + $rectangle->getWidth(),
-                    $yPos - $rectangle->getHeight(),
-                    $xPos,
-                    $yPos - $rectangle->getHeight()
-                ); // leftwards
-            }
-            if (array_key_exists('t', $arrLineColors) === true) {
-                $this->setLineColor($arrLineColors['t']);
-                $this->drawLine($xPos, $yPos, $xPos + $rectangle->getWidth(), $yPos);    // rightwards
-            }
-
-            if (array_key_exists('l', $arrLineColors) === true) {
-                $this->setLineColor($arrLineColors['l']);
-                $this->drawLine($xPos, $yPos - $rectangle->getHeight(), $xPos, $yPos);  // upwards
-            }
-            if (array_key_exists('r', $arrLineColors) === true) {
-                $this->setLineColor($arrLineColors['r']);
-                $this->drawLine(
-                    $xPos + $rectangle->getWidth(),
-                    $yPos,
-                    $xPos + $rectangle->getWidth(),
-                    $yPos - $rectangle->getHeight()
-                ); // downwards
-            }
-        } else /* string */ {
-            $this->setLineColor($arrLineColors);
-            if ($cornerRadius !== null) {
-                $this->drawRoundedRectangle(
-                    $xPos,
-                    $yPos - $rectangle->getHeight(),
-                    $xPos + $rectangle->getWidth(),
-                    $yPos,
-                    $cornerRadius,
-                    $nStyle
-                );
-            } else {
+        if ($arrLineColors !== null) {
+            if (is_array($arrLineColors)) {
+                $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL;
                 $this->drawRectangle(
                     $xPos,
                     $yPos - $rectangle->getHeight(),
@@ -230,6 +176,53 @@ abstract class Page extends Zend_Pdf_Page
                     $yPos,
                     $nStyle
                 );
+                if (array_key_exists('b', $arrLineColors) === true) {
+                    $this->setLineColor($arrLineColors['b']);
+                    $this->drawLine(
+                        $xPos + $rectangle->getWidth(),
+                        $yPos - $rectangle->getHeight(),
+                        $xPos,
+                        $yPos - $rectangle->getHeight()
+                    ); // leftwards
+                }
+                if (array_key_exists('t', $arrLineColors) === true) {
+                    $this->setLineColor($arrLineColors['t']);
+                    $this->drawLine($xPos, $yPos, $xPos + $rectangle->getWidth(), $yPos);    // rightwards
+                }
+
+                if (array_key_exists('l', $arrLineColors) === true) {
+                    $this->setLineColor($arrLineColors['l']);
+                    $this->drawLine($xPos, $yPos - $rectangle->getHeight(), $xPos, $yPos);  // upwards
+                }
+                if (array_key_exists('r', $arrLineColors) === true) {
+                    $this->setLineColor($arrLineColors['r']);
+                    $this->drawLine(
+                        $xPos + $rectangle->getWidth(),
+                        $yPos,
+                        $xPos + $rectangle->getWidth(),
+                        $yPos - $rectangle->getHeight()
+                    ); // downwards
+                }
+            } else /* string */ {
+                $this->setLineColor($arrLineColors);
+                if ($cornerRadius !== null) {
+                    $this->drawRoundedRectangle(
+                        $xPos,
+                        $yPos - $rectangle->getHeight(),
+                        $xPos + $rectangle->getWidth(),
+                        $yPos,
+                        $cornerRadius,
+                        $nStyle
+                    );
+                } else {
+                    $this->drawRectangle(
+                        $xPos,
+                        $yPos - $rectangle->getHeight(),
+                        $xPos + $rectangle->getWidth(),
+                        $yPos,
+                        $nStyle
+                    );
+                }
             }
         }
 
