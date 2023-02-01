@@ -74,17 +74,21 @@ final class PlanningAction extends Action
             $defaultInput = (new RoundNumber\PlanningInputCreator())->create($roundNumber, $nrOfReferees);
 
             $input = $this->inputRepos->getFromInput($defaultInput);
-            if ($input === null) {
-                throw new \Exception(
-                    'de planning "' . $defaultInput->getUniqueString(
-                                                                          ) . '" kan niet gevonden worden, doe een aanpassing',
-                    E_ERROR
-                );
+            if ($input !== null) {
+                $seekingPerc = $input->getSeekingPercentage();
+                if ($seekingPerc < 0) {
+                    $seekingPerc = 0;
+                }
+            } else {
+                if( $roundNumber->getNumber() === 1 ) {
+                    throw new \Exception('de planning "' . $defaultInput->getUniqueString() . '" kan niet gevonden worden, doe een aanpassing',
+                        E_ERROR
+                    );
+                } else { // could be still calculating for roundnumber 1
+                    $seekingPerc = 0;
+                }
             }
-            $seekingPerc = $input->getSeekingPercentage();
-            if ($seekingPerc < 0) {
-                $seekingPerc = 0;
-            }
+
             $json = json_encode(['progress' => $seekingPerc]);
             return $this->respondWithJson($response, $json === false ? '' : $json);
         } catch (Exception $exception) {
@@ -127,7 +131,7 @@ final class PlanningAction extends Action
             $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
+                return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

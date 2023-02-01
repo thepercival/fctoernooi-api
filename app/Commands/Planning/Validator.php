@@ -22,6 +22,7 @@ use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Planning\Repository as PlanningRepository;
 use SportsPlanning\Planning\State as PlanningState;
 use SportsPlanning\Planning\Validator as PlanningValidator;
+use SportsPlanning\Schedule\Name as ScheduleName;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -200,7 +201,8 @@ class Validator extends Command
             $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($succeededPlanning, true);
             $planningOutput->outputWithTotals($succeededPlanning, true);
-
+            $sportVariants = array_values($planningInput->createSportVariants()->toArray());
+            $this->getLogger()->info('sportsConfigName : ' . (new ScheduleName($sportVariants)));
             throw new \Exception(reset($validations), E_ERROR);
         }
     }

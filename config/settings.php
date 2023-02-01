@@ -107,6 +107,5 @@ return [
         'pass' => 'guest',
         'persisted' => false,
         'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
-
     ]
 ];
