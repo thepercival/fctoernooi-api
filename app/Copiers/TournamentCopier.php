@@ -95,6 +95,11 @@ class TournamentCopier
                 $sport,
                 $newCompetition,
                 $competitionSportSer->getDefaultPointsCalculation(),
+                $competitionSportSer->getDefaultWinPoints(),
+                $competitionSportSer->getDefaultDrawPoints(),
+                $competitionSportSer->getDefaultWinPointsExt(),
+                $competitionSportSer->getDefaultDrawPointsExt(),
+                $competitionSportSer->getDefaultLosePointsExt(),
                 $competitionSportSer
             );
             /** @var Field $fieldSer */

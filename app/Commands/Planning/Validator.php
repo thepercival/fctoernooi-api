@@ -68,7 +68,7 @@ class Validator extends Command
             // the name of the command (the part after "bin/console")
             ->setName('app:' . $this->customName)
             // the short description shown while running "php bin/console list"
-            ->setDescription('validates the created plaining')
+            ->setDescription('validates the created planning')
             // the full command description shown when running the command with
             // the "--help" option
             ->setHelp('validates the plannings');
@@ -95,8 +95,8 @@ class Validator extends Command
         $loggerName = 'command-' . $this->customName;
         $this->initLogger(
             $this->getLogLevel($input),
-            $this->getStreamDef($input),
-            'command-planning-validate.log'
+            $this->getStreamDef($input, $loggerName),
+            $loggerName,
         );
 
         $sendEmailWhenInvalid = $input->getOption('sendEmailWhenInvalid');

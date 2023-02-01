@@ -106,6 +106,11 @@ final class CompetitionSportAction extends Action
             $newCompSport = $this->addHelper(
                 $sportPersistVariant,
                 $serializedCompSport->getDefaultPointsCalculation(),
+                $serializedCompSport->getDefaultWinPoints(),
+                $serializedCompSport->getDefaultDrawPoints(),
+                $serializedCompSport->getDefaultWinPointsExt(),
+                $serializedCompSport->getDefaultDrawPointsExt(),
+                $serializedCompSport->getDefaultLosePointsExt(),
                 $fieldNames,
                 $sport,
                 $competition,
@@ -284,6 +289,11 @@ final class CompetitionSportAction extends Action
     /**
      * @param PersistVariant $sportPersistVariant
      * @param PointsCalculation $defaultPointsCalculation
+     * @param float $defaultWinPoints
+     * @param float $defaultDrawPoints
+     * @param float $defaultWinPointsExt
+     * @param float $defaultDrawPointsExt
+     * @param float $defaultLosePointsExt
      * @param list<string> $fieldNames
      * @param Sport $sport
      * @param Competition $competition
@@ -294,6 +304,11 @@ final class CompetitionSportAction extends Action
     protected function addHelper(
         PersistVariant $sportPersistVariant,
         PointsCalculation $defaultPointsCalculation,
+        float $defaultWinPoints,
+        float $defaultDrawPoints,
+        float $defaultWinPointsExt,
+        float $defaultDrawPointsExt,
+        float $defaultLosePointsExt,
         array $fieldNames,
         Sport $sport,
         Competition $competition,
@@ -303,6 +318,11 @@ final class CompetitionSportAction extends Action
             $sport,
             $competition,
             $defaultPointsCalculation,
+            $defaultWinPoints,
+            $defaultDrawPoints,
+            $defaultWinPointsExt,
+            $defaultDrawPointsExt,
+            $defaultLosePointsExt,
             $sportPersistVariant
         );
 
