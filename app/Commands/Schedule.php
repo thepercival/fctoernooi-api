@@ -245,7 +245,7 @@ class Schedule extends Command
         $logger->info('');
         $logger->info('INPUTS RECALCULATING : ' );
         foreach ($inputs as $input) {
-            $logger->info('     ' . $input->getUniqueString());
+            $logger->info('     ' . $input->getId() . ' : ' . $input->getUniqueString());
         }
 
         if ($this->mailer !== null && $this->config->getString("environment") === "production") {
