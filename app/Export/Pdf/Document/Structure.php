@@ -136,7 +136,7 @@ class Structure extends PdfDocument
         $nrOfPouleRows = 1;
         $rectangle = $this->categoryDrawer->calculateRectangle($category, $nrOfPouleRows);
         $previousWidth = null;
-        while ($rectangle->getWidth() > $outerRectangle->getWidth() && $previousWidth !== $rectangle->getWidth()) {
+        while ($rectangle->getWidth() >= $outerRectangle->getWidth() && $previousWidth !== $rectangle->getWidth()) {
             $previousWidth = $rectangle->getWidth();
             $rectangle = $this->categoryDrawer->calculateRectangle(
                 $category,

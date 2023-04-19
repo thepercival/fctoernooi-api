@@ -13,6 +13,7 @@ use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Poule\RoundWidth;
 use App\Export\Pdf\Rectangle;
+use Sports\Qualify\Target;
 use Sports\Qualify\Target as QualifyTarget;
 use Sports\Round;
 use Sports\Structure\NameService as StructureNameService;
@@ -45,6 +46,9 @@ class RoundCardDrawer
         if ($round->isRoot()) {
             $poulesTop = $top;
         } else {
+            if( $round->getNumberAsValue() === 2) {
+                $rt = 12;
+            }
             $headerBottom = $this->renderRoundCardHeader($page, $round, $top);
             if ($round->getNrOfPlaces() === 2) {
                 return $headerBottom;
@@ -57,8 +61,11 @@ class RoundCardDrawer
 
             $poulesTop = $headerBottom->addY(-$pouleMargin);
             $startTopWithMargin = $poulesTop->getStart()->addX($pouleMargin);
-            $widthWithMargin = $poulesTop->getWidth() - (2 * $pouleMargin);
-            $poulesTop = new HorizontalLine($startTopWithMargin, $widthWithMargin);
+            // $widthWithMargin = $poulesTop->getWidth() - (2 * $pouleMargin);
+            $poulesTop = new HorizontalLine($startTopWithMargin, $poulesTop->getWidth());
+        }
+        if( $round->getNumberAsValue() === 3) {
+            $rt = 12;
         }
         $poulesBottomY = $this->roundDrawer->renderPoules($round, $poulesTop, $page);
 
@@ -77,7 +84,9 @@ class RoundCardDrawer
         );
         $childX = $top->getStart()->getX() + $leftMarginX;
 
-        foreach ($round->getChildren() as $childRound) {
+        foreach ($round->getQualifyGroupsLosersReversed() as $qualifyGroup) {
+            $childRound = $qualifyGroup->getChildRound();
+
             $childWidth = $this->calculateMinimalCascadingWidth($childRound, $maxNrOfPouleRows);
             $childTop = new HorizontalLine(new Point($childX, $childrenTopY), $childWidth);
             $childBottom = $this->renderRoundCard($page, $childRound, $childTop, $maxNrOfPouleRows);
@@ -185,13 +194,14 @@ class RoundCardDrawer
                 $childrenMaxHeight = $childHeight;
             }
         }
-        return max($selfHeight, $childrenMaxHeight) + ($round->isRoot() ? 0 : $this->config->getMargin());
+        return ($selfHeight + $childrenMaxHeight) + ($round->isRoot() ? 0 : $this->config->getMargin());
     }
 
     public function calculateSelfHeight(Round $round, float $width): float
     {
         $top = new HorizontalLine(new Point(0, 0), $width);
         $bottomY = $this->roundDrawer->renderPoules($round, $top, null);
+
         return $top->getY() - $bottomY;
     }
 

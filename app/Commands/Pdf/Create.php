@@ -13,6 +13,7 @@ use App\Mailer;
 use App\QueueService\Pdf as PdfQueueService;
 use App\QueueService\Pdf\CreateMessage as PdfCreateMessage;
 use App\TmpService;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
@@ -20,6 +21,8 @@ use Memcached;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Sports\Competition;
+use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,6 +38,7 @@ class Create extends PlanningCommand
     protected PdfService $pdfService;
     protected PdfQueueService $queueService;
     protected DocumentFactory $documentFactory;
+    protected EntityManagerInterface $entityManager;
     protected bool $showSuccessful = false;
     protected bool $disableThrowOnTimeout = false;
 
@@ -57,6 +61,10 @@ class Create extends PlanningCommand
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
+
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $this->entityManager = $entityManager;
 
         /** @var Memcached $memcached */
         $memcached = $container->get(Memcached::class);
@@ -170,6 +178,7 @@ class Create extends PlanningCommand
     {
         $time_start = microtime(true);
         $tournament = $message->getTournament();
+        $this->refreshCompetition($tournament->getCompetition());
         $tournamentId = (string)$tournament->getId();
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
         $progressPerSubject = $this->pdfService->getProgressPerSubject($message->getTotalNrOfSubjects());
@@ -206,5 +215,57 @@ class Create extends PlanningCommand
         $expireDateTime = (new \DateTimeImmutable())->modify('-1 hours');
         $tmpService->removeOldFiles($this->pdfService->getTmpDir(), $expireDateTime);
         $tmpService->removeOldFiles($this->pdfService->getPublicDir(), $expireDateTime);
+    }
+
+    protected function getRoundNumber(Competition $competition): RoundNumber
+    {
+        $roundNumberAsValue = 1;
+        $structure = $this->structureRepos->getStructure($competition);
+        $roundNumber = $structure->getRoundNumber($roundNumberAsValue);
+        if ($roundNumber === null) {
+            throw new \Exception(
+                "roundnumber " . $roundNumberAsValue . " not found for competitionid " . ((string)$competition->getId()),
+                E_ERROR
+            );
+        }
+        return $roundNumber;
+    }
+
+    protected function refreshCompetition(Competition $competition): void
+    {
+        $this->entityManager->refresh($competition);
+        foreach ($competition->getSports() as $sport) {
+            $this->entityManager->refresh($sport);
+        }
+        $roundNumber = $this->getRoundNumber($competition);
+        $this->refreshRoundNumber($roundNumber);
+    }
+
+    protected function refreshRoundNumber(RoundNumber $roundNumber): void
+    {
+        $this->entityManager->refresh($roundNumber);
+
+        $this->entityManager->refresh($roundNumber);
+        foreach ($roundNumber->getRounds() as $round) {
+            $this->entityManager->refresh($round);
+            foreach ($round->getPoules() as $poule) {
+                $this->entityManager->refresh($poule);
+//                foreach ($poule->getAgainstGames() as $game) {
+//                    $this->entityManager->refresh($game);
+//                }
+            }
+        }
+        $planningConfig =$roundNumber->getPlanningConfig();
+        if ($planningConfig !== null) {
+            $this->entityManager->refresh($planningConfig);
+        }
+        foreach ($roundNumber->getValidGameAmountConfigs() as $gameAmountConfig) {
+            $this->entityManager->refresh($gameAmountConfig);
+        }
+
+        $nextRoundNumber = $roundNumber->getNext();
+        if ($nextRoundNumber !== null) {
+            $this->refreshRoundNumber($nextRoundNumber);
+        }
     }
 }

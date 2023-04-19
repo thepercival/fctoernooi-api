@@ -32,15 +32,19 @@ class RoundDrawer
         $showCompetitor = $round->isRoot();
 
         $pouleRowTop = $startHorLine;
+
+        $pouleMargin = $this->config->getPouleConfig()->getMargin();
         $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
         $poules = array_values($round->getPoules()->toArray());
+
         while ($rowPoules = $this->getRowPoules($round, $poules, $pouleRowTop->getWidth())) {
-            list($marginLeft, $marginX) = $this->getPouleMarginX($round, $rowPoules, $pouleRowTop->getWidth());
+            $totalWithWithoutMargins = $pouleRowTop->getWidth() - (2 * $pouleMargin);
+            list($marginLeft, $marginX) = $this->getPouleMarginX($round, $rowPoules, $totalWithWithoutMargins);
             $pouleTopLeft = $pouleRowTop->getStart()->addX($marginLeft);
             foreach ($rowPoules as $poule) {
                 $pouleWidth = $pouleDrawer->calculateWidth($poule, $showPouleNamePrefix, $showCompetitor);
                 $pouleTop = new HorizontalLine($pouleTopLeft, $pouleWidth);
-                if ($page) {
+                if ($page !== null) {
                     $this->pouleDrawer->renderPoule($poule, $showPouleNamePrefix, $showCompetitor, $pouleTop, $page);
                 }
                 $pouleTopLeft = $pouleTopLeft->addX($pouleWidth)->addX($marginX);
@@ -113,6 +117,9 @@ class RoundDrawer
         $poulesWidth = array_sum(array_map(fn(PouleWidth $pouleWidth) => $pouleWidth->getWidth(), $pouleWidths));
 
         $totalMarginWidth = $totalWidth - $poulesWidth;
+        if( $round->getNumberAsValue() === 2) {
+            $er = 12;
+        }
         $aroundNrOfMargins = count($rowPoules) + 1;
         $aroundMargin = $totalMarginWidth / $aroundNrOfMargins;
         if ($aroundMargin < $this->config->getPouleConfig()->getMargin() && count($rowPoules) > 1) {
@@ -131,7 +138,7 @@ class RoundDrawer
     }
 
     /**
-     * @param Round $round ,
+     * @param Round $round
      * @param list<Poule> $poules
      * @param float $width
      * @return list<Poule>
@@ -141,12 +148,17 @@ class RoundDrawer
         $showPouleNamePrefix = $round->isRoot();
         $showCompetitor = $round->isRoot();
         $pouleDrawer = new PouleDrawer($this->structureNameService, $this->config->getPouleConfig());
-        $poulesWidth = 0;
+        $poulesWidth = $this->config->getPouleConfig()->getMargin();
         $poulesForRow = [];
         while ($poule = array_shift($poules)) {
             $pouleWidth = $pouleDrawer->calculateWidth($poule, $showPouleNamePrefix, $showCompetitor);
-            if (($poulesWidth + $pouleWidth) > $width) {
-                array_unshift($poules, $poule);
+            $tmp = $poulesWidth + $pouleWidth;
+            if (($tmp + $this->config->getPouleConfig()->getMargin()) > $width) {
+                if( count($poulesForRow) === 0 ) {
+                    $poulesForRow[] = $poule;
+                } else {
+                    array_unshift($poules, $poule);
+                }
                 return $poulesForRow;
             }
             $poulesWidth += $pouleWidth + $this->config->getPouleConfig()->getMargin();
@@ -163,7 +175,7 @@ class RoundDrawer
         $pouleRows = $this->getPouleRows($round, $maxNrOfPouleRows);
 
         $widthsPouleRows = array_map(function (array $pouleRow) use ($pouleDrawer, $round, $pouleMargin): float {
-            $width = 0;
+            $width = $pouleMargin;
             foreach ($pouleRow as $poule) {
                 $width += $pouleDrawer->calculateWidth($poule, $round->isRoot(), $round->isRoot());
                 $width += $pouleMargin;
@@ -171,7 +183,7 @@ class RoundDrawer
             return $width;
         }, $pouleRows);
 
-        return min($widthsPouleRows);
+        return max($widthsPouleRows);
     }
 
     /**
