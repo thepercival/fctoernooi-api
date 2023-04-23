@@ -13,6 +13,7 @@ use App\Commands\Planning\Report as PlanningReport;
 use App\Commands\Planning\RetryTimeout as PlanningRetryTimeout;
 use App\Commands\Planning\Validator as PlanningValidator;
 use App\Commands\RemoveOld;
+use App\Commands\Planning\Show as PlanningShow;
 use App\Commands\Schedule\Create as ScheduleCreate;
 use App\Commands\Schedule\Update as ScheduleUpdate;
 use App\Commands\Schedule\Get as ScheduleGet;
@@ -36,6 +37,9 @@ $commands = [
     },
     "app:enhance-schedule" => function (ContainerInterface $container): ScheduleEnhance {
         return new ScheduleEnhance($container);
+    },
+    "app:show-planning" => function (ContainerInterface $container): PlanningShow {
+        return new PlanningShow($container);
     },
     "app:create-planning" => function (ContainerInterface $container): PlanningCreate {
         return new PlanningCreate($container);
