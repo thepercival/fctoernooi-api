@@ -50,5 +50,6 @@ Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateT
 Type::addType('enum_GameState', Sports\Game\StateType::class);
 Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
 Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
+Type::addType('enum_PaymentState', FCToernooi\Payment\StateType::class);
 
 return new SingleManagerProvider($em);

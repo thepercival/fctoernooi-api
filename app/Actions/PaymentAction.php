@@ -50,6 +50,39 @@ final class PaymentAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
+    public function fetchOne(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $payment = $this->paymentRepos->find((int)$args['paymentId']);
+
+            if( $payment === null) {
+                throw new \Exception('Unknown paymentId', E_ERROR);
+            }
+            if( $payment->getUser() !== $user) {
+                throw new \Exception('Unknown paymentId', E_ERROR);
+            }
+
+            return $this->respondWithJson(
+                $response,
+                $this->serializer->serialize(
+                    $payment,
+                    'json'
+                )
+            );
+        } catch (Exception $exception) {
+            throw new HttpException($request, $exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
     public function fetchMethods(Request $request, Response $response, array $args): Response
     {
         try {
@@ -120,34 +153,55 @@ final class PaymentAction extends Action
             $logAmount = number_format($payment->getAmount(), 2, '.', '');
             $logUserId = (string)$payment->getUser()->getId();
 
-            if ($payment->getState() !== 'paid' && $molliePayment->status === 'paid') {
-                $payment->setState($molliePayment->status);
+            $molliePaymentState = Payment\State::getValue($molliePayment->status);
+            if ($payment->getState() !== Payment\State::Paid && $molliePaymentState === Payment\State::Paid) {
+                $payment->setState($molliePaymentState);
                 $this->paymentRepos->save($payment, true);
 
                 // @TODO CDK PAYMENT
 //                $this->creditActionRepos->buyCredits($payment);
 
                 $this->paymentLogger->info(
-                    'payment to state ' . $molliePayment->status . ' for user ' . $logUserId . ' with amount ' . $logAmount
+                    'payment to state ' . $molliePaymentState->value . ' for user ' . $logUserId . ' with amount ' . $logAmount
                 );
             }
 
-            if ($payment->getState() === 'paid' && $molliePayment->status !== 'paid') {
+            if ($payment->getState() === Payment\State::Paid && $molliePaymentState !== Payment\State::Paid) {
                 // @TODO CDK PAYMENT
                 // $this->creditActionRepos->cancelCredits($payment);
 
-                $payment->setState($molliePayment->status);
+                $payment->setState($molliePaymentState);
                 $this->paymentRepos->save($payment, true);
 
                 $this->paymentLogger->info(
-                    'payment to state ' . $molliePayment->status . ' for user ' . $logUserId . ' with amount ' . $logAmount
+                    'payment to state ' . $molliePaymentState->value . ' for user ' . $logUserId . ' with amount ' . $logAmount
                 );
             }
         } catch (Exception $e) {
             $this->paymentLogger->error($e->getMessage());
         }
+
         return $response->withStatus(200);
     }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function redirect(Request $request, Response $response, array $args): Response
+    {
+        try {
+            $url = $this->config->getString('www.wwwurl') . 'user/paymentresult/' . (int)$args['paymentId'];
+            return $response->withStatus(302)->withHeader('Location', $url);
+        } catch (Exception $e) {
+            $this->paymentLogger->error($e->getMessage());
+        }
+
+        return $response->withStatus(200);
+    }
+
 
     protected function getIdFromRequest(Request $request): string|null
     {
@@ -203,14 +257,17 @@ final class PaymentAction extends Action
                 throw new \Exception('unknown paymentmethod', E_ERROR);
             }
 
+            $payment = new Payment($user, null, PaymentMethod::IDEAL, $serPayment->getAmount());
+            $this->paymentRepos->save($payment, true);
+
             $molliePaymentOptions = [
                 'amount' => [
                     'value' => number_format($serPayment->getAmount(), 2, '.', ''),
                     'currency' => 'EUR'
                 ],
                 'description' => 'API payment user ' . (string)$user->getId(),
-                'redirectUrl' => $this->config->getString('payment.webhookUrl'),
                 'webhookUrl' => $this->config->getString('payment.webhookUrl'),
+                'redirectUrl' => $this->config->getString('payment.redirectUrl') . '/' . (string)$payment->getId(),
                 'method' => $method
             ];
 
@@ -222,7 +279,7 @@ final class PaymentAction extends Action
 
             $molliePayment = $this->getMollieClient()->payments->create($molliePaymentOptions);
 
-            $payment = new Payment($user, $molliePayment->id, PaymentMethod::IDEAL, $serPayment->getAmount());
+            $payment->setPaymentId($molliePayment->id);
             $this->paymentRepos->save($payment, true);
 
             return $this->respondWithJson(
@@ -236,6 +293,34 @@ final class PaymentAction extends Action
             throw new HttpException($request, $exception->getMessage(), 422);
         }
     }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function fetchMostRecentCreatedPayment(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $payment = $this->paymentRepos->findOneBy(['user' => $user, 'state' => 'created'], ['updatedAt' => 'DESC']);
+
+            return $this->respondWithJson(
+                $response,
+                $this->serializer->serialize(
+                    ['id' => $payment !== null ? $payment->getPaymentId() : ''],
+                    'json'
+                )
+            );
+        } catch (Exception $exception) {
+            throw new HttpException($request, $exception->getMessage(), 422);
+        }
+    }
+
+
 
     /**
      * @param Request $request

@@ -38,5 +38,10 @@ ALTER TABLE rounds DROP numberid, CHANGE structureCellId structureCellId INT NOT
 # update planningInputs set seekingPercentage = -1;
 # update planningInputs set minNrOfBatches = (select min(nrOfBatches) from plannings p where p.inputId = planningInputs.id and p.state = 2);
 
+# STEP 1 update planningInputs set recreatedAt = null, seekingPercentage = -1, minNrOfBatches = (select min(nrOfBatches) from plannings p where p.inputId = planningInputs.id and p.state = 2) where id = 62099;
+# STEP 2 php bin/console.php app:recalculate-planning-inputs --id-range=62099-62099
+# STEP 3 php bin/console.php app:show-planning 62099 --loglevel=200
+# STEP 4 php bin/console.php app:retry-timeout-planning 62099 --maxNrOfGamesInARow=1 --batchGamesRange=3-3 --planningType=GamesInARow --timeoutState=Time1xNoSort --loglevel=200
+
 
 

@@ -133,6 +133,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
         Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_StartEditMode');
+        Type::addType('enum_PaymentState', FCToernooi\Payment\StateType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PaymentState');
 
         Type::overrideType('datetime_immutable', UTCDateTimeType::class);
         return $em;
@@ -141,21 +143,21 @@ return [
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         $env = $config->getString("environment");
-        $serializerBuilder = SerializerBuilder::create()->setDebug($env === "development");
+        $builder = SerializerBuilder::create()->setDebug($env === "development");
         if ($env !== "development") {
-            $serializerBuilder = $serializerBuilder->setCacheDir($config->getString('serializer.cache_dir'));
+            $builder = $builder->setCacheDir($config->getString('serializer.cache_dir'));
         }
-        $serializerBuilder->setPropertyNamingStrategy(
+        $builder->setPropertyNamingStrategy(
             new \JMS\Serializer\Naming\SerializedNameAnnotationStrategy(
                 new \JMS\Serializer\Naming\IdenticalPropertyNamingStrategy()
             )
         );
-        $serializerBuilder->setSerializationContextFactory(
+        $builder->setSerializationContextFactory(
             function (): SerializationContext {
                 return SerializationContext::create()->setGroups(['Default']);
             }
         );
-        $serializerBuilder->setDeserializationContextFactory(
+        $builder->setDeserializationContextFactory(
             function (): DeserializationContext {
                 return DeserializationContext::create()->setGroups(['Default']);
             }
@@ -163,15 +165,19 @@ return [
         /** @var array<string, string> $ymlDirs */
         $ymlDirs = $config->getArray('serializer.yml_dir');
         foreach ($ymlDirs as $ymlnamespace => $ymldir) {
-            $serializerBuilder->addMetadataDir($ymldir, $ymlnamespace);
+            $builder->addMetadataDir($ymldir, $ymlnamespace);
         }
         $dummyCreator = new DummyCreator();
-        $serializerBuilder->configureHandlers(
+        $builder->configureHandlers(
             function (JMS\Serializer\Handler\HandlerRegistry $registry) use ($dummyCreator): void {
                 (new HandlerSubscriber($dummyCreator))->subscribeHandlers($registry);
             }
         );
-//            $serializerBuilder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
+        $builder->enableEnumSupport();
+
+
+        //   $builder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
+
 //                /*$dispatcher->addListener('serializer.pre_serialize',
 //                    function(JMS\Serializer\EventDispatcher\PreSerializeEvent $event) {
 //                        // do something
@@ -179,10 +185,10 @@ return [
 //                );*/
 //                //$dispatcher->addSubscriber(new RoundNumberEventSubscriber());
 //                $dispatcher->addSubscriber(new RoundNumberEventSubscriber());
-//            });
-        $serializerBuilder->addDefaultHandlers();
+   //     });
+        $builder = $builder->addDefaultHandlers();
 
-        return $serializerBuilder->build();
+        return $builder->build();
     },
     Mailer::class => function (ContainerInterface $container): Mailer {
         /** @var Configuration $config */

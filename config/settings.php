@@ -36,12 +36,13 @@ return [
         'cache_file' => __DIR__ . '/../cache/router',
     ],
     'payment' => [
-        'redirectUrl' => $_ENV['WWW_URL'] . 'user/awaitpayment',
-        // 'webhookUrl' => $_ENV['API_URL'] . 'public/payments',
-        'webhookUrl' => ' http://f9ca-2001-1c06-1e02-6100-6c54-314e-86eb-f52c.ngrok.io/public/payments',
+        'webhookUrl' => $_ENV['ENVIRONMENT'] !== 'development'
+            ? $_ENV['API_URL'] : 'https://59da-2001-1c06-1ecc-1400-a2c-79e4-aada-25d9.ngrok-free.app/'
+            . 'public/paymentUpdate',
         'mollie' => [
             'apikey' => $_ENV['MOLLIE_APIKEY']
         ],
+        'redirectUrl' =>  $_ENV['WWW_URL'] . 'user/paymentresult',
     ],
     // Doctrine settings
     'doctrine' => [

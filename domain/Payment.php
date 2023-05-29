@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
+use FCToernooi\Payment\State as PaymentState;
 use SportsHelpers\Identifiable;
 
 class Payment extends Identifiable
 {
-    protected string $state = 'created';
+    protected PaymentState $state = PaymentState::Open;
     protected \DateTimeImmutable $updatedAt;
     public const EUROS_PER_CREDIT = 0.5;
 
+
     public function __construct(
         protected User $user,
-        protected string $paymentId,
+        protected string|null $paymentId,
         protected string $method,
         protected float $amount
     ) {
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function getPaymentId(): string
+    public function getPaymentId(): string|null
     {
         return $this->paymentId;
+    }
+
+    public function setPaymentId(string $paymentId): void
+    {
+        $this->paymentId = $paymentId;
     }
 
     public function getUser(): User
@@ -41,12 +48,12 @@ class Payment extends Identifiable
         return $this->amount;
     }
 
-    public function getState(): string
+    public function getState(): PaymentState
     {
         return $this->state;
     }
 
-    public function setState(string $state): void
+    public function setState(PaymentState $state): void
     {
         $this->state = $state;
         $this->updatedAt = new \DateTimeImmutable();

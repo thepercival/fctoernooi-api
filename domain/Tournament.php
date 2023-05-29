@@ -170,11 +170,6 @@ class Tournament extends Identifiable
         return $this->startEditMode;
     }
 
-    public function getStartEditModeNative(): string
-    {
-        return $this->startEditMode->value;
-    }
-
     public function setStartEditMode(StartEditMode $startEditMode): void
     {
         $this->startEditMode = $startEditMode;

@@ -8,4 +8,5 @@
 /tests/.phpunit.result.cache
 /tests/codecoverage/
 /.php*
+public/pdf
 

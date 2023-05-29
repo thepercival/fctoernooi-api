@@ -85,9 +85,11 @@ return function (App $app): void {
                 TwigMiddleware::createFromContainer($app, TwigView::class)
             );
 
-            $group->options('/payments', PaymentAction::class . ':options');
-            $group->get('/payments', PaymentAction::class . ':update');
-            $group->post('/payments', PaymentAction::class . ':update');
+            $group->options('/paymentUpdate', PaymentAction::class . ':options');
+            $group->get('/paymentUpdate', PaymentAction::class . ':update');
+            $group->post('/paymentUpdate', PaymentAction::class . ':update');
+            $group->options('/paymentRedirect/:paymentId', PaymentAction::class . ':options');
+            $group->get('/paymentRedirect/:paymentId', PaymentAction::class . ':redirect');
         }
     );
 
@@ -124,6 +126,10 @@ return function (App $app): void {
             $group->get('/idealissuers', PaymentAction::class . ':fetchIDealIssuers');
             $group->options('/buycredits', PaymentAction::class . ':options');
             $group->post('/buycredits', PaymentAction::class . ':buyCredits');
+            $group->options('/mostrecentcreatedpayment', PaymentAction::class . ':options');
+            $group->get('/mostrecentcreatedpayment', PaymentAction::class . ':fetchMostRecentCreatedPayment');
+            $group->options('/{paymentId}', PaymentAction::class . ':options');
+            $group->get('/{paymentId}', PaymentAction::class . ':fetchOne');
         }
     )->add(UserAuthMiddleware::class)->add(UserMiddleware::class)->add(VersionMiddleware::class);
 

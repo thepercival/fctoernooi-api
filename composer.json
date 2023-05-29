@@ -22,7 +22,7 @@
       "doctrine/orm": "^2.10",
       "doctrine/common": "^3.0",
       "endroid/qr-code": "^4.0",
-      "jms/serializer": "^3.7",
+      "jms/serializer": "^3.23",
       "middlewares/negotiation": "^2.0",
       "monolog/monolog": "^2.0",
       "phpmailer/phpmailer": "^6.1",
