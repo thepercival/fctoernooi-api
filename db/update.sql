@@ -6,30 +6,12 @@
 
 -- POST POST POST doctrine-update ===========================================================
 
-insert into categories(number, name, competitionId) (select 1, 'standaard', competitionId from roundNumbers where previousId is null);
-
-insert into structureCells(categoryId, roundNumberId) (select c.id, rn.id
-                                                       from roundNumbers rn
-                                                                join categories c on c.competitionId = rn.competitionId);
-
-update rounds r
-    join roundNumbers rn on r.numberId = rn.id
-    join categories c on c.competitionId = rn.competitionId
-set structureCellId = (select id from structureCells where roundNumberId = rn.id and categoryId = c.id);
-
-update competitors
-set categoryNr = 1;
-
-update recesses
-set name = 'pauze';
-
-update tournaments
-set startEditMode = 'EditLongTerm';
-
-update planningSchedules pss set succeededMargin = -1;
-
--- FROM composer run doctrine-try
-ALTER TABLE rounds DROP numberid, CHANGE structureCellId structureCellId INT NOT NULL;
+-- update planningInputs set uniqueString = REPLACE (uniqueString, ':OP', ':OP(1)') where uniqueString like '%:OP%';
+-- update planningInputs set uniqueString = REPLACE (uniqueString, ':SP', ':SP(1)') where uniqueString like '%:SP%';
+-- update planningInputs set nrOfSimSelfRefs = 0;
+-- update planningInputs set nrOfSimSelfRefs = 1 where uniqueString like '%:OP(1)%' or uniqueString like '%:SP(1)%';
+-- update planningConfigs set nrOfSimSelfRefs = 0;
+-- update planningConfigs set nrOfSimSelfRefs = 1 where selfReferee > 0;
 
 -- insert into creditActions(userId, action, nrOfCredits, atDateTime) (select id, 'CreateAccountReward', 3, CURRENT_TIMESTAMP from users);
 

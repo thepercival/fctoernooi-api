@@ -748,16 +748,16 @@
         },
         {
             "name": "doctrine/deprecations",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/deprecations.git",
-                "reference": "0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de"
+                "reference": "8cffffb2218e01f3b370bf763e00e81697725259"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de",
-                "reference": "0e2a4f1f8cdfc7a92ec3b01c9334898c806b30de",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/8cffffb2218e01f3b370bf763e00e81697725259",
+                "reference": "8cffffb2218e01f3b370bf763e00e81697725259",
                 "shasum": ""
             },
             "require": {
@@ -785,9 +785,9 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
-                "source": "https://github.com/doctrine/deprecations/tree/v1.0.0"
+                "source": "https://github.com/doctrine/deprecations/tree/v1.1.0"
             },
-            "time": "2022-05-02T15:47:09+00:00"
+            "time": "2023-05-29T18:55:17+00:00"
         },
         {
             "name": "doctrine/event-manager",
@@ -2555,16 +2555,16 @@
         },
         {
             "name": "mollie/mollie-api-php",
-            "version": "v2.55.0",
+            "version": "v2.56.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mollie/mollie-api-php.git",
-                "reference": "a2be26bd83dd33ea187a2238fbe0b30582c50774"
+                "reference": "a14c294cfefbe91cc14a59809032fc95ee994645"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mollie/mollie-api-php/zipball/a2be26bd83dd33ea187a2238fbe0b30582c50774",
-                "reference": "a2be26bd83dd33ea187a2238fbe0b30582c50774",
+                "url": "https://api.github.com/repos/mollie/mollie-api-php/zipball/a14c294cfefbe91cc14a59809032fc95ee994645",
+                "reference": "a14c294cfefbe91cc14a59809032fc95ee994645",
                 "shasum": ""
             },
             "require": {
@@ -2641,9 +2641,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mollie/mollie-api-php/issues",
-                "source": "https://github.com/mollie/mollie-api-php/tree/v2.55.0"
+                "source": "https://github.com/mollie/mollie-api-php/tree/v2.56.0"
             },
-            "time": "2023-05-09T10:09:56+00:00"
+            "time": "2023-05-30T13:11:03+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -3479,16 +3479,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "1.21.1",
+            "version": "1.21.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "e560a3eb5e76b35d6d92377e5abb6887c1c13c95"
+                "reference": "b0c366dd2cea79407d635839d25423ba07c55dd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/e560a3eb5e76b35d6d92377e5abb6887c1c13c95",
-                "reference": "e560a3eb5e76b35d6d92377e5abb6887c1c13c95",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/b0c366dd2cea79407d635839d25423ba07c55dd6",
+                "reference": "b0c366dd2cea79407d635839d25423ba07c55dd6",
                 "shasum": ""
             },
             "require": {
@@ -3519,9 +3519,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.21.1"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.21.3"
             },
-            "time": "2023-05-29T11:55:57+00:00"
+            "time": "2023-05-29T19:31:28+00:00"
         },
         {
             "name": "psr/cache",
@@ -5925,16 +5925,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.140",
+            "version": "v1.0.144",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "c155fde98c08d0e5204b4264ed1a01fa1263062d"
+                "reference": "fa63e6c41fc1228dc0facfbfe4ec6d06b113d34a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/c155fde98c08d0e5204b4264ed1a01fa1263062d",
-                "reference": "c155fde98c08d0e5204b4264ed1a01fa1263062d",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/fa63e6c41fc1228dc0facfbfe4ec6d06b113d34a",
+                "reference": "fa63e6c41fc1228dc0facfbfe4ec6d06b113d34a",
                 "shasum": ""
             },
             "require": {
@@ -5948,7 +5948,7 @@
                 "php": ">=8.2",
                 "phplucidframe/console-table": "^1.2",
                 "symfony/yaml": "^6.0",
-                "thepercival/php-sports-helpers": "1.2.14",
+                "thepercival/php-sports-helpers": "^1.2",
                 "thepercival/php-sports-planning": "^1.0"
             },
             "require-dev": {
@@ -5997,22 +5997,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.140"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.144"
             },
-            "time": "2023-04-19T14:14:16+00:00"
+            "time": "2023-05-30T18:41:40+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
-            "version": "v1.2.14",
+            "version": "v1.2.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-helpers.git",
-                "reference": "b5cfa333eff954657ae1e6cae8b0db8ce5f6a3e9"
+                "reference": "bfe8c4b0e9ded992ced5be0f433bdb320a18ccba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/b5cfa333eff954657ae1e6cae8b0db8ce5f6a3e9",
-                "reference": "b5cfa333eff954657ae1e6cae8b0db8ce5f6a3e9",
+                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/bfe8c4b0e9ded992ced5be0f433bdb320a18ccba",
+                "reference": "bfe8c4b0e9ded992ced5be0f433bdb320a18ccba",
                 "shasum": ""
             },
             "require": {
@@ -6063,22 +6063,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-helpers/issues",
-                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.2.14"
+                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.2.20"
             },
-            "time": "2023-01-16T22:04:23+00:00"
+            "time": "2023-05-30T15:33:55+00:00"
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.96",
+            "version": "v1.0.98",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "bf669216a095b40c0eb266e5f19cd3425aa94d2c"
+                "reference": "165934f0ef711c132972167c8967406019d275f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/bf669216a095b40c0eb266e5f19cd3425aa94d2c",
-                "reference": "bf669216a095b40c0eb266e5f19cd3425aa94d2c",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/165934f0ef711c132972167c8967406019d275f3",
+                "reference": "165934f0ef711c132972167c8967406019d275f3",
                 "shasum": ""
             },
             "require": {
@@ -6134,9 +6134,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.96"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.98"
             },
-            "time": "2023-02-06T12:48:14+00:00"
+            "time": "2023-05-30T17:24:38+00:00"
         },
         {
             "name": "thepercival/zend-pdf",
@@ -8490,16 +8490,16 @@
         },
         {
             "name": "phpdocumentor/type-resolver",
-            "version": "1.7.1",
+            "version": "1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpDocumentor/TypeResolver.git",
-                "reference": "dfc078e8af9c99210337325ff5aa152872c98714"
+                "reference": "b2fe4d22a5426f38e014855322200b97b5362c0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/dfc078e8af9c99210337325ff5aa152872c98714",
-                "reference": "dfc078e8af9c99210337325ff5aa152872c98714",
+                "url": "https://api.github.com/repos/phpDocumentor/TypeResolver/zipball/b2fe4d22a5426f38e014855322200b97b5362c0d",
+                "reference": "b2fe4d22a5426f38e014855322200b97b5362c0d",
                 "shasum": ""
             },
             "require": {
@@ -8542,9 +8542,9 @@
             "description": "A PSR-5 based resolver of Class names, Types and Structural Element Names",
             "support": {
                 "issues": "https://github.com/phpDocumentor/TypeResolver/issues",
-                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.1"
+                "source": "https://github.com/phpDocumentor/TypeResolver/tree/1.7.2"
             },
-            "time": "2023-03-27T19:02:04+00:00"
+            "time": "2023-05-30T18:13:47+00:00"
         },
         {
             "name": "phpstan/extension-installer",

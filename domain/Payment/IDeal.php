@@ -19,11 +19,4 @@ class IDeal extends Payment
     {
         return $this->issuer;
     }
-
-
-
-//    public function setMethodNative(string $method): void
-//    {
-//        $this->method = PaymentMethod::from($method);
-//    }
 }

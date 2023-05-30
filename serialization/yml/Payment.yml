@@ -9,5 +9,3 @@ FCToernooi\Payment:
     amount:
       type: float
     state:
-      read_only: true
-      type: FCToernooi\Payment\State
