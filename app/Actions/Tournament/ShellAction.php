@@ -60,7 +60,8 @@ final class ShellAction extends Action
 
             $shells = [];
             $public = true;
-            $tournamentsByDates = $this->tournamentRepos->findByFilter($name, $startDateTime, $endDateTime, $public);
+            $tournamentsByDates = $this->tournamentRepos->findByFilter(
+                $name, $startDateTime, $endDateTime, $public, null, null, 100);
             foreach ($tournamentsByDates as $tournament) {
                 $shells[] = new Shell($tournament, $user);
             }

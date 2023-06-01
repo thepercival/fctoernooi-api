@@ -52,7 +52,8 @@ class Repository extends EntityRepository
         DateTimeImmutable $endDateTime = null,
         bool $public = null,
         DateTimeImmutable $startDateTimeCreated = null,
-        DateTimeImmutable $endDateTimeCreated = null
+        DateTimeImmutable $endDateTimeCreated = null,
+        int $max = null
     ): array {
         $query = $this->createQueryBuilder('t')
             ->join("t.competition", "c")
@@ -94,6 +95,10 @@ class Repository extends EntityRepository
                 $query = $query->where('t.public = :public');
             }
             $query = $query->setParameter('public', $public);
+        }
+
+        if ($max !== null) {
+            $query = $query->setMaxResults($max);
         }
 
         /** @var list<TournamentBase> $results */
