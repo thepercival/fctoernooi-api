@@ -23,12 +23,17 @@ use Sports\Round\Number\PlanningCreator as RoundNumberPlanningCreator;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure\Repository as StructureRepository;
 use SportsHelpers\Dev\ByteFormatter;
+use SportsHelpers\SportRange;
+use SportsPlanning\Exception\NoBestPlanning as NoBestPlanningException;
 use SportsPlanning\Input as PlanningInput;
 use SportsPlanning\Planning\Filter as PlanningFilter;
 use SportsPlanning\Planning\Output as PlanningOutput;
 use SportsPlanning\Planning\State as PlanningState;
+use SportsPlanning\Planning\TimeoutConfig;
+use SportsPlanning\Planning\TimeoutState;
 use SportsPlanning\Planning\Type as PlanningType;
 use SportsPlanning\Seeker as PlanningSeeker;
+use SportsPlanning\Seeker\Timeout as PlanningTimeoutSeeker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -191,7 +196,23 @@ class Create extends PlanningCommand
         }
         $schedules = $this->scheduleRepos->findByInput($planningInput);
         $planningSeeker->processInput($planningInput, $schedules);
-        $bestPlanning = $planningInput->getBestPlanning(PlanningType::BatchGames);
+        try {
+            $bestPlanning = $planningInput->getBestPlanning(PlanningType::BatchGames);
+        }
+        catch(NoBestPlanningException $e) {
+            $planningTimeoutSeeker = new PlanningTimeoutSeeker(
+                $this->getLogger(),
+                $this->planningInputRepos,
+                $this->planningRepos,
+                $this->scheduleRepos
+            );
+            // $this->getLogger()->info('trying Timeout');
+            $planningTimeoutSeeker->process($planningInput, TimeoutState::Time1xNoSort);
+            $planningInput->setSeekingPercentage(100);
+            $this->planningInputRepos->save($planningInput, true);
+
+            $bestPlanning = $planningInput->getBestPlanning(PlanningType::BatchGames);
+        }
         if ($this->showSuccessful === true) {
             $planningOutput = new PlanningOutput($this->getLogger());
             $planningOutput->outputWithGames($bestPlanning, true);
