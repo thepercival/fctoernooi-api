@@ -14,7 +14,7 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Suin\ImageResizer\ImageResizer;
+use Selective\Config\Configuration;
 
 final class SponsorAction extends Action
 {
@@ -22,7 +22,8 @@ final class SponsorAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private SponsorRepository $sponsorRepos,
-        private ImageService $imageService
+        private ImageService $imageService,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -192,7 +193,8 @@ final class SponsorAction extends Action
                 throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
             }
 
-            $logoUrl = $this->imageService->process((string)$sponsor->getId(), $uploadedFiles["logostream"]);
+            $pathPostfix = $this->config->getString('images.sponsors.pathpostfix');
+            $logoUrl = $this->imageService->processImage((string)$sponsor->getId(), $uploadedFiles["logostream"], $pathPostfix);
 
             $sponsor->setLogoUrl($logoUrl);
             $this->sponsorRepos->save($sponsor);

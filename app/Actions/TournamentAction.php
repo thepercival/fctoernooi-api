@@ -121,6 +121,9 @@ final class TournamentAction extends Action
     protected function getSerializationContext(Tournament $tournament, User $user = null): SerializationContext
     {
         $serGroups = ['Default', 'noReference'];
+
+        $context = SerializationContext::create()->setGroups($serGroups);
+
 //        if ($user !== null) {
 //            $tournamentUser = $tournament->getUser($user);
 //            if ($tournamentUser !== null) {
@@ -297,6 +300,8 @@ final class TournamentAction extends Action
             $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
             $this->tournamentRepos->customPersist($newTournament, true);
 
+            $this->tournamentCopier->copyAndSaveSettings($tournament, $newTournament);
+
             $structure = $this->structureRepos->getStructure($competition);
 
             $newStructure = $this->structureCopier->copy($structure, $newTournament->getCompetition());
@@ -312,6 +317,9 @@ final class TournamentAction extends Action
             );
 
             $this->structureRepos->add($newStructure);
+
+            $this->tournamentCopier->copyAndSaveCompetitors($tournament, $newTournament, $newStructure);
+
 
             $this->planningCreator->addFrom(
                 new PlanningQueueService($this->config->getArray('queue')),

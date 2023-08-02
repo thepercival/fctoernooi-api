@@ -135,6 +135,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_StartEditMode');
         Type::addType('enum_PaymentState', FCToernooi\Payment\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PaymentState');
+        Type::addType('enum_RegistrationState', FCToernooi\Tournament\Registration\StateType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_RegistrationState');
 
         Type::overrideType('datetime_immutable', UTCDateTimeType::class);
         return $em;

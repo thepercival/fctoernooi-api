@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="FCToernooi\Tournament\RegistrationSettings" table="tournamentRegistrationSettings" repository-class="FCToernooi\Tournament\RegistrationSettings\Repository">
+        <field name="enabled" column="enabled" type="boolean" nullable="false" unique="false"/>
+        <field name="endDateTime" column="endDateTime" type="datetime_immutable" nullable="false" unique="false"/>
+        <field name="remark" column="remark" type="string" length="200" nullable="true" unique="false"/>
+        <field name="mailAlert" column="mailAlert" type="boolean" nullable="false" unique="false"/>
+        <field name="acceptText" column="acceptText" type="text" nullable="true" unique="false"/>
+        <field name="acceptAsSubstituteText" column="acceptAsSubstituteText" type="text" nullable="true" unique="false"/>
+        <field name="declineText" column="declineText" type="text" nullable="true" unique="false"/>
+        <many-to-one field="tournament" target-entity="FCToernooi\Tournament">
+            <join-columns>
+                <join-column name="tournamentId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+            </join-columns>
+        </many-to-one>
+        <unique-constraints>
+            <unique-constraint columns="tournamentId" name="main_u_idx"/>
+        </unique-constraints>
+    </entity>
+</doctrine-mapping>

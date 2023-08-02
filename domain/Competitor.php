@@ -11,10 +11,16 @@ use Sports\Competitor\StartLocation;
 
 class Competitor extends StartLocation implements SportsCompetitor
 {
-    public const MAX_LENGTH_INGO = 200;
+
+    public const MAX_LENGTH_TELEPHONE = 14;
+    public const MAX_LENGTH_INFO = 200;
 
     protected int|string|null $id = null;
     protected bool $registered = false;
+    private string|null $emailaddress = null;
+    private string|null $telephone = null;
+
+    protected bool $hasLogo = false;
     protected string|null $info = null;
 
     protected string $name;
@@ -58,6 +64,26 @@ class Competitor extends StartLocation implements SportsCompetitor
         $this->name = $name;
     }
 
+    public function getEmailaddress(): string|null
+    {
+        return $this->emailaddress;
+    }
+
+    public function setEmailaddress(string|null $emailaddress): void
+    {
+        $this->emailaddress = $emailaddress;
+    }
+
+    public function getTelephone(): string|null
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(string|null $telephone): void
+    {
+        $this->telephone = $telephone;
+    }
+
     public function getRegistered(): bool
     {
         return $this->registered;
@@ -67,6 +93,17 @@ class Competitor extends StartLocation implements SportsCompetitor
     {
         $this->registered = $registered;
     }
+
+    public function getHasLogo(): bool
+    {
+        return $this->hasLogo;
+    }
+
+    public function setHasLogo(bool $hasLogo): void
+    {
+        $this->hasLogo = $hasLogo;
+    }
+
 
     public function getInfo(): ?string
     {
@@ -78,8 +115,8 @@ class Competitor extends StartLocation implements SportsCompetitor
         if ($info !== null && strlen($info) === 0) {
             $info = null;
         }
-        if ($info !== null && strlen($info) > self::MAX_LENGTH_INGO) {
-            throw new InvalidArgumentException('de extra-info mag maximaal ' . self::MAX_LENGTH_INGO . ' karakters bevatten', E_ERROR);
+        if ($info !== null && strlen($info) > self::MAX_LENGTH_INFO) {
+            throw new InvalidArgumentException('de extra-info mag maximaal ' . self::MAX_LENGTH_INFO . ' karakters bevatten', E_ERROR);
         }
         $this->info = $info;
     }

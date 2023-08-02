@@ -92,12 +92,17 @@ return [
             'smtp_port' => 2525,
             'smtp_user' => $_ENV['MAILTRAP_USER'],
             'smtp_pass' => $_ENV['MAILTRAP_PASSWORD']
-        ]
+        ],
+        'textTemplatesPath' => __DIR__ . '/../templates/registration/'
     ],
     'images' => [
         'sponsors' => [
             'pathpostfix' => 'images/sponsors/',
             'backuppath' => '/var/sponsorbackups/',
+        ],
+        'competitors' => [
+            'pathpostfix' => 'images/competitors/',
+            'backuppath' => '/var/competitorbackups/',
         ]
     ],
     'queue' => [

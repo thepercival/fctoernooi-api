@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
 use FCToernooi\PlanningInfo\Calculator as PlanningInfoCalculator;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
@@ -18,6 +19,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Sports\Category;
+use Sports\Output\StructureOutput;
 use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
@@ -35,6 +38,7 @@ final class StructureAction extends Action
         protected InputRepository $inputRepos,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
+        protected RegistrationRepository $registrationRepos,
         protected EntityManagerInterface $em,
         Memcached $memcached,
         protected Configuration $config
@@ -73,8 +77,17 @@ final class StructureAction extends Action
 
             $tournamentId = (int)$tournament->getId();
             $json = $this->cacheService->getStructure($tournamentId);
-            if ($json === false /*|| $this->config->getString('environment') === 'development'*/) {
+            if ($json === false || $this->config->getString('environment') === 'development') {
                 $structure = $this->structureRepos->getStructure($competition);
+                $structureOutput = new StructureOutput($this->logger);
+                $structureOutput->output($structure);
+//                $this->logger->info('categoryid-map : ' . join(',',
+//                        array_map( function(Category $category): string {
+//                            return ((string)$category->getId()) . ' - '.$category->getNumber() . '.';
+//                        }, $structure->getCategories()
+//                        )
+//                    )
+//                );
                 $json = $this->serializer->serialize(
                     $structure,
                     'json',
@@ -104,17 +117,30 @@ final class StructureAction extends Action
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
+            $structureOutput = new StructureOutput($this->logger);
+            $this->logger->warning('####### DESER. STRUCTURE ########');
+            $structureOutput->output($structureSer);
+            $this->logger->warning('####### END DESER. STRUCTURE ########');
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
             $competition = $tournament->getCompetition();
-
+            $fromToCategoryMap = null;
             if ($this->structureRepos->hasStructure($competition)) {
+                $oldStructure = $this->structureRepos->getStructure($competition);
+
+                $this->logger->warning('####### OLD STRUCTURE ########');
+                $structureOutput->output($oldStructure);
+
+                $fromToCategoryMap = $this->getFromToMap($oldStructure, $structureSer);
                 $this->structureRepos->remove($competition);
             }
+
             $newStructure = $this->structureCopier->copy($structureSer, $competition);
             $this->structureRepos->add($newStructure/*, $roundNumberAsValue*/);
+
+            $this->logger->warning('####### END OLD STRUCTURE ########');
 
             $structureValidator = new StructureValidator();
             $structureValidator->checkValidity($competition, $newStructure, $tournament->getPlaceRanges());
@@ -133,7 +159,14 @@ final class StructureAction extends Action
             foreach ($structure->getCategories() as $category) {
                 $this->competitorRepos->syncCompetitors($tournament, $category->getRootRound());
             }
+            if( $fromToCategoryMap !== null ) {
+                $this->registrationRepos->syncRegistrations($tournament, $fromToCategoryMap);
+            }
             $conn->commit();
+
+            $this->logger->warning('####### START NEW STRUCTURE ########');
+            $structureOutput->output($structure);
+
             $json = $this->serializer->serialize($structure, 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
@@ -179,4 +212,28 @@ final class StructureAction extends Action
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
+
+    /**
+     * @param Structure $oldStructure
+     * @param Structure $structureSer
+     * @return array<int, int|null>
+     */
+    private function getFromToMap(Structure $oldStructure, Structure $structureSer): array {
+        $categoryMap = [];
+        foreach( $oldStructure->getCategories() as $oldCategory ) {
+            $category = $this->getCategoryById($structureSer, $oldCategory->getId());
+            $categoryMap[$oldCategory->getNumber()] = $category?->getNumber();
+        }
+        return $categoryMap;
+    }
+
+    private function getCategoryById(Structure $structure, string|int|null $id): Category|null {
+        foreach( $structure->getCategories() as $category ) {
+            if( $category->getId() === $id ) {
+                return $category;
+            }
+        }
+        return null;
+    }
+
 }

@@ -18,6 +18,10 @@ use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
+use FCToernooi\Tournament\Registration as TournamentRegistration;
+use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
+use FCToernooi\Tournament\RegistrationSettings as TournamentRegistrationSettings;
+use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\TournamentUser;
 use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
@@ -52,6 +56,8 @@ use Sports\Qualify\AgainstConfig\Repository as AgainstQualifyConfigRepository;
 use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
 use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\Repository as RoundNumberRepository;
+use Sports\Category as Category;
+use Sports\Category\Repository as CategoryRepository;
 use Sports\Score\Against as AgainstScore;
 use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Score\Config as ScoreConfig;
@@ -106,6 +112,18 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(Sponsor::class);
         return new SponsorRepository($entityManager, $metaData);
+    },
+    TournamentRegistrationRepository::class => function (ContainerInterface $container): TournamentRegistrationRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(TournamentRegistration::class);
+        return new TournamentRegistrationRepository($entityManager, $metaData);
+    },
+    TournamentRegistrationSettingsRepository::class => function (ContainerInterface $container): TournamentRegistrationSettingsRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(TournamentRegistrationSettings::class);
+        return new TournamentRegistrationSettingsRepository($entityManager, $metaData);
     },
     PaymentRepository::class => function (ContainerInterface $container): PaymentRepository {
         /** @var EntityManagerInterface $entityManager */
@@ -236,6 +254,12 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(AgainstQualifyConfig::class);
         return new AgainstQualifyConfigRepository($entityManager, $metaData);
+    },
+    CategoryRepository::class => function (ContainerInterface $container): CategoryRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(Category::class);
+        return new CategoryRepository($entityManager, $metaData);
     },
     RoundNumberRepository::class => function (ContainerInterface $container): RoundNumberRepository {
         /** @var EntityManagerInterface $entityManager */

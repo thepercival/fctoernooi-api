@@ -18,7 +18,7 @@ class ImageService
         $this->config = $config;
     }
 
-    public function process(string $imageName, UploadedFileInterface $logostream): string
+    public function processSVG(string $imageName, UploadedFileInterface $logostream, string $pathPostfix): void
     {
         if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
             throw new Exception(
@@ -29,9 +29,25 @@ class ImageService
 
         $extension = $this->getExtensionFromStream($logostream);
 
-        $localPath = $this->config->getString('www.apiurl-localpath') . $this->config->getString(
-            'images.sponsors.pathpostfix'
-        );
+        $localPath = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
+
+        $newImagePath = $localPath . $imageName . '.' . $extension;
+
+        $logostream->moveTo($newImagePath);
+    }
+
+    public function processImage(string $imageName, UploadedFileInterface $logostream, string $pathPostfix): string
+    {
+        if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
+            throw new Exception(
+                "het plaatje mag maximaal \"" . ini_get("upload_max_filesize") . "\" groot zijn",
+                E_ERROR
+            );
+        }
+
+        $extension = $this->getExtensionFromStream($logostream);
+
+        $localPath = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
 
         $newImagePath = $localPath . $imageName . '.' . $extension;
 
@@ -42,6 +58,8 @@ class ImageService
             throw new \Exception("could not read img dimensions", E_ERROR);
         }
         $image_type = $source_properties[2];
+
+
         if ($image_type == IMAGETYPE_JPEG) {
             $image_resource_id = imagecreatefromjpeg($newImagePath);
             if ($image_resource_id instanceof GdImage) {
@@ -61,7 +79,7 @@ class ImageService
                 imagepng($target_layer, $newImagePath);
             }
         }
-        $urlPath = $this->config->getString('www.apiurl') . $this->config->getString('images.sponsors.pathpostfix');
+        $urlPath = $this->config->getString('www.apiurl') . $pathPostfix;
         return $urlPath . $imageName . '.' . $extension;
     }
 
@@ -75,6 +93,9 @@ class ImageService
         }
         if ($logostream->getClientMediaType() === "image/gif") {
             return "gif";
+        }
+        if ($logostream->getClientMediaType() === "image/svg+xml" || $logostream->getClientMediaType() === "image/svg") {
+            return "svg";
         }
         throw new \Exception("alleen jpg, png em gif zijn toegestaan", E_ERROR);
     }

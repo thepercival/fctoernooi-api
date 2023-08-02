@@ -1,0 +1,13 @@
+FCToernooi\Tournament\RegistrationSettings:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    enabled:
+      type: boolean
+    endDateTime:
+      type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
+      serialized_name: end
+    mailAlert:
+      type: boolean
+    remark:
+      type: string

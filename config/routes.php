@@ -7,6 +7,8 @@ use App\Actions\LockerRoomAction;
 use App\Actions\PaymentAction;
 use App\Actions\PdfAction;
 use App\Actions\RecessAction;
+use App\Actions\RegistrationAction;
+use App\Actions\RegistrationSettingsAction;
 use App\Actions\ReportAction;
 use App\Actions\SponsorAction;
 use App\Actions\Sports\AgainstQualifyConfigAction;
@@ -75,6 +77,16 @@ return function (App $app): void {
                         ->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                             VersionMiddleware::class
                         );
+
+                    $group->group(
+                        '/categories/{categoryId}/registrations',
+                        function (Group $group): void {
+                            $group->options('', RegistrationAction::class . ':options');
+                            $group->post('', RegistrationAction::class . ':add');
+                        }
+                    )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
+                        VersionMiddleware::class
+                    );
                 }
             );
 
@@ -222,11 +234,15 @@ return function (App $app): void {
                             $group->options('', CompetitorAction::class . ':options');
                             $group->get('', CompetitorAction::class . ':fetch');
                             $group->post('', CompetitorAction::class . ':add');
+                            $group->post('/{registrationId}', CompetitorAction::class . ':addFromRegistration');
                             $group->options('/{competitorId}', CompetitorAction::class . ':options');
+                            $group->get('/{competitorId}', CompetitorAction::class . ':fetchOne');
                             $group->put('/{competitorId}', CompetitorAction::class . ':edit');
                             $group->delete('/{competitorId}', CompetitorAction::class . ':remove');
                             $group->options('/{competitorOneId}/{competitorTwoId}', CompetitorAction::class . ':options');
                             $group->put('/{competitorOneId}/{competitorTwoId}', CompetitorAction::class . ':swap');
+                            $group->options('/{competitorId}/upload', CompetitorAction::class . ':options');
+                            $group->post('/{competitorId}/upload', CompetitorAction::class . ':upload');
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
@@ -411,6 +427,45 @@ return function (App $app): void {
                             $group->delete('/{invitationId}', InvitationAction::class . ':remove');
                         }
                     )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'categories/{categoryId}/registrations',
+                        function (Group $group): void {
+                            $group->options('', RegistrationAction::class . ':options');
+                            $group->get('', RegistrationAction::class . ':fetch');
+                            $group->post('', RegistrationAction::class . ':add');
+
+                            $group->options('/{registrationId}', RegistrationAction::class . ':options');
+                            $group->get('/{registrationId}', RegistrationAction::class . ':fetchOne');
+                            $group->put('/{registrationId}', RegistrationAction::class . ':edit');
+                            $group->delete('/{registrationId}', RegistrationAction::class . ':remove');
+                        }
+                    )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'registrations/settings',
+                        function (Group $group): void {
+                            $group->options('', RegistrationSettingsAction::class . ':options');
+                            $group->get('', RegistrationSettingsAction::class . ':fetchOne');
+                            $group->options('/{settingsId}', RegistrationSettingsAction::class . ':options');
+                            $group->put('/{settingsId}', RegistrationSettingsAction::class . ':edit');
+                        }
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'registrationsubjects',
+                        function (Group $group): void {
+                            $group->options('/{subject}', RegistrationSettingsAction::class . ':options');
+                            $group->get('/{subject}', RegistrationSettingsAction::class . ':fetchOneText');
+                            $group->put('/{subject}', RegistrationSettingsAction::class . ':editText');
+                        }
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 

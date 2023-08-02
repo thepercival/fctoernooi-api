@@ -7,6 +7,8 @@ FCToernooi\Tournament:
       type: Sports\Competition
     public:
       type: boolean
+    useSelfRegistration:
+      type: boolean
     startEditMode:
     users:
       type: ArrayCollection<FCToernooi\TournamentUser>

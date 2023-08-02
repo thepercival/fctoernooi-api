@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <p class="text-gray-700"
+       style="line-height: 24px; font-size: 16px; color: #4a5568; width: 100%; margin-bottom: 24px;" align="left">
+        Beste beheerder,
+    </p>
+
+    <p class="text-gray-700" style="line-height: 24px; font-size: 16px; color: #4a5568; width: 100%; margin: 0;"
+       align="left">
+        "{{ name }}" heeft zich geregistreerd voor je toernooi. Klik <a href="{{ url }}">hier</a> om de inschrijving te bekijken.
+    </p>
+
+    <p class="text-gray-700"
+       style="line-height: 24px; font-size: 16px; color: #4a5568; width: 100%; margin-top: 24px; margin-bottom: 0px"
+       align="left">
+        met vriendelijke groet,
+        <br>
+        FCToernooi
+    </p>
+{% endblock %}

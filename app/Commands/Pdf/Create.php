@@ -134,7 +134,7 @@ class Create extends PlanningCommand
             try {
                 $createMessage = $this->getMessage($message->getBody());
                 $tournamentId = (string)$createMessage->getTournament()->getId();
-                $logMessage = 'creating pdf for tournamentid "' . $tournamentId . '"';
+                $logMessage = 'creating pdf for tournamentId "' . $tournamentId . '"';
                 $logMessage .= ' with subject "' . $createMessage->getSubject()->name . '"';
                 $this->getLogger()->info($logMessage);
                 $this->createPdf($createMessage);
@@ -197,7 +197,7 @@ class Create extends PlanningCommand
         $this->getLogger()->info('     executed in ' . $duration . ' seconds');
 
         if ($this->pdfService->creationCompleted($progress->getProgress())) {
-            $this->getLogger()->info('merging pdf for tournamentid "' . $tournamentId . '"');
+            $this->getLogger()->info('merging pdf for tournamentId "' . $tournamentId . '"');
             $time_start = microtime(true);
             $this->pdfService->mergePdfs($tournament, $message->getFileName());
             $duration = round(microtime(true) - $time_start, 1);

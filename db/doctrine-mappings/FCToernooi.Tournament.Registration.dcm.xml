@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="FCToernooi\Tournament\Registration" table="tournamentRegistrations" repository-class="FCToernooi\Tournament\Registration\Repository">
+        <field name="categoryNr" column="categoryNr" type="smallint" unique="false"/>
+        <field name="name" column="name" type="string" length="30" unique="false"/>
+        <field name="emailaddress" column="emailaddress" type="string" length="100" nullable="false" unique="false"/>
+        <field name="telephone" column="telephone" type="string" length="15" nullable="false" unique="false"/>
+        <field name="info" column="info" type="string" length="200" nullable="true" unique="false"/>
+        <field name="state" column="state" type="enum_RegistrationState" length="10" nullable="false" unique="false"/>
+        <many-to-one field="tournament" target-entity="FCToernooi\Tournament">
+            <join-columns>
+                <join-column name="tournamentId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
+            </join-columns>
+        </many-to-one>
+        <many-to-one field="competitor" target-entity="FCToernooi\Competitor">
+            <join-columns>
+                <join-column name="competitorId" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+            </join-columns>
+        </many-to-one>
+    </entity>
+</doctrine-mapping>

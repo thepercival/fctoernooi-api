@@ -5,8 +5,11 @@
             <generator strategy="AUTO"/>
         </id>
         <field name="registered" column="registered" type="boolean" nullable="false" unique="false"/>
+        <field name="hasLogo" column="hasLogo" type="boolean" nullable="false" unique="false"/>
         <field name="info" column="info" type="string" length="200" nullable="true" unique="false"/>
         <field name="name" column="name" type="string" length="30" unique="false"/>
+        <field name="emailaddress" column="emailaddress" type="string" length="100" nullable="true" unique="false"/>
+        <field name="telephone" column="telephone" type="string" length="15" nullable="true" unique="false"/>
         <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="competitors">
             <join-columns>
                 <join-column name="tournamentId" referenced-column-name="id" nullable="true" on-delete="CASCADE"/>

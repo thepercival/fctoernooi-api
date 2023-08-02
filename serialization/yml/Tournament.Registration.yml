@@ -1,0 +1,17 @@
+FCToernooi\Tournament\Registration:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    state:
+    name:
+      type: string
+    emailaddress:
+      type: string
+    telephone:
+      type: string
+    info:
+      type: string
+  virtual_properties:
+    getStartLocation:
+      type: Sports\Place\Location
+      serialized_name: startLocation

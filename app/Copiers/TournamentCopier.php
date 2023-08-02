@@ -11,7 +11,9 @@ use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Recess;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament as TournamentBase;
+use FCToernooi\Tournament\RegistrationSettings;
+use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
+use FCToernooi\Competitor\Repository as TournamentCompetitorRepository;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use League\Period\Period;
@@ -21,17 +23,22 @@ use Sports\Competition\Field;
 use Sports\Competition\Referee;
 use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competitor\StartLocation;
 use Sports\League;
 use Sports\Season\Repository as SeasonRepository;
 use Sports\Sport;
 use Sports\Sport\Repository as SportRepository;
+use Sports\Structure;
+
 
 class TournamentCopier
 {
     public function __construct(
         private SportRepository $sportRepos,
         private SeasonRepository $seasonRepos,
-        private LockerRoomRepository $lockerRoomRepos
+        private LockerRoomRepository $lockerRoomRepos,
+        private TournamentRegistrationSettingsRepository $settingsRepos,
+        private TournamentCompetitorRepository $competitorRepos
     ) {
     }
 
@@ -121,7 +128,7 @@ class TournamentCopier
         Competition $newCompetition,
         DateTimeImmutable $newStartDateTime
     ): Tournament {
-        $newTournament = new TournamentBase($newCompetition);
+        $newTournament = new Tournament($newCompetition);
         $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
 
         foreach( $fromTournament->getRecesses() as $fromRecess) {
@@ -136,8 +143,39 @@ class TournamentCopier
         }
 
         $newTournament->setPublic($fromTournament->getPublic());
+
         return $newTournament;
     }
+
+    public function copyAndSaveSettings(Tournament $fromTournament, Tournament $newTournament): void {
+        $fromSettings = $this->settingsRepos->findOneBy(['tournament' => $fromTournament]);
+        if ($fromSettings === null) {
+            return;
+        }
+
+        $newSettings = new RegistrationSettings(
+            $newTournament,
+            $fromSettings->getEnabled(),
+            $this->calculateNewEndDateTime($fromSettings, $newTournament),
+            $fromSettings->getMailAlert(),
+            $fromSettings->getRemark()
+        );
+        $this->settingsRepos->save($newSettings, true);
+    }
+
+    private function calculateNewEndDateTime(RegistrationSettings $fromSettings, Tournament $newTournament): DateTimeImmutable {
+        $fromTournament = $fromSettings->getTournament();
+
+        $fromTournamentStartDateTIme = $fromTournament->getCompetition()->getStartDateTime();
+        $fromBetweenPeriod = new Period(
+            $fromSettings->getEndDateTime(), $fromTournamentStartDateTIme
+        );
+
+        $newTournamentStartDateTIme = $newTournament->getCompetition()->getStartDateTime();
+
+        return $newTournamentStartDateTIme->sub($fromBetweenPeriod->dateInterval());
+    }
+
 
     /**
      * @param Tournament $sourceTournament
@@ -164,4 +202,30 @@ class TournamentCopier
             $this->lockerRoomRepos->save($newLocerRoom);
         }
     }
+
+    public function copyAndSaveCompetitors(
+        Tournament $fromTournament,
+        Tournament $newTournament,
+        Structure $newStructure): void
+    {
+        foreach ($fromTournament->getCompetitors() as $fromCompetitor) {
+            $startLocation = $fromCompetitor->getStartLocation();
+            if( !$newStructure->locationExists( $startLocation ) ) {
+                continue;
+            }
+            $newCompetitor = new Competitor(
+                $newTournament, $startLocation, $fromCompetitor->getName()
+            );
+            $newCompetitor->setEmailaddress($fromCompetitor->getEmailaddress());
+            $newCompetitor->setTelephone($fromCompetitor->getTelephone());
+            $newCompetitor->setInfo($fromCompetitor->getInfo());
+            $fromCompetitor->setHasLogo($fromCompetitor->getHasLogo());
+            $this->competitorRepos->save($newCompetitor, true);
+            if ($fromCompetitor->getHasLogo()) {
+                $this->copyCompetitorLogo();
+                // copy file
+            }
+        }
+    }
+
 }

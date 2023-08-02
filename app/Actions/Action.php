@@ -90,6 +90,12 @@ abstract class Action
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+    protected function respondWithPlainText(Response $response, string $text): Response
+    {
+        $response->getBody()->write($text);
+        return $response->withHeader('Content-Type', 'text/plain');
+    }
+
     /**
      * @template T
      * @param Request $request

@@ -6,7 +6,15 @@ FCToernooi\Competitor:
       type: integer
     name:
       type: string
+    emailaddress:
+      type: string
+      groups: [ privacy ]
+    telephone:
+      type: string
+      groups: [ privacy ]
     registered:
+      type: boolean
+    hasLogo:
       type: boolean
     info:
       type: string
