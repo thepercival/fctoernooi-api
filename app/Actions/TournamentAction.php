@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Copiers\TournamentCopier;
+use App\ImageService;
 use App\QueueService;
 use App\QueueService\Planning as PlanningQueueService;
 use DateTimeImmutable;
@@ -39,6 +40,7 @@ use stdClass;
 final class TournamentAction extends Action
 {
     private CacheService $cacheService;
+    private ImageService $imageService;
 
     public function __construct(
         LoggerInterface $logger,
@@ -56,6 +58,7 @@ final class TournamentAction extends Action
         parent::__construct($logger, $serializer);
 
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
+        $this->imageService =  new ImageService($this->config);
     }
 
     /**
@@ -318,7 +321,9 @@ final class TournamentAction extends Action
 
             $this->structureRepos->add($newStructure);
 
-            $this->tournamentCopier->copyAndSaveCompetitors($tournament, $newTournament, $newStructure);
+
+            $this->tournamentCopier->copyAndSaveCompetitors(
+                $tournament, $newTournament, $newStructure, $this->imageService);
 
 
             $this->planningCreator->addFrom(

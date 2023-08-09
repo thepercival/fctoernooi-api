@@ -4,37 +4,27 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\ImageService\Entity;
 use Exception;
+use FCToernooi\Competitor;
+use FCToernooi\Tournament;
 use GdImage;
 use Psr\Http\Message\UploadedFileInterface;
 use Selective\Config\Configuration;
+use App\ImageService\Entity as ImageEntity;
 
 class ImageService
 {
     protected const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+
+    public const COMPETITOR_IMAGE_FOLDER = 'competitor';
 
     public function __construct(private Configuration $config)
     {
         $this->config = $config;
     }
 
-    public function processSVG(string $imageName, UploadedFileInterface $logostream, string $pathPostfix): void
-    {
-        if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
-            throw new Exception(
-                "het plaatje mag maximaal \"" . ini_get("upload_max_filesize") . "\" groot zijn",
-                E_ERROR
-            );
-        }
 
-        $extension = $this->getExtensionFromStream($logostream);
-
-        $localPath = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
-
-        $newImagePath = $localPath . $imageName . '.' . $extension;
-
-        $logostream->moveTo($newImagePath);
-    }
 
     public function processImage(string $imageName, UploadedFileInterface $logostream, string $pathPostfix): string
     {
@@ -53,34 +43,35 @@ class ImageService
 
         $logostream->moveTo($newImagePath);
 
-        $source_properties = getimagesize($newImagePath);
-        if ($source_properties === false) {
-            throw new \Exception("could not read img dimensions", E_ERROR);
-        }
-        $image_type = $source_properties[2];
+        if( strtolower($extension) !== 'svg') {
+            $source_properties = getimagesize($newImagePath);
+            if ($source_properties === false) {
+                throw new \Exception("could not read img dimensions", E_ERROR);
+            }
+            $image_type = $source_properties[2];
 
-
-        if ($image_type == IMAGETYPE_JPEG) {
-            $image_resource_id = imagecreatefromjpeg($newImagePath);
-            if ($image_resource_id instanceof GdImage) {
-                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagejpeg($target_layer, $newImagePath);
-            }
-        } elseif ($image_type == IMAGETYPE_GIF) {
-            $image_resource_id = imagecreatefromgif($newImagePath);
-            if ($image_resource_id instanceof GdImage) {
-                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagegif($target_layer, $newImagePath);
-            }
-        } elseif ($image_type == IMAGETYPE_PNG) {
-            $image_resource_id = imagecreatefrompng($newImagePath);
-            if ($image_resource_id instanceof GdImage) {
-                $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                imagepng($target_layer, $newImagePath);
+            if ($image_type == IMAGETYPE_JPEG) {
+                $image_resource_id = imagecreatefromjpeg($newImagePath);
+                if ($image_resource_id instanceof GdImage) {
+                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                    imagejpeg($target_layer, $newImagePath);
+                }
+            } elseif ($image_type == IMAGETYPE_GIF) {
+                $image_resource_id = imagecreatefromgif($newImagePath);
+                if ($image_resource_id instanceof GdImage) {
+                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                    imagegif($target_layer, $newImagePath);
+                }
+            } elseif ($image_type == IMAGETYPE_PNG) {
+                $image_resource_id = imagecreatefrompng($newImagePath);
+                if ($image_resource_id instanceof GdImage) {
+                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
+                    imagepng($target_layer, $newImagePath);
+                }
             }
         }
-        $urlPath = $this->config->getString('www.apiurl') . $pathPostfix;
-        return $urlPath . $imageName . '.' . $extension;
+
+        return $extension;
     }
 
     private function getExtensionFromStream(UploadedFileInterface $logostream): string
@@ -162,5 +153,29 @@ class ImageService
         );
         /** @var GdImage $target_layer */
         return $target_layer;
+    }
+
+
+
+//    public function getLocalPath(ImageEntity $imageEntity): string {
+//        return realpath(
+//            $this->config->getString('www.apiurl-localpath') . DIRECTORY_SEPARATOR
+//            . $imageEntity->value
+//        ) . '/';
+//    }
+
+    public function copyCompetitorImage(
+        Competitor $fromCompetitor, Competitor $newCompetitor): bool {
+        // fromPath
+        // $extension = $this->getExtensionFromStream($logostream);
+
+        $pathPostfix = $this->config->getString('images.competitors.pathpostfix');
+        $localFolder = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
+        $localFileName = $imageName . '.' . $extension;
+        $imagePath = $localFolder . $localFileName;
+
+      //   $localPath = $this->getLocalPath(ImageEntity::Competitor) . $fromCompetitor->getId();
+      //   $this->config->getString('www.apiurl-localpath') . $pathPostfix;
+        // toPath
     }
 }

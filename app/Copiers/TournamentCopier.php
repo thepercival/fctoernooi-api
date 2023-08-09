@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Copiers;
 
+use App\ImageService;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Competitor;
@@ -206,15 +207,16 @@ class TournamentCopier
     public function copyAndSaveCompetitors(
         Tournament $fromTournament,
         Tournament $newTournament,
-        Structure $newStructure): void
+        Structure $newStructure,
+        ImageService $imageService
+    ): void
     {
         foreach ($fromTournament->getCompetitors() as $fromCompetitor) {
-            $startLocation = $fromCompetitor->getStartLocation();
-            if( !$newStructure->locationExists( $startLocation ) ) {
+            if( !$newStructure->locationExists( $fromCompetitor ) ) {
                 continue;
             }
             $newCompetitor = new Competitor(
-                $newTournament, $startLocation, $fromCompetitor->getName()
+                $newTournament, $fromCompetitor, $fromCompetitor->getName()
             );
             $newCompetitor->setEmailaddress($fromCompetitor->getEmailaddress());
             $newCompetitor->setTelephone($fromCompetitor->getTelephone());
@@ -222,7 +224,7 @@ class TournamentCopier
             $fromCompetitor->setHasLogo($fromCompetitor->getHasLogo());
             $this->competitorRepos->save($newCompetitor, true);
             if ($fromCompetitor->getHasLogo()) {
-                $this->copyCompetitorLogo();
+                $imageService->copyImage($fromCompetitor, $newCompetitor);
                 // copy file
             }
         }

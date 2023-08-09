@@ -20,7 +20,7 @@ class Competitor extends StartLocation implements SportsCompetitor
     private string|null $emailaddress = null;
     private string|null $telephone = null;
 
-    protected bool $hasLogo = false;
+    protected string|null $logoExtension = null;
     protected string|null $info = null;
 
     protected string $name;
@@ -94,14 +94,14 @@ class Competitor extends StartLocation implements SportsCompetitor
         $this->registered = $registered;
     }
 
-    public function getHasLogo(): bool
+    public function getLogoExtension(): string|null
     {
-        return $this->hasLogo;
+        return $this->logoExtension;
     }
 
-    public function setHasLogo(bool $hasLogo): void
+    public function setLogoExtension(string|null $logoExtension): void
     {
-        $this->hasLogo = $hasLogo;
+        $this->logoExtension = $logoExtension;
     }
 
 

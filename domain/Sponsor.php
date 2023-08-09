@@ -11,6 +11,7 @@ class Sponsor extends Identifiable
     private string $name;
     private string|null $url = null;
     private string|null $logoUrl = null;
+    private string|null $logoExtension = null;
     private int $screenNr = 0;
 
     public const MIN_LENGTH_NAME = 2;
@@ -64,25 +65,14 @@ class Sponsor extends Identifiable
         $this->url = $url;
     }
 
-    public function getLogoUrl(): string|null
+    public function getLogoExtension(): string|null
     {
-        return $this->logoUrl;
+        return $this->logoExtension;
     }
 
-    public function setLogoUrl(string $url = null): void
+    public function setLogoExtension(string $extension = null): void
     {
-        if ($url !== null) {
-            if (strlen($url) > self::MAX_LENGTH_URL) {
-                throw new \InvalidArgumentException(
-                    'de url mag maximaal ' . self::MAX_LENGTH_URL . ' karakters bevatten',
-                    E_ERROR
-                );
-            }
-            if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-                throw new \InvalidArgumentException('de url ' . $url . ' is niet valide (begin met https://)', E_ERROR);
-            }
-        }
-        $this->logoUrl = $url;
+        $this->logoExtension = $extension;
     }
 
     public function getScreenNr(): int

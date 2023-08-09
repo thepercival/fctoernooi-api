@@ -91,7 +91,7 @@ final class SponsorAction extends Action
 
             $newSponsor = new Sponsor($tournament, $sponsor->getName());
             $newSponsor->setUrl($sponsor->getUrl());
-            $newSponsor->setLogoUrl($sponsor->getLogoUrl());
+            $newSponsor->setLogoExtension($sponsor->getLogoExtension());
             $newSponsor->setScreenNr($sponsor->getScreenNr());
             $this->sponsorRepos->save($newSponsor);
 
@@ -129,7 +129,7 @@ final class SponsorAction extends Action
 
             $sponsor->setName($sponsorSer->getName());
             $sponsor->setUrl($sponsorSer->getUrl());
-            $sponsor->setLogoUrl($sponsorSer->getLogoUrl());
+            $sponsor->setLogoExtension($sponsorSer->getLogoExtension());
             $sponsor->setScreenNr($sponsorSer->getScreenNr());
             $this->sponsorRepos->save($sponsor);
 
@@ -194,9 +194,9 @@ final class SponsorAction extends Action
             }
 
             $pathPostfix = $this->config->getString('images.sponsors.pathpostfix');
-            $logoUrl = $this->imageService->processImage((string)$sponsor->getId(), $uploadedFiles["logostream"], $pathPostfix);
+            $extension = $this->imageService->processImage((string)$sponsor->getId(), $uploadedFiles["logostream"], $pathPostfix);
 
-            $sponsor->setLogoUrl($logoUrl);
+            $sponsor->setLogoExtension($extension);
             $this->sponsorRepos->save($sponsor);
 
             $json = $this->serializer->serialize($sponsor, 'json');

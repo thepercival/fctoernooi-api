@@ -121,7 +121,7 @@ final class CompetitorAction extends Action
             );
             $newCompetitor->setEmailaddress($competitor->getEmailaddress());
             $newCompetitor->setTelephone($competitor->getTelephone());
-            $newCompetitor->setHasLogo($competitor->getHasLogo());
+            $newCompetitor->setLogoExtension($competitor->getLogoExtension());
             $newCompetitor->setInfo($competitor->getInfo());
 
             $this->competitorRepos->save($newCompetitor);
@@ -172,7 +172,7 @@ final class CompetitorAction extends Action
             );
             $newCompetitor->setEmailaddress($registration->getEmailaddress());
             $newCompetitor->setTelephone($registration->getTelephone());
-            $newCompetitor->setHasLogo(false);
+            $newCompetitor->setLogoExtension(null);
             $newCompetitor->setInfo($registration->getInfo());
 
             $this->competitorRepos->save($newCompetitor);
@@ -221,7 +221,7 @@ final class CompetitorAction extends Action
             $competitor->setEmailaddress($competitorSer->getEmailaddress());
             $competitor->setTelephone($competitorSer->getTelephone());
             $competitor->setRegistered($competitorSer->getRegistered());
-            $competitor->setHasLogo($competitorSer->getHasLogo());
+            $competitor->setLogoExtension($competitorSer->getLogoExtension());
             $competitor->setInfo($competitorSer->getInfo());
             $this->competitorRepos->save($competitor);
 
@@ -327,9 +327,9 @@ final class CompetitorAction extends Action
             }
 
             $pathPostfix = $this->config->getString('images.competitors.pathpostfix');
-            $this->imageService->processSVG((string)$competitor->getId(), $uploadedFiles["logostream"], $pathPostfix);
+            $extension = $this->imageService->processImage((string)$competitor->getId(), $uploadedFiles["logostream"], $pathPostfix);
 
-            $competitor->setHasLogo(true);
+            $competitor->setLogoExtension($extension);
             $this->competitorRepos->save($competitor);
 
             $serGroups = $this->getModifySerializationGroup();

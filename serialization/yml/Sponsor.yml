@@ -6,7 +6,7 @@ FCToernooi\Sponsor:
       type: string
     url:
       type: string
-    logoUrl:
+    logoExtension:
       type: string
     screenNr:
       type: integer

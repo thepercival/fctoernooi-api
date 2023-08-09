@@ -5,7 +5,7 @@
 -- ALTER TABLE rounds ADD structureCellId INT  NULL;
 
 -- POST POST POST doctrine-update ===========================================================
-
+UPDATE sponsors set logoExtension = RIGHT(logoUrl, 3) where logoUrl is not null;
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':OP', ':OP(1)') where uniqueString like '%:OP%';
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':SP', ':SP(1)') where uniqueString like '%:SP%';
 -- update planningInputs set nrOfSimSelfRefs = 0;

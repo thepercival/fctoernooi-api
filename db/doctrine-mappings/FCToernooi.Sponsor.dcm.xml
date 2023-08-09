@@ -3,6 +3,7 @@
   <entity name="FCToernooi\Sponsor" table="sponsors" repository-class="FCToernooi\Sponsor\Repository">
     <field name="name" column="name" type="string" length="30" nullable="false" unique="false"/>
     <field name="url" column="url" type="string" length="100" nullable="true" unique="false"/>
+    <field name="logoExtension" column="logoExtension" type="string" length="10" nullable="true" unique="false"/>
     <field name="logoUrl" column="logoUrl" type="string" length="100" nullable="true" unique="false"/>
     <field name="screenNr" column="screenNr" type="smallint" nullable="false" unique="false">
       <options>
