@@ -10,6 +10,7 @@ use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Competitor;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
+use FCToernooi\Sponsor;
 use Sports\Structure\Repository as StructureRepository;
 use FCToernooi\Role;
 use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
@@ -221,7 +222,6 @@ final class CompetitorAction extends Action
             $competitor->setEmailaddress($competitorSer->getEmailaddress());
             $competitor->setTelephone($competitorSer->getTelephone());
             $competitor->setRegistered($competitorSer->getRegistered());
-            $competitor->setLogoExtension($competitorSer->getLogoExtension());
             $competitor->setInfo($competitorSer->getInfo());
             $this->competitorRepos->save($competitor);
 
@@ -323,11 +323,14 @@ final class CompetitorAction extends Action
 
             $uploadedFiles = $request->getUploadedFiles();
             if (!array_key_exists("logostream", $uploadedFiles)) {
-                throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
+                $logoExtension = $competitor->getLogoExtension();
+                if( $logoExtension !== null ) {
+                    $this->imageService->removeImages($competitor, $logoExtension);
+                }
+                $extension = null;
+            } else {
+                $extension = $this->imageService->processUploadedImage($competitor, $uploadedFiles["logostream"]);
             }
-
-            $pathPostfix = $this->config->getString('images.competitors.pathpostfix');
-            $extension = $this->imageService->processImage((string)$competitor->getId(), $uploadedFiles["logostream"], $pathPostfix);
 
             $competitor->setLogoExtension($extension);
             $this->competitorRepos->save($competitor);

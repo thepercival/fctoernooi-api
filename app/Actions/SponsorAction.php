@@ -126,10 +126,9 @@ final class SponsorAction extends Action
             }
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor);
-
+            $oldLogoExtension = $sponsor->getLogoExtension();
             $sponsor->setName($sponsorSer->getName());
             $sponsor->setUrl($sponsorSer->getUrl());
-            $sponsor->setLogoExtension($sponsorSer->getLogoExtension());
             $sponsor->setScreenNr($sponsorSer->getScreenNr());
             $this->sponsorRepos->save($sponsor);
 
@@ -190,11 +189,14 @@ final class SponsorAction extends Action
 
             $uploadedFiles = $request->getUploadedFiles();
             if (!array_key_exists("logostream", $uploadedFiles)) {
-                throw new \Exception("geen goede upload gedaan, probeer opnieuw", E_ERROR);
+                $logoExtension = $sponsor->getLogoExtension();
+                if( $logoExtension !== null ) {
+                    $this->imageService->removeImages($sponsor, $logoExtension);
+                }
+                $extension = null;
+            } else {
+                $extension = $this->imageService->processUploadedImage($sponsor, $uploadedFiles["logostream"]);
             }
-
-            $pathPostfix = $this->config->getString('images.sponsors.pathpostfix');
-            $extension = $this->imageService->processImage((string)$sponsor->getId(), $uploadedFiles["logostream"], $pathPostfix);
 
             $sponsor->setLogoExtension($extension);
             $this->sponsorRepos->save($sponsor);

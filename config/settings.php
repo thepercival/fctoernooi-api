@@ -96,14 +96,7 @@ return [
         'textTemplatesPath' => __DIR__ . '/../templates/registration/'
     ],
     'images' => [
-        'sponsors' => [
-            'pathpostfix' => 'images/sponsors/',
-            'backuppath' => '/var/sponsorbackups/',
-        ],
-        'competitors' => [
-            'pathpostfix' => 'images/competitors/',
-            'backuppath' => '/var/competitorbackups/',
-        ]
+        'backuppath' => (($_ENV['ENVIRONMENT'] === 'development') ? '/tmp' : '/var') . '/imgbackups'
     ],
     'queue' => [
         'host' => 'localhost',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Commands\BackupSponsorImages;
+use App\Commands\BackupImages;
 use App\Commands\Listing as ListingCommand;
 use App\Commands\Pdf\Create as PdfCreate;
 use App\Commands\Pdf\Validate as PdfValidate;
@@ -56,8 +56,8 @@ $commands = [
     "app:update-sitemap" => function (ContainerInterface $container): UpdateSitemap {
         return new UpdateSitemap($container);
     },
-    "app:backup-sponsorimages" => function (ContainerInterface $container): BackupSponsorImages {
-        return new BackupSponsorImages($container);
+    "app:backup-images" => function (ContainerInterface $container): BackupImages {
+        return new BackupImages($container);
     },
     "app:validate" => function (ContainerInterface $container): Validator {
         return new Validator($container);

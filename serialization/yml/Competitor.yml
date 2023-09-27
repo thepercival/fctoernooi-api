@@ -14,7 +14,7 @@ FCToernooi\Competitor:
       groups: [ privacy ]
     registered:
       type: boolean
-    hasLogo:
-      type: boolean
+    logoExtension:
+      type: string
     info:
       type: string

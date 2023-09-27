@@ -14,6 +14,7 @@ class Competitor extends StartLocation implements SportsCompetitor
 
     public const MAX_LENGTH_TELEPHONE = 14;
     public const MAX_LENGTH_INFO = 200;
+    public const IMG_FOLDER = 'competitors';
 
     protected int|string|null $id = null;
     protected bool $registered = false;

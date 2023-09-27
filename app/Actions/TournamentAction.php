@@ -58,7 +58,7 @@ final class TournamentAction extends Action
         parent::__construct($logger, $serializer);
 
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
-        $this->imageService =  new ImageService($this->config);
+        $this->imageService =  new ImageService($this->config, $logger);
     }
 
     /**
@@ -251,6 +251,19 @@ final class TournamentAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
+            foreach( $tournament->getSponsors() as $sponsor) {
+                $logoExtension = $sponsor->getLogoExtension();
+                if( $logoExtension !== null ) {
+                    $this->imageService->removeImages($sponsor, $logoExtension);
+                }
+            }
+            foreach( $tournament->getCompetitors() as $competitor) {
+                $logoExtension = $competitor->getLogoExtension();
+                if( $logoExtension !== null ) {
+                    $this->imageService->removeImages($competitor, $logoExtension);
+                }
+            }
+
             $this->tournamentRepos->remove($tournament);
 
             return $response->withStatus(200);
@@ -321,10 +334,12 @@ final class TournamentAction extends Action
 
             $this->structureRepos->add($newStructure);
 
-
             $this->tournamentCopier->copyAndSaveCompetitors(
                 $tournament, $newTournament, $newStructure, $this->imageService);
 
+            $this->tournamentCopier->copyAndSaveLockerRooms($tournament, $newTournament);
+
+            $this->tournamentCopier->copyAndSaveSponsors($tournament, $newTournament, $this->imageService);
 
             $this->planningCreator->addFrom(
                 new PlanningQueueService($this->config->getArray('queue')),

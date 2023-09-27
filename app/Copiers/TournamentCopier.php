@@ -11,6 +11,8 @@ use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Recess;
+use FCToernooi\Sponsor;
+use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\RegistrationSettings;
 use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
@@ -25,12 +27,12 @@ use Sports\Competition\Referee;
 use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competitor\StartLocation;
+use Sports\Competitor\StartLocationMap;
 use Sports\League;
 use Sports\Season\Repository as SeasonRepository;
 use Sports\Sport;
 use Sports\Sport\Repository as SportRepository;
 use Sports\Structure;
-
 
 class TournamentCopier
 {
@@ -38,6 +40,7 @@ class TournamentCopier
         private SportRepository $sportRepos,
         private SeasonRepository $seasonRepos,
         private LockerRoomRepository $lockerRoomRepos,
+        private SponsorRepository $sponsorRepos,
         private TournamentRegistrationSettingsRepository $settingsRepos,
         private TournamentCompetitorRepository $competitorRepos
     ) {
@@ -178,27 +181,19 @@ class TournamentCopier
     }
 
 
-    /**
-     * @param Tournament $sourceTournament
-     * @param Tournament $newTournament
-     * @param list<Competitor> $newCompetitors
-     * @throws Exception
-     */
-    public function copyLockerRooms(Tournament $sourceTournament, Tournament $newTournament, array $newCompetitors): void
+    public function copyAndSaveLockerRooms(Tournament $sourceTournament, Tournament $newTournament): void
     {
+        $newStartLocationMap = new StartLocationMap( array_values($newTournament->getCompetitors()->toArray() ) );
+
         foreach ($sourceTournament->getLockerRooms() as $sourceLockerRoom) {
             $newLocerRoom = new LockerRoom($newTournament, $sourceLockerRoom->getName());
             foreach ($sourceLockerRoom->getCompetitors() as $sourceCompetitor) {
-                $newCompetitorsFound = array_filter(
-                    $newCompetitors,
-                    function ($newCompetitorIt) use ($sourceCompetitor): bool {
-                        return $newCompetitorIt->getName() === $sourceCompetitor->getName();
-                    }
-                );
-                if (count($newCompetitorsFound) !== 1) {
+
+                $newCompetitor = $newStartLocationMap->getCompetitor($sourceCompetitor);
+                if( !($newCompetitor instanceof Competitor)) {
                     continue;
                 }
-                $newLocerRoom->getCompetitors()->add(reset($newCompetitorsFound));
+                $newLocerRoom->getCompetitors()->add($newCompetitor);
             }
             $this->lockerRoomRepos->save($newLocerRoom);
         }
@@ -221,10 +216,31 @@ class TournamentCopier
             $newCompetitor->setEmailaddress($fromCompetitor->getEmailaddress());
             $newCompetitor->setTelephone($fromCompetitor->getTelephone());
             $newCompetitor->setInfo($fromCompetitor->getInfo());
-            $fromCompetitor->setHasLogo($fromCompetitor->getHasLogo());
+            $newCompetitor->setLogoExtension($fromCompetitor->getLogoExtension());
             $this->competitorRepos->save($newCompetitor, true);
-            if ($fromCompetitor->getHasLogo()) {
-                $imageService->copyImage($fromCompetitor, $newCompetitor);
+            if ($fromCompetitor->getLogoExtension() !== null) {
+                $imageService->copyImages($fromCompetitor, $newCompetitor);
+                // copy file
+            }
+        }
+    }
+
+    public function copyAndSaveSponsors(
+        Tournament $fromTournament,
+        Tournament $newTournament,
+        ImageService $imageService
+    ): void
+    {
+        foreach ($fromTournament->getSponsors() as $fromSponsor) {
+            $newSponsor = new Sponsor(
+                $newTournament, $fromSponsor->getName()
+            );
+            $newSponsor->setUrl($fromSponsor->getUrl());
+            $newSponsor->setLogoExtension($fromSponsor->getLogoExtension());
+            $newSponsor->setScreenNr($fromSponsor->getScreenNr());
+            $this->sponsorRepos->save($newSponsor, true);
+            if ($fromSponsor->getLogoExtension() !== null) {
+                $imageService->copyImages($fromSponsor, $newSponsor);
                 // copy file
             }
         }

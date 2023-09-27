@@ -17,6 +17,7 @@ class Sponsor extends Identifiable
     public const MIN_LENGTH_NAME = 2;
     public const MAX_LENGTH_NAME = 30;
     public const MAX_LENGTH_URL = 100;
+    public const IMG_FOLDER = 'sponsors';
 
     public function __construct(private Tournament $tournament, string $name)
     {

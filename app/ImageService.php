@@ -5,28 +5,48 @@ declare(strict_types=1);
 namespace App;
 
 use App\ImageService\Entity;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Competitor;
+use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
 use GdImage;
 use Psr\Http\Message\UploadedFileInterface;
+use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use App\ImageService\Entity as ImageEntity;
 
 class ImageService
 {
-    protected const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+    public const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+    protected ImageResizer $resizer;
+    protected ImagePathResolver $pathResolver;
 
-    public const COMPETITOR_IMAGE_FOLDER = 'competitor';
-
-    public function __construct(private Configuration $config)
+    public function __construct(Configuration $config, private LoggerInterface $logger)
     {
-        $this->config = $config;
+        $this->resizer = new ImageResizer($config, $logger);
+        $this->pathResolver = new ImagePathResolver($config);
     }
 
+    public function removeImages(Sponsor|Competitor $object, string $extension): void {
+        $imagePath = $this->pathResolver->getPath($object, null, $extension);
+        if (!file_exists($imagePath)) {
+            return;
+        }
+        unlink($imagePath);
 
+        if( $object->getLogoExtension() === 'svg') {
+            return;
+        }
 
-    public function processImage(string $imageName, UploadedFileInterface $logostream, string $pathPostfix): string
+        foreach( $this->resizer->getImageResizeHeights() as $imageSize ) {
+            $resizedImagePath = $this->pathResolver->getPath($object, $imageSize, $extension);
+            unlink($resizedImagePath);
+        }
+
+    }
+
+    public function processUploadedImage(Sponsor|Competitor $object, UploadedFileInterface $logostream): string|null
     {
         if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
             throw new Exception(
@@ -35,43 +55,23 @@ class ImageService
             );
         }
 
+        $imgPath = $this->saveUploadStream($object, $logostream);
+        $this->logger->info( 'het plaatje is opgeslagen onder "' . $imgPath . '"' );
+
         $extension = $this->getExtensionFromStream($logostream);
-
-        $localPath = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
-
-        $newImagePath = $localPath . $imageName . '.' . $extension;
-
-        $logostream->moveTo($newImagePath);
-
         if( strtolower($extension) !== 'svg') {
-            $source_properties = getimagesize($newImagePath);
-            if ($source_properties === false) {
-                throw new \Exception("could not read img dimensions", E_ERROR);
-            }
-            $image_type = $source_properties[2];
-
-            if ($image_type == IMAGETYPE_JPEG) {
-                $image_resource_id = imagecreatefromjpeg($newImagePath);
-                if ($image_resource_id instanceof GdImage) {
-                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                    imagejpeg($target_layer, $newImagePath);
-                }
-            } elseif ($image_type == IMAGETYPE_GIF) {
-                $image_resource_id = imagecreatefromgif($newImagePath);
-                if ($image_resource_id instanceof GdImage) {
-                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                    imagegif($target_layer, $newImagePath);
-                }
-            } elseif ($image_type == IMAGETYPE_PNG) {
-                $image_resource_id = imagecreatefrompng($newImagePath);
-                if ($image_resource_id instanceof GdImage) {
-                    $target_layer = $this->resize($image_resource_id, $source_properties[0], $source_properties[1]);
-                    imagepng($target_layer, $newImagePath);
-                }
-            }
+            $this->resizer->addResizeImagesFromUpload($object, $extension);
         }
 
         return $extension;
+    }
+
+    private function saveUploadStream(Sponsor|Competitor $object, UploadedFileInterface $logostream): string {
+        $extension = $this->getExtensionFromStream($logostream);
+
+        $imagePath = $this->pathResolver->getPath($object,null, $extension);
+        $logostream->moveTo($imagePath);
+        return $imagePath;
     }
 
     private function getExtensionFromStream(UploadedFileInterface $logostream): string
@@ -91,71 +91,6 @@ class ImageService
         throw new \Exception("alleen jpg, png em gif zijn toegestaan", E_ERROR);
     }
 
-    /**
-     * @param GdImage $image_resource_id
-     * @param int $width
-     * @param int $height
-     * @return GdImage
-     */
-    private function resize(GdImage $image_resource_id, int $width, int $height): GdImage
-    {
-        $target_height = 200;
-        if ($height === $target_height) {
-            return $image_resource_id;
-        }
-        $thressHold = self::LOGO_ASPECTRATIO_THRESHOLD;
-        $aspectRatio = $width / $height;
-
-        $target_width = $width - (($height - $target_height) * $aspectRatio);
-        if ($target_width < ($target_height * (1 - $thressHold))) {
-            $target_width = $target_height * (1 - $thressHold);
-        } elseif ($target_width > ($target_height * (1 + $thressHold))) {
-            $target_width = $target_height * (1 + $thressHold);
-        }
-        return $this->resizeHelper($image_resource_id, $width, $height, (int)$target_width, 200);
-        /*else if( $height < $target_height ) { // make image larger
-            $target_width = $width - (( $height - $target_height ) * $aspectRatio );
-            $new_image_resource_id = $this->>resizeHelper($image_resource_id,$width,$height,$target_width,200)
-        }*/
-    }
-
-    /**
-     * @param GdImage $image_resource_id
-     * @param int $width
-     * @param int $height
-     * @param int $target_width
-     * @param int $target_height
-     * @return GdImage
-     */
-    private function resizeHelper(
-        GdImage $image_resource_id,
-        int $width,
-        int $height,
-        int $target_width,
-        int $target_height
-    ): GdImage {
-        $target_layer = imagecreatetruecolor($target_width, $target_height);
-        if (!($target_layer instanceof GdImage)) {
-            throw new \Exception('could not create image', E_ERROR);
-        }
-        /** @psalm-suppress InvalidArgument */
-        imagecopyresampled(
-            $target_layer,
-            $image_resource_id,
-            0,
-            0,
-            0,
-            0,
-            $target_width,
-            $target_height,
-            $width,
-            $height
-        );
-        /** @var GdImage $target_layer */
-        return $target_layer;
-    }
-
-
 
 //    public function getLocalPath(ImageEntity $imageEntity): string {
 //        return realpath(
@@ -164,18 +99,87 @@ class ImageService
 //        ) . '/';
 //    }
 
-    public function copyCompetitorImage(
-        Competitor $fromCompetitor, Competitor $newCompetitor): bool {
-        // fromPath
-        // $extension = $this->getExtensionFromStream($logostream);
+    public function copyImages(Sponsor|Competitor $fromObject, Sponsor|Competitor $newObject): bool {
+        $logoExtension = $fromObject->getLogoExtension();
+        if( $logoExtension === null) {
+            return false;
+        }
 
-        $pathPostfix = $this->config->getString('images.competitors.pathpostfix');
-        $localFolder = $this->config->getString('www.apiurl-localpath') . $pathPostfix;
-        $localFileName = $imageName . '.' . $extension;
-        $imagePath = $localFolder . $localFileName;
-
-      //   $localPath = $this->getLocalPath(ImageEntity::Competitor) . $fromCompetitor->getId();
-      //   $this->config->getString('www.apiurl-localpath') . $pathPostfix;
-        // toPath
+        $allCopiesOK = true;
+        $imgSizes = array_merge([null], $this->resizer->getImageResizeHeights());
+        foreach( $imgSizes as $imageSize) {
+            $fromImagePath = $this->pathResolver->getPath($fromObject, $imageSize, $logoExtension);
+            $newImagePath = $this->pathResolver->getPath($newObject, $imageSize, $logoExtension);
+            if( !copy($fromImagePath, $newImagePath ) ) {
+                $allCopiesOK = false;
+            }
+        }
+        return $allCopiesOK;
     }
+
+    public function backupImages(Sponsor|Competitor $object, EntityManagerInterface|null $syncDbWithDisk): bool {
+        $logoExtension = $object->getLogoExtension();
+        if( $logoExtension === null) {
+            return false;
+        }
+        if( $logoExtension !== 'svg') {
+            $this->resizer->addMissingResizeImages($object, $logoExtension);
+        }
+
+        $allCopiesOK = true;
+        $imgSizes = array_merge([null], $this->resizer->getImageResizeHeights());
+        foreach( $imgSizes as $imageSize) {
+            $imagePath = $this->pathResolver->getPath($object, $imageSize, $logoExtension);
+            if( $logoExtension === 'svg' && $imageSize !== null ) {
+                continue;
+            }
+            if (!is_readable($imagePath)) {
+                $this->logger->warning('sponsor-image ' . $imagePath . ' not readable');
+                if ($syncDbWithDisk !== null ) {
+                    $object->setLogoExtension(null);
+                    $syncDbWithDisk->persist($object);
+                    $syncDbWithDisk->flush();
+                    $this->logger->warning('sponsor-extension updated to NULL');
+                }
+                $allCopiesOK = false;
+                continue;
+            }
+
+            $backupImagePath = $this->pathResolver->getBackupPath($object, $imageSize, $logoExtension);
+            if (file_exists($backupImagePath)) {
+                unlink($backupImagePath);
+                $this->logger->info('backup-sponsor-image ' . $backupImagePath . ' removed');
+            }
+
+            if( !copy($imagePath, $backupImagePath ) ) {
+                $allCopiesOK = false;
+            } else {
+                $this->logger->info('backup-sponsor-image ' . $backupImagePath . ' backed up');
+            }
+        }
+        return $allCopiesOK;
+    }
+
+
+
+
+
+//    protected function copyImage(Competitor $fromCompetitor, Competitor $newCompetitor): bool {
+//
+//        $localFolder = $this->config->getString('www.apiurl-localpath') . 'images/' . Competitor::IMG_FOLDER . '/';
+//        $logoExtension = $fromCompetitor->getLogoExtension();
+//
+//        if( $logoExtension === null) {
+//            return false;
+//        }
+//        $localFromFileName = ((string)$fromCompetitor->getId()) . '.' . $logoExtension;
+//        $fromImagePath = $localFolder . $localFromFileName;
+//
+//        $localNewFileName = ((string)$newCompetitor->getId()) . '.' . $logoExtension;
+//        $newImagePath = $localFolder . $localNewFileName;
+//
+//        return copy($fromImagePath, $newImagePath );
+//    }
+
+
 }
