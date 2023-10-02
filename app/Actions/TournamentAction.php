@@ -173,6 +173,7 @@ final class TournamentAction extends Action
 
             $tournament = $this->tournamentCopier->copy(
                 $tournamentSer,
+                null,
                 $tournamentSer->getCompetition()->getStartDateTime(),
                 $user
             );
@@ -298,22 +299,25 @@ final class TournamentAction extends Action
 
             /** @var stdClass $copyData */
             $copyData = $this->getFormData($request);
-            if (property_exists($copyData, 'startdatetime') === false) {
+            if (property_exists($copyData, 'startDate') === false) {
                 throw new Exception('er is geen nieuwe startdatum-tijd opgegeven', E_ERROR);
             }
-
+            if (property_exists($copyData, 'name') === false) {
+                throw new Exception('er is geen naam opgegeven', E_ERROR);
+            }
+            $processCompetitors = property_exists($copyData, 'name') && $copyData->competitors == true;
             $competition = $tournament->getCompetition();
 
 //            if ( $this->structureRepos->hasStructure( $competition )  ) {
 //                throw new \Exception("er kan voor deze competitie geen indeling worden aangemaakt, omdat deze al bestaan", E_ERROR);
 //            }
 
-            $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startdatetime);
+            $startDateTime = DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $copyData->startDate);
             if ($startDateTime === false) {
                 throw new Exception('no input for startdatetime', E_ERROR);
             }
 
-            $newTournament = $this->tournamentCopier->copy($tournament, $startDateTime, $user);
+            $newTournament = $this->tournamentCopier->copy($tournament, $copyData->name, $startDateTime, $user);
             $this->tournamentRepos->customPersist($newTournament, true);
 
             $this->tournamentCopier->copyAndSaveSettings($tournament, $newTournament);
@@ -334,8 +338,10 @@ final class TournamentAction extends Action
 
             $this->structureRepos->add($newStructure);
 
-            $this->tournamentCopier->copyAndSaveCompetitors(
-                $tournament, $newTournament, $newStructure, $this->imageService);
+            if( $processCompetitors ) {
+                $this->tournamentCopier->copyAndSaveCompetitors(
+                    $tournament, $newTournament, $newStructure, $this->imageService);
+            }
 
             $this->tournamentCopier->copyAndSaveLockerRooms($tournament, $newTournament);
 

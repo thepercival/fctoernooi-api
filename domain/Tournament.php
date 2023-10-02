@@ -41,6 +41,10 @@ class Tournament extends Identifiable
      */
     private Collection $recesses;
     protected int $exported = 0;
+    protected bool $example = false;
+    protected string|null $coordinate = null;
+
+    public const MAX_LENGTH_COORDINATE = 30;
 
     public function __construct(private Competition $competition)
     {
@@ -69,6 +73,37 @@ class Tournament extends Identifiable
     public function setPublic(bool $public): void
     {
         $this->public = $public;
+    }
+
+    public function getExample(): bool
+    {
+        return $this->example;
+    }
+
+    public function setExample(bool $example): void
+    {
+        $this->example = $example;
+    }
+
+    public function getCoordinate(): string|null
+    {
+        return $this->coordinate;
+    }
+
+    public function setCoordinate(string $coordinate = null): void
+    {
+        if ($coordinate !== null && strlen($coordinate) > 0) {
+            if (strlen($coordinate) > self::MAX_LENGTH_COORDINATE) {
+                throw new \InvalidArgumentException(
+                    "het coordinaat mag maximaal " . self::MAX_LENGTH_COORDINATE . " karakters bevatten",
+                    E_ERROR
+                );
+            }
+            if (strpos($coordinate, ',') === false ) {
+                throw new \InvalidArgumentException("het coordinaat moet een komma bevatten)", E_ERROR);
+            }
+        }
+        $this->coordinate = $coordinate;
     }
 
     /**

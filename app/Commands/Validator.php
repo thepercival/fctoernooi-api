@@ -250,7 +250,8 @@ class Validator extends Command
 
         $start = $this->getStartFromInput($input);
         $end = $this->getEndFromInput($input, $start);
-        return $this->tournamentRepos->findByFilter(null, $start, $end);
+        $shellFilter = new Tournament\ShellFilter( $start, $end, null, null, null);
+        return $this->tournamentRepos->findByFilter($shellFilter);
     }
 
     protected function getStartFromInput(InputInterface $input): DateTimeImmutable

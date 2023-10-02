@@ -38,19 +38,13 @@ class Repository extends EntityRepository
     }
 
     /**
-     * @param string|null $name
-     * @param DateTimeImmutable|null $startDateTime
-     * @param DateTimeImmutable|null $endDateTime
-     * @param bool|null $public
+     * @param ShellFilter $shellFilter
      * @param DateTimeImmutable|null $startDateTimeCreated
      * @param DateTimeImmutable|null $endDateTimeCreated
      * @return list<TournamentBase>
      */
     public function findByFilter(
-        string $name = null,
-        DateTimeImmutable $startDateTime = null,
-        DateTimeImmutable $endDateTime = null,
-        bool $public = null,
+        ShellFilter $shellFilter,
         DateTimeImmutable $startDateTimeCreated = null,
         DateTimeImmutable $endDateTimeCreated = null,
         int $max = null
@@ -59,18 +53,18 @@ class Repository extends EntityRepository
             ->join("t.competition", "c")
             ->join("c.league", "l");
 
-        if ($startDateTime !== null) {
-            $query = $query->where('c.startDateTime >= :startDateTime');
-            $query = $query->setParameter('startDateTime', $startDateTime);
+        if ($shellFilter->startDateTime !== null) {
+            $query = $query->andWhere('c.startDateTime >= :startDateTime');
+            $query = $query->setParameter('startDateTime', $shellFilter->startDateTime);
         }
 
-        if ($endDateTime !== null) {
+        if ($shellFilter->endDateTime !== null) {
             $query = $query->andWhere('c.startDateTime <= :endDateTime');
-            $query = $query->setParameter('endDateTime', $endDateTime);
+            $query = $query->setParameter('endDateTime', $shellFilter->endDateTime);
         }
 
         if ($startDateTimeCreated !== null) {
-            $query = $query->where('t.createdDateTime >= :startDateTimeCreated');
+            $query = $query->andWhere('t.createdDateTime >= :startDateTimeCreated');
             $query = $query->setParameter('startDateTimeCreated', $startDateTimeCreated);
         }
 
@@ -79,22 +73,19 @@ class Repository extends EntityRepository
             $query = $query->setParameter('endDateTimeCreated', $endDateTimeCreated);
         }
 
-        if ($name !== null) {
-            if ($startDateTime !== null || $endDateTime !== null) {
-                $query = $query->andWhere("l.name like :name");
-            } else {
-                $query = $query->where('l.name like :name');
-            }
-            $query = $query->setParameter('name', '%' . $name . '%');
+        if ($shellFilter->name !== null) {
+            $query = $query->andWhere("l.name like :name");
+            $query = $query->setParameter('name', '%' . $shellFilter->name . '%');
         }
 
-        if ($public !== null) {
-            if ($startDateTime !== null || $endDateTime !== null || $name !== null) {
-                $query = $query->andWhere("t.public = :public");
-            } else {
-                $query = $query->where('t.public = :public');
-            }
-            $query = $query->setParameter('public', $public);
+        if ($shellFilter->public !== null) {
+            $query = $query->andWhere("t.public = :public");
+            $query = $query->setParameter('public', $shellFilter->public);
+        }
+
+        if ($shellFilter->example !== null) {
+            $query = $query->andWhere("t.example = :example");
+            $query = $query->setParameter('example', $shellFilter->example);
         }
 
         if ($max !== null) {
@@ -119,6 +110,10 @@ class Repository extends EntityRepository
         $qb = $qb->where('tu.user = :user')->andWhere('BIT_AND(tu.roles, :roles) > 0');
         $qb = $qb->setParameter('user', $user);
         $qb = $qb->setParameter('roles', $roles);
+
+        $qb = $qb->andWhere('t.example = :example');
+        $qb = $qb->setParameter('example', false);
+
         /** @var list<TournamentBase> $results */
         $results = $qb->getQuery()->getResult();
         return $results;

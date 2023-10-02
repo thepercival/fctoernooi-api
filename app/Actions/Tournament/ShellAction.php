@@ -7,6 +7,7 @@ namespace App\Actions\Tournament;
 use App\Actions\Action;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Shell as Shell;
+use FCToernooi\Tournament\ShellFilter;
 use FCToernooi\User;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -35,33 +36,12 @@ final class ShellAction extends Action
         /** @var User $user */
         $user = $request->getAttribute("user");
         try {
-            $queryParams = $request->getQueryParams();
+            $shellFilter = $this->getShellFilterFromInput( $request->getQueryParams() );
 
-            $name = null;
-            if (array_key_exists("name", $queryParams) && strlen($queryParams["name"]) > 0) {
-                $name = $queryParams["name"];
-            }
-
-            $startDateTime = null;
-            if (array_key_exists("startDate", $queryParams) && strlen($queryParams["startDate"]) > 0) {
-                $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["startDate"]);
-            }
-            if ($startDateTime === false) {
-                $startDateTime = null;
-            }
-
-            $endDateTime = null;
-            if (array_key_exists("endDate", $queryParams) && strlen($queryParams["endDate"]) > 0) {
-                $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["endDate"]);
-            }
-            if ($endDateTime === false) {
-                $endDateTime = null;
-            }
 
             $shells = [];
-            $public = true;
             $tournamentsByDates = $this->tournamentRepos->findByFilter(
-                $name, $startDateTime, $endDateTime, $public, null, null, 100);
+                $shellFilter, null, null, 100);
             foreach ($tournamentsByDates as $tournament) {
                 $shells[] = new Shell($tournament, $user);
             }
@@ -71,6 +51,41 @@ final class ShellAction extends Action
         } catch (\Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);
         }
+    }
+
+    /**
+     * @param list<string> $queryParams
+     * @return ShellFilter
+     */
+    protected function getShellFilterFromInput(array $queryParams): ShellFilter{
+        $startDateTime = null;
+        if (array_key_exists("startDate", $queryParams) && strlen($queryParams["startDate"]) > 0) {
+            $startDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["startDate"]);
+        }
+        if ($startDateTime === false) {
+            $startDateTime = null;
+        }
+
+        $endDateTime = null;
+        if (array_key_exists("endDate", $queryParams) && strlen($queryParams["endDate"]) > 0) {
+            $endDateTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.u\Z', $queryParams["endDate"]);
+        }
+        if ($endDateTime === false) {
+            $endDateTime = null;
+        }
+
+        $name = null;
+        if (array_key_exists("name", $queryParams) && strlen($queryParams["name"]) > 0) {
+            $name = $queryParams["name"];
+        }
+
+        $example = null;
+        if (array_key_exists("example", $queryParams) && strlen($queryParams["example"]) > 0) {
+            $example = $queryParams["example"] == 1;
+        }
+        return new ShellFilter(
+            $startDateTime, $endDateTime, $name, true, $example
+        );
     }
 
     /**

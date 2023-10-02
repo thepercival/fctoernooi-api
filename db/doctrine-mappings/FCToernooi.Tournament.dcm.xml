@@ -9,6 +9,8 @@
                unique="false"/>
         <field name="exported" column="exported" type="smallint" nullable="false" unique="false"/>
         <field name="public" column="public" type="boolean" nullable="false" unique="false"/>
+        <field name="example" column="example" type="boolean" nullable="false" unique="false"/>
+        <field name="coordinate" column="coordinate" type="string" length="30" nullable="true" unique="false"/>
         <many-to-one field="competition" target-entity="Sports\Competition">
             <cascade>
                 <cascade-remove/>

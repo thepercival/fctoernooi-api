@@ -9,6 +9,7 @@ use App\ViewHelpers\TournamentReport as TournamentReportHelper;
 use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\ShellFilter;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -96,10 +97,7 @@ final class ReportAction extends Action
         }
 
         $tournaments = $this->tournamentRepos->findByFilter(
-            null,
-            null,
-            null,
-            null,
+            new ShellFilter(null, null, null, null, null),
             $startDateTimeCreated,
             null
         );

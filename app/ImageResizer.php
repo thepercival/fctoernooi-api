@@ -121,13 +121,18 @@ class ImageResizer
         int $target_width,
         int $target_height
     ): GdImage {
-        $target_layer = imagecreatetruecolor($target_width, $target_height);
-        if (!($target_layer instanceof GdImage)) {
+        $gdImage = imagecreatetruecolor($target_width, $target_height);
+        if (!($gdImage instanceof GdImage)) {
             throw new \Exception('could not create image', E_ERROR);
         }
+
+        imagesavealpha($gdImage, true);
+        $trans_colour = imagecolorallocatealpha($gdImage, 0, 0, 0, 127);
+        imagefill($gdImage, 0, 0, $trans_colour);
+
         /** @psalm-suppress InvalidArgument */
         imagecopyresampled(
-            $target_layer,
+            $gdImage,
             $image_resource_id,
             0,
             0,
@@ -138,8 +143,7 @@ class ImageResizer
             $width,
             $height
         );
-        /** @var GdImage $target_layer */
-        return $target_layer;
+        return $gdImage;
     }
 
 

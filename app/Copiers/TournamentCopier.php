@@ -46,13 +46,13 @@ class TournamentCopier
     ) {
     }
 
-    public function copy(Tournament $fromTournament, DateTimeImmutable $newStartDateTime, User $user): Tournament
+    public function copy(Tournament $fromTournament, string|null $name, DateTimeImmutable $newStartDateTime, User $user): Tournament
     {
         $association = $this->createAssociationFromUserIdAndDateTime((int)$user->getId());
 
         $fromCompetition = $fromTournament->getCompetition();
-        $fromLeague = $fromCompetition->getLeague();
-        $league = new League($association, $fromLeague->getName());
+        $leagueName = $name === null ? $fromCompetition->getLeague()->getName() : $name;
+        $league = new League($association, $leagueName);
 
         $season = $this->seasonRepos->findOneBy(['name' => '9999']);
         if ($season === null) {
@@ -73,6 +73,7 @@ class TournamentCopier
         );
 
         $newTournament = $this->createTournament($fromTournament, $newCompetition, $newStartDateTime);
+        $newTournament->setCoordinate($fromTournament->getCoordinate());
 
         foreach ($fromTournament->getUsers() as $fromTournamentUser) {
             new TournamentUser($newTournament, $fromTournamentUser->getUser(), $fromTournamentUser->getRoles());

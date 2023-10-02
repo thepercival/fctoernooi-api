@@ -8,6 +8,7 @@ use App\Command;
 use App\Mailer;
 use DateTime;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\ShellFilter;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
@@ -72,15 +73,14 @@ class RemoveOld extends Command
                 throw new \Exception('nrOfMonthsBeforeRemoval must be greater than 11', E_ERROR);
             }
             $oldTournaments = $this->tournamentRepos->findByFilter(
-                null,
-                null,
-                null,
-                null,
-                null,
-                $this->getRemovalDeadline()
+                new ShellFilter(null, null, null, null, false),
+                null, $this->getRemovalDeadline()
             );
             // $nrOfCompetitions = count($oldCompetitions);
             while ($oldTournament = array_shift($oldTournaments)) {
+                if( $oldTournament->getExample() ) {
+                    continue;
+                }
                 $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';
                 $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
                 $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';

@@ -10,6 +10,8 @@ FCToernooi\Tournament:
     useSelfRegistration:
       type: boolean
     startEditMode:
+    coordinate:
+      type: string
     users:
       type: ArrayCollection<FCToernooi\TournamentUser>
       #groups: [users]
