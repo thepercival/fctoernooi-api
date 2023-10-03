@@ -76,10 +76,11 @@ class Planning extends Command
         if (count($existingSchedules) !== $distinctNrOfPoulePlaces) {
             $scheduleCreator = new ScheduleCreator($this->getLogger());
             $scheduleCreator->setExistingSchedules($existingSchedules);
-            $this->getLogger()->info('creating schedules .. ');
+            $this->getLogger()->info('creating schedules for ' . $planningInput->getUniqueString() );
             $maxGppMargin = $scheduleCreator->getMaxGppMargin($planningInput, $planningInput->getPoule(1));
             $schedules = $scheduleCreator->createFromInput($planningInput, $maxGppMargin);
             foreach ($schedules as $schedule) {
+                // $this->logger->info('   schedule : ' . $schedule);
                 $schedule->setSucceededMargin($maxGppMargin);
                 $this->scheduleRepos->save($schedule);
             }
