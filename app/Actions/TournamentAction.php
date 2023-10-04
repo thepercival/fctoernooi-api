@@ -297,6 +297,13 @@ final class TournamentAction extends Action
                 throw new \Exception('je hebt geen credits meer om toernooien aan te maken', E_ERROR);
             }
 
+            if (!$tournament->getExample() ) {
+                $tournamentUser = $tournament->getUser($user);
+                if( $tournamentUser === null || !$tournamentUser->hasARole(Role::ADMIN) ) {
+                    throw new \Exception('je hebt geen rechten om het toernooi te kopieren', E_ERROR);
+                }
+            }
+
             /** @var stdClass $copyData */
             $copyData = $this->getFormData($request);
             if (property_exists($copyData, 'startDate') === false) {

@@ -11,6 +11,7 @@ use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Recess;
+use FCToernooi\Role;
 use FCToernooi\Sponsor;
 use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
@@ -75,8 +76,12 @@ class TournamentCopier
         $newTournament = $this->createTournament($fromTournament, $newCompetition, $newStartDateTime);
         $newTournament->setCoordinate($fromTournament->getCoordinate());
 
-        foreach ($fromTournament->getUsers() as $fromTournamentUser) {
-            new TournamentUser($newTournament, $fromTournamentUser->getUser(), $fromTournamentUser->getRoles());
+        if( $fromTournament->getExample() ) {
+            new TournamentUser($newTournament, $user, Role::ALL - Role::REFEREE);
+        } else {
+            foreach ($fromTournament->getUsers() as $fromTournamentUser) {
+                new TournamentUser($newTournament, $fromTournamentUser->getUser(), $fromTournamentUser->getRoles());
+            }
         }
 
         return $newTournament;

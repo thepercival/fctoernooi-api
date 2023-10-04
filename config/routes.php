@@ -485,9 +485,7 @@ return function (App $app): void {
                             $group->options('copy', TournamentAction::class . ':options');
                             $group->post('copy', TournamentAction::class . ':copy');
                         }
-                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
+                    )->add(UserMiddleware::class)->add(TournamentMiddleware::class);
 
                     $group->group(
                         'pdf',
