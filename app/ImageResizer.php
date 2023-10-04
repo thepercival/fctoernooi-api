@@ -62,18 +62,21 @@ class ImageResizer
                 if ($image_resource_id instanceof GdImage) {
                     $target_layer = $this->resize($image_resource_id, $image_width, $image_height, $targetHeight);
                     imagejpeg($target_layer, $resizedImagePath);
+                    chgrp($resizedImagePath, 'www-data');
                 }
             } elseif ($image_type == IMAGETYPE_GIF) {
                 $image_resource_id = imagecreatefromgif($imagePath);
                 if ($image_resource_id instanceof GdImage) {
                     $target_layer = $this->resize($image_resource_id, $image_width, $image_height, $targetHeight);
                     imagegif($target_layer, $resizedImagePath);
+                    chgrp($resizedImagePath, 'www-data');
                 }
             } elseif ($image_type == IMAGETYPE_PNG) {
                 $image_resource_id = imagecreatefrompng($imagePath);
                 if ($image_resource_id instanceof GdImage) {
                     $target_layer = $this->resize($image_resource_id, $image_width, $image_height, $targetHeight);
                     imagepng($target_layer, $resizedImagePath);
+                    chgrp($resizedImagePath, 'www-data');
                 }
             }
         }
