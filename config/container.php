@@ -119,6 +119,8 @@ return [
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_EditMode');
         Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_QualifyTarget');
+        Type::addType('enum_Distribution', Sports\Qualify\DistributionType::class);
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_Distribution');
         Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('int', 'enum_AgainstRuleSet');
         Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);

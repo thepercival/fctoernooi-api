@@ -118,9 +118,9 @@ final class StructureAction extends Action
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
             $structureOutput = new StructureOutput($this->logger);
-            $this->logger->warning('####### DESER. STRUCTURE ########');
-            $structureOutput->output($structureSer);
-            $this->logger->warning('####### END DESER. STRUCTURE ########');
+//            $this->logger->warning('####### DESER. STRUCTURE ########');
+//            $structureOutput->output($structureSer);
+//            $this->logger->warning('####### END DESER. STRUCTURE ########');
 
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");

@@ -21,7 +21,7 @@ use Sports\Competition\Field;
 use Sports\Competition\Field\Repository as FieldRepository;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competition\Sport\Repository as CompetitionSportRepository;
-use Sports\Competition\Sport\Service as CompetitionSportService;
+use Sports\Competition\Sport\Editor as CompetitionSportEditor;
 use Sports\Ranking\PointsCalculation;
 use Sports\Round;
 use Sports\Sport;
@@ -333,7 +333,7 @@ final class CompetitionSportAction extends Action
                 E_ERROR
             );
         }
-        (new CompetitionSportService())->addToStructure($newCompetitionSport, $structure);
+        (new CompetitionSportEditor())->addToStructure($newCompetitionSport, $structure);
         $this->competitionSportRepos->customAdd($newCompetitionSport, $structure);
 
         foreach ($fieldNames as $fieldName) {

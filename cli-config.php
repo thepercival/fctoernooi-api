@@ -43,6 +43,7 @@ Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
 Type::addType('enum_AgainstSide', SportsHelpers\Against\SideType::class);
 Type::addType('enum_EditMode', Sports\Planning\EditModeType::class);
 Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
+Type::addType('enum_Distribution', Sports\Qualify\DistributionType::class);
 Type::addType('enum_RegistrationState', FCToernooi\Tournament\Registration\StateType::class);
 Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
 Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
