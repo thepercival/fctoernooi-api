@@ -1,0 +1,6 @@
+FCToernooi\Tournament\Rule:
+  exclusion_policy: ALL
+  exclude: false
+  properties:
+    text:
+      type: string

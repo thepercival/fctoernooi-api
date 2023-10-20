@@ -6,6 +6,7 @@ namespace App;
 
 use FCToernooi\Competitor;
 use FCToernooi\Sponsor;
+use FCToernooi\Tournament;
 use Selective\Config\Configuration;
 
 class ImagePathResolver
@@ -17,7 +18,7 @@ class ImagePathResolver
 
 
 
-    public function getPath(Sponsor|Competitor $object, ImageSize|null $imageSize, string $logoExtension ): string {
+    public function getPath(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $logoExtension ): string {
         $fileName = $this->getFileName($object, $imageSize, $logoExtension);
 
         $localFolder = $this->config->getString('www.apiurl-localpath') . 'images/';
@@ -36,18 +37,23 @@ class ImagePathResolver
 //        return $localFolder . $this->getPathSuffix($object)  . $fileNameWithoutExtension;
 //    }
 
-    public function getBackupPath(Sponsor|Competitor $object, ImageSize|null $imageSize, string $extension ): string {
+    public function getBackupPath(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $extension ): string {
         $fileName = $this->getFileName($object, $imageSize, $extension);
         $localFolder = $this->config->getString('images.backuppath') . '/';
 
         return $localFolder . $this->getPathSuffix($object)  . $fileName;
     }
 
-    public function getPathSuffix(Sponsor|Competitor $object): string {
-        return ($object instanceof Sponsor) ? Sponsor::IMG_FOLDER . '/'  : Competitor::IMG_FOLDER . '/';
+    public function getPathSuffix(Sponsor|Competitor|Tournament $object): string {
+        if( $object instanceof Sponsor) {
+            return Sponsor::IMG_FOLDER . '/';
+        } else if( $object instanceof Competitor) {
+            return Competitor::IMG_FOLDER . '/';
+        }
+        return Tournament::IMG_FOLDER . '/';
     }
 
-    protected function getFileName(Sponsor|Competitor $object, ImageSize|null $imageSize, string $logoExtension ): string {
+    protected function getFileName(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $logoExtension ): string {
         if( $imageSize === null ) {
             return ((string)$object->getId()) .  '.' . $logoExtension;
         }

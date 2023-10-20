@@ -33,6 +33,9 @@ use Sports\League;
 use Sports\Season\Repository as SeasonRepository;
 use Sports\Sport;
 use Sports\Sport\Repository as SportRepository;
+use FCToernooi\Tournament\Rule as TournamentRule;
+use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
+
 use Sports\Structure;
 
 class TournamentCopier
@@ -43,7 +46,8 @@ class TournamentCopier
         private LockerRoomRepository $lockerRoomRepos,
         private SponsorRepository $sponsorRepos,
         private TournamentRegistrationSettingsRepository $settingsRepos,
-        private TournamentCompetitorRepository $competitorRepos
+        private TournamentCompetitorRepository $competitorRepos,
+        private TournamentRuleRepository $ruleRepos
     ) {
     }
 
@@ -138,7 +142,7 @@ class TournamentCopier
         Competition $newCompetition,
         DateTimeImmutable $newStartDateTime
     ): Tournament {
-        $newTournament = new Tournament($newCompetition);
+        $newTournament = new Tournament($fromTournament->getIntro(), $newCompetition);
         $newTournament->getCompetition()->setStartDateTime($newStartDateTime);
 
         foreach( $fromTournament->getRecesses() as $fromRecess) {
@@ -249,6 +253,15 @@ class TournamentCopier
                 $imageService->copyImages($fromSponsor, $newSponsor);
                 // copy file
             }
+        }
+    }
+
+    public function copyAndSaveRules(Tournament $fromTournament, Tournament $newTournament): void
+    {
+        $fromRules = $this->ruleRepos->findBy(['tournament' => $fromTournament]);
+        foreach( $fromRules as $fromRule) {
+            $newRule = new TournamentRule($newTournament, $fromRule->getText() );
+            $this->ruleRepos->save($newRule, true);
         }
     }
 

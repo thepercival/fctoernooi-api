@@ -42,11 +42,18 @@ class Tournament extends Identifiable
     private Collection $recesses;
     protected int $exported = 0;
     protected bool $example = false;
+    private string $intro;
+    private string|null $logoExtension = null;
     protected string|null $coordinate = null;
 
     public const MAX_LENGTH_COORDINATE = 30;
+    public const MAX_LENGTH_INTRO = 200;
+    public const IMG_FOLDER = 'tournaments';
 
-    public function __construct(private Competition $competition)
+
+    public function __construct(
+        string $intro,
+        private Competition $competition)
     {
         $this->createdDateTime = new DateTimeImmutable();
         $this->users = new ArrayCollection();
@@ -54,6 +61,7 @@ class Tournament extends Identifiable
         $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
         $this->recesses = new ArrayCollection();
+        $this->setIntro($intro);
     }
 
     public function getName(): string {
@@ -104,6 +112,16 @@ class Tournament extends Identifiable
             }
         }
         $this->coordinate = $coordinate;
+    }
+
+    public function getLogoExtension(): string|null
+    {
+        return $this->logoExtension;
+    }
+
+    public function setLogoExtension(string $extension = null): void
+    {
+        $this->logoExtension = $extension;
     }
 
     /**
@@ -208,5 +226,21 @@ class Tournament extends Identifiable
     public function setStartEditMode(StartEditMode $startEditMode): void
     {
         $this->startEditMode = $startEditMode;
+    }
+
+    public function getIntro(): string
+    {
+        return $this->intro;
+    }
+
+    final public function setIntro(string $intro): void
+    {
+        if (strlen($intro) > self::MAX_LENGTH_INTRO) {
+            throw new \InvalidArgumentException(
+                'de tekst mag maximaal ' . self::MAX_LENGTH_INTRO . ' karakters bevatten',
+                E_ERROR
+            );
+        }
+        $this->intro = $intro;
     }
 }

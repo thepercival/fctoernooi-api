@@ -10,8 +10,14 @@ FCToernooi\Tournament:
     useSelfRegistration:
       type: boolean
     startEditMode:
+    intro:
+      type: string
+      #groups: [home]
+    logoExtension:
+      type: string
     coordinate:
       type: string
+      #groups: [home]
     users:
       type: ArrayCollection<FCToernooi\TournamentUser>
       #groups: [users]

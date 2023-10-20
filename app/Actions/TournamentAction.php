@@ -11,6 +11,7 @@ use App\QueueService\Planning as PlanningQueueService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
@@ -35,6 +36,7 @@ use Sports\Round\Number\PlanningCreator;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
+use FCToernooi\Tournament\Rule as TournamentRule;
 use stdClass;
 
 final class TournamentAction extends Action
@@ -46,6 +48,8 @@ final class TournamentAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
+
+        private TournamentRuleRepository $ruleRepos,
         private CreditActionRepository $creditActionRepos,
         private TournamentCopier $tournamentCopier,
         private StructureCopier $structureCopier,
@@ -162,6 +166,7 @@ final class TournamentAction extends Action
                 'json',
                 $deserializationContext
             );
+            $tournamentSer->setIntro('Welkom bij ons toernooi! Hieronder staan de regels. De onderwerpen kun je met het menu, onderaan het scherm, opvragen.');
             if (!$user->getValidated()
                 && $user->getValidateIn() < CreditActionRepository::NR_OF_CREDITS_PER_TOURNAMENT) {
                 throw new \Exception('je moet eerst je account validateren', E_ERROR);
@@ -183,6 +188,10 @@ final class TournamentAction extends Action
             $this->tournamentRepos->customPersist($tournament, true);
 // @TODO CDK PAYMENT
 //            $this->creditActionRepos->removeCreateTournamentCredits($user);
+
+            $ruleText = 'sportiviteit en respect zijn de uitgangspunten van dit toernooi';
+            $rule = new TournamentRule($tournament, $ruleText);
+            $this->ruleRepos->save($rule, true );
 
             $serializationContext = $this->getSerializationContext($tournament, $user);
             $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
@@ -325,7 +334,11 @@ final class TournamentAction extends Action
             }
 
             $newTournament = $this->tournamentCopier->copy($tournament, $copyData->name, $startDateTime, $user);
+            $newTournament->setLogoExtension($tournament->getLogoExtension());
             $this->tournamentRepos->customPersist($newTournament, true);
+            if ($tournament->getLogoExtension() !== null) {
+                $this->imageService->copyImages($tournament, $newTournament);
+            }
 
             $this->tournamentCopier->copyAndSaveSettings($tournament, $newTournament);
 
@@ -353,6 +366,8 @@ final class TournamentAction extends Action
             $this->tournamentCopier->copyAndSaveLockerRooms($tournament, $newTournament);
 
             $this->tournamentCopier->copyAndSaveSponsors($tournament, $newTournament, $this->imageService);
+
+            $this->tournamentCopier->copyAndSaveRules($tournament, $newTournament);
 
             $this->planningCreator->addFrom(
                 new PlanningQueueService($this->config->getArray('queue')),

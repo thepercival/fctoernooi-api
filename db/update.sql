@@ -5,7 +5,7 @@
 -- ALTER TABLE rounds ADD structureCellId INT  NULL;
 
 -- POST POST POST doctrine-update ===========================================================
-update categories set abbreviation = SUBSTRing(name, 1, 1) where name is not null and abbreviation is null;
+update tournaments set intro = 'Welkom bij ons toernooi! Hieronder staan de regels. De onderwerpen kun je met het menu, onderaan het scherm, opvragen.';
 
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':OP', ':OP(1)') where uniqueString like '%:OP%';
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':SP', ':SP(1)') where uniqueString like '%:SP%';

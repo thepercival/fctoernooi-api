@@ -23,15 +23,15 @@ class ImageResizer
         $this->pathResolver = new ImagePathResolver($config);
     }
 
-    public function addMissingResizeImages( Sponsor|Competitor $object, string $extension ): void {
+    public function addMissingResizeImages( Sponsor|Competitor|Tournament $object, string $extension ): void {
         $this->resizeAndSaveImages($object, false, $extension );
     }
 
-    public function addResizeImagesFromUpload(Sponsor|Competitor $object, string $extension ): void {
+    public function addResizeImagesFromUpload(Sponsor|Competitor|Tournament $object, string $extension ): void {
         $this->resizeAndSaveImages($object, true, $extension );
     }
 
-    private function resizeAndSaveImages(Sponsor|Competitor $object, bool $removeResizeImages, string $extension ): void
+    private function resizeAndSaveImages(Sponsor|Competitor|Tournament $object, bool $removeResizeImages, string $extension ): void
     {
         $imagePath = $this->pathResolver->getPath($object, null, $extension);
         if (!is_readable($imagePath)) {

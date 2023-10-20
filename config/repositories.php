@@ -22,6 +22,8 @@ use FCToernooi\Tournament\Registration as TournamentRegistration;
 use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
 use FCToernooi\Tournament\RegistrationSettings as TournamentRegistrationSettings;
 use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
+use FCToernooi\Tournament\Rule as TournamentRule;
+use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\TournamentUser;
 use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
@@ -94,6 +96,12 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(TournamentInvitation::class);
         return new TournamentInvitationRepository($entityManager, $metaData);
+    },
+    TournamentRuleRepository::class => function (ContainerInterface $container): TournamentRuleRepository {
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $container->get(EntityManagerInterface::class);
+        $metaData = $entityManager->getClassMetadata(TournamentRule::class);
+        return new TournamentRuleRepository($entityManager, $metaData);
     },
     UserRepository::class => function (ContainerInterface $container): UserRepository {
         /** @var EntityManagerInterface $entityManager */

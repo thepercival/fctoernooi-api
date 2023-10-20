@@ -28,7 +28,7 @@ class ImageService
         $this->pathResolver = new ImagePathResolver($config);
     }
 
-    public function removeImages(Sponsor|Competitor $object, string $extension): void {
+    public function removeImages(Sponsor|Competitor|Tournament $object, string $extension): void {
         $imagePath = $this->pathResolver->getPath($object, null, $extension);
         if (!file_exists($imagePath)) {
             return;
@@ -46,7 +46,7 @@ class ImageService
 
     }
 
-    public function processUploadedImage(Sponsor|Competitor $object, UploadedFileInterface $logostream): string|null
+    public function processUploadedImage(Sponsor|Competitor|Tournament $object, UploadedFileInterface $logostream): string|null
     {
         if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
             throw new Exception(
@@ -66,7 +66,7 @@ class ImageService
         return $extension;
     }
 
-    private function saveUploadStream(Sponsor|Competitor $object, UploadedFileInterface $logostream): string {
+    private function saveUploadStream(Sponsor|Competitor|Tournament $object, UploadedFileInterface $logostream): string {
         $extension = $this->getExtensionFromStream($logostream);
 
         $imagePath = $this->pathResolver->getPath($object,null, $extension);
@@ -99,7 +99,7 @@ class ImageService
 //        ) . '/';
 //    }
 
-    public function copyImages(Sponsor|Competitor $fromObject, Sponsor|Competitor $newObject): bool {
+    public function copyImages(Sponsor|Competitor|Tournament $fromObject, Sponsor|Competitor|Tournament $newObject): bool {
         $logoExtension = $fromObject->getLogoExtension();
         if( $logoExtension === null) {
             return false;
@@ -117,7 +117,7 @@ class ImageService
         return $allCopiesOK;
     }
 
-    public function backupImages(Sponsor|Competitor $object, EntityManagerInterface|null $syncDbWithDisk): bool {
+    public function backupImages(Sponsor|Competitor|Tournament $object, EntityManagerInterface|null $syncDbWithDisk): bool {
         $logoExtension = $object->getLogoExtension();
         if( $logoExtension === null) {
             return false;

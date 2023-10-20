@@ -26,7 +26,7 @@ final class ValidatorTest extends TestCase
         ));
         $startDateTime = new DateTimeImmutable("2080-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
-        $tournament = new Tournament($competition);
+        $tournament = new Tournament('intro', $competition);
         $recessPeriod = new Period($startDateTime->modify('-10 minutes'), $startDateTime->modify('+10 minutes'));
 
         $validator = new Recess\Validator();
@@ -43,7 +43,7 @@ final class ValidatorTest extends TestCase
         ));
         $startDateTime = new DateTimeImmutable("2080-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
-        $tournament = new Tournament($competition);
+        $tournament = new Tournament('intro', $competition);
         $recessPeriod = new Period($startDateTime->modify('-10 minutes'), $startDateTime->modify('-5 minutes'));
 
         $validator = new Recess\Validator();
@@ -60,7 +60,7 @@ final class ValidatorTest extends TestCase
         ));
         $startDateTime = new DateTimeImmutable("2081-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
-        $tournament = new Tournament($competition);
+        $tournament = new Tournament('intro', $competition);
         $recessPeriod1 = new Period($startDateTime->modify('+10 minutes'), $startDateTime->modify('+20 minutes'));
         new Recess($tournament, 'pauze', $recessPeriod1);
 

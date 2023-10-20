@@ -10,7 +10,6 @@ class Sponsor extends Identifiable
 {
     private string $name;
     private string|null $url = null;
-    private string|null $logoUrl = null;
     private string|null $logoExtension = null;
     private int $screenNr = 0;
 

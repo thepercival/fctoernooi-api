@@ -11,6 +11,7 @@ use App\Actions\RegistrationAction;
 use App\Actions\RegistrationSettingsAction;
 use App\Actions\ReportAction;
 use App\Actions\SponsorAction;
+use App\Actions\RuleAction;
 use App\Actions\Sports\AgainstQualifyConfigAction;
 use App\Actions\Sports\CompetitionSportAction;
 use App\Actions\Sports\CompetitorAction;
@@ -83,6 +84,16 @@ return function (App $app): void {
                         function (Group $group): void {
                             $group->options('', RegistrationAction::class . ':options');
                             $group->post('', RegistrationAction::class . ':add');
+                        }
+                    )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
+                        VersionMiddleware::class
+                    );
+
+                    $group->group(
+                        'rules',
+                        function (Group $group): void {
+                            $group->options('', RuleAction::class . ':options');
+                            $group->get('', RuleAction::class . ':fetch');
                         }
                     )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                         VersionMiddleware::class
@@ -345,6 +356,20 @@ return function (App $app): void {
                     );
                     $group->options('planning/{roundNumber}/progress', PlanningAction::class . ':options');
                     $group->get('planning/{roundNumber}/progress', PlanningAction::class . ':progress')->add(
+                        TournamentMiddleware::class
+                    );
+
+                    $group->group(
+                        'rules',
+                        function (Group $group): void {
+                            $group->options('', RuleAction::class . ':options');
+                            $group->get('', RuleAction::class . ':fetch');
+                            $group->post('', RuleAction::class . ':add');
+                            $group->options('/{ruleId}', RuleAction::class . ':options');
+                            $group->put('/{ruleId}', RuleAction::class . ':edit');
+                            $group->delete('/{ruleId}', RuleAction::class . ':remove');
+                        }
+                    )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class
                     );
 
