@@ -30,7 +30,7 @@ class Repository extends EntityRepository
         $getUnassignedPlaces = function (Round $rootRound): array {
             $unassignedPlaces = [];
             foreach ($rootRound->getPlaces() as $place) {
-                $unassignedPlaces[$place->getRoundLocationId()] = $place;
+                $unassignedPlaces[$place->getUniqueIndex()] = $place;
             }
             return $unassignedPlaces;
         };

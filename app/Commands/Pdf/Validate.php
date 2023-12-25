@@ -22,7 +22,6 @@ use Selective\Config\Configuration;
 use Sports\Output\StructureOutput;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -32,7 +31,6 @@ class Validate extends Command
 {
     private string $customName = 'validate-pdf';
     protected TournamentRepository $tournamentRepos;
-    protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
     protected PdfService $pdfService;
     protected PdfQueueService $queueService;
@@ -46,10 +44,6 @@ class Validate extends Command
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
-
-        /** @var PlanningInputRepository $planningInputRepos */
-        $planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningInputRepos = $planningInputRepos;
 
         /** @var Memcached $memcached */
         $memcached = $container->get(Memcached::class);

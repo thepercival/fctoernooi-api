@@ -5,13 +5,19 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\GuzzleClient;
 use App\Response\ErrorResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use FCToernooi\PlanningTotals;
+use FCToernooi\PlanningTotals\CompetitorAmountCalculator;
+use FCToernooi\PlanningTotals\RoundNumberWithMinNrOfBatches;
+use FCToernooi\PlanningTotals\TotalPeriodCalculator;
+use FCToernooi\Recess;
 use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
-use FCToernooi\PlanningInfo\Calculator as PlanningInfoCalculator;
+use FCToernooi\PlanningTotals\TotalPeriodCalculator as PlanningInfoCalculator;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -22,20 +28,22 @@ use Selective\Config\Configuration;
 use Sports\Category;
 use Sports\Output\StructureOutput;
 use Sports\Structure;
+use Sports\Round\Number as RoundNumber;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
-use SportsPlanning\Input\Repository as InputRepository;
+use Sports\Round\Number\InputConfigurationCreator;
+use SportsPlanning\Referee\Info as PlanningRefereeInfo;
 
 final class StructureAction extends Action
 {
     private CacheService $cacheService;
+    private GuzzleClient $planningClient;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
-        protected InputRepository $inputRepos,
         private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
         protected RegistrationRepository $registrationRepos,
@@ -45,6 +53,10 @@ final class StructureAction extends Action
     ) {
         parent::__construct($logger, $serializer);
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
+        $this->planningClient = new GuzzleClient(
+            $config->getString('scheduler.url'),
+            $config->getString('scheduler.apikey')
+        );
     }
 
     /**
@@ -59,6 +71,11 @@ final class StructureAction extends Action
     protected function getSerializationContext(): SerializationContext
     {
         return SerializationContext::create()->setGroups(['Default', 'structure', 'games']);
+    }
+
+    protected function getPlanningSerializationContext(): SerializationContext
+    {
+        return SerializationContext::create()->setGroups(['Default', 'noReference']);
     }
 
     /**
@@ -181,7 +198,7 @@ final class StructureAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
-    public function getPlanningInfo(Request $request, Response $response, array $args): Response
+    public function getPlanningTotals(Request $request, Response $response, array $args): Response
     {
         try {
             /** @var Structure|false $structureSer */
@@ -194,21 +211,35 @@ final class StructureAction extends Action
             $tournament = $request->getAttribute("tournament");
 
             $competition = $tournament->getCompetition();
-            $nrOfReferees = $competition->getReferees()->count();
 
             $newStructure = $this->structureCopier->copy($structureSer, $competition);
             $recesses = array_values($tournament->getRecesses()->toArray());
 
-            $calculator = new PlanningInfoCalculator($this->inputRepos);
+            $roundNumbersWithMinNrOfBatches = array_map( function(RoundNumber $roundNumber): RoundNumberWithMinNrOfBatches {
+                $planningRefereeInfo = new PlanningRefereeInfo($roundNumber->getRefereeInfo());
+                $cfg = (new InputConfigurationCreator())->create($roundNumber, $planningRefereeInfo);
+                $jsonCfg = $this->serializer->serialize($cfg, 'json');
+                return new RoundNumberWithMinNrOfBatches(
+                    $roundNumber,
+                    $this->planningClient->getMinNrOfBatches($jsonCfg)
+                );
+            } , $newStructure->getRoundNumbers() );
 
-            $planningInfo = $calculator->calculate($newStructure, $recesses, $nrOfReferees);
-            if ($planningInfo === null) {
-                throw new \Exception('unknown planning', E_ERROR);
-            }
+            $competitorAmountRange = (new CompetitorAmountCalculator())->calculate(
+                $newStructure->getCategories(),
+                $competition->createSportVariantsWithFields()
+            );
 
-            $json = $this->serializer->serialize($planningInfo, 'json');
+            $competitionStartDateTime = $competition->getStartDateTime();
+            $recessPeriods = array_map(fn(Recess $recess) => $recess->getPeriod(), $recesses);
+            $totalPeriod = (new TotalPeriodCalculator())->calculate(
+                $competitionStartDateTime, $roundNumbersWithMinNrOfBatches, $recessPeriods);
+
+            $planningTotals = new PlanningTotals($totalPeriod, $competitorAmountRange);
+            $json = $this->serializer->serialize($planningTotals, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
+            // \SportsPlanning\Exception\NoBestPlanning
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }

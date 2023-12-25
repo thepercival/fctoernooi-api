@@ -187,8 +187,8 @@ return function (App $app): void {
                             TournamentMiddleware::class
                         );
 
-                    $group->options('structure/planning', StructureAction::class . ':options');
-                    $group->put('structure/planning', StructureAction::class . ':getPlanningInfo')
+                    $group->options('structure/planningtotals', StructureAction::class . ':options');
+                    $group->put('structure/planningtotals', StructureAction::class . ':getPlanningTotals')
                         ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );

@@ -23,6 +23,7 @@ return [
         'cache_dir' => __DIR__ . '/../cache/serializer',
         'yml_dir' => [
             'SportsHelpers' => __DIR__ . '/../vendor/thepercival/php-sports-helpers/serialization/yml',
+            'SportsPlanning' => __DIR__ . '/../vendor/thepercival/php-sports-planning/serialization/yml',
             'Sports' => __DIR__ . '/../vendor/thepercival/php-sports/serialization/yml',
             'FCToernooi' => __DIR__ . '/../serialization/yml'
         ],
@@ -49,7 +50,6 @@ return [
         'meta' => [
             'entity_path' => [
                 __DIR__ . '/../vendor/thepercival/php-sports-helpers/db/doctrine-mappings',
-                __DIR__ . '/../vendor/thepercival/php-sports-planning/db/doctrine-mappings',
                 __DIR__ . '/../vendor/thepercival/php-sports/db/doctrine-mappings',
                 __DIR__ . '/../db/doctrine-mappings'
             ],
@@ -98,6 +98,17 @@ return [
     'images' => [
         'backuppath' => (($_ENV['ENVIRONMENT'] === 'development') ? '/tmp' : '/var') . '/imgbackups'
     ],
+    'queuenew' => [
+//        'host' => 'localhost',
+//        'port' => 5672,
+//        'vhost' => '/',
+//        'user' => 'guest',
+        'apikey' => $_ENV['CLOUD_AMQP_APIKEY'],
+        'url' => 'amqps://ctydjbyu:Onxmv7zJFCDRUDkT9DEvPmxJsO9KSi3T@rattlesnake.rmq.cloudamqp.com/ctydjbyu',
+//        'pass' => 'guest',
+//        'persisted' => false,
+//        'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
+    ],
     'queue' => [
         'host' => 'localhost',
         'port' => 5672,
@@ -106,5 +117,9 @@ return [
         'pass' => 'guest',
         'persisted' => false,
         'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
+    ],
+    'scheduler' => [
+        'url' => $_ENV['SCHEDULER_URL'],
+        'apikey' => $_ENV['SCHEDULER_APIKEY'],
     ]
 ];

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Copiers\TournamentCopier;
+use App\GuzzleClient;
 use App\ImageService;
-use App\QueueService;
-use App\QueueService\Planning as PlanningQueueService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use FCToernooi\PlanningTotals\RoundNumberWithMinNrOfBatches;
+use FCToernooi\RoundNumberWithPlanning;
 use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use Memcached;
 use FCToernooi\CacheService;
@@ -32,17 +33,21 @@ use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
 use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Round\Number\PlanningCreator;
+use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\InputConfigurationCreator;
+use Sports\Round\Number\PlanningAssigner;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
 use FCToernooi\Tournament\Rule as TournamentRule;
+use SportsPlanning\Planning;
 use stdClass;
 
 final class TournamentAction extends Action
 {
     private CacheService $cacheService;
     private ImageService $imageService;
+    private GuzzleClient $planningClient;
 
     public function __construct(
         LoggerInterface $logger,
@@ -55,7 +60,6 @@ final class TournamentAction extends Action
         private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
         private EntityManagerInterface $entityManager,
-        private PlanningCreator $planningCreator,
         Memcached $memcached,
         private Configuration $config
     ) {
@@ -63,6 +67,10 @@ final class TournamentAction extends Action
 
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
         $this->imageService =  new ImageService($this->config, $logger);
+        $this->planningClient = new GuzzleClient(
+            $config->getString('scheduler.url'),
+            $config->getString('scheduler.apikey')
+        );
     }
 
     /**
@@ -238,6 +246,8 @@ final class TournamentAction extends Action
                 new Recess($tournament, $recessSer->getName(), $recessSer->getPeriod());
             }
             $tournament->setPublic($tournamentSer->getPublic());
+            $tournament->setCoordinate($tournamentSer->getCoordinate());
+            $tournament->setIntro($tournamentSer->getIntro());
             $tournament->getCompetition()->getLeague()->setName($tournamentSer->getName());
             $this->tournamentRepos->customPersist($tournament, true);
             $serializationContext = $this->getSerializationContext($tournament, $user);
@@ -369,14 +379,18 @@ final class TournamentAction extends Action
 
             $this->tournamentCopier->copyAndSaveRules($tournament, $newTournament);
 
-            $this->planningCreator->addFrom(
-                new PlanningQueueService($this->config->getArray('queue')),
-                $newStructure->getFirstRoundNumber(),
-                $newTournament->createRecessPeriods(),
-                QueueService::MAX_PRIORITY
-            );
-
             // $this->creditActionRepos->removeCreateTournamentCredits($user);
+
+            $recesses = array_values( $tournament->getRecesses()->toArray() );
+            $recessPeriods = array_map( fn(Recess $recess) => $recess->getPeriod(), $recesses );
+            $planningAssigner = new PlanningAssigner( new RoundNumber\PlanningScheduler($recessPeriods) );
+            $roundNumbersWithPlanning = $this->getRoundNumbersWithPlanning($newStructure->getRoundNumbers());
+            foreach( $roundNumbersWithPlanning as $roundNumberWithPlanning ) {
+                $planningAssigner->assignPlanningToRoundNumber(
+                    $roundNumberWithPlanning->roundNumber,
+                    $roundNumberWithPlanning->planning,
+                );
+            }
 
             $conn->commit();
 
@@ -386,6 +400,25 @@ final class TournamentAction extends Action
             $conn->rollBack();
             throw new HttpException($request, $exception->getMessage(), 422);
         }
+    }
+
+    private function getRoundNumbersWithPlanning(array $roundNumbers): array {
+
+        $roundNumbersWithPlanning = [];
+        foreach( $roundNumbers as $roundNumber) {
+            $cfg = (new InputConfigurationCreator())->create($roundNumber, $roundNumber->getRefereeInfo());
+            $jsonCfg = $this->serializer->serialize($cfg, 'json');
+            /** @var Planning $planning */
+            $planning = null;
+            try {
+                $planningAsString = $this->planningClient->get($jsonCfg);
+                $planning = $this->serializer->deserialize($planningAsString, Planning::class, 'json');
+                $roundNumbersWithPlanning[] = new RoundNumberWithPlanning($roundNumber, $planning);
+            } catch( \Exception $e ) {
+                break;
+            }
+        }
+        return $roundNumbersWithPlanning;
     }
 
     /**

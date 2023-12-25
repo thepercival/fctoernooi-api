@@ -71,12 +71,6 @@ use Sports\Season\Repository as SeasonRepository;
 use Sports\Sport;
 use Sports\Sport\Repository as SportRepository;
 use Sports\Structure\Repository as StructureRepository;
-use SportsPlanning\Input as PlanningInput;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
-use SportsPlanning\Planning;
-use SportsPlanning\Planning\Repository as PlanningRepository;
-use SportsPlanning\Schedule;
-use SportsPlanning\Schedule\Repository as ScheduleRepository;
 
 return [
     TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
@@ -190,24 +184,6 @@ return [
             new HorizontalPouleCreator(),
             new QualifyRuleCreator()
         );
-    },
-    PlanningRepository::class => function (ContainerInterface $container): PlanningRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Planning::class);
-        return new PlanningRepository($entityManager, $metaData);
-    },
-    PlanningInputRepository::class => function (ContainerInterface $container): PlanningInputRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(PlanningInput::class);
-        return new PlanningInputRepository($entityManager, $metaData);
-    },
-    ScheduleRepository::class => function (ContainerInterface $container): ScheduleRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Schedule::class);
-        return new ScheduleRepository($entityManager, $metaData);
     },
     AgainstGameRepository::class => function (ContainerInterface $container): AgainstGameRepository {
         /** @var EntityManagerInterface $entityManager */

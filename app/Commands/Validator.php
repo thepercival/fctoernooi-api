@@ -27,9 +27,9 @@ use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
-use SportsPlanning\Input\Repository as PlanningInputRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Validator extends Command
@@ -39,7 +39,6 @@ class Validator extends Command
     protected StructureRepository $structureRepos;
     protected StructureValidator $structureValidator;
     protected CompetitionValidator $competitionValidator;
-    protected PlanningInputRepository $planningInputRepos;
     protected GamesValidator $gamesValidator;
     private DateTimeImmutable $deprecatedCreatedDateTime;
     private const DEFAULT_START_DAYS_IN_PAST = 7;
@@ -67,10 +66,6 @@ class Validator extends Command
         $structureRepos = $container->get(StructureRepository::class);
         $this->structureRepos = $structureRepos;
 
-        /** @var PlanningInputRepository $planningInputRepos */
-        $planningInputRepos = $container->get(PlanningInputRepository::class);
-        $this->planningInputRepos = $planningInputRepos;
-
         $this->competitionValidator = new CompetitionValidator();
         $this->structureValidator = new StructureValidator();
         $this->gamesValidator = new GamesValidator();
@@ -96,8 +91,9 @@ class Validator extends Command
             ->setHelp('validates the tournaments');
         parent::configure();
 
-        $this->addOption('startDate', null, InputArgument::OPTIONAL, 'Y-m-d');
-        $this->addOption('endDate', null, InputArgument::OPTIONAL, 'Y-m-d');
+        $this->addOption('startDate', null, InputOption::VALUE_OPTIONAL, 'Y-m-d');
+        $this->addOption('endDate', null, InputOption::VALUE_OPTIONAL, 'Y-m-d');
+        $this->addOption('show-structure', null, InputOption::VALUE_NONE);
 
         $this->addArgument('tournamentId', InputArgument::OPTIONAL);
     }
@@ -115,6 +111,10 @@ class Validator extends Command
 
             $logger->info('aan het valideren..');
 
+            $showStructure = $input->getOption('show-structure');
+            $showStructure = is_bool($showStructure) ? $showStructure : false;
+            $tournamentCompetitorValidator = new \FCToernooi\Competitor\Validator();
+
             foreach ($tournaments as $tournament) {
                 $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
                 $description .= $tournament->getCreatedDateTime()->format(DATE_ISO8601);
@@ -123,6 +123,8 @@ class Validator extends Command
                 /** @var Structure|null $structure */
                 $structure = null;
                 try {
+                    $tournamentCompetitorValidator->checkValidity($tournament);
+
                     $structure = $this->checkValidity($tournament);
                     if ($tournament->getUsers()->count() === 0) {
                         $invitations = $this->invitationRepos->findBy(['tournament' => $tournament]);
@@ -133,11 +135,14 @@ class Validator extends Command
                             );
                         }
                     }
+                    if( $showStructure ) {
+                        $this->addStructureToLog($tournament, $structure);
+                    }
                 } catch (NoUsersException $exception) {
                     $logger->error($exception->getMessage());
-//                    if ($structure !== null) {
-//                        $this->addStructureToLog($tournament, $structure);
-//                    }
+                    if( $showStructure && $structure !== null) {
+                        $this->addStructureToLog($tournament, $structure);
+                    }
                 } catch (Exception $exception) {
                     $logger->error($exception->getMessage());
                 }

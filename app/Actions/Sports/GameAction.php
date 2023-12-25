@@ -183,7 +183,9 @@ class GameAction extends Action
         $qualifyService = new QualifyService($poule->getRound());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
 
-        $this->removeQualifiedPlaces($qualifyService->resetQualifiers($pouleToFilter));
+//        $nextRoundPlaces =
+            $qualifyService->resetQualifiers($pouleToFilter);
+//        $this->savePlaces($nextRoundPlaces);
         return $qualifyService->setQualifiers($pouleToFilter);
     }
 
@@ -206,7 +208,7 @@ class GameAction extends Action
      * @param list<Place> $places
      * @throws Exception
      */
-    protected function removeQualifiedPlaces(array $places): void
+    protected function savePlaces(array $places): void
     {
         foreach ($places as $place) {
             $this->placeRepos->save($place);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FCToernooi\PlanningInfo;
+namespace FCToernooi\PlanningTotals;
 
 use SportsHelpers\SportRange;
 
@@ -15,11 +15,6 @@ class CompetitorAmount
     {
         $this->nrOfGames = $nrOfGames !== null ? $nrOfGames : new SportRange(0, 0);
         $this->nrOfMinutes = $nrOfMinutes !== null ? $nrOfMinutes : new SportRange(0, 0);
-    }
-
-    public function allTheSame(): bool
-    {
-        return $this->nrOfGames->equals($this->nrOfMinutes);
     }
 
     public function getOuterValues(self $competitorAmount): self

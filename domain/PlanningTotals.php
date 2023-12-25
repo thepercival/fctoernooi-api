@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace FCToernooi;
 
 use DateTimeImmutable;
-use FCToernooi\PlanningInfo\CompetitorAmount;
+use FCToernooi\PlanningTotals\CompetitorAmount;
 use League\Period\Period;
 
-final class PlanningInfo
+final class PlanningTotals
 {
     private DateTimeImmutable $startDateTime;
     private DateTimeImmutable $endDateTime;

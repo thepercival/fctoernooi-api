@@ -1,4 +1,4 @@
-FCToernooi\PlanningInfo:
+FCToernooi\PlanningTotals:
   exclusion_policy: ALL
   exclude: false
 
@@ -10,4 +10,4 @@ FCToernooi\PlanningInfo:
       type: DateTimeImmutable<'Y-m-d\TH:i:s.u\Z'>
       serialized_name: end
     competitorAmount:
-      type: FCToernooi\PlanningInfo\CompetitorAmount
+      type: FCToernooi\PlanningTotals\CompetitorAmount

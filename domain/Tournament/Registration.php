@@ -124,7 +124,7 @@ class Registration extends Identifiable
         $this->info = $info;
     }
 
-    public function getStartLocation(): PlaceLocation|null {
+    /*public function getStartLocation(): PlaceLocation|null {
         if( $this->competitor === null ) {
             return null;
         }
@@ -132,7 +132,7 @@ class Registration extends Identifiable
             $this->competitor->getPouleNr(),
             $this->competitor->getPlaceNr()
         );
-    }
+    }*/
 
     public function setCompetitor(Competitor|null $competitor): void {
         $this->competitor = $competitor;

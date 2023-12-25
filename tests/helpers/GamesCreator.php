@@ -14,11 +14,12 @@ use Sports\Round\Number\PlanningAssigner;
 use Sports\Round\Number\PlanningInputCreator;
 use Sports\Round\Number\PlanningScheduler;
 use Sports\Structure;
+use SportsPlanning\Referee\Info as RefereeInfo;
 use SportsHelpers\SportRange;
 use SportsPlanning\Batch\SelfReferee\OtherPoule as SelfRefereeBatchOtherPoule;
 use SportsPlanning\Batch\SelfReferee\SamePoule as SelfRefereeBatchSamePoule;
 use SportsPlanning\Planning;
-use SportsPlanning\Resource\RefereePlace\Service as RefereePlaceService;
+use SportsScheduler\Resource\RefereePlace\Service as RefereePlaceService;
 
 class GamesCreator
 {
@@ -33,62 +34,62 @@ class GamesCreator
         return $logger;
     }
 
-    /**
-     * @param Structure $structure
-     * @param list<Period> $blockedPeriods
-     * @param SportRange|null $range
-     */
-    public function createStructureGames(Structure $structure, array $blockedPeriods = [], SportRange $range = null): void
-    {
-        $this->removeGamesHelper($structure->getFirstRoundNumber());
-        $this->createGamesHelper($structure->getFirstRoundNumber(), $blockedPeriods, $range);
-    }
+//    /**
+//     * @param Structure $structure
+//     * @param list<Period> $blockedPeriods
+//     * @param SportRange|null $range
+//     */
+//    public function createStructureGames(Structure $structure, array $blockedPeriods = [], SportRange $range = null): void
+//    {
+//        $this->removeGamesHelper($structure->getFirstRoundNumber());
+//        $this->createGamesHelper($structure->getFirstRoundNumber(), $blockedPeriods, $range);
+//    }
+//
+//    /**
+//     * @param RoundNumber $roundNumber
+//     * @param list<Period> $blockedPeriods
+//     * @param SportRange|null $range
+//     */
+//    public function createGames(RoundNumber $roundNumber, array $blockedPeriods = [], SportRange $range = null): void
+//    {
+//        $this->removeGamesHelper($roundNumber);
+//        $this->createGamesHelper($roundNumber, $blockedPeriods, $range);
+//    }
 
-    /**
-     * @param RoundNumber $roundNumber
-     * @param list<Period> $blockedPeriods
-     * @param SportRange|null $range
-     */
-    public function createGames(RoundNumber $roundNumber, array $blockedPeriods = [], SportRange $range = null): void
-    {
-        $this->removeGamesHelper($roundNumber);
-        $this->createGamesHelper($roundNumber, $blockedPeriods, $range);
-    }
+//    public function createPlanning(RoundNumber $roundNumber, SportRange $range = null): Planning
+//    {
+//        $planningInputCreator = new PlanningInputCreator();
+//        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
+//        $planningInput = $planningInputCreator->create($roundNumber, new RefereeInfo($nrOfReferees) );
+//        $planningCreator = new PlanningCreator();
+//        return $planningCreator->createPlanning($planningInput, $range);
+//    }
 
-    public function createPlanning(RoundNumber $roundNumber, SportRange $range = null): Planning
-    {
-        $planningInputCreator = new PlanningInputCreator();
-        $nrOfReferees = $roundNumber->getCompetition()->getReferees()->count();
-        $planningInput = $planningInputCreator->create($roundNumber, $nrOfReferees);
-        $planningCreator = new PlanningCreator();
-        return $planningCreator->createPlanning($planningInput, $range);
-    }
-
-    /**
-     * @param RoundNumber $roundNumber
-     * @param list<Period> $blockedPeriods
-     * @param SportRange|null $range
-     */
-    private function createGamesHelper(
-        RoundNumber $roundNumber,
-        array $blockedPeriods,
-        SportRange|null $range
-    ): void {
-        $minIsMaxPlanning = $this->createPlanning($roundNumber, $range);
-        $firstBatch = $minIsMaxPlanning->createFirstBatch();
-        if ($firstBatch instanceof SelfRefereeBatchOtherPoule ||
-            $firstBatch instanceof SelfRefereeBatchSamePoule) {
-            $refereePlaceService = new RefereePlaceService($minIsMaxPlanning);
-            $refereePlaceService->assign($firstBatch);
-        }
-
-        $planningAssigner = new PlanningAssigner(new PlanningScheduler($blockedPeriods));
-        $planningAssigner->assignPlanningToRoundNumber($roundNumber, $minIsMaxPlanning);
-        $nextRoundNumber = $roundNumber->getNext();
-        if ($nextRoundNumber !== null) {
-            $this->createGamesHelper($nextRoundNumber, $blockedPeriods, $range);
-        }
-    }
+//    /**
+//     * @param RoundNumber $roundNumber
+//     * @param list<Period> $blockedPeriods
+//     * @param SportRange|null $range
+//     */
+//    private function createGamesHelper(
+//        RoundNumber $roundNumber,
+//        array $blockedPeriods,
+//        SportRange|null $range
+//    ): void {
+//        $minIsMaxPlanning = $this->createPlanning($roundNumber, $range);
+//        $firstBatch = $minIsMaxPlanning->createFirstBatch();
+//        if ($firstBatch instanceof SelfRefereeBatchOtherPoule ||
+//            $firstBatch instanceof SelfRefereeBatchSamePoule) {
+//            $refereePlaceService = new RefereePlaceService($minIsMaxPlanning);
+//            $refereePlaceService->assign($firstBatch);
+//        }
+//
+//        $planningAssigner = new PlanningAssigner(new PlanningScheduler($blockedPeriods));
+//        $planningAssigner->assignPlanningToRoundNumber($roundNumber, $minIsMaxPlanning);
+//        $nextRoundNumber = $roundNumber->getNext();
+//        if ($nextRoundNumber !== null) {
+//            $this->createGamesHelper($nextRoundNumber, $blockedPeriods, $range);
+//        }
+//    }
 
     private function removeGamesHelper(RoundNumber $roundNumber): void
     {

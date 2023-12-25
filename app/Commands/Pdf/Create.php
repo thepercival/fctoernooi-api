@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Commands\Pdf;
 
-use App\Commands\Planning as PlanningCommand;
+use App\Command;
 use App\Export\Pdf\DocumentFactory;
 use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
 use App\Export\PdfService;
@@ -29,7 +29,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Create extends PlanningCommand
+class Create extends Command
 {
     private string $customName = 'create-pdf';
     protected StructureRepository $structureRepos;
@@ -44,7 +44,10 @@ class Create extends PlanningCommand
 
     public function __construct(ContainerInterface $container)
     {
-        parent::__construct($container);
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+
+        parent::__construct($config);
 
         /** @var Mailer|null $mailer */
         $mailer = $container->get(Mailer::class);
@@ -68,8 +71,6 @@ class Create extends PlanningCommand
 
         /** @var Memcached $memcached */
         $memcached = $container->get(Memcached::class);
-        /** @var Configuration $config */
-        $config = $container->get(Configuration::class);
         /** @var LoggerInterface $logger */
         $logger = $container->get(LoggerInterface::class);
         $this->pdfService = new PdfService(
