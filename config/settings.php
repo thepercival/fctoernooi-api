@@ -98,26 +98,24 @@ return [
     'images' => [
         'backuppath' => (($_ENV['ENVIRONMENT'] === 'development') ? '/tmp' : '/var') . '/imgbackups'
     ],
-    'queuenew' => [
+    'queue' => [
+        'host' => 'rattlesnake.rmq.cloudamqp.com',
+        // 'port' => 5672,
+        'vhost' => 'ctydjbyu',
+        'user' => 'ctydjbyu',
+        'pass' => $_ENV['CLOUD_AMQP_APIKEY2'],
+        'persisted' => false,
+        'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
+    ],
+//    'queue' => [
 //        'host' => 'localhost',
 //        'port' => 5672,
 //        'vhost' => '/',
 //        'user' => 'guest',
-        'apikey' => $_ENV['CLOUD_AMQP_APIKEY'],
-        'url' => 'amqps://ctydjbyu:Onxmv7zJFCDRUDkT9DEvPmxJsO9KSi3T@rattlesnake.rmq.cloudamqp.com/ctydjbyu',
 //        'pass' => 'guest',
 //        'persisted' => false,
 //        'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
-    ],
-    'queue' => [
-        'host' => 'localhost',
-        'port' => 5672,
-        'vhost' => '/',
-        'user' => 'guest',
-        'pass' => 'guest',
-        'persisted' => false,
-        'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
-    ],
+//    ],
     'scheduler' => [
         'url' => $_ENV['SCHEDULER_URL'],
         'apikey' => $_ENV['SCHEDULER_APIKEY'],
