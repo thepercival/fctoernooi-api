@@ -141,7 +141,7 @@ final class GameTogetherAction extends GameAction
                         return $gamePlaceSer;
                     }
                 }
-                throw new Exception('de pouleplek kon niet gevonden worden', E_ERROR);
+                throw new Exception('de wedstrijdplek kon niet gevonden worden', E_ERROR);
             };
             foreach ($game->getPlaces() as $gamePlace) {
                 $scores = array_values($getSerGamePlace($gamePlace)->getScores()->toArray());

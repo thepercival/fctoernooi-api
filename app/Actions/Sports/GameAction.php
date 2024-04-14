@@ -183,9 +183,9 @@ class GameAction extends Action
         $qualifyService = new QualifyService($poule->getRound());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
 
-//        $nextRoundPlaces =
-            $qualifyService->resetQualifiers($pouleToFilter);
-//        $this->savePlaces($nextRoundPlaces);
+        $nextRoundPlaces = $qualifyService->resetQualifiers($pouleToFilter);
+        $this->savePlaces($nextRoundPlaces);
+
         return $qualifyService->setQualifiers($pouleToFilter);
     }
 

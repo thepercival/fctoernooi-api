@@ -4,7 +4,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="FCToernooi\Tournament\Rule" table="tournamentRules" repository-class="FCToernooi\Tournament\Rule\Repository">
         <field name="text" column="text" type="string" length="80" nullable="false" unique="false"/>
-        <many-to-one field="tournament" target-entity="FCToernooi\Tournament">
+        <field name="priority" column="priority" type="smallint" nullable="false" unique="false"/>
+        <many-to-one field="tournament" target-entity="FCToernooi\Tournament" inversed-by="rules">
             <join-columns>
                 <join-column name="tournamentId" referenced-column-name="id" nullable="false" on-delete="CASCADE"/>
             </join-columns>

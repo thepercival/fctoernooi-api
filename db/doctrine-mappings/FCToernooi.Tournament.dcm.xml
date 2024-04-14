@@ -14,7 +14,7 @@
         <field name="logoExtension" column="logoExtension" type="string" length="10" nullable="true" unique="false"/>
 <!--        <field name="theme" column="theme" type="string" length="10" nullable="true" unique="false"/>-->
         <field name="intro" column="intro" type="string" length="200" nullable="false" unique="false"/>
-        <field name="coordinate" column="coordinate" type="string" length="30" nullable="true" unique="false"/>
+        <field name="location" column="location" type="string" length="80" nullable="true" unique="false"/>
         <many-to-one field="competition" target-entity="Sports\Competition">
             <cascade>
                 <cascade-remove/>
@@ -56,8 +56,17 @@
                 <order-by-field name="startDateTime" direction="ASC"/>
             </order-by>
         </one-to-many>
+        <one-to-many field="rules" target-entity="FCToernooi\Tournament\Rule" mapped-by="tournament">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <order-by>
+                <order-by-field name="priority" direction="ASC"/>
+            </order-by>
+        </one-to-many>
         <unique-constraints>
-            <unique-constraint columns="competitionid" name="main_u_idx"/>
+            <unique-constraint columns="competitionId" name="main_u_idx"/>
         </unique-constraints>
     </entity>
 </doctrine-mapping>

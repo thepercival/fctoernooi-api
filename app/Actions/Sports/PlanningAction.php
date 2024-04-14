@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Exceptions\DomainRecordBeingCalculatedException;
+use App\Exceptions\DomainRecordNotFoundException;
 use App\GuzzleClient;
 use App\Response\ErrorResponse;
 use Exception;
+use FCToernooi\CacheService;
+use FCToernooi\Recess;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use League\Period\Period;
+use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -18,11 +24,14 @@ use Selective\Config\Configuration;
 use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\EditMode;
 use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\PlanningAssigner;
+use Sports\Round\Number\PlanningScheduler;
 use Sports\Round\Number\Repository as RoundNumberRepository;
 use Sports\Structure;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Round\Number\InputConfigurationCreator;
 use SportsPlanning\Input;
+use SportsPlanning\Planning;
 use SportsPlanning\Referee\Info as PlanningRefereeInfo;
 
 final class PlanningAction extends Action
@@ -35,12 +44,15 @@ final class PlanningAction extends Action
         private StructureRepository $structureRepos,
         private RoundNumberRepository $roundNumberRepos,
         private PlanningConfigRepository $planningConfigRepos,
-        Configuration $config
+        Configuration $config,
+        Memcached $memcached
     ) {
         parent::__construct($logger, $serializer);
         $url = $config->getString('scheduler.url');
         $apikey = $config->getString('scheduler.apikey');
-        $this->planningClient = new GuzzleClient($url, $apikey);
+        $cacheService = new CacheService($memcached, $config->getString('namespace'));
+        $this->planningClient = new GuzzleClient($url, $apikey, $cacheService, $serializer, $logger);
+
     }
 
     /**
@@ -54,6 +66,8 @@ final class PlanningAction extends Action
     {
         try {
             $roundNumber = $this->getRoundNumberFromRequest($request, $args);
+            $y = $roundNumber->getPoules();
+            $x = count ( reset($y)->getAgainstGames() );
             $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
@@ -81,12 +95,13 @@ final class PlanningAction extends Action
 
             $seekingPercentage = 0;
             try {
-                $jsonConfig = $this->serializer->serialize($config, 'json');
+                $context = SerializationContext::create()->setGroups(['Default', 'noReference']);
+                $jsonConfig = $this->serializer->serialize($config, 'json', $context );
                 $seekingPercentage = $this->planningClient->getProgress($jsonConfig);
             } catch (Exception $e) {
                 if( $roundNumber->getNumber() === 1 ) {
                     $input = new Input($config);
-                    throw new \Exception('de planning "' . $input->getName() . '" kan niet gevonden worden, doe een aanpassing',
+                    throw new \Exception('de planning "' . $config->getName() . '" kan niet gevonden worden, doe een aanpassing',
                         E_ERROR
                     );
                 }
@@ -130,44 +145,61 @@ final class PlanningAction extends Action
             $structure = $this->getStructureFromRequest($request, $args);
             $startRoundNumber = $this->getRoundNumberFromRequest($request, $args);
 
-//            $config = (new InputConfigurationCreator())->create($roundNumber, $roundNumber->getRefereeInfo());
+            // in command en hier moet hetzelfde gecontroleerd worden.
+            // voor de structuur vanaf rondeNummber x tot en met laatste rondenummer moet er een bestPlanning zijn
+
+            $roundNumber = $startRoundNumber;
+            while ( $roundNumber !== null ) {
+                $this->roundNumberRepos->removePlanning($roundNumber);
+                $roundNumber = $roundNumber->getNext();
+            }
+
+            // $roundNumber = $structure->getRoundNumber($startRoundNumber);
+//            $inputConfig = (new InputConfigurationCreator())->create($startRoundNumber,
+//                new PlanningRefereeInfo( $startRoundNumber->getRefereeInfo()) );
 //
-//            $seekingPercentage = 0;
-//            try {
-//                $seekingPercentage = $this->planningClient->getProgress($config);
-//            } catch (Exception $e) {
-//                if( $roundNumber->getNumber() === 1 ) {
-//                    throw new \Exception('de planning "' . $input->getName() . '" kan niet gevonden worden, doe een aanpassing',
-//                        E_ERROR
-//                    );
-//                }
+//            $jsonInputConfig = $this->serializer->serialize($inputConfig, 'json');
+//            $jsonPlanning = $this->planningClient->get($jsonInputConfig);
+//            /** @var Planning $planning */
+//            $planning = $this->serializer->deserialize(
+//                $jsonPlanning,
+//                Planning::class,
+//                'json'/*,
+//                $deserializationContext*/
+//            );
+
+//            if( $planningInput === null ) {
+//                throw new \Exception('de planning "' . $inputConfig->getName() . '" kan niet gevonden worden, doe een aanpassing',
+//                    E_ERROR );
 //            }
 
-            // @TODO CDK GUZZLE DO REQUEST API SCHEDULER
+            $recessPeriods = array_values( array_map( function(Recess $recess): Period {
+                return $recess->getPeriod();
+            }, $tournament->getRecesses()->toArray() ) );
+            $planningAssigner = new PlanningAssigner( new RoundNumber\PlanningScheduler($recessPeriods) );
 
-            // if success than create from planning
+            $json = '';
+            try {
+                $roundNumbersWithPlanning = $this->planningClient->getRoundNumbersWithPlanning(
+                    $tournament->getCompetition(), $structure->getRoundNumbers(), true);
+                foreach( $roundNumbersWithPlanning as $roundNumberWithPlanning ) {
+                    $planningAssigner->assignPlanningToRoundNumber(
+                        $roundNumberWithPlanning->roundNumber,
+                        $roundNumberWithPlanning->planning,
+                    );
+                    $this->roundNumberRepos->savePlanning($roundNumberWithPlanning->roundNumber);
+                }
 
-            // DO API-REQUEST AT SPORTS-SCHEDULER
-//            $roundNumberPlanningCreator = new RoundNumberPlanningCreator(
-//                $this->inputRepos,
-//                $this->repos,
-//                $this->roundNumberRepos
-//            );
-//            $roundNumberPlanningCreator->removeFrom($startRoundNumber);
-//            $queueService = new PlanningQueueService($this->config->getArray('queue'));
-//            $roundNumberPlanningCreator->addFrom(
-//                $queueService,
-//                $startRoundNumber,
-//                $tournament->createRecessPeriods(),
-//                QueueService::MAX_PRIORITY
-//            );
+                $this->updatePlanningEditMode($startRoundNumber);
 
-            $this->updatePlanningEditMode($startRoundNumber);
+                $json = $this->serializer->serialize($structure, 'json');
+            } catch( DomainRecordNotFoundException $e ) {
+            } catch( DomainRecordBeingCalculatedException $e ) {
+            }
 
-            $json = $this->serializer->serialize($structure, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
-                return new ErrorResponse($exception->getMessage(), 422, $this->logger);
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 

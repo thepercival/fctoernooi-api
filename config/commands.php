@@ -2,34 +2,40 @@
 
 declare(strict_types=1);
 
-use App\Commands\BackupImages;
-use App\Commands\Listing as ListingCommand;
-use App\Commands\Pdf\Create as PdfCreate;
-use App\Commands\Pdf\Validate as PdfValidate;
-use App\Commands\RemoveOld;
-use App\Commands\UpdateSitemap;
-use App\Commands\Validator;
+use App\Commands\BackupImagesCommand;
+use App\Commands\BestPlanningCreatedCommand;
+use App\Commands\ListingCommand;
+use App\Commands\Pdf\PdfCreateCommand;
+use App\Commands\Pdf\PdfValidateCommand;
+use App\Commands\RemoveOldTournamentsCommand;
+use App\Commands\UpdateSitemapCommand;
+use App\Commands\StructureAdminCommand;
+use JMS\Serializer\SerializerInterface;
 use Psr\Container\ContainerInterface;
 
 $commands = [
-    "app:update-sitemap" => function (ContainerInterface $container): UpdateSitemap {
-        return new UpdateSitemap($container);
+    "app:update-sitemap" => function (ContainerInterface $container): UpdateSitemapCommand {
+        return new UpdateSitemapCommand($container);
     },
-    "app:backup-images" => function (ContainerInterface $container): BackupImages {
-        return new BackupImages($container);
+    "app:backup-images" => function (ContainerInterface $container): BackupImagesCommand {
+        return new BackupImagesCommand($container);
     },
-    "app:validate" => function (ContainerInterface $container): Validator {
-        return new Validator($container);
+    "app:structure-admin" => function (ContainerInterface $container): StructureAdminCommand {
+        return new StructureAdminCommand($container);
     },
-    "app:remove-old-tournaments" => function (ContainerInterface $container): RemoveOld {
-        return new RemoveOld($container);
+    "app:remove-old-tournaments" => function (ContainerInterface $container): RemoveOldTournamentsCommand {
+        return new RemoveOldTournamentsCommand($container);
     },
-    "app:create-pdf" => function (ContainerInterface $container): PdfCreate {
-        return new PdfCreate($container);
+    "app:create-pdf" => function (ContainerInterface $container): PdfCreateCommand {
+        return new PdfCreateCommand($container);
     },
-    "app:validate-pdf" => function (ContainerInterface $container): PdfValidate {
-        return new PdfValidate($container);
+    "app:validate-pdf" => function (ContainerInterface $container): PdfValidateCommand {
+        return new PdfValidateCommand($container);
+    },
+    "app:planning-available-listener" => function (ContainerInterface $container, SerializerInterface $serializer): BestPlanningCreatedCommand {
+        return new BestPlanningCreatedCommand($container, $serializer);
     }
+
 ];
 
 $commands["app:list"] = function (ContainerInterface $container) use ($commands): ListingCommand {

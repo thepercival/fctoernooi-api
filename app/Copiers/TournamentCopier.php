@@ -78,7 +78,7 @@ class TournamentCopier
         );
 
         $newTournament = $this->createTournament($fromTournament, $newCompetition, $newStartDateTime);
-        $newTournament->setCoordinate($fromTournament->getCoordinate());
+        $newTournament->setLocation($fromTournament->getLocation());
 
         if( $fromTournament->getExample() ) {
             new TournamentUser($newTournament, $user, Role::ALL - Role::REFEREE);

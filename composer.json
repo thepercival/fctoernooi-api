@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-      "php": ">=8.2",
+      "php": ">=8.3",
       "ext-gd": "*",
       "ext-gmp": "*",
       "ext-json": "*",
@@ -92,6 +92,7 @@
         "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:query --flush",
         "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:metadata"
       ],
+      "planning-available-listener": "XDEBUG_MODE=off php bin/console.php app:planning-available-listener --loglevel=200 --logtofile",
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [
         "App\\Handlers\\ComposerPostInstall::execute",

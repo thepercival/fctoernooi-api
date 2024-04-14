@@ -15,7 +15,7 @@ FCToernooi\Tournament:
       #groups: [home]
     logoExtension:
       type: string
-    coordinate:
+    location:
       type: string
       #groups: [home]
     users:

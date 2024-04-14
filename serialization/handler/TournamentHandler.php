@@ -28,7 +28,7 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
 
     /**
      * @param JsonDeserializationVisitor $visitor
-     * @param array{competition: Competition, public: bool, useSelfRegistration: bool, coordinate: string} $fieldValue
+     * @param array{competition: Competition, intro: string, public: bool, useSelfRegistration: bool, location: string} $fieldValue
      * @param array<string, int|string> $type
      * @param Context $context
      * @return Tournament
@@ -40,9 +40,9 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
         Context $context
     ): Tournament {
         $competition = $this->getProperty($visitor, $fieldValue, 'competition', Competition::class);
-        $tournament = new Tournament('intro', $competition);
+        $tournament = new Tournament($fieldValue['intro'], $competition);
         $tournament->setPublic($fieldValue['public']);
-        $tournament->setCoordinate($fieldValue['coordinate']);
+        $tournament->setLocation($fieldValue['location']);
         return $tournament;
     }
 }

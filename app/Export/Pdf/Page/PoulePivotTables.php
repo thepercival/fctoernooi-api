@@ -115,16 +115,19 @@ abstract class PoulePivotTables extends ToernooiPdfPage
 
     public function draw(Poule $poule, GameAmountConfig $gameAmountConfig, float $y): float
     {
-        // draw first row
-        $y = $this->drawPouleHeader($poule, $gameAmountConfig, $y);
         $competitionSport = $gameAmountConfig->getCompetitionSport();
         $pouleState = $poule->getGamesState($competitionSport);
+
 
         $sportRankingItems = null;
         if ($pouleState === GameState::Finished) {
             $calculator = $this->getSportRankingCalculator($competitionSport);
             $sportRankingItems = $calculator->getItemsForPoule($poule);
         }
+
+        // draw first row
+        $y = $this->drawPouleHeader($poule, $gameAmountConfig, $y);
+
 
         $height = $this->parent->getConfig()->getRowHeight();
         $structureNameService = $this->getStructureNameService();

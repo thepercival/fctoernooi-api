@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -13,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Rule as TournamentRule;
 use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use Psr\Log\LoggerInterface;
+use Sports\Priority\Service as PriorityService;
 
 final class RuleAction extends Action
 {
@@ -36,9 +38,7 @@ final class RuleAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-            $rules = $this->ruleRepos->findBy(['tournament' => $tournament]);
-
-            $json = $this->serializer->serialize($rules, 'json');
+            $json = $this->serializer->serialize($tournament->getRules(), 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400, $this->logger);
@@ -112,6 +112,42 @@ final class RuleAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
+    public function priorityUp(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+
+            $competition = $tournament->getCompetition();
+
+            $rule = $this->ruleRepos->find((int)$args['ruleId']);
+            if ($rule === null) {
+                throw new \Exception("geen regel met het opgegeven id gevonden", E_ERROR);
+            }
+            if ($rule->getTournament() !== $tournament) {
+                return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de regel");
+            }
+
+            $priorityService = new PriorityService(array_values($tournament->getRules()->toArray()));
+            $changedRules = $priorityService->upgrade($rule);
+            foreach ($changedRules as $changedRule) {
+                if ($changedRule instanceof Tournament\Rule) {
+                    $this->ruleRepos->save($changedRule);
+                }
+            }
+
+            return $response->withStatus(200);
+        } catch (Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
     public function remove(Request $request, Response $response, array $args): Response
     {
         try {
@@ -124,6 +160,17 @@ final class RuleAction extends Action
             }
             if ($rule->getTournament() !== $tournament) {
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de regel");
+            }
+
+            $tournament->getRules()->removeElement($rule);
+            $this->ruleRepos->remove($rule);
+
+            $priorityService = new PriorityService(array_values($tournament->getRules()->toArray()));
+            $changedRules = $priorityService->validate();
+            foreach ($changedRules as $changedRule) {
+                if ($changedRule instanceof Tournament\Rule) {
+                    $this->ruleRepos->save($changedRule);
+                }
             }
 
             $this->ruleRepos->remove($rule);

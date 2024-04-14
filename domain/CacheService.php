@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
+use FCToernooi\Planning\RoundNumbersToAssignPlanningTo;
 use Memcached;
 
 class CacheService
 {
     public const TournamentCacheIdPrefix = 'json-tournament-';
     public const StructureCacheIdPrefix = 'json-structure-';
+
+    public const RoundNumberWithoutPlanningCacheId = 'json-roundNumbers-without-planning';
     public const CacheTime = 86400;
 
     public function __construct(private MemCached $memCached, private string $namespace)
@@ -64,5 +67,44 @@ class CacheService
     public function resetStructure(string|int $structureId): void
     {
         $this->memCached->delete($this->getStructureCacheId($structureId));
+    }
+
+    /**
+     * @return array<int|string, int|string>
+     */
+    public function getCompetitionIdsWithoutPlanning(): array
+    {
+        /** @var array<int|string, int|string>|false $memCachedItem */
+        $memCachedItem = $this->memCached->get($this->getCompetitionIdsWithoutPlanningId());
+        if( $memCachedItem === false ) {
+            $memCachedItem = [];
+            $this->memCached->set($this->getCompetitionIdsWithoutPlanningId(), $memCachedItem);
+        }
+        return $memCachedItem;
+    }
+
+    public function addCompetitionIdWithoutPlanning(string|int|null $competitionId): void
+    {
+        if( $competitionId === null ) {
+            return;
+        }
+        $competitionIdsWithoutPlanning = $this->getCompetitionIdsWithoutPlanning();
+        $competitionIdsWithoutPlanning[$competitionId] = $competitionId;
+        $this->memCached->set($this->getCompetitionIdsWithoutPlanningId(), $competitionIdsWithoutPlanning);
+    }
+
+    public function removeCompetitionIdWithoutPlanning(string|int|null $competitionId): void
+    {
+        if( $competitionId === null ) {
+            return;
+        }
+        $competitionIdsWithoutPlanning = $this->getCompetitionIdsWithoutPlanning();
+        unset($competitionIdsWithoutPlanning[$competitionId]);
+        $this->memCached->set($this->getCompetitionIdsWithoutPlanningId(), $competitionIdsWithoutPlanning);
+    }
+
+    private function getCompetitionIdsWithoutPlanningId(): string
+    {
+        return $this->namespace . '-' . self::RoundNumberWithoutPlanningCacheId;
     }
 }

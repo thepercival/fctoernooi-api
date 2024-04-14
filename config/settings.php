@@ -105,7 +105,8 @@ return [
         'user' => 'ctydjbyu',
         'pass' => $_ENV['CLOUD_AMQP_APIKEY2'],
         'persisted' => false,
-        'suffix' => 'fctoernooi' . $_ENV['ENVIRONMENT']
+        'suffix' => 'fctoernooi' . '-' . $_ENV['ENVIRONMENT'],
+        'planningSuffix' => 'sportsscheduler' . '-' . $_ENV['ENVIRONMENT']
     ],
 //    'queue' => [
 //        'host' => 'localhost',

@@ -90,6 +90,9 @@ final class CompetitionSportAction extends Action
             if ($sport === null) {
                 throw new \Exception('de sport kan niet gevonden worden', E_ERROR);
             }
+            if ($this->doesSameCompetitionSportExists($serializedCompSport, $competition) ) {
+                throw new \Exception('een sport met dezelfde eigenschappen bestaat al', E_ERROR);
+            }
 
             $structure = $this->structureRepos->getStructure($competition);
 
@@ -121,6 +124,15 @@ final class CompetitionSportAction extends Action
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
+    }
+
+    private function doesSameCompetitionSportExists(CompetitionSport $newCompetitionSport, Competition $competition): bool {
+        foreach( $competition->getSports() as $competitionSport ) {
+            if( $competitionSport->equals($newCompetitionSport) ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

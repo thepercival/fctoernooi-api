@@ -5,35 +5,40 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Exceptions\DomainRecordBeingCalculatedException;
+use App\Exceptions\DomainRecordNotFoundException;
 use App\GuzzleClient;
 use App\Response\ErrorResponse;
 use Doctrine\ORM\EntityManagerInterface;
-use FCToernooi\PlanningTotals;
-use FCToernooi\PlanningTotals\CompetitorAmountCalculator;
-use FCToernooi\PlanningTotals\RoundNumberWithMinNrOfBatches;
-use FCToernooi\PlanningTotals\TotalPeriodCalculator;
-use FCToernooi\Recess;
-use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\Competitor\Repository as CompetitorRepository;
-use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
-use FCToernooi\PlanningTotals\TotalPeriodCalculator as PlanningInfoCalculator;
+use FCToernooi\Planning\Totals\CompetitorAmountCalculator;
+use FCToernooi\Planning\Totals\PlanningTotals;
+use FCToernooi\Planning\Totals\RoundNumberWithMinNrOfBatches;
+use FCToernooi\Planning\Totals\TotalPeriodCalculator;
+use FCToernooi\Recess;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Sports\Category;
 use Sports\Output\StructureOutput;
-use Sports\Structure;
 use Sports\Round\Number as RoundNumber;
+use Sports\Round\Number\InputConfigurationCreator;
+use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
-use Sports\Round\Number\InputConfigurationCreator;
 use SportsPlanning\Referee\Info as PlanningRefereeInfo;
+use Sports\Competition\Sport\FromToMapper;
+use Sports\Competition\Sport\FromToMapStrategy;
+use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
+use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
 
 final class StructureAction extends Action
 {
@@ -44,7 +49,6 @@ final class StructureAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
-        private StructureCopier $structureCopier,
         protected CompetitorRepository $competitorRepos,
         protected RegistrationRepository $registrationRepos,
         protected EntityManagerInterface $em,
@@ -55,7 +59,8 @@ final class StructureAction extends Action
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
         $this->planningClient = new GuzzleClient(
             $config->getString('scheduler.url'),
-            $config->getString('scheduler.apikey')
+            $config->getString('scheduler.apikey'),
+            $this->cacheService, $serializer, $logger
         );
     }
 
@@ -154,7 +159,20 @@ final class StructureAction extends Action
                 $this->structureRepos->remove($competition);
             }
 
-            $newStructure = $this->structureCopier->copy($structureSer, $competition);
+            $competitionSportsSer = $structureSer->getFirstRoundNumber()->getCompetitionSports();
+            $fromToMapper = new FromToMapper(
+                array_values( $competitionSportsSer->toArray() ),
+                array_values( $competition->getSports()->toArray() ),
+                FromToMapStrategy::ById
+            );
+
+            $structureCopier = new StructureCopier(
+                new HorizontalPouleCreator(),
+                new QualifyRuleCreator(),
+                $fromToMapper
+            );
+
+            $newStructure = $structureCopier->copy($structureSer, $competition);
             $this->structureRepos->add($newStructure/*, $roundNumberAsValue*/);
 
             $this->logger->warning('####### END OLD STRUCTURE ########');
@@ -212,31 +230,50 @@ final class StructureAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $newStructure = $this->structureCopier->copy($structureSer, $competition);
-            $recesses = array_values($tournament->getRecesses()->toArray());
-
-            $roundNumbersWithMinNrOfBatches = array_map( function(RoundNumber $roundNumber): RoundNumberWithMinNrOfBatches {
-                $planningRefereeInfo = new PlanningRefereeInfo($roundNumber->getRefereeInfo());
-                $cfg = (new InputConfigurationCreator())->create($roundNumber, $planningRefereeInfo);
-                $jsonCfg = $this->serializer->serialize($cfg, 'json');
-                return new RoundNumberWithMinNrOfBatches(
-                    $roundNumber,
-                    $this->planningClient->getMinNrOfBatches($jsonCfg)
-                );
-            } , $newStructure->getRoundNumbers() );
-
-            $competitorAmountRange = (new CompetitorAmountCalculator())->calculate(
-                $newStructure->getCategories(),
-                $competition->createSportVariantsWithFields()
+            $competitionSportsSer = $structureSer->getFirstRoundNumber()->getCompetitionSports();
+            $fromToMapper = new FromToMapper(
+                array_values( $competitionSportsSer->toArray() ),
+                array_values( $competition->getSports()->toArray() ),
+                FromToMapStrategy::ById
             );
 
-            $competitionStartDateTime = $competition->getStartDateTime();
-            $recessPeriods = array_map(fn(Recess $recess) => $recess->getPeriod(), $recesses);
-            $totalPeriod = (new TotalPeriodCalculator())->calculate(
-                $competitionStartDateTime, $roundNumbersWithMinNrOfBatches, $recessPeriods);
+            $structureCopier = new StructureCopier(
+                new HorizontalPouleCreator(),
+                new QualifyRuleCreator(),
+                $fromToMapper
+            );
 
-            $planningTotals = new PlanningTotals($totalPeriod, $competitorAmountRange);
-            $json = $this->serializer->serialize($planningTotals, 'json');
+            $newStructure = $structureCopier->copy($structureSer, $competition);
+            $recesses = array_values($tournament->getRecesses()->toArray());
+
+            $json = '';
+            try {
+                $roundNumbersWithMinNrOfBatches = array_map( function(RoundNumber $roundNumber): RoundNumberWithMinNrOfBatches {
+                    $planningRefereeInfo = new PlanningRefereeInfo($roundNumber->getRefereeInfo());
+                    $cfg = (new InputConfigurationCreator())->create($roundNumber, $planningRefereeInfo);
+                    $jsonCfg = $this->serializer->serialize($cfg, 'json');
+                    return new RoundNumberWithMinNrOfBatches(
+                        $roundNumber,
+                        $this->planningClient->getMinNrOfBatches($jsonCfg)
+                    );
+                } , $newStructure->getRoundNumbers() );
+
+                $competitorAmountRange = (new CompetitorAmountCalculator())->calculate(
+                    $newStructure->getCategories(),
+                    $competition->createSportVariantsWithFields()
+                );
+
+                $competitionStartDateTime = $competition->getStartDateTime();
+                $recessPeriods = array_map(fn(Recess $recess) => $recess->getPeriod(), $recesses);
+                $totalPeriod = (new TotalPeriodCalculator())->calculate(
+                    $competitionStartDateTime, $roundNumbersWithMinNrOfBatches, $recessPeriods);
+
+                $planningTotals = new PlanningTotals($totalPeriod, $competitorAmountRange);
+                $json = $this->serializer->serialize($planningTotals, 'json');
+            } catch( DomainRecordNotFoundException $e ) {
+            } catch( DomainRecordBeingCalculatedException $e ) {
+            }
+
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             // \SportsPlanning\Exception\NoBestPlanning

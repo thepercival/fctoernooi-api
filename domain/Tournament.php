@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use FCToernooi\Tournament\CustomPlaceRanges;
+use FCToernooi\Tournament\Rule;
 use FCToernooi\Tournament\StartEditMode;
 use League\Period\Period;
 use Sports\Competition;
@@ -40,13 +41,17 @@ class Tournament extends Identifiable
      * @var Collection<int|string, Recess>
      */
     private Collection $recesses;
+    /**
+     * @var Collection<int|string, Rule>
+     */
+    private Collection $rules;
     protected int $exported = 0;
     protected bool $example = false;
     private string $intro;
     private string|null $logoExtension = null;
-    protected string|null $coordinate = null;
+    protected string|null $location = null;
 
-    public const MAX_LENGTH_COORDINATE = 30;
+    public const MAX_LENGTH_LOCATION = 80;
     public const MAX_LENGTH_INTRO = 200;
     public const IMG_FOLDER = 'tournaments';
 
@@ -61,6 +66,7 @@ class Tournament extends Identifiable
         $this->competitors = new ArrayCollection();
         $this->lockerRooms = new ArrayCollection();
         $this->recesses = new ArrayCollection();
+        $this->rules = new ArrayCollection();
         $this->setIntro($intro);
     }
 
@@ -93,25 +99,22 @@ class Tournament extends Identifiable
         $this->example = $example;
     }
 
-    public function getCoordinate(): string|null
+    public function getLocation(): string|null
     {
-        return $this->coordinate;
+        return $this->location;
     }
 
-    public function setCoordinate(string $coordinate = null): void
+    public function setLocation(string $location = null): void
     {
-        if ($coordinate !== null && strlen($coordinate) > 0) {
-            if (strlen($coordinate) > self::MAX_LENGTH_COORDINATE) {
+        if ($location !== null && strlen($location) > 0) {
+            if (strlen($location) > self::MAX_LENGTH_LOCATION) {
                 throw new \InvalidArgumentException(
-                    "het coordinaat mag maximaal " . self::MAX_LENGTH_COORDINATE . " karakters bevatten",
+                    "de locatie mag maximaal " . self::MAX_LENGTH_LOCATION . " karakters bevatten",
                     E_ERROR
                 );
             }
-            if (strpos($coordinate, ',') === false ) {
-                throw new \InvalidArgumentException("het coordinaat moet een komma bevatten)", E_ERROR);
-            }
         }
-        $this->coordinate = $coordinate;
+        $this->location = $location;
     }
 
     public function getLogoExtension(): string|null
@@ -183,6 +186,14 @@ class Tournament extends Identifiable
         return array_values($this->getRecesses()->map(function (Recess $recess): Period {
             return $recess->getPeriod();
         })->toArray());
+    }
+
+    /**
+     * @return Collection<int|string, Rule>
+     */
+    public function getRules(): Collection
+    {
+        return $this->rules;
     }
 
     public function getExported(): int

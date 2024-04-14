@@ -6,6 +6,7 @@ namespace App;
 
 use Exception;
 use Monolog\Handler\StreamHandler;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ class Command extends SymCommand
     {
         $this->addOption('logtofile', null, InputOption::VALUE_NONE, 'logtofile?');
         $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '' . Logger::INFO);
+        $this->addOption('maillog', null, InputOption::VALUE_NONE, 'maillog');
     }
 
     protected function getLogger(): LoggerInterface
@@ -40,7 +42,8 @@ class Command extends SymCommand
 
     protected function initLogger(
         int $logLevel,
-        string $streamDef,
+        bool $mailLog,
+        string $pathOrStdOut,
         string $name,
         MailHandler|null $mailHandler = null
     ): Logger {
@@ -48,13 +51,31 @@ class Command extends SymCommand
         $processor = new UidProcessor();
         $this->logger->pushProcessor($processor);
 
-        $handler = new StreamHandler($streamDef, $logLevel);
-        $this->logger->pushHandler($handler);
+        // Format Line Start //////////////////////////
+
+        // the default date format is "Y-m-d\TH:i:sP"
+        $dateFormat = "Y n j, g:i a";
+
+        // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
+        // we now change the default output format according to our needs.
+        $messageFormat = $logLevel === Logger::DEBUG ? 'info': 'default';
+        if( $messageFormat === 'info' ) {
+            $output = "%message% %context% %extra%\n";
+        } else {
+            $output = "%datetime% > %level_name% > %message% %context% %extra%\n";
+        }
+        // finally, create a formatter
+        $formatter = new LineFormatter($output, null/*$dateFormat*/);
+        // Create a handler
+        $streamHandler = new StreamHandler($pathOrStdOut, $logLevel);
+        $streamHandler->setFormatter($formatter);
+        $this->logger->pushHandler($streamHandler);
+        // Format Line End //////////////////////////
 
         if ($mailHandler === null) {
             $mailHandler = $this->getMailHandler();
         }
-        if ($this->mailer !== null) {
+        if ($this->mailer !== null && $mailLog) {
             $mailHandler->setMailer($this->mailer);
         }
         $this->logger->pushHandler($mailHandler);
@@ -76,6 +97,12 @@ class Command extends SymCommand
         return new MailHandler($toEmailAddress, $subject, $fromEmailAddress, $mailLogLevel);
     }
 
+    protected function getMailLog(InputInterface $input): bool
+    {
+        $mailLog = $input->getOption('maillog');
+        return is_bool($mailLog) ? $mailLog : false;
+    }
+
     protected function getLogLevel(InputInterface $input, int|null $defaultLogLevel = null): int
     {
         if ($defaultLogLevel === null) {
@@ -93,7 +120,7 @@ class Command extends SymCommand
         return $defaultLogLevel;
     }
 
-    protected function getStreamDef(InputInterface $input, string|null $fileName = null): string
+    protected function getPathOrStdOut(InputInterface $input, string|null $fileName = null): string
     {
         $logToFile = $input->getOption('logtofile');
         $logToFile = is_bool($logToFile) ? $logToFile : false;

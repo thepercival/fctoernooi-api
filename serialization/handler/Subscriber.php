@@ -7,6 +7,7 @@ namespace FCToernooi\SerializationHandler;
 use JMS\Serializer\Handler\HandlerRegistry;
 use Sports\SerializationHandler\DummyCreator;
 use Sports\SerializationHandler\Subscriber as SportsSubscriber;
+use SportsPlanning\SerializationHandler\Subscriber as SportsPlanningSubscriber;
 
 class Subscriber
 {
@@ -18,5 +19,6 @@ class Subscriber
     {
         $registry->registerSubscribingHandler(new TournamentHandler($this->dummyCreator));
         (new SportsSubscriber($this->dummyCreator))->subscribeHandlers($registry);
+        (new SportsPlanningSubscriber())->subscribeHandlers($registry);
     }
 }

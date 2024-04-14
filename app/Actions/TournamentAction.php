@@ -7,25 +7,30 @@ namespace App\Actions;
 use App\Copiers\TournamentCopier;
 use App\GuzzleClient;
 use App\ImageService;
+use App\Response\ErrorResponse;
+use Sports\Competition\Sport\FromToMapper;
+use Sports\Competition\Sport\FromToMapStrategy;
+use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
+use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use FCToernooi\PlanningTotals\RoundNumberWithMinNrOfBatches;
-use FCToernooi\RoundNumberWithPlanning;
-use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
-use Memcached;
 use FCToernooi\CacheService;
 use FCToernooi\CreditAction\Repository as CreditActionRepository;
+use FCToernooi\Planning\PlanningWriter;
 use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\Tournament\Rule as TournamentRule;
+use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use FCToernooi\Tournament\StartEditMode;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
@@ -33,14 +38,9 @@ use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
 use Sports\Competition\Service as CompetitionService;
 use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\InputConfigurationCreator;
-use Sports\Round\Number\PlanningAssigner;
 use Sports\Structure\Copier as StructureCopier;
 use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
-use FCToernooi\Tournament\Rule as TournamentRule;
-use SportsPlanning\Planning;
 use stdClass;
 
 final class TournamentAction extends Action
@@ -48,6 +48,7 @@ final class TournamentAction extends Action
     private CacheService $cacheService;
     private ImageService $imageService;
     private GuzzleClient $planningClient;
+    private PlanningWriter $planningWriter;
 
     public function __construct(
         LoggerInterface $logger,
@@ -57,7 +58,6 @@ final class TournamentAction extends Action
         private TournamentRuleRepository $ruleRepos,
         private CreditActionRepository $creditActionRepos,
         private TournamentCopier $tournamentCopier,
-        private StructureCopier $structureCopier,
         private StructureRepository $structureRepos,
         private EntityManagerInterface $entityManager,
         Memcached $memcached,
@@ -69,8 +69,10 @@ final class TournamentAction extends Action
         $this->imageService =  new ImageService($this->config, $logger);
         $this->planningClient = new GuzzleClient(
             $config->getString('scheduler.url'),
-            $config->getString('scheduler.apikey')
+            $config->getString('scheduler.apikey'),
+            $this->cacheService, $serializer, $logger
         );
+        $this->planningWriter = new PlanningWriter($this->cacheService, $this->entityManager, $logger);
     }
 
     /**
@@ -246,7 +248,7 @@ final class TournamentAction extends Action
                 new Recess($tournament, $recessSer->getName(), $recessSer->getPeriod());
             }
             $tournament->setPublic($tournamentSer->getPublic());
-            $tournament->setCoordinate($tournamentSer->getCoordinate());
+            $tournament->setLocation($tournamentSer->getLocation());
             $tournament->setIntro($tournamentSer->getIntro());
             $tournament->getCompetition()->getLeague()->setName($tournamentSer->getName());
             $this->tournamentRepos->customPersist($tournament, true);
@@ -354,7 +356,18 @@ final class TournamentAction extends Action
 
             $structure = $this->structureRepos->getStructure($competition);
 
-            $newStructure = $this->structureCopier->copy($structure, $newTournament->getCompetition());
+            $fromToMapper = new FromToMapper(
+                array_values( $competition->getSports()->toArray() ),
+                array_values( $newTournament->getCompetition()->getSports()->toArray() ),
+                FromToMapStrategy::ByProperties
+            );
+
+            $structureCopier = new StructureCopier(
+                new HorizontalPouleCreator(),
+                new QualifyRuleCreator(),
+                $fromToMapper
+            );
+            $newStructure = $structureCopier->copy($structure, $newTournament->getCompetition());
 
             $competitionValidator = new CompetitionValidator();
             $competitionValidator->checkValidity($newTournament->getCompetition());
@@ -381,16 +394,9 @@ final class TournamentAction extends Action
 
             // $this->creditActionRepos->removeCreateTournamentCredits($user);
 
-            $recesses = array_values( $tournament->getRecesses()->toArray() );
-            $recessPeriods = array_map( fn(Recess $recess) => $recess->getPeriod(), $recesses );
-            $planningAssigner = new PlanningAssigner( new RoundNumber\PlanningScheduler($recessPeriods) );
-            $roundNumbersWithPlanning = $this->getRoundNumbersWithPlanning($newStructure->getRoundNumbers());
-            foreach( $roundNumbersWithPlanning as $roundNumberWithPlanning ) {
-                $planningAssigner->assignPlanningToRoundNumber(
-                    $roundNumberWithPlanning->roundNumber,
-                    $roundNumberWithPlanning->planning,
-                );
-            }
+            $roundNumbersWithPlanning = $this->planningClient->getRoundNumbersWithPlanning(
+                $newTournament->getCompetition(), $newStructure->getRoundNumbers(), false );
+            $this->planningWriter->write($tournament, $roundNumbersWithPlanning);
 
             $conn->commit();
 
@@ -402,24 +408,7 @@ final class TournamentAction extends Action
         }
     }
 
-    private function getRoundNumbersWithPlanning(array $roundNumbers): array {
 
-        $roundNumbersWithPlanning = [];
-        foreach( $roundNumbers as $roundNumber) {
-            $cfg = (new InputConfigurationCreator())->create($roundNumber, $roundNumber->getRefereeInfo());
-            $jsonCfg = $this->serializer->serialize($cfg, 'json');
-            /** @var Planning $planning */
-            $planning = null;
-            try {
-                $planningAsString = $this->planningClient->get($jsonCfg);
-                $planning = $this->serializer->deserialize($planningAsString, Planning::class, 'json');
-                $roundNumbersWithPlanning[] = new RoundNumberWithPlanning($roundNumber, $planning);
-            } catch( \Exception $e ) {
-                break;
-            }
-        }
-        return $roundNumbersWithPlanning;
-    }
 
     /**
      * @param Request $request
@@ -447,6 +436,39 @@ final class TournamentAction extends Action
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, int|string> $args
+     * @return Response
+     */
+    public function upload(Request $request, Response $response, array $args): Response
+    {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $uploadedFiles = $request->getUploadedFiles();
+            if (!array_key_exists("logostream", $uploadedFiles)) {
+                $logoExtension = $tournament->getLogoExtension();
+                if( $logoExtension !== null ) {
+                    $this->imageService->removeImages($tournament, $logoExtension);
+                }
+                $extension = null;
+            } else {
+                $extension = $this->imageService->processUploadedImage($tournament, $uploadedFiles["logostream"]);
+            }
+
+            $tournament->setLogoExtension($extension);
+            $this->tournamentRepos->save($tournament);
+
+            $json = $this->serializer->serialize($tournament, 'json');
+            return $this->respondWithJson($response, $json);
+        } catch (\Exception $exception) {
+            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
 }

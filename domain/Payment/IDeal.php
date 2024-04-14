@@ -10,7 +10,7 @@ use Mollie\Api\Types\PaymentMethod;
 
 class IDeal extends Payment
 {
-    public function __construct(User $user, string $id, protected IDealIssuer $issuer, float $amount)
+    public function __construct(User $user, string $id, protected IDealIssuer $issuer, string $amount)
     {
         parent::__construct($user, $id, PaymentMethod::IDEAL, $amount);
     }

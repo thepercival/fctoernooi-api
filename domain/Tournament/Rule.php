@@ -8,21 +8,25 @@ use FCToernooi\Competitor;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 use Sports\Place\Location as PlaceLocation;
+use Sports\Priority\Prioritizable;
 use SportsHelpers\Identifiable;
 use FCToernooi\Tournament\Registration\State;
 
-class Rule extends Identifiable
+class Rule extends Identifiable implements Prioritizable
 {
     private string $text;
+    private int $priority;
 
     public const MIN_LENGTH_TEXT = 5;
     public const MAX_LENGTH_TEXT = 80;
 
     public function __construct(
         private Tournament $tournament,
-        string             $text
+        string             $text,
     )
     {
+        $this->tournament->getRules()->add($this);
+        $this->priority = count($this->tournament->getRules());
         $this->setText($text);
     }
 
@@ -47,5 +51,15 @@ class Rule extends Identifiable
             );
         }
         $this->text = $text;
+    }
+
+    public function getPriority(): int
+    {
+        return $this->priority;
+    }
+
+    final public function setPriority(int $priority): void
+    {
+        $this->priority = $priority;
     }
 }

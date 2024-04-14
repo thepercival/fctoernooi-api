@@ -1,9 +1,0 @@
-FCToernooi\PlanningTotals\CompetitorAmount:
-  exclusion_policy: ALL
-  exclude: false
-
-  properties:
-    nrOfGames:
-      type: SportsHelpers\SportRange
-    nrOfMinutes:
-      type: SportsHelpers\SportRange

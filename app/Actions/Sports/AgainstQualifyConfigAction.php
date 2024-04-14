@@ -94,57 +94,6 @@ final class AgainstQualifyConfigAction extends Action
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
         }
     }
-//
-//    public function edit(Request $request, Response $response, $args): Response
-//    {
-//        try {
-//            /** @var Competition $competition */
-//            $competition = $request->getAttribute('tournament')->getCompetition();
-//
-//            /** @var AgainstQualifyConfig $qualifyConfigSer */
-//            $qualifyConfigSer = $this->serializer->deserialize(
-//                $this->getRawData($request),
-//                AgainstQualifyConfig::class,
-//                'json'
-//            );
-//
-//            // $structure = $this->structureRepos->getStructure($competition); // to init next/previous
-//
-//            if (!array_key_exists('roundId', $args) || strlen($args['roundId']) === 0) {
-//                throw new \Exception('geen ronde opgegeven', E_ERROR);
-//            }
-//            $structure = $this->structureRepos->getStructure($competition);
-//            $round = $this->getRound($structure, (int)$args['roundId']);
-//
-//            if (!array_key_exists('competitionSportId', $args) || strlen($args['competitionSportId']) === 0) {
-//                throw new \Exception('geen sport opgegeven', E_ERROR);
-//            }
-//            $competitionSport = $this->competiionSportRepos->find((int)$args['competitionSportId']);
-//            if ($competitionSport === null) {
-//                throw new \Exception('de sport kon niet gevonden worden', E_ERROR);
-//            }
-//            $qualifyConfig = $round->getAgainstQualifyConfig($competitionSport);
-//            if ($qualifyConfig === null) {
-//                $qualifyConfig = new AgainstQualifyConfig($competitionSport, $round);
-//                // throw new \Exception('er zijn al score-instellingen aanwezig', E_ERROR);
-//            }
-//
-//            $qualifyConfig->setWinPoints($qualifyConfigSer->getWinPoints());
-//            $qualifyConfig->setDrawPoints($qualifyConfigSer->getDrawPoints());
-//            $qualifyConfig->setWinPointsExt($qualifyConfigSer->getWinPointsExt());
-//            $qualifyConfig->setDrawPointsExt($qualifyConfigSer->getDrawPointsExt());
-//            $qualifyConfig->setLosePointsExt($qualifyConfigSer->getLosePointsExt());
-//            $qualifyConfig->setPointsCalculation($qualifyConfigSer->getPointsCalculation());
-//            $this->qualifyConfigRepos->save($qualifyConfig);
-//
-//            $this->removeNext($round, $qualifyConfig->getCompetitionSport());
-//
-//            $json = $this->serializer->serialize($qualifyConfig, 'json');
-//            return $this->respondWithJson($response, $json);
-//        } catch (\Exception $exception) {
-//            return new ErrorResponse($exception->getMessage(), 422, $this->logger);
-//        }
-//    }
 
     protected function removeNext(Round $round, CompetitionSport $competitionSport): void
     {

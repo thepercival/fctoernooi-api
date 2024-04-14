@@ -90,7 +90,7 @@ return function (App $app): void {
                     );
 
                     $group->group(
-                        'rules',
+                        '/rules',
                         function (Group $group): void {
                             $group->options('', RuleAction::class . ':options');
                             $group->get('', RuleAction::class . ':fetch');
@@ -186,6 +186,11 @@ return function (App $app): void {
                         ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                             TournamentMiddleware::class
                         );
+                    $group->options('upload', TournamentAction::class . ':options');
+                    $group->post('upload', TournamentAction::class . ':upload')
+                        ->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
+                            TournamentMiddleware::class
+                        );
 
                     $group->options('structure/planningtotals', StructureAction::class . ':options');
                     $group->put('structure/planningtotals', StructureAction::class . ':getPlanningTotals')
@@ -216,23 +221,53 @@ return function (App $app): void {
                         function (Group $group): void {
                             $group->options('', CompetitionSportAction::class . ':options');
                             $group->post('', CompetitionSportAction::class . ':add');
-                            $group->options('/{competitionSportId}', CompetitionSportAction::class . ':options');
-                            // $group->put('/{competitionSportId}', CompetitionSportAction::class . ':edit');
-                            $group->delete('/{competitionSportId}', CompetitionSportAction::class . ':remove');
 
                             $group->group(
-                                '/{competitionSportId}/fields',
+                                '/{competitionSportId}',
                                 function (Group $group): void {
-                                    $group->options('', FieldAction::class . ':options');
-                                    $group->post('', FieldAction::class . ':add');
-                                    $group->options('/{fieldId}', FieldAction::class . ':options');
-                                    $group->put('/{fieldId}', FieldAction::class . ':edit');
-                                    $group->delete('/{fieldId}', FieldAction::class . ':remove');
-                                    $group->options('/{fieldId}/priorityup', FieldAction::class . ':options');
-                                    $group->post('/{fieldId}/priorityup', FieldAction::class . ':priorityUp');
+                                    $group->options('', CompetitionSportAction::class . ':options');
+                                    // $group->put('/{competitionSportId}', CompetitionSportAction::class . ':edit');
+                                    $group->delete('', CompetitionSportAction::class . ':remove');
+
+                                    $group->group(
+                                        '/fields',
+                                        function (Group $group): void {
+                                            $group->options('', FieldAction::class . ':options');
+                                            $group->post('', FieldAction::class . ':add');
+                                            $group->options('/{fieldId}', FieldAction::class . ':options');
+                                            $group->put('/{fieldId}', FieldAction::class . ':edit');
+                                            $group->delete('/{fieldId}', FieldAction::class . ':remove');
+                                            $group->options('/{fieldId}/priorityup', FieldAction::class . ':options');
+                                            $group->post('/{fieldId}/priorityup', FieldAction::class . ':priorityUp');
+                                        }
+                                    );
+
+                                    $group->group(
+                                        '/games',
+                                        function (Group $group): void {
+                                            $group->group(
+                                                'against',
+                                                function (Group $group): void {
+                                                    $group->options('', GameAgainstAction::class . ':options');
+                                                    $group->post('', GameAgainstAction::class . ':add');
+                                                    $group->options('/{gameId}', GameAgainstAction::class . ':options');
+                                                    $group->put('/{gameId}', GameAgainstAction::class . ':edit');
+                                                    $group->delete('/{gameId}', GameAgainstAction::class . ':remove');
+                                                }
+                                            );
+                                            $group->group(
+                                                'together',
+                                                function (Group $group): void {
+                                                    $group->options('', GameTogetherAction::class . ':options');
+                                                    $group->post('', GameTogetherAction::class . ':add');
+                                                    $group->options('/{gameId}', GameTogetherAction::class . ':options');
+                                                    $group->put('/{gameId}', GameTogetherAction::class . ':edit');
+                                                    $group->delete('/{gameId}', GameTogetherAction::class . ':remove');
+                                                }
+                                            );
+                                        }
+                                    );
                                 }
-                            )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                                TournamentMiddleware::class
                             );
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
@@ -310,34 +345,6 @@ return function (App $app): void {
                     );
 
                     $group->group(
-                        'games',
-                        function (Group $group): void {
-                            $group->group(
-                                'against',
-                                function (Group $group): void {
-                                    $group->options('', GameAgainstAction::class . ':options');
-                                    $group->post('', GameAgainstAction::class . ':add');
-                                    $group->options('/{gameId}', GameAgainstAction::class . ':options');
-                                    $group->put('/{gameId}', GameAgainstAction::class . ':edit');
-                                    $group->delete('/{gameId}', GameAgainstAction::class . ':remove');
-                                }
-                            );
-                            $group->group(
-                                'together',
-                                function (Group $group): void {
-                                    $group->options('', GameTogetherAction::class . ':options');
-                                    $group->post('', GameTogetherAction::class . ':add');
-                                    $group->options('/{gameId}', GameTogetherAction::class . ':options');
-                                    $group->put('/{gameId}', GameTogetherAction::class . ':edit');
-                                    $group->delete('/{gameId}', GameTogetherAction::class . ':remove');
-                                }
-                            );
-                        }
-                    )->add(TournamentGameAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
-
-                    $group->group(
                         'planning/{roundNumber}',
                         function (Group $group): void {
                             $group->options('/create', PlanningAction::class . ':options');
@@ -368,6 +375,10 @@ return function (App $app): void {
                             $group->options('/{ruleId}', RuleAction::class . ':options');
                             $group->put('/{ruleId}', RuleAction::class . ':edit');
                             $group->delete('/{ruleId}', RuleAction::class . ':remove');
+
+                            $group->options('/{ruleId}/priorityup', RuleAction::class . ':options');
+                            $group->post('/{ruleId}/priorityup', RuleAction::class . ':priorityUp');
+
                         }
                     )->add(TournamentAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
                         TournamentMiddleware::class

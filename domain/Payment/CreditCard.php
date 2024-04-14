@@ -15,7 +15,7 @@ class CreditCard extends Payment
         string $id,
         protected string $cardNumber,
         protected string $cvc,
-        float $amount
+        string $amount
     ) {
         parent::__construct($user, $id, PaymentMethod::CREDITCARD, $amount);
     }

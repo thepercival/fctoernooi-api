@@ -18,7 +18,7 @@ class Payment extends Identifiable
         protected User $user,
         protected string|null $paymentId,
         protected string $method,
-        protected float $amount
+        protected string $amount
     ) {
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -45,7 +45,7 @@ class Payment extends Identifiable
 
     public function getAmount(): float
     {
-        return $this->amount;
+        return (float)$this->amount;
     }
 
     public function getState(): PaymentState
@@ -61,7 +61,7 @@ class Payment extends Identifiable
 
     public function calculateNrOfCredits(): int
     {
-        return (int)($this->amount / self::EUROS_PER_CREDIT);
+        return (int)($this->getAmount() / self::EUROS_PER_CREDIT);
     }
 
     public function getUpdatedAt(): \DateTimeImmutable

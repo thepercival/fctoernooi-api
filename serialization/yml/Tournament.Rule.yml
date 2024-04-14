@@ -4,3 +4,5 @@ FCToernooi\Tournament\Rule:
   properties:
     text:
       type: string
+    priority:
+      type: int

@@ -31,14 +31,19 @@ abstract class QueueService
     /**
      * @param array<string, mixed> $amqpOptions
      */
-    public function __construct(array $amqpOptions, string $queueName)
+    public function __construct(array $amqpOptions, string $queueName, string|null $suffixField = null)
     {
-        if (array_key_exists('suffix', $amqpOptions) === false) {
+        if( $suffixField === null ) {
+            $suffixField = 'suffix';
+        }
+
+        if (array_key_exists($suffixField, $amqpOptions) === false) {
             throw new Exception('option queue:suffix is missing', E_ERROR);
         }
         /** @var string $queueSuffix */
-        $queueSuffix = $amqpOptions['suffix'];
+        $queueSuffix = $amqpOptions[$suffixField];
         unset($amqpOptions['suffix']);
+        unset($amqpOptions['planningSuffix']);
         $queueSuffix = mb_strlen($queueSuffix) > 0 ? '-' . $queueSuffix : $queueSuffix;
 
         $this->amqpOptions = $amqpOptions;
