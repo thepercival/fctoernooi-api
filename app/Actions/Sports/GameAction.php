@@ -82,7 +82,7 @@ class GameAction extends Action
         $refereeSer = $gameSer->getReferee();
         if ($refereeStructureLocation !== null) {
             $placeMap = $this->getPlaceMap($roundNumber);
-            $game->setRefereePlace($placeMap[$refereeStructureLocation]);
+            $game->setRefereePlace($placeMap[(string)$refereeStructureLocation]);
             $game->setReferee(null);
         } elseif ($refereeSer !== null) {
             $referee = $this->getRefereeById($roundNumber->getCompetition(), $refereeSer);
@@ -105,7 +105,7 @@ class GameAction extends Action
         $map = [];
         foreach ($roundNumber->getRounds() as $round) {
             foreach ($round->getPlaces() as $place) {
-                $map[$place->getStructureLocation()] = $place;
+                $map[(string)$place->getStructureLocation()] = $place;
             }
         }
         return $map;

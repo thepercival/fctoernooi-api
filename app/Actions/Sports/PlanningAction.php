@@ -145,33 +145,11 @@ final class PlanningAction extends Action
             $structure = $this->getStructureFromRequest($request, $args);
             $startRoundNumber = $this->getRoundNumberFromRequest($request, $args);
 
-            // in command en hier moet hetzelfde gecontroleerd worden.
-            // voor de structuur vanaf rondeNummber x tot en met laatste rondenummer moet er een bestPlanning zijn
-
             $roundNumber = $startRoundNumber;
             while ( $roundNumber !== null ) {
                 $this->roundNumberRepos->removePlanning($roundNumber);
                 $roundNumber = $roundNumber->getNext();
             }
-
-            // $roundNumber = $structure->getRoundNumber($startRoundNumber);
-//            $inputConfig = (new InputConfigurationCreator())->create($startRoundNumber,
-//                new PlanningRefereeInfo( $startRoundNumber->getRefereeInfo()) );
-//
-//            $jsonInputConfig = $this->serializer->serialize($inputConfig, 'json');
-//            $jsonPlanning = $this->planningClient->get($jsonInputConfig);
-//            /** @var Planning $planning */
-//            $planning = $this->serializer->deserialize(
-//                $jsonPlanning,
-//                Planning::class,
-//                'json'/*,
-//                $deserializationContext*/
-//            );
-
-//            if( $planningInput === null ) {
-//                throw new \Exception('de planning "' . $inputConfig->getName() . '" kan niet gevonden worden, doe een aanpassing',
-//                    E_ERROR );
-//            }
 
             $recessPeriods = array_values( array_map( function(Recess $recess): Period {
                 return $recess->getPeriod();

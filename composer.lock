@@ -5812,16 +5812,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.188",
+            "version": "v1.0.190",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "dd74c0620b30bd7f03393550a0253ed3349fa9e4"
+                "reference": "c1d8e2b52599614e333aeb57552dfde41e0bd9d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/dd74c0620b30bd7f03393550a0253ed3349fa9e4",
-                "reference": "dd74c0620b30bd7f03393550a0253ed3349fa9e4",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/c1d8e2b52599614e333aeb57552dfde41e0bd9d6",
+                "reference": "c1d8e2b52599614e333aeb57552dfde41e0bd9d6",
                 "shasum": ""
             },
             "require": {
@@ -5885,9 +5885,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.188"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.190"
             },
-            "time": "2024-04-13T06:37:26+00:00"
+            "time": "2024-04-15T17:53:46+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -5957,16 +5957,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.152",
+            "version": "v1.0.153",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "1ef8c67797ca157bc4eb77dafabdb1a0e7e92f84"
+                "reference": "dae09c6caa990c93c25ee8f2b9a95757a1035fb4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/1ef8c67797ca157bc4eb77dafabdb1a0e7e92f84",
-                "reference": "1ef8c67797ca157bc4eb77dafabdb1a0e7e92f84",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/dae09c6caa990c93c25ee8f2b9a95757a1035fb4",
+                "reference": "dae09c6caa990c93c25ee8f2b9a95757a1035fb4",
                 "shasum": ""
             },
             "require": {
@@ -6024,9 +6024,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.152"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.153"
             },
-            "time": "2024-04-12T14:21:47+00:00"
+            "time": "2024-04-14T17:09:52+00:00"
         },
         {
             "name": "thepercival/php-sports-scheduler",
@@ -7000,16 +7000,16 @@
         },
         {
             "name": "amphp/byte-stream",
-            "version": "v1.8.1",
+            "version": "v1.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/byte-stream.git",
-                "reference": "acbd8002b3536485c997c4e019206b3f10ca15bd"
+                "reference": "4f0e968ba3798a423730f567b1b50d3441c16ddc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/byte-stream/zipball/acbd8002b3536485c997c4e019206b3f10ca15bd",
-                "reference": "acbd8002b3536485c997c4e019206b3f10ca15bd",
+                "url": "https://api.github.com/repos/amphp/byte-stream/zipball/4f0e968ba3798a423730f567b1b50d3441c16ddc",
+                "reference": "4f0e968ba3798a423730f567b1b50d3441c16ddc",
                 "shasum": ""
             },
             "require": {
@@ -7025,11 +7025,6 @@
                 "psalm/phar": "^3.11.4"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.x-dev"
-                }
-            },
             "autoload": {
                 "files": [
                     "lib/functions.php"
@@ -7053,7 +7048,7 @@
                 }
             ],
             "description": "A stream abstraction to make working with non-blocking I/O simple.",
-            "homepage": "http://amphp.org/byte-stream",
+            "homepage": "https://amphp.org/byte-stream",
             "keywords": [
                 "amp",
                 "amphp",
@@ -7063,9 +7058,8 @@
                 "stream"
             ],
             "support": {
-                "irc": "irc://irc.freenode.org/amphp",
                 "issues": "https://github.com/amphp/byte-stream/issues",
-                "source": "https://github.com/amphp/byte-stream/tree/v1.8.1"
+                "source": "https://github.com/amphp/byte-stream/tree/v1.8.2"
             },
             "funding": [
                 {
@@ -7073,7 +7067,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-03-30T17:13:30+00:00"
+            "time": "2024-04-13T18:00:56+00:00"
         },
         {
             "name": "composer/class-map-generator",
