@@ -5,7 +5,7 @@
 -- ALTER TABLE rounds ADD structureCellId INT  NULL;
 
 -- POST POST POST doctrine-update ===========================================================
-update tournaments set intro = 'Welkom bij ons toernooi! Hieronder staan de regels. De onderwerpen kun je met het menu, onderaan het scherm, opvragen.';
+update tournaments set intro = 'Dit is een standaard welkomsbericht. Je kunt het welkomstbericht aanpassen, de huisregels opgeven, een locatie opgeven en sponsoren tonen.' where intro = '' and public = 1;
 
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':OP', ':OP(1)') where uniqueString like '%:OP%';
 -- update planningInputs set uniqueString = REPLACE (uniqueString, ':SP', ':SP(1)') where uniqueString like '%:SP%';

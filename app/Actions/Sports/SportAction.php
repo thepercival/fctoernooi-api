@@ -26,16 +26,6 @@ final class SportAction extends Action
         parent::__construct($logger, $serializer);
     }
 
-    protected function getDeserializationContext(): DeserializationContext
-    {
-        return DeserializationContext::create()->setGroups(['Default', 'noReference']);
-    }
-
-    protected function getSerializationContext(): SerializationContext
-    {
-        return SerializationContext::create()->setGroups(['Default', 'noReference']);
-    }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -46,7 +36,7 @@ final class SportAction extends Action
     {
         try {
             $sports = $this->sportRepos->findByExt(true);
-            $json = $this->serializer->serialize($sports, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($sports, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400, $this->logger);
@@ -66,7 +56,7 @@ final class SportAction extends Action
             throw new Exception("geen sport met het opgegeven id gevonden", E_ERROR);
         }
 
-        $json = $this->serializer->serialize($sport, 'json', $this->getSerializationContext());
+        $json = $this->serializer->serialize($sport, 'json');
         return $this->respondWithJson($response, $json);
     }
 
@@ -80,7 +70,7 @@ final class SportAction extends Action
     {
         try {
             /** @var Sport $sportSer */
-            $sportSer = $this->serializer->deserialize($this->getRawData($request), Sport::class, 'json', $this->getDeserializationContext());
+            $sportSer = $this->serializer->deserialize($this->getRawData($request), Sport::class, 'json');
 
             $newSport = $this->sportRepos->findOneBy(['name' => strtolower($sportSer->getName())]);
             if ($newSport === null) {
@@ -94,7 +84,7 @@ final class SportAction extends Action
                 $this->sportRepos->save($newSport);
             }
 
-            $json = $this->serializer->serialize($newSport, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($newSport, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);

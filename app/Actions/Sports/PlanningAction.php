@@ -66,8 +66,6 @@ final class PlanningAction extends Action
     {
         try {
             $roundNumber = $this->getRoundNumberFromRequest($request, $args);
-            $y = $roundNumber->getPoules();
-            $x = count ( reset($y)->getAgainstGames() );
             $json = $this->serializer->serialize($roundNumber->getPoules(), 'json', $this->getSerializationContext());
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
@@ -95,8 +93,7 @@ final class PlanningAction extends Action
 
             $seekingPercentage = 0;
             try {
-                $context = SerializationContext::create()->setGroups(['Default', 'noReference']);
-                $jsonConfig = $this->serializer->serialize($config, 'json', $context );
+                $jsonConfig = $this->serializer->serialize($config, 'json' );
                 $seekingPercentage = $this->planningClient->getProgress($jsonConfig);
             } catch (Exception $e) {
                 if( $roundNumber->getNumber() === 1 ) {

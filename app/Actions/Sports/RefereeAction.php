@@ -39,12 +39,7 @@ final class RefereeAction extends Action
 
     protected function getDeserializationContext(): DeserializationContext
     {
-        return DeserializationContext::create()->setGroups(['Default', 'privacy', 'noReference']);
-    }
-
-    protected function getSerializationContext(): SerializationContext
-    {
-        return SerializationContext::create()->setGroups(['Default', 'noReference']);
+        return DeserializationContext::create()->setGroups(['Default', 'privacy']);
     }
 
     /**
@@ -85,7 +80,7 @@ final class RefereeAction extends Action
             }
             $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress(), $sendMail);
 
-            $json = $this->serializer->serialize($newReferee, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($newReferee, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
@@ -145,7 +140,7 @@ final class RefereeAction extends Action
                 $this->authSyncService->add($tournament, Role::REFEREE, $referee->getEmailaddress(), $sendMail);
             }
 
-            $json = $this->serializer->serialize($referee, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($referee, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);

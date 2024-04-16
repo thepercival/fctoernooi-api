@@ -34,16 +34,6 @@ final class FieldAction extends Action
         parent::__construct($logger, $serializer);
     }
 
-    protected function getDeserializationContext(): DeserializationContext
-    {
-        return DeserializationContext::create()->setGroups(['Default', 'noReference']);
-    }
-
-    protected function getSerializationContext(): SerializationContext
-    {
-        return SerializationContext::create()->setGroups(['Default', 'noReference']);
-    }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -67,8 +57,7 @@ final class FieldAction extends Action
             $field = $this->serializer->deserialize(
                 $this->getRawData($request),
                 Field::class,
-                'json',
-                $this->getDeserializationContext()
+                'json'
             );
 
             $availabilityChecker = new AvailabilityChecker();
@@ -79,7 +68,7 @@ final class FieldAction extends Action
 
             $this->fieldRepos->save($newField);
 
-            $json = $this->serializer->serialize($newField, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($newField, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);
@@ -115,8 +104,7 @@ final class FieldAction extends Action
             $fieldSer = $this->serializer->deserialize(
                 $this->getRawData($request),
                 Field::class,
-                'json',
-                $this->getDeserializationContext()
+                'json'
             );
             if ($fieldSer === false) {
                 throw new Exception('het veld kon niet gevonden worden o.b.v. de invoer', E_ERROR);
@@ -129,7 +117,7 @@ final class FieldAction extends Action
             $field->setName($fieldSer->getName());
             $this->fieldRepos->save($field);
 
-            $json = $this->serializer->serialize($field, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($field, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);

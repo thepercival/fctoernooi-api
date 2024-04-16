@@ -50,20 +50,12 @@ final class CompetitionSportAction extends Action
     /**
      * @return list<string>
      */
-    protected function getDeserializationGroups(): array
-    {
-        return ['Default', 'noReference'];
-    }
+//    protected function getDeserializationGroups(): array
+//    {
+//        return ['Default', 'noReference'];
+//    }
 
-    protected function getDeserializationContext(): DeserializationContext
-    {
-        return DeserializationContext::create()->setGroups(['Default', 'noReference']);
-    }
 
-    protected function getSerializationContext(): SerializationContext
-    {
-        return SerializationContext::create()->setGroups(['Default', 'noReference']);
-    }
 
     /**
      * @param Request $request
@@ -80,11 +72,7 @@ final class CompetitionSportAction extends Action
             $competition = $tournament->getCompetition();
 
             /** @var CompetitionSport $serializedCompSport */
-            $serializedCompSport = $this->deserialize(
-                $request,
-                CompetitionSport::class,
-                $this->getDeserializationGroups()
-            );
+            $serializedCompSport = $this->deserialize($request,CompetitionSport::class);
 
             $sport = $this->sportRepos->find($serializedCompSport->getSport()->getId());
             if ($sport === null) {
@@ -119,7 +107,7 @@ final class CompetitionSportAction extends Action
                 $competition,
                 $structure);
 
-            $json = $this->serializer->serialize($newCompSport, 'json', $this->getSerializationContext());
+            $json = $this->serializer->serialize($newCompSport, 'json');
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 422, $this->logger);

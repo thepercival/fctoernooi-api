@@ -78,11 +78,6 @@ final class StructureAction extends Action
         return SerializationContext::create()->setGroups(['Default', 'structure', 'games']);
     }
 
-    protected function getPlanningSerializationContext(): SerializationContext
-    {
-        return SerializationContext::create()->setGroups(['Default', 'noReference']);
-    }
-
     /**
      * @param Request $request
      * @param Response $response

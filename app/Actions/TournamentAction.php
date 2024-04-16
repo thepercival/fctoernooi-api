@@ -108,8 +108,7 @@ final class TournamentAction extends Action
                 }
                 $json = $this->serializer->serialize(
                     $tournament,
-                    'json',
-                    $this->getSerializationContext($tournament, $user)
+                    'json'
                 );
                 $this->cacheService->setTournament($tournamentId, $json);
             }
@@ -121,8 +120,7 @@ final class TournamentAction extends Action
 
     protected function getDeserializationContext(User $user = null): DeserializationContext
     {
-        $serGroups = ['Default', 'noReference'];
-
+        $serGroups = ['Default'];
         if ($user !== null) {
             $serGroups[] = 'privacy';
         }
@@ -135,11 +133,7 @@ final class TournamentAction extends Action
     // roleadmin: provides fctoernooi\user::emailaddress, logisch
 
     // privacy: Sports\Competition\Referee::emailaddress
-    protected function getSerializationContext(Tournament $tournament, User $user = null): SerializationContext
-    {
-        $serGroups = ['Default', 'noReference'];
 
-        $context = SerializationContext::create()->setGroups($serGroups);
 
 //        if ($user !== null) {
 //            $tournamentUser = $tournament->getUser($user);
@@ -153,8 +147,6 @@ final class TournamentAction extends Action
 //                }
 //            }
 //        }
-        return SerializationContext::create()->setGroups($serGroups);
-    }
 
     /**
      * @param Request $request
@@ -203,8 +195,7 @@ final class TournamentAction extends Action
             $rule = new TournamentRule($tournament, $ruleText);
             $this->ruleRepos->save($rule, true );
 
-            $serializationContext = $this->getSerializationContext($tournament, $user);
-            $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
+            $json = $this->serializer->serialize($tournament, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);
@@ -252,9 +243,8 @@ final class TournamentAction extends Action
             $tournament->setIntro($tournamentSer->getIntro());
             $tournament->getCompetition()->getLeague()->setName($tournamentSer->getName());
             $this->tournamentRepos->customPersist($tournament, true);
-            $serializationContext = $this->getSerializationContext($tournament, $user);
 
-            $json = $this->serializer->serialize($tournament, 'json', $serializationContext);
+            $json = $this->serializer->serialize($tournament, 'json');
             return $this->respondWithJson($response, $json);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);
