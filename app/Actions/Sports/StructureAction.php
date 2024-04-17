@@ -86,15 +86,15 @@ final class StructureAction extends Action
      */
     public function fetchOne(Request $request, Response $response, array $args): Response
     {
+        /** @var Tournament $tournament */
+        $tournament = $request->getAttribute("tournament");
         try {
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
             $competition = $tournament->getCompetition();
 
             $tournamentId = (int)$tournament->getId();
             $json = $this->cacheService->getStructure($tournamentId);
             if ($json === false || $this->config->getString('environment') === 'development') {
+
                 $structure = $this->structureRepos->getStructure($competition);
                 $structureOutput = new StructureOutput($this->logger);
                 $structureOutput->output($structure);
@@ -114,7 +114,8 @@ final class StructureAction extends Action
             }
             return $this->respondWithJson($response, $json);
         } catch (\Exception $exception) {
-            return new ErrorResponse($exception->getMessage(), 500, $this->logger);
+            $msgSuffix = ' => tournamentId('.((string)$tournament->getId()).')';
+            return new ErrorResponse($exception->getMessage() . $msgSuffix, 500, $this->logger);
         }
     }
 

@@ -11,6 +11,7 @@ use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\PlanningAssigner;
 use Sports\Round\Number\PlanningScheduler;
 use SportsPlanning\Planning;
+use SportsPlanning\Exceptions\NoBestPlanningException;
 
 class TotalPeriodCalculator
 {
@@ -58,7 +59,7 @@ class TotalPeriodCalculator
      * @param RoundNumber $roundNumber
      * @param Planning $bestPlanning
      * @param list<Period> $recessPeriods
-     * @throws \SportsPlanning\Exception\NoBestPlanning
+     * @throws NoBestPlanningException
      */
     public function assignGames(
         RoundNumber $roundNumber,

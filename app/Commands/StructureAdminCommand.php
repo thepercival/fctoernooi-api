@@ -119,26 +119,28 @@ class StructureAdminCommand extends Command
 
             foreach ($tournaments as $tournament) {
                 $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
-                $description .= $tournament->getCreatedDateTime()->format(DATE_ISO8601);
+                $description .= $tournament->getCreatedDateTime()->format(DATE_ATOM);
 
                 $logger->info($description);
                 /** @var Structure|null $structure */
                 $structure = null;
                 try {
-                    $tournamentCompetitorValidator->checkValidity($tournament);
-
-                    $structure = $this->checkValidity($tournament);
-                    if ($tournament->getUsers()->count() === 0) {
-                        $invitations = $this->invitationRepos->findBy(['tournament' => $tournament]);
-                        if (count($invitations) === 0) {
-                            throw new NoUsersException(
-                                'toernooi-id(' . ((string)$tournament->getId()) . ') => has no users or invitations',
-                                E_ERROR
-                            );
-                        }
-                    }
+                    $structure = $this->structureRepos->getStructure($tournament->getCompetition());
                     if( $action === StructureActionArgument::Show ) {
                         $this->addStructureToLog($tournament, $structure);
+                    } else {
+                        $tournamentCompetitorValidator->checkValidity($tournament);
+                        $this->checkValidity($tournament, $structure);
+
+                        if ($tournament->getUsers()->count() === 0) {
+                            $invitations = $this->invitationRepos->findBy(['tournament' => $tournament]);
+                            if (count($invitations) === 0) {
+                                throw new NoUsersException(
+                                    'toernooi-id(' . ((string)$tournament->getId()) . ') => has no users or invitations',
+                                    E_ERROR
+                                );
+                            }
+                        }
                     }
                 } catch (NoUsersException $exception) {
                     $logger->error($exception->getMessage());
@@ -165,10 +167,9 @@ class StructureAdminCommand extends Command
         return StructureActionArgument::from($action);
     }
 
-    protected function checkValidity(Tournament $tournament): Structure
+    protected function checkValidity(Tournament $tournament, Structure $structure): void
     {
         try {
-            $structure = $this->structureRepos->getStructure($tournament->getCompetition());
             $competition = $tournament->getCompetition();
             if (count($competition->getFields()) === 0) {
                 throw new Exception('het toernooi moet minimaal 1 veld bevatten', E_ERROR);
@@ -182,7 +183,6 @@ class StructureAdminCommand extends Command
             // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
             throw new Exception('toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $throwable->getMessage(), E_ERROR);
         }
-        return $structure;
     }
 
     protected function validateGames(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
