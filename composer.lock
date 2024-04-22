@@ -380,16 +380,16 @@
         },
         {
             "name": "doctrine/collections",
-            "version": "2.2.1",
+            "version": "2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/collections.git",
-                "reference": "420480fc085bc65f3c956af13abe8e7546f94813"
+                "reference": "d8af7f248c74f195f7347424600fd9e17b57af59"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/collections/zipball/420480fc085bc65f3c956af13abe8e7546f94813",
-                "reference": "420480fc085bc65f3c956af13abe8e7546f94813",
+                "url": "https://api.github.com/repos/doctrine/collections/zipball/d8af7f248c74f195f7347424600fd9e17b57af59",
+                "reference": "d8af7f248c74f195f7347424600fd9e17b57af59",
                 "shasum": ""
             },
             "require": {
@@ -446,7 +446,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/collections/issues",
-                "source": "https://github.com/doctrine/collections/tree/2.2.1"
+                "source": "https://github.com/doctrine/collections/tree/2.2.2"
             },
             "funding": [
                 {
@@ -462,7 +462,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-03-05T22:28:45+00:00"
+            "time": "2024-04-18T06:56:21+00:00"
         },
         {
             "name": "doctrine/common",
@@ -5812,16 +5812,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.192",
+            "version": "v1.0.193",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "2b95c0a43869ff16d78598418b9f8a89d2c4174d"
+                "reference": "aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/2b95c0a43869ff16d78598418b9f8a89d2c4174d",
-                "reference": "2b95c0a43869ff16d78598418b9f8a89d2c4174d",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd",
+                "reference": "aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd",
                 "shasum": ""
             },
             "require": {
@@ -5885,9 +5885,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.192"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.193"
             },
-            "time": "2024-04-17T20:57:18+00:00"
+            "time": "2024-04-19T14:18:56+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -5957,16 +5957,16 @@
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.154",
+            "version": "v1.0.156",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "1f190a9dec883d7565808f3fe4833cb5a0a78659"
+                "reference": "417ee7340b7749c728c7e9983802119b73db0cbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/1f190a9dec883d7565808f3fe4833cb5a0a78659",
-                "reference": "1f190a9dec883d7565808f3fe4833cb5a0a78659",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/417ee7340b7749c728c7e9983802119b73db0cbb",
+                "reference": "417ee7340b7749c728c7e9983802119b73db0cbb",
                 "shasum": ""
             },
             "require": {
@@ -6024,22 +6024,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.154"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.156"
             },
-            "time": "2024-04-17T20:19:50+00:00"
+            "time": "2024-04-19T13:46:40+00:00"
         },
         {
             "name": "thepercival/php-sports-scheduler",
-            "version": "v1.0.21",
+            "version": "v1.0.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-scheduler.git",
-                "reference": "2180ba1ac7d846e38a8390cc7e3f9f780a8eb1b4"
+                "reference": "cf047234d70434c7884669a565b01a2dbcd6209a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-scheduler/zipball/2180ba1ac7d846e38a8390cc7e3f9f780a8eb1b4",
-                "reference": "2180ba1ac7d846e38a8390cc7e3f9f780a8eb1b4",
+                "url": "https://api.github.com/repos/thepercival/php-sports-scheduler/zipball/cf047234d70434c7884669a565b01a2dbcd6209a",
+                "reference": "cf047234d70434c7884669a565b01a2dbcd6209a",
                 "shasum": ""
             },
             "require": {
@@ -6096,9 +6096,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-scheduler/issues",
-                "source": "https://github.com/thepercival/php-sports-scheduler/tree/v1.0.21"
+                "source": "https://github.com/thepercival/php-sports-scheduler/tree/v1.0.23"
             },
-            "time": "2024-04-17T20:53:44+00:00"
+            "time": "2024-04-19T14:17:26+00:00"
         },
         {
             "name": "thepercival/zend-pdf",
@@ -6489,16 +6489,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.9.2",
+            "version": "v3.9.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "856cb5a6cfd6f3e4dc1f6c9a8f54e259503f7cf3"
+                "reference": "a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/856cb5a6cfd6f3e4dc1f6c9a8f54e259503f7cf3",
-                "reference": "856cb5a6cfd6f3e4dc1f6c9a8f54e259503f7cf3",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58",
+                "reference": "a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58",
                 "shasum": ""
             },
             "require": {
@@ -6552,7 +6552,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.9.2"
+                "source": "https://github.com/twigphp/Twig/tree/v3.9.3"
             },
             "funding": [
                 {
@@ -6564,7 +6564,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-17T14:16:25+00:00"
+            "time": "2024-04-18T11:59:33+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -6708,21 +6708,21 @@
         },
         {
             "name": "zf1s/zend-cache",
-            "version": "1.15.4",
+            "version": "1.15.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zf1s/zend-cache.git",
-                "reference": "bd20dd88aa1bafabd0d9e2b34579a6b0c75347e6"
+                "reference": "af9ad663cc471b70b76140eda95501188ac4d6d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zf1s/zend-cache/zipball/bd20dd88aa1bafabd0d9e2b34579a6b0c75347e6",
-                "reference": "bd20dd88aa1bafabd0d9e2b34579a6b0c75347e6",
+                "url": "https://api.github.com/repos/zf1s/zend-cache/zipball/af9ad663cc471b70b76140eda95501188ac4d6d4",
+                "reference": "af9ad663cc471b70b76140eda95501188ac4d6d4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3",
-                "zf1s/zend-exception": "^1.15.4"
+                "zf1s/zend-exception": "^1.15.5"
             },
             "replace": {
                 "zf1/zend-cache": "^1.12"
@@ -6759,13 +6759,13 @@
             ],
             "support": {
                 "issues": "https://github.com/zf1s/zend-cache/issues",
-                "source": "https://github.com/zf1s/zend-cache/tree/1.15.4"
+                "source": "https://github.com/zf1s/zend-cache/tree/1.15.5"
             },
-            "time": "2024-02-25T14:57:38+00:00"
+            "time": "2024-04-18T08:48:59+00:00"
         },
         {
             "name": "zf1s/zend-exception",
-            "version": "1.15.4",
+            "version": "1.15.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zf1s/zend-exception.git",
@@ -6807,28 +6807,28 @@
                 "zend"
             ],
             "support": {
-                "source": "https://github.com/zf1s/zend-exception/tree/1.15.4"
+                "source": "https://github.com/zf1s/zend-exception/tree/1.15.5"
             },
             "time": "2024-01-04T13:33:07+00:00"
         },
         {
             "name": "zf1s/zend-log",
-            "version": "1.15.4",
+            "version": "1.15.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zf1s/zend-log.git",
-                "reference": "cdaf3e3eb344e4c3ceafeba55f860b083f7680c6"
+                "reference": "d4b19f8b76367597c7deca54479bf3249f6bbf33"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zf1s/zend-log/zipball/cdaf3e3eb344e4c3ceafeba55f860b083f7680c6",
-                "reference": "cdaf3e3eb344e4c3ceafeba55f860b083f7680c6",
+                "url": "https://api.github.com/repos/zf1s/zend-log/zipball/d4b19f8b76367597c7deca54479bf3249f6bbf33",
+                "reference": "d4b19f8b76367597c7deca54479bf3249f6bbf33",
                 "shasum": ""
             },
             "require": {
                 "ext-reflection": "*",
                 "php": ">=5.3.3",
-                "zf1s/zend-exception": "^1.15.4"
+                "zf1s/zend-exception": "^1.15.5"
             },
             "replace": {
                 "zf1/zend-log": "^1.12"
@@ -6861,28 +6861,28 @@
                 "zend"
             ],
             "support": {
-                "source": "https://github.com/zf1s/zend-log/tree/1.15.4"
+                "source": "https://github.com/zf1s/zend-log/tree/1.15.5"
             },
-            "time": "2024-02-25T14:57:38+00:00"
+            "time": "2024-04-18T08:48:59+00:00"
         },
         {
             "name": "zf1s/zend-memory",
-            "version": "1.15.4",
+            "version": "1.15.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zf1s/zend-memory.git",
-                "reference": "918f930928932166825f2bf8cbb9f05ec46b2116"
+                "reference": "faeaf095e3dc046157612bb356c024b09ba06948"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zf1s/zend-memory/zipball/918f930928932166825f2bf8cbb9f05ec46b2116",
-                "reference": "918f930928932166825f2bf8cbb9f05ec46b2116",
+                "url": "https://api.github.com/repos/zf1s/zend-memory/zipball/faeaf095e3dc046157612bb356c024b09ba06948",
+                "reference": "faeaf095e3dc046157612bb356c024b09ba06948",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3",
-                "zf1s/zend-cache": "^1.15.4",
-                "zf1s/zend-exception": "^1.15.4"
+                "zf1s/zend-cache": "^1.15.5",
+                "zf1s/zend-exception": "^1.15.5"
             },
             "replace": {
                 "zf1/zend-memory": "^1.12"
@@ -6911,9 +6911,9 @@
                 "zend"
             ],
             "support": {
-                "source": "https://github.com/zf1s/zend-memory/tree/1.15.4"
+                "source": "https://github.com/zf1s/zend-memory/tree/1.15.5"
             },
-            "time": "2024-02-25T14:57:38+00:00"
+            "time": "2024-04-18T08:48:59+00:00"
         }
     ],
     "packages-dev": [
@@ -8621,16 +8621,16 @@
         },
         {
             "name": "phpstan/phpstan-doctrine",
-            "version": "1.3.66",
+            "version": "1.3.69",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-doctrine.git",
-                "reference": "45aa4438527ef1ec84c1fca1355c53a5857a1e69"
+                "reference": "ac567407e750b94e2133dace33b19082ad9ed751"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/45aa4438527ef1ec84c1fca1355c53a5857a1e69",
-                "reference": "45aa4438527ef1ec84c1fca1355c53a5857a1e69",
+                "url": "https://api.github.com/repos/phpstan/phpstan-doctrine/zipball/ac567407e750b94e2133dace33b19082ad9ed751",
+                "reference": "ac567407e750b94e2133dace33b19082ad9ed751",
                 "shasum": ""
             },
             "require": {
@@ -8687,9 +8687,9 @@
             "description": "Doctrine extensions for PHPStan",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-doctrine/issues",
-                "source": "https://github.com/phpstan/phpstan-doctrine/tree/1.3.66"
+                "source": "https://github.com/phpstan/phpstan-doctrine/tree/1.3.69"
             },
-            "time": "2024-04-15T07:24:11+00:00"
+            "time": "2024-04-18T12:56:14+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
