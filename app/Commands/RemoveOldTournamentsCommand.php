@@ -63,9 +63,9 @@ class RemoveOldTournamentsCommand extends Command
             $loggerName = 'command-' . $this->customName;
             $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
             $logger = $this->initLogger(
-                $this->getLogLevel($input),
-                $this->getMailLog($input),
-                $this->getPathOrStdOut($input, $loggerName),
+                $this->getLogLevelFromInput($input),
+                $this->getMailLogFromInput($input),
+                $this->getPathOrStdOutFromInput($input, $loggerName),
                 $loggerName,
                 $mailHandler
             );

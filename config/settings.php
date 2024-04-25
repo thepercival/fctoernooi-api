@@ -99,11 +99,11 @@ return [
         'backuppath' => (($_ENV['ENVIRONMENT'] === 'development') ? '/tmp' : '/var') . '/imgbackups'
     ],
     'queue' => [
-        'host' => 'rattlesnake.rmq.cloudamqp.com',
-        // 'port' => 5672,
-        'vhost' => 'ctydjbyu',
-        'user' => 'ctydjbyu',
-        'pass' => $_ENV['CLOUD_AMQP_APIKEY2'],
+        'host' => 'localhost',  // 'rattlesnake.rmq.cloudamqp.com'
+        'port' => 5672,
+        'vhost' => '/', // 'ctydjbyu'
+        'user' => 'guest', // 'ctydjbyu'
+        'pass' => 'guest', // $_ENV['CLOUD_AMQP_APIKEY2']
         'persisted' => false,
         'suffix' => 'fctoernooi' . '-' . $_ENV['ENVIRONMENT'],
         'planningSuffix' => 'sportsscheduler' . '-' . $_ENV['ENVIRONMENT']

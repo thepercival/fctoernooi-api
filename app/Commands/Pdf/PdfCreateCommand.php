@@ -106,9 +106,9 @@ class PdfCreateCommand extends Command
         try {
             $loggerName = 'command-' . $this->customName;
             $this->initLogger(
-                $this->getLogLevel($input),
-                $this->getMailLog($input),
-                $this->getPathOrStdOut($input, $loggerName),
+                $this->getLogLevelFromInput($input),
+                $this->getMailLogFromInput($input),
+                $this->getPathOrStdOutFromInput($input, $loggerName),
                 $loggerName,
             );
             $this->getLogger()->info('starting command app:pdf-create');

@@ -97,13 +97,7 @@ class Command extends SymCommand
         return new MailHandler($toEmailAddress, $subject, $fromEmailAddress, $mailLogLevel);
     }
 
-    protected function getMailLog(InputInterface $input): bool
-    {
-        $mailLog = $input->getOption('maillog');
-        return is_bool($mailLog) ? $mailLog : false;
-    }
-
-    protected function getLogLevel(InputInterface $input, int|null $defaultLogLevel = null): int
+    protected function getLogLevelFromInput(InputInterface $input, int|null $defaultLogLevel = null): int
     {
         if ($defaultLogLevel === null) {
             $loggerSettings = $this->config->getArray('logger');
@@ -120,7 +114,7 @@ class Command extends SymCommand
         return $defaultLogLevel;
     }
 
-    protected function getPathOrStdOut(InputInterface $input, string|null $fileName = null): string
+    protected function getPathOrStdOutFromInput(InputInterface $input, string|null $fileName = null): string
     {
         $logToFile = $input->getOption('logtofile');
         $logToFile = is_bool($logToFile) ? $logToFile : false;
@@ -129,5 +123,16 @@ class Command extends SymCommand
         }
         $loggerSettings = $this->config->getArray('logger');
         return ($loggerSettings['path'] . $fileName . '.log');
+    }
+
+    protected function getMailLogFromInput(InputInterface $input): bool
+    {
+        return $this->getBooleanFromInput($input, 'maillog');
+    }
+
+    protected function getBooleanFromInput(InputInterface $input, string $key): bool
+    {
+        $logToFile = $input->getOption($key);
+        return is_bool($logToFile) ? $logToFile : false;
     }
 }

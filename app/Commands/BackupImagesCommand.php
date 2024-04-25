@@ -71,9 +71,9 @@ class BackupImagesCommand extends Command
 
         $loggerName = 'command-' . $this->customName;
         $logger = $this->initLogger(
-            $this->getLogLevel($input),
-            $this->getMailLog($input),
-            $this->getPathOrStdOut($input, $loggerName),
+            $this->getLogLevelFromInput($input),
+            $this->getMailLogFromInput($input),
+            $this->getPathOrStdOutFromInput($input, $loggerName),
             $loggerName,
         );
         $imageService = new ImageService($this->config, $logger);

@@ -105,9 +105,9 @@ class StructureAdminCommand extends Command
         try {
             $loggerName = 'command-' . $this->customName;
             $logger = $this->initLogger(
-                $this->getLogLevel($input),
-                $this->getMailLog($input),
-                $this->getPathOrStdOut($input, $loggerName),
+                $this->getLogLevelFromInput($input),
+                $this->getMailLogFromInput($input),
+                $this->getPathOrStdOutFromInput($input, $loggerName),
                 $loggerName,
             );
             $tournaments = $this->getTournamentsFromInput($input);

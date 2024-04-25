@@ -5812,16 +5812,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.193",
+            "version": "v1.0.196",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd"
+                "reference": "4d55ac82318d08c9bd4b993da67a1eb51a78016d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd",
-                "reference": "aa5fe211ea9fa2aeb0ff7ca8d079f46efcb9d1cd",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/4d55ac82318d08c9bd4b993da67a1eb51a78016d",
+                "reference": "4d55ac82318d08c9bd4b993da67a1eb51a78016d",
                 "shasum": ""
             },
             "require": {
@@ -5885,22 +5885,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.193"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.196"
             },
-            "time": "2024-04-19T14:18:56+00:00"
+            "time": "2024-04-25T06:07:31+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
-            "version": "v1.2.50",
+            "version": "v1.2.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-helpers.git",
-                "reference": "8ab3a146783f51dbb25457bd9fa395c27cd69f54"
+                "reference": "ae6c6fc864a67bd049671ab201cba92788623189"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/8ab3a146783f51dbb25457bd9fa395c27cd69f54",
-                "reference": "8ab3a146783f51dbb25457bd9fa395c27cd69f54",
+                "url": "https://api.github.com/repos/thepercival/php-sports-helpers/zipball/ae6c6fc864a67bd049671ab201cba92788623189",
+                "reference": "ae6c6fc864a67bd049671ab201cba92788623189",
                 "shasum": ""
             },
             "require": {
@@ -5951,22 +5951,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-helpers/issues",
-                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.2.50"
+                "source": "https://github.com/thepercival/php-sports-helpers/tree/v1.2.52"
             },
-            "time": "2024-04-12T14:05:08+00:00"
+            "time": "2024-04-23T13:01:06+00:00"
         },
         {
             "name": "thepercival/php-sports-planning",
-            "version": "v1.0.156",
+            "version": "v1.0.166",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-planning.git",
-                "reference": "417ee7340b7749c728c7e9983802119b73db0cbb"
+                "reference": "46a0f710bc5789b37156cee0b41f17fcbde98102"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/417ee7340b7749c728c7e9983802119b73db0cbb",
-                "reference": "417ee7340b7749c728c7e9983802119b73db0cbb",
+                "url": "https://api.github.com/repos/thepercival/php-sports-planning/zipball/46a0f710bc5789b37156cee0b41f17fcbde98102",
+                "reference": "46a0f710bc5789b37156cee0b41f17fcbde98102",
                 "shasum": ""
             },
             "require": {
@@ -6024,22 +6024,22 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-planning/issues",
-                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.156"
+                "source": "https://github.com/thepercival/php-sports-planning/tree/v1.0.166"
             },
-            "time": "2024-04-19T13:46:40+00:00"
+            "time": "2024-04-25T06:04:43+00:00"
         },
         {
             "name": "thepercival/php-sports-scheduler",
-            "version": "v1.0.23",
+            "version": "v1.0.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports-scheduler.git",
-                "reference": "cf047234d70434c7884669a565b01a2dbcd6209a"
+                "reference": "291bb4dc90132b8e82a8fcd65f2858d06673be84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports-scheduler/zipball/cf047234d70434c7884669a565b01a2dbcd6209a",
-                "reference": "cf047234d70434c7884669a565b01a2dbcd6209a",
+                "url": "https://api.github.com/repos/thepercival/php-sports-scheduler/zipball/291bb4dc90132b8e82a8fcd65f2858d06673be84",
+                "reference": "291bb4dc90132b8e82a8fcd65f2858d06673be84",
                 "shasum": ""
             },
             "require": {
@@ -6096,9 +6096,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports-scheduler/issues",
-                "source": "https://github.com/thepercival/php-sports-scheduler/tree/v1.0.23"
+                "source": "https://github.com/thepercival/php-sports-scheduler/tree/v1.0.27"
             },
-            "time": "2024-04-19T14:17:26+00:00"
+            "time": "2024-04-25T06:05:59+00:00"
         },
         {
             "name": "thepercival/zend-pdf",
@@ -7152,16 +7152,16 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.7.2",
+            "version": "2.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "b826edb791571ab1eaf281eb1bd6e181a1192adc"
+                "reference": "a625e50598e12171d3f60b1149eb530690c43474"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/b826edb791571ab1eaf281eb1bd6e181a1192adc",
-                "reference": "b826edb791571ab1eaf281eb1bd6e181a1192adc",
+                "url": "https://api.github.com/repos/composer/composer/zipball/a625e50598e12171d3f60b1149eb530690c43474",
+                "reference": "a625e50598e12171d3f60b1149eb530690c43474",
                 "shasum": ""
             },
             "require": {
@@ -7246,7 +7246,7 @@
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/composer/issues",
                 "security": "https://github.com/composer/composer/security/policy",
-                "source": "https://github.com/composer/composer/tree/2.7.2"
+                "source": "https://github.com/composer/composer/tree/2.7.4"
             },
             "funding": [
                 {
@@ -7262,7 +7262,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-03-11T16:12:18+00:00"
+            "time": "2024-04-22T19:17:03+00:00"
         },
         {
             "name": "composer/metadata-minifier",
@@ -8745,16 +8745,16 @@
         },
         {
             "name": "phpstan/phpstan-strict-rules",
-            "version": "1.5.3",
+            "version": "1.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-strict-rules.git",
-                "reference": "568210bd301f94a0d4b1e5a0808c374c1b9cf11b"
+                "reference": "2e193a07651a6f4be3baa44ddb21d822681f5918"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-strict-rules/zipball/568210bd301f94a0d4b1e5a0808c374c1b9cf11b",
-                "reference": "568210bd301f94a0d4b1e5a0808c374c1b9cf11b",
+                "url": "https://api.github.com/repos/phpstan/phpstan-strict-rules/zipball/2e193a07651a6f4be3baa44ddb21d822681f5918",
+                "reference": "2e193a07651a6f4be3baa44ddb21d822681f5918",
                 "shasum": ""
             },
             "require": {
@@ -8788,9 +8788,9 @@
             "description": "Extra strict and opinionated rules for PHPStan",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-strict-rules/issues",
-                "source": "https://github.com/phpstan/phpstan-strict-rules/tree/1.5.3"
+                "source": "https://github.com/phpstan/phpstan-strict-rules/tree/1.5.5"
             },
-            "time": "2024-04-06T07:43:25+00:00"
+            "time": "2024-04-19T15:12:26+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
