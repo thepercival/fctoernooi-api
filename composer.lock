@@ -5813,16 +5813,16 @@
         },
         {
             "name": "thepercival/php-sports",
-            "version": "v1.0.200",
+            "version": "v1.0.203",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thepercival/php-sports.git",
-                "reference": "b38818bfb8025cdfc9d0f1113f10d0445858ae86"
+                "reference": "24f3216f0b105b25138e279a59b9ed24f48b4933"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/b38818bfb8025cdfc9d0f1113f10d0445858ae86",
-                "reference": "b38818bfb8025cdfc9d0f1113f10d0445858ae86",
+                "url": "https://api.github.com/repos/thepercival/php-sports/zipball/24f3216f0b105b25138e279a59b9ed24f48b4933",
+                "reference": "24f3216f0b105b25138e279a59b9ed24f48b4933",
                 "shasum": ""
             },
             "require": {
@@ -5886,9 +5886,9 @@
             "support": {
                 "email": "coendunnink@gmail.com",
                 "issues": "https://github.com/thepercival/php-sports/issues",
-                "source": "https://github.com/thepercival/php-sports/tree/v1.0.200"
+                "source": "https://github.com/thepercival/php-sports/tree/v1.0.203"
             },
-            "time": "2024-05-10T12:00:38+00:00"
+            "time": "2024-05-12T04:54:31+00:00"
         },
         {
             "name": "thepercival/php-sports-helpers",
@@ -6490,16 +6490,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.9.3",
+            "version": "v3.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58"
+                "reference": "3af5ab2e52279e5e23dc192b1a26db3b8cffa4e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58",
-                "reference": "a842d75fed59cdbcbd3a3ad7fb9eb768fc350d58",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3af5ab2e52279e5e23dc192b1a26db3b8cffa4e7",
+                "reference": "3af5ab2e52279e5e23dc192b1a26db3b8cffa4e7",
                 "shasum": ""
             },
             "require": {
@@ -6553,7 +6553,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.9.3"
+                "source": "https://github.com/twigphp/Twig/tree/v3.10.1"
             },
             "funding": [
                 {
@@ -6565,7 +6565,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-18T11:59:33+00:00"
+            "time": "2024-05-12T06:16:18+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
