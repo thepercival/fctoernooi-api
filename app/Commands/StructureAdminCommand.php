@@ -118,10 +118,6 @@ class StructureAdminCommand extends Command
             $tournamentCompetitorValidator = new \FCToernooi\Competitor\Validator();
 
             foreach ($tournaments as $tournament) {
-                $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
-                $description .= $tournament->getCreatedDateTime()->format(DATE_ATOM);
-
-                $logger->info($description);
                 /** @var Structure|null $structure */
                 $structure = null;
                 try {
@@ -129,6 +125,10 @@ class StructureAdminCommand extends Command
                     if( $action === StructureActionArgument::Show ) {
                         $this->addStructureToLog($tournament, $structure);
                     } else {
+//                        $description = 'validate id ' . (string)$tournament->getId() . ', created at ';
+//                        $description .= $tournament->getCreatedDateTime()->format(DATE_ATOM);
+//                        $logger->info($description);
+
                         $tournamentCompetitorValidator->checkValidity($tournament);
                         $this->checkValidity($tournament, $structure);
 
