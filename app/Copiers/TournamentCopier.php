@@ -225,7 +225,8 @@ class TournamentCopier
             );
             $newCompetitor->setEmailaddress($fromCompetitor->getEmailaddress());
             $newCompetitor->setTelephone($fromCompetitor->getTelephone());
-            $newCompetitor->setInfo($fromCompetitor->getInfo());
+            $newCompetitor->setPublicInfo($fromCompetitor->getPublicInfo());
+            $newCompetitor->setPrivateInfo($fromCompetitor->getPrivateInfo());
             $newCompetitor->setLogoExtension($fromCompetitor->getLogoExtension());
             $this->competitorRepos->save($newCompetitor, true);
             if ($fromCompetitor->getLogoExtension() !== null) {

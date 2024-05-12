@@ -123,7 +123,8 @@ final class CompetitorAction extends Action
             $newCompetitor->setEmailaddress($competitor->getEmailaddress());
             $newCompetitor->setTelephone($competitor->getTelephone());
             $newCompetitor->setLogoExtension($competitor->getLogoExtension());
-            $newCompetitor->setInfo($competitor->getInfo());
+            $newCompetitor->setPublicInfo($competitor->getPublicInfo());
+            $newCompetitor->setPrivateInfo($competitor->getPrivateInfo());
 
             $this->competitorRepos->save($newCompetitor);
 
@@ -174,7 +175,7 @@ final class CompetitorAction extends Action
             $newCompetitor->setEmailaddress($registration->getEmailaddress());
             $newCompetitor->setTelephone($registration->getTelephone());
             $newCompetitor->setLogoExtension(null);
-            $newCompetitor->setInfo($registration->getInfo());
+            $newCompetitor->setPrivateInfo($registration->getInfo());
 
             $this->competitorRepos->save($newCompetitor);
 
@@ -221,8 +222,9 @@ final class CompetitorAction extends Action
             $competitor->setName($competitorSer->getName());
             $competitor->setEmailaddress($competitorSer->getEmailaddress());
             $competitor->setTelephone($competitorSer->getTelephone());
-            $competitor->setRegistered($competitorSer->getRegistered());
-            $competitor->setInfo($competitorSer->getInfo());
+            $competitor->setPresent($competitorSer->getPresent());
+            $competitor->setPublicInfo($competitorSer->getPublicInfo());
+            $competitor->setPrivateInfo($competitorSer->getPrivateInfo());
             $this->competitorRepos->save($competitor);
 
             $serGroups = $this->getModifySerializationGroup();

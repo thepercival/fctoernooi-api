@@ -16,5 +16,8 @@ FCToernooi\Competitor:
       type: boolean
     logoExtension:
       type: string
-    info:
+    publicInfo:
       type: string
+    privateInfo:
+      type: string
+      groups: [ privacy ]

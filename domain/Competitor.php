@@ -17,12 +17,13 @@ class Competitor extends StartLocation implements SportsCompetitor
     public const IMG_FOLDER = 'competitors';
 
     protected int|string|null $id = null;
-    protected bool $registered = false;
+    protected bool $present = false;
     private string|null $emailaddress = null;
     private string|null $telephone = null;
 
     protected string|null $logoExtension = null;
-    protected string|null $info = null;
+    protected string|null $publicInfo = null;
+    protected string|null $privateInfo = null;
 
     protected string $name;
 
@@ -85,14 +86,14 @@ class Competitor extends StartLocation implements SportsCompetitor
         $this->telephone = $telephone;
     }
 
-    public function getRegistered(): bool
+    public function getPresent(): bool
     {
-        return $this->registered;
+        return $this->present;
     }
 
-    public function setRegistered(bool $registered): void
+    public function setPresent(bool $present): void
     {
-        $this->registered = $registered;
+        $this->present = $present;
     }
 
     public function getLogoExtension(): string|null
@@ -106,19 +107,35 @@ class Competitor extends StartLocation implements SportsCompetitor
     }
 
 
-    public function getInfo(): ?string
+    public function getPublicInfo(): ?string
     {
-        return $this->info;
+        return $this->publicInfo;
     }
 
-    public function setInfo(string $info = null): void
+    public function setPublicInfo(string $publicInfo = null): void
     {
-        if ($info !== null && strlen($info) === 0) {
-            $info = null;
+        if ($publicInfo !== null && strlen($publicInfo) === 0) {
+            $publicInfo = null;
         }
-        if ($info !== null && strlen($info) > self::MAX_LENGTH_INFO) {
+        if ($publicInfo !== null && strlen($publicInfo) > self::MAX_LENGTH_INFO) {
             throw new InvalidArgumentException('de extra-info mag maximaal ' . self::MAX_LENGTH_INFO . ' karakters bevatten', E_ERROR);
         }
-        $this->info = $info;
+        $this->publicInfo = $publicInfo;
+    }
+
+    public function getPrivateInfo(): ?string
+    {
+        return $this->privateInfo;
+    }
+
+    public function setPrivateInfo(string $privateInfo = null): void
+    {
+        if ($privateInfo !== null && strlen($privateInfo) === 0) {
+            $privateInfo = null;
+        }
+        if ($privateInfo !== null && strlen($privateInfo) > self::MAX_LENGTH_INFO) {
+            throw new InvalidArgumentException('de extra-info mag maximaal ' . self::MAX_LENGTH_INFO . ' karakters bevatten', E_ERROR);
+        }
+        $this->privateInfo = $privateInfo;
     }
 }
