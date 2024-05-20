@@ -98,6 +98,15 @@ return function (App $app): void {
                     )->add(TournamentPublicAuthMiddleware::class)->add(TournamentMiddleware::class)->add(
                         VersionMiddleware::class
                     );
+
+                    $group->group(
+                        '/registrations/settings',
+                        function (Group $group): void {
+                            $group->options('', RegistrationSettingsAction::class . ':options');
+                            $group->get('', RegistrationSettingsAction::class . ':fetchOne');
+                        }
+                    )->add(TournamentPublicAuthMiddleware::class)
+                        ->add(TournamentMiddleware::class)->add(VersionMiddleware::class);
                 }
             );
 
