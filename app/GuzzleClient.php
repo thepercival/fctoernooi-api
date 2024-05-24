@@ -16,7 +16,7 @@ use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\InputConfigurationCreator;
 use SportsPlanning\Input\Configuration;
 use SportsPlanning\Planning;
-use SportsPlanning\Referee\Info as PlanningInfoRefereeInfo;
+use SportsPlanning\Referee\Info as PlanningRefereeInfo;
 
 class GuzzleClient
 {
@@ -72,7 +72,7 @@ class GuzzleClient
         $roundNumbersWithPlanning = [];
 
         foreach( $roundNumbers as $roundNumber) {
-            $refereeInfo = new PlanningInfoRefereeInfo($roundNumber->getRefereeInfo());
+            $refereeInfo = new PlanningRefereeInfo($roundNumber->getRefereeInfo());
             $inputConfiguration = (new InputConfigurationCreator())->create($roundNumber, $refereeInfo);
 
             $competitionId = (string)$competition->getId();

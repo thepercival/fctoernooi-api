@@ -10,8 +10,9 @@ use Sports\Round;
 use SportsHelpers\PouleStructure\Balanced as BalancedPouleStructure;
 use SportsHelpers\Sport\VariantWithFields;
 use SportsHelpers\SportRange;
+use SportsPlanning\Input\ConfigurationValidator;
 use SportsPlanning\PouleStructure as PlanningPouleStructure;
-use SportsPlanning\Referee\Info as RefereeInfo;
+use SportsPlanning\Referee\Info as PlanningRefereeInfo;
 
 class CompetitorAmountCalculator
 {
@@ -57,9 +58,12 @@ class CompetitorAmountCalculator
         }, $round->getPoules()->toArray() );
         $pouleStructure = new BalancedPouleStructure(...$nrOfPlaces);
 
-        $planningRefereeInfo = new RefereeInfo($refereeInfo);
+        $validatedInputConfig = (new ConfigurationValidator())->createReducedAndValidatedInputConfiguration(
+            $pouleStructure, $sportVariantsWithFields, new PlanningRefereeInfo($refereeInfo),true
+        );
+        $validatedRefereeInfo = $validatedInputConfig->refereeInfo;
         $competitorAmount = $this->getCompetitorAmountSelf(
-            $pouleStructure, $maxNrOfMinutesPerGame, $sportVariantsWithFields, $planningRefereeInfo);
+            $pouleStructure, $maxNrOfMinutesPerGame, $sportVariantsWithFields, $validatedRefereeInfo);
         if (count($round->getChildren()) === 0) {
             return $competitorAmount;
         }
@@ -77,16 +81,17 @@ class CompetitorAmountCalculator
     }
 
     /**
-     * @param BalancedPouleStructure $pouleStructure ,
-     * @param int $maxNrOfMinutesPerGame,
+     * @param BalancedPouleStructure $pouleStructure
+     * @param int $maxNrOfMinutesPerGame
      * @param list<VariantWithFields> $sportVariantsWithFields
+     * @param PlanningRefereeInfo $refereeInfo
      * @return CompetitorAmount
      */
     private function getCompetitorAmountSelf(
         BalancedPouleStructure $pouleStructure,
         int $maxNrOfMinutesPerGame,
         array $sportVariantsWithFields,
-        RefereeInfo $refereeInfo ): CompetitorAmount
+        PlanningRefereeInfo $refereeInfo ): CompetitorAmount
     {
         // als poules van twee plaatsen en scheidsrechter is zelf eigen poule dan mag hier op doorgegaan worden
         // er zou iets van een exception moeten komen om te kijken welke optie je wilt afvangen
