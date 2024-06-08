@@ -412,7 +412,7 @@ abstract class Page extends Zend_Pdf_Page
      * @param list<int> $pattern
      * @return void
      */
-    public function drawDashedLine(HorizontalLine|VerticalLine $line, array $pattern = [10,10]): void {
+    public function drawDashedLine(HorizontalLine|VerticalLine $line, array $pattern = [3,3]): void {
         // DASHED LINE
         $this->setLineDashingPattern($pattern);
         $this->drawLineCustom($line);
