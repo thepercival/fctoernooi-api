@@ -539,6 +539,8 @@ return function (App $app): void {
                             $group->post('', PdfAction::class . ':create');
                             $group->options('/progress', PdfAction::class . ':options');
                             $group->get('/progress', PdfAction::class . ':progress');
+                            $group->options('/apply-service', PdfAction::class . ':options');
+                            $group->post('/apply-service', PdfAction::class . ':applyService');
                         }
                     )
                         ->add(TournamentRoleAdminAuthMiddleware::class)

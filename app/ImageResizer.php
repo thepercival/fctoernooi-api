@@ -47,11 +47,11 @@ class ImageResizer
         $image_height = $source_properties[1];
         $image_type = $source_properties[2];
 
-        foreach( $this->getImageResizeHeights() as $imageSize ) {
+        foreach( $this->getImageResizeProps() as $imageProps ) {
 
-            $targetHeight = $imageSize->getHeight();
+            $targetHeight = $imageProps->getHeight();
 
-            $resizedImagePath = $this->pathResolver->getPath($object, $imageSize, $extension);
+            $resizedImagePath = $this->pathResolver->getPath($object, $imageProps, $extension);
 
             if (is_readable($resizedImagePath) && $removeResizeImages) {
                 unlink($resizedImagePath);
@@ -159,9 +159,16 @@ class ImageResizer
 //    }
 
     /**
-     * @return list<ImageSize>
+     * @return list<ImageProps>
      */
-    public function getImageResizeHeights(): array {
-        return [new ImageSize('_h_20', 20) , new ImageSize('_h_200', 200)];
+    public function getImageResizeProps(): array {
+        return [
+            $this->getImageProps(ImageSize::Small),
+            $this->getImageProps(ImageSize::Normal)
+        ];
+    }
+
+    public function getImageProps(ImageSize $imageSize): ImageProps {
+        return new ImageProps( ImageProps::Suffix . $imageSize->value, $imageSize);
     }
 }

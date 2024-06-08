@@ -6,10 +6,12 @@ namespace App\Actions;
 
 use App\Export\PdfService;
 use App\Export\PdfSubject;
+use App\Mailer;
 use App\QueueService\Pdf as PdfQueueService;
 use Exception;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Repository as TournamentRepository;
+use FCToernooi\User;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -27,7 +29,8 @@ final class PdfAction extends Action
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
         private PdfService $pdfService,
-        Configuration $config
+        private Mailer $mailer,
+        private Configuration $config
     ) {
         parent::__construct($logger, $serializer);
         $this->pdfQueueService = new PdfQueueService($config->getArray('queue'));
@@ -105,5 +108,42 @@ final class PdfAction extends Action
             throw new Exception('kies minimaal 1 exportoptie', E_ERROR);
         }
         return $subjects;
+    }
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array<string, string> $args
+     * @return Response
+     */
+    public function applyService(Request $request, Response $response, array $args): Response {
+        try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute('tournament');
+
+            /** @var User $user */
+            $user = $request->getAttribute('user');
+
+            $tournamentUser = $tournament->getUser($user);
+            if( $tournamentUser === null ) {
+                throw new Exception('toernooi gebruiker niet gevonden', E_ERROR);
+            }
+
+            $this->sendPrintServiceApplication($tournament, $user);
+
+            return $this->respondWithJson($response, '');
+        } catch (Exception $exception) {
+            throw new HttpException($request, $exception->getMessage(), 422);
+        }
+    }
+
+    protected function sendPrintServiceApplication(Tournament $tournament, User $user): void
+    {
+        $subject = 'printaanvraag voor toernooi "' . $tournament->getName() . '"';
+
+        $content = 'vraag naar de aantallen, maak voeg welkomstpagina toe <br/>';
+        $content .= 'stuur door naar ' . $user->getEmailaddress();
+
+        $this->mailer->send($subject, $content, $this->config->getString('email.admin'));
     }
 }

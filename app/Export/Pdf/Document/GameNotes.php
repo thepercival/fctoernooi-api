@@ -11,6 +11,7 @@ use App\Export\Pdf\Drawers\GameNote\AllInOneGame as AllInOneGameDrawer;
 use App\Export\Pdf\Drawers\GameNote\Single as SingleDrawer;
 use App\Export\Pdf\Page\GameNotes as GameNotesPage;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
 use FCToernooi\Tournament;
 use Sports\Competition\Referee;
 use Sports\Competition\Sport as CompetitionSport;
@@ -29,14 +30,14 @@ use Zend_Pdf_Page;
 class GameNotes extends PdfDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         protected GameNotesConfig $config
     ) {
-        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+        parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
     }
 
     public function getConfig(): GameNotesConfig

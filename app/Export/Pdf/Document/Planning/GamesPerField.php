@@ -11,6 +11,9 @@ use App\Export\Pdf\Line\Horizontal;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageProps;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Game;
 use Sports\Round\Number as RoundNumber;
@@ -22,18 +25,18 @@ use Sports\Structure;
 class GamesPerField extends PdfPlanningDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         GamesConfig $gamesConfig,
         GameLineConfig $gameLineConfig
     ) {
         parent::__construct(
             $tournament,
             $structure,
-            $url,
+            $imagePathResolver,
             $progress,
             $maxSubjectProgress,
             $gamesConfig,
@@ -48,11 +51,12 @@ class GamesPerField extends PdfPlanningDocument
 
     protected function drawPlanningPerField(RoundNumber $roundNumber): void
     {
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $fields = $this->getTournament()->getCompetition()->getFields();
         foreach ($fields as $field) {
             $title = 'veld ' . (string)$field->getName();
             $page = $this->createPagePlanning($roundNumber, $title);
-            $y = $page->drawHeader($this->getTournament()->getName(), $title);
+            $y = $page->drawHeader($this->getTournament()->getName(), $logoPath,  $title);
             $page->setGameFilter(
                 function (Game $game) use ($field): bool {
                     return $game->getField() === $field;

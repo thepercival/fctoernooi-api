@@ -11,17 +11,25 @@ use Selective\Config\Configuration;
 
 class ImagePathResolver
 {
-    public function __construct(private Configuration $config)
-    {
+    private string $wwwApiurlLocalpath;
+    private string $localFolder;
+    private string $wwwUrl;
 
+    public function __construct(Configuration $config)
+    {
+        $this->wwwApiurlLocalpath = $config->getString('www.apiurl-localpath');
+        $this->localFolder = $config->getString('images.backuppath') . '/';
+        $this->wwwUrl = $config->getString('www.wwwurl');
     }
 
+    public function getWwwUrl(): string {
+        return $this->wwwUrl;
+    }
 
+    public function getPath(Sponsor|Competitor|Tournament $object, ImageProps|null $imageProps, string $logoExtension ): string {
+        $fileName = $this->getFileName($object, $imageProps, $logoExtension);
 
-    public function getPath(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $logoExtension ): string {
-        $fileName = $this->getFileName($object, $imageSize, $logoExtension);
-
-        $localFolder = $this->config->getString('www.apiurl-localpath') . 'images/';
+        $localFolder = $this->wwwApiurlLocalpath . 'images/';
 
         return $localFolder . $this->getPathSuffix($object)  . $fileName;
     }
@@ -37,11 +45,9 @@ class ImagePathResolver
 //        return $localFolder . $this->getPathSuffix($object)  . $fileNameWithoutExtension;
 //    }
 
-    public function getBackupPath(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $extension ): string {
-        $fileName = $this->getFileName($object, $imageSize, $extension);
-        $localFolder = $this->config->getString('images.backuppath') . '/';
-
-        return $localFolder . $this->getPathSuffix($object)  . $fileName;
+    public function getBackupPath(Sponsor|Competitor|Tournament $object, ImageProps|null $imageProps, string $extension ): string {
+        $fileName = $this->getFileName($object, $imageProps, $extension);
+        return $this->localFolder . $this->getPathSuffix($object)  . $fileName;
     }
 
     public function getPathSuffix(Sponsor|Competitor|Tournament $object): string {
@@ -53,11 +59,11 @@ class ImagePathResolver
         return Tournament::IMG_FOLDER . '/';
     }
 
-    protected function getFileName(Sponsor|Competitor|Tournament $object, ImageSize|null $imageSize, string $logoExtension ): string {
-        if( $imageSize === null ) {
+    protected function getFileName(Sponsor|Competitor|Tournament $object, ImageProps|null $imageProps, string $logoExtension ): string {
+        if( $imageProps === null ) {
             return ((string)$object->getId()) .  '.' . $logoExtension;
         }
-        return ((string)$object->getId()) . $imageSize->getSuffix() .  '.' . $logoExtension;
+        return ((string)$object->getId()) . $imageProps->getSuffix() .  '.' . $logoExtension;
     }
 
 //    protected function getFileNameWithoutExtension(Sponsor|Competitor $object, ImageSize|null $imageSize ): string|null {

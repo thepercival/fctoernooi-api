@@ -10,6 +10,7 @@ use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
+use App\ImageSize;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Zend_Pdf_Color_Html;
@@ -60,7 +61,8 @@ class GameNotes extends ToernooiPdfPage
     public function renderGames(AgainstGame|TogetherGame $gameOne, AgainstGame|TogetherGame|null $gameTwo): void
     {
         $subHeader = $this->getSubHeader($gameOne);
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $subHeader);
+        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, $subHeader);
         $top = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $this->getDisplayWidth());
         $this->renderGame($gameOne, $top);
 
@@ -81,6 +83,7 @@ class GameNotes extends ToernooiPdfPage
         $subHeader = $this->getSubHeader($gameTwo);
         $y = $this->drawHeader(
             $this->parent->getTournament()->getName(),
+            $this->parent->getTournamentLogoPath(ImageSize::Small),
             $subHeader,
             new HeaderConfig(
                 ($this->getHeight() / 2) - self::PAGEMARGIN

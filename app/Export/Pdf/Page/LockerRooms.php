@@ -10,6 +10,7 @@ use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
+use App\ImageSize;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
 
@@ -82,7 +83,8 @@ class LockerRooms extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), 'kleedkamers');
+        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath,'kleedkamers');
         $yStart = $this->drawTitle('indeling kleedkamers', $y);
         $lockerRooms = array_values($this->parent->getTournament()->getLockerRooms()->toArray());
         if (count($lockerRooms) === 0) {

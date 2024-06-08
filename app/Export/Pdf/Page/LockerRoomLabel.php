@@ -10,6 +10,7 @@ use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
+use App\ImageSize;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom as LockerRoomBase;
 use FCToernooi\QRService;
@@ -72,7 +73,8 @@ class LockerRoomLabel extends ToernooiPdfPage
      */
     public function draw(array &$competitors): void
     {
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), "kleedkamer");
+        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, "kleedkamer");
         $y = $this->drawLockerRoom($y);
         $infoHeight = $this->parent->getTournament()->getPublic() ? $this->parent->getLabelConfig()->getInfoHeight(
         ) : 0;
@@ -147,7 +149,7 @@ class LockerRoomLabel extends ToernooiPdfPage
         $this->drawString("toernooi informatie:", new Point($x, $y), $maxWidth, Align::Right);
 
         $y = self::PAGEMARGIN + ($infoHeight * 1 / 3);
-        $url = $this->parent->getUrl() . (string)$this->parent->getTournament()->getId();
+        $url = $this->parent->getWwwUrl() . (string)$this->parent->getTournament()->getId();
         $this->drawString($url, new Point($x, $y), $maxWidth, Align::Right);
 
         $centerRight = $center + (self::PAGEMARGIN / 2);

@@ -14,6 +14,8 @@ use App\Export\Pdf\Point;
 use App\Export\Pdf\RecessHelper;
 use App\Export\Pdf\Rectangle;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
@@ -26,18 +28,18 @@ use Zend_Pdf_Exception;
 class Games extends PdfPlanningDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         GamesConfig $gamesConfig,
         GameLineConfig $gameLineConfig
     ) {
         parent::__construct(
             $tournament,
             $structure,
-            $url,
+            $imagePathResolver,
             $progress,
             $maxSubjectProgress,
             $gamesConfig,
@@ -50,7 +52,8 @@ class Games extends PdfPlanningDocument
         $firstRoundNumber = $this->structure->getFirstRoundNumber();
         $title = 'wedstrijden';
         $page = $this->createPagePlanning($firstRoundNumber, $title);
-        $y = $page->drawHeader($this->getTournament()->getName(), $title);
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
+        $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
         $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
         $this->drawPlanning($firstRoundNumber, $page, $horLine);
     }
@@ -81,6 +84,7 @@ class Games extends PdfPlanningDocument
             $gameHorStartLine = $horLine;
         }
 
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $games = $roundNumber->getGames(GameOrder::ByDate);
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
@@ -91,7 +95,7 @@ class Games extends PdfPlanningDocument
             if ($gameHorStartLine->getY() - $gameHeight < Page::PAGEMARGIN) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
-                $y = $page->drawHeader($this->getTournament()->getName(), $title);
+                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(
                     new HorizontalLine(

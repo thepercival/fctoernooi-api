@@ -10,6 +10,7 @@ use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Page\LockerRoomLabel as LockerRoomLabelPage;
 use App\Export\Pdf\Page\LockerRooms as LockerRoomsPage;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
 use FCToernooi\LockerRoom;
 use FCToernooi\Tournament;
 use Sports\Structure;
@@ -21,15 +22,15 @@ use Zend_Pdf_Page;
 class LockerRooms extends PdfDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         protected LockerRoomConfig $config,
         protected LockerRoomLabelConfig $labelConfig
     ) {
-        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+        parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
     }
 
     public function getConfig(): LockerRoomConfig

@@ -2,17 +2,8 @@
 
 namespace App;
 
-class ImageSize
+enum ImageSize: int
 {
-    public function __construct(private string $suffix, private  int $height)
-    {
-    }
-
-    public function getSuffix(): string {
-        return $this->suffix;
-    }
-
-    public function getHeight(): int {
-        return $this->height;
-    }
+    case Small = 20;
+    case Normal = 200;
 }

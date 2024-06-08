@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Export\Pdf;
 
 use App\Export\Pdf\Drawers\Helper;
+use App\Export\Pdf\Line\Horizontal as HorizontalLine;
+use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Page\Traits\HeaderDrawer;
 use App\Export\Pdf\Page\Traits\TitleDrawer;
 use Sports\Structure\NameService as StructureNameService;
@@ -403,6 +405,26 @@ abstract class Page extends Zend_Pdf_Page
            }
         }
         return $xPosText;
+    }
+
+    /**
+     * @param HorizontalLine|VerticalLine $line
+     * @param list<int> $pattern
+     * @return void
+     */
+    public function drawDashedLine(HorizontalLine|VerticalLine $line, array $pattern = [10,10]): void {
+        // DASHED LINE
+        $this->setLineDashingPattern($pattern);
+        $this->drawLineCustom($line);
+        $this->setLineDashingPattern(Zend_Pdf_Page::LINE_DASHING_SOLID);
+    }
+
+    public function drawLineCustom(HorizontalLine|VerticalLine $line): void {
+        $this->drawLine(
+            $line->getStart()->getX(),
+            $line->getStart()->getY(),
+            $line->getEnd()->getX(),
+            $line->getEnd()->getY());
     }
 
     /**

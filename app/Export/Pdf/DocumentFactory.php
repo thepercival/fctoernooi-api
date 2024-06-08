@@ -11,6 +11,7 @@ use App\Export\Pdf\Configs\LockerRoomConfig;
 use App\Export\Pdf\Configs\LockerRoomLabelConfig;
 use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Configs\QRCodeConfig;
+use App\Export\Pdf\Configs\RegistrationFormConfig;
 use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
@@ -23,9 +24,11 @@ use App\Export\Pdf\Document\Planning\GamesPerField as GamesPerFieldDocument;
 use App\Export\Pdf\Document\Planning\GamesPerPoule as GamesPerPouleDocument;
 use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
 use App\Export\Pdf\Document\QRCode as QRCodeDocument;
+use App\Export\Pdf\Document\RegistrationForm as RegistrationFormDocument;
 use App\Export\Pdf\Document\Structure as StructureDocument;
 use App\Export\PdfProgress;
 use App\Export\PdfSubject;
+use App\ImagePathResolver;
 use FCToernooi\Tournament;
 use Selective\Config\Configuration;
 use Sports\Competition\Sport as CompetitionSport;
@@ -41,21 +44,35 @@ use Sports\Structure;
  */
 class DocumentFactory
 {
-    protected string $wwwUrl;
+    protected ImagePathResolver $imagePathResolver;
 
     public function __construct(Configuration $config)
     {
-        $this->wwwUrl = $config->getString('www.wwwurl');
+        $this->imagePathResolver = new ImagePathResolver($config);
     }
 
     public function createSubject(
         Tournament $tournament,
+        Tournament\RegistrationSettings|null $registrationSettings,
         Structure $structure,
         PdfSubject $subject,
         PdfProgress $progress,
         float $maxSubjectProgress
     ): PdfDocument {
         switch ($subject) {
+            case PdfSubject::RegistrationForm:
+                if( $registrationSettings === null) {
+                    throw new \Exception('no registration settings found');
+                }
+                return new RegistrationFormDocument(
+                    $tournament,
+                    $registrationSettings,
+                    $structure,
+                    $this->imagePathResolver,
+                    $progress,
+                    $maxSubjectProgress,
+                    new RegistrationFormConfig(18, 14)
+                );
             case PdfSubject::Structure:
                 $config = new StructureConfig(
                     new CategoryConfig(
@@ -73,20 +90,19 @@ class DocumentFactory
                 return new StructureDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
                     $config
                 );
             case PdfSubject::PoulePivotTables:
-                $config = new PoulePivotConfig();
                 return new PoulePivotTablesDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    $config
+                    new PoulePivotConfig()
                 );
             case PdfSubject::Planning:
                 $gamesCfg = new GamesConfig(20, 18, 14);
@@ -94,7 +110,7 @@ class DocumentFactory
                 return new GamesDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
                     $gamesCfg,
@@ -106,7 +122,7 @@ class DocumentFactory
                 return new GamesPerPouleDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
                     $gamesCfg,
@@ -118,43 +134,39 @@ class DocumentFactory
                 return new GamesPerFieldDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
                     $gamesCfg,
                     $gameLineCfg
                 );
             case PdfSubject::GameNotes:
-                $config = new GameNotesConfig();
                 return new GameNotesDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    $config
+                    new GameNotesConfig()
                 );
             case PdfSubject::QrCode:
-                $config = new QRCodeConfig();
                 return new QRCodeDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    $config
+                    new QRCodeConfig()
                 );
             case PdfSubject::LockerRooms:
-                $config = new LockerRoomConfig(20, 16, 12);
-                $labelConfig = new LockerRoomLabelConfig();
                 return new LockerRoomsDocument(
                     $tournament,
                     $structure,
-                    $this->wwwUrl,
+                    $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    $config,
-                    $labelConfig
+                    new LockerRoomConfig(20, 16, 12),
+                    new LockerRoomLabelConfig()
                 );
         }
         throw new \Exception('unknown subject', E_ERROR);

@@ -33,6 +33,7 @@ class PdfValidateCommand extends Command
 {
     private string $customName = 'validate-pdf';
     protected TournamentRepository $tournamentRepos;
+
     protected GamesValidator $gamesValidator;
     protected PdfService $pdfService;
     protected PdfQueueService $queueService;

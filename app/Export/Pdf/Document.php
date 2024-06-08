@@ -6,6 +6,9 @@ namespace App\Export\Pdf;
 
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageProps;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competitor\StartLocationMap;
@@ -36,7 +39,7 @@ abstract class Document extends Zend_Pdf
     public function __construct(
         protected Tournament $tournament,
         protected Structure $structure,
-        protected string $url,
+        protected ImagePathResolver $imagePathResolver,
         protected PdfProgress $progress,
         protected float $maxSubjectProgress
     ) {
@@ -47,6 +50,15 @@ abstract class Document extends Zend_Pdf
     protected function getHelper(): Helper
     {
         return $this->helper;
+    }
+
+    public function getTournamentLogoPath(ImageSize $imageSize): string|null {
+        $logoExtension = $this->tournament->getLogoExtension();
+        if( $logoExtension === null ){
+            return null;
+        }
+        $imageProps = new ImageProps(ImageProps::Suffix . $imageSize->value, $imageSize);
+        return $this->imagePathResolver->getPath($this->tournament, $imageProps, $logoExtension);
     }
 
     public function render($newSegmentOnly = false, $outputStream = null): string
@@ -135,9 +147,9 @@ abstract class Document extends Zend_Pdf
         return $this->tournament;
     }
 
-    public function getUrl(): string
+    public function getWwwUrl(): string
     {
-        return $this->url;
+        return $this->imagePathResolver->getWwwUrl();
     }
 
     public function getStructureNameService(): StructureNameService

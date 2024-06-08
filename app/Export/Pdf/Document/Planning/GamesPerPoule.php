@@ -11,6 +11,8 @@ use App\Export\Pdf\Line\Horizontal;
 use App\Export\Pdf\Page;
 use App\Export\Pdf\Point;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Game;
 use Sports\Poule;
@@ -23,18 +25,18 @@ use Sports\Structure;
 class GamesPerPoule extends PdfPlanningDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         GamesConfig $gamesConfig,
         GameLineConfig $gameLineConfig
     ) {
         parent::__construct(
             $tournament,
             $structure,
-            $url,
+            $imagePathResolver,
             $progress,
             $maxSubjectProgress,
             $gamesConfig,
@@ -52,10 +54,11 @@ class GamesPerPoule extends PdfPlanningDocument
         $poules = array_filter($roundNumber->getPoules(), function (Poule $poule): bool {
             return $poule->needsRanking();
         });
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         foreach ($poules as $poule) {
             $title = $this->getStructureNameService()->getPouleName($poule, true);
             $page = $this->createPagePlanning($roundNumber, $title);
-            $y = $page->drawHeader($this->getTournament()->getName(), $title);
+            $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
             $page->setGameFilter(
                 function (Game $game) use ($poule): bool {
                     return $game->getPoule() === $poule;

@@ -13,6 +13,8 @@ use App\Export\Pdf\Page\Structure as StructurePage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Category;
 
@@ -26,14 +28,14 @@ class Structure extends PdfDocument
     private CategoryDrawer $categoryDrawer;
 
     public function __construct(
-        protected Tournament $tournament,
-        protected \Sports\Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        \Sports\Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         protected StructureConfig $config
     ) {
-        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+        parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
         $drawCategoryHeader = !$this->getStructure()->hasSingleCategory();
         $this->categoryDrawer = new CategoryDrawer(
             $this->getStructureNameService(),
@@ -49,6 +51,7 @@ class Structure extends PdfDocument
 
     protected function renderCustom(): void
     {
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $horLine = null;
         $page = null;
         $categories = $this->getStructure()->getCategories();
@@ -56,7 +59,7 @@ class Structure extends PdfDocument
             $nextCategory = array_shift($categories);
             if ($page === null || $horLine === null) {
                 $page = $this->createStructurePage($this->calculatePageDimensions($category));
-                $y = $page->drawHeader($this->getTournament()->getName(), 'opzet & indeling');
+                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, 'opzet & indeling');
                 $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
             }
             $rectangle = new Rectangle($horLine, -($horLine->getY() - Page::PAGEMARGIN));

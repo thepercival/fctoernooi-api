@@ -274,7 +274,7 @@ abstract class GameNote
     protected function getQrCodeUrlPrefix(GameNotesPage $page, AgainstGame|TogetherGame $game): string
     {
         $suffix = ($game instanceof AgainstGame) ? 'against' : 'together';
-        return $page->getParent()->getUrl() . 'admin/game' . $suffix . '/' .
+        return $page->getParent()->getWwwUrl() . 'admin/game' . $suffix . '/' .
             (string)$page->getParent()->getTournament()->getId() . '/';
     }
 

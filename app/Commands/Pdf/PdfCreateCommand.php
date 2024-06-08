@@ -14,6 +14,8 @@ use App\QueueService\Pdf as PdfQueueService;
 use App\QueueService\Pdf\CreateMessage as PdfCreateMessage;
 use App\TmpService;
 use Doctrine\ORM\EntityManagerInterface;
+use FCToernooi\Tournament;
+use FCToernooi\Tournament\RegistrationSettings;
 use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
@@ -35,6 +37,7 @@ class PdfCreateCommand extends Command
     protected StructureRepository $structureRepos;
     protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
+    protected RegistrationSettings\Repository $registrationSettingsRepos;
     protected PdfService $pdfService;
     protected PdfQueueService $queueService;
     protected DocumentFactory $documentFactory;
@@ -64,6 +67,10 @@ class PdfCreateCommand extends Command
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
+
+        /** @var RegistrationSettings\Repository $registrationSettingsRepos */
+        $registrationSettingsRepos = $container->get(RegistrationSettings\Repository::class);
+        $this->registrationSettingsRepos = $registrationSettingsRepos;
 
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
@@ -184,10 +191,12 @@ class PdfCreateCommand extends Command
         $tournamentId = (string)$tournament->getId();
         $structure = $this->structureRepos->getStructure($tournament->getCompetition());
         $progressPerSubject = $this->pdfService->getProgressPerSubject($message->getTotalNrOfSubjects());
+        $registrationSettings = $this->registrationSettingsRepos->findOneBy(['tournament' => $tournament]);
         $subject = $message->getSubject();
         $progress = $this->pdfService->getProgress($tournamentId);
         $pdf = $this->documentFactory->createSubject(
             $tournament,
+            $registrationSettings,
             $structure,
             $subject,
             $progress,

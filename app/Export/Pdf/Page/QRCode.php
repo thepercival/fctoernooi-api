@@ -6,6 +6,7 @@ namespace App\Export\Pdf\Page;
 
 use App\Export\Pdf\Document\QRCode as QRCodeDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\ImageSize;
 use FCToernooi\QRService;
 use Zend_Pdf_Resource_Image;
 
@@ -31,9 +32,10 @@ class QRCode extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), "qrcode");
+        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, 'qrcode');
 
-        $url = $this->parent->getUrl() . (string)$this->parent->getTournament()->getId();
+        $url = $this->parent->getWwwUrl() . (string)$this->parent->getTournament()->getId();
 
         $y = $this->drawTitle($url, $y);
 

@@ -15,6 +15,8 @@ use App\Export\Pdf\Point;
 use App\Export\Pdf\RecessHelper;
 use App\Export\Pdf\Rectangle;
 use App\Export\PdfProgress;
+use App\ImagePathResolver;
+use App\ImageSize;
 use FCToernooi\Tournament;
 use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
@@ -29,15 +31,15 @@ use Zend_Pdf_Page;
 abstract class Planning extends PdfDocument
 {
     public function __construct(
-        protected Tournament $tournament,
-        protected Structure $structure,
-        protected string $url,
-        protected PdfProgress $progress,
-        protected float $maxSubjectProgress,
+        Tournament $tournament,
+        Structure $structure,
+        ImagePathResolver $imagePathResolver,
+        PdfProgress $progress,
+        float $maxSubjectProgress,
         protected GamesConfig $gameConfig,
         protected GameLineConfig $gameLineConfig
     ) {
-        parent::__construct($tournament, $structure, $url, $progress, $maxSubjectProgress);
+        parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
     }
 
 
@@ -108,6 +110,7 @@ abstract class Planning extends PdfDocument
             $page->drawGamesHeader($roundNumber, $rectangle);
             $gameHorStartLine = $rectangle->getBottom();
         }
+        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $games = $roundNumber->getGames(GameOrder::ByDate);
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
@@ -118,7 +121,7 @@ abstract class Planning extends PdfDocument
             if ($gameHorStartLine->getY() - $gameHeight < PdfPage::PAGEMARGIN) {
                 // $field = $page->getFieldFilter();
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle());
-                $y = $page->drawHeader($this->getTournament()->getName(), $page->getTitle());
+                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $page->getTitle());
                 $page->setGameFilter($page->getGameFilter());
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(

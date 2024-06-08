@@ -231,6 +231,8 @@ final class PdfService
     private function getTmpSubjectFileSuffix(PdfSubject $subject): string
     {
         switch ($subject) {
+            case PdfSubject::RegistrationForm:
+                return 'inschrijfformulier';
             case PdfSubject::GameNotes:
                 return 'wedstrijdbrieven';
             case PdfSubject::Structure:

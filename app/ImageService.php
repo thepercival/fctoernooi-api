@@ -39,8 +39,8 @@ class ImageService
             return;
         }
 
-        foreach( $this->resizer->getImageResizeHeights() as $imageSize ) {
-            $resizedImagePath = $this->pathResolver->getPath($object, $imageSize, $extension);
+        foreach( $this->resizer->getImageResizeProps() as $imageProps ) {
+            $resizedImagePath = $this->pathResolver->getPath($object, $imageProps, $extension);
             unlink($resizedImagePath);
         }
 
@@ -106,10 +106,10 @@ class ImageService
         }
 
         $allCopiesOK = true;
-        $imgSizes = array_merge([null], $this->resizer->getImageResizeHeights());
-        foreach( $imgSizes as $imageSize) {
-            $fromImagePath = $this->pathResolver->getPath($fromObject, $imageSize, $logoExtension);
-            $newImagePath = $this->pathResolver->getPath($newObject, $imageSize, $logoExtension);
+        $imgPropsList = array_merge([null], $this->resizer->getImageResizeProps());
+        foreach( $imgPropsList as $imgProps) {
+            $fromImagePath = $this->pathResolver->getPath($fromObject, $imgProps, $logoExtension);
+            $newImagePath = $this->pathResolver->getPath($newObject, $imgProps, $logoExtension);
             if( !copy($fromImagePath, $newImagePath ) ) {
                 $allCopiesOK = false;
             }
@@ -127,10 +127,10 @@ class ImageService
         }
 
         $allCopiesOK = true;
-        $imgSizes = array_merge([null], $this->resizer->getImageResizeHeights());
-        foreach( $imgSizes as $imageSize) {
-            $imagePath = $this->pathResolver->getPath($object, $imageSize, $logoExtension);
-            if( $logoExtension === 'svg' && $imageSize !== null ) {
+        $imgPropsList = array_merge([null], $this->resizer->getImageResizeProps());
+        foreach( $imgPropsList as $imgProps) {
+            $imagePath = $this->pathResolver->getPath($object, $imgProps, $logoExtension);
+            if( $logoExtension === 'svg' && $imgProps !== null ) {
                 continue;
             }
             if (!is_readable($imagePath)) {
@@ -145,7 +145,7 @@ class ImageService
                 continue;
             }
 
-            $backupImagePath = $this->pathResolver->getBackupPath($object, $imageSize, $logoExtension);
+            $backupImagePath = $this->pathResolver->getBackupPath($object, $imgProps, $logoExtension);
             if (file_exists($backupImagePath)) {
                 unlink($backupImagePath);
                 $this->logger->info('backup-sponsor-image ' . $backupImagePath . ' removed');
