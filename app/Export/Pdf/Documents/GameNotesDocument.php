@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Drawers\GameNote\Against as AgainstDrawer;
 use App\Export\Pdf\Drawers\GameNote\AllInOneGame as AllInOneGameDrawer;
 use App\Export\Pdf\Drawers\GameNote\Single as SingleDrawer;
-use App\Export\Pdf\Page\GameNotes as GameNotesPage;
+use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use FCToernooi\Tournament;
@@ -27,7 +27,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class GameNotes extends PdfDocument
+class GameNotesDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,

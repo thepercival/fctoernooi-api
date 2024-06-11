@@ -249,6 +249,12 @@ final class PdfService
                 return 'qrcode-en-link';
             case PdfSubject::LockerRooms:
                 return 'kleedkamers';
+            case PdfSubject::FrontPage:
+                return 'voorblad';
+            case PdfSubject::Intro:
+                return 'intro';
+            case PdfSubject::Sponsor:
+                return 'sponsoren';
         }
         throw new \Exception('unknown subject', E_ERROR);
     }

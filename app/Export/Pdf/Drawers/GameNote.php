@@ -8,7 +8,7 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\GameNotes as GameNotesPage;
+use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use DateTimeZone;

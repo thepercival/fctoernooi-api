@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\PoulePivotTable\Against as AgainstPoulePivotTablePage;
-use App\Export\Pdf\Page\PoulePivotTable\Multiple as MultipleSportsPoulePivotTablePage;
-use App\Export\Pdf\Page\PoulePivotTable\Together as TogetherPoulePivotTablePage;
+use App\Export\Pdf\Pages\PoulePivotTable\AgainstPoulePivotTablePage as AgainstPoulePivotTablePage;
+use App\Export\Pdf\Pages\PoulePivotTable\MultiplePoulePivotTablePage as MultipleSportsPoulePivotTablePage;
+use App\Export\Pdf\Pages\PoulePivotTable\TogetherPoulePivotTablePage as TogetherPoulePivotTablePage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use App\ImageSize;
@@ -23,7 +23,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class PoulePivotTables extends PdfDocument
+class PoulePivotTablesDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,

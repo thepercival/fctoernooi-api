@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class LockerRoomLabelConfig
+readonly class LockerRoomLabelConfig
 {
     public function __construct(
         private int $infoHeight = 150,

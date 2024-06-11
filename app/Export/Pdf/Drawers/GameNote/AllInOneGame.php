@@ -7,8 +7,8 @@ namespace App\Export\Pdf\Drawers\GameNote;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Drawers\GameNote as GameNotesDrawer;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
-use App\Export\Pdf\Page\GameNotes as GameNotesPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
@@ -68,14 +68,14 @@ class AllInOneGame extends GameNotesDrawer
         $largerFontSize = $fontSize * $larger;
         $height = $this->config->getRowHeight() * $larger;
         $leftPartWidth = $this->getLeftPartWidth($top);
-        $placesStart = Page::PAGEMARGIN;
+        $placesStart = ToernooiPdfPage::PAGEMARGIN;
         $unitWidth = $this->getPartWidth($top);
         $unitStart = $this->getStartDetailLabel($top);
 
         $y = $top->getY();
         // 2x font thuis - uit
         $page->setFont($this->helper->getTimesFont(), $largerFontSize);
-        $rectangle = new Rectangle(new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $leftPartWidth), -$height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
         $page->drawCell('wedstrijd', $rectangle, Align::Right);
 
         // SCOREUNITS

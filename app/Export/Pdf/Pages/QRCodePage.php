@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
-use App\Export\Pdf\Document\QRCode as QRCodeDocument;
+use App\Export\Pdf\Documents\QRCodeDocument as QRCodeDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\ImageSize;
 use FCToernooi\QRService;
@@ -13,7 +13,7 @@ use Zend_Pdf_Resource_Image;
 /**
  * @template-extends ToernooiPdfPage<QRCodeDocument>
  */
-class QRCode extends ToernooiPdfPage
+class QRCodePage extends ToernooiPdfPage
 {
     protected float $rowHeight = 18;
     protected QRService $qrService;

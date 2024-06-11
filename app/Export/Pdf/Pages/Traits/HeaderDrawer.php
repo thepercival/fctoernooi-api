@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\Traits;
+namespace App\Export\Pdf\Pages\Traits;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\HeaderConfig;
 use App\Export\Pdf\Document;
+use App\Export\Pdf\Documents;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
@@ -85,7 +86,6 @@ trait HeaderDrawer
                 $this->drawImageExt($img, $imgRectangle);
             } catch ( Zend_Pdf_Exception $e ) {
                 // $this->logger->warning($e->getMessage());
-                $es = $e;
             }
 
         }

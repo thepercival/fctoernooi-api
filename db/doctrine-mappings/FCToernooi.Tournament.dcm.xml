@@ -12,7 +12,7 @@
         <field name="example" column="example" type="boolean" nullable="false" unique="false"/>
 
         <field name="logoExtension" column="logoExtension" type="string" length="10" nullable="true" unique="false"/>
-<!--        <field name="theme" column="theme" type="string" length="10" nullable="true" unique="false"/>-->
+        <field name="theme" column="theme" type="json" nullable="true" unique="false"/>
         <field name="intro" column="intro" type="string" length="400" nullable="false" unique="false"/>
         <field name="location" column="location" type="string" length="80" nullable="true" unique="false"/>
         <many-to-one field="competition" target-entity="Sports\Competition">

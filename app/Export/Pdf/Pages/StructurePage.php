@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
-use App\Export\Pdf\Document\Structure as StructureDocument;
+use App\Export\Pdf\Documents\StructureDocument;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 
 /**
  * @template-extends ToernooiPdfPage<StructureDocument>
  */
-class Structure extends ToernooiPdfPage
+class StructurePage extends ToernooiPdfPage
 {
 //    use RoundCardDrawer;
 //    use RoundDrawer;

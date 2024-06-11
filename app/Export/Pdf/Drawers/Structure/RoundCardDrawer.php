@@ -9,7 +9,8 @@ use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Poule\RoundWidth;
 use App\Export\Pdf\Rectangle;
@@ -37,7 +38,7 @@ class RoundCardDrawer
     // protected int $maxPoulesPerLine = 3;
 
     public function renderRoundCard(
-        Page $page,
+        ToernooiPdfPage $page,
         Round $round,
         HorizontalLine $top,
         int $maxNrOfPouleRows
@@ -133,7 +134,7 @@ class RoundCardDrawer
         return 'gray';
     }
 
-    public function renderRoundCardHeader(Page $page, Round $round, HorizontalLine $horLine): HorizontalLine
+    public function renderRoundCardHeader(ToernooiPdfPage $page, Round $round, HorizontalLine $horLine): HorizontalLine
     {
         $rectangle = new Rectangle($horLine, -$this->config->getHeaderHeight());
         $roundName = $this->structureNameService->getRoundName($round);

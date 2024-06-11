@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\LockerRoomConfig;
 use App\Export\Pdf\Configs\LockerRoomLabelConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\LockerRoomLabel as LockerRoomLabelPage;
-use App\Export\Pdf\Page\LockerRooms as LockerRoomsPage;
+use App\Export\Pdf\Pages\LockerRoomLabelPage as LockerRoomLabelPage;
+use App\Export\Pdf\Pages\LockerRoomsPage as LockerRoomsPage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use FCToernooi\LockerRoom;
@@ -19,7 +19,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class LockerRooms extends PdfDocument
+class LockerRoomsDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,

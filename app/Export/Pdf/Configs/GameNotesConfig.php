@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class GameNotesConfig
+readonly class GameNotesConfig
 {
     public function __construct(
         private int $rowHeight = 20,

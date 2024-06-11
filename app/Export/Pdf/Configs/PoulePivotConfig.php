@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class PoulePivotConfig
+readonly class PoulePivotConfig
 {
     public function __construct(
         private int $rowHeight = 18/*; between $fontHeight and 20*/,

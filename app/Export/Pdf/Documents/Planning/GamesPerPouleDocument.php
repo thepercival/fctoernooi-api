@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document\Planning;
+namespace App\Export\Pdf\Documents\Planning;
 
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GamesConfig;
-use App\Export\Pdf\Document\Planning as PdfPlanningDocument;
+use App\Export\Pdf\Documents\PlanningDocument as PdfPlanningDocument;
 use App\Export\Pdf\Line\Horizontal;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages;
 use App\Export\Pdf\Point;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
@@ -22,7 +23,7 @@ use Sports\Structure;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class GamesPerPoule extends PdfPlanningDocument
+class GamesPerPouleDocument extends PdfPlanningDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -64,7 +65,7 @@ class GamesPerPoule extends PdfPlanningDocument
                     return $game->getPoule() === $poule;
                 }
             );
-            $horLine = new Horizontal(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
+            $horLine = new Horizontal(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $page->getDisplayWidth());
             $this->drawPlanningPerFieldOrPouleHelper($roundNumber, $page, $horLine, false);
         }
 

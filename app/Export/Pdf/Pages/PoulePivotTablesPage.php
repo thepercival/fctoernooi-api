@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
-use App\Export\Pdf\Page\PoulePivotTable\Helper;
+use App\Export\Pdf\Pages\PoulePivotTable\Helper;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Exception;
@@ -24,7 +24,7 @@ use Sports\Score\Config\Service as ScoreConfigService;
 /**
  * @template-extends ToernooiPdfPage<PoulePivotTablesDocument>
  */
-abstract class PoulePivotTables extends ToernooiPdfPage
+abstract class PoulePivotTablesPage extends ToernooiPdfPage
 {
     use Helper;
 

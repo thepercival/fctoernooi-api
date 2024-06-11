@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\RegistrationFormConfig;
-use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\RegistrationForm as RegistrationFormPage;
+use App\Export\Pdf\Document as FCToernooiPdfDocument;
+use App\Export\Pdf\Pages\RegistrationFormPage as RegistrationFormPage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use FCToernooi\Tournament;
@@ -17,7 +17,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class RegistrationForm extends PdfDocument
+class RegistrationFormDocument extends FCToernooiPdfDocument
 {
     public function __construct(
         Tournament $tournament,

@@ -48,6 +48,10 @@ class Tournament extends Identifiable
     protected int $exported = 0;
     protected bool $example = false;
     private string $intro;
+    /**
+     * @var array<string,string>
+     */
+    private array|null $theme = null;
     private string|null $logoExtension = null;
     protected string|null $location = null;
 
@@ -253,5 +257,21 @@ class Tournament extends Identifiable
             );
         }
         $this->intro = $intro;
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    public function getTheme(): array|null
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(string $key, string $value): void
+    {
+        if( $this->theme === null) {
+            $this->theme = [];
+        }
+        $this->theme[$key] = $value;
     }
 }

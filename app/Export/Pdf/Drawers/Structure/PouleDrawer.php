@@ -8,7 +8,8 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Competitor;
@@ -35,7 +36,7 @@ final class PouleDrawer
         bool $showPouleNamePrefix,
         bool $showCompetitor,
         HorizontalLine $top,
-        Page $page
+        ToernooiPdfPage $page
     ): void {
         $rowHeight = $this->config->getRowHeight();
 
@@ -72,7 +73,7 @@ final class PouleDrawer
         Place $place,
         bool $showCompetitor,
         HorizontalLine $top,
-        Page $page,
+        ToernooiPdfPage $page,
         bool $last
     ): HorizontalLine {
         $rowHeight = $this->config->getRowHeight();

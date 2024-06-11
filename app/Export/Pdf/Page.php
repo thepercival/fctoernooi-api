@@ -7,8 +7,8 @@ namespace App\Export\Pdf;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
-use App\Export\Pdf\Page\Traits\HeaderDrawer;
-use App\Export\Pdf\Page\Traits\TitleDrawer;
+use App\Export\Pdf\Pages\Traits\HeaderDrawer;
+use App\Export\Pdf\Pages\Traits\TitleDrawer;
 use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
@@ -64,6 +64,10 @@ abstract class Page extends Zend_Pdf_Page
     public function getStructureNameService(): StructureNameService
     {
         return $this->parent->getStructureNameService();
+    }
+
+    public function getDateFormatter(string $pattern = null): \IntlDateFormatter {
+        return $this->parent->getDateFormatter($pattern);
     }
 
     public function getFillColor(): Zend_Pdf_Color

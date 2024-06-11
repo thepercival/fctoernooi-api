@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class HeaderConfig
+readonly class HeaderConfig
 {
     private const DEFAULT_ROWHEIGHT = 18;
     private const DEFAULT_FONTHEIGHT = 14;
@@ -13,7 +13,7 @@ class HeaderConfig
     private int $fontHeight;
 
     public function __construct(
-        private float|null $yStart,
+        private float|null $yStart = null,
         int|null $rowHeight = null,
         int|null $fontHeight = null,
     ) {

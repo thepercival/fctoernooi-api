@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\Planning as PlanningDocument;
+use App\Export\Pdf\Documents\PlanningDocument as PlanningDocument;
 use App\Export\Pdf\Drawers\GameLine\Against as AgainstGameLine;
 use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\Drawers\GameLine\Together as TogetherGameLine;
@@ -20,7 +20,7 @@ use Sports\Round\Number as RoundNumber;
 use SportsHelpers\GameMode;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 
-class Planning extends ToernooiPdfPage
+class PlanningPage extends ToernooiPdfPage
 {
     protected AgainstGameLine|null $againstGameLine = null;
     protected TogetherGameLine|null $togetherGameLine = null;

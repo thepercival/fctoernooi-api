@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\RegistrationForm as RegistrationFormDocument;
+use App\Export\Pdf\Configs\HeaderConfig;
+use App\Export\Pdf\Documents\RegistrationFormDocument as RegistrationFormDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Pages;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
@@ -20,7 +21,7 @@ use Zend_Pdf_Resource_Image;
 /**
  * @template-extends ToernooiPdfPage<RegistrationFormDocument>
  */
-class RegistrationForm extends ToernooiPdfPage
+class RegistrationFormPage extends ToernooiPdfPage
 {
     public function __construct(RegistrationFormDocument $document, mixed $param1)
     {
@@ -31,12 +32,17 @@ class RegistrationForm extends ToernooiPdfPage
     public function draw(): void
     {
         $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small );
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath,'inschrijfformulier');
+        $y = $this->drawHeader(
+            $this->parent->getTournament()->getName(),
+            $logoPath,
+            'inschrijfformulier',
+            new HeaderConfig()
+        );
 
         $config = $this->parent->getConfig();
         $rowHeight = $config->getRowHeight() * 2;
         $y -= $rowHeight;
-        $xStart = Page::PAGEMARGIN;
+        $xStart = ToernooiPdfPage::PAGEMARGIN;
         $labelWidth = 100;
         $marginStartDashedLine = 30;
         $widthDashedLine = $this->getDisplayWidth() - ($labelWidth + $marginStartDashedLine);

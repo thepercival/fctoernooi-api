@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\PoulePivotTable;
+namespace App\Export\Pdf\Pages\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
-use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
+use App\Export\Pdf\Pages\PoulePivotTablesPage as PoulePivotTablesPage;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\State as GameState;
 use Sports\Place;
@@ -15,7 +15,7 @@ use Sports\Poule;
 use SportsHelpers\Against\Side as AgainstSide;
 use Zend_Pdf_Color_Html;
 
-class Against extends PoulePivotTablesPage
+class AgainstPoulePivotTablePage extends PoulePivotTablesPage
 {
     public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {

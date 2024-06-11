@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class GameLineConfig
+readonly class GameLineConfig
 {
     public function __construct(
         private int $rowHeight,

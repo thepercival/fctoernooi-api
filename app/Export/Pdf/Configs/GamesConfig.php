@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class GamesConfig
+readonly class GamesConfig
 {
     public function __construct(
         private int $roundNumberHeaderHeight,

@@ -15,10 +15,13 @@ enum PdfSubject: int
     case LockerRooms = 64;
     case QrCode = 128;
     case RegistrationForm = 256;
+    case FrontPage = 512;
+    case Intro = 1024;
+    case Sponsor = 4096;
 
     public static function all(): int
     {
-        return 511;
+        return 8191;
     }
 
     /**

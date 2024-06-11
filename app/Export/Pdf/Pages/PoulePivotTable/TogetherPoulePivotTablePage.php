@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\PoulePivotTable;
+namespace App\Export\Pdf\Pages\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
-use App\Export\Pdf\Page\PoulePivotTables as PoulePivotTablesPage;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
+use App\Export\Pdf\Pages\PoulePivotTablesPage as PoulePivotTablesPage;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\State as GameState;
@@ -14,7 +14,7 @@ use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
 
-class Together extends PoulePivotTablesPage
+class TogetherPoulePivotTablePage extends PoulePivotTablesPage
 {
     public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {

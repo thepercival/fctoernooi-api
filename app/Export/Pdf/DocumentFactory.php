@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\Pdf\Configs\FrontPageConfig;
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Configs\GamesConfig;
@@ -16,16 +17,18 @@ use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Configs\Structure\StructureConfig;
-use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
-use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
-use App\Export\Pdf\Document\Planning\Games as GamesDocument;
-use App\Export\Pdf\Document\Planning\GamesPerField as GamesPerFieldDocument;
-use App\Export\Pdf\Document\Planning\GamesPerPoule as GamesPerPouleDocument;
-use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
-use App\Export\Pdf\Document\QRCode as QRCodeDocument;
-use App\Export\Pdf\Document\RegistrationForm as RegistrationFormDocument;
-use App\Export\Pdf\Document\Structure as StructureDocument;
+use App\Export\Pdf\Documents\FrontPageDocument;
+use App\Export\Pdf\Document as FCToernooiPdfDocument;
+use App\Export\Pdf\Documents\GameNotesDocument as GameNotesDocument;
+use App\Export\Pdf\Documents\LockerRoomsDocument as LockerRoomsDocument;
+use App\Export\Pdf\Documents\Planning\GamesDocument as GamesDocument;
+use App\Export\Pdf\Documents\Planning\GamesPerFieldDocument as GamesPerFieldDocument;
+use App\Export\Pdf\Documents\Planning\GamesPerPouleDocument as GamesPerPouleDocument;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
+use App\Export\Pdf\Documents\QRCodeDocument as QRCodeDocument;
+use App\Export\Pdf\Documents\RegistrationFormDocument as RegistrationFormDocument;
+use App\Export\Pdf\Documents\StructureDocument as StructureDocument;
+use App\Export\Pdf\Page as ToernooiPage;
 use App\Export\PdfProgress;
 use App\Export\PdfSubject;
 use App\ImagePathResolver;
@@ -58,7 +61,7 @@ class DocumentFactory
         PdfSubject $subject,
         PdfProgress $progress,
         float $maxSubjectProgress
-    ): PdfDocument {
+    ): FCToernooiPdfDocument {
         switch ($subject) {
             case PdfSubject::RegistrationForm:
                 if( $registrationSettings === null) {
@@ -168,6 +171,41 @@ class DocumentFactory
                     new LockerRoomConfig(20, 16, 12),
                     new LockerRoomLabelConfig()
                 );
+            case PdfSubject::FrontPage:
+                return new FrontPageDocument(
+                    $tournament,
+                    $structure,
+                    $this->imagePathResolver,
+                    $progress,
+                    $maxSubjectProgress,
+                    new FrontPageConfig(ToernooiPage::PAGEMARGIN * 3, 28)
+                );
+//            case PdfSubject::Intro:
+//                if( $registrationSettings === null) {
+//                    throw new \Exception('no registration settings found');
+//                }
+//                return new FrontPageDocument(
+//                    $tournament,
+//                    $registrationSettings,
+//                    $structure,
+//                    $this->imagePathResolver,
+//                    $progress,
+//                    $maxSubjectProgress,
+//                    new RegistrationFormConfig(18, 14)
+//                );
+//            case PdfSubject::Sponsor:
+//                if( $registrationSettings === null) {
+//                    throw new \Exception('no registration settings found');
+//                }
+//                return new FrontPageDocument(
+//                    $tournament,
+//                    $registrationSettings,
+//                    $structure,
+//                    $this->imagePathResolver,
+//                    $progress,
+//                    $maxSubjectProgress,
+//                    new RegistrationFormConfig(18, 14)
+//                );
         }
         throw new \Exception('unknown subject', E_ERROR);
     }

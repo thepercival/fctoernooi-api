@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class LockerRoomConfig
+readonly class LockerRoomConfig
 {
     public function __construct(
         private int $lockerRoomMargin,

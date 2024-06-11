@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document\Planning;
+namespace App\Export\Pdf\Documents\Planning;
 
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GamesConfig;
-use App\Export\Pdf\Document\Planning as PdfPlanningDocument;
+use App\Export\Pdf\Documents\PlanningDocument as PdfPlanningDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
-use App\Export\Pdf\Page\Planning as PlanningPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages;
+use App\Export\Pdf\Pages\PlanningPage as PlanningPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\RecessHelper;
 use App\Export\Pdf\Rectangle;
@@ -25,7 +26,7 @@ use Zend_Pdf_Exception;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class Games extends PdfPlanningDocument
+class GamesDocument extends PdfPlanningDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -54,7 +55,7 @@ class Games extends PdfPlanningDocument
         $page = $this->createPagePlanning($firstRoundNumber, $title);
         $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
-        $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
+        $horLine = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $page->getDisplayWidth());
         $this->drawPlanning($firstRoundNumber, $page, $horLine);
     }
 
@@ -92,14 +93,14 @@ class Games extends PdfPlanningDocument
             $gameHeight = $page->getParent()->getGameLineConfig()->getRowHeight();
             $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
             $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
-            if ($gameHorStartLine->getY() - $gameHeight < Page::PAGEMARGIN) {
+            if ($gameHorStartLine->getY() - $gameHeight < ToernooiPdfPage::PAGEMARGIN) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
                 $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(
                     new HorizontalLine(
-                        new Point(Page::PAGEMARGIN, $y), $horLine->getWidth()
+                        new Point(ToernooiPdfPage::PAGEMARGIN, $y), $horLine->getWidth()
                     ),
                     $this->getGameLineConfig()->getRowHeight()
                 );

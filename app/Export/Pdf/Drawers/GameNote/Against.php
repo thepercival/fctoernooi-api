@@ -7,9 +7,10 @@ namespace App\Export\Pdf\Drawers\GameNote;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Drawers\GameNote as GameNotesDrawer;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
-use App\Export\Pdf\Page\GameNotes;
-use App\Export\Pdf\Page\GameNotes as GameNotesPage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages;
+use App\Export\Pdf\Pages\GameNotesPage;
+use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
@@ -72,7 +73,7 @@ class Against extends GameNotesDrawer
         $y = $top->getY();
         // 2x font thuis - uit
         $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight() * $larger);
-        $rectangle = new Rectangle(new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $leftPartWidth), -$height);
+        $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
         $page->drawCell('wedstrijd', $rectangle, Align::Right);
 
         // COMPETITORS
@@ -99,7 +100,7 @@ class Against extends GameNotesDrawer
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
                 $rectangle = new Rectangle(
-                    new HorizontalLine(new Point(Page::PAGEMARGIN, $y - $yDelta), $leftPartWidth),
+                    new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y - $yDelta), $leftPartWidth),
                     -$height
                 );
                 $page->drawCell($descr, $rectangle, Align::Right);
@@ -118,7 +119,7 @@ class Against extends GameNotesDrawer
                 $yDelta += $height;
             }
         } else {
-            $rectangle = new Rectangle(new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $leftPartWidth), -$height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
             $page->drawCell('score', $rectangle, Align::Right);
             $rectangle = new Rectangle(new HorizontalLine(new Point($homeStart, $y), $sideWidth), -$height);
             $page->drawCell($dots, $rectangle, Align::Right);
@@ -149,7 +150,7 @@ class Against extends GameNotesDrawer
         $y -= $height; // extra lege regel
 
         if ($planningConfig->getExtension()) {
-            $rectangle = new Rectangle(new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $leftPartWidth), -$height);
+            $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
             $page->drawCell('na verleng.', $rectangle, Align::Right);
             $rectangle = new Rectangle(new HorizontalLine(new Point($homeStart, $y), $sideWidth), -$height);
             $page->drawCell($dots, $rectangle, Align::Right);

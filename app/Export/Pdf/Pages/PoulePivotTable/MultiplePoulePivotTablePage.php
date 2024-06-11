@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\PoulePivotTable;
+namespace App\Export\Pdf\Pages\PoulePivotTable;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\PoulePivotTables as PoulePivotTablesDocument;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
@@ -19,7 +19,7 @@ use Sports\Ranking\Item\Round as RoundRankingItem;
 use Sports\Ranking\Item\Round\Sport as SportRoundRankingItem;
 use Sports\Round\Number as RoundNumber;
 
-class Multiple extends ToernooiPdfPage
+class MultiplePoulePivotTablePage extends ToernooiPdfPage
 {
     use Helper;
 

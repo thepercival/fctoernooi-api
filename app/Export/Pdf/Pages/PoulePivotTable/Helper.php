@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\PoulePivotTable;
+namespace App\Export\Pdf\Pages\PoulePivotTable;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;

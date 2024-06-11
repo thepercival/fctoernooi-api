@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page\Traits;
+namespace App\Export\Pdf\Pages\Traits;
 
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\TitleConfig;

@@ -10,6 +10,7 @@ use App\ImagePathResolver;
 use App\ImageProps;
 use App\ImageSize;
 use FCToernooi\Tournament;
+use IntlDateFormatter;
 use Sports\Competition\Sport as CompetitionSport;
 use Sports\Competitor\StartLocationMap;
 use Sports\Game\Against as AgainstGame;
@@ -47,17 +48,31 @@ abstract class Document extends Zend_Pdf
         $this->helper = new Helper();
     }
 
+    public function getDateFormatter(string $pattern = ''): IntlDateFormatter {
+        return new IntlDateFormatter(
+            'nl_NL',
+            IntlDateFormatter::FULL,
+            IntlDateFormatter::FULL,
+            'Europe/Amsterdam',
+            IntlDateFormatter::GREGORIAN,
+            $pattern
+        );
+    }
+
     protected function getHelper(): Helper
     {
         return $this->helper;
     }
 
-    public function getTournamentLogoPath(ImageSize $imageSize): string|null {
+    public function getTournamentLogoPath(ImageSize|null $imageSize): string|null {
         $logoExtension = $this->tournament->getLogoExtension();
         if( $logoExtension === null ){
             return null;
         }
-        $imageProps = new ImageProps(ImageProps::Suffix . $imageSize->value, $imageSize);
+        $imageProps = null;
+        if( $imageSize !== null ) {
+            $imageProps = new ImageProps(ImageProps::Suffix . $imageSize->value, $imageSize);
+        }
         return $this->imagePathResolver->getPath($this->tournament, $imageProps, $logoExtension);
     }
 

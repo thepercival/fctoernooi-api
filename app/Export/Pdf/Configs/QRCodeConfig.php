@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-class QRCodeConfig
+readonly class QRCodeConfig
 {
     public function __construct(
         private int $fontHeight = 14/*; between 10 and 20*/,

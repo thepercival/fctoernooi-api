@@ -2,47 +2,49 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
-use App\Export\Pdf\Configs\QRCodeConfig;
+use App\Export\Pdf\Configs\FrontPageConfig;
+use App\Export\Pdf\Configs\RegistrationFormConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Page\QRCode as QRCodePage;
+use App\Export\Pdf\Pages\FrontPage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\RegistrationSettings;
 use Sports\Structure;
 use Zend_Pdf_Page;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class QRCode extends PdfDocument
+class FrontPageDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
-        Structure $structure,
+        protected Structure $structure,
         ImagePathResolver $imagePathResolver,
         PdfProgress $progress,
         float $maxSubjectProgress,
-        protected QRCodeConfig $config
+        protected FrontPageConfig $config
     ) {
         parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
     }
 
-    public function getConfig(): QRCodeConfig
+    public function getConfig(): FrontPageConfig
     {
         return $this->config;
     }
 
     protected function renderCustom(): void
     {
-        $page = $this->createPageQRCode();
+        $page = $this->createFrontPage();
         $page->draw();
     }
 
-    protected function createPageQRCode(): QRCodePage
+    protected function createFrontPage(): FrontPage
     {
-        $page = new QRCodePage($this, Zend_Pdf_Page::SIZE_A4);
+        $page = new FrontPage($this, Zend_Pdf_Page::SIZE_A4);
         $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
         $this->pages[] = $page;
         return $page;

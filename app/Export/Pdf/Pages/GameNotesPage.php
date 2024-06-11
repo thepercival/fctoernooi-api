@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Configs\HeaderConfig;
-use App\Export\Pdf\Document\GameNotes as GameNotesDocument;
+use App\Export\Pdf\Documents\GameNotesDocument as GameNotesDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Pages;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use App\ImageSize;
@@ -19,7 +19,7 @@ use Zend_Pdf_Page;
 /**
  * @template-extends ToernooiPdfPage<GameNotesDocument>
  */
-class GameNotes extends ToernooiPdfPage
+class GameNotesPage extends ToernooiPdfPage
 {
     public function __construct(
         mixed $parent,
@@ -63,7 +63,7 @@ class GameNotes extends ToernooiPdfPage
         $subHeader = $this->getSubHeader($gameOne);
         $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
         $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, $subHeader);
-        $top = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $this->getDisplayWidth());
+        $top = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $this->getDisplayWidth());
         $this->renderGame($gameOne, $top);
 
         $this->setLineColor(new Zend_Pdf_Color_Html('black'));
@@ -89,7 +89,7 @@ class GameNotes extends ToernooiPdfPage
                 ($this->getHeight() / 2) - self::PAGEMARGIN
             )
         );
-        $top = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $this->getDisplayWidth());
+        $top = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $this->getDisplayWidth());
         $this->renderGame($gameTwo, $top);
     }
 

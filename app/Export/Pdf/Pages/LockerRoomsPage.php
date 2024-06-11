@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Page;
+namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Document\LockerRooms as LockerRoomsDocument;
+use App\Export\Pdf\Documents\LockerRoomsDocument as LockerRoomsDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
@@ -17,7 +17,7 @@ use FCToernooi\LockerRoom;
 /**
  * @template-extends ToernooiPdfPage<LockerRoomsDocument>
  */
-class LockerRooms extends ToernooiPdfPage
+class LockerRoomsPage extends ToernooiPdfPage
 {
     public function __construct(LockerRoomsDocument $document, mixed $param1)
     {

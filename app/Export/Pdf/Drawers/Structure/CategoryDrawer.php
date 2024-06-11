@@ -8,7 +8,7 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\Structure\CategoryConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Category;
@@ -34,7 +34,7 @@ final class CategoryDrawer
 
     // Always fit on page
     public function drawCategory(
-        Page $page,
+        ToernooiPdfPage $page,
         Category $category,
         HorizontalLine $top,
         int $maxNrOfPouleRows
@@ -48,7 +48,7 @@ final class CategoryDrawer
         return $bottom;
     }
 
-    private function drawHeader(Page $page, Category $category, HorizontalLine $top): HorizontalLine
+    private function drawHeader(ToernooiPdfPage $page, Category $category, HorizontalLine $top): HorizontalLine
     {
         $rectangle = new Rectangle($top, -$this->config->getRoundConfig()->getHeaderHeight());
         $page->setFont($this->helper->getTimesFont(true), $this->config->getFontHeight());

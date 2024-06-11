@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\Structure\StructureConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Drawers\Structure\CategoryDrawer;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
-use App\Export\Pdf\Page\Structure as StructurePage;
+use App\Export\Pdf\Page as ToernooiPdfPage;
+use App\Export\Pdf\Pages\StructurePage as StructurePage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use App\Export\PdfProgress;
@@ -23,7 +23,7 @@ use Sports\Category;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class Structure extends PdfDocument
+class StructureDocument extends PdfDocument
 {
     private CategoryDrawer $categoryDrawer;
 
@@ -60,9 +60,9 @@ class Structure extends PdfDocument
             if ($page === null || $horLine === null) {
                 $page = $this->createStructurePage($this->calculatePageDimensions($category));
                 $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, 'opzet & indeling');
-                $horLine = new HorizontalLine(new Point(Page::PAGEMARGIN, $y), $page->getDisplayWidth());
+                $horLine = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $page->getDisplayWidth());
             }
-            $rectangle = new Rectangle($horLine, -($horLine->getY() - Page::PAGEMARGIN));
+            $rectangle = new Rectangle($horLine, -($horLine->getY() - ToernooiPdfPage::PAGEMARGIN));
             if ($nextCategory != null) {
                 if ($this->canRenderBesideEachOther($category, $nextCategory, $rectangle)) {
                     $horLine = $this->renderBesideEachOther($page, $category, $nextCategory, $horLine);
@@ -106,7 +106,7 @@ class Structure extends PdfDocument
     }
 
     private function renderBesideEachOther(
-        Page $page,
+        ToernooiPdfPage $page,
         Category $category,
         Category $nextCategory,
         HorizontalLine $top
@@ -121,7 +121,7 @@ class Structure extends PdfDocument
         $topNext = new HorizontalLine($topLeftNext, $widthNext);
         $bottomNext = $this->categoryDrawer->drawCategory($page, $nextCategory, $topNext, $maxNrOfPouleRows);
         return new HorizontalLine(
-            new Point(Page::PAGEMARGIN, min($bottom->getY(), $bottomNext->getY())),
+            new Point(ToernooiPdfPage::PAGEMARGIN, min($bottom->getY(), $bottomNext->getY())),
             $top->getWidth()
         );
     }
@@ -167,26 +167,26 @@ class Structure extends PdfDocument
 
     private function calculatePageDimensions(Category $category): Point
     {
-        $point = new Point(Page::PAGEMARGIN, Page::A4_PORTRET_HEIGHT - Page::PAGEMARGIN);
-        $horLine = new HorizontalLine($point, Page::A4_PORTRET_WIDTH - (2 * Page::PAGEMARGIN));
-        $rectangle = new Rectangle($horLine, -(Page::A4_PORTRET_HEIGHT - (2 * Page::PAGEMARGIN)));
+        $point = new Point(ToernooiPdfPage::PAGEMARGIN, ToernooiPdfPage::A4_PORTRET_HEIGHT - ToernooiPdfPage::PAGEMARGIN);
+        $horLine = new HorizontalLine($point, ToernooiPdfPage::A4_PORTRET_WIDTH - (2 * ToernooiPdfPage::PAGEMARGIN));
+        $rectangle = new Rectangle($horLine, -(ToernooiPdfPage::A4_PORTRET_HEIGHT - (2 * ToernooiPdfPage::PAGEMARGIN)));
         $lowestNrOfPouleRows = $this->getLowestNrOfPouleRows($category, $rectangle);
         if ($lowestNrOfPouleRows !== null) {
-            return new Point(Page::A4_PORTRET_WIDTH, Page::A4_PORTRET_HEIGHT);
+            return new Point(ToernooiPdfPage::A4_PORTRET_WIDTH, ToernooiPdfPage::A4_PORTRET_HEIGHT);
         }
         $rectangle = $this->categoryDrawer->calculateRectangle($category, 1);
-        $portretAspectRatio = Page::A4_PORTRET_WIDTH / Page::A4_PORTRET_HEIGHT;
+        $portretAspectRatio = ToernooiPdfPage::A4_PORTRET_WIDTH / ToernooiPdfPage::A4_PORTRET_HEIGHT;
         if ($rectangle->getAspectRatio() > $portretAspectRatio) {
-            $pageWidth = Page::PAGEMARGIN + $rectangle->getWidth() + Page::PAGEMARGIN;
+            $pageWidth = ToernooiPdfPage::PAGEMARGIN + $rectangle->getWidth() + ToernooiPdfPage::PAGEMARGIN;
             return new Point($pageWidth, $pageWidth / $portretAspectRatio);
         }
-        $pageHeight = Page::PAGEMARGIN + $rectangle->getHeight() + Page::PAGEMARGIN;
+        $pageHeight = ToernooiPdfPage::PAGEMARGIN + $rectangle->getHeight() + ToernooiPdfPage::PAGEMARGIN;
         return new Point($pageHeight * $portretAspectRatio, $pageHeight);
     }
 
 //    private function calculateRectangle(Category $category, int $maxNrOfPouleRows): Rectangle
 //    {
-//        $defaultWidth = Page::A4_PORTRET_WIDTH;
+//        $defaultWidth = ToernooiPdfPage::A4_PORTRET_WIDTH;
 //        $minimalWidth = $this->categoryDrawer->getRectangle($category, $maxNrOfPouleRows);
 //        return $minimalWidth < $defaultWidth ? $defaultWidth : $minimalWidth;
 //    }

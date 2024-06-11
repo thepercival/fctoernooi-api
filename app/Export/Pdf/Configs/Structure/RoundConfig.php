@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs\Structure;
 
-class RoundConfig
+readonly class RoundConfig
 {
     public function __construct(
         private int $headerHeight,

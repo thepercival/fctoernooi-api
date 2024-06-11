@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Export\Pdf\Document;
+namespace App\Export\Pdf\Documents;
 
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GamesConfig;
 use App\Export\Pdf\Document as PdfDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Page\Planning as PlanningPage;
+use App\Export\Pdf\Pages\PlanningPage as PlanningPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\RecessHelper;
 use App\Export\Pdf\Rectangle;
@@ -28,7 +28,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-abstract class Planning extends PdfDocument
+abstract class PlanningDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -126,7 +126,7 @@ abstract class Planning extends PdfDocument
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(
                     new HorizontalLine(
-                        new Point(Page::PAGEMARGIN, $y),
+                        new Point(ToernooiPdfPage::PAGEMARGIN, $y),
                         $horLine->getWidth()
                     ),
                     -$this->getGameLineConfig()->getRowHeight()

@@ -7,7 +7,7 @@ namespace App\Export\Pdf\Drawers\Structure;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
-use App\Export\Pdf\Page;
+use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Poule\PouleWidth;
 use Sports\Poule;
 use Sports\Round;
@@ -26,7 +26,7 @@ class RoundDrawer
         $this->pouleDrawer = new PouleDrawer($structureNameService, $config->getPouleConfig());
     }
 
-    public function renderPoules(Round $round, HorizontalLine $startHorLine, Page|null $page): float
+    public function renderPoules(Round $round, HorizontalLine $startHorLine, ToernooiPdfPage|null $page): float
     {
         $showPouleNamePrefix = $round->isRoot();
         $showCompetitor = $round->isRoot();

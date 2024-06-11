@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs\Structure;
 
-class PouleConfig
+readonly class PouleConfig
 {
     private int $fontHeight;
 
