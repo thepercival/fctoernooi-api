@@ -241,6 +241,12 @@ final class TournamentAction extends Action
             $tournament->setPublic($tournamentSer->getPublic());
             $tournament->setLocation($tournamentSer->getLocation());
             $tournament->setIntro($tournamentSer->getIntro());
+            $serTheme = $tournamentSer->getTheme();
+            if($serTheme !== null) {
+                foreach( $serTheme as $key => $value ){
+                    $tournament->setTheme($key, $value);
+                }
+            }
             $tournament->getCompetition()->getLeague()->setName($tournamentSer->getName());
             $this->tournamentRepos->customPersist($tournament, true);
 

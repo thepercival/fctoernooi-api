@@ -11,6 +11,7 @@ use JMS\Serializer\JsonDeserializationVisitor;
 use Sports\Competition;
 use Sports\SerializationHandler\DummyCreator;
 use Sports\SerializationHandler\Handler;
+use stdClass;
 
 class TournamentHandler extends Handler implements SubscribingHandlerInterface
 {
@@ -28,7 +29,7 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
 
     /**
      * @param JsonDeserializationVisitor $visitor
-     * @param array{competition: Competition, intro: string, public: bool, useSelfRegistration: bool, location: string} $fieldValue
+     * @param array{competition: Competition, intro: string, theme: stdClass, public: bool, useSelfRegistration: bool, location: string} $fieldValue
      * @param array<string, int|string> $type
      * @param Context $context
      * @return Tournament
@@ -41,6 +42,9 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
     ): Tournament {
         $competition = $this->getProperty($visitor, $fieldValue, 'competition', Competition::class);
         $tournament = new Tournament($fieldValue['intro'], $competition);
+        foreach($fieldValue['theme'] as $key => $value) {
+            $tournament->setTheme($key, $value);
+        }
         $tournament->setPublic($fieldValue['public']);
         $tournament->setLocation($fieldValue['location']);
         return $tournament;

@@ -16,7 +16,7 @@ FCToernooi\Tournament:
     logoExtension:
       type: string
     theme:
-      type: json
+      type: array<string,string>
     location:
       type: string
       #groups: [home]

@@ -8,6 +8,7 @@ use App\Export\Pdf\Configs\FrontPageConfig;
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Configs\GamesConfig;
+use App\Export\Pdf\Configs\IntroConfig;
 use App\Export\Pdf\Configs\LockerRoomConfig;
 use App\Export\Pdf\Configs\LockerRoomLabelConfig;
 use App\Export\Pdf\Configs\PoulePivotConfig;
@@ -18,16 +19,17 @@ use App\Export\Pdf\Configs\Structure\PouleConfig;
 use App\Export\Pdf\Configs\Structure\RoundConfig;
 use App\Export\Pdf\Configs\Structure\StructureConfig;
 use App\Export\Pdf\Documents\FrontPageDocument;
+use App\Export\Pdf\Documents\GameNotesDocument;
+use App\Export\Pdf\Documents\LockerRoomsDocument;
+use App\Export\Pdf\Documents\Planning\GamesDocument;
+use App\Export\Pdf\Documents\Planning\GamesPerFieldDocument;
 use App\Export\Pdf\Document as FCToernooiPdfDocument;
-use App\Export\Pdf\Documents\GameNotesDocument as GameNotesDocument;
-use App\Export\Pdf\Documents\LockerRoomsDocument as LockerRoomsDocument;
-use App\Export\Pdf\Documents\Planning\GamesDocument as GamesDocument;
-use App\Export\Pdf\Documents\Planning\GamesPerFieldDocument as GamesPerFieldDocument;
-use App\Export\Pdf\Documents\Planning\GamesPerPouleDocument as GamesPerPouleDocument;
-use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
-use App\Export\Pdf\Documents\QRCodeDocument as QRCodeDocument;
+use App\Export\Pdf\Documents\Planning\GamesPerPouleDocument;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument;
+use App\Export\Pdf\Documents\QRCodeDocument;
 use App\Export\Pdf\Documents\RegistrationFormDocument as RegistrationFormDocument;
 use App\Export\Pdf\Documents\StructureDocument as StructureDocument;
+use App\Export\Pdf\Documents\IntroDocument;
 use App\Export\Pdf\Page as ToernooiPage;
 use App\Export\PdfProgress;
 use App\Export\PdfSubject;
@@ -180,19 +182,15 @@ class DocumentFactory
                     $maxSubjectProgress,
                     new FrontPageConfig(ToernooiPage::PAGEMARGIN * 3, 28)
                 );
-//            case PdfSubject::Intro:
-//                if( $registrationSettings === null) {
-//                    throw new \Exception('no registration settings found');
-//                }
-//                return new FrontPageDocument(
-//                    $tournament,
-//                    $registrationSettings,
-//                    $structure,
-//                    $this->imagePathResolver,
-//                    $progress,
-//                    $maxSubjectProgress,
-//                    new RegistrationFormConfig(18, 14)
-//                );
+            case PdfSubject::Intro:
+                return new IntroDocument(
+                    $tournament,
+                    $structure,
+                    $this->imagePathResolver,
+                    $progress,
+                    $maxSubjectProgress,
+                    new IntroConfig(18, 14)
+                );
 //            case PdfSubject::Sponsor:
 //                if( $registrationSettings === null) {
 //                    throw new \Exception('no registration settings found');
