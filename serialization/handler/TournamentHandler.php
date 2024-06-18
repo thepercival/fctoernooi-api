@@ -29,7 +29,7 @@ class TournamentHandler extends Handler implements SubscribingHandlerInterface
 
     /**
      * @param JsonDeserializationVisitor $visitor
-     * @param array{competition: Competition, intro: string, theme: stdClass, public: bool, useSelfRegistration: bool, location: string} $fieldValue
+     * @param array{competition: Competition, intro: string, theme: array<string, string>, public: bool, useSelfRegistration: bool, location: string} $fieldValue
      * @param array<string, int|string> $type
      * @param Context $context
      * @return Tournament

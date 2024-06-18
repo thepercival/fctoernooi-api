@@ -343,6 +343,12 @@ final class TournamentAction extends Action
 
             $newTournament = $this->tournamentCopier->copy($tournament, $copyData->name, $startDateTime, $user);
             $newTournament->setLogoExtension($tournament->getLogoExtension());
+            $theme = $tournament->getTheme();
+            if($theme !== null) {
+                foreach( $theme as $key => $value ){
+                    $newTournament->setTheme($key, $value);
+                }
+            }
             $this->tournamentRepos->customPersist($newTournament, true);
             if ($tournament->getLogoExtension() !== null) {
                 $this->imageService->copyImages($tournament, $newTournament);
