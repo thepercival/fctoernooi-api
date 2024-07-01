@@ -4,8 +4,21 @@ namespace App\Export\Pdf;
 
 final class Point implements \Stringable
 {
-    public function __construct(protected float $x, protected float $y)
+    protected float $x;
+    protected float $y;
+
+    public function __construct(Point|float $pointOrX, float $y = null)
     {
+        if( $pointOrX instanceof Point) {
+            $this->x = $pointOrX->getX();
+            $this->y = $pointOrX->getY();
+        } else {
+            $this->x = $pointOrX;
+            if( $y === null ) {
+                throw new \Exception('incorrect use of point-constructor');
+            }
+            $this->y = $y;
+        }
     }
 
     public function addX(float $x): self

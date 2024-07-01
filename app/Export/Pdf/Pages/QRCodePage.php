@@ -32,8 +32,7 @@ class QRCodePage extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, 'qrcode');
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), 'qrcode');
 
         $url = $this->parent->getWwwUrl() . (string)$this->parent->getTournament()->getId();
 

@@ -55,11 +55,10 @@ class GamesPerPouleDocument extends PdfPlanningDocument
         $poules = array_filter($roundNumber->getPoules(), function (Poule $poule): bool {
             return $poule->needsRanking();
         });
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         foreach ($poules as $poule) {
             $title = $this->getStructureNameService()->getPouleName($poule, true);
             $page = $this->createPagePlanning($roundNumber, $title);
-            $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
+            $y = $page->drawHeader($this->getTournament()->getName(), $title);
             $page->setGameFilter(
                 function (Game $game) use ($poule): bool {
                     return $game->getPoule() === $poule;

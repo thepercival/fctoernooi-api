@@ -7,35 +7,19 @@ namespace App\Export\Pdf\Configs;
 readonly class IntroConfig
 {
     public function __construct(
-//        private int $roundNumberHeaderHeight,
-        private int $rowHeight,
-        private int $fontHeight,
+        private FieldsetTextConfig $introFieldsetTextConfig,
+        private FieldsetListConfig $rulesFieldsetListConfig
     ) {
-        if ($fontHeight < 10 || $fontHeight > 20) {
-            throw new \Exception('fontHeight should be between 10 and 20');
-        }
-        if ($rowHeight <= $fontHeight || $rowHeight > 20) {
-            throw new \Exception('rowHeight should be between fontheight and 20');
-        }
+
     }
 
-//    public function getRoundNumberHeaderHeight(): int
-//    {
-//        return $this->roundNumberHeaderHeight;
-//    }
-//
-//    public function getRoundNumberHeaderFontHeight(): int
-//    {
-//        return $this->roundNumberHeaderHeight - 4;
-//    }
-
-    public function getRowHeight(): int
+    public function getIntroFieldsetTextConfig(): FieldsetTextConfig
     {
-        return $this->rowHeight;
+        return $this->introFieldsetTextConfig;
     }
 
-    public function getFontHeight(): int
+    public function getRulesFieldsetListConfig(): FieldsetListConfig
     {
-        return $this->fontHeight;
+        return $this->rulesFieldsetListConfig;
     }
 }

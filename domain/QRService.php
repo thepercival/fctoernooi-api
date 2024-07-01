@@ -31,7 +31,16 @@ class QRService
 
     public function writeGameToJpg(Tournament $tournament, Game $game, string $qrCodeText, int $imgWidthPts): string
     {
-        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $game);
+        $suffix = "-game-" . (string)$game->getId();
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $suffix);
+        $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
+        return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
+    }
+
+    public function writeLocationToJpg(Tournament $tournament, string $qrCodeText, int $imgWidthPts): string
+    {
+        $suffix = "-location";
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $suffix);
         $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
         return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
     }
@@ -53,12 +62,12 @@ class QRService
         return $mm / $mmPerInch;
     }
 
-    protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, Game $game = null): string
+    protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, string $suffix = null): string
     {
         $path = $this->tmpService->getPath(["qrcode"]);
         $path .= "tournament-" . (string)$tournament->getId();
-        if ($game !== null) {
-            $path .= "-game-" . (string)$game->getId();
+        if ($suffix !== null) {
+            $path .= $suffix;
         }
         return $path . "-width-" . $imgWidth;
     }

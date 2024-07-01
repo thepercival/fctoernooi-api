@@ -29,4 +29,9 @@ class Horizontal extends Line
     public function getWidth(): float {
         return $this->end->getX() - $this->start->getX();
     }
+
+    public function moveY(float $length): self {
+        $newStartPoint = new Point($this->getStart()->getX(), $this->getStart()->getY() + $length);
+        return new self($newStartPoint, $this->getWidth());
+    }
 }

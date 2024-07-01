@@ -57,6 +57,9 @@ final class RuleAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
+//            if( $tournament->getRules() >= TournamentRule::MAX_PER_TOURNAMENT ) {
+                throw new \Exception('Het maximum aantal regels is bereikt');
+  //          }
             /** @var TournamentRule $serRule */
             $serRule = $this->serializer->deserialize($this->getRawData($request), TournamentRule::class, 'json');
 

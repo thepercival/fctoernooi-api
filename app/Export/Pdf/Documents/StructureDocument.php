@@ -51,7 +51,6 @@ class StructureDocument extends PdfDocument
 
     protected function renderCustom(): void
     {
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $horLine = null;
         $page = null;
         $categories = $this->getStructure()->getCategories();
@@ -59,7 +58,7 @@ class StructureDocument extends PdfDocument
             $nextCategory = array_shift($categories);
             if ($page === null || $horLine === null) {
                 $page = $this->createStructurePage($this->calculatePageDimensions($category));
-                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, 'opzet & indeling');
+                $y = $page->drawHeader($this->getTournament()->getName(), 'opzet & indeling');
                 $horLine = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $page->getDisplayWidth());
             }
             $rectangle = new Rectangle($horLine, -($horLine->getY() - ToernooiPdfPage::PAGEMARGIN));

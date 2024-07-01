@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\Pdf\Configs\FieldsetListConfig;
+use App\Export\Pdf\Configs\FieldsetTextConfig;
 use App\Export\Pdf\Configs\FrontPageConfig;
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Configs\GameNotesConfig;
@@ -31,9 +33,11 @@ use App\Export\Pdf\Documents\RegistrationFormDocument as RegistrationFormDocumen
 use App\Export\Pdf\Documents\StructureDocument as StructureDocument;
 use App\Export\Pdf\Documents\IntroDocument;
 use App\Export\Pdf\Page as ToernooiPage;
+use App\Export\Pdf\Pages\IntroPage;
 use App\Export\PdfProgress;
 use App\Export\PdfSubject;
 use App\ImagePathResolver;
+use FCToernooi\Theme;
 use FCToernooi\Tournament;
 use Selective\Config\Configuration;
 use Sports\Competition\Sport as CompetitionSport;
@@ -189,7 +193,15 @@ class DocumentFactory
                     $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    new IntroConfig(18, 14)
+                    new IntroConfig(
+                       new FieldsetTextConfig(
+                           ToernooiPage::PAGEMARGIN,
+                           14, IntroPage::FieldsetHeaderPadding,
+                        12, IntroPage::FieldsetTextMargin),
+                        new FieldsetListConfig(
+                            14, IntroPage::FieldsetHeaderPadding,
+                            12, IntroPage::FieldsetTextMargin)
+                    )
                 );
 //            case PdfSubject::Sponsor:
 //                if( $registrationSettings === null) {

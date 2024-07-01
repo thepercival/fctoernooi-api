@@ -110,7 +110,6 @@ abstract class PlanningDocument extends PdfDocument
             $page->drawGamesHeader($roundNumber, $rectangle);
             $gameHorStartLine = $rectangle->getBottom();
         }
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $games = $roundNumber->getGames(GameOrder::ByDate);
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
@@ -121,7 +120,7 @@ abstract class PlanningDocument extends PdfDocument
             if ($gameHorStartLine->getY() - $gameHeight < PdfPage::PAGEMARGIN) {
                 // $field = $page->getFieldFilter();
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle());
-                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $page->getTitle());
+                $y = $page->drawHeader($this->getTournament()->getName(), $page->getTitle());
                 $page->setGameFilter($page->getGameFilter());
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(

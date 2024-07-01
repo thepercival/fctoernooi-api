@@ -83,8 +83,7 @@ class LockerRoomsPage extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath,'kleedkamers');
+        $y = $this->drawHeader($this->parent->getTournament()->getName(),'kleedkamers');
         $yStart = $this->drawTitle('indeling kleedkamers', $y);
         $lockerRooms = array_values($this->parent->getTournament()->getLockerRooms()->toArray());
         if (count($lockerRooms) === 0) {

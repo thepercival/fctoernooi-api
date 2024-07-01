@@ -73,8 +73,7 @@ class LockerRoomLabelPage extends ToernooiPdfPage
      */
     public function draw(array &$competitors): void
     {
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, "kleedkamer");
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), "kleedkamer");
         $y = $this->drawLockerRoom($y);
         $infoHeight = $this->parent->getTournament()->getPublic() ? $this->parent->getLabelConfig()->getInfoHeight(
         ) : 0;

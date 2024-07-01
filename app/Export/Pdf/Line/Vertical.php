@@ -35,4 +35,9 @@ class Vertical extends Line
     {
         return $this->end->getY() - $this->start->getY();
     }
+
+    public function moveX(float $length): self {
+        $newStartPoint = new Point($this->getStart()->getX() + $length, $this->getStart()->getY());
+        return new self($newStartPoint, $this->getHeight());
+    }
 }

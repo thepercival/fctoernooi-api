@@ -55,12 +55,11 @@ class PoulePivotTablesDocument extends PdfDocument
             if ($roundNumber->getCompetition()->hasMultipleSports()) {
                 $this->drawPoulePivotTablesMultipleSports($roundNumber);
             }
-            $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
             $biggestPoule = $roundNumber->createPouleStructure()->getBiggestPoule();
             $gameAmountConfigs = $roundNumber->getValidGameAmountConfigs();
             foreach ($gameAmountConfigs as $gameAmountConfig) {
                 $page = $this->createPagePoulePivotTables($gameAmountConfig->createVariant(), $biggestPoule);
-                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath,  'pouledraaitabel');
+                $y = $page->drawHeader($this->getTournament()->getName(),   'pouledraaitabel');
                 $y = $page->drawPageStartHeader($roundNumber, $gameAmountConfig->getCompetitionSport(), $y);
                 foreach ($roundNumber->getRounds() as $round) {
                     foreach ($round->getPoules() as $poule) {
@@ -71,7 +70,7 @@ class PoulePivotTablesDocument extends PdfDocument
                         if ($y - $pouleHeight < AgainstPoulePivotTablePage::PAGEMARGIN) {
                             $nrOfPlaces = $poule->getPlaces()->count();
                             $page = $this->createPagePoulePivotTables($gameAmountConfig->createVariant(), $nrOfPlaces);
-                            $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, 'pouledraaitabel');
+                            $y = $page->drawHeader($this->getTournament()->getName(),  'pouledraaitabel');
                             $y = $page->drawPageStartHeader($roundNumber, $gameAmountConfig->getCompetitionSport(), $y);
                         }
                         $y = $page->draw($poule, $gameAmountConfig, $y);
@@ -100,10 +99,9 @@ class PoulePivotTablesDocument extends PdfDocument
         if (!$this->someStructureCellNeedsRanking($roundNumber)) {
             return;
         }
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $biggestPoule = $roundNumber->createPouleStructure()->getBiggestPoule();
         $page = $this->createPagePoulePivotTablesMultipleSports($biggestPoule);
-        $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, 'pouledraaitabel');
+        $y = $page->drawHeader($this->getTournament()->getName(), 'pouledraaitabel');
         $y = $page->drawPageStartHeader($roundNumber, $y);
 
         foreach ($roundNumber->getRounds() as $round) {
@@ -115,7 +113,7 @@ class PoulePivotTablesDocument extends PdfDocument
                 if ($y - $pouleHeight < MultipleSportsPoulePivotTablePage::PAGEMARGIN) {
                     $nrOfPlaces = $poule->getPlaces()->count();
                     $page = $this->createPagePoulePivotTablesMultipleSports($nrOfPlaces);
-                    $y = $page->drawHeader($this->getTournament()->getName(), $logoPath,  'pouledraaitabel');
+                    $y = $page->drawHeader($this->getTournament()->getName(),  'pouledraaitabel');
                     $y = $page->drawPageStartHeader($roundNumber, $y);
                 }
                 $y = $page->draw($poule, $y);

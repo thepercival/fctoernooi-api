@@ -53,8 +53,7 @@ class GamesDocument extends PdfPlanningDocument
         $firstRoundNumber = $this->structure->getFirstRoundNumber();
         $title = 'wedstrijden';
         $page = $this->createPagePlanning($firstRoundNumber, $title);
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
-        $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
+        $y = $page->drawHeader($this->getTournament()->getName(), $title);
         $horLine = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $page->getDisplayWidth());
         $this->drawPlanning($firstRoundNumber, $page, $horLine);
     }
@@ -85,7 +84,6 @@ class GamesDocument extends PdfPlanningDocument
             $gameHorStartLine = $horLine;
         }
 
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $games = $roundNumber->getGames(GameOrder::ByDate);
         $recessHelper = new RecessHelper($roundNumber);
         $recesses = $recessHelper->getRecesses($this->tournament);
@@ -96,7 +94,7 @@ class GamesDocument extends PdfPlanningDocument
             if ($gameHorStartLine->getY() - $gameHeight < ToernooiPdfPage::PAGEMARGIN) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);
-                $y = $page->drawHeader($this->getTournament()->getName(), $logoPath, $title);
+                $y = $page->drawHeader($this->getTournament()->getName(), $title);
                 $page->initGameLines($roundNumber);
                 $rectangle = new Rectangle(
                     new HorizontalLine(

@@ -31,10 +31,8 @@ class RegistrationFormPage extends ToernooiPdfPage
 
     public function draw(): void
     {
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small );
         $y = $this->drawHeader(
             $this->parent->getTournament()->getName(),
-            $logoPath,
             'inschrijfformulier',
             new HeaderConfig()
         );

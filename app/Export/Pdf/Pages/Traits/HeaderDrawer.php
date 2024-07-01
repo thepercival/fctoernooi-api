@@ -20,7 +20,6 @@ trait HeaderDrawer
 {
     public function drawHeader(
         string $tournamentName,
-        string|null $tournamentLogoPath,
         string $subTitle,
         HeaderConfig $config = null
     ): float {
@@ -31,42 +30,34 @@ trait HeaderDrawer
 
         $displayWidth = $this->getDisplayWidth();
 
-
         $padding = 10;
         $rowHeight = $config->getRowHeight();
-        $imgSize = $rowHeight;
-        $xImage = self::PAGEMARGIN;
-        $xLeft = $xImage + $imgSize;
-        $widthLeft = $this->getTextWidth('FCToernooi', $config->getFontHeight());
-        $xCenter = $xLeft + $widthLeft + $padding;
+        $xLeft = self::PAGEMARGIN;
+        $widthAppText = $this->getTextWidth('FCToernooi', $config->getFontHeight());
         $this->setFont($this->helper->getTimesFont(true), $config->getFontHeight());
-        $widthRight = strlen($subTitle) > 0 ? $this->getTextWidth($subTitle, $config->getFontHeight()) : 0;
+        $widthSubtitle = strlen($subTitle) > 0 ? $this->getTextWidth($subTitle, $config->getFontHeight()) : 0;
         $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
-        $xRight = strlen($subTitle) > 0 ? $this->getWidth() - (self::PAGEMARGIN + $widthRight) : 0;
-        $tournamentLogoSize = 20;
+        $xCenter = $xLeft + $widthSubtitle + $padding;
+        $xRight = $this->getWidth() - (self::PAGEMARGIN + $widthAppText);
 
-        $logoSize = $tournamentLogoPath !== null ? $tournamentLogoSize : 0;
-        $widthCenter = $displayWidth - ($imgSize + $widthLeft + $padding + $logoSize + $padding + $widthRight);
+        $widthCenter = $displayWidth - ($widthSubtitle + $padding + $padding + $widthAppText);
         $y = $config->getYStart();
         if ($y === null) {
             $y = $this->getHeight() - self::PAGEMARGIN;
         }
 
-        // draw fctoernooi-logo and name
-        {
-            /** @var Zend_Pdf_Resource_Image $img */
-            $img = Zend_Pdf_Resource_ImageFactory::factory(__DIR__ . '/../../../logo.jpg');
-            $imgRectangle = new Rectangle(new HorizontalLine(new Point($xImage, $y), $imgSize), -$imgSize);
-            $this->drawImageExt($img, $imgRectangle);
+        $theme = $this->parent->getTheme();
+        $this->setTextColor(new \Zend_Pdf_Color_Html($theme->textColor));
+        $this->setFillColor(new \Zend_Pdf_Color_Html($theme->bgColor));
 
-            $arrLineColors = ['b' => 'black'];
+        // draw fill
+        {
             $rectangle = new Rectangle(
-                new HorizontalLine(new Point($xLeft, $y), $widthLeft),
+                new HorizontalLine(new Point($xLeft, $y), $widthSubtitle),
                 -$rowHeight
             );
-            $this->setFillColor(new \Zend_Pdf_Color_Html(Document::THEME_BG));
-            $this->drawCell('FCToernooi', $rectangle, Align::Left, $arrLineColors);
-            $this->setFillColor(new \Zend_Pdf_Color_Html('white'));
+            $arrCorners = [10,0,0,10];
+            $this->drawCell($subTitle, $rectangle, Align::Left, $theme->bgColor, $arrCorners);
         }
 
         // draw tournament name and logo
@@ -75,31 +66,23 @@ trait HeaderDrawer
                 new HorizontalLine(new Point($xCenter, $y), $widthCenter),
                 -$rowHeight
             );
-            $this->drawCell($tournamentName, $rectangle, Align::Center, $arrLineColors);
-
-            try {
-                /** @var Zend_Pdf_Resource_Image $img */
-                $img = Zend_Pdf_Resource_ImageFactory::factory($tournamentLogoPath);
-                $xImage = $xCenter + $widthCenter + 2;
-                $logoSize = ImageSize::Small->value;
-                $imgRectangle = new Rectangle(new HorizontalLine(new Point($xImage, $y + 1), $logoSize), -$logoSize);
-                $this->drawImageExt($img, $imgRectangle);
-            } catch ( Zend_Pdf_Exception $e ) {
-                // $this->logger->warning($e->getMessage());
-            }
-
+            $this->drawCell($tournamentName, $rectangle, Align::Center, $theme->bgColor);
         }
 
         // draw subTitle
         if (strlen($subTitle) > 0) {
-            $this->setFont($this->helper->getTimesFont(true), $config->getFontHeight());
+            $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
             $rectangle = new Rectangle(
-                new HorizontalLine(new Point($xRight, $y), $widthRight),
+                new HorizontalLine(new Point($xRight, $y), $widthAppText),
                 -$rowHeight
             );
-            $this->drawCell($subTitle, $rectangle, Align::Right, $arrLineColors);
+            $arrCorners = [0,10,10,0];
+            $this->drawCell('FCToernooi', $rectangle, Align::Right, $theme->bgColor, $arrCorners);
             $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
         }
+
+        $this->setFillColor(new \Zend_Pdf_Color_Html('white'));
+        $this->setTextColor(new \Zend_Pdf_Color_Html('black'));
 
         return $y - (2 * $rowHeight);
     }

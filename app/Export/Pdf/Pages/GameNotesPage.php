@@ -61,8 +61,7 @@ class GameNotesPage extends ToernooiPdfPage
     public function renderGames(AgainstGame|TogetherGame $gameOne, AgainstGame|TogetherGame|null $gameTwo): void
     {
         $subHeader = $this->getSubHeader($gameOne);
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
-        $y = $this->drawHeader($this->parent->getTournament()->getName(), $logoPath, $subHeader);
+        $y = $this->drawHeader($this->parent->getTournament()->getName(), $subHeader);
         $top = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $this->getDisplayWidth());
         $this->renderGame($gameOne, $top);
 
@@ -83,7 +82,6 @@ class GameNotesPage extends ToernooiPdfPage
         $subHeader = $this->getSubHeader($gameTwo);
         $y = $this->drawHeader(
             $this->parent->getTournament()->getName(),
-            $this->parent->getTournamentLogoPath(ImageSize::Small),
             $subHeader,
             new HeaderConfig(
                 ($this->getHeight() / 2) - self::PAGEMARGIN

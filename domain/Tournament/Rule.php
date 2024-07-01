@@ -19,6 +19,7 @@ class Rule extends Identifiable implements Prioritizable
 
     public const MIN_LENGTH_TEXT = 5;
     public const MAX_LENGTH_TEXT = 80;
+    public const MAX_PER_TOURNAMENT = 25;
 
     public function __construct(
         private Tournament $tournament,

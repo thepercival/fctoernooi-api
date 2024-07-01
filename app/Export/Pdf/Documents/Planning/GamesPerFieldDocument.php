@@ -52,12 +52,11 @@ class GamesPerFieldDocument extends PdfPlanningDocument
 
     protected function drawPlanningPerField(RoundNumber $roundNumber): void
     {
-        $logoPath = $this->getTournamentLogoPath(ImageSize::Small);
         $fields = $this->getTournament()->getCompetition()->getFields();
         foreach ($fields as $field) {
             $title = 'veld ' . (string)$field->getName();
             $page = $this->createPagePlanning($roundNumber, $title);
-            $y = $page->drawHeader($this->getTournament()->getName(), $logoPath,  $title);
+            $y = $page->drawHeader($this->getTournament()->getName(),  $title);
             $page->setGameFilter(
                 function (Game $game) use ($field): bool {
                     return $game->getField() === $field;

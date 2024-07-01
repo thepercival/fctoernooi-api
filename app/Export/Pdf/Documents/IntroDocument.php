@@ -39,14 +39,14 @@ class IntroDocument extends FCToernooiPdfDocument
 
     protected function renderCustom(): void
     {
-        $page = $this->createPageRegistrationForm();
+        $page = $this->createPageIntro();
         $page->draw();
     }
 
-    protected function createPageRegistrationForm(): IntroPage
+    protected function createPageIntro(): IntroPage
     {
         $page = new IntroPage($this, Zend_Pdf_Page::SIZE_A4);
-        $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+        // $page->setFont($this->helper->getTimesFont(), $this->config->getFontSize());
         $this->pages[] = $page;
         return $page;
     }

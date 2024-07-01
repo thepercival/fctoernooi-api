@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf;
 
+use App\Export\Pdf\Configs\FieldsetListConfig;
+use App\Export\Pdf\Configs\FieldsetTextConfig;
 use App\Export\Pdf\Drawers\Helper;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Line\Vertical as VerticalLine;
 use App\Export\Pdf\Pages\Traits\HeaderDrawer;
 use App\Export\Pdf\Pages\Traits\TitleDrawer;
+use FCToernooi\Theme;
 use Sports\Structure\NameService as StructureNameService;
 use Zend_Pdf_Color;
 use Zend_Pdf_Color_Html;
@@ -35,6 +38,7 @@ abstract class Page extends Zend_Pdf_Page
     protected Zend_Pdf_Color $fillColor;
     protected Zend_Pdf_Color|null $fillColorTmp = null;
     protected float $lineWidth;
+
     /**
      * @var T
      */
@@ -128,8 +132,9 @@ abstract class Page extends Zend_Pdf_Page
         Align $nAlign = Align::Left,
         array|string $vtLineColors = null,
         array|null $cornerRadius = null,
+        int $nStyle = null
     ): void {
-        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, $cornerRadius);
+        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, $cornerRadius, $nStyle);
     }
 
     /**
@@ -145,9 +150,10 @@ abstract class Page extends Zend_Pdf_Page
         Rectangle $rectangle,
         Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
-        int $degrees = null
+        int $degrees = null,
+        int $nStyle = null
     ): void {
-        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, null, $degrees);
+        $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, null, $degrees, $nStyle);
     }
 
     /**
@@ -157,6 +163,7 @@ abstract class Page extends Zend_Pdf_Page
      * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColors
      * @param array<int> | null $cornerRadius
      * @param int|null $degrees
+     * @param int|null $nStyle
      * @throws Zend_Pdf_Exception
      */
     private function drawCellHelper(
@@ -165,9 +172,12 @@ abstract class Page extends Zend_Pdf_Page
         Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
         array|null $cornerRadius = null,
-        int $degrees = null
+        int $degrees = null,
+        int $nStyle = null
     ): void {
-        $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
+        if( $nStyle === null ) {
+            $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
+        }
 
         $xPos = $rectangle->getLeft()->getX();
         $yPos = $rectangle->getTop()->getY();
@@ -266,6 +276,13 @@ abstract class Page extends Zend_Pdf_Page
         Rectangle $rectangle/*x1, $y1, $x2, $y2*/,
         int $fillType = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE
     ): void {
+        $this->drawRectangle(
+            $rectangle->getTop()->getStart()->getX(),
+            $rectangle->getTop()->getStart()->getY(),
+            $rectangle->getTop()->getEnd()->getX(),
+            $rectangle->getTop()->getEnd()->getY(),
+            $fillType
+        );
     }
 
     /**
@@ -523,6 +540,246 @@ abstract class Page extends Zend_Pdf_Page
 
                 $bTop = false;
             }
+        }
+    }
+
+    /**
+     * 1 determine text startpoint
+     * 2 determine textWidth by usting width of rectangle and subtract padding
+     * 3 determine height of fieldset
+     * 4 draw fieldset
+     * 5 draw lines of text
+     *
+     * @param string|null $text
+     * @param Rectangle $rectangle
+     * @param Theme $theme
+     * @param string|null $title
+     * @param FieldsetTextConfig $fieldsetTextConfig
+     * @return float
+     */
+    protected function drawFieldset(
+        string|null $text,
+        Rectangle $rectangle,
+        Theme $theme,
+        string|null $title,
+        FieldsetTextConfig $fieldsetTextConfig): float {
+
+        $originalFontSize = $this->getFontSize();
+
+        $padding = $fieldsetTextConfig->getPadding();
+        $textMargin = $fieldsetTextConfig->getTextMargin();
+        $textFontSize = $fieldsetTextConfig->getTextFontSize();
+        $headerFontSize = $fieldsetTextConfig->getHeaderFontSize();
+        $headerTextMargin = $fieldsetTextConfig->getHeaderTextMargin();
+
+//        * 1 determine text startpoint
+        $textStartPoint = $rectangle->getTop()->getStart()->add($padding,$padding);
+
+//        * 2 determine maximum textwidth by usting width of rectangle and subtract padding
+        $maxTextWidth = $rectangle->getWidth() - (2 * $padding );
+
+//        * 3 determine height of fieldset
+        $linesToDraw = $this->getLines($text, $maxTextWidth, $textFontSize);
+        $rowHeight = $textFontSize + $textMargin;
+        $textTotalHeight = (count($linesToDraw) - 1) * $rowHeight;
+
+        $height = $textTotalHeight + ( 2 * $padding );
+
+//        * 4 draw fieldset
+        if( $text !== null ) {
+            $outerRectangle = new Rectangle($rectangle->getTop(), -$height);
+        } else {
+            $outerRectangle = $rectangle;
+        }
+        $this->drawFieldsetOuter( $headerFontSize, $headerTextMargin, $outerRectangle, $title, $theme);
+
+        $this->setFont($this->helper->getTimesFont(false), $textFontSize);
+
+//        * 5 draw lines of text
+        $this->drawFieldsetText( $textStartPoint, $linesToDraw, $textFontSize, $textMargin);
+
+        $this->setFont($this->helper->getTimesFont(false), $originalFontSize);
+
+        return $outerRectangle->getBottom()->getY();
+    }
+
+    /**
+     * 1 determine text startpoint
+     * 2 determine textWidth by usting width of rectangle and subtract padding
+     * 3 determine height of fieldset
+     * 4 draw fieldset
+     * 5 draw lines of text
+     *
+     * @param list<string> $linesToDraw
+     * @param Rectangle $rectangle
+     * @param Theme $theme
+     * @param string|null $title
+     * @param FieldsetListConfig $ieldsetListConfig
+     * @return void
+     */
+    protected function drawFieldsetList(
+        array $linesToDraw,
+        Rectangle $rectangle,
+        Theme $theme,
+        string|null $title,
+        FieldsetListConfig $fieldsetListConfig): void {
+
+        $originalFontSize = $this->getFontSize();
+
+        $textFontSize = $fieldsetListConfig->getTextFontSize();
+        $textMargin = $fieldsetListConfig->getTextMargin();
+        $headerFontSize = $fieldsetListConfig->getHeaderFontSize();
+        $headerTextMargin = $fieldsetListConfig->getHeaderTextMargin();
+
+//        * 1 determine text startpoint
+        $textStartPoint = $rectangle->getTop()->getStart()->add($textMargin,$textMargin);
+
+//        * 2 determine maximum textwidth by usting width of rectangle and subtract padding
+        $maxTextWidth = $rectangle->getWidth() - (2 * $textMargin );
+
+//        * 3 determine height of fieldset
+        $rowHeight = $textFontSize + $textMargin;
+        $textTotalHeight = (count($linesToDraw) - 1) * $rowHeight;
+
+        $height = $textTotalHeight + ( 2 * $textMargin );
+
+//        * 4 draw fieldset
+        $this->drawFieldsetOuter( $headerFontSize, $headerTextMargin, new Rectangle($rectangle->getTop(), -$height), $title, $theme);
+
+        $this->setFont($this->helper->getTimesFont(false), $textFontSize);
+
+//        * 5 draw lines of text
+        foreach( $linesToDraw as $lineToDraw) {
+            $this->drawFieldsetLines($textStartPoint, $linesToDraw, $textFontSize, $textMargin);
+        }
+
+        $this->setFont($this->helper->getTimesFont(false), $originalFontSize);
+    }
+
+    /**
+     * @param list<string> $linesToDraw
+     * @param float $maxTextWidth
+     * @param FieldsetListConfig $fieldsetListConfig
+     * @return float
+     */
+    protected function getFieldsetListHeight(
+        array $linesToDraw,
+        float $maxTextWidth,
+        FieldsetListConfig $fieldsetListConfig
+    ): float {
+        $headerFontSize = $fieldsetListConfig->getHeaderFontSize();
+        $headerTextMargin = $fieldsetListConfig->getHeaderTextMargin();
+        $textFontSize = $fieldsetListConfig->getTextFontSize();
+        $textMargin = $fieldsetListConfig->getTextMargin();
+
+        $headerHeight = $headerFontSize + $headerTextMargin;
+        $nrOfLines = 0;
+        foreach( $linesToDraw as $lineToDraw) {
+            $nrOfLines += count($this->getLines($lineToDraw, $maxTextWidth, $textFontSize));
+        }
+        $textRowHeight = $textFontSize * $textMargin;
+        $linesTotalHeight = $nrOfLines * $textRowHeight;
+
+        return $headerHeight + $linesTotalHeight;
+    }
+
+    /**
+     * @param string|null $text
+     * @param float $maxTextWidth
+     * @param int $fontSize
+     * @return list<string>
+     */
+    private function getLines( string|null $text, float $maxTextWidth, int $fontSize ): array {
+        $linesToDraw = [];
+        if( $text === null ) {
+            return $linesToDraw;
+        }
+        $lines = explode( PHP_EOL, $text);
+        foreach( $lines as  $line ) {
+            $textWidth = 0;
+            $lineToDraw = '';
+            $words = explode( ' ', $line);
+            $firstWord = true;
+            foreach( $words as $word ) {
+                if( !$firstWord) {
+                    $word = ' ' . $word;
+                }
+                $wordWidth = $this->getTextWidth($word, $fontSize, false);
+                while( $wordWidth > $maxTextWidth ) {
+                    $word = substr($word, 0, strlen($word) - 1);
+                    $wordWidth = $this->getTextWidth($word, $fontSize, false);
+                }
+                if( $textWidth + $wordWidth > $maxTextWidth ) {
+                    $firstWordOfLine = substr($word, 1);
+                    $textWidth = $this->getTextWidth($firstWordOfLine, $fontSize, false);
+                    $linesToDraw[] = $lineToDraw;
+                    $lineToDraw = $firstWordOfLine;
+                } else {
+                    $textWidth += $wordWidth;
+                    $lineToDraw .= $word;
+                }
+                $firstWord = false;
+            }
+            $linesToDraw[] = $lineToDraw;
+        }
+        return $linesToDraw;
+    }
+
+    private function drawFieldsetOuter( int $headerFontSize, float $headerTextMargin, Rectangle $rectangle, string|null $title, Theme $theme): void {
+
+        if( $title !== null ) {
+            $title =  ' ' . $title;
+        }
+        $titleWidth = $this->getTextWidth($title, $headerFontSize);
+        $bottom = new HorizontalLine($rectangle->getTop()->getStart(), $titleWidth + $headerTextMargin);
+        $headerRectangle = new Rectangle($bottom,$headerFontSize + $headerTextMargin);
+
+        if( $title !== null ) {
+            $roundedCorners = [10,10,0,0];
+            $this->setFont($this->helper->getTimesFont(true), $headerFontSize);
+            $this->setTextColor(new Zend_Pdf_Color_Html($theme->textColor));
+            $this->setFillColor(new Zend_Pdf_Color_Html($theme->bgColor));
+            $this->drawCell($title, $headerRectangle, Align::Left, $theme->bgColor, $roundedCorners);
+            $this->setFillColor(new Zend_Pdf_Color_Html('white'));
+            $this->setTextColor(new Zend_Pdf_Color_Html('black'));
+        }
+
+        $topLeftRoundedCorner = $title !== null ? 10 : 0;
+        $roundedCorners = [$topLeftRoundedCorner,10,10,10];
+        $this->drawCell('', $rectangle, Align::Left, $theme->bgColor, $roundedCorners);
+    }
+
+    /**
+     * @param Point $textStartPoint
+     * @param float $maxTextWidth
+     * @param list<string> $textLines
+     * @param int $fontSize
+     * @param float $textMargin
+     * @return void
+     */
+    private function drawFieldsetText( Point $textStartPoint, array $textLines, int $fontSize, float $textMargin): void {
+        $rowHeight = $fontSize + $textMargin;
+        $point = new Point($textStartPoint);
+        foreach( $textLines as  $textLine ) {
+            $this->drawString($textLine, $point);
+            $point = $point->addY(-$rowHeight);
+        }
+    }
+
+    /**
+     * @param Point $textStartPoint
+     * @param list<string> $textLines
+     * @param int $fontSize
+     * @param float $textMargin
+     * @return void
+     * @throws \Exception
+     */
+    private function drawFieldsetLines( Point $textStartPoint, array $textLines, int $fontSize, float $textMargin): void {
+        $rowHeight = $fontSize + $textMargin;
+        $point = new Point($textStartPoint);
+        foreach( $textLines as  $textLine ) {
+            $this->drawString($textLine, $point);
+            $point = $point->addY(-$rowHeight);
         }
     }
 }

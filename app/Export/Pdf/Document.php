@@ -9,6 +9,7 @@ use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use App\ImageProps;
 use App\ImageSize;
+use FCToernooi\Theme;
 use FCToernooi\Tournament;
 use IntlDateFormatter;
 use Sports\Competition\Sport as CompetitionSport;
@@ -26,8 +27,6 @@ use Zend_Pdf;
  */
 abstract class Document extends Zend_Pdf
 {
-    public const THEME_BG = '#93c54b';
-
     protected StructureNameService|null $structureNameService = null;
     protected StartLocationMap|null $startLocationMap = null;
     protected Helper $helper;
@@ -46,6 +45,14 @@ abstract class Document extends Zend_Pdf
     ) {
         parent::__construct();
         $this->helper = new Helper();
+    }
+
+    public function getTheme(): Theme {
+        $arrTheme = $this->tournament->getTheme();
+        if( $arrTheme !== null ) {
+            return new Theme($arrTheme['textColor'],$arrTheme['bgColor']);
+        }
+        return new Theme();
     }
 
     public function getDateFormatter(string $pattern = ''): IntlDateFormatter {
