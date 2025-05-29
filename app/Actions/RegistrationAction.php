@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\ImageService;
 use App\Mailer;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use FCToernooi\Role;
-use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Registration as TournamentRegistration;
+use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
 use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
-use FCToernooi\User;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Registration as TournamentRegistration;
-use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
-use Slim\Views\Twig as TwigView;
-use Sports\Category\Repository as CategoryRepository;
-use Sports\Category;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Slim\Views\Twig as TwigView;
+use Sports\Category\Repository as CategoryRepository;
 
 final class RegistrationAction extends Action
 {

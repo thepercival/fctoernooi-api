@@ -1,0 +1,12 @@
+type: object
+description: |
+  A sports league
+required:
+  - name
+  - association
+properties:
+  name:
+    type: string
+  association:
+    description: The association which organizes the league
+    ref: './Association.yml'

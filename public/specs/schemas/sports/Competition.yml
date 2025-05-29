@@ -1,0 +1,13 @@
+type: object
+description: |
+  A sports competition
+required:
+  - league
+  - season
+properties:
+    league:
+      description: The league for which this competition is held
+      $ref: './League.yml'
+    season:
+      description: The season for which this competition is held
+      $ref: './Season.yml'

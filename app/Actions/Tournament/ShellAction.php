@@ -31,13 +31,18 @@ final class ShellAction extends Action
      * @param array<string, int|string> $args
      * @return Response
      */
-    public function fetchPublic(Request $request, Response $response, array $args): Response
+    public function fetch(Request $request, Response $response, array $args): Response
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $request->getAttribute("user");
         try {
             $shellFilter = $this->getShellFilterFromInput( $request->getQueryParams() );
 
+            if( $shellFilter->roles > 0 ) {
+                if( $user === null ) {
+                    throw new HttpException($request, "user not logged in", 401);
+                }
+            }
 
             $shells = [];
             $tournamentsByDates = $this->tournamentRepos->findByFilter(
@@ -79,12 +84,17 @@ final class ShellAction extends Action
             $name = $queryParams["name"];
         }
 
+        $roles = null;
+        if (array_key_exists("roles", $queryParams) && strlen($queryParams["roles"]) > 0) {
+            $roles = (int)$queryParams["roles"];
+        }
+
         $example = null;
         if (array_key_exists("example", $queryParams) && strlen($queryParams["example"]) > 0) {
             $example = $queryParams["example"] == 1;
         }
         return new ShellFilter(
-            $startDateTime, $endDateTime, $name, true, $example
+            $startDateTime, $endDateTime, $name, $roles, $example
         );
     }
 
@@ -98,10 +108,7 @@ final class ShellAction extends Action
     {
         try {
             $queryParams = $request->getQueryParams();
-            $roles = 0;
-            if (array_key_exists("roles", $queryParams) && strlen($queryParams["roles"]) > 0) {
-                $roles = (int)$queryParams["roles"];
-            }
+
 
             $shells = [];
             /** @var User $user */

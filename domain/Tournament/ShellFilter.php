@@ -12,7 +12,7 @@ class ShellFilter
         public DateTimeImmutable|null $startDateTime,
         public DateTimeImmutable|null $endDateTime,
         public string|null $name,
-        public bool|null $public,
+        public int|null $roles,
         public bool|null $example
     )
     {

@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Actions;
+namespace App\Actions\Auth;
 
+use App\Actions\Action;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;

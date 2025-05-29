@@ -1,0 +1,183 @@
+openapi: '3.0.3'
+info:
+  title: FCToernooi Auth
+  version: '1.0'
+servers:
+  - url: http://localhost:2998/auth
+paths:
+  /public/register:
+    post:
+      summary: Register an user 
+      requestBody:
+        description: by email and password
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterAndLoginInfo"
+              example:              
+                emailaddress: cdk@gmail.com
+                password: MyD0gIs0ld!
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+  /public/login:
+    post:
+      summary: Login for user 
+      requestBody:
+        description: by email and password
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterAndLoginInfo"
+              example:              
+                emailaddress: cdk@gmail.com
+                password: MyD0gIs0ld!
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+  /public/passwordreset:
+    post:
+      summary: Password reset for user 
+      requestBody:
+        description: by email and verification
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailaddress:
+                  type: string
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+  /public/passwordchange:
+    post:
+      summary: Password change for user 
+      requestBody:
+        description: use code from email
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailaddress:
+                  type: string
+                password:
+                  type: string
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+  /extendtoken:
+    post:
+      summary: Extend user session
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: extend the session of the user with token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailaddress:
+                  type: string
+                password:
+                  type: string
+                code:
+                  type: string      
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+  /users/:
+    get:
+      summary: Get the user
+      security:
+        - bearerAuth: []      
+      description: Get the user by id
+      parameters:
+      - in: path
+        name: userId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get
+      responses:
+        '200':
+          description: Created
+        '400':
+          description: Bad Request
+    put:
+      summary: Update the user
+      security:
+        - bearerAuth: []      
+      description: Update certain props of the user
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the user to get
+      requestBody:
+        description: the user as json
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                emailaddress:
+                  type: string
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+    delete:
+      summary: Removes the user
+      security:
+        - bearerAuth: []      
+      description: Removes the user by id
+      parameters:
+      - in: path
+        name: userId
+        schema:
+          type: integer
+        required: true
+        description: Numeric ID of the user to get
+      responses:
+        '200':
+          description: Created
+        '422':
+          description: Unprocessable
+components:
+  schemas:
+    RegisterAndLoginInfo:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+        password:
+          type: string
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes  

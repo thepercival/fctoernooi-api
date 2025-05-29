@@ -1,0 +1,9 @@
+type: object
+description: |
+  A sports season
+required:
+  - name
+properties:
+    name:
+      description: The association which organizes the league
+      $ref: './Association.yml'

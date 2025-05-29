@@ -9,4 +9,5 @@
 /tests/codecoverage/
 /.php*
 public/pdf
+node_modules
 

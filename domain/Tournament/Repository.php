@@ -78,7 +78,7 @@ class Repository extends EntityRepository
             $query = $query->setParameter('name', '%' . $shellFilter->name . '%');
         }
 
-        if ($shellFilter->public !== null) {
+        if ($shellFilter->roles !== null) {
             $query = $query->andWhere("t.public = :public");
             $query = $query->setParameter('public', $shellFilter->public);
         }

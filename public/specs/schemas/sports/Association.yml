@@ -1,0 +1,11 @@
+type: object
+description: |
+  A sports association
+required:
+  - name
+properties:
+  name:
+    type: string
+  parent:
+    description: The parent association
+    ref: './Association.yml'

@@ -1,0 +1,13 @@
+type: object
+description: |
+  A sports tournaments
+required:
+  - competition
+  - public
+properties:
+    competition:
+      description: The competition as external-defined
+      $ref: './Sports/Competition.yml'
+    public:
+      type: boolean
+      description: if tournament can be viewed by others
