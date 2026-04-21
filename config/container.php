@@ -2,14 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Handlers\JwtAuthBeforeHandler;
 use App\Mailer;
 use App\UTCDateTimeType;
-use Doctrine\Common\EventManager;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Auth\Settings as AuthSettings;
 use FCToernooi\SerializationHandler\Subscriber as HandlerSubscriber;
+use JimTools\JwtAuth\Decoder\DecoderInterface;
+use JimTools\JwtAuth\Decoder\FirebaseDecoder;
+use JimTools\JwtAuth\Middleware\JwtAuthentication;
+use JimTools\JwtAuth\Options;
+use JimTools\JwtAuth\Rules\RequestMethodRule;
+use JimTools\JwtAuth\Rules\RequestPathRule;
+use JimTools\JwtAuth\Secret;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerBuilder;
@@ -26,6 +33,7 @@ use Slim\Views\Twig as TwigView;
 use Sports\SerializationHandler\DummyCreator;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 
+/** @psalm-suppress UnusedClosureParam */
 return [
     // Application settings
     Configuration::class => function (): Configuration {
@@ -106,38 +114,38 @@ return [
         $driver = new \Doctrine\ORM\Mapping\Driver\XmlDriver($entityPath);
         $docConfig->setMetadataDriverImpl($driver);
 
-        $connection = DriverManager::getConnection($doctrineAppConfig['connection'], $docConfig, new EventManager());
+        $connection = DriverManager::getConnection($doctrineAppConfig['connection'], $docConfig);
         $em = new Doctrine\ORM\EntityManager($connection, $docConfig);
 
-        Type::addType('enum_SelfReferee', SportsHelpers\SelfRefereeType::class);
+        Type::addType('enum_SelfReferee', SportsHelpers\DbEnums\SelfRefereeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_SelfReferee');
         Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_GameMode');
-        Type::addType('enum_AgainstSide', SportsHelpers\Against\SideType::class);
+        Type::addType('enum_AgainstSide', SportsHelpers\DbEnums\AgainstSideType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_AgainstSide');
-        Type::addType('enum_EditMode', Sports\Planning\EditModeType::class);
+        Type::addType('enum_EditMode', Sports\DbEnums\PlanningEditModeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_EditMode');
-        Type::addType('enum_QualifyTarget', Sports\Qualify\TargetType::class);
+        Type::addType('enum_QualifyTarget', Sports\DbEnums\QualifyTargetType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_QualifyTarget');
-        Type::addType('enum_Distribution', Sports\Qualify\DistributionType::class);
+        Type::addType('enum_Distribution', Sports\DbEnums\QualifyDistributionType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_Distribution');
-        Type::addType('enum_AgainstRuleSet', Sports\Ranking\AgainstRuleSetType::class);
+        Type::addType('enum_AgainstRuleSet', Sports\DbEnums\RankingAgainstRuleSetType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_AgainstRuleSet');
-        Type::addType('enum_PointsCalculation', Sports\Ranking\PointsCalculationType::class);
+        Type::addType('enum_PointsCalculation', Sports\DbEnums\RankingPointsCalculationType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PointsCalculation');
         Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningState');
         Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningTimeoutState');
-        Type::addType('enum_GameState', Sports\Game\StateType::class);
+        Type::addType('enum_GameState', Sports\DbEnums\GameStateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_GameState');
-        Type::addType('enum_CreditAction', FCToernooi\CreditAction\NameType::class);
+        Type::addType('enum_CreditAction', FCToernooi\Database\enums\CreditActionNameEnumDbType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
-        Type::addType('enum_StartEditMode', FCToernooi\Tournament\StartEditModeType::class);
+        Type::addType('enum_StartEditMode', FCToernooi\Database\enums\StartEditModeType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_StartEditMode');
-        Type::addType('enum_PaymentState', FCToernooi\Payment\StateType::class);
+        Type::addType('enum_PaymentState', FCToernooi\Database\enums\PaymentStateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PaymentState');
-        Type::addType('enum_RegistrationState', FCToernooi\Tournament\Registration\StateType::class);
+        Type::addType('enum_RegistrationState', FCToernooi\Database\enums\RegistrationStateType::class);
         $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_RegistrationState');
 
         Type::overrideType('datetime_immutable', UTCDateTimeType::class);
@@ -217,5 +225,28 @@ return [
             $config->getString('auth.jwtalgorithm'),
             $config->getString('auth.activationsecret')
         );
-    }
+    },
+    DecoderInterface::class => function (ContainerInterface $container): DecoderInterface {
+        /** @var Configuration $config */
+        $config = $container->get(Configuration::class);
+        return new FirebaseDecoder(
+            new Secret(
+                $config->getString('auth.jwtsecret'),
+                $config->getString('auth.jwtalgorithm')
+            )
+        );
+    },
+    JwtAuthentication::class => function (ContainerInterface $container): JwtAuthentication {
+        /** @var DecoderInterface $decoder */
+        $decoder = $container->get(DecoderInterface::class);
+        return new JwtAuthentication(
+            new Options(before: new JwtAuthBeforeHandler()),
+            $decoder,
+            [
+                new RequestMethodRule(), new RequestPathRule(ignore: [
+                    '/public'
+                ])
+            ],
+        );
+    },
 ];

@@ -5,36 +5,51 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\TournamentInvitationRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Invitation\Repository as InvitationRepository;
-use FCToernooi\User\Repository as UserRepository;
+use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
 use Sports\Competition;
-use Sports\Competition\Referee;
-use Sports\Competition\Referee\Repository as RefereeRepository;
+use Sports\Competition\CompetitionReferee;
 use Sports\Priority\Service as PriorityService;
 
+/**
+ * @api
+ */
 final class RefereeAction extends Action
 {
+    /** @var EntityRepository<User> */
+    private EntityRepository $userRepos;
+    /** @var EntityRepository<CompetitionReferee> */
+    private EntityRepository $competitionRefereeRepos;
+
+
     public function __construct(
+        private EntityManagerInterface $entityManager,
+        private AuthSyncService $authSyncService,
+        private TournamentInvitationRepository $invitationRepos,
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private RefereeRepository $refereeRepos,
-        private UserRepository $userRepos,
-        private InvitationRepository $invitationRepos,
-        private AuthSyncService $authSyncService
+
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(User::class);
+        $this->userRepos = new EntityRepository($entityManager, $metaData);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionReferee::class);
+        $this->competitionRefereeRepos = new EntityRepository($entityManager, $metaData);
     }
 
     protected function getDeserializationContext(): DeserializationContext
@@ -51,10 +66,10 @@ final class RefereeAction extends Action
     public function add(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Referee $referee */
+            /** @var CompetitionReferee $referee */
             $referee = $this->serializer->deserialize(
                 $this->getRawData($request),
-                Referee::class,
+                CompetitionReferee::class,
                 'json',
                 $this->getDeserializationContext()
             );
@@ -67,12 +82,13 @@ final class RefereeAction extends Action
             $availabilityChecker->checkRefereeEmailaddress($competition, $referee->getInitials());
             $availabilityChecker->checkRefereeInitials($competition, $referee->getInitials());
 
-            $newReferee = new Referee($competition, $referee->getInitials());
+            $newReferee = new CompetitionReferee($competition, $referee->getInitials());
             $newReferee->setName($referee->getName());
             $newReferee->setEmailaddress($referee->getEmailaddress());
             $newReferee->setInfo($referee->getInfo());
 
-            $this->refereeRepos->save($newReferee);
+            $this->entityManager->persist($newReferee);
+            $this->entityManager->flush();
 
             $sendMail = false;
             if (array_key_exists('invite', $args)) {
@@ -96,10 +112,10 @@ final class RefereeAction extends Action
     public function edit(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var Referee $refereeSer */
+            /** @var CompetitionReferee $refereeSer */
             $refereeSer = $this->serializer->deserialize(
                 $this->getRawData($request),
-                Referee::class,
+                CompetitionReferee::class,
                 'json',
                 $this->getDeserializationContext()
             );
@@ -123,7 +139,8 @@ final class RefereeAction extends Action
             $referee->setEmailaddress($refereeSer->getEmailaddress());
             $referee->setInfo($refereeSer->getInfo());
 
-            $this->refereeRepos->save($referee);
+            $this->entityManager->persist($referee);
+            $this->entityManager->flush();
 
 //            $priorityService = new PriorityService( $competition->getReferees() );
 //            $changedReferees = $priorityService->getChanged();
@@ -166,8 +183,9 @@ final class RefereeAction extends Action
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->upgrade($referee);
             foreach ($changedReferees as $changedReferee) {
-                if ($changedReferee instanceof Referee) {
-                    $this->refereeRepos->save($changedReferee);
+                if ($changedReferee instanceof CompetitionReferee) {
+                    $this->entityManager->persist($changedReferee);
+                    $this->entityManager->flush();
                 }
             }
 
@@ -239,14 +257,16 @@ final class RefereeAction extends Action
             $referee = $this->getRefereeFromInput((int)$args["refereeId"], $competition);
 
             $competition->getReferees()->removeElement($referee);
-            $this->refereeRepos->remove($referee);
+            $this->entityManager->remove($referee);
+            $this->entityManager->flush();
             $this->authSyncService->remove($tournament, Role::REFEREE, $referee->getEmailaddress());
 
             $priorityService = new PriorityService(array_values($competition->getReferees()->toArray()));
             $changedReferees = $priorityService->validate();
             foreach ($changedReferees as $changedReferee) {
-                if ($changedReferee instanceof Referee) {
-                    $this->refereeRepos->save($changedReferee);
+                if ($changedReferee instanceof CompetitionReferee) {
+                    $this->entityManager->persist($changedReferee);
+                    $this->entityManager->flush();
                 }
             }
 
@@ -256,9 +276,9 @@ final class RefereeAction extends Action
         }
     }
 
-    protected function getRefereeFromInput(int $id, Competition $competition): Referee
+    protected function getRefereeFromInput(int $id, Competition $competition): CompetitionReferee
     {
-        $referee = $this->refereeRepos->find($id);
+        $referee = $this->competitionRefereeRepos->find($id);
         if ($referee === null) {
             throw new Exception('de scheidsrechter kon niet gevonden worden o.b.v. de invoer', E_ERROR);
         }

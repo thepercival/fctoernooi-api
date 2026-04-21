@@ -46,13 +46,14 @@ final class Point implements \Stringable
         return new self($this->getX() + $x, $this->getY() - $y);
     }
 
-    public function enlarge(float $multiplier): Point
-    {
-        return new Point($this->getX() * $multiplier, $this->getY() * $multiplier);
-    }
+//    public function enlarge(float $multiplier): Point
+//    {
+//        return new Point($this->getX() * $multiplier, $this->getY() * $multiplier);
+//    }
 
-    public function __toString()
+    #[\Override]
+    public function __toString(): string
     {
-        return $this->getX() . ',' . $this->getY();
+        return (string)$this->getX() . ',' . (string)$this->getY();
     }
 }

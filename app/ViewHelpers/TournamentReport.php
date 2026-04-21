@@ -6,7 +6,7 @@ namespace App\ViewHelpers;
 
 use Exception;
 use FCToernooi\Tournament;
-use Sports\Competition\Validator as CompetitionValidator;
+use Sports\Competition\CompetitionValidator;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order as GameOrder;
 use Sports\Round\Number as RoundNumber;
@@ -14,7 +14,10 @@ use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
 use Sports\Structure\Validator as StructureValidator;
 
-class TournamentReport
+/**
+ * @api
+ */
+final class TournamentReport
 {
     public string $name;
     public string $firstRoundStructure;

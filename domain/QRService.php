@@ -13,7 +13,10 @@ use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\PngResult;
 use Sports\Game;
 
-class QRService
+/**
+ * @api
+ */
+final class QRService
 {
     protected TmpService $tmpService;
 
@@ -22,32 +25,32 @@ class QRService
         $this->tmpService = new TmpService();
     }
 
-    public function writeTournamentToJpg(Tournament $tournament, string $qrCodeText, int $imgWidthPts): string
+    public function writeTournamentToJpg(Tournament $tournament, string $qrCodeText, float $imgWidthPts): string
     {
-        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts);
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, (int)$imgWidthPts);
         $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
         return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
     }
 
-    public function writeGameToJpg(Tournament $tournament, Game $game, string $qrCodeText, int $imgWidthPts): string
+    public function writeGameToJpg(Tournament $tournament, Game $game, string $qrCodeText, float $imgWidthPts): string
     {
         $suffix = "-game-" . (string)$game->getId();
-        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $suffix);
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, (int)$imgWidthPts, $suffix);
         $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
         return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
     }
 
-    public function writeLocationToJpg(Tournament $tournament, string $qrCodeText, int $imgWidthPts): string
+    public function writeLocationToJpg(Tournament $tournament, string $qrCodeText, float $imgWidthPts): string
     {
         $suffix = "-location";
-        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, $imgWidthPts, $suffix);
+        $pathWithoutExtension = $this->getPathWihoutExtension($tournament, (int)$imgWidthPts, $suffix);
         $imgWidthPx = $this->convertPointsToPixels($imgWidthPts);
         return $this->writeToJpg($pathWithoutExtension, $qrCodeText, $imgWidthPx);
     }
 
     public function convertPointsToPixels(float $pdfPoints): int
     {
-        $dpi = 96;
+        $dpi = 96.0;
         $inch = $this->convertPdfPointsToInches($pdfPoints);
         $dots = $inch * $dpi;
         return (int)$dots;
@@ -57,12 +60,12 @@ class QRService
     {
         // 210 x 297 mm
         // a4 zend 595 x 842
-        $mm = $pdfPoints * 210 / 595;
+        $mm = $pdfPoints * 210.0 / 595.0;
         $mmPerInch = 25.4;
         return $mm / $mmPerInch;
     }
 
-    protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, string $suffix = null): string
+    protected function getPathWihoutExtension(Tournament $tournament, int $imgWidth, string|null $suffix = null): string
     {
         $path = $this->tmpService->getPath(["qrcode"]);
         $path .= "tournament-" . (string)$tournament->getId();

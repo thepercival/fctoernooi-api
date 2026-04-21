@@ -16,9 +16,7 @@ final class MailHandler extends NativeMailerHandler
         $this->mailer = $mailer;
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     protected function send(string $content, array $records): void
     {
         if ($this->mailer === null) {

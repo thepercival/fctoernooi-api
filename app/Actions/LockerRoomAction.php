@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Repositories\LockerRoomRepository;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -17,6 +18,7 @@ use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpException;
 
 /**
+ * @api
  * @template Action<LockerRoom>
  */
 final class LockerRoomAction extends Action
@@ -24,12 +26,14 @@ final class LockerRoomAction extends Action
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private LockerRoomRepository $lockerRoomRepos
+        private LockerRoomRepository $lockerRoomRepos,
+        private EntityManagerInterface $entityManager
     ) {
         parent::__construct($logger, $serializer);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -45,7 +49,8 @@ final class LockerRoomAction extends Action
             $lockerRoomSer = $this->serializer->deserialize($this->getRawData($request), LockerRoom::class, 'json');
 
             $newLockerRoom = new LockerRoom($tournament, $lockerRoomSer->getName());
-            $this->lockerRoomRepos->save($newLockerRoom);
+            $this->entityManager->persist($newLockerRoom);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($newLockerRoom, 'json');
             return $this->respondWithJson($response, $json);
@@ -77,7 +82,8 @@ final class LockerRoomAction extends Action
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de kleedkamer");
             }
             $lockerRoom->setName($lockerRoomSer->getName());
-            $this->lockerRoomRepos->save($lockerRoom);
+            $this->entityManager->persist($lockerRoom);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($lockerRoom, 'json');
             return $this->respondWithJson($response, $json);
@@ -106,7 +112,8 @@ final class LockerRoomAction extends Action
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de kleedkamer");
             }
 
-            $this->lockerRoomRepos->remove($lockerRoom);
+            $this->entityManager->remove($lockerRoom);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {

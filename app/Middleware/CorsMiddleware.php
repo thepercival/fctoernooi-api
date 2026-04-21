@@ -27,6 +27,7 @@ final class CorsMiddleware implements MiddlewareInterface
         $this->origin = $origin;
     }
 
+    #[\Override]
     public function process(Request $request, RequestHandler $handler): Response
     {
         $routeContext = RouteContext::fromRequest($request);
@@ -41,7 +42,7 @@ final class CorsMiddleware implements MiddlewareInterface
             ->withHeader('Access-Control-Allow-Origin', substr($this->origin, 0, strlen($this->origin) - 1))
             ->withHeader(
                 'Access-Control-Allow-Headers',
-                'X-Requested-With, Content-Type, Accept, Origin, Authorization, X-Api-Version'
+                'X-Requested-With, Content-Type, Accept, Origin, Authorization, X-Api-Version, x-api-version'
             )
             ->withHeader('Access-Control-Allow-Methods', implode(',', $methods))
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')

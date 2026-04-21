@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class GameLineConfig
+final readonly class GameLineConfig
 {
     public function __construct(
-        private int $rowHeight,
-        private int $fontHeight,
+        private float $rowHeight,
+        private float $fontHeight,
         private int $maxNrOfPlacesPerLine = 4
     ) {
         if ($maxNrOfPlacesPerLine < 1 || $maxNrOfPlacesPerLine > 6) {
@@ -16,12 +16,12 @@ readonly class GameLineConfig
         }
     }
 
-    public function getRowHeight(): int
+    public function getRowHeight(): float
     {
         return $this->rowHeight;
     }
 
-    public function getFontHeight(): int
+    public function getFontHeight(): float
     {
         return $this->fontHeight;
     }

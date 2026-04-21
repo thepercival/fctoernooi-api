@@ -9,8 +9,9 @@ use FCToernooi\TournamentUser;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
 
-class RoleAdminMiddleware extends AuthorizationTournamentAdminMiddleware
+final class RoleAdminMiddleware extends AuthorizationTournamentAdminMiddleware
 {
+    #[\Override]
     protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
         if ($tournamentUser->hasRoles(Role::ROLEADMIN) === false) {

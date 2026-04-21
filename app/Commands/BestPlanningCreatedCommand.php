@@ -8,39 +8,34 @@ use App\Command;
 use App\GuzzleClient;
 use App\Mailer;
 use App\QueueService\BestPlanningCreated as BestPlanningCreatedQueueService;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\CacheService;
 use FCToernooi\Planning\PlanningWriter;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
-use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializerInterface;
 use Memcached;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Sports\Competition;
-use Sports\Competition\Repository as CompetitionRepository;
 use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\InputConfigurationCreator;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Structure\Repository as StructureRepository;
 use SportsPlanning\Input\Configuration as InputConfiguration;
-use SportsPlanning\Referee\Info as PlanningRefereeInfo;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BestPlanningCreatedCommand extends Command
+final class BestPlanningCreatedCommand extends Command
 {
     private string $customName = 'planning-available-listener';
     private bool $processSingleMessage = false;
 
-    protected CompetitionRepository $competitionRepos;
-    protected  StructureRepository $structureRepos;
-    protected  RoundNumberRepository $roundNumberRepos;
-    protected  TournamentRepository $tournamentRepos;
+    /** @var EntityRepository<Competition>  */
+    protected EntityRepository $competitionRepos;
+    protected StructureRepository $structureRepos;
+    protected TournamentRepository $tournamentRepos;
     protected EntityManagerInterface $entityManager;
     private Memcached $memcached;
 
@@ -55,22 +50,19 @@ class BestPlanningCreatedCommand extends Command
         $mailer = $container->get(Mailer::class);
         $this->mailer = $mailer;
 
-        /** @var CompetitionRepository $competitionRepos */
-        $competitionRepos = $container->get(CompetitionRepository::class);
-        $this->competitionRepos = $competitionRepos;
+        $entityManager = $container->get(EntityManagerInterface::class);
+
+        $metaData = $entityManager->getClassMetadata(Competition::class);
+        /** @var EntityRepository<Competition> competitionRepos */
+        $this->competitionRepos = new EntityRepository($entityManager, $metaData);
 
         /** @var StructureRepository $structureRepos */
         $structureRepos = $container->get(StructureRepository::class);
         $this->structureRepos = $structureRepos;
 
-        /** @var RoundNumberRepository $roundNumberRepos */
-        $roundNumberRepos = $container->get(RoundNumberRepository::class);
-        $this->roundNumberRepos = $roundNumberRepos;
 
-
-        /** @var TournamentRepository $tournamentRepos */
-        $tournamentRepos = $container->get(TournamentRepository::class);
-        $this->tournamentRepos = $tournamentRepos;
+        /** @var TournamentRepository tournamentRepos */
+        $this->tournamentRepos = $container->get(TournamentRepository::class);
 
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
@@ -79,6 +71,7 @@ class BestPlanningCreatedCommand extends Command
         $this->memcached = $container->get(Memcached::class);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -95,6 +88,7 @@ class BestPlanningCreatedCommand extends Command
         parent::configure();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {

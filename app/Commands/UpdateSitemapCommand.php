@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Command;
-use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateSitemapCommand extends Command
+final class UpdateSitemapCommand extends Command
 {
     private string $customName = 'update-sitemap';
     protected TournamentRepository $tournamentRepos;
@@ -27,6 +26,7 @@ class UpdateSitemapCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -40,6 +40,7 @@ class UpdateSitemapCommand extends Command
         parent::configure();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
@@ -59,7 +60,6 @@ class UpdateSitemapCommand extends Command
             $content .= $url . "user/login" . PHP_EOL;
 
             $tournaments = $this->tournamentRepos->findAll();
-            /** @var Tournament $tournament */
             foreach ($tournaments as $tournament) {
                 if ($tournament->getPublic() === false) {
                     continue;

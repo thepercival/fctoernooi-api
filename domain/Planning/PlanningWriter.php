@@ -2,17 +2,20 @@
 
 namespace FCToernooi\Planning;
 
+use App\Repositories\Sports\RoundNumberRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\CacheService;
 use FCToernooi\Recess;
 use FCToernooi\Tournament;
 use Psr\Log\LoggerInterface;
+use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\PlanningAssigner;
 use Sports\Round\Number\PlanningScheduler;
-use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\Repository as RoundNumberRepository;
 
-class PlanningWriter
+/**
+ * @api
+ */
+final class PlanningWriter
 {
     public function __construct(
         private CacheService $cacheService,
@@ -25,12 +28,12 @@ class PlanningWriter
     /**
      * @param Tournament $tournament
      * @param list<RoundNumberWithPlanning> $roundNumbersWithPlanning
-     * @return bool
+     * @return void
      * @throws \Doctrine\DBAL\Exception
      */
     public function write(
         Tournament $tournament,
-        array $roundNumbersWithPlanning): bool // Response
+        array $roundNumbersWithPlanning): void // Response
     {
         $conn = $this->entityManager->getConnection();
 
@@ -64,8 +67,6 @@ class PlanningWriter
             $conn->rollBack();
             $this->logger->error($exception->getMessage());
             // throw new HttpException($request, $exception->getMessage(), 422);
-            return false;
         }
-        return true;
     }
 }

@@ -13,8 +13,8 @@ use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use FCToernooi\Tournament;
-use Sports\Competition\Referee;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionReferee;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Order;
 use Sports\Game\Together as TogetherGame;
@@ -27,7 +27,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class GameNotesDocument extends PdfDocument
+final class GameNotesDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -45,11 +45,12 @@ class GameNotesDocument extends PdfDocument
         return $this->config;
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $nrOfGameNotes = $this->getTotalNrOfGameNotes($this->structure->getFirstRoundNumber());
         if ($nrOfGameNotes > 0) {
-            $nrOfProgressPerGameNote = $this->maxSubjectProgress / $nrOfGameNotes;
+            $nrOfProgressPerGameNote = $this->maxSubjectProgress / (float)$nrOfGameNotes;
         } else {
             $nrOfProgressPerGameNote = 0;
         }
@@ -61,6 +62,7 @@ class GameNotesDocument extends PdfDocument
     /**
      * do not remove, progress is done while drawing, when remove, progress will be out of bounds
      */
+    #[\Override]
     protected function updateProgress(): void
     {
     }
@@ -103,8 +105,11 @@ class GameNotesDocument extends PdfDocument
             foreach ($roundNumber->getCompetition()->getReferees() as $referee) {
                 $gamesPerPage = $this->getGamesPerPage($roundNumber, $referee);
                 foreach ($gamesPerPage as $games) {
-                    $progression = $nrOfProgressPerGameNote * count($games);
-                    $this->createPage()->renderGames(array_shift($games), array_shift($games));
+                    $progression = $nrOfProgressPerGameNote * (float)count($games);
+                    $gameOne = array_shift($games);
+                    if( $gameOne !== null ) {
+                        $this->createPage()->renderGames($gameOne, array_shift($games));
+                    }
                     $this->progress->addProgression($progression);
                 }
 //                    $sportVariant = $competitionSport->createVariant();
@@ -120,8 +125,11 @@ class GameNotesDocument extends PdfDocument
         } else {
             $gamesPerPage = $this->getGamesPerPage($roundNumber, null);
             foreach ($gamesPerPage as $games) {
-                $progression = $nrOfProgressPerGameNote * count($games);
-                $this->createPage()->renderGames(array_shift($games), array_shift($games));
+                $progression = $nrOfProgressPerGameNote * (float)count($games);
+                $gameOne = array_shift($games);
+                if( $gameOne !== null ) {
+                    $this->createPage()->renderGames($gameOne, array_shift($games));
+                }
                 $this->progress->addProgression($progression);
             }
 
@@ -170,10 +178,10 @@ class GameNotesDocument extends PdfDocument
 
     /**
      * @param RoundNumber $roundNumber
-     * @param Referee|null $referee
+     * @param CompetitionReferee|null $referee
      * @return list<list<AgainstGame|TogetherGame>>
      */
-    protected function getGamesPerPage(RoundNumber $roundNumber, Referee|null $referee): array
+    protected function getGamesPerPage(RoundNumber $roundNumber, CompetitionReferee|null $referee): array
     {
         $gamesPerPage = [];
         $gamesTmp = $roundNumber->getGames(Order::ByBatch);
@@ -205,9 +213,11 @@ class GameNotesDocument extends PdfDocument
 
             if ($oneGamePerPageGameTwo) {
                 $gamesPerPage[] = [$gameOne];
-                $gamesPerPage[] = [$gameTwo];
+                if( $gameTwo !== null) {
+                    $gamesPerPage[] = [$gameTwo];
+                }
             } else {
-                $gamesPerPage[] = [$gameOne, $gameTwo];
+                $gamesPerPage[] = $gameTwo !== null ? [$gameOne, $gameTwo] : [$gameOne];
             }
         }
         return $gamesPerPage;

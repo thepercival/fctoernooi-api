@@ -2,7 +2,7 @@
 
 namespace App;
 
-class ImageProps
+final class ImageProps
 {
     public const string Suffix = '_h_';
 

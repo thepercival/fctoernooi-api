@@ -5,7 +5,7 @@ namespace App\Export\Pdf\Line;
 use App\Export\Pdf\Line;
 use App\Export\Pdf\Point;
 
-class Vertical extends Line
+final class Vertical extends Line
 {
     public function __construct(protected Point $start, float $height)
     {
@@ -36,8 +36,8 @@ class Vertical extends Line
         return $this->end->getY() - $this->start->getY();
     }
 
-    public function moveX(float $length): self {
-        $newStartPoint = new Point($this->getStart()->getX() + $length, $this->getStart()->getY());
-        return new self($newStartPoint, $this->getHeight());
-    }
+//    public function moveX(float $length): self {
+//        $newStartPoint = new Point($this->getStart()->getX() + $length, $this->getStart()->getY());
+//        return new self($newStartPoint, $this->getHeight());
+//    }
 }

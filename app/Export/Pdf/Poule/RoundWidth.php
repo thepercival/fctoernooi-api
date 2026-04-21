@@ -4,9 +4,9 @@ namespace App\Export\Pdf\Poule;
 
 use Sports\Round;
 
-class RoundWidth
+final class RoundWidth
 {
-    public function __construct(protected float $width, protected Round $round)
+    public function __construct(protected float $width)
     {
     }
 
@@ -15,8 +15,8 @@ class RoundWidth
         return $this->width;
     }
 
-    public function getRound(): Round
-    {
-        return $this->round;
-    }
+//    public function getRound(): Round
+//    {
+//        return $this->round;
+//    }
 }

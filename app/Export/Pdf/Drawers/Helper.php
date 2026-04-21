@@ -7,7 +7,7 @@ namespace App\Export\Pdf\Drawers;
 use Zend_Pdf_Font;
 use Zend_Pdf_Resource_Font;
 
-class Helper
+final class Helper
 {
     public function __construct(
     ) {
@@ -32,8 +32,8 @@ class Helper
         Zend_Pdf_Resource_Font $font,
         float $nFontSize
     ): float {
-        $nCharPosition = 0;
-        $nFontUnitsPerEM = $font->getUnitsPerEm();
+        $nCharPosition = 0.0;
+        $nFontUnitsPerEM = (float)$font->getUnitsPerEm();
         // $unicodeString = 'aÄ…bcÄ�deÄ™Ã«Å‚';
         $chrArray = preg_split('//u', $sText, -1, PREG_SPLIT_NO_EMPTY);
         if ($chrArray === false) {
@@ -42,7 +42,7 @@ class Helper
         for ($nCharIndex = 0; $nCharIndex < count($chrArray); $nCharIndex++) {
             $nTmp = $this->uniord($chrArray[$nCharIndex]);
 
-            $nCharWidth = $font->widthForGlyph($font->glyphNumberForCharacter($nTmp));
+            $nCharWidth = (float)$font->widthForGlyph($font->glyphNumberForCharacter($nTmp));
             $nCharWidth = $nCharWidth / $nFontUnitsPerEM * $nFontSize;
 
             $nCharPosition += $nCharWidth;

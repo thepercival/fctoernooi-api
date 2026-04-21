@@ -10,12 +10,16 @@ use Sports\Sport\Custom as CustomSport;
 
 /**
  * Class TranslationService, translates certain sports-terms
+ * @api
  * @package FCToernooi
  */
 class TranslationService
 {
-    protected const LANGUAGE = 'nl';
+    protected const string LANGUAGE = 'nl';
 
+    /**
+     * @psalm-suppress PossiblyUnusedParam
+     */
     public function getSportName(string $language, int $customId): string
     {
         switch ($customId) {

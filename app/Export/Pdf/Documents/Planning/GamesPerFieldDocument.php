@@ -23,7 +23,7 @@ use Sports\Structure;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class GamesPerFieldDocument extends PdfPlanningDocument
+final class GamesPerFieldDocument extends PdfPlanningDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -45,6 +45,7 @@ class GamesPerFieldDocument extends PdfPlanningDocument
         );
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $this->drawPlanningPerField($this->structure->getFirstRoundNumber());

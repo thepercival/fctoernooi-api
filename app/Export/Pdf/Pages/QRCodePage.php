@@ -13,9 +13,9 @@ use Zend_Pdf_Resource_Image;
 /**
  * @template-extends ToernooiPdfPage<QRCodeDocument>
  */
-class QRCodePage extends ToernooiPdfPage
+final class QRCodePage extends ToernooiPdfPage
 {
-    protected float $rowHeight = 18;
+//    protected float $rowHeight = 18.0;
     protected QRService $qrService;
 
     public function __construct(QRCodeDocument $document, mixed $param1)
@@ -25,10 +25,10 @@ class QRCodePage extends ToernooiPdfPage
         $this->qrService = new QRService();
     }
 
-    public function getRowHeight(): float
-    {
-        return $this->rowHeight;
-    }
+//    public function getRowHeight(): float
+//    {
+//        return $this->rowHeight;
+//    }
 
     public function draw(): void
     {
@@ -38,11 +38,11 @@ class QRCodePage extends ToernooiPdfPage
 
         $y = $this->drawTitle($url, $y);
 
-        $imgWidth = 300;
-        $qrPath = $this->qrService->writeTournamentToJpg($this->parent->getTournament(), $url, $imgWidth);
+        $imgWidth = 300.0;
+        $qrPath = $this->qrService->writeTournamentToJpg($this->parent->getTournament(), $url, (int)$imgWidth);
         /** @var Zend_Pdf_Resource_Image $img */
         $img = \Zend_Pdf_Resource_ImageFactory::factory($qrPath);
-        $xLeft = self::PAGEMARGIN + ($this->getDisplayWidth() / 2) - ($imgWidth / 2);
+        $xLeft = self::PAGEMARGIN + ($this->getDisplayWidth() / 2.0) - ($imgWidth / 2.0);
         $this->drawImage($img, $xLeft, $y - $imgWidth, $xLeft + $imgWidth, $y);
     }
 }

@@ -17,7 +17,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class RegistrationFormDocument extends FCToernooiPdfDocument
+final class RegistrationFormDocument extends FCToernooiPdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -41,6 +41,7 @@ class RegistrationFormDocument extends FCToernooiPdfDocument
         return $this->registrationSettings;
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $page = $this->createPageRegistrationForm();

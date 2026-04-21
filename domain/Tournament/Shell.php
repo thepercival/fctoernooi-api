@@ -8,7 +8,10 @@ use DateTimeImmutable;
 use FCToernooi\Tournament;
 use FCToernooi\User;
 
-class Shell
+/**
+ * @api
+ */
+final class Shell
 {
     private int $tournamentId;
     private int $singleCustomSport;

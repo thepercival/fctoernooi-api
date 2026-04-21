@@ -5,28 +5,34 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\Sports\SportRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Sport;
-use Sports\Sport\Repository as SportRepository;
 
+/**
+ * @api
+ */
 final class SportAction extends Action
 {
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected SportRepository $sportRepos
+        private EntityManagerInterface $entityManager,
+        private SportRepository $sportRepos
     ) {
         parent::__construct($logger, $serializer);
+
+
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -44,6 +50,7 @@ final class SportAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -61,6 +68,7 @@ final class SportAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -81,7 +89,8 @@ final class SportAction extends Action
                     $sportSer->getDefaultNrOfSidePlaces()
                 );
                 $newSport->setCustomId($sportSer->getCustomId());
-                $this->sportRepos->save($newSport);
+                $this->entityManager->persist($newSport);
+                $this->entityManager->flush();
             }
 
             $json = $this->serializer->serialize($newSport, 'json');

@@ -16,7 +16,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class QRCodeDocument extends PdfDocument
+final class QRCodeDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -29,11 +29,12 @@ class QRCodeDocument extends PdfDocument
         parent::__construct($tournament, $structure, $imagePathResolver, $progress, $maxSubjectProgress);
     }
 
-    public function getConfig(): QRCodeConfig
-    {
-        return $this->config;
-    }
+//    public function getConfig(): QRCodeConfig
+//    {
+//        return $this->config;
+//    }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $page = $this->createPageQRCode();

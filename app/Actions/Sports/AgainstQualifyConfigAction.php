@@ -5,31 +5,39 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionSport;
 use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
-use Sports\Qualify\AgainstConfig\Repository as QualifyConfigRepository;
 use Sports\Round;
 use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class AgainstQualifyConfigAction extends Action
 {
+    /** @var EntityRepository<CompetitionSport>  */
+    protected EntityRepository $competiionSportRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected CompetitionSportRepository $competiionSportRepos,
         protected StructureRepository $structureRepos,
-        protected QualifyConfigRepository $qualifyConfigRepos
+        protected EntityManagerInterface $entityManager
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionSport::class);
+        $this->competiionSportRepos = new EntityRepository($entityManager, $metaData);
     }
 
     /**
@@ -84,7 +92,8 @@ final class AgainstQualifyConfigAction extends Action
                 $qualifyConfig->setLosePointsExt($qualifyConfigSer->getLosePointsExt());
                 $qualifyConfig->setPointsCalculation($qualifyConfigSer->getPointsCalculation());
             }
-            $this->qualifyConfigRepos->save($qualifyConfig);
+            $this->entityManager->persist($qualifyConfig);
+            $this->entityManager->flush();
 
             $this->removeNext($round, $competitionSport);
 
@@ -103,7 +112,8 @@ final class AgainstQualifyConfigAction extends Action
                 continue;
             }
             $childRound->getAgainstQualifyConfigs()->removeElement($qualifyConfig);
-            $this->qualifyConfigRepos->remove($qualifyConfig);
+            $this->entityManager->remove($qualifyConfig);
+            $this->entityManager->flush();
             $this->removeNext($childRound, $competitionSport);
         }
     }

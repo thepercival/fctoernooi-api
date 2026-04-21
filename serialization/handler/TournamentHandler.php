@@ -9,25 +9,29 @@ use JMS\Serializer\Context;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\JsonDeserializationVisitor;
 use Sports\Competition;
-use Sports\SerializationHandler\DummyCreator;
 use Sports\SerializationHandler\Handler;
-use stdClass;
 
-class TournamentHandler extends Handler implements SubscribingHandlerInterface
+
+/**
+ * @api
+ */
+final class TournamentHandler extends Handler implements SubscribingHandlerInterface
 {
-    public function __construct(protected DummyCreator $dummyCreator)
+    public function __construct(/*protected DummyCreator $dummyCreator*/)
     {
     }
 
     /**
      * @psalm-return list<array<string, int|string>>
      */
+    #[\Override]
     public static function getSubscribingMethods(): array
     {
         return static::getDeserializationMethods(Tournament::class);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param JsonDeserializationVisitor $visitor
      * @param array{competition: Competition, intro: string, theme: array<string, string>, public: bool, useSelfRegistration: bool, location: string} $fieldValue
      * @param array<string, int|string> $type

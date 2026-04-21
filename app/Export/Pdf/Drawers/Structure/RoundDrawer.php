@@ -13,16 +13,16 @@ use Sports\Poule;
 use Sports\Round;
 use Sports\Structure\NameService as StructureNameService;
 
-class RoundDrawer
+final class RoundDrawer
 {
     protected PouleDrawer $pouleDrawer;
-    protected Helper $helper;
+//    protected Helper $helper;
 
     public function __construct(
         protected StructureNameService $structureNameService,
         protected RoundConfig $config
     ) {
-        $this->helper = new Helper();
+//        $this->helper = new Helper();
         $this->pouleDrawer = new PouleDrawer($structureNameService, $config->getPouleConfig());
     }
 
@@ -38,7 +38,8 @@ class RoundDrawer
         $poules = array_values($round->getPoules()->toArray());
 
         while ($rowPoules = $this->getRowPoules($round, $poules, $pouleRowTop->getWidth())) {
-            $totalWithWithoutMargins = $pouleRowTop->getWidth() - (2 * $pouleMargin);
+            $totalWithWithoutMargins = $pouleRowTop->getWidth() - (2.0 * $pouleMargin);
+            /** @psalm-suppress PossiblyUndefinedArrayOffset */
             list($marginLeft, $marginX) = $this->getPouleMarginX($round, $rowPoules, $totalWithWithoutMargins);
             $pouleTopLeft = $pouleRowTop->getStart()->addX($marginLeft);
             foreach ($rowPoules as $poule) {
@@ -107,8 +108,7 @@ class RoundDrawer
         $pouleWidths = array_map(
             function (Poule $poule) use ($showPouleNamePrefix, $showCompetitor, $pouleDrawer): PouleWidth {
                 return new PouleWidth(
-                    $pouleDrawer->calculateWidth($poule, $showPouleNamePrefix, $showCompetitor),
-                    $poule
+                    $pouleDrawer->calculateWidth($poule, $showPouleNamePrefix, $showCompetitor)
                 );
             },
             $rowPoules
@@ -117,13 +117,10 @@ class RoundDrawer
         $poulesWidth = array_sum(array_map(fn(PouleWidth $pouleWidth) => $pouleWidth->getWidth(), $pouleWidths));
 
         $totalMarginWidth = $totalWidth - $poulesWidth;
-        if( $round->getNumberAsValue() === 2) {
-            $er = 12;
-        }
-        $aroundNrOfMargins = count($rowPoules) + 1;
+        $aroundNrOfMargins = (float)(count($rowPoules) + 1);
         $aroundMargin = $totalMarginWidth / $aroundNrOfMargins;
         if ($aroundMargin < $this->config->getPouleConfig()->getMargin() && count($rowPoules) > 1) {
-            $betweenNrOfMargins = count($rowPoules) - 1;
+            $betweenNrOfMargins = (float)(count($rowPoules) - 1);
             $betweenMargin = $totalMarginWidth / $betweenNrOfMargins;
             return [0, $betweenMargin];
         }

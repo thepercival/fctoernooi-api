@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class IntroConfig
+final readonly class IntroConfig
 {
     public function __construct(
         private FieldsetTextConfig $introFieldsetTextConfig,

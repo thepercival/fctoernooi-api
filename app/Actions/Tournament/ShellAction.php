@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Tournament;
 
 use App\Actions\Action;
-use FCToernooi\Tournament\Repository as TournamentRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use FCToernooi\Tournament\Shell as Shell;
 use FCToernooi\Tournament\ShellFilter;
 use FCToernooi\User;
@@ -15,6 +15,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpException;
 
+/**
+ * @api
+ */
 final class ShellAction extends Action
 {
     public function __construct(
@@ -26,6 +29,7 @@ final class ShellAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -54,7 +58,7 @@ final class ShellAction extends Action
     }
 
     /**
-     * @param list<string> $queryParams
+     * @param array<string, mixed> $queryParams
      * @return ShellFilter
      */
     protected function getShellFilterFromInput(array $queryParams): ShellFilter{
@@ -89,6 +93,7 @@ final class ShellAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args

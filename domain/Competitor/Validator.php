@@ -8,7 +8,10 @@ use Exception;
 use FCToernooi\Tournament;
 use Sports\Competition;
 
-class Validator
+/**
+ * @api
+ */
+final class Validator
 {
     public function __construct()
     {

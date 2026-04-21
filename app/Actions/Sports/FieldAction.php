@@ -6,32 +6,43 @@ namespace App\Actions\Sports;
 
 use App\Actions\Action;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Tournament;
-use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Availability\Checker as AvailabilityChecker;
-use Sports\Competition\Field;
-use Sports\Competition\Field\Repository as FieldRepository;
-use Sports\Competition\Repository as CompetitionRepos;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition;
+use Sports\Competition\CompetitionField;
+use Sports\Competition\CompetitionSport;
 use Sports\Priority\Service as PriorityService;
 
+/**
+ * @api
+ */
 final class FieldAction extends Action
 {
+    /** @var EntityRepository<CompetitionField>  */
+    protected EntityRepository $fieldRepos;
+    /** @var EntityRepository<CompetitionSport>  */
+    protected EntityRepository $competitionSportRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected FieldRepository $fieldRepos,
-        protected CompetitionSportRepository $competitionSportRepos,
-        protected CompetitionRepos $competitionRepos
+        private EntityManagerInterface $entityManager,
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionField::class);
+        $this->fieldRepos = new EntityRepository($entityManager, $metaData);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionSport::class);
+        $this->competitionSportRepos = new EntityRepository($entityManager, $metaData);
     }
 
     /**
@@ -53,20 +64,21 @@ final class FieldAction extends Action
                 throw new Exception('de sport is onjuist', E_ERROR);
             }
 
-            /** @var Field $field */
+            /** @var CompetitionField $field */
             $field = $this->serializer->deserialize(
                 $this->getRawData($request),
-                Field::class,
+                CompetitionField::class,
                 'json'
             );
 
             $availabilityChecker = new AvailabilityChecker();
             $availabilityChecker->checkFieldName($competition, (string)$field->getName());
 
-            $newField = new Field($competitionSport);
+            $newField = new CompetitionField($competitionSport);
             $newField->setName($field->getName());
 
-            $this->fieldRepos->save($newField);
+            $this->entityManager->persist($newField);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($newField, 'json');
             return $this->respondWithJson($response, $json);
@@ -89,7 +101,6 @@ final class FieldAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            /** @var CompetitionSport|null $competitionSport */
             $competitionSport = $this->competitionSportRepos->find((int)$args['competitionSportId']);
             if ($competitionSport === null || $competitionSport->getCompetition() !== $competition) {
                 throw new Exception('de sport is onjuist', E_ERROR);
@@ -100,10 +111,10 @@ final class FieldAction extends Action
                 throw new Exception('het veld en de sport zijn een onjuiste combinatie', E_ERROR);
             }
 
-            /** @var Field|false $fieldSer */
+            /** @var CompetitionField|false $fieldSer */
             $fieldSer = $this->serializer->deserialize(
                 $this->getRawData($request),
-                Field::class,
+                CompetitionField::class,
                 'json'
             );
             if ($fieldSer === false) {
@@ -115,7 +126,8 @@ final class FieldAction extends Action
             $availabilityChecker->checkFieldName($competition, (string)$fieldSer->getName(), $field);
 
             $field->setName($fieldSer->getName());
-            $this->fieldRepos->save($field);
+            $this->entityManager->persist($field);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($field, 'json');
             return $this->respondWithJson($response, $json);
@@ -151,8 +163,9 @@ final class FieldAction extends Action
             $priorityService = new PriorityService(array_values($competitionSport->getFields()->toArray()));
             $changedFields = $priorityService->upgrade($field);
             foreach ($changedFields as $changedField) {
-                if ($changedField instanceof Field) {
-                    $this->fieldRepos->save($changedField);
+                if ($changedField instanceof CompetitionField) {
+                    $this->entityManager->persist($changedField);
+                    $this->entityManager->flush();
                 }
             }
 
@@ -187,13 +200,15 @@ final class FieldAction extends Action
             }
 
             $competitionSport->getFields()->removeElement($field);
-            $this->fieldRepos->remove($field);
+            $this->entityManager->remove($field);
+            $this->entityManager->flush();
 
             $priorityService = new PriorityService(array_values($competitionSport->getFields()->toArray()));
             $changedFields = $priorityService->upgrade($field);
             foreach ($changedFields as $changedField) {
-                if ($changedField instanceof Field) {
-                    $this->fieldRepos->save($changedField);
+                if ($changedField instanceof CompetitionField) {
+                    $this->entityManager->persist($changedField);
+                    $this->entityManager->flush();
                 }
             }
 

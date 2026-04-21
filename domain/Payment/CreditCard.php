@@ -8,7 +8,10 @@ use FCToernooi\Payment;
 use FCToernooi\User;
 use Mollie\Api\Types\PaymentMethod;
 
-class CreditCard extends Payment
+/**
+ * @api
+ */
+final class CreditCard extends Payment
 {
     public function __construct(
         User $user,

@@ -21,7 +21,7 @@ trait HeaderDrawer
     public function drawHeader(
         string $tournamentName,
         string $subTitle,
-        HeaderConfig $config = null
+        HeaderConfig|null $config = null
     ): float {
         if ($config === null) {
             $config = new HeaderConfig(null);
@@ -30,12 +30,12 @@ trait HeaderDrawer
 
         $displayWidth = $this->getDisplayWidth();
 
-        $padding = 10;
+        $padding = 10.0;
         $rowHeight = $config->getRowHeight();
         $xLeft = self::PAGEMARGIN;
         $widthAppText = $this->getTextWidth('FCToernooi', $config->getFontHeight());
         $this->setFont($this->helper->getTimesFont(true), $config->getFontHeight());
-        $widthSubtitle = strlen($subTitle) > 0 ? $this->getTextWidth($subTitle, $config->getFontHeight()) : 0;
+        $widthSubtitle = strlen($subTitle) > 0 ? $this->getTextWidth($subTitle, $config->getFontHeight()) : 0.0;
         $this->setFont($this->helper->getTimesFont(), $config->getFontHeight());
         $xCenter = $xLeft + $widthSubtitle + $padding;
         $xRight = $this->getWidth() - (self::PAGEMARGIN + $widthAppText);
@@ -84,6 +84,6 @@ trait HeaderDrawer
         $this->setFillColor(new \Zend_Pdf_Color_Html('white'));
         $this->setTextColor(new \Zend_Pdf_Color_Html('black'));
 
-        return $y - (2 * $rowHeight);
+        return $y - (2.0 * (float)$rowHeight);
     }
 }

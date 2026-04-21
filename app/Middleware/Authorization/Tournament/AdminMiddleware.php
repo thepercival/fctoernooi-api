@@ -14,6 +14,7 @@ use FCToernooi\TournamentUser;
 
 abstract class AdminMiddleware extends AuthorizationMiddleware
 {
+    #[\Override]
     protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void
     {
         if ($user === null) {

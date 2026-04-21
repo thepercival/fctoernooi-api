@@ -23,7 +23,7 @@ use Sports\Category;
  *
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class StructureDocument extends PdfDocument
+final class StructureDocument extends PdfDocument
 {
     private CategoryDrawer $categoryDrawer;
 
@@ -49,6 +49,7 @@ class StructureDocument extends PdfDocument
         return $this->config;
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $horLine = null;
@@ -167,8 +168,8 @@ class StructureDocument extends PdfDocument
     private function calculatePageDimensions(Category $category): Point
     {
         $point = new Point(ToernooiPdfPage::PAGEMARGIN, ToernooiPdfPage::A4_PORTRET_HEIGHT - ToernooiPdfPage::PAGEMARGIN);
-        $horLine = new HorizontalLine($point, ToernooiPdfPage::A4_PORTRET_WIDTH - (2 * ToernooiPdfPage::PAGEMARGIN));
-        $rectangle = new Rectangle($horLine, -(ToernooiPdfPage::A4_PORTRET_HEIGHT - (2 * ToernooiPdfPage::PAGEMARGIN)));
+        $horLine = new HorizontalLine($point, ToernooiPdfPage::A4_PORTRET_WIDTH - (2.0 * ToernooiPdfPage::PAGEMARGIN));
+        $rectangle = new Rectangle($horLine, -(ToernooiPdfPage::A4_PORTRET_HEIGHT - (2.0 * ToernooiPdfPage::PAGEMARGIN)));
         $lowestNrOfPouleRows = $this->getLowestNrOfPouleRows($category, $rectangle);
         if ($lowestNrOfPouleRows !== null) {
             return new Point(ToernooiPdfPage::A4_PORTRET_WIDTH, ToernooiPdfPage::A4_PORTRET_HEIGHT);

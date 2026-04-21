@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories\Sports;
+
+use Doctrine\ORM\EntityRepository;
+use Exception;
+use Sports\Competition\CompetitionSport;
+use Sports\Planning\GameAmountConfig;
+use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
+use Sports\Score\Config as ScoreConfig;
+use Sports\Structure;
+
+/**
+ * @template-extends EntityRepository<CompetitionSport>
+ */
+final class CompetitionSportRepository extends EntityRepository
+{
+    public function customAdd(CompetitionSport $competitionSport, Structure $structure): void
+    {
+        $em = $this->getEntityManager();
+        $conn = $em->getConnection();
+        $conn->beginTransaction();
+        try {
+            $this->getEntityManager()->persist($competitionSport);
+
+            $firstRoundNumber = $structure->getFirstRoundNumber();
+
+            $rootRounds = $structure->getRootRounds();
+            foreach ($rootRounds as $rootRound) {
+                $scoreRepos = new ScoreConfigRepository($em, $em->getClassMetadata(ScoreConfig::class));
+                $scoreRepos->addObjects($competitionSport, $rootRound);
+
+                $againstQualifyConfigRepos = new AgainstQualifyConfigRepository(
+                    $em,
+                    $em->getClassMetadata(
+                        AgainstQualifyConfig::class
+                    )
+                );
+                $againstQualifyConfigRepos->addObjects($competitionSport, $rootRound);
+
+                $gameAmountRepos = new GameAmountConfigRepository($em, $em->getClassMetadata(GameAmountConfig::class));
+                $gameAmountRepos->addObjects($competitionSport, $firstRoundNumber);
+            }
+
+
+            $em->flush();
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollBack();
+            throw $e;
+        }
+    }
+
+    public function customRemove(CompetitionSport $competitionSport/*, Structure $structure*/): void
+    {
+        $em = $this->getEntityManager();
+        $conn = $this->getEntityManager()->getConnection();
+        $conn->beginTransaction();
+        try {
+            while ($field = $competitionSport->getFields()->first()) {
+                $competitionSport->getFields()->removeElement($field);
+                $this->getEntityManager()->remove($field);
+            }
+
+            // $rootRound = $structure->getRootRound();
+            $metaData = $em->getClassMetadata(ScoreConfig::class);
+            $scoreRepos = new ScoreConfigRepository($em, $metaData);
+            $scoreRepos->removeObjects($competitionSport);
+
+            $metaData = $em->getClassMetadata(AgainstQualifyConfig::class);
+            $againstQualifyConfigRepos = new AgainstQualifyConfigRepository($em, $metaData);
+            $againstQualifyConfigRepos->removeObjects($competitionSport);
+
+            // $firstRoundNumber = $structure->getFirstRoundNumber();
+            $metaData = $em->getClassMetadata(GameAmountConfig::class);
+            $gameAmountRepos = new GameAmountConfigRepository($em, $metaData);
+            $gameAmountRepos->removeObjects($competitionSport);
+
+            $sport = $competitionSport->getSport();
+            $this->getEntityManager()->remove($competitionSport);
+
+            if ($this->findOneBy(["sport" => $sport]) === null) {
+                $this->getEntityManager()->remove($sport);
+            }
+
+            $this->getEntityManager()->flush();
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollBack();
+            throw $e;
+        }
+    }
+}

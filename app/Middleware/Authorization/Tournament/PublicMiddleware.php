@@ -9,8 +9,9 @@ use FCToernooi\User;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Middleware\AuthorizationMiddleware;
 
-class PublicMiddleware extends AuthorizationMiddleware
+final class PublicMiddleware extends AuthorizationMiddleware
 {
+    #[\Override]
     protected function isAuthorized(Request $request, User $user = null, Tournament $tournament = null): void
     {
         if ($tournament === null) {

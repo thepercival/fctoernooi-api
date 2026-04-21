@@ -23,7 +23,7 @@ final class CategoryDrawer
     private RoundCardDrawer $roundCardDrawer;
 
     public function __construct(
-        protected StructureNameService $structureNameService,
+        StructureNameService $structureNameService,
         protected bool $drawCategoryHeader,
         protected CategoryConfig $config
     ) {
@@ -68,16 +68,16 @@ final class CategoryDrawer
     {
         $minimalWidth = $this->calculateMinWidth($category, $maxNrOfPouleRows);
 
-        $height = $this->calculateHeight($category, $maxNrOfPouleRows, $minimalWidth);
+        $height = $this->calculateHeight($category, $minimalWidth);
 
         return new Rectangle(new HorizontalLine(new Point(0, 0), $minimalWidth), $height);
     }
 
     private function calculateMinWidth(Category $category, int $maxNrOfPouleRows): float
     {
-        $minimalWidth = 0;
+        $minimalWidth = 0.0;
         if ($this->drawCategoryHeader) {
-            $cellPadding = 2;
+            $cellPadding = 2.0;
             $minimalWidth = $cellPadding + $this->helper->getTextWidth(
                     $category->getName(),
                     $this->helper->getTimesFont(),
@@ -95,9 +95,9 @@ final class CategoryDrawer
         return $minimalWidth;
     }
 
-    public function calculateHeight(Category $category, int $maxNrOfPouleRows, float $width): float
+    public function calculateHeight(Category $category, float $width): float
     {
-        $height = 0;
+        $height = 0.0;
         if ($this->drawCategoryHeader) {
             $height += $this->config->getHeaderHeight() + $this->config->getRoundConfig()->getMargin();
         }

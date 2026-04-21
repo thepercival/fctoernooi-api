@@ -5,7 +5,7 @@ namespace App\Export\Pdf\Line;
 use App\Export\Pdf\Line;
 use App\Export\Pdf\Point;
 
-class Horizontal extends Line
+final class Horizontal extends Line
 {
     public function __construct(protected Point $start, float $width)
     {

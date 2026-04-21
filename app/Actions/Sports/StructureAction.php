@@ -8,17 +8,18 @@ use App\Actions\Action;
 use App\Exceptions\DomainRecordBeingCalculatedException;
 use App\Exceptions\DomainRecordNotFoundException;
 use App\GuzzleClient;
+use App\Repositories\CompetitorRepository;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRegistrationRepository as RegistrationRepository;
 use App\Response\ErrorResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\CacheService;
-use FCToernooi\Competitor\Repository as CompetitorRepository;
 use FCToernooi\Planning\Totals\CompetitorAmountCalculator;
 use FCToernooi\Planning\Totals\PlanningTotals;
 use FCToernooi\Planning\Totals\RoundNumberWithMinNrOfBatches;
 use FCToernooi\Planning\Totals\TotalPeriodCalculator;
 use FCToernooi\Recess;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Memcached;
@@ -27,19 +28,21 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Sports\Category;
+use Sports\Competition\CompetitionSportFromToMapper;
+use Sports\Competition\CompetitionSportFromToMapStrategy;
 use Sports\Output\StructureOutput;
+use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
+use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
 use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\InputConfigurationCreator;
 use Sports\Structure;
 use Sports\Structure\Copier as StructureCopier;
-use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
-use SportsPlanning\Referee\Info as PlanningRefereeInfo;
-use Sports\Competition\Sport\FromToMapper;
-use Sports\Competition\Sport\FromToMapStrategy;
-use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
-use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
+use SportsPlanning\PlanningRefereeInfo;
 
+/**
+ * @api
+ */
 final class StructureAction extends Action
 {
     private CacheService $cacheService;
@@ -49,14 +52,16 @@ final class StructureAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected StructureRepository $structureRepos,
-        protected CompetitorRepository $competitorRepos,
         protected RegistrationRepository $registrationRepos,
-        protected EntityManagerInterface $em,
+        private CompetitorRepository $competitorRepos,
+        protected EntityManagerInterface $entityManager,
         Memcached $memcached,
         protected Configuration $config
     ) {
         parent::__construct($logger, $serializer);
+
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
+
         $this->planningClient = new GuzzleClient(
             $config->getString('scheduler.url'),
             $config->getString('scheduler.apikey'),
@@ -65,10 +70,9 @@ final class StructureAction extends Action
     }
 
     /**
-     * @param bool $bWithGames
      * @return list<string>
      */
-    protected function getDeserialzeGroups(bool $bWithGames = true): array
+    protected function getDeserialzeGroups(): array
     {
         return ['Default', 'structure', 'games'];
     }
@@ -79,6 +83,7 @@ final class StructureAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -120,6 +125,7 @@ final class StructureAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -127,21 +133,20 @@ final class StructureAction extends Action
      */
     public function edit(Request $request, Response $response, array $args): Response
     {
-        $conn = $this->em->getConnection();
+        $conn = $this->entityManager->getConnection();
         $conn->beginTransaction();
         try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $this->logStructure($request, $tournament);
+
             /** @var Structure|false $structureSer */
             $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
             if ($structureSer === false) {
                 throw new \Exception("er kan geen ronde worden gewijzigd o.b.v. de invoergegevens", E_ERROR);
             }
             $structureOutput = new StructureOutput($this->logger);
-//            $this->logger->warning('####### DESER. STRUCTURE ########');
-//            $structureOutput->output($structureSer);
-//            $this->logger->warning('####### END DESER. STRUCTURE ########');
-
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
 
             $competition = $tournament->getCompetition();
             $fromToCategoryMap = null;
@@ -156,10 +161,10 @@ final class StructureAction extends Action
             }
 
             $competitionSportsSer = $structureSer->getFirstRoundNumber()->getCompetitionSports();
-            $fromToMapper = new FromToMapper(
+            $fromToMapper = new CompetitionSportFromToMapper(
                 array_values( $competitionSportsSer->toArray() ),
                 array_values( $competition->getSports()->toArray() ),
-                FromToMapStrategy::ById
+                CompetitionSportFromToMapStrategy::ById
             );
 
             $structureCopier = new StructureCopier(
@@ -207,6 +212,7 @@ final class StructureAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -215,22 +221,24 @@ final class StructureAction extends Action
     public function getPlanningTotals(Request $request, Response $response, array $args): Response
     {
         try {
+            /** @var Tournament $tournament */
+            $tournament = $request->getAttribute("tournament");
+
+            $this->logStructure($request, $tournament);
+
             /** @var Structure|false $structureSer */
-            $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups(false));
+            $structureSer = $this->deserialize($request, Structure::class, $this->getDeserialzeGroups());
             if ($structureSer === false) {
                 throw new \Exception("de planning-Info kan niet berekend worden o.b.v. de invoergegevens", E_ERROR);
             }
 
-            /** @var Tournament $tournament */
-            $tournament = $request->getAttribute("tournament");
-
             $competition = $tournament->getCompetition();
 
             $competitionSportsSer = $structureSer->getFirstRoundNumber()->getCompetitionSports();
-            $fromToMapper = new FromToMapper(
+            $fromToMapper = new CompetitionSportFromToMapper(
                 array_values( $competitionSportsSer->toArray() ),
                 array_values( $competition->getSports()->toArray() ),
-                FromToMapStrategy::ById
+                CompetitionSportFromToMapStrategy::ById
             );
 
             $structureCopier = new StructureCopier(
@@ -300,4 +308,14 @@ final class StructureAction extends Action
         return null;
     }
 
+    private function logStructure(Request $request, Tournament $tournament): void
+    {
+        $structuresPath = $this->config->getString('logger.structures_path');
+        if (!is_dir($structuresPath)) {
+            mkdir($structuresPath, 0777, true);
+        }
+        $tournamentId = (string)$tournament->getId();
+        $fileName = $structuresPath . 'structure-tourn-id-' . $tournamentId . '.json';
+        file_put_contents($fileName, $this->getRawData($request));
+    }
 }

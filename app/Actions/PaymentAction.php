@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
-use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Payment;
 use FCToernooi\Payment\CreditCard as CreditCardPayment;
 use FCToernooi\Payment\IDeal as IDealPayment;
 use FCToernooi\Payment\IDealIssuer;
-use FCToernooi\Payment\Repository as PaymentRepository;
 use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\SerializerInterface;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Types\PaymentMethod;
@@ -25,22 +25,35 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
+use Sports\Planning\GameAmountConfig;
 use stdClass;
 
+/**
+ * @api
+ */
 final class PaymentAction extends Action
 {
     private LoggerInterface $paymentLogger;
+    private EntityRepository $userRepos;
+    private EntityRepository $paymentRepos;
+
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private UserRepository $userRepos,
-        private PaymentRepository $paymentRepos,
-        private CreditActionRepository $creditActionRepos,
+//        private CreditActionRepository $creditActionRepos,
         private AuthSyncService $syncService,
-        private Configuration $config
+        private Configuration $config,
+        private EntityManagerInterface $entityManager,
     ) {
+        $metaData = $entityManager->getClassMetadata(User::class);
+        $this->userRepos = new EntityRepository($entityManager, $metaData);
+
         $this->paymentLogger = $this->initPaymentLogger($config);
+
+        $metaData = $entityManager->getClassMetadata(GameAmountConfig::class);
+        $this->paymentRepos = new EntityRepository($entityManager, $metaData);
+
         parent::__construct($logger, $serializer);
     }
 
@@ -78,6 +91,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -99,6 +113,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -129,6 +144,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -156,7 +172,8 @@ final class PaymentAction extends Action
             $molliePaymentState = Payment\State::getValue($molliePayment->status);
             if ($payment->getState() !== Payment\State::Paid && $molliePaymentState === Payment\State::Paid) {
                 $payment->setState($molliePaymentState);
-                $this->paymentRepos->save($payment, true);
+                $this->entityManager->persist($payment);
+                $this->entityManager->flush();
 
                 // @TODO CDK PAYMENT
 //                $this->creditActionRepos->buyCredits($payment);
@@ -171,7 +188,8 @@ final class PaymentAction extends Action
                 // $this->creditActionRepos->cancelCredits($payment);
 
                 $payment->setState($molliePaymentState);
-                $this->paymentRepos->save($payment, true);
+                $this->entityManager->persist($payment);
+                $this->entityManager->flush();
 
                 $this->paymentLogger->info(
                     'payment to state ' . $molliePaymentState->value . ' for user ' . $logUserId . ' with amount ' . $logAmount
@@ -185,6 +203,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -221,6 +240,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -258,7 +278,8 @@ final class PaymentAction extends Action
             }
 
             $payment = new Payment($user, null, PaymentMethod::IDEAL, $serPayment->getAmount());
-            $this->paymentRepos->save($payment, true);
+            $this->entityManager->persist($payment);
+            $this->entityManager->flush();
 
             $molliePaymentOptions = [
                 'amount' => [
@@ -280,7 +301,8 @@ final class PaymentAction extends Action
             $molliePayment = $this->getMollieClient()->payments->create($molliePaymentOptions);
 
             $payment->setPaymentId($molliePayment->id);
-            $this->paymentRepos->save($payment, true);
+            $this->entityManager->persist($payment);
+            $this->entityManager->flush();
 
             return $this->respondWithJson(
                 $response,
@@ -295,6 +317,7 @@ final class PaymentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -344,7 +367,8 @@ final class PaymentAction extends Action
 
             $this->syncService->revertTournamentUsers($userAuth);
 
-            $this->userRepos->remove($user);
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
             return $response->withStatus(200);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);

@@ -6,14 +6,15 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\DateTimeImmutableType;
 
-class UTCDateTimeType extends DateTimeImmutableType
+final class UTCDateTimeType extends DateTimeImmutableType
 {
     /**
      * @var \DateTimeZone|null
      */
     private static $utc;
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    #[\Override]
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): string|null
     {
 //        if ($value instanceof \DateTimeImmutable && $value->getTimezone() === ) {
 //            $value = $value->setTimezone(self::getUtc());
@@ -27,7 +28,8 @@ class UTCDateTimeType extends DateTimeImmutableType
         return self::$utc ?: self::$utc = new \DateTimeZone('UTC');
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    #[\Override]
+    public function convertToPHPValue($value, AbstractPlatform $platform): \DateTimeImmutable|null
     {
         if (null === $value || $value instanceof \DateTimeImmutable) {
             return $value;
@@ -40,11 +42,7 @@ class UTCDateTimeType extends DateTimeImmutableType
         );
 
         if (!$converted) {
-            throw ConversionException::conversionFailedFormat(
-                $value,
-                $this->getName(),
-                $platform->getDateTimeFormatString()
-            );
+            throw new ConversionException($value . ' is not a valid UTC date.');
         }
 
         return $converted;

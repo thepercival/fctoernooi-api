@@ -120,7 +120,7 @@ final class PouleDrawer
     // could be extended with maxNrOfRows, maxNrOfColumns
     public function calculateAllPlacesWidth(Poule $poule, bool $showCompetitor): float
     {
-        $minimalWidth = 0;
+        $minimalWidth = 0.0;
         $places = array_values($poule->getPlaces()->toArray());
         $nrOfPlacesInColumn = $this->getNrOfPlacesInColumn($poule);
         $placesToCalculate = array_splice($places, 0, $nrOfPlacesInColumn);
@@ -200,21 +200,21 @@ final class PouleDrawer
     {
         $nrOfColumns = $this->getNrOfColumnsNeeded($poule);
         $nrOfPlaces = count($poule->getPlaces());
-        $nrOfRows = ceil($nrOfPlaces / $nrOfColumns);
-        return $this->config->getRowHeight() * (1 + $nrOfRows);
+        $nrOfRows = ceil(((float)$nrOfPlaces) / $nrOfColumns);
+        return $this->config->getRowHeight() * (1.0 + $nrOfRows);
     }
 
     public function getNrOfColumnsNeeded(Poule $poule): float
     {
         $rest = count($poule->getPlaces()) % self::MAX_NR_PLACES_IN_COLUMN;
-        $nrOfColumns = (count($poule->getPlaces()) - $rest) / self::MAX_NR_PLACES_IN_COLUMN;
-        return $rest === 0 ? $nrOfColumns : $nrOfColumns + 1;
+        $nrOfColumns = (float)((count($poule->getPlaces()) - $rest) / self::MAX_NR_PLACES_IN_COLUMN);
+        return $rest === 0 ? $nrOfColumns : $nrOfColumns + 1.0;
     }
 
     public function getNrOfPlacesInColumn(Poule $poule): int
     {
         $nrOfColumns = $this->getNrOfColumnsNeeded($poule);
-        return (int)ceil(count($poule->getPlaces()) / $nrOfColumns);
+        return (int)ceil(((float)count($poule->getPlaces())) / $nrOfColumns);
     }
 
 //

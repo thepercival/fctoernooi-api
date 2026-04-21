@@ -8,32 +8,27 @@ use App\Command;
 use App\Commands\Arguments\StructureActionArgument;
 use App\Commands\Validator\NoUsersException;
 use App\Mailer;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentInvitationRepository as TournamentInvitationRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
-use Sports\Competition\Validator as CompetitionValidator;
-use Sports\Competitor\StartLocationMap;
-use Sports\Game\Against as AgainstGame;
-use Sports\Game\Order as GameOrder;
-use Sports\Output\Game\Against as AgainstGameOutput;
-use Sports\Output\Game\Together as TogetherGameOutput;
+use Sports\Competition\CompetitionValidator;
 use Sports\Output\StructureOutput;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\GamesValidator;
 use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class StructureAdminCommand extends Command
+final class StructureAdminCommand extends Command
 {
     protected TournamentRepository $tournamentRepos;
     protected TournamentInvitationRepository $invitationRepos;
@@ -42,9 +37,9 @@ class StructureAdminCommand extends Command
     protected CompetitionValidator $competitionValidator;
     protected GamesValidator $gamesValidator;
     private DateTimeImmutable $deprecatedCreatedDateTime;
-    private const DEFAULT_START_DAYS_IN_PAST = 7;
-    private const DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
-    public const TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
+    private const int DEFAULT_START_DAYS_IN_PAST = 7;
+    private const int DEFAULT_END_DAYS_IN_PAST = -1; // tomorrow
+    public const string TOURNAMENT_DEPRECATED_CREATED_DATETIME = '2020-06-01';
     private string $customName = 'structure-admin';
 
     public function __construct(ContainerInterface $container)
@@ -80,6 +75,7 @@ class StructureAdminCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -100,6 +96,7 @@ class StructureAdminCommand extends Command
         $this->addArgument('action', InputArgument::REQUIRED, join(',', ['show', 'validate']));
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
@@ -206,39 +203,47 @@ class StructureAdminCommand extends Command
         }
     }
 
-    protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
-    {
-        $map = new StartLocationMap(array_values($tournament->getCompetitors()->toArray()));
-        $againstGameOutput = new AgainstGameOutput($map, $this->getLogger());
-        $togetherGameOutput = new TogetherGameOutput($map, $this->getLogger());
-        foreach ($roundNumber->getGames(GameOrder::ByBatch) as $game) {
-            if ($game instanceof AgainstGame) {
-                $againstGameOutput->output($game);
-            } else {
-                $togetherGameOutput->output($game);
-            }
-        }
-        // return;
-
-//        $planningOutput = new PlanningOutput($this->getLogger());
-//
-//        $inputService = new PlanningInputService();
-//        $planningService = new PlanningService();
-//        $planningInput = $this->planningInputRepos->getFromInput(
-//            $inputService->get($roundNumber, $nrOfReferees)
-//        );
-//        if ($planningInput === null) {
-//            $this->getLogger()->info('no planninginput');
-//            return;
+//    /**
+//     * @psalm-suppress UnusedParam
+//     * @param Tournament $tournament
+//     * @param RoundNumber $roundNumber
+//     * @param int $nrOfReferees
+//     * @return void
+//     * @throws Exception
+//     */
+//    protected function showPlanning(Tournament $tournament, RoundNumber $roundNumber, int $nrOfReferees): void
+//    {
+//        $map = new StartLocationMap(array_values($tournament->getCompetitors()->toArray()));
+//        $againstGameOutput = new AgainstGameOutput($map, $this->getLogger());
+//        $togetherGameOutput = new TogetherGameOutput($map, $this->getLogger());
+//        foreach ($roundNumber->getGames(GameOrder::ByBatch) as $game) {
+//            if ($game instanceof AgainstGame) {
+//                $againstGameOutput->output($game);
+//            } else {
+//                $togetherGameOutput->output($game);
+//            }
 //        }
+//        // return;
 //
-//        $bestPlanning = $planningService->getBestPlanning($planningInput);
-//        if ($bestPlanning === null) {
-//            $planningOutput->outputPlanningInput($planningInput, 'no best planning for');
-//            return;
-//        }
-//        $planningOutput->outputWithGames($bestPlanning, true);
-    }
+////        $planningOutput = new PlanningOutput($this->getLogger());
+////
+////        $inputService = new PlanningInputService();
+////        $planningService = new PlanningService();
+////        $planningInput = $this->planningInputRepos->getFromInput(
+////            $inputService->get($roundNumber, $nrOfReferees)
+////        );
+////        if ($planningInput === null) {
+////            $this->getLogger()->info('no planninginput');
+////            return;
+////        }
+////
+////        $bestPlanning = $planningService->getBestPlanning($planningInput);
+////        if ($bestPlanning === null) {
+////            $planningOutput->outputPlanningInput($planningInput, 'no best planning for');
+////            return;
+////        }
+////        $planningOutput->outputWithGames($bestPlanning, true);
+//    }
 
     protected function addStructureToLog(Tournament $tournament, Structure $structure): void
     {

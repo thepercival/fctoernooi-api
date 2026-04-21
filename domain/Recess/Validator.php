@@ -5,7 +5,10 @@ namespace FCToernooi\Recess;
 use FCToernooi\Tournament;
 use League\Period\Period;
 
-class Validator
+/**
+ * @api
+ */
+final class Validator
 {
     public function validateNewPeriod(Period $recessPeriod, Tournament $tournament): void {
         $this->validateBeforeCompetitionStart($recessPeriod, $tournament);
@@ -14,7 +17,7 @@ class Validator
 
     protected function validateBeforeCompetitionStart(Period $recessPeriod, Tournament $tournament): void {
         $competitionStart = $tournament->getCompetition()->getStartDateTime();
-        if ($recessPeriod->getEndDate()->getTimestamp() <= $competitionStart->getTimestamp()) {
+        if ($recessPeriod->endDate->getTimestamp() <= $competitionStart->getTimestamp()) {
             throw new \Exception('er is een pauze voordat het toernooi start', E_ERROR);
         }
     }

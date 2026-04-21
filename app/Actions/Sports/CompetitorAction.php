@@ -6,15 +6,16 @@ namespace App\Actions\Sports;
 
 use App\Actions\Action;
 use App\ImageService;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRegistrationRepository as RegistrationRepository;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor;
-use FCToernooi\Competitor\Repository as CompetitorRepository;
-use FCToernooi\Sponsor;
-use Sports\Structure\Repository as StructureRepository;
 use FCToernooi\Role;
-use FCToernooi\Tournament\Registration\Repository as RegistrationRepository;
 use FCToernooi\Tournament;
+use FCToernooi\Tournament\Registration\State as RegistrationState;
 use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
@@ -22,22 +23,28 @@ use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Selective\Config\Configuration;
 use Sports\Availability\Checker as AvailabilityChecker;
-use FCToernooi\Tournament\Registration\State as RegistrationState;
 
+/**
+ * @api
+ */
 final class CompetitorAction extends Action
 {
+    /** @var EntityRepository<Competitor>  */
+    protected EntityRepository $competitorRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected CompetitorRepository $competitorRepos,
         protected RegistrationRepository $registrationRepos,
         protected StructureRepository $structureRepos,
         private ImageService $imageService,
-        private Configuration $config
+        private EntityManagerInterface $entityManager,
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(Competitor::class);
+        $this->competitorRepos = new EntityRepository($entityManager, $metaData);
     }
 
     /**
@@ -68,6 +75,7 @@ final class CompetitorAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -93,6 +101,7 @@ final class CompetitorAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -126,7 +135,8 @@ final class CompetitorAction extends Action
             $newCompetitor->setPublicInfo($competitor->getPublicInfo());
             $newCompetitor->setPrivateInfo($competitor->getPrivateInfo());
 
-            $this->competitorRepos->save($newCompetitor);
+            $this->entityManager->persist($newCompetitor);
+            $this->entityManager->flush();
 
             $serGroups = $this->getModifySerializationGroup();
             $context = SerializationContext::create()->setGroups($serGroups);
@@ -177,11 +187,13 @@ final class CompetitorAction extends Action
             $newCompetitor->setLogoExtension(null);
             $newCompetitor->setPrivateInfo($registration->getInfo());
 
-            $this->competitorRepos->save($newCompetitor);
+            $this->entityManager->persist($newCompetitor);
+            $this->entityManager->flush();
 
             $registration->setCompetitor($newCompetitor);
             $registration->setState(RegistrationState::Accepted);
-            $this->registrationRepos->save($registration);
+            $this->entityManager->persist($registration);
+            $this->entityManager->flush();
 
             $serGroups = $this->getModifySerializationGroup();
             $context = SerializationContext::create()->setGroups($serGroups);
@@ -225,7 +237,8 @@ final class CompetitorAction extends Action
             $competitor->setPresent($competitorSer->getPresent());
             $competitor->setPublicInfo($competitorSer->getPublicInfo());
             $competitor->setPrivateInfo($competitorSer->getPrivateInfo());
-            $this->competitorRepos->save($competitor);
+            $this->entityManager->persist($competitor);
+            $this->entityManager->flush();
 
             $serGroups = $this->getModifySerializationGroup();
             $context = SerializationContext::create()->setGroups($serGroups);
@@ -258,8 +271,9 @@ final class CompetitorAction extends Action
             $competitorOne->setPlaceNr($competitorTwo->getPlaceNr());
             $competitorTwo->setPouleNr($pouleNrTmp);
             $competitorTwo->setPlaceNr($placeNrTmp);
-            $this->competitorRepos->save($competitorOne);
-            $this->competitorRepos->save($competitorTwo);
+            $this->entityManager->persist($competitorOne);
+            $this->entityManager->persist($competitorTwo);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
@@ -284,7 +298,8 @@ final class CompetitorAction extends Action
                 return new ForbiddenResponse('het toernooi komt niet overeen met het toernooi van de deelnemer');
             }
 
-            $this->competitorRepos->remove($competitor);
+            $this->entityManager->remove($competitor);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
@@ -335,7 +350,8 @@ final class CompetitorAction extends Action
             }
 
             $competitor->setLogoExtension($extension);
-            $this->competitorRepos->save($competitor);
+            $this->entityManager->persist($competitor);
+            $this->entityManager->flush();
 
             $serGroups = $this->getModifySerializationGroup();
             $context = SerializationContext::create()->setGroups($serGroups);

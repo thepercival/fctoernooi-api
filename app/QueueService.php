@@ -19,8 +19,8 @@ use Interop\Amqp\AmqpQueue;
  */
 abstract class QueueService
 {
-    public const MIN_PRIORITY = 0;
-    public const MAX_PRIORITY = 9;
+    public const int MIN_PRIORITY = 0;
+    public const int MAX_PRIORITY = 9;
 
     protected string $queueName;
     /**

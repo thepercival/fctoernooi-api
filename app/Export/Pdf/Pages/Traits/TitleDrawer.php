@@ -29,6 +29,6 @@ trait TitleDrawer
             new HorizontalLine(new Point($x, $y), $displayWidth), -$config->getFontHeight()
         );
         $this->drawCell($title, $rectangle, Align::Center);
-        return $y - (2 * $config->getFontHeight());
+        return $y - (2.0 * (float)$config->getFontHeight());
     }
 }

@@ -6,18 +6,49 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="app/Commands"/>
-        <directory name="app/"/>
-        <directory name="config/"/>
         <directory name="domain/"/>
-        <directory name="tests/cases/"/>
+        <directory name="config/"/>
+        <directory name="app/"/>
         <directory name="serialization/handler/"/>
+        <directory name="tests/cases/"/>
+        <directory name="db/enums"/>
+        <directory name="db/repositories"/>
+        <directory name="bin/"/>
+        <file name="cli-config.php"/>
         <ignoreFiles>
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+
+<!--        <InvalidArgument errorLevel="suppress" />-->
+<!--        <MixedArgument errorLevel="suppress" />-->
+<!--        <InvalidOperand errorLevel="suppress" />-->
+<!--        <PossiblyUnusedMethod errorLevel="suppress" />-->
+<!--        <PossiblyUnusedProperty errorLevel="suppress" />-->
+<!--        <UnusedParam errorLevel="suppress" />-->
+<!--        <UnusedProperty errorLevel="suppress" />-->
+<!--        <InaccessibleMethod errorLevel="suppress" />-->
+<!--        <TooFewArguments errorLevel="suppress" />-->
+<!--        <PossiblyNullReference errorLevel="suppress" />-->
+<!--        <MixedAssignment errorLevel="suppress" />-->
+<!--        <ClassMustBeFinal errorLevel="suppress" />-->
+<!--        <MissingPropertyType errorLevel="suppress" />-->
+<!--        <DeprecatedConstant errorLevel="suppress" />-->
+<!--        <MixedMethodCall errorLevel="suppress" />-->
+<!--        <UndefinedMethod errorLevel="suppress" />-->
+<!--        <UndefinedTrait errorLevel="suppress" />-->
+<!--        <ImplicitToStringCast errorLevel="suppress" />-->
+<!--        <MissingOverrideAttribute errorLevel="suppress" />-->
+<!--        <MethodSignatureMismatch errorLevel="suppress" />-->
+<!--        <MixedReturnTypeCoercion errorLevel="suppress" />-->
+<!--        <MixedReturnStatement errorLevel="suppress" />-->
+<!--        <MethodSignatureMustProvideReturnType errorLevel="suppress" />-->
+
+    </issueHandlers>
+
     <plugins>
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
-        <pluginClass class="Weirdan\DoctrinePsalmPlugin\Plugin"/>
     </plugins>
 </psalm>

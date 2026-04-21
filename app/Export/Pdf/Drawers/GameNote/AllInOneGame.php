@@ -14,10 +14,11 @@ use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 
-class AllInOneGame extends GameNotesDrawer
+final class AllInOneGame extends GameNotesDrawer
 {
-    public const ONE_PAGE_MAX_NROFSCORELINES = 6;
+    public const int ONE_PAGE_MAX_NROFSCORELINES = 6;
 
+    #[\Override]
     protected function drawPlaces(GameNotesPage $page, AgainstGame|TogetherGame $game, Rectangle $rectangle): void
     {
         if ($game instanceof AgainstGame) {
@@ -30,6 +31,7 @@ class AllInOneGame extends GameNotesDrawer
         $page->drawCell($description, $rectangle);
     }
 
+    #[\Override]
     protected function drawGameRoundNumber(
         GameNotesPage $page,
         AgainstGame|TogetherGame $game,
@@ -54,6 +56,7 @@ class AllInOneGame extends GameNotesDrawer
 //        return $placesWidth / $game->getPlaces()->count();
 //    }
 
+    #[\Override]
     protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
     {
         if ($game instanceof AgainstGame) {
@@ -91,7 +94,7 @@ class AllInOneGame extends GameNotesDrawer
             $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y), $unitWidth), -$height);
             $page->drawCell($descr, $rectangle, Align::Right);
         }
-        $y -= 2 * $height;
+        $y -= 2.0 * $height;
 
         // COMPETITORS
         $page->setFont($this->helper->getTimesFont(), $fontSize);

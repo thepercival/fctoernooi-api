@@ -20,7 +20,10 @@ use Sports\Round\Number as RoundNumber;
 use SportsHelpers\GameMode;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 
-class PlanningPage extends ToernooiPdfPage
+/**
+ * @template-extends ToernooiPdfPage<PlanningDocument>
+ */
+final class PlanningPage extends ToernooiPdfPage
 {
     protected AgainstGameLine|null $againstGameLine = null;
     protected TogetherGameLine|null $togetherGameLine = null;
@@ -187,7 +190,7 @@ class PlanningPage extends ToernooiPdfPage
         $cell = new Rectangle($horLine, -$roundNumberHeaderHeight);
         $this->drawCell($roundNumberName, $cell, Align::Center);
         // $this->setFont($this->helper->getTimesFont(), $this->getParent()->getConfig()->getFontHeight());
-        return $horLine->addY(-(2 * $roundNumberHeaderHeight));
+        return $horLine->addY(-(2.0 * $roundNumberHeaderHeight));
     }
 
 

@@ -14,6 +14,7 @@ use FCToernooi\Tournament\Rule as TournamentRule;
 use App\ImageSize;
 
 /**
+ * @api
  * @template-extends ToernooiPdfPage<IntroDocument>
  */
 class RulesPage extends ToernooiPdfPage
@@ -39,10 +40,10 @@ class RulesPage extends ToernooiPdfPage
         $xStart = ToernooiPdfPage::PAGEMARGIN;
         $y -= $fieldsetMargin;
 
-        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
+//        $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
         $imgWidth = ImageSize::Normal->value;
         $introWidth = $this->getDisplayWidth() - ( $imgWidth + $fieldsetMargin );
-        $marginStartDashedLine = 30;
+//        $marginStartDashedLine = 30;
         // $widthDashedLine = $this->getDisplayWidth() - ($labelWidth + $marginStartDashedLine);
 
         // $xStartDashedLine = $xStart + $labelWidth + $marginStartDashedLine;

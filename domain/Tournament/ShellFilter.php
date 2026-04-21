@@ -6,7 +6,10 @@ namespace FCToernooi\Tournament;
 
 use DateTimeImmutable;
 
-class ShellFilter
+/**
+ * @api
+ */
+final class ShellFilter
 {
     public function __construct(
         public DateTimeImmutable|null $startDateTime,

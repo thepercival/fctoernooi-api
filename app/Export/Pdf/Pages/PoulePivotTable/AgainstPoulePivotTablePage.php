@@ -12,10 +12,10 @@ use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
-use SportsHelpers\Against\Side as AgainstSide;
+use SportsHelpers\Against\AgainstSide;
 use Zend_Pdf_Color_Html;
 
-class AgainstPoulePivotTablePage extends PoulePivotTablesPage
+final class AgainstPoulePivotTablePage extends PoulePivotTablesPage
 {
     public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
@@ -40,36 +40,37 @@ class AgainstPoulePivotTablePage extends PoulePivotTablesPage
         }
     }*/
 
+    #[\Override]
     protected function drawPouleHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $y): float
     {
         $nrOfItems = $poule->getPlaces()->count();
         return parent::drawPouleHeaderHelper($poule, $gameAmountConfig, $y, $this->getVersusHeaderDegrees($nrOfItems));
     }
 
+    #[\Override]
     protected function drawVersusHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
         $nrOfPlaces = $poule->getPlaces()->count();
-        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+        $versusColumnWidth = $this->versusColumnsWidth / (float)$nrOfPlaces;
         $degrees = $this->getVersusHeaderDegrees($nrOfPlaces);
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
-        $nVersus = 0;
         foreach ($poule->getPlaces() as $place) {
             $placeName = $place->getPlaceNr() . '. ';
             $placeName .= $this->getStructureNameService()->getPlaceFromName($place, true);
             $this->setFont($this->helper->getTimesFont(), $this->getPlaceFontHeight($placeName));
             $x = $this->drawHeaderCustom($placeName, $x, $y, $versusColumnWidth, $height, $degrees);
-            $nVersus++;
         }
         $this->setFont($this->helper->getTimesFont(), $this->parent->getConfig()->getFontHeight());
         return $x;
     }
 
+    #[\Override]
     protected function drawVersusCell(Place $place, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
         $poule = $place->getPoule();
         $games = $place->getAgainstGames($gameAmountConfig->getCompetitionSport());
-        $columnWidth = $this->versusColumnsWidth / $poule->getPlaces()->count();
+        $columnWidth = $this->versusColumnsWidth / (float)$poule->getPlaces()->count();
 
         // draw versus
         for ($placeNr = 1; $placeNr <= $poule->getPlaces()->count(); $placeNr++) {
@@ -142,23 +143,24 @@ class AgainstPoulePivotTablePage extends PoulePivotTablesPage
             return $score;
         }
         if ($reverse === true) {
-            return $finalScore->getAway() . $score . $finalScore->getHome();
+            return ((string)$finalScore->getAway()) . $score . ((string)$finalScore->getHome());
         }
-        return $finalScore->getHome() . $score . $finalScore->getAway();
+        return ((string)$finalScore->getHome()) . $score . ((string)$finalScore->getAway());
     }
 
     // t/m 3 places 0g, t/m 8 places 45g, hoger 90g
+    #[\Override]
     public function getPouleHeight(Poule $poule): float
     {
         $nrOfPlaces = $poule->getPlaces()->count();
 
         // header row
-        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+        $versusColumnWidth = $this->versusColumnsWidth / (float)$nrOfPlaces;
         $degrees = $this->getVersusHeaderDegrees($nrOfPlaces);
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         // places
-        $height += $this->parent->getConfig()->getRowHeight() * $nrOfPlaces;
+        $height += $this->parent->getConfig()->getRowHeight() * (float)$nrOfPlaces;
 
         return $height;
     }

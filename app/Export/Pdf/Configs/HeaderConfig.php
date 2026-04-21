@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class HeaderConfig
+final readonly class HeaderConfig
 {
-    private const DEFAULT_ROWHEIGHT = 18;
-    private const DEFAULT_FONTHEIGHT = 14;
+    private const int DEFAULT_ROWHEIGHT = 18;
+    private const int DEFAULT_FONTHEIGHT = 14;
 
     private int $rowHeight;
     private int $fontHeight;

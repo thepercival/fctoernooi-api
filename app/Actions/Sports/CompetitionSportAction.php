@@ -5,44 +5,46 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\Sports\CompetitionSportRepository;
+use App\Repositories\Sports\SportRepository;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament;
-use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Category;
 use Sports\Competition;
-use Sports\Competition\Field;
-use Sports\Competition\Field\Repository as FieldRepository;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
-use Sports\Competition\Sport\Editor as CompetitionSportEditor;
+use Sports\Competition\CompetitionField;
+use Sports\Competition\CompetitionSport;
+use Sports\Competition\CompetitionSportEditor;
 use Sports\Ranking\PointsCalculation;
 use Sports\Round;
 use Sports\Sport;
-use Sports\Sport\Repository as SportRepository;
 use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 use SportsHelpers\Sport\PersistVariant;
 use SportsHelpers\Sport\Variant\Against\GamesPerPlace as AgainstGpp;
 use SportsHelpers\Sport\Variant\Against\H2h as AgainstH2h;
 use SportsHelpers\Sport\Variant\AllInOneGame;
 use SportsHelpers\Sport\Variant\Single;
 
+/**
+ * @api
+ */
 final class CompetitionSportAction extends Action
 {
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected SportRepository $sportRepos,
         protected StructureRepository $structureRepos,
         protected CompetitionSportRepository $competitionSportRepos,
-        protected FieldRepository $fieldRepos
+        protected SportRepository $sportRepos,
+        private EntityManagerInterface $entityManager,
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -58,6 +60,7 @@ final class CompetitionSportAction extends Action
 
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -71,7 +74,6 @@ final class CompetitionSportAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            /** @var CompetitionSport $serializedCompSport */
             $serializedCompSport = $this->deserialize($request,CompetitionSport::class);
 
             $sport = $this->sportRepos->find($serializedCompSport->getSport()->getId());
@@ -88,7 +90,8 @@ final class CompetitionSportAction extends Action
                 $firstCompetitionSport = $competition->getSingleSport();
                 if ($firstCompetitionSport->createVariant() instanceof AgainstH2h) {
                     $firstCompetitionSport->convertAgainst();
-                    $this->competitionSportRepos->save($firstCompetitionSport);
+                    $this->entityManager->persist($firstCompetitionSport);
+                    $this->entityManager->flush();
                 }
             }
 
@@ -240,22 +243,21 @@ final class CompetitionSportAction extends Action
 
             $competition = $tournament->getCompetition();
 
-            $structure = $this->structureRepos->getStructure($competition);
-
             $competitionSport = $this->getCompetitionSportFromInput((int)$args['competitionSportId'], $competition);
 
             if (count($competition->getSports()) <= 1) {
                 throw new \Exception('er moet minimaal 1 sport zijn', E_ERROR);
             }
 
-            $this->removeHelper($competitionSport, $structure);
+            $this->removeHelper($competitionSport);
 
             if (!$competition->hasMultipleSports()) {
                 $firstCompetitionSport = $competition->getSingleSport();
                 $variant = $firstCompetitionSport->createVariant();
                 if ($variant instanceof AgainstGpp && !$variant->hasMultipleSidePlaces()) {
                     $firstCompetitionSport->convertAgainst();
-                    $this->competitionSportRepos->save($firstCompetitionSport, true);
+                    $this->entityManager->persist($firstCompetitionSport);
+                    $this->entityManager->flush();
                 }
             }
 
@@ -280,10 +282,10 @@ final class CompetitionSportAction extends Action
         return $competitionSport;
     }
 
-    protected function removeHelper(CompetitionSport $competitionSport, Structure $structure): void
+    protected function removeHelper(CompetitionSport $competitionSport): void
     {
         // (new CompetitionSportService())->remove($competitionSport, $structure);
-        $this->competitionSportRepos->customRemove($competitionSport, $structure);
+        $this->competitionSportRepos->customRemove($competitionSport);
     }
 
     /**
@@ -337,9 +339,10 @@ final class CompetitionSportAction extends Action
         $this->competitionSportRepos->customAdd($newCompetitionSport, $structure);
 
         foreach ($fieldNames as $fieldName) {
-            $field = new Field($newCompetitionSport);
+            $field = new CompetitionField($newCompetitionSport);
             $field->setName($fieldName);
-            $this->fieldRepos->save($field);
+            $this->entityManager->persist($field);
+            $this->entityManager->flush();
         }
         return $newCompetitionSport;
     }

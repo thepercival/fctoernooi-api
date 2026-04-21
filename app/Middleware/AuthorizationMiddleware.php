@@ -15,6 +15,7 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 abstract class AuthorizationMiddleware implements MiddlewareInterface
 {
+    #[\Override]
     public function process(Request $request, RequestHandler $handler): Response
     {
         if ($request->getMethod() === "OPTIONS") {

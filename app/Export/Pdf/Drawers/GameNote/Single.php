@@ -15,8 +15,9 @@ use Sports\Game\Against as AgainstGame;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\Together as TogetherGame;
 
-class Single extends GameNotesDrawer
+final class Single extends GameNotesDrawer
 {
+    #[\Override]
     protected function drawPlaces(GameNotesPage $page, AgainstGame|TogetherGame $game, Rectangle $rectangle): void
     {
         if ($game instanceof AgainstGame) {
@@ -29,6 +30,7 @@ class Single extends GameNotesDrawer
         $page->drawCell($description, $rectangle);
     }
 
+    #[\Override]
     protected function drawGameRoundNumber(
         GameNotesPage $page,
         AgainstGame|TogetherGame $game,
@@ -51,10 +53,11 @@ class Single extends GameNotesDrawer
         $margin = $this->config->getMargin();
         $placesWidth = $this->getDetailPartWidth($horLine) + $margin + $this->getDetailPartWidth($horLine);
         $placesWidth -= ($margin + $this->getPartWidth($horLine)); // unit(right side)
-        $placesWidth -= ($game->getPlaces()->count() - 1) * $margin;
-        return $placesWidth / $game->getPlaces()->count();
+        $placesWidth -= ((float)($game->getPlaces()->count() - 1)) * $margin;
+        return $placesWidth / (float)$game->getPlaces()->count();
     }
 
+    #[\Override]
     protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
     {
         if ($game instanceof AgainstGame) {
@@ -74,7 +77,7 @@ class Single extends GameNotesDrawer
         $placeWidth = $this->getPlaceWidth($game, $top);
         $unitWidth = $this->getPartWidth($top);
         $unitStart = $placesStart;
-        foreach ($game->getPlaces() as $gamePlace) {
+        foreach ($game->getPlaces() as $_) {
             $unitStart += $placeWidth + $this->config->getMargin();
         }
 
@@ -94,7 +97,7 @@ class Single extends GameNotesDrawer
             $page->drawCell($name, $rectangle);
             $placesX = $rectangle->getRight()->getX() + $margin;
         }
-        $y -= 2 * $height;
+        $y -= 2.0 * $height;
 
         $page->setFont($this->helper->getTimesFont(), $largerFontSize);
 
@@ -104,7 +107,7 @@ class Single extends GameNotesDrawer
 
         // DOTS
         if ($firstScoreConfig !== $calculateScoreConfig) {
-            $yDelta = 0;
+            $yDelta = 0.0;
 
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
@@ -114,7 +117,7 @@ class Single extends GameNotesDrawer
                 $page->drawCell($descr, $rectangle, Align::Right);
 
                 $placesX = $placesStart;
-                foreach ($game->getPlaces() as $gamePlace) {
+                foreach ($game->getPlaces() as $_) {
                     $rectangle = new Rectangle(
                         new HorizontalLine(new Point($placesX, $y - $yDelta), $placeWidth),
                         -$height
@@ -128,7 +131,7 @@ class Single extends GameNotesDrawer
             $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
             $page->drawCell('score', $rectangle, Align::Right);
             $placesX = $placesStart;
-            foreach ($game->getPlaces() as $gamePlace) {
+            foreach ($game->getPlaces() as $_) {
                 $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y), $placeWidth), -$height);
                 $page->drawCell($dots, $rectangle, Align::Left);
                 $placesX = $rectangle->getRight()->getX() + $margin;
@@ -138,7 +141,7 @@ class Single extends GameNotesDrawer
         // SCOREUNITS
         $descr = $this->getInputScoreConfigDescription($firstScoreConfig);
         if ($firstScoreConfig !== $calculateScoreConfig) {
-            $yDelta = 0;
+            $yDelta = 0.0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $rectangle = new Rectangle(
                     new HorizontalLine(new Point($unitStart, $y - $yDelta), $unitWidth), -$height
@@ -158,7 +161,7 @@ class Single extends GameNotesDrawer
             $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), $height);
             $page->drawCell('na verleng.', $rectangle, Align::Right);
             $placesX = $placesStart;
-            foreach ($game->getPlaces() as $gamePlace) {
+            foreach ($game->getPlaces() as $_) {
                 $rectangle = new Rectangle(new HorizontalLine(new Point($placesX, $y), $placeWidth), -$height);
                 $page->drawCell($dots, $rectangle);
                 $placesX = $rectangle->getRight()->getX() + $margin;

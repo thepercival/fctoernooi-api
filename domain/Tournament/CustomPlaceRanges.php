@@ -6,7 +6,7 @@ namespace FCToernooi\Tournament;
 
 use SportsHelpers\PlaceRanges;
 
-class CustomPlaceRanges extends PlaceRanges
+final class CustomPlaceRanges extends PlaceRanges
 {
     public const MaxNrOfPlacesPerPouleSmall = 20;
     public const MaxNrOfPlacesPerPouleLarge = 12;

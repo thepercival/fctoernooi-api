@@ -12,11 +12,14 @@ use FCToernooi\Tournament\Rule;
 use FCToernooi\Tournament\StartEditMode;
 use League\Period\Period;
 use Sports\Competition;
-use Sports\Competition\Referee;
+use Sports\Competition\CompetitionReferee;
 use SportsHelpers\Identifiable;
 use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 
-class Tournament extends Identifiable
+/**
+ * @api
+ */
+final class Tournament extends Identifiable
 {
     private DateTimeImmutable $createdDateTime;
     private bool $public = false;
@@ -108,7 +111,7 @@ class Tournament extends Identifiable
         return $this->location;
     }
 
-    public function setLocation(string $location = null): void
+    public function setLocation(string|null $location = null): void
     {
         if ($location !== null && strlen($location) > 0) {
             if (strlen($location) > self::MAX_LENGTH_LOCATION) {
@@ -126,7 +129,7 @@ class Tournament extends Identifiable
         return $this->logoExtension;
     }
 
-    public function setLogoExtension(string $extension = null): void
+    public function setLogoExtension(string|null $extension = null): void
     {
         $this->logoExtension = $extension;
     }
@@ -210,7 +213,7 @@ class Tournament extends Identifiable
         $this->exported = $exported;
     }
 
-    public function getReferee(string $emailaddress): Referee|null
+    public function getReferee(string $emailaddress): CompetitionReferee|null
     {
         $referees = $this->getCompetition()->getReferees();
         foreach ($referees as $referee) {

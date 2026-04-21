@@ -6,37 +6,26 @@ namespace App\Commands\Pdf;
 
 use App\Command;
 use App\Commands\StructureAdminCommand;
-use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
-use App\Export\PdfService;
-use App\Export\PdfSubject;
-use App\QueueService\Pdf as PdfQueueService;
-use App\TmpService;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use DateTimeImmutable;
 use Exception;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use Memcached;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use Sports\Output\StructureOutput;
-use Sports\Round\Number\GamesValidator;
-use Sports\Structure;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-
-class PdfValidateCommand extends Command
+final class PdfValidateCommand extends Command
 {
     private string $customName = 'validate-pdf';
     protected TournamentRepository $tournamentRepos;
 
-    protected GamesValidator $gamesValidator;
-    protected PdfService $pdfService;
-    protected PdfQueueService $queueService;
+//    protected GamesValidator $gamesValidator;
+//    protected PdfService $pdfService;
+//    protected PdfQueueService $queueService;
     protected int $borderTimestamp;
 
     public function __construct(ContainerInterface $container)
@@ -48,29 +37,29 @@ class PdfValidateCommand extends Command
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
 
-        /** @var Memcached $memcached */
-        $memcached = $container->get(Memcached::class);
-        /** @var Configuration $config */
-        $config = $container->get(Configuration::class);
-        /** @var LoggerInterface $logger */
-        $logger = $container->get(LoggerInterface::class);
-        $this->pdfService = new PdfService(
-            $config,
-            new TmpService(),
-            new PdfDocumentFactory($config),
-            $memcached,
-            $logger
-        );
+//        /** @var Memcached $memcached */
+//        $memcached = $container->get(Memcached::class);
+//        /** @var Configuration $config */
+//        $config = $container->get(Configuration::class);
+//        /** @var LoggerInterface $logger */
+//        $logger = $container->get(LoggerInterface::class);
+//        $this->pdfService = new PdfService(
+//            $config,
+//            new TmpService(),
+//            $memcached,
+//            $logger
+//        );
 
-        $this->queueService = new PdfQueueService($config->getArray('queue'));
+//        $this->queueService = new PdfQueueService($config->getArray('queue'));
 
-        $this->gamesValidator = new GamesValidator();
+//        $this->gamesValidator = new GamesValidator();
 
         /** @var Configuration $config */
         $config = $container->get(Configuration::class);
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -89,6 +78,10 @@ class PdfValidateCommand extends Command
         $this->addOption('startId', null, InputOption::VALUE_OPTIONAL, '1');
     }
 
+    /**
+     * @psalm-suppress UnusedVariable
+     */
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
@@ -109,8 +102,7 @@ class PdfValidateCommand extends Command
             $amount = $this->getAmountFromInput($input);
             $startId = $this->getStartIdFromInput($input);
             $tournaments = $this->tournamentRepos->findBy($filter);
-            $subjects = $this->getSubjects($input);
-            /** @var Tournament $tournament */
+//            $subjects = $this->getSubjects($input);
             foreach ($tournaments as $tournament) {
                 if ($this->tournamentTooOld($tournament) || $tournament->getId() < $startId) {
                     continue;
@@ -121,16 +113,16 @@ class PdfValidateCommand extends Command
                 }
 
                     $logger->info('creating pdf for ' . (string)$tournament->getId());
-                    $structure = null;
-                    try {
-                        $this->createPdf($tournament, $subjects);
-                        // $this->addStructureToLog($tournament, $structure);
-                    } catch (Exception $exception) {
-                        $logger->error($exception->getMessage());
-                        if ($structure !== null && count($filter) > 0) {
-                            $this->addStructureToLog($tournament, $structure);
-                        }
-                    }
+//                    $structure = null;
+//                    try {
+//                        $this->createPdf($tournament, $subjects);
+//                        // $this->addStructureToLog($tournament, $structure);
+//                    } catch (Exception $exception) {
+//                        $logger->error($exception->getMessage());
+//                        if ($structure !== null && count($filter) > 0) {
+//                            $this->addStructureToLog($tournament, $structure);
+//                        }
+//                    }
 
             }
             $logger->info('alle pdf-en zijn gegenereerd');
@@ -168,58 +160,58 @@ class PdfValidateCommand extends Command
         return $tournament->getCreatedDateTime()->getTimestamp() <= $this->borderTimestamp;
     }
 
-    /**
-     * @param Tournament $tournament
-     * @param non-empty-list<PdfSubject> $subjects
-     * @throws Exception
-     */
-    protected function createPdf(Tournament $tournament, array $subjects): void
-    {
-        try {
-            $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->queueService);
-        } catch (Exception $exception) {
-            // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
-            throw new Exception(
-                'toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(),
-                E_ERROR
-            );
-        }
-    }
+//    /**
+//     * @param Tournament $tournament
+//     * @param non-empty-list<PdfSubject> $subjects
+//     * @throws Exception
+//     */
+//    protected function createPdf(Tournament $tournament, array $subjects): void
+//    {
+//        try {
+//            $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->queueService);
+//        } catch (Exception $exception) {
+//            // $this->showPlanning($tournament, $roundNumber, $competition->getReferees()->count());
+//            throw new Exception(
+//                'toernooi-id(' . ((string)$tournament->getId()) . ') => ' . $exception->getMessage(),
+//                E_ERROR
+//            );
+//        }
+//    }
 
-    /**
-     * @param InputInterface $input
-     * @return non-empty-list<PdfSubject>
-     * @throws Exception
-     */
-    protected function getSubjects(InputInterface $input): array
-    {
-        $inputSubjects = $input->getOption('subjects');
-        $summedUpInputSubjects = (int)$inputSubjects;
+//    /**
+//     * @param InputInterface $input
+//     * @return non-empty-list<PdfSubject>
+//     * @throws Exception
+//     */
+//    protected function getSubjects(InputInterface $input): array
+//    {
+//        $inputSubjects = $input->getOption('subjects');
+//        $summedUpInputSubjects = (int)$inputSubjects;
+//
+//        $filteredSubjects = PdfSubject::toFilteredArray($summedUpInputSubjects);
+//        if (count($filteredSubjects) === 0) {
+//            return PdfSubject::cases();
+//        }
+//        return $filteredSubjects;
+//    }
 
-        $filteredSubjects = PdfSubject::toFilteredArray($summedUpInputSubjects);
-        if (count($filteredSubjects) === 0) {
-            return PdfSubject::cases();
-        }
-        return $filteredSubjects;
-    }
+//    /**
+//     * @param non-empty-list<PdfSubject> $subjects
+//     * @return non-empty-list<non-empty-list<PdfSubject>>
+//     */
+//    protected function toSubjectsLists(array $subjects): array
+//    {
+//        return array_map(function (PdfSubject $subject): array {
+//            return [$subject];
+//        }, $subjects);
+//    }
 
-    /**
-     * @param non-empty-list<PdfSubject> $subjects
-     * @return non-empty-list<non-empty-list<PdfSubject>>
-     */
-    protected function toSubjectsLists(array $subjects): array
-    {
-        return array_map(function (PdfSubject $subject): array {
-            return [$subject];
-        }, $subjects);
-    }
-
-    protected function addStructureToLog(Tournament $tournament, Structure $structure): void
-    {
-        try {
-            (new StructureOutput($this->getLogger()))->output($structure);
-        } catch (Exception $exception) {
-            $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
-        }
-    }
+//    protected function addStructureToLog(Tournament $tournament, Structure $structure): void
+//    {
+//        try {
+//            (new StructureOutput($this->getLogger()))->output($structure);
+//        } catch (Exception $exception) {
+//            $this->getLogger()->error('could not find structure for tournamentId ' . ((string)$tournament->getId()));
+//        }
+//    }
 }

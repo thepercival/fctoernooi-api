@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class RegistrationFormConfig
+final readonly class RegistrationFormConfig
 {
     public function __construct(
 //        private int $roundNumberHeaderHeight,
-        private int $rowHeight,
-        private int $fontHeight,
+        private float $rowHeight,
+        private float $fontHeight,
     ) {
-        if ($fontHeight < 10 || $fontHeight > 20) {
+        if ($fontHeight < 10.0 || $fontHeight > 20.0) {
             throw new \Exception('fontHeight should be between 10 and 20');
         }
-        if ($rowHeight <= $fontHeight || $rowHeight > 20) {
+        if ($rowHeight <= $fontHeight || $rowHeight > 20.0) {
             throw new \Exception('rowHeight should be between fontheight and 20');
         }
     }
@@ -29,12 +29,12 @@ readonly class RegistrationFormConfig
 //        return $this->roundNumberHeaderHeight - 4;
 //    }
 
-    public function getRowHeight(): int
+    public function getRowHeight(): float
     {
         return $this->rowHeight;
     }
 
-    public function getFontHeight(): int
+    public function getFontHeight(): float
     {
         return $this->fontHeight;
     }

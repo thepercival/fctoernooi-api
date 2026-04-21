@@ -6,13 +6,14 @@ namespace App\Renderer;
 
 use Slim\Error\Renderers\PlainTextErrorRenderer;
 
-class ErrorRenderer extends PlainTextErrorRenderer
+final class ErrorRenderer extends PlainTextErrorRenderer
 {
     /**
      * @param \Throwable $exception
      * @param bool $displayErrorDetails
      * @return string
      */
+    #[\Override]
     public function __invoke(\Throwable $exception, bool $displayErrorDetails): string
     {
         if ($displayErrorDetails) {

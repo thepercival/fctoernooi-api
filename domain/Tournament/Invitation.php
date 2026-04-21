@@ -10,7 +10,10 @@ use FCToernooi\Tournament;
 use FCToernooi\User;
 use SportsHelpers\Identifiable;
 
-class Invitation extends Identifiable
+/**
+ * @api
+ */
+final class Invitation extends Identifiable
 {
     private string $emailaddress;
     private int $roles;

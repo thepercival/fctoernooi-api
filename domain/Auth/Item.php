@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
-class Item
+/**
+ * @api
+ */
+final class Item
 {
     public function __construct(protected string $token, protected int|string $userId)
     {

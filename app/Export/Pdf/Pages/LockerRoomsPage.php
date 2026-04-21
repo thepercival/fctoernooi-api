@@ -17,7 +17,7 @@ use FCToernooi\LockerRoom;
 /**
  * @template-extends ToernooiPdfPage<LockerRoomsDocument>
  */
-class LockerRoomsPage extends ToernooiPdfPage
+final class LockerRoomsPage extends ToernooiPdfPage
 {
     public function __construct(LockerRoomsDocument $document, mixed $param1)
     {
@@ -43,7 +43,7 @@ class LockerRoomsPage extends ToernooiPdfPage
 
     protected function getLockerRoomHeight(int $nrOfCompetitors): float
     {
-        return (1 + $nrOfCompetitors) * $this->parent->getConfig()->getRowHeight();
+        return (1.0 + (float)$nrOfCompetitors) * $this->parent->getConfig()->getRowHeight();
     }
 
     protected function getLinesAvailable(float $y): int
@@ -72,13 +72,12 @@ class LockerRoomsPage extends ToernooiPdfPage
         if ($nrOfColumns === 1 || $nrOfColumns === 2) {
             return $this->getMaxColumnWidth();
         }
-        return ($this->getDisplayWidth() - (($nrOfColumns - 1) * $this->parent->getConfig()->getLockerRoomMargin(
-                    ))) / $nrOfColumns;
+        return ($this->getDisplayWidth() - (((float)($nrOfColumns - 1)) * $this->parent->getConfig()->getLockerRoomMargin())) / (float)$nrOfColumns;
     }
 
     public function getMaxColumnWidth(): float
     {
-        return ($this->getDisplayWidth() - self::PAGEMARGIN) / 2;
+        return ($this->getDisplayWidth() - self::PAGEMARGIN) / 2.0;
     }
 
     public function draw(): void

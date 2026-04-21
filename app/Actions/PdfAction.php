@@ -8,9 +8,10 @@ use App\Export\PdfService;
 use App\Export\PdfSubject;
 use App\Mailer;
 use App\QueueService\Pdf as PdfQueueService;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\User;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -20,6 +21,9 @@ use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
 use stdClass;
 
+/**
+ * @api
+ */
 final class PdfAction extends Action
 {
     private PdfQueueService $pdfQueueService;
@@ -27,7 +31,7 @@ final class PdfAction extends Action
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private TournamentRepository $tournamentRepos,
+        private EntityManagerInterface $entityManager,
         private PdfService $pdfService,
         private Mailer $mailer,
         private Configuration $config
@@ -37,6 +41,7 @@ final class PdfAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, string> $args
@@ -57,7 +62,8 @@ final class PdfAction extends Action
             $subjects = $this->getSubjects($postData->subjects);
 
             $tournament->setExported($tournament->getExported() | PdfSubject::sum($subjects));
-            $this->tournamentRepos->save($tournament);
+            $this->entityManager->persist($tournament);
+            $this->entityManager->flush();
 
             $fileName = $this->pdfService->createASyncOnDisk($tournament, $subjects, $this->pdfQueueService);
 
@@ -69,6 +75,7 @@ final class PdfAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, string> $args
@@ -111,6 +118,7 @@ final class PdfAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, string> $args

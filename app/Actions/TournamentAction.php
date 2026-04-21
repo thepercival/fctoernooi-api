@@ -7,28 +7,23 @@ namespace App\Actions;
 use App\Copiers\TournamentCopier;
 use App\GuzzleClient;
 use App\ImageService;
+use App\Repositories\CreditActionRepository as CreditActionRepository;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use App\Response\ErrorResponse;
-use Sports\Competition\Sport\FromToMapper;
-use Sports\Competition\Sport\FromToMapStrategy;
-use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
-use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\CacheService;
-use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\Planning\PlanningWriter;
 use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\Rule as TournamentRule;
-use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use FCToernooi\Tournament\StartEditMode;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use JMS\Serializer\DeserializationContext;
-use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Memcached;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -36,13 +31,19 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
-use Sports\Competition\Service as CompetitionService;
-use Sports\Competition\Validator as CompetitionValidator;
+use Sports\Competition\CompetitionEditor;
+use Sports\Competition\CompetitionSportFromToMapper;
+use Sports\Competition\CompetitionSportFromToMapStrategy;
+use Sports\Competition\CompetitionValidator;
+use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
+use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
 use Sports\Structure\Copier as StructureCopier;
-use Sports\Structure\Repository as StructureRepository;
 use Sports\Structure\Validator as StructureValidator;
 use stdClass;
 
+/**
+ * @api
+ */
 final class TournamentAction extends Action
 {
     private CacheService $cacheService;
@@ -54,9 +55,6 @@ final class TournamentAction extends Action
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRepository $tournamentRepos,
-
-        private TournamentRuleRepository $ruleRepos,
-        private CreditActionRepository $creditActionRepos,
         private TournamentCopier $tournamentCopier,
         private StructureRepository $structureRepos,
         private EntityManagerInterface $entityManager,
@@ -90,15 +88,11 @@ final class TournamentAction extends Action
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
-     * @param User|null $user
      * @return Response
      */
-    public function fetchOneHelper(Request $request, Response $response, array $args, User $user = null): Response
+    public function fetchOneHelper(Request $request, Response $response, array $args): Response
     {
         try {
-            /** @var User|null $user */
-            $user = $request->getAttribute('user');
-
             $tournamentId = (int)$args['tournamentId'];
             $json = $this->cacheService->getTournament($tournamentId);
             if ($json === false || $this->config->getString('environment') === 'development') {
@@ -118,7 +112,7 @@ final class TournamentAction extends Action
         }
     }
 
-    protected function getDeserializationContext(User $user = null): DeserializationContext
+    protected function getDeserializationContext(User|null $user = null): DeserializationContext
     {
         $serGroups = ['Default'];
         if ($user !== null) {
@@ -149,6 +143,7 @@ final class TournamentAction extends Action
 //        }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -193,7 +188,8 @@ final class TournamentAction extends Action
 
             $ruleText = 'sportiviteit en respect zijn de uitgangspunten van dit toernooi';
             $rule = new TournamentRule($tournament, $ruleText);
-            $this->ruleRepos->save($rule, true );
+            $this->entityManager->persist($rule);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($tournament, 'json');
             return $this->respondWithJson($response, $json);
@@ -203,6 +199,7 @@ final class TournamentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -215,13 +212,11 @@ final class TournamentAction extends Action
             $tournamentSer = $this->serializer->deserialize($this->getRawData($request), Tournament::class, 'json');
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
-            /** @var User $user */
-            $user = $request->getAttribute('user');
 
             $dateTime = $tournamentSer->getCompetition()->getStartDateTime();
             $ruleSet = $tournamentSer->getCompetition()->getAgainstRuleSet();
 
-            $competitionService = new CompetitionService();
+            $competitionService = new CompetitionEditor();
             $competition = $tournament->getCompetition();
             $diff = $competitionService->changeStartDateTime($competition, $dateTime);
             if ($diff !== null) {
@@ -258,6 +253,7 @@ final class TournamentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -282,7 +278,8 @@ final class TournamentAction extends Action
                 }
             }
 
-            $this->tournamentRepos->remove($tournament);
+            $this->entityManager->remove($tournament);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
@@ -291,6 +288,7 @@ final class TournamentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -358,10 +356,10 @@ final class TournamentAction extends Action
 
             $structure = $this->structureRepos->getStructure($competition);
 
-            $fromToMapper = new FromToMapper(
+            $fromToMapper = new CompetitionSportFromToMapper(
                 array_values( $competition->getSports()->toArray() ),
                 array_values( $newTournament->getCompetition()->getSports()->toArray() ),
-                FromToMapStrategy::ByProperties
+                CompetitionSportFromToMapStrategy::ByProperties
             );
 
             $structureCopier = new StructureCopier(
@@ -413,6 +411,7 @@ final class TournamentAction extends Action
 
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -442,6 +441,7 @@ final class TournamentAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -465,7 +465,8 @@ final class TournamentAction extends Action
             }
 
             $tournament->setLogoExtension($extension);
-            $this->tournamentRepos->save($tournament);
+            $this->entityManager->persist($tournament);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($tournament, 'json');
             return $this->respondWithJson($response, $json);

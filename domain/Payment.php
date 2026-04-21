@@ -7,11 +7,14 @@ namespace FCToernooi;
 use FCToernooi\Payment\State as PaymentState;
 use SportsHelpers\Identifiable;
 
+/**
+ * @api
+ */
 class Payment extends Identifiable
 {
     protected PaymentState $state = PaymentState::Open;
     protected \DateTimeImmutable $updatedAt;
-    public const EUROS_PER_CREDIT = 0.5;
+    public const float EUROS_PER_CREDIT = 0.5;
 
 
     public function __construct(

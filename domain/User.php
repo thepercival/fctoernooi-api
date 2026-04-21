@@ -8,9 +8,12 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use InvalidArgumentException;
-use Sports\Competition\Referee;
+use Sports\Competition\CompetitionReferee;
 use SportsHelpers\Identifiable;
 
+/**
+ * @api
+ */
 class User extends Identifiable
 {
     private string $emailaddress;
@@ -20,12 +23,12 @@ class User extends Identifiable
     private int $validateIn = 3;
     private int $nrOfCredits = 3;
 
-    public const MIN_LENGTH_EMAIL = Referee::MIN_LENGTH_EMAIL;
-    public const MAX_LENGTH_EMAIL = Referee::MAX_LENGTH_EMAIL;
-    public const MIN_LENGTH_PASSWORD = 3;
-    public const MAX_LENGTH_PASSWORD = 50;
-    public const MIN_LENGTH_NAME = 3;
-    public const MAX_LENGTH_NAME = 15;
+    public const int MIN_LENGTH_EMAIL = CompetitionReferee::MIN_LENGTH_EMAIL;
+    public const int MAX_LENGTH_EMAIL = CompetitionReferee::MAX_LENGTH_EMAIL;
+    public const int MIN_LENGTH_PASSWORD = 3;
+    public const int MAX_LENGTH_PASSWORD = 50;
+    public const int MIN_LENGTH_NAME = 3;
+    public const int MAX_LENGTH_NAME = 15;
 
     /**
      * @var Collection<int|string, CreditAction>
@@ -114,11 +117,11 @@ class User extends Identifiable
 
     public function resetForgetpassword(): void
     {
-        $forgetpassword = rand(100000, 999999);
-        $tomorrow = date('Y-m-d', strtotime('tomorrow'));
-        $tomorrow = new DateTimeImmutable($tomorrow);
-        $tomorrow = $tomorrow->modify('+1 days');
-        $this->setForgetpassword($forgetpassword . ':' . $tomorrow->format('Y-m-d'));
+        $forgetPassword = rand(100000, 999999);
+
+        $tomorrow = new DateTimeImmutable('tomorrow');
+        $dayAfterTomorrow = $tomorrow->modify('+1 days');
+        $this->setForgetpassword($forgetPassword . ':' . $dayAfterTomorrow->format('Y-m-d'));
     }
 
     public function getForgetpasswordToken(): string

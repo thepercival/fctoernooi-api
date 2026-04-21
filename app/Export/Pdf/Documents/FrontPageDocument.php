@@ -18,7 +18,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class FrontPageDocument extends PdfDocument
+final class FrontPageDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -36,6 +36,7 @@ class FrontPageDocument extends PdfDocument
         return $this->config;
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $page = $this->createFrontPage();

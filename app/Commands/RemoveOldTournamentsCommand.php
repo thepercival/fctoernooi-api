@@ -6,28 +6,26 @@ namespace App\Commands;
 
 use App\Command;
 use App\Mailer;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use DateTime;
-use FCToernooi\Tournament\Repository as TournamentRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament\ShellFilter;
-use Monolog\Logger;
+use Monolog\Level;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
-use Sports\Competition\Repository as CompetitionRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RemoveOldTournamentsCommand extends Command
+final class RemoveOldTournamentsCommand extends Command
 {
     private string $customName = 'remove-old-tournaments';
     protected int $nrOfMonthsBeforeRemoval;
-    protected CompetitionRepository $competitionRepos;
     protected TournamentRepository $tournamentRepos;
+    protected EntityManagerInterface $entityManager;
 
     public function __construct(ContainerInterface $container)
     {
-        /** @var CompetitionRepository $competitionRepos */
-        $competitionRepos = $container->get(CompetitionRepository::class);
-        $this->competitionRepos = $competitionRepos;
+        $this->entityManager = $container->get(EntityManagerInterface::class);
 
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
@@ -44,6 +42,7 @@ class RemoveOldTournamentsCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -57,11 +56,12 @@ class RemoveOldTournamentsCommand extends Command
         parent::configure();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
             $loggerName = 'command-' . $this->customName;
-            $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
+            $mailHandler = $this->getMailHandler((string)$this->getName(), Level::Info);
             $logger = $this->initLogger(
                 $this->getLogLevelFromInput($input),
                 $this->getMailLogFromInput($input),
@@ -86,7 +86,8 @@ class RemoveOldTournamentsCommand extends Command
                 $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
                 $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';
                 $logger->info($msg);
-                $this->competitionRepos->remove($oldTournament->getCompetition(), true);
+                $this->entityManager->remove($oldTournament->getCompetition());
+                $this->entityManager->flush();
             }
         } catch (\Exception $exception) {
             if ($this->logger !== null) {

@@ -13,10 +13,11 @@ use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
-use SportsHelpers\Against\Side as AgainstSide;
+use SportsHelpers\Against\AgainstSide;
 
-class Against extends GameNotesDrawer
+final class Against extends GameNotesDrawer
 {
+    #[\Override]
     protected function drawPlaces(GameNotesPage $page, AgainstGame|TogetherGame $game, Rectangle $rectangle): void
     {
         if ($game instanceof TogetherGame) {
@@ -31,6 +32,7 @@ class Against extends GameNotesDrawer
         $page->drawCell($home . ' - ' . $away, $rectangle);
     }
 
+    #[\Override]
     protected function drawGameRoundNumber(
         GameNotesPage $page,
         AgainstGame|TogetherGame $game,
@@ -45,6 +47,7 @@ class Against extends GameNotesDrawer
         return $rectangle->getBottom();
     }
 
+    #[\Override]
     protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
     {
         if ($game instanceof TogetherGame) {
@@ -83,7 +86,7 @@ class Against extends GameNotesDrawer
         $away = $structureNameService->getPlacesFromName($game->getSidePlaces(AgainstSide::Away), true, true);
         $rectangle = new Rectangle(new HorizontalLine(new Point($awayStart, $y), $sideWidth), -$height);
         $page->drawCell($away, $rectangle);
-        $y -= 2 * $height;
+        $y -= 2.0 * $height;
 
         $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight() * $larger);
 
@@ -94,7 +97,7 @@ class Against extends GameNotesDrawer
 
         // DOTS
         if ($firstScoreConfig !== $calculateScoreConfig) {
-            $yDelta = 0;
+            $yDelta = 0.0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
                 $rectangle = new Rectangle(
@@ -130,7 +133,7 @@ class Against extends GameNotesDrawer
         // SCOREUNITS
         $descr = $this->getInputScoreConfigDescription($firstScoreConfig);
         if ($firstScoreConfig !== $calculateScoreConfig) {
-            $yDelta = 0;
+            $yDelta = 0.0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $rectangle = new Rectangle(
                     new HorizontalLine(new Point($unitStart, $y - $yDelta), $unitWidth),

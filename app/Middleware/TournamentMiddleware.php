@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Repositories\TournamentRepository as TournamentRepository;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Routing\RouteContext;
 
-class TournamentMiddleware implements MiddlewareInterface
+/**
+ * @api
+ */
+final class TournamentMiddleware implements MiddlewareInterface
 {
     public function __construct(protected TournamentRepository $tournamentRepos)
     {
     }
 
+    #[\Override]
     public function process(Request $request, RequestHandler $handler): Response
     {
         if ($request->getMethod() === 'OPTIONS') {

@@ -10,7 +10,7 @@ use Sports\Game\Together as TogetherGame;
 use Sports\Planning\Config as PlanningConfig;
 use Sports\Round\Number as RoundNumber;
 
-class RecessHelper
+final class RecessHelper
 {
     protected PlanningConfig $planningConfig;
     protected DateTimeImmutable $previousLastEndDateTime;
@@ -57,7 +57,7 @@ class RecessHelper
         }
 
         $filteredRecesses = array_filter($recesses, function (Recess $recess) use ($game): bool {
-            return $game->getStartDateTime()->getTimestamp() === $recess->getPeriod()->getEndDate()->getTimestamp();
+            return $game->getStartDateTime()->getTimestamp() === $recess->getPeriod()->endDate->getTimestamp();
         });
         $filteredRecess = reset($filteredRecesses);
         if ($filteredRecess === false) {

@@ -4,32 +4,32 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class LockerRoomLabelConfig
+final readonly class LockerRoomLabelConfig
 {
     public function __construct(
-        private int $infoHeight = 150,
-        private int $startFontSize = 40,
-        private int $maxFontSize = 50,
-        private int $infoFontSize = 20
+        private float $infoHeight = 150.0,
+        private float $startFontSize = 40.0,
+        private float $maxFontSize = 50.0,
+        private float $infoFontSize = 20.0
     ) {
     }
 
-    public function getInfoHeight(): int
+    public function getInfoHeight(): float
     {
         return $this->infoHeight;
     }
 
-    public function getStartFontSize(): int
+    public function getStartFontSize(): float
     {
         return $this->startFontSize;
     }
 
-    public function getMaxFontSize(): int
+    public function getMaxFontSize(): float
     {
         return $this->maxFontSize;
     }
 
-    public function getInfoFontSize(): int
+    public function getInfoFontSize(): float
     {
         return $this->infoFontSize;
     }

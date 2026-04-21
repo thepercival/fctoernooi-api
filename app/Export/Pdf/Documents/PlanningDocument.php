@@ -116,7 +116,7 @@ abstract class PlanningDocument extends PdfDocument
         foreach ($games as $game) {
             $gameHeight = $page->getParent()->getGameLineConfig()->getRowHeight();
             $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
-            $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
+            $gameHeight += $recessToDraw !== null ? $gameHeight : 0.0;
             if ($gameHorStartLine->getY() - $gameHeight < PdfPage::PAGEMARGIN) {
                 // $field = $page->getFieldFilter();
                 $page = $this->createPagePlanning($roundNumber, $page->getTitle());

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Auth\SyncService as AuthSyncService;
 use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
@@ -16,15 +18,23 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpException;
 
+/**
+ * @api
+ */
 final class UserAction extends Action
 {
+    private EntityRepository $userRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        private UserRepository $userRepos,
+        private EntityManagerInterface $entityManager,
         private AuthSyncService $syncService
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(User::class);
+        $this->userRepos = new EntityRepository($entityManager, $metaData);
     }
 
     protected function getDeserializationContext(): DeserializationContext
@@ -84,6 +94,7 @@ final class UserAction extends Action
 //    }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -108,7 +119,8 @@ final class UserAction extends Action
             }
 
             $userAuth->setEmailaddress(strtolower(trim($userSer->getEmailaddress())));
-            $this->userRepos->save($userAuth);
+            $this->entityManager->persist($userAuth);
+            $this->entityManager->flush();
             return $this->respondWithJson(
                 $response,
                 $this->serializer->serialize(
@@ -144,7 +156,8 @@ final class UserAction extends Action
 
             $this->syncService->revertTournamentUsers($userAuth);
 
-            $this->userRepos->remove($user);
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
             return $response->withStatus(200);
         } catch (Exception $exception) {
             throw new HttpException($request, $exception->getMessage(), 422);

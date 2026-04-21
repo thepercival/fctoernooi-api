@@ -8,9 +8,9 @@ use DateTimeImmutable;
 use League\Period\Period;
 use Sports\Association;
 use Sports\Competition;
-use Sports\Competition\Field;
-use Sports\Competition\Referee;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionReferee;
+use Sports\Competition\CompetitionField;
+use Sports\Competition\CompetitionSport;
 use Sports\League;
 use Sports\Ranking\PointsCalculation;
 use Sports\Season;
@@ -38,7 +38,7 @@ trait CompetitionCreator
         }
 
         if ($season === null) {
-            $season = new Season("2018/2019", new Period(
+            $season = new Season("2018/2019", Period::fromDate(
                 new DateTimeImmutable("2018-08-01"),
                 new DateTimeImmutable("2019-07-01"),
             ));
@@ -51,8 +51,8 @@ trait CompetitionCreator
         $competition = new Competition($league, $season);
         $competition->setId(0);
         $competition->setStartDateTime($startDateTime);
-        new Referee($competition, '111');
-        new Referee($competition, '222');
+        new CompetitionReferee($competition, '111');
+        new CompetitionReferee($competition, '222');
 
         $this->createCompetitionSport($competition, $sportVariantWithFields);
         $this->competition = $competition;
@@ -89,7 +89,7 @@ trait CompetitionCreator
             3,1,2,1,0,
             $persistVariant);
         for ($fieldNr = 1; $fieldNr <= $sportVariantWithFields->getNrOfFields(); $fieldNr++) {
-            $field = new Field($competitionSport);
+            $field = new CompetitionField($competitionSport);
             $field->setName((string)$fieldNr);
         }
     }

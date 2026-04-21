@@ -8,8 +8,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
 use FCToernooi\TournamentUser;
 
-class UserMiddleware extends AuthorizationTournamentAdminMiddleware
+final class UserMiddleware extends AuthorizationTournamentAdminMiddleware
 {
+    #[\Override]
     protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
     }

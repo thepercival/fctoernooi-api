@@ -6,16 +6,27 @@ namespace App\Handlers;
 
 use Composer\Script\Event;
 
+/**
+ * @api
+ */
 class ComposerPostInstall
 {
+    /**
+     * @psalm-suppress PossiblyUnusedParam
+     * @param Event $event
+     * @return int
+     */
     public static function execute(Event $event): int
     {
 //        if ($event->isDevMode()) {
 //            echo "devMode is enabled, no post-install-executed for fctoernooi" . PHP_EOL;
 //        }
-        $pathPrefix = realpath(
-                __DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . ".."
-            ) . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
+        $realPath = realpath(__DIR__ . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "..");
+        if( $realPath === false ) {
+            echo "unknown real path, no path prefix" . PHP_EOL;
+            return -1;
+        }
+        $pathPrefix = $realPath . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
         $routerCache = $pathPrefix . 'router';
         if (file_exists($routerCache)) {
             echo "router cached emptied" . PHP_EOL;

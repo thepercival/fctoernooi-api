@@ -8,7 +8,6 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameLineConfig;
 use App\Export\Pdf\Drawers\GameLine\Column;
 use App\Export\Pdf\Drawers\GameLine\Column\Against as AgainstColumn;
-use App\Export\Pdf\Drawers\GameLine\Column\DateTime;
 use App\Export\Pdf\Drawers\GameLine\Column\DateTime as DateTimeColumn;
 use App\Export\Pdf\Drawers\GameLine\Column\Referee as RefereeColumn;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
@@ -78,7 +77,7 @@ abstract class GameLine
 
     public function getGameHeight(TogetherGame|AgainstGame $game): float
     {
-        $nrOfLines = (int) ceil($game->getPlaces()->count() / $this->config->getMaxNrOfPlacesPerLine());
+        $nrOfLines = ceil($game->getPlaces()->count() / $this->config->getMaxNrOfPlacesPerLine());
         return $this->config->getRowHeight() * $nrOfLines;
     }
 
@@ -157,7 +156,7 @@ abstract class GameLine
         $vertLine = $startVertLine->addX($this->getColumnWidth(Column::Poule));
         $this->page->setFillColor(new Zend_Pdf_Color_GrayScale(1));
         if ($dateTimeColumn !== DateTimeColumn::None) {
-            $text = $this->getDateTime($recess->getStartDateTime(), $dateTimeColumn);
+            $text = $this->getDateTimeAsLocalString($recess->getStartDateTime(), $dateTimeColumn);
             $rectangle = new Rectangle($vertLine, $this->getColumnWidth(Column::Start));
             $this->drawHeaderCell($text, $rectangle);
             $vertLine = $rectangle->getRight();
@@ -191,7 +190,7 @@ abstract class GameLine
         $leftNext = $left->addX($pouleWidth);
 
         if ($this->dateTimeColumn !== DateTimeColumn::None) {
-            $text = $this->getDateTime($game->getStartDateTime(), $this->dateTimeColumn);
+            $text = $this->getDateTimeAsLocalString($game->getStartDateTime(), $this->dateTimeColumn);
             $this->drawTableCell($text, new Rectangle($leftNext, $startWidth));
             $leftNext = $leftNext->addX($startWidth);
         }
@@ -225,36 +224,30 @@ abstract class GameLine
 
     abstract protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, VerticalLine $left): VerticalLine;
 
-    protected function getDateTime(DateTimeImmutable $dateTime, DateTimeColumn $dateTimeColumn): string
+    protected function getDateTimeAsLocalString(\DateTimeImmutable $dateTimeImmutable, DateTimeColumn $dateTimeColumn): string
     {
-//        $df = new \IntlDateFormatter('nl_NL',\IntlDateFormatter::LONG, \IntlDateFormatter::NONE,'Europe/Oslo');
-//        $dateElements = explode(" ", $df->format($game->getStartDateTime()));
-//        $month = strtolower( substr( $dateElements[1], 0, 3 ) );
-//        $text = $game->getStartDateTime()->format("d") . " " . $month . " ";
-//        return $localDateTime->format('d-m ') . $text;
+        // Convert the time to the desired timezone (Amsterdam)
+        $localDateTime = $dateTimeImmutable->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
 
-        setlocale(LC_ALL, 'nl_NL.UTF-8'); //
-        $localDateTime = $dateTime->setTimezone(new DateTimeZone('Europe/Amsterdam'));
+        $pattern = $dateTimeColumn === DateTimeColumn::Time ? 'HH:mm' : 'dd-MM HH:mm';
 
-        $text = $localDateTime->format('H:i');
-        if ($dateTimeColumn === DateTimeColumn::Time) {
-            return $text;
-        }
-        return mb_strtolower(
-            strftime('%d-%m', $localDateTime->getTimestamp()) . ' ' .
-            $text
+        // Create an IntlDateFormatter for Dutch (Netherlands)
+        $formatter = new \IntlDateFormatter(
+            'nl_NL',                     // locale
+            \IntlDateFormatter::FULL,   // date style – we’ll build a custom pattern anyway
+            \IntlDateFormatter::NONE,   // time style – handled separately
+            'Europe/Amsterdam',          // explicit timezone (matches $localDateTime)
+            \IntlDateFormatter::GREGORIAN,
+            $pattern                               // pattern: full weekday, day, short month, year, 24‑h time
         );
+
+        // Format the DateTimeImmutable instance
+        $formatted = $formatter->format($localDateTime);
+
+        // Ensure the whole string is lower‑cased (mb_* handles multibyte characters correctly)
+        return $formatted === false ? 'unknown date' : mb_strtolower($formatted, 'UTF-8');
     }
 
-    protected function getDateTimeAsStringForEmail(DateTimeImmutable $dateTimeImmutable): string
-    {
-        setlocale(LC_ALL, 'nl_NL.UTF-8'); //
-        $localDateTime = $dateTimeImmutable->setTimezone(new DateTimeZone('Europe/Amsterdam'));
-        return mb_strtolower(
-            strftime('%A %e %b %Y', $localDateTime->getTimestamp()) . ' ' .
-            $localDateTime->format('H:i')
-        );
-    }
 
     protected function drawHeaderCell(string $val, Rectangle $cell, Align|null $align = Align::Center): void
     {
@@ -269,7 +262,7 @@ abstract class GameLine
     }
 
     /**
-     * @param string $sText
+     * @param string $text
      * @param Rectangle $rectangle
      * @param array<string, string>| string | null $vtLineColors
      * @throws Zend_Pdf_Exception

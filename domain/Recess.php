@@ -8,7 +8,10 @@ use DateTimeImmutable;
 use League\Period\Period;
 use SportsHelpers\Identifiable;
 
-class Recess extends Identifiable
+/**
+ * @api
+ */
+final class Recess extends Identifiable
 {
     public const MAX_LENGTH_NAME = 15;
 
@@ -19,8 +22,8 @@ class Recess extends Identifiable
     public function __construct(private Tournament $tournament, string $name, Period $period)
     {
         $this->setName($name);
-        $this->startDateTime = $period->getStartDate();
-        $this->endDateTime = $period->getEndDate();
+        $this->startDateTime = $period->startDate;
+        $this->endDateTime = $period->endDate;
         $tournament->getRecesses()->add($this);
     }
 
@@ -57,6 +60,6 @@ class Recess extends Identifiable
 
     public function getPeriod(): Period
     {
-        return new Period($this->getStartDateTime(), $this->getEndDateTime());
+        return Period::fromDate($this->getStartDateTime(), $this->getEndDateTime());
     }
 }
