@@ -133,7 +133,7 @@ class TranslationService
                 return 'set';
             }
         }
-        return '';
+        return 'set';
     }
 
     public function getScoreNamePlural(ScoreConfig $scoreConfig): string
@@ -184,7 +184,7 @@ class TranslationService
                 return 'sets';
             }
         }
-        return '';
+        return 'sets';
     }
 
     public function getScoreDirection(int $direction): string
