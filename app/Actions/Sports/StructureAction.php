@@ -254,8 +254,11 @@ final class StructureAction extends Action
             try {
                 $roundNumbersWithMinNrOfBatches = array_map( function(RoundNumber $roundNumber): RoundNumberWithMinNrOfBatches {
                     $planningRefereeInfo = new PlanningRefereeInfo($roundNumber->getRefereeInfo());
-                    $cfg = (new InputConfigurationCreator())->create($roundNumber, $planningRefereeInfo);
-                    $jsonCfg = $this->serializer->serialize($cfg, 'json');
+                    $inputConfig = (new InputConfigurationCreator())->create($roundNumber, $planningRefereeInfo);
+                    if( $this->config->getString('environment') === 'development' ) {
+                        $this->logger->info('Roundnumber ' . $roundNumber->getNumber() . '-> planning -> ' . $inputConfig->getName() );
+                    }
+                    $jsonCfg = $this->serializer->serialize($inputConfig, 'json');
                     return new RoundNumberWithMinNrOfBatches(
                         $roundNumber,
                         $this->planningClient->getMinNrOfBatches($jsonCfg)

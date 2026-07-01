@@ -193,6 +193,7 @@ final class CompetitionSportAction extends Action
     }
 
 //    /**
+//     * @psalm-suppress UnusedParam
 //     * @param Request $request
 //     * @param Response $response
 //     * @param array<string, int|string> $args
@@ -208,8 +209,7 @@ final class CompetitionSportAction extends Action
 //            $competitionSportSer = $this->serializer->deserialize(
 //                $this->getRawData($request),
 //                CompetitionSport::class,
-//                'json',
-//                $this->getDeserializationContext()
+//                'json'
 //            );
 //
 //            $sport = $this->sportRepos->findOneBy(['name' => $competitionSportSer->getSport()->getName()]);
@@ -220,9 +220,10 @@ final class CompetitionSportAction extends Action
 //            if ($competitionSport === null) {
 //                throw new \Exception('de competitionSport is niet gevonden bij de competitie', E_ERROR);
 //            }
-//            $this->competitionSportRepos->save($competitionSport);
+////            $this->entityManager->persist($competitionSport);
+////            $this->entityManager->flush();
 //
-//            $json = $this->serializer->serialize($competitionSport, 'json', $this->getSerializationContext());
+//            $json = $this->serializer->serialize($competitionSport, 'json');
 //            return $this->respondWithJson($response, $json);
 //        } catch (\Exception $exception) {
 //            return new ErrorResponse($exception->getMessage(), 422, $this->logger);

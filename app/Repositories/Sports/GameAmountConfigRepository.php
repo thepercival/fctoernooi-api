@@ -32,6 +32,7 @@ final class GameAmountConfigRepository extends EntityRepository
         $gameAmountConfigs = $this->findBy(["competitionSport" => $competitionSport ]);
         foreach ($gameAmountConfigs as $config) {
             $this->getEntityManager()->remove($config);
+            $this->getEntityManager()->flush();
         }
     }
 }

@@ -48,10 +48,10 @@ final class Against extends GameNotesDrawer
     }
 
     #[\Override]
-    protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
+    protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): HorizontalLine
     {
         if ($game instanceof TogetherGame) {
-            return;
+            return $top;
         }
         $structureNameService = $page->getParent()->getStructureNameService();
         $roundNumber = $game->getRound()->getNumber();
@@ -148,9 +148,10 @@ final class Against extends GameNotesDrawer
             $page->drawCell($descr, $rectangle, Align::Right);
         }
 
-        $y -= $height; // extra lege regel
-
         if ($planningConfig->getExtension()) {
+            $y -= $height; // extra lege regel
+
+            $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight() * $larger);;
             $rectangle = new Rectangle(new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth), -$height);
             $page->drawCell('na verleng.', $rectangle, Align::Right);
             $rectangle = new Rectangle(new HorizontalLine(new Point($homeStart, $y), $sideWidth), -$height);
@@ -164,5 +165,31 @@ final class Against extends GameNotesDrawer
             $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y), $unitWidth), -$height);
             $page->drawCell($name, $rectangle, Align::Right);
         }
+        return new HorizontalLine(new Point($top->getStart()->getX(), $y), $top->getWidth());
+    }
+
+    #[\Override]
+    protected function drawFairPlay(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
+    {
+        if ($game instanceof TogetherGame) {
+            return;
+        }
+
+        $margin = $this->config->getMargin();
+        $height = $this->config->getRowHeight();
+        $homeStart = $this->getStartDetailLabel($top);
+        $sideWidth = $this->getDetailPartWidth($top);
+        $sepStartX = $homeStart + $sideWidth;
+        $awayStart = $this->getStartDetailValue($top);
+        $placeDescr = 'onsportief / neutraal / sportief';
+        $y = $top->getY() - $height;
+
+        $page->setFont($this->helper->getTimesFont(), $this->config->getFontHeight());
+        $rectangle = new Rectangle(new HorizontalLine(new Point($homeStart, $y), $sideWidth), -$height);
+        $page->drawCell($placeDescr, $rectangle, Align::Right);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), -$height);
+        $page->drawCell('-', $rectangle, Align::Center);
+        $rectangle = new Rectangle(new HorizontalLine(new Point($awayStart, $y), $sideWidth), -$height);
+        $page->drawCell($placeDescr, $rectangle);
     }
 }

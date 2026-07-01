@@ -45,7 +45,9 @@ abstract class GameNote
         $this->drawQRCode($page, $game, $topQRCode);
 
         // $y -= $rowHeight; // extra lege regel
-        $this->drawScore($page, $game, $topQRCode->addY(-$rowHeight));
+        $bottomLine = $this->drawScore($page, $game, $topQRCode->addY(-$rowHeight));
+
+        $this->drawFairPlay($page, $game, $bottomLine->addY(-$rowHeight));
     }
 
     protected function drawGameDetail(
@@ -275,6 +277,12 @@ abstract class GameNote
     }
 
     abstract protected function drawScore(
+        GameNotesPage $page,
+        AgainstGame|TogetherGame $game,
+        HorizontalLine $top
+    ): HorizontalLine;
+
+    abstract protected function drawFairPlay(
         GameNotesPage $page,
         AgainstGame|TogetherGame $game,
         HorizontalLine $top

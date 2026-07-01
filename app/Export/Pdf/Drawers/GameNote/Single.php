@@ -58,10 +58,10 @@ final class Single extends GameNotesDrawer
     }
 
     #[\Override]
-    protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
+    protected function drawScore(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): HorizontalLine
     {
         if ($game instanceof AgainstGame) {
-            return;
+            return $top;
         }
         $margin = $this->config->getMargin();
         $structureNameService = $page->getParent()->getStructureNameService();
@@ -112,7 +112,8 @@ final class Single extends GameNotesDrawer
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $descr = $this->translationService->getScoreNameSingular($calculateScoreConfig) . ' ' . $gameUnitNr;
                 $rectangle = new Rectangle(
-                    new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y - $yDelta), $leftPartWidth), -$height
+                    new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y - $yDelta), $leftPartWidth),
+                    -$height
                 );
                 $page->drawCell($descr, $rectangle, Align::Right);
 
@@ -144,7 +145,8 @@ final class Single extends GameNotesDrawer
             $yDelta = 0.0;
             for ($gameUnitNr = 1; $gameUnitNr <= $nrOfScoreLines; $gameUnitNr++) {
                 $rectangle = new Rectangle(
-                    new HorizontalLine(new Point($unitStart, $y - $yDelta), $unitWidth), -$height
+                    new HorizontalLine(new Point($unitStart, $y - $yDelta), $unitWidth),
+                    -$height
                 );
                 $page->drawCell($descr, $rectangle, Align::Right);
                 $yDelta += $height;
@@ -171,5 +173,30 @@ final class Single extends GameNotesDrawer
             $rectangle = new Rectangle(new HorizontalLine(new Point($unitStart, $y), $unitWidth), -$height);
             $page->drawCell($name, $rectangle, Align::Right);
         }
+        return new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $leftPartWidth);
+    }
+
+    #[\Override]
+    protected function drawFairPlay(GameNotesPage $page, AgainstGame|TogetherGame $game, HorizontalLine $top): void
+    {
+        //        if ($game instanceof AgainstGame) {
+        //            return;
+        //        }
+        //
+        //        $margin = $this->config->getMargin();
+        //        $height = $this->config->getRowHeight();
+        //        $homeStart = $this->getStartDetailLabel($top);
+        //        $sideWidth = $this->getDetailPartWidth($top);
+        //        $sepStartX = $homeStart + $sideWidth;
+        //        $awayStart = $this->getStartDetailValue($top);
+        //        $placeDescr = 'onsportief / neutraal / sportief';
+        //        $y = $top->getY() - $awayStart;
+        //
+        //        $rectangle = new Rectangle(new HorizontalLine(new Point($homeStart, $y), $sideWidth), -$height);
+        //        $page->drawCell($placeDescr, $rectangle, Align::Right);
+        //        $rectangle = new Rectangle(new HorizontalLine(new Point($sepStartX, $y), $margin), -$height);
+        //        $page->drawCell('-', $rectangle, Align::Center);
+        //        $rectangle = new Rectangle(new HorizontalLine(new Point($awayStart, $y), $sideWidth), -$height);
+        //        $page->drawCell($placeDescr, $rectangle);
     }
 }
