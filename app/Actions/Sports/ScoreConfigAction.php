@@ -5,29 +5,34 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\Sports\CompetitionSportRepository;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionSport;
 use Sports\Round;
 use Sports\Score\Config as ScoreConfig;
-use Sports\Score\Config\Repository as ScoreConfigRepository;
 use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class ScoreConfigAction extends Action
 {
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected CompetitionSportRepository $competiionSportRepos,
+        private EntityManagerInterface $entityManager,
         protected StructureRepository $structureRepos,
-        protected ScoreConfigRepository $scoreConfigRepos
+        protected CompetitionSportRepository $competiionSportRepos
+
     ) {
         parent::__construct($logger, $serializer);
     }
@@ -95,7 +100,8 @@ final class ScoreConfigAction extends Action
                 }
             }
 
-            $this->scoreConfigRepos->save($scoreConfig);
+            $this->entityManager->persist($scoreConfig);
+            $this->entityManager->flush();
 
             $this->removeNext($round, $competitionSport);
 
@@ -114,7 +120,8 @@ final class ScoreConfigAction extends Action
                 continue;
             }
             $childRound->getScoreConfigs()->removeElement($scoreConfig);
-            $this->scoreConfigRepos->remove($scoreConfig);
+            $this->entityManager->remove($scoreConfig);
+            $this->entityManager->flush();
             $this->removeNext($childRound, $competitionSport);
         }
     }

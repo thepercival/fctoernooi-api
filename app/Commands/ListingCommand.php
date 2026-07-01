@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListingCommand extends Command
+final class ListingCommand extends Command
 {
     /**
      * Listing constructor.
@@ -25,6 +25,7 @@ class ListingCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -41,6 +42,7 @@ class ListingCommand extends Command
         $this->addArgument('commandName', InputArgument::OPTIONAL, 'command-name');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $commandFilter = null;

@@ -6,38 +6,51 @@ namespace FCToernooi\Auth;
 
 use App\Mailer;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\CacheService;
 use FCToernooi\Role;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Invitation as TournamentInvitation;
-use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\TournamentUser;
-use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
 use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use Selective\Config\Configuration;
 use Slim\Views\Twig as TwigView;
 
-class SyncService
+/**
+ * @api
+ */
+final class SyncService
 {
+    /** @var EntityRepository<TournamentInvitation>  */
+    private EntityRepository $tournamentInvitationRepos;
+    /** @var EntityRepository<TournamentUser>  */
+    private EntityRepository $tournamentUserRepos;
+    /** @var EntityRepository<User>  */
+    private EntityRepository $userRepos;
     private CacheService $cacheService;
 
     public function __construct(
-        private UserRepository $userRepos,
-        private TournamentUserRepository $tournamentUserRepos,
-        private TournamentInvitationRepository $tournamentInvitationRepos,
         private Mailer $mailer,
         private TwigView $view,
         \Memcached $memcached,
-        private Configuration $config
+        private Configuration $config,
+        private EntityManagerInterface $entityManager
     ) {
+        $metaData = $entityManager->getClassMetadata(User::class);
+        $this->userRepos = new EntityRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(TournamentUser::class);
+        $this->tournamentUserRepos = new EntityRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(TournamentInvitation::class);
+        $this->tournamentInvitationRepos = new EntityRepository($entityManager, $metaData);
+
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
     public function add(
         Tournament $tournament,
         int $roles,
-        string $emailaddress = null,
+        string|null $emailaddress = null,
         bool $sendMail = false
     ): TournamentUser|TournamentInvitation|null {
         if ($emailaddress === null) {
@@ -54,7 +67,8 @@ class SyncService
             } else {
                 $tournamentUser->setRoles($tournamentUser->getRoles() | $roles);
             }
-            $this->tournamentUserRepos->save($tournamentUser);
+            $this->entityManager->persist($tournamentUser);
+            $this->entityManager->flush();
             $this->cacheService->resetTournament((int)$tournament->getId());
 
             if ($sendMail && $newUser) {
@@ -75,14 +89,15 @@ class SyncService
         } else {
             $invitation->setRoles($invitation->getRoles() | $roles);
         }
-        $this->tournamentInvitationRepos->save($invitation);
+        $this->entityManager->persist($invitation);
+        $this->entityManager->flush();
         if ($sendMail && $newInvitation) {
             $this->sendTournamentInvitationEmail($invitation);
         }
         return $invitation;
     }
 
-    public function remove(Tournament $tournament, int $roles, string $emailaddress = null): void
+    public function remove(Tournament $tournament, int $roles, string|null $emailaddress = null): void
     {
         if ($emailaddress === null) {
             return;
@@ -97,10 +112,12 @@ class SyncService
             $rolesToRemove = $tournamentUser->getRoles() & $roles;
             if ($tournamentUser->getRoles() === $rolesToRemove) {
                 $tournament->getUsers()->removeElement($tournamentUser);
-                $this->tournamentUserRepos->remove($tournamentUser);
+                $this->entityManager->remove($tournamentUser);
+                $this->entityManager->flush();
             } else {
                 $tournamentUser->setRoles($tournamentUser->getRoles() - $rolesToRemove);
-                $this->tournamentUserRepos->save($tournamentUser);
+                $this->entityManager->persist($tournamentUser);
+                $this->entityManager->flush();
             }
             $this->cacheService->resetTournament((int)$tournament->getId());
             return;
@@ -114,10 +131,12 @@ class SyncService
         }
         $rolesToRemove = $invitation->getRoles() & $roles;
         if ($invitation->getRoles() === $rolesToRemove) {
-            $this->tournamentInvitationRepos->remove($invitation);
+            $this->entityManager->remove($invitation);
+            $this->entityManager->flush();
         } else {
             $invitation->setRoles($invitation->getRoles() - $rolesToRemove);
-            $this->tournamentInvitationRepos->save($invitation);
+            $this->entityManager->persist($invitation);
+            $this->entityManager->flush();
         }
     }
 
@@ -131,40 +150,37 @@ class SyncService
         $tournamentUsers = [];
         while (count($invitations) > 0) {
             $invitation = array_shift($invitations);
-            $this->tournamentInvitationRepos->remove($invitation);
+            $this->entityManager->remove($invitation);
+            $this->entityManager->flush();
             $tournamentUser = new TournamentUser(
                 $invitation->getTournament(),
                 $user,
                 $invitation->getRoles()
             );
-            $this->tournamentUserRepos->save($tournamentUser);
+            $this->entityManager->persist($tournamentUser);
+            $this->entityManager->flush();
             $tournamentUsers[] = $tournamentUser;
         }
         return $tournamentUsers;
     }
 
-    /**
-     * @param User $user
-     * @return list<TournamentInvitation>
-     */
-    public function revertTournamentUsers(User $user): array
+    public function revertTournamentUsers(User $user): void
     {
-        $invitations = [];
         $tournamentUsers = $this->tournamentUserRepos->findBy(["user" => $user]);
         while (count($tournamentUsers) > 0) {
             $tournamentUser = array_shift($tournamentUsers);
             $tournamentUser->getTournament()->getUsers()->removeElement($tournamentUser);
-            $this->tournamentUserRepos->remove($tournamentUser);
+            $this->entityManager->remove($tournamentUser);
+            $this->entityManager->flush();
             $invitation = new TournamentInvitation(
                 $tournamentUser->getTournament(),
                 $tournamentUser->getUser()->getEmailaddress(),
                 $tournamentUser->getRoles()
             );
             $invitation->setCreatedDateTime(new DateTimeImmutable());
-            $this->tournamentInvitationRepos->save($invitation);
-            $invitations[] = $invitation;
+            $this->entityManager->persist($invitation);
+            $this->entityManager->flush();
         }
-        return $invitations;
     }
 
     protected function sendTournamentUserEmail(TournamentUser $tournamentUser): void

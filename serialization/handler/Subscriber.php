@@ -9,7 +9,7 @@ use Sports\SerializationHandler\DummyCreator;
 use Sports\SerializationHandler\Subscriber as SportsSubscriber;
 use SportsPlanning\SerializationHandler\Subscriber as SportsPlanningSubscriber;
 
-class Subscriber
+final class Subscriber
 {
     public function __construct(protected DummyCreator $dummyCreator)
     {
@@ -17,7 +17,7 @@ class Subscriber
 
     public function subscribeHandlers(HandlerRegistry $registry): void
     {
-        $registry->registerSubscribingHandler(new TournamentHandler($this->dummyCreator));
+        $registry->registerSubscribingHandler(new TournamentHandler());
         (new SportsSubscriber($this->dummyCreator))->subscribeHandlers($registry);
         (new SportsPlanningSubscriber())->subscribeHandlers($registry);
     }

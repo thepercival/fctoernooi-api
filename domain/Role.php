@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FCToernooi;
 
-class Role
+final class Role
 {
     public const ADMIN = 1;
     public const ROLEADMIN = 2;

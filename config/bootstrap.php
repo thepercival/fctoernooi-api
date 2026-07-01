@@ -11,6 +11,7 @@ $containerBuilder = new ContainerBuilder();
 // Set up settings
 $containerBuilder->addDefinitions(__DIR__ . '/container.php');
 $containerBuilder->addDefinitions(__DIR__ . '/repositories.php');
+/** @psalm-suppress RedundantCondition */
 if (isset($_SERVER['REQUEST_METHOD']) === false) {
     $containerBuilder->addDefinitions(__DIR__ . '/commands.php');
 }

@@ -12,7 +12,7 @@ FCToernooi\Competitor:
     telephone:
       type: string
       groups: [ privacy ]
-    registered:
+    present:
       type: boolean
     logoExtension:
       type: string

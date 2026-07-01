@@ -7,11 +7,11 @@ class Line
     public function __construct(protected Point $start, protected Point $end)
     {
         if ($start->getX() == $end->getX() && $start->getY() == $end->getY()) {
-            throw new \Exception('the points("' . $start . '" & "' . $end . '") form a dot instead of a line', E_ERROR);
+            throw new \Exception('the points("' . ((string)$start) . '" & "' . ((string)$end) . '") form a dot instead of a line', E_ERROR);
         } else {
             if ($start->getX() != $end->getX() && $start->getY() != $end->getY()) {
                 throw new \Exception(
-                    'the points("' . $start . '" & "' . $end . '") form a rectangle instead of a line',
+                    'the points("' . ((string)$start) . '" & "' . ((string)$end) . '") form a rectangle instead of a line',
                     E_ERROR
                 );
             }
@@ -30,12 +30,12 @@ class Line
 //        return $this->start->getY() == $this->end->getY();
 //    }
 
-    public function move(float $width, float $height): self {
-        return new self(
-            new Point($this->start->getX() + $width, $this->start->getY() + $height),
-            new Point($this->end->getX() + $width, $this->end->getY() + $height )
-        );
-    }
+//    public function move(float $width, float $height): self {
+//        return new self(
+//            new Point($this->start->getX() + $width, $this->start->getY() + $height),
+//            new Point($this->end->getX() + $width, $this->end->getY() + $height )
+//        );
+//    }
 
 //    public function isVertical(): bool {
 //        return $this->start->getX() == $this->end->getX();

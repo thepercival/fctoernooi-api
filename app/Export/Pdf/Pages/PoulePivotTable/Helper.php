@@ -8,14 +8,14 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionSport;
 use Sports\Ranking\Calculator\Round\Sport as SportRankingCalculator;
 use SportsHelpers\Sport\Variant\Against as AgainstSportVariant;
 
 trait Helper
 {
     /**
-     * @var array<string, int>
+     * @var array<string, float>
      */
     protected array $fontSizeMap = [];
 
@@ -39,19 +39,18 @@ trait Helper
         return $rectangle->getRight()->getX();
     }
 
-    protected function getPlaceFontHeight(string $placeName): int
+    protected function getPlaceFontHeight(string $placeName): float
     {
         if (array_key_exists($placeName, $this->fontSizeMap)) {
             return $this->fontSizeMap[$placeName];
         }
-        /** @var int $fontHeight */
         $fontHeight = $this->parent->getConfig()->getFontHeight();
         if ($this->helper->getTextWidth(
                 $placeName,
                 $this->helper->getTimesFont(),
                 $fontHeight
             ) > $this->nameColumnWidth) {
-            $fontHeight -= 2;
+            $fontHeight -= 2.0;
         }
         $this->fontSizeMap[$placeName] = $fontHeight;
         return $fontHeight;
@@ -74,7 +73,7 @@ trait Helper
             return $this->parent->getConfig()->getRowHeight();
         }
         if ($degrees === 90) {
-            return $versusColumnWidth * 2;
+            return $versusColumnWidth * 2.0;
         }
         return (tan(deg2rad($degrees)) * $versusColumnWidth);
     }

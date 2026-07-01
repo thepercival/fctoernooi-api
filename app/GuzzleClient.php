@@ -7,8 +7,6 @@ use App\Exceptions\DomainRecordNotFoundException;
 use FCToernooi\CacheService;
 use FCToernooi\Planning\RoundNumberWithPlanning;
 use GuzzleHttp\Client;
-use JMS\Serializer\SerializationContext;
-use JMS\Serializer\DeserializationContext;
 use JMS\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
 use Sports\Competition;
@@ -16,12 +14,12 @@ use Sports\Round\Number as RoundNumber;
 use Sports\Round\Number\InputConfigurationCreator;
 use SportsPlanning\Input\Configuration;
 use SportsPlanning\Planning;
-use SportsPlanning\Referee\Info as PlanningRefereeInfo;
+use SportsPlanning\PlanningRefereeInfo;
 
-class GuzzleClient
+final class GuzzleClient
 {
     private Client $client;
-    private SerializationContext|null $serContext = null;
+//    private SerializationContext|null $serContext = null;
 
     public function __construct(
         private string $baseUrl,

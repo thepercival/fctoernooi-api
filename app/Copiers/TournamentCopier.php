@@ -5,50 +5,54 @@ declare(strict_types=1);
 namespace App\Copiers;
 
 use App\ImageService;
+use App\Repositories\Sports\SportRepository;
+use App\Repositories\TournamentRegistrationSettingsRepository;
 use DateTimeImmutable;
-use Exception;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor;
 use FCToernooi\LockerRoom;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
 use FCToernooi\Recess;
 use FCToernooi\Role;
 use FCToernooi\Sponsor;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\RegistrationSettings;
-use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
-use FCToernooi\Competitor\Repository as TournamentCompetitorRepository;
+use FCToernooi\Tournament\Rule as TournamentRule;
 use FCToernooi\TournamentUser;
 use FCToernooi\User;
 use League\Period\Period;
 use Sports\Association;
 use Sports\Competition;
-use Sports\Competition\Field;
-use Sports\Competition\Referee;
-use Sports\Competition\Service as CompetitionService;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competitor\StartLocation;
+use Sports\Competition\CompetitionEditor;
+use Sports\Competition\CompetitionField;
+use Sports\Competition\CompetitionReferee;
+use Sports\Competition\CompetitionSport;
 use Sports\Competitor\StartLocationMap;
 use Sports\League;
-use Sports\Season\Repository as SeasonRepository;
+use Sports\Season;
 use Sports\Sport;
-use Sports\Sport\Repository as SportRepository;
-use FCToernooi\Tournament\Rule as TournamentRule;
-use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
-
 use Sports\Structure;
 
-class TournamentCopier
+/**
+ * @api
+ */
+final class TournamentCopier
 {
+    private EntityRepository $ruleRepos;
+
+    /** @var EntityRepository<Season>  */
+    private EntityRepository $seasonRepos;
+
+
     public function __construct(
-        private SportRepository $sportRepos,
-        private SeasonRepository $seasonRepos,
-        private LockerRoomRepository $lockerRoomRepos,
-        private SponsorRepository $sponsorRepos,
         private TournamentRegistrationSettingsRepository $settingsRepos,
-        private TournamentCompetitorRepository $competitorRepos,
-        private TournamentRuleRepository $ruleRepos
+        private SportRepository $sportRepos,
+        private EntityManagerInterface $entityManager
     ) {
+        $metaData = $entityManager->getClassMetadata(TournamentRule::class);
+        $this->ruleRepos = new EntityRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(Season::class);
+        $this->seasonRepos = new EntityRepository($entityManager, $metaData);
     }
 
     public function copy(Tournament $fromTournament, string|null $name, DateTimeImmutable $newStartDateTime, User $user): Tournament
@@ -64,7 +68,7 @@ class TournamentCopier
             throw new \Exception('season 9999 not found', E_ERROR);
         }
 
-        $newCompetition = (new CompetitionService())->create(
+        $newCompetition = (new CompetitionEditor())->create(
             $league,
             $season,
             $fromCompetition->getAgainstRuleSet(),
@@ -102,7 +106,7 @@ class TournamentCopier
     /**
      * @param Competition $newCompetition
      * @param array<CompetitionSport> $compSportsSer
-     * @param array<Referee> $refereesSer
+     * @param array<CompetitionReferee> $refereesSer
      */
     protected function copyFieldsAndReferees(
         Competition $newCompetition,
@@ -123,14 +127,13 @@ class TournamentCopier
                 $competitionSportSer->getDefaultLosePointsExt(),
                 $competitionSportSer
             );
-            /** @var Field $fieldSer */
             foreach ($competitionSportSer->getFields() as $fieldSer) {
-                $field = new Field($newCompetitionSport, $fieldSer->getPriority());
+                $field = new CompetitionField($newCompetitionSport, $fieldSer->getPriority());
                 $field->setName($fieldSer->getName());
             }
         }
         foreach ($refereesSer as $refereeSer) {
-            $referee = new Referee($newCompetition, $refereeSer->getInitials(), $refereeSer->getPriority());
+            $referee = new CompetitionReferee($newCompetition, $refereeSer->getInitials(), $refereeSer->getPriority());
             $referee->setName($refereeSer->getName());
             $referee->setEmailaddress($refereeSer->getEmailaddress());
             $referee->setInfo($refereeSer->getInfo());
@@ -150,7 +153,7 @@ class TournamentCopier
             $diffStart = $fromTournament->getCompetition()->getStartDateTime()->diff($start);
             $end = $fromRecess->getEndDateTime();
             $diffEnd = $fromTournament->getCompetition()->getStartDateTime()->diff($end);
-            $period = new Period(
+            $period = Period::fromDate(
                 $newStartDateTime->add($diffStart), $newStartDateTime->add($diffEnd)
             );
             new Recess($newTournament, $fromRecess->getName(), $period);
@@ -174,14 +177,15 @@ class TournamentCopier
             $fromSettings->getMailAlert(),
             $fromSettings->getRemark()
         );
-        $this->settingsRepos->save($newSettings, true);
+        $this->entityManager->persist($newSettings);
+        $this->entityManager->flush();
     }
 
     private function calculateNewEndDateTime(RegistrationSettings $fromSettings, Tournament $newTournament): DateTimeImmutable {
         $fromTournament = $fromSettings->getTournament();
 
         $fromTournamentStartDateTIme = $fromTournament->getCompetition()->getStartDateTime();
-        $fromBetweenPeriod = new Period(
+        $fromBetweenPeriod = Period::fromDate(
             $fromSettings->getEndDateTime(), $fromTournamentStartDateTIme
         );
 
@@ -205,7 +209,8 @@ class TournamentCopier
                 }
                 $newLocerRoom->getCompetitors()->add($newCompetitor);
             }
-            $this->lockerRoomRepos->save($newLocerRoom);
+            $this->entityManager->persist($newLocerRoom);
+            $this->entityManager->flush();
         }
     }
 
@@ -228,7 +233,8 @@ class TournamentCopier
             $newCompetitor->setPublicInfo($fromCompetitor->getPublicInfo());
             $newCompetitor->setPrivateInfo($fromCompetitor->getPrivateInfo());
             $newCompetitor->setLogoExtension($fromCompetitor->getLogoExtension());
-            $this->competitorRepos->save($newCompetitor, true);
+            $this->entityManager->persist($newCompetitor);
+            $this->entityManager->flush();
             if ($fromCompetitor->getLogoExtension() !== null) {
                 $imageService->copyImages($fromCompetitor, $newCompetitor);
                 // copy file
@@ -249,7 +255,9 @@ class TournamentCopier
             $newSponsor->setUrl($fromSponsor->getUrl());
             $newSponsor->setLogoExtension($fromSponsor->getLogoExtension());
             $newSponsor->setScreenNr($fromSponsor->getScreenNr());
-            $this->sponsorRepos->save($newSponsor, true);
+            $this->entityManager->persist($newSponsor);
+            $this->entityManager->flush();
+
             if ($fromSponsor->getLogoExtension() !== null) {
                 $imageService->copyImages($fromSponsor, $newSponsor);
                 // copy file
@@ -262,7 +270,8 @@ class TournamentCopier
         $fromRules = $this->ruleRepos->findBy(['tournament' => $fromTournament]);
         foreach( $fromRules as $fromRule) {
             $newRule = new TournamentRule($newTournament, $fromRule->getText() );
-            $this->ruleRepos->save($newRule, true);
+            $this->entityManager->persist($newRule);
+            $this->entityManager->flush();
         }
     }
 

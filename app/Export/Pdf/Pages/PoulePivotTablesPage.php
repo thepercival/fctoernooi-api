@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Export\Pdf\Pages;
 
 use App\Export\Pdf\Align;
-use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
+use App\Export\Pdf\Documents\PoulePivotTablesDocument;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as ToernooiPdfPage;
 use App\Export\Pdf\Pages\PoulePivotTable\Helper;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
 use Exception;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
@@ -65,7 +65,7 @@ abstract class PoulePivotTablesPage extends ToernooiPdfPage
         );
         $this->drawCell($subHeader, $rectangle, Align::Center);
         $this->setFont($this->helper->getTimesFont(), $fontHeight);
-        return $y - (2 * $fontHeight);
+        return $y - (2.0 * $fontHeight);
     }
 
     /*public function draw()
@@ -89,7 +89,7 @@ abstract class PoulePivotTablesPage extends ToernooiPdfPage
     protected function drawPouleHeaderHelper(Poule $poule, GameAmountConfig $gameAmountConfig, float $y, int $degrees = 0): float
     {
         $nrOfPlaces = $poule->getPlaces()->count();
-        $versusColumnWidth = $this->versusColumnsWidth / $nrOfPlaces;
+        $versusColumnWidth = $this->versusColumnsWidth / (float)$nrOfPlaces;
         $height = $this->getVersusHeight($versusColumnWidth, $degrees);
 
         $x = self::PAGEMARGIN;
@@ -100,7 +100,7 @@ abstract class PoulePivotTablesPage extends ToernooiPdfPage
         // draw pointsrectangle
         $x = $this->drawHeaderCustom('punten', $x, $y, $this->pointsColumnWidth, $height);
         // draw rankrectangle
-        $x = $this->drawHeaderCustom('plek', $x, $y, $this->rankColumnWidth, $height);
+        $this->drawHeaderCustom('plek', $x, $y, $this->rankColumnWidth, $height);
 
         return $y - $height;
     }

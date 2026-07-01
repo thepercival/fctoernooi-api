@@ -6,16 +6,15 @@ namespace App\Commands;
 
 use App\Command;
 use App\Mailer;
-use DateTime;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\Tournament\ShellFilter;
-use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use Sports\Competition\Repository as CompetitionRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @api
+ */
 class MailLogsCommand extends Command
 {
     private string $customName = 'mail-logs';
@@ -33,6 +32,7 @@ class MailLogsCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -46,6 +46,7 @@ class MailLogsCommand extends Command
         parent::configure();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {

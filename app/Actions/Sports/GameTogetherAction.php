@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace App\Actions\Sports;
 
+use App\Repositories\Sports\AgainstGameRepository;
+use App\Repositories\Sports\AgainstScoreRepository;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\Sports\TogetherGameRepository;
+use App\Repositories\Sports\TogetherScoreRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\Together as TogetherGame;
-use Sports\Game\Together\Repository as TogetherGameRepository;
-use Sports\Game\Against\Repository as AgainstGameRepository;
-use Sports\Place\Repository as PlaceRepository;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Poule;
-use Sports\Poule\Repository as PouleRepository;
-use Sports\Score\Against\Repository as AgainstScoreRepository;
 use Sports\Score\Creator as GameScoreCreator;
-use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class GameTogetherAction extends GameAction
 {
     public function __construct(
@@ -33,12 +34,10 @@ final class GameTogetherAction extends GameAction
         SerializerInterface $serializer,
         AgainstGameRepository $againstGameRepos,
         TogetherGameRepository $togetherGameRepos,
-        PouleRepository $pouleRepos,
-        PlaceRepository $placeRepos,
         StructureRepository $structureRepos,
-        AgainstScoreRepository $scoreRepos,
+        AgainstScoreRepository $againstScoreRepos,
         TogetherScoreRepository $togetherScoreRepos,
-        CompetitionSportRepository $competitionSportRepos
+        protected EntityManagerInterface $entityManager
     ) {
         parent::__construct(
             $logger,
@@ -46,16 +45,15 @@ final class GameTogetherAction extends GameAction
             $togetherGameRepos,
             $againstGameRepos,
             $togetherGameRepos,
-            $pouleRepos,
-            $placeRepos,
-            $structureRepos,
-            $scoreRepos,
+            $againstScoreRepos,
             $togetherScoreRepos,
-            $competitionSportRepos
+            $structureRepos,
+            $entityManager
         );
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -85,7 +83,8 @@ final class GameTogetherAction extends GameAction
             }
             $game = $this->createGame($poule, $gameSer, $competitionSport);
             $this->addBase($game, $gameSer);
-            $this->togetherGameRepos->save($game);
+            $this->entityManager->persist($game);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($game, 'json');
             return $this->respondWithJson($response, $json);
@@ -150,7 +149,8 @@ final class GameTogetherAction extends GameAction
 
             $this->editBase($game, $gameSer);
 
-            $this->togetherGameRepos->save($game);
+            $this->entityManager->persist($game);
+            $this->entityManager->flush();
 
             $this->changeQualifyPlaces($competition, $game->getPoule(), $initialPouleState);
 
@@ -189,7 +189,8 @@ final class GameTogetherAction extends GameAction
 
             /** @var TogetherGame $game */
             $poule->getTogetherGames()->removeElement($game);
-            $this->togetherGameRepos->remove($game);
+            $this->entityManager->remove($game);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (Exception $exception) {

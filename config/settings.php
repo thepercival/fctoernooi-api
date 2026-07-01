@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-use Monolog\Logger;
+use Monolog\Level;
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
+
+$wwwUrlLocalPath = realpath(__DIR__ . "/../../");
+$apiUrlLocalPath = realpath(__DIR__ . '/../public/');
 
 return [
     'environment' => $_ENV['ENVIRONMENT'],
@@ -31,7 +34,8 @@ return [
     // Monolog settings
     'logger' => [
         'path' => __DIR__ . '/../logs/',
-        'level' => ($_ENV['ENVIRONMENT'] === 'development' ? Logger::DEBUG : Logger::ERROR),
+        'structures_path' => __DIR__ . '/../logs/structures/',
+        'level' => ($_ENV['ENVIRONMENT'] === 'development' ? Level::Info : Level::Error),
     ],
     'router' => [
         'cache_file' => __DIR__ . '/../cache/router',
@@ -79,9 +83,10 @@ return [
     ],
     'www' => [
         'wwwurl' => $_ENV['WWW_URL'],
-        'wwwurl-localpath' => realpath(__DIR__ . '/../../') . '/fctoernooi/dist/',
+        'wwwurl-localpath' => ($wwwUrlLocalPath !== false ? $wwwUrlLocalPath : '') . "/fctoernooi/dist/nl/",
         'apiurl' => $_ENV['API_URL'],
-        'apiurl-localpath' => realpath(__DIR__ . '/../public/') . '/',
+        "apiurl-localpath" => ($apiUrlLocalPath !== false ? $apiUrlLocalPath : '') . '/',
+
     ],
     'email' => [
         'from' => 'info@fctoernooi.nl',

@@ -7,14 +7,17 @@ namespace FCToernooi\Planning\Totals;
 use Sports\Category;
 use Sports\Poule;
 use Sports\Round;
-use SportsHelpers\PouleStructure\Balanced as BalancedPouleStructure;
+use SportsHelpers\PouleStructures\BalancedPouleStructure;
 use SportsHelpers\Sport\VariantWithFields;
 use SportsHelpers\SportRange;
 use SportsPlanning\Input\ConfigurationValidator;
-use SportsPlanning\PouleStructure as PlanningPouleStructure;
-use SportsPlanning\Referee\Info as PlanningRefereeInfo;
+use SportsPlanning\PlanningPouleStructure;
+use SportsPlanning\PlanningRefereeInfo;
 
-class CompetitorAmountCalculator
+/**
+ * @api
+ */
+final class CompetitorAmountCalculator
 {
     /**
      * @param list<Category> $categories

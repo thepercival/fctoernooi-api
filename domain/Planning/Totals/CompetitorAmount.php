@@ -6,7 +6,10 @@ namespace FCToernooi\Planning\Totals;
 
 use SportsHelpers\SportRange;
 
-class CompetitorAmount
+/**
+ * @api
+ */
+final class CompetitorAmount
 {
     private SportRange $nrOfGames;
     private SportRange $nrOfMinutes;

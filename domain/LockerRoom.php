@@ -8,7 +8,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use SportsHelpers\Identifiable;
 
-class LockerRoom extends Identifiable
+/**
+ * @api
+ */
+final class LockerRoom extends Identifiable
 {
     protected string $name;
     /**

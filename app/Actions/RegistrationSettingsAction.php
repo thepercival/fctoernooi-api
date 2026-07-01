@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\ImageService;
+use App\Repositories\TournamentRegistrationSettingsRepository;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Registration\TextSubject;
-use FCToernooi\Tournament\RegistrationSettings;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 
+/**
+ * @api
+ */
 final class RegistrationSettingsAction extends Action
 {
     public function __construct(
@@ -24,12 +26,14 @@ final class RegistrationSettingsAction extends Action
         SerializerInterface $serializer,
         private TournamentRegistrationSettingsRepository $settingsRepos,
         /*private ImageService $imageService,*/
-        private Configuration $config
+        private Configuration $config,
+        private EntityManagerInterface $entityManager
     ) {
         parent::__construct($logger, $serializer);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -79,7 +83,8 @@ final class RegistrationSettingsAction extends Action
             $settings->setEndDateTime($settingsSer->getEndDateTime());
             $settings->setMailAlert($settingsSer->getMailAlert());
             $settings->setRemark($settingsSer->getRemark());
-            $this->settingsRepos->save($settings);
+            $this->entityManager->persist($settings);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($settings, 'json');
             return $this->respondWithJson($response, $json);
@@ -109,7 +114,8 @@ final class RegistrationSettingsAction extends Action
             if( $text == null ) {
                 $text = $this->getDefaultText($subject);
                 $settings->setText($subject, $text);
-                $this->settingsRepos->save($settings, true);
+                $this->entityManager->persist($settings);
+                $this->entityManager->flush();
             }
             return $this->respondWithPlainText($response, $text);
         } catch (\Exception $exception) {
@@ -159,7 +165,8 @@ final class RegistrationSettingsAction extends Action
             $subject = TextSubject::from((int)$args['subject']);
             $text = $this->getRawData($request);
             $settings->setText($subject, $text);
-            $this->settingsRepos->save($settings, true);
+            $this->entityManager->persist($settings);
+            $this->entityManager->flush();
             return $this->respondWithPlainText($response, $text);
         } catch (\Exception $exception) {
             return new ErrorResponse($exception->getMessage(), 400, $this->logger);

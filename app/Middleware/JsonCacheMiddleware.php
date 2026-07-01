@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use FCToernooi\CacheService;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
@@ -13,18 +12,21 @@ use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Selective\Config\Configuration;
 use Slim\Routing\RouteContext;
 
-class JsonCacheMiddleware implements MiddlewareInterface
+/**
+ * @api
+ */
+final class JsonCacheMiddleware implements MiddlewareInterface
 {
     private CacheService $cacheService;
 
     public function __construct(
         \Memcached $memcached,
-        protected TournamentRepository $tournamentRepos,
-        protected Configuration $config
+        Configuration $config
     ) {
         $this->cacheService = new CacheService($memcached, $config->getString('namespace'));
     }
 
+    #[\Override]
     public function process(Request $request, RequestHandler $handler): Response
     {
         if ($request->getMethod() !== 'PUT' && $request->getMethod() !== 'POST' && $request->getMethod() !== 'DELETE') {

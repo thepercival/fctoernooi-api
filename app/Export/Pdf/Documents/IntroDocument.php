@@ -18,7 +18,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class IntroDocument extends FCToernooiPdfDocument
+final class IntroDocument extends FCToernooiPdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -37,6 +37,7 @@ class IntroDocument extends FCToernooiPdfDocument
     }
 
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $page = $this->createPageIntro();

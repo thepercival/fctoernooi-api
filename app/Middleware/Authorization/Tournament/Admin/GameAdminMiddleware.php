@@ -5,23 +5,35 @@ declare(strict_types=1);
 namespace App\Middleware\Authorization\Tournament\Admin;
 
 use App\Middleware\Authorization\Tournament\AdminMiddleware as AuthorizationTournamentAdminMiddleware;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Role;
 use FCToernooi\TournamentUser;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Routing\RouteContext;
 use Sports\Game\Against as AgainstGame;
-use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\Together as TogetherGame;
-use Sports\Game\Together\Repository as TogetherGameRepository;
 
+/**
+ * @api
+ */
 class GameAdminMiddleware extends AuthorizationTournamentAdminMiddleware
 {
-    public function __construct(
-        protected TogetherGameRepository $togetherGameRepos,
-        protected AgainstGameRepository $againstGameRepos,
-    ) {
+    /** @var EntityRepository<TogetherGame>  */
+    protected EntityRepository $togetherGameRepos;
+    /** @var EntityRepository<AgainstGame>  */
+    protected EntityRepository $againstGameRepos;
+
+    public function __construct(protected EntityManagerInterface $entityManager)
+    {
+        $metaData = $entityManager->getClassMetadata(TogetherGame::class);
+        $this->togetherGameRepos = new EntityRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(AgainstGame::class);
+        $this->againstGameRepos = new EntityRepository($entityManager, $metaData);
     }
 
+    #[\Override]
     protected function isTournamentUserAuthorized(Request $request, TournamentUser $tournamentUser): void
     {
         if ($tournamentUser->hasRoles(Role::GAMERESULTADMIN)) {

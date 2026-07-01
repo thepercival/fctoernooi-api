@@ -8,7 +8,10 @@ use App\Actions\Action;
 use App\Exceptions\DomainRecordBeingCalculatedException;
 use App\Exceptions\DomainRecordNotFoundException;
 use App\GuzzleClient;
+use App\Repositories\Sports\RoundNumberRepository;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\CacheService;
 use FCToernooi\Recess;
@@ -21,19 +24,17 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\EditMode;
 use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\PlanningAssigner;
-use Sports\Round\Number\PlanningScheduler;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Structure;
-use Sports\Structure\Repository as StructureRepository;
 use Sports\Round\Number\InputConfigurationCreator;
+use Sports\Round\Number\PlanningAssigner;
+use Sports\Structure;
 use SportsPlanning\Input;
-use SportsPlanning\Planning;
-use SportsPlanning\Referee\Info as PlanningRefereeInfo;
+use SportsPlanning\PlanningRefereeInfo;
 
+/**
+ * @api
+ */
 final class PlanningAction extends Action
 {
     private GuzzleClient $planningClient;
@@ -43,14 +44,16 @@ final class PlanningAction extends Action
         SerializerInterface $serializer,
         private StructureRepository $structureRepos,
         private RoundNumberRepository $roundNumberRepos,
-        private PlanningConfigRepository $planningConfigRepos,
+        private EntityManagerInterface $entityManager,
         Configuration $config,
         Memcached $memcached
     ) {
         parent::__construct($logger, $serializer);
+
+        $cacheService = new CacheService($memcached, $config->getString('namespace'));
+
         $url = $config->getString('scheduler.url');
         $apikey = $config->getString('scheduler.apikey');
-        $cacheService = new CacheService($memcached, $config->getString('namespace'));
         $this->planningClient = new GuzzleClient($url, $apikey, $cacheService, $serializer, $logger);
 
     }
@@ -97,7 +100,7 @@ final class PlanningAction extends Action
                 $seekingPercentage = $this->planningClient->getProgress($jsonConfig);
             } catch (Exception $e) {
                 if( $roundNumber->getNumber() === 1 ) {
-                    $input = new Input($config);
+                    new Input($config);
                     throw new \Exception('de planning "' . $config->getName() . '" kan niet gevonden worden, doe een aanpassing',
                         E_ERROR
                     );
@@ -253,7 +256,8 @@ final class PlanningAction extends Action
         $planningConfig = $roundNumber->getPlanningConfig();
         if ($planningConfig !== null && $planningConfig->getEditMode() === EditMode::Manual) {
             $planningConfig->setEditMode(EditMode::Auto);
-            $this->planningConfigRepos->save($planningConfig);
+            $this->entityManager->persist($planningConfig);
+            $this->entityManager->flush();
         }
 
         $nextRoundNumber = $roundNumber->getNext();

@@ -4,39 +4,45 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\ImageService;
 use App\Mailer;
+use App\Repositories\TournamentRegistrationRepository;
+use App\Repositories\TournamentRegistrationSettingsRepository;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Role;
-use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
-use FCToernooi\User;
+use FCToernooi\Tournament\Registration as TournamentRegistration;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use FCToernooi\Tournament\Registration as TournamentRegistration;
-use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
-use Slim\Views\Twig as TwigView;
-use Sports\Category\Repository as CategoryRepository;
-use Sports\Category;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
+use Slim\Views\Twig as TwigView;
+use Sports\Category;
 
+/**
+ * @api
+ */
 final class RegistrationAction extends Action
 {
+    protected EntityRepository $categoryRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private TournamentRegistrationRepository $registrationRepos,
         private TournamentRegistrationSettingsRepository $settingsRepos,
-        private CategoryRepository $categoryRepos,
+        private EntityManagerInterface $entityManager,
         protected Mailer $mailer,
         private TwigView $view,
         private Configuration $configuration
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(Category::class);
+        $this->categoryRepos = new EntityRepository($entityManager, $metaData);
     }
 
 
@@ -120,7 +126,8 @@ final class RegistrationAction extends Action
                 $serRegistration->getTelephone(),
                 $serRegistration->getInfo()
             );
-            $this->registrationRepos->save($newRegistration);
+            $this->entityManager->persist($newRegistration);
+            $this->entityManager->flush();
 
             $settings = $this->settingsRepos->findOneBy(['tournament' => $tournament]);
             if( $settings && $settings->getMailAlert() ) {
@@ -186,7 +193,8 @@ final class RegistrationAction extends Action
             $registration->setEmailaddress($registrationSer->getEmailaddress());
             $registration->setTelephone($registrationSer->getTelephone());
             $registration->setInfo($registrationSer->getInfo());
-            $this->registrationRepos->save($registration);
+            $this->entityManager->persist($registration);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($registration, 'json');
             return $this->respondWithJson($response, $json);
@@ -215,7 +223,8 @@ final class RegistrationAction extends Action
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de registratie");
             }
 
-            $this->registrationRepos->remove($registration);
+            $this->entityManager->remove($registration);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {

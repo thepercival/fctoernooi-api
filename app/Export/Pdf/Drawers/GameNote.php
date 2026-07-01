@@ -8,18 +8,16 @@ use App\Export\Pdf\Align;
 use App\Export\Pdf\Configs\GameNotesConfig;
 use App\Export\Pdf\Line\Horizontal as HorizontalLine;
 use App\Export\Pdf\Page as PdfPage;
-use App\Export\Pdf\Pages\GameNotesPage as GameNotesPage;
+use App\Export\Pdf\Pages\GameNotesPage;
 use App\Export\Pdf\Point;
 use App\Export\Pdf\Rectangle;
-use DateTimeZone;
 use FCToernooi\QRService;
 use FCToernooi\TranslationService;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Against as AgainstGame;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round;
 use Sports\Score\Config as ScoreConfig;
-use Sports\Score\Config\Service as ScoreConfigService;
 use SportsHelpers\Sport\Variant\AllInOneGame as AllInOneGameSportVariant;
 use Zend_Pdf_Resource_Image;
 use Zend_Pdf_Resource_ImageFactory;
@@ -27,14 +25,14 @@ use Zend_Pdf_Resource_ImageFactory;
 abstract class GameNote
 {
     protected Helper $helper;
-    protected ScoreConfigService $scoreConfigService;
+//    protected ScoreConfigService $scoreConfigService;
     protected TranslationService $translationService;
     protected QRService $qrService;
 
     public function __construct(protected GameNotesConfig $config)
     {
         $this->helper = new Helper();
-        $this->scoreConfigService = new ScoreConfigService();
+//        $this->scoreConfigService = new ScoreConfigService();
         $this->translationService = new TranslationService();
         $this->qrService = new QRService();
     }
@@ -47,7 +45,9 @@ abstract class GameNote
         $this->drawQRCode($page, $game, $topQRCode);
 
         // $y -= $rowHeight; // extra lege regel
-        $this->drawScore($page, $game, $topQRCode->addY(-$rowHeight));
+        $bottomLine = $this->drawScore($page, $game, $topQRCode->addY(-$rowHeight));
+
+        $this->drawFairPlay($page, $game, $bottomLine->addY(-$rowHeight));
     }
 
     protected function drawGameDetail(
@@ -112,10 +112,8 @@ abstract class GameNote
 
         if ($planningConfig->getEnableTime()) {
             setlocale(LC_ALL, 'nl_NL.UTF-8'); //
-            $localDateTime = $game->getStartDateTime()->setTimezone(new DateTimeZone('Europe/Amsterdam'));
-            $dateTime = strtolower(
-                $localDateTime->format('H:i') . '     ' . strftime('%a %d %b %Y', $localDateTime->getTimestamp())
-            );
+
+            $dateTime = $this->getDateTimeAsLocalString($game->getStartDateTime());
             // $dateTime = strtolower( $localDateTime->format("H:i") . "     " . $localDateTime->format("D d M") );
             $duration = $planningConfig->getMinutesPerGame() . ' min.';
             if ($planningConfig->getExtension()) {
@@ -210,7 +208,7 @@ abstract class GameNote
 
     protected function getPartWidth(HorizontalLine $horLine): float
     {
-        return ($horLine->getWidth() - (4 * $this->config->getMargin())) / 5;
+        return ($horLine->getWidth() - (4.0 * $this->config->getMargin())) / 5.0;
     }
 
     protected function getDetailPartWidth(HorizontalLine $horLine): float
@@ -282,6 +280,12 @@ abstract class GameNote
         GameNotesPage $page,
         AgainstGame|TogetherGame $game,
         HorizontalLine $top
+    ): HorizontalLine;
+
+    abstract protected function drawFairPlay(
+        GameNotesPage $page,
+        AgainstGame|TogetherGame $game,
+        HorizontalLine $top
     ): void;
 
     public function getNrOfScoreLines(Round $round, CompetitionSport $competitionSport): int
@@ -322,5 +326,29 @@ abstract class GameNote
     protected function getDirectionName(ScoreConfig $scoreConfig): string
     {
         return $this->translationService->getScoreDirection($scoreConfig->getDirection());
+    }
+
+    protected function getDateTimeAsLocalString(\DateTimeImmutable $dateTimeImmutable): string
+    {
+        // Convert the time to the desired timezone (Amsterdam)
+        $localDateTime = $dateTimeImmutable->setTimezone(new \DateTimeZone('Europe/Amsterdam'));
+
+        $pattern = 'HH:mm     EEE dd MMM yyyy';
+
+        // Create an IntlDateFormatter for Dutch (Netherlands)
+        $formatter = new \IntlDateFormatter(
+            'nl_NL',                     // locale
+            \IntlDateFormatter::FULL,   // date style – we’ll build a custom pattern anyway
+            \IntlDateFormatter::NONE,   // time style – handled separately
+            'Europe/Amsterdam',          // explicit timezone (matches $localDateTime)
+            \IntlDateFormatter::GREGORIAN,
+            $pattern                               // pattern: full weekday, day, short month, year, 24‑h time
+        );
+
+        // Format the DateTimeImmutable instance
+        $formatted = $formatter->format($localDateTime);
+
+        // Ensure the whole string is lower‑cased (mb_* handles multibyte characters correctly)
+        return $formatted === false ? 'unknown date' : mb_strtolower($formatted, 'UTF-8');
     }
 }

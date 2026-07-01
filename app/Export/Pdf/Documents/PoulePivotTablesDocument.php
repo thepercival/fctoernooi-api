@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Documents;
 
+use App\Export\Pdf\Configs\GamesConfig;
 use App\Export\Pdf\Configs\PoulePivotConfig;
 use App\Export\Pdf\Document as PdfDocument;
-use App\Export\Pdf\Pages\PoulePivotTable\AgainstPoulePivotTablePage as AgainstPoulePivotTablePage;
+use App\Export\Pdf\Pages\PoulePivotTable\AgainstPoulePivotTablePage;
 use App\Export\Pdf\Pages\PoulePivotTable\MultiplePoulePivotTablePage as MultipleSportsPoulePivotTablePage;
-use App\Export\Pdf\Pages\PoulePivotTable\TogetherPoulePivotTablePage as TogetherPoulePivotTablePage;
+use App\Export\Pdf\Pages\PoulePivotTable\TogetherPoulePivotTablePage;
 use App\Export\PdfProgress;
 use App\ImagePathResolver;
 use App\ImageSize;
@@ -23,7 +24,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class PoulePivotTablesDocument extends PdfDocument
+final class PoulePivotTablesDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -41,6 +42,7 @@ class PoulePivotTablesDocument extends PdfDocument
         return $this->config;
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $this->drawPoulePivotTables($this->structure->getFirstRoundNumber());
@@ -48,8 +50,8 @@ class PoulePivotTablesDocument extends PdfDocument
 
     protected function drawPoulePivotTables(
         RoundNumber $roundNumber,
-        AgainstPoulePivotTablePage|TogetherPoulePivotTablePage $page = null,
-        float $y = null
+        AgainstPoulePivotTablePage|TogetherPoulePivotTablePage|null $page = null,
+        float|null $y = null
     ): void {
         if ($this->someStructureCellNeedsRanking($roundNumber)) {
             if ($roundNumber->getCompetition()->hasMultipleSports()) {

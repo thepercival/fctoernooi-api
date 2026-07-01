@@ -21,7 +21,7 @@ use Zend_Pdf_Resource_Image;
 /**
  * @template-extends ToernooiPdfPage<RegistrationFormDocument>
  */
-class RegistrationFormPage extends ToernooiPdfPage
+final class RegistrationFormPage extends ToernooiPdfPage
 {
     public function __construct(RegistrationFormDocument $document, mixed $param1)
     {
@@ -38,11 +38,11 @@ class RegistrationFormPage extends ToernooiPdfPage
         );
 
         $config = $this->parent->getConfig();
-        $rowHeight = $config->getRowHeight() * 2;
+        $rowHeight = $config->getRowHeight() * 2.0;
         $y -= $rowHeight;
         $xStart = ToernooiPdfPage::PAGEMARGIN;
-        $labelWidth = 100;
-        $marginStartDashedLine = 30;
+        $labelWidth = 100.0;
+        $marginStartDashedLine = 30.0;
         $widthDashedLine = $this->getDisplayWidth() - ($labelWidth + $marginStartDashedLine);
 
         $xStartDashedLine = $xStart + $labelWidth + $marginStartDashedLine;
@@ -64,14 +64,20 @@ class RegistrationFormPage extends ToernooiPdfPage
         // SHOW INFO FROM ORGANIZER
         $settings = $this->parent->getRegistrationSettings();
         $lines = explode(PHP_EOL, $settings->getRemark());
-        $rectangle = new Rectangle(new HorizontalLine(new Point($xStartDashedLine, $y), $widthDashedLine), -($rowHeight * (count($lines) + 1 ) ) );
+        $rectangle = new Rectangle(
+            new HorizontalLine(
+                new Point($xStartDashedLine, $y),
+                $widthDashedLine
+            ),
+            -($rowHeight * (((float)count($lines)) + 1.0 ) )
+        );
         $this->drawCell( ' ', $rectangle, Align::Left, 'gray');
 
-        $textPaddingX = 5;
+        $textPaddingX = 5.0;
         foreach($lines as $line) {
             // DASHED LINE
             $xStartDashedLine = $xStart + $labelWidth + $marginStartDashedLine + $textPaddingX;
-            $this->drawString($line, new Point($xStartDashedLine, $y - $rowHeight), $widthDashedLine - (2 * $textPaddingX));
+            $this->drawString($line, new Point($xStartDashedLine, $y - $rowHeight), $widthDashedLine - (2.0 * $textPaddingX));
 
             $y -= $rowHeight;
         }

@@ -7,7 +7,7 @@ namespace FCToernooi;
 use FCToernooi\Planning\RoundNumbersToAssignPlanningTo;
 use Memcached;
 
-class CacheService
+final class CacheService
 {
     public const TournamentCacheIdPrefix = 'json-tournament-';
     public const StructureCacheIdPrefix = 'json-structure-';

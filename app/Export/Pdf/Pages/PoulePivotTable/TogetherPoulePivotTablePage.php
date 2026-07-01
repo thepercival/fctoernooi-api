@@ -7,14 +7,14 @@ namespace App\Export\Pdf\Pages\PoulePivotTable;
 use App\Export\Pdf\Align;
 use App\Export\Pdf\Documents\PoulePivotTablesDocument as PoulePivotTablesDocument;
 use App\Export\Pdf\Pages\PoulePivotTablesPage as PoulePivotTablesPage;
-use Sports\Competition\Sport as CompetitionSport;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Place\Together as TogetherGamePlace;
 use Sports\Game\State as GameState;
 use Sports\Place;
 use Sports\Planning\GameAmountConfig;
 use Sports\Poule;
 
-class TogetherPoulePivotTablePage extends PoulePivotTablesPage
+final class TogetherPoulePivotTablePage extends PoulePivotTablesPage
 {
     public function __construct(PoulePivotTablesDocument $document, mixed $param1)
     {
@@ -40,23 +40,26 @@ class TogetherPoulePivotTablePage extends PoulePivotTablesPage
     }*/
 
     // t/m 3 places 0g, t/m 8 places 45g, hoger 90g
+    #[\Override]
     public function getPouleHeight(Poule $poule): float
     {
         $height = $this->parent->getConfig()->getRowHeight();
         // places
-        $height += $this->parent->getConfig()->getRowHeight() * $poule->getPlaces()->count();
+        $height += $this->parent->getConfig()->getRowHeight() * (float)$poule->getPlaces()->count();
 
         return $height;
     }
 
+    #[\Override]
     protected function drawPouleHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $y): float
     {
         return parent::drawPouleHeaderHelper($poule, $gameAmountConfig, $y);
     }
 
+    #[\Override]
     protected function drawVersusHeader(Poule $poule, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
-        $versusColumnWidth = $this->versusColumnsWidth / $gameAmountConfig->getAmount();
+        $versusColumnWidth = $this->versusColumnsWidth / (float)$gameAmountConfig->getAmount();
         $height = $this->getVersusHeight($versusColumnWidth);
 
         for ($gameRoundNumber = 1 ; $gameRoundNumber <= $gameAmountConfig->getAmount() ; $gameRoundNumber++) {
@@ -65,9 +68,10 @@ class TogetherPoulePivotTablePage extends PoulePivotTablesPage
         return $x;
     }
 
+    #[\Override]
     protected function drawVersusCell(Place $place, GameAmountConfig $gameAmountConfig, float $x, float $y): float
     {
-        $columnWidth = $this->versusColumnsWidth / $gameAmountConfig->getAmount();
+        $columnWidth = $this->versusColumnsWidth / (float)$gameAmountConfig->getAmount();
         for ($gameRoundNumber = 1 ; $gameRoundNumber <= $gameAmountConfig->getAmount() ; $gameRoundNumber++) {
             $score = $this->getScore($place, $gameAmountConfig->getCompetitionSport(), $gameRoundNumber);
             $x = $this->drawCellCustom(

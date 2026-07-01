@@ -5,30 +5,39 @@ declare(strict_types=1);
 namespace App\Actions\Sports\Planning;
 
 use App\Actions\Action;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionSport;
 use Sports\Planning\GameAmountConfig;
-use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
 use Sports\Round\Number as RoundNumber;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class GameAmountConfigAction extends Action
 {
+    /** @var EntityRepository<CompetitionSport> */
+    protected EntityRepository $competiionSportRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        protected CompetitionSportRepository $competiionSportRepos,
         protected StructureRepository $structureRepos,
-        protected GameAmountConfigRepository $gameAmountConfigRepos
+        private EntityManagerInterface $entityManager
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionSport::class);
+        $this->competiionSportRepos = new EntityRepository($entityManager, $metaData);
+
     }
 
     /**
@@ -77,7 +86,8 @@ final class GameAmountConfigAction extends Action
                 $gameAmountConfig->setAmount($gameAmountConfigSer->getAmount());
             }
 
-            $this->gameAmountConfigRepos->save($gameAmountConfig);
+            $this->entityManager->persist($gameAmountConfig);
+            $this->entityManager->flush();
 
             $this->removeNext($roundNumber, $competitionSport);
 
@@ -97,7 +107,8 @@ final class GameAmountConfigAction extends Action
         $gameAmountConfig = $next->getGameAmountConfig($competitionSport);
         if ($gameAmountConfig !== null) {
             $next->getGameAmountConfigs()->removeElement($gameAmountConfig);
-            $this->gameAmountConfigRepos->remove($gameAmountConfig);
+            $this->entityManager->remove($gameAmountConfig);
+            $this->entityManager->flush();
         }
         $this->removeNext($next, $competitionSport);
     }

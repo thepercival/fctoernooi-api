@@ -10,12 +10,16 @@ use Sports\Sport\Custom as CustomSport;
 
 /**
  * Class TranslationService, translates certain sports-terms
+ * @api
  * @package FCToernooi
  */
 class TranslationService
 {
-    protected const LANGUAGE = 'nl';
+    protected const string LANGUAGE = 'nl';
 
+    /**
+     * @psalm-suppress PossiblyUnusedParam
+     */
     public function getSportName(string $language, int $customId): string
     {
         switch ($customId) {
@@ -129,7 +133,7 @@ class TranslationService
                 return 'set';
             }
         }
-        return '';
+        return 'set';
     }
 
     public function getScoreNamePlural(ScoreConfig $scoreConfig): string
@@ -180,7 +184,7 @@ class TranslationService
                 return 'sets';
             }
         }
-        return '';
+        return 'sets';
     }
 
     public function getScoreDirection(int $direction): string

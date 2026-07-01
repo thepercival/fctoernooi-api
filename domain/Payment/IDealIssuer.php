@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace FCToernooi\Payment;
 
-class IDealIssuer
+/**
+ * @api
+ */
+final class IDealIssuer
 {
     public function __construct(protected string $id, protected string $name, protected string $imgUrl)
     {

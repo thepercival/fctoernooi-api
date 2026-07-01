@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class TitleConfig
+final readonly class TitleConfig
 {
     public function __construct(
         private int $fontHeight = 16/*; between 10 and 20*/,

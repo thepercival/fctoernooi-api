@@ -11,7 +11,10 @@ use Sports\Place\Location as PlaceLocation;
 use SportsHelpers\Identifiable;
 use FCToernooi\Tournament\Registration\State;
 
-class Registration extends Identifiable
+/**
+ * @api
+ */
+final class Registration extends Identifiable
 {
     private State $state = State::Created;
     private string $name;

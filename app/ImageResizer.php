@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\ImageService\Entity;
 use FCToernooi\Competitor;
 use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
 use GdImage;
-use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use App\ImageService\Entity as ImageEntity;
 
-class ImageResizer
+final class ImageResizer
 {
     protected ImagePathResolver $pathResolver;
 
@@ -94,13 +91,13 @@ class ImageResizer
             return $image_resource_id;
         }
         $thressHold = ImageService::LOGO_ASPECTRATIO_THRESHOLD;
-        $aspectRatio = $width / $height;
+        $aspectRatio = (float)($width / $height);
 
-        $target_width = $width - (($height - $target_height) * $aspectRatio);
-        if ($target_width < ($target_height * (1 - $thressHold))) {
-            $target_width = $target_height * (1 - $thressHold);
-        } elseif ($target_width > ($target_height * (1 + $thressHold))) {
-            $target_width = $target_height * (1 + $thressHold);
+        $target_width = ((float)$width) - ((((float)$height) - ((float)$target_height)) * $aspectRatio);
+        if ($target_width < (((float)$target_height) * (1.0 - $thressHold))) {
+            $target_width = ((float)$target_height) * (1.0 - $thressHold);
+        } elseif ($target_width > (((float)$target_height) * (1.0 + $thressHold))) {
+            $target_width = ((float)$target_height) * (1.0 + $thressHold);
         }
         return $this->resizeHelper($image_resource_id, $width, $height, (int)$target_width, $target_height);
         /*else if( $height < $target_height ) { // make image larger
@@ -131,6 +128,9 @@ class ImageResizer
 
         imagesavealpha($gdImage, true);
         $trans_colour = imagecolorallocatealpha($gdImage, 0, 0, 0, 127);
+        if( $trans_colour === false ) {
+            throw new \Exception('could not create image', E_ERROR);
+        }
         imagefill($gdImage, 0, 0, $trans_colour);
 
         /** @psalm-suppress InvalidArgument */

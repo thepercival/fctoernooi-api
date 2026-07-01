@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace FCToernooi\Planning\Totals;
 
 use DateTimeImmutable;
-use FCToernooi\Planning\RoundNumberWithPlanning;
 use League\Period\Period;
-use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\PlanningAssigner;
 use Sports\Round\Number\PlanningScheduler;
-use SportsPlanning\Planning;
-use SportsPlanning\Exceptions\NoBestPlanningException;
 
-class TotalPeriodCalculator
+/**
+ * @api
+ */
+final class TotalPeriodCalculator
 {
     /**
      * @param DateTimeImmutable $startDateTime
@@ -46,40 +44,40 @@ class TotalPeriodCalculator
                 }
 
                 $nextGamePeriod = $scheduler->createGamePeriod($nextGameStartDateTime, $planningConfig);
-                $nextGameStartDateTime = $scheduler->moveToFirstAvailableSlot($nextGamePeriod)->getStartDate();
+                $nextGameStartDateTime = $scheduler->moveToFirstAvailableSlot($nextGamePeriod)->startDate;
 
                 $interval = new \DateInterval('PT' . $planningConfig->getMaxNrOfMinutesPerGame() . 'M');
                 $endDateTime = $nextGameStartDateTime->add($interval);
             }
         }
-        return new Period( $startDateTime, $endDateTime );
+        return Period::fromDate( $startDateTime, $endDateTime );
     }
 
-    /**
-     * @param RoundNumber $roundNumber
-     * @param Planning $bestPlanning
-     * @param list<Period> $recessPeriods
-     * @throws NoBestPlanningException
-     */
-    public function assignGames(
-        RoundNumber $roundNumber,
-        Planning $bestPlanning,
-        array $recessPeriods,
-    ): void
-    {
-        // while ($roundNumber) {
-//            $planningInput = (new PlanningInputCreator())->create($roundNumber, $nrOfReferees);
+//    /**
+//     * @param RoundNumber $roundNumber
+//     * @param Planning $bestPlanning
+//     * @param list<Period> $recessPeriods
+//     * @throws NoBestPlanningException
+//     */
+//    public function assignGames(
+//        RoundNumber $roundNumber,
+//        Planning $bestPlanning,
+//        array $recessPeriods,
+//    ): void
+//    {
+//        // while ($roundNumber) {
+////            $planningInput = (new PlanningInputCreator())->create($roundNumber, $nrOfReferees);
+////
+////            $input = $this->inputRepository->getFromInput($planningInput);
+////            if ($input === null) {
+////                return false;
+////            }
+////            $bestPlanning = $input->getBestPlanning(null);
 //
-//            $input = $this->inputRepository->getFromInput($planningInput);
-//            if ($input === null) {
-//                return false;
-//            }
-//            $bestPlanning = $input->getBestPlanning(null);
-
-        $planningAssigner = new PlanningAssigner(new PlanningScheduler($recessPeriods));
-        $planningAssigner->assignPlanningToRoundNumber($roundNumber, $bestPlanning);
-        // return $planningAssigner->unusedRecessPeriods();
-    }
+//        $planningAssigner = new PlanningAssigner(new PlanningScheduler($recessPeriods));
+//        $planningAssigner->assignPlanningToRoundNumber($roundNumber, $bestPlanning);
+//        // return $planningAssigner->unusedRecessPeriods();
+//    }
 
     // je bent hier de hyrarchie nodig en daarnaast moet je weten per ronde
     // hoeveel wat de minimum en maximum te spelen wedstrijden zijn

@@ -8,7 +8,7 @@ use App\QueueService;
 use Interop\Amqp\AmqpTopic;
 use Interop\Amqp\Impl\AmqpBind;
 
-class Pdf extends QueueService
+final class Pdf extends QueueService
 {
     /**
      * @param array<string, mixed> $amqpOptions

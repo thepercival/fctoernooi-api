@@ -19,7 +19,7 @@ use Zend_Pdf_Page;
 /**
  * @template-extends ToernooiPdfPage<GameNotesDocument>
  */
-class GameNotesPage extends ToernooiPdfPage
+final class GameNotesPage extends ToernooiPdfPage
 {
     public function __construct(
         mixed $parent,
@@ -73,9 +73,9 @@ class GameNotesPage extends ToernooiPdfPage
         $this->setLineDashingPattern([10, 10]);
         $this->drawLine(
             self::PAGEMARGIN,
-            $this->getHeight() / 2,
+            $this->getHeight() / 2.0,
             $this->getWidth() - self::PAGEMARGIN,
-            $this->getHeight() / 2
+            $this->getHeight() / 2.0
         );
         $this->setLineDashingPattern(Zend_Pdf_Page::LINE_DASHING_SOLID);
 
@@ -84,7 +84,7 @@ class GameNotesPage extends ToernooiPdfPage
             $this->parent->getTournament()->getName(),
             $subHeader,
             new HeaderConfig(
-                ($this->getHeight() / 2) - self::PAGEMARGIN
+                ($this->getHeight() / 2.0) - self::PAGEMARGIN
             )
         );
         $top = new HorizontalLine(new Point(ToernooiPdfPage::PAGEMARGIN, $y), $this->getDisplayWidth());

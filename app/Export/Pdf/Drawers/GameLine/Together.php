@@ -17,7 +17,7 @@ use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round\Number as RoundNumber;
 
-class Together extends GameLine
+final class Together extends GameLine
 {
     public function __construct(PdfPage $page, GameLineConfig $config, RoundNumber $roundNumber)
     {
@@ -30,9 +30,10 @@ class Together extends GameLine
             $nrOfGamePlaces = $this->config->getMaxNrOfPlacesPerLine();
         }
         $width = $this->getColumnWidth(Column::PlacesAndScore);
-        return $width / $nrOfGamePlaces;
+        return $width / (float)$nrOfGamePlaces;
     }
 
+    #[\Override]
     protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine
     {
         $width = $this->getColumnWidth(Column::PlacesAndScore);
@@ -40,6 +41,7 @@ class Together extends GameLine
         return $left->addX($width);
     }
 
+    #[\Override]
     protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, VerticalLine $left): VerticalLine
     {
         // HIER MOETEN DE SCORES OOK VERWERKT WORDEN IN DE PLACES!!!
@@ -50,10 +52,7 @@ class Together extends GameLine
         $height = $this->config->getRowHeight();
         $placeWidth = $this->getPlaceWidth($game->getPlaces()->count());
         $placeNameWidth = $placeWidth;
-        $scoreWidth = 0;
-        if ($game->getState() === GameState::Finished) {
-            $scoreWidth = 25;
-        }
+        $scoreWidth = $game->getState() === GameState::Finished ? 25.0 : 0.0;
         $placeNameWidth -= $scoreWidth;
 
         $placeCounter = 1;

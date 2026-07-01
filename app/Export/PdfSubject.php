@@ -19,10 +19,10 @@ enum PdfSubject: int
     case Intro = 1024;
     case Sponsor = 4096;
 
-    public static function all(): int
-    {
-        return 8191;
-    }
+//    public static function all(): int
+//    {
+//        return 8191;
+//    }
 
     /**
      * @param int $subjects

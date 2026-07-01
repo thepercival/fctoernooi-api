@@ -5,30 +5,35 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\ImageService;
+use App\Repositories\SponsorRepository;
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Sponsor;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
-use Selective\Config\Configuration;
 
+/**
+ * @api
+ */
 final class SponsorAction extends Action
 {
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private SponsorRepository $sponsorRepos,
         private ImageService $imageService,
-        private Configuration $config
+        private EntityManagerInterface $entityManager,
     ) {
         parent::__construct($logger, $serializer);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -73,6 +78,7 @@ final class SponsorAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -93,7 +99,8 @@ final class SponsorAction extends Action
             $newSponsor->setUrl($sponsor->getUrl());
             $newSponsor->setLogoExtension($sponsor->getLogoExtension());
             $newSponsor->setScreenNr($sponsor->getScreenNr());
-            $this->sponsorRepos->save($newSponsor);
+            $this->entityManager->persist($newSponsor);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($newSponsor, 'json');
             return $this->respondWithJson($response, $json);
@@ -126,11 +133,12 @@ final class SponsorAction extends Action
             }
 
             $this->sponsorRepos->checkNrOfSponsors($tournament, $sponsorSer->getScreenNr(), $sponsor);
-            $oldLogoExtension = $sponsor->getLogoExtension();
+//            $oldLogoExtension = $sponsor->getLogoExtension();
             $sponsor->setName($sponsorSer->getName());
             $sponsor->setUrl($sponsorSer->getUrl());
             $sponsor->setScreenNr($sponsorSer->getScreenNr());
-            $this->sponsorRepos->save($sponsor);
+            $this->entityManager->persist($sponsor);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($sponsor, 'json');
             return $this->respondWithJson($response, $json);
@@ -159,7 +167,8 @@ final class SponsorAction extends Action
                 return new ForbiddenResponse("het toernooi komt niet overeen met het toernooi van de sponsor");
             }
 
-            $this->sponsorRepos->remove($sponsor);
+            $this->entityManager->remove($sponsor);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {
@@ -199,7 +208,8 @@ final class SponsorAction extends Action
             }
 
             $sponsor->setLogoExtension($extension);
-            $this->sponsorRepos->save($sponsor);
+            $this->entityManager->persist($sponsor);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($sponsor, 'json');
             return $this->respondWithJson($response, $json);

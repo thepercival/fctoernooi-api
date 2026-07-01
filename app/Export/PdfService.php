@@ -14,6 +14,9 @@ use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Zend_Pdf;
 
+/**
+ * @api
+ */
 final class PdfService
 {
     public const CACHE_EXPIRATION = 300;
@@ -21,7 +24,6 @@ final class PdfService
     public const MERGE_PERCENTAGE = 10;
 
     protected string $pdfLocalDir;
-    protected string $wwwUrl;
     /**
      * @var list<string>
      */
@@ -30,11 +32,9 @@ final class PdfService
     public function __construct(
         Configuration $config,
         protected TmpService $tmpService,
-        protected PdfDocumentFactory $factory,
         protected Memcached $memcached,
         protected LoggerInterface $logger
     ) {
-        $this->wwwUrl = $config->getString('www.wwwurl');
         $this->tmpSubDir = ['pdf'];
         $this->pdfLocalDir = $config->getString('www.apiurl-localpath') . 'pdf' . DIRECTORY_SEPARATOR;
     }
@@ -82,11 +82,11 @@ final class PdfService
         // clean files from tmp
         $this->logger->info("clean files from " . $this->getTmpDir() );
         $retVal = $this->tmpService->removeFile($this->tmpSubDir, $this->getTmpPath($tournamentId));
-        $this->logger->info("   clean file " . $this->getTmpPath($tournamentId) . ' : ' . $retVal);
+        $this->logger->info("   clean file " . $this->getTmpPath($tournamentId) . ' : ' . ($retVal ? "1" : ""));
         foreach (PdfSubject::cases() as $subject) {
             $fileName = $this->getTmpSubjectFileName($tournamentId, $subject);
             $retVal = $this->tmpService->removeFile($this->tmpSubDir, $fileName);
-            $this->logger->info("   clean file " . $fileName . ' : ' . $retVal);
+            $this->logger->info("   clean file " . $fileName . ' : ' . ($retVal ? "1" : ""));
         }
     }
 

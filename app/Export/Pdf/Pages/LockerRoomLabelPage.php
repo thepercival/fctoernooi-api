@@ -19,7 +19,7 @@ use Zend_Pdf_Resource_Image;
 /**
  * @template-extends ToernooiPdfPage<LockerRoomsDocument>
  */
-class LockerRoomLabelPage extends ToernooiPdfPage
+final class LockerRoomLabelPage extends ToernooiPdfPage
 {
     protected QRService $qrService;
 
@@ -62,8 +62,8 @@ class LockerRoomLabelPage extends ToernooiPdfPage
         $maxText = $fncMaxText($texts);
 
         while ($fontHeight < $this->parent->getLabelConfig()->getMaxFontSize()
-            && $this->getTextWidth($maxText, $fontHeight + 1) <= $columnWidth) {
-            $fontHeight++;
+            && $this->getTextWidth($maxText, $fontHeight + 1.0) <= $columnWidth) {
+            $fontHeight += 1.0;
         }
         return $fontHeight;
     }
@@ -76,7 +76,7 @@ class LockerRoomLabelPage extends ToernooiPdfPage
         $y = $this->drawHeader($this->parent->getTournament()->getName(), "kleedkamer");
         $y = $this->drawLockerRoom($y);
         $infoHeight = $this->parent->getTournament()->getPublic() ? $this->parent->getLabelConfig()->getInfoHeight(
-        ) : 0;
+        ) : 0.0;
         $this->drawCompetitors($competitors, $y, self::PAGEMARGIN + $infoHeight);
         if ($this->parent->getTournament()->getPublic()) {
             $this->drawInfo();
@@ -89,7 +89,7 @@ class LockerRoomLabelPage extends ToernooiPdfPage
         $columnWidth = $this->getDisplayWidth();
 
         $fontHeight = $this->getCompetitorFontHeight($columnWidth);
-        $rowHeight = $fontHeight + ((int)(floor($fontHeight / 2)));
+        $rowHeight = $fontHeight + floor($fontHeight / 2.0);
 
         //  $x = $this->getXLineCentered($nrOfPoulesForLine, $pouleWidth, $pouleMargin);
         $this->setFont($this->helper->getTimesFont(true), $fontHeight);
@@ -103,7 +103,7 @@ class LockerRoomLabelPage extends ToernooiPdfPage
             "black"
         );
         $this->setFont($this->helper->getTimesFont(), $fontHeight);
-        return $y - (2 * $rowHeight);
+        return $y - (2.0 * $rowHeight);
     }
 
     /**
@@ -118,7 +118,7 @@ class LockerRoomLabelPage extends ToernooiPdfPage
         $columnWidth = $this->getDisplayWidth();
 
         $fontHeight = $this->getCompetitorFontHeight($columnWidth);
-        $rowHeight = $fontHeight + ((int)(floor($fontHeight / 2)));
+        $rowHeight = $fontHeight + (floor($fontHeight / 2.0));
 
         $y = $yStart;
         while (($y - $rowHeight) >= $yEnd && $competitor = array_shift($competitors)) {
@@ -137,21 +137,21 @@ class LockerRoomLabelPage extends ToernooiPdfPage
 
     protected function drawInfo(): void
     {
-        $center = $this->getWidth() / 2;
+        $center = $this->getWidth() / 2.0;
         $infoHeight = $this->parent->getLabelConfig()->getInfoHeight();
-        $centerLeft = $center - (self::PAGEMARGIN / 2);
+        $centerLeft = $center - (self::PAGEMARGIN / 2.0);
 
         $this->setFont($this->helper->getTimesFont(), $this->parent->getLabelConfig()->getInfoFontSize());
         $x = self::PAGEMARGIN;
         $maxWidth = (int)($centerLeft - $x);
-        $y = self::PAGEMARGIN + ($infoHeight * 2 / 3);
+        $y = self::PAGEMARGIN + ($infoHeight * 2.0 / 3.0);
         $this->drawString("toernooi informatie:", new Point($x, $y), $maxWidth, Align::Right);
 
-        $y = self::PAGEMARGIN + ($infoHeight * 1 / 3);
+        $y = self::PAGEMARGIN + ($infoHeight * 1.0 / 3.0);
         $url = $this->parent->getWwwUrl() . (string)$this->parent->getTournament()->getId();
         $this->drawString($url, new Point($x, $y), $maxWidth, Align::Right);
 
-        $centerRight = $center + (self::PAGEMARGIN / 2);
+        $centerRight = $center + (self::PAGEMARGIN / 2.0);
 
         $y = self::PAGEMARGIN + $infoHeight;
         $qrPath = $this->qrService->writeTournamentToJpg($this->parent->getTournament(), $url, $infoHeight);

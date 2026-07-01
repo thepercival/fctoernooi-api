@@ -5,7 +5,7 @@ namespace App\QueueService\Pdf;
 use App\Export\PdfSubject;
 use FCToernooi\Tournament;
 
-class CreateMessage
+final class CreateMessage
 {
     public function __construct(
         protected Tournament $tournament,

@@ -7,6 +7,9 @@ namespace FCToernooi\Planning\Totals;
 use DateTimeImmutable;
 use League\Period\Period;
 
+/**
+ * @api
+ */
 final class PlanningTotals
 {
     private DateTimeImmutable $startDateTime;
@@ -14,8 +17,8 @@ final class PlanningTotals
 
     public function __construct(Period $period, private CompetitorAmount $competitorAmount)
     {
-        $this->startDateTime = $period->getStartDate();
-        $this->endDateTime = $period->getEndDate();
+        $this->startDateTime = $period->startDate;
+        $this->endDateTime = $period->endDate;
     }
 
     public function getStartDateTime(): DateTimeImmutable

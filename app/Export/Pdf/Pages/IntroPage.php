@@ -25,11 +25,11 @@ use Zend_Pdf_Resource_ImageFactory;
 /**
  * @template-extends ToernooiPdfPage<IntroDocument>
  */
-class IntroPage extends ToernooiPdfPage
+final class IntroPage extends ToernooiPdfPage
 {
     protected QRService $qrService;
-    public const int FieldsetHeaderPadding = 4;
-    public const int FieldsetTextMargin = 2;
+    public const float FieldsetHeaderPadding = 4.0;
+    public const float FieldsetTextMargin = 2.0;
 
     public function __construct(IntroDocument $document, mixed $param1)
     {
@@ -38,7 +38,7 @@ class IntroPage extends ToernooiPdfPage
         $this->qrService = new QRService();
     }
 
-    public function draw(): bool
+    public function draw(): void
     {
         $y = $this->drawHeader(
             $this->parent->getTournament()->getName(),
@@ -54,7 +54,7 @@ class IntroPage extends ToernooiPdfPage
         $y -= $fieldsetMargin;
 
         $logoPath = $this->parent->getTournamentLogoPath(ImageSize::Small);
-        $rightWidth = 200;
+        $rightWidth = 200.0;
         $leftWidth = $this->getDisplayWidth() - ( $rightWidth + $fieldsetMargin );
 
         $theme = $this->parent->getTheme();
@@ -75,13 +75,13 @@ class IntroPage extends ToernooiPdfPage
         );
 
         $xImage = $rectangle->getRight()->getX() + $fieldsetMargin;
-        $yRight = $y + 1;
+        $yRight = $y + 1.0;
         $locationStartY = $yRight;
         // 2 MAAK RECHTSBOVEN EEN LOGO
         try {
             /** @var Zend_Pdf_Resource_Image $img */
             $img = Zend_Pdf_Resource_ImageFactory::factory($logoPath);
-            $logoSize = ImageSize::Normal->value;
+            $logoSize = (float)ImageSize::Normal->value;
             $imgRectangle = new Rectangle(new HorizontalLine(new Point($xImage, $yRight), $logoSize), -$logoSize);
             $this->drawImageExt($img, $imgRectangle);
             $locationStartY = $yRight - $logoSize;
@@ -123,12 +123,8 @@ class IntroPage extends ToernooiPdfPage
                     $theme,
                     'huisregels',
                     $config->getRulesFieldsetListConfig());
-            } else {
-                return false;
             }
-
         }
-        return true;
     }
 
 

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\ViewHelpers\TournamentReport;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use App\ViewHelpers\TournamentReport as TournamentReportHelper;
 use DateTimeImmutable;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use FCToernooi\Tournament\ShellFilter;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -17,8 +17,10 @@ use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Slim\Exception\HttpException;
 use Slim\Views\Twig as TwigView;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class ReportAction extends Action
 {
     public function __construct(
@@ -33,6 +35,7 @@ final class ReportAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, string|int> $args

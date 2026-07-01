@@ -7,33 +7,35 @@ namespace App\Commands;
 use App\Command;
 use App\ImageService;
 use App\Mailer;
+use App\Repositories\SponsorRepository as SponsorRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use FCToernooi\Competitor;
 use FCToernooi\Sponsor;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
-use FCToernooi\Competitor\Repository as CompetitorRepository;
 use Psr\Container\ContainerInterface;
 use Selective\Config\Configuration;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BackupImagesCommand extends Command
+final class BackupImagesCommand extends Command
 {
     private string $customName = 'backup-images';
     protected SponsorRepository $sponsorRepos;
-    protected CompetitorRepository $competitorRepos;
+    /** @var EntityRepository<Competitor>  */
+    protected EntityRepository $competitorRepos;
     protected EntityManagerInterface|null $entityManager;
 
     public function __construct(ContainerInterface $container)
     {
-        /** @var CompetitorRepository $competitorRepos */
-        $competitorRepos = $container->get(CompetitorRepository::class);
-        $this->competitorRepos = $competitorRepos;
+        $entityManager = $container->get(EntityManagerInterface::class);
 
-        /** @var SponsorRepository $sponsorRepos */
-        $sponsorRepos = $container->get(SponsorRepository::class);
-        $this->sponsorRepos = $sponsorRepos;
+        $metaData = $entityManager->getClassMetadata(Competitor::class);
+        /** @var EntityRepository<Competitor> competitorRepos */
+        $this->competitorRepos = new EntityRepository($entityManager, $metaData);
+
+        /** @var SponsorRepository sponsorRepos */
+        $this->sponsorRepos = $container->get(SponsorRepository::class);
 
         /** @var Mailer|null $mailer */
         $mailer = $container->get(Mailer::class);
@@ -48,6 +50,7 @@ class BackupImagesCommand extends Command
         parent::__construct($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -64,6 +67,7 @@ class BackupImagesCommand extends Command
         parent::configure();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $syncDbWithDisk = $input->getOption('sync-db-with-disk');

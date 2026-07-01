@@ -31,10 +31,10 @@ abstract class Document extends Zend_Pdf
     protected StartLocationMap|null $startLocationMap = null;
     protected Helper $helper;
 
-    /**
-     * @var array<string, float>
-     */
-    protected array $widthText = [];
+//    /**
+//     * @var array<string, float>
+//     */
+//    protected array $widthText = [];
 
     public function __construct(
         protected Tournament $tournament,
@@ -55,21 +55,10 @@ abstract class Document extends Zend_Pdf
         return new Theme();
     }
 
-    public function getDateFormatter(string $pattern = ''): IntlDateFormatter {
-        return new IntlDateFormatter(
-            'nl_NL',
-            IntlDateFormatter::FULL,
-            IntlDateFormatter::FULL,
-            'Europe/Amsterdam',
-            IntlDateFormatter::GREGORIAN,
-            $pattern
-        );
-    }
-
-    protected function getHelper(): Helper
-    {
-        return $this->helper;
-    }
+//    protected function getHelper(): Helper
+//    {
+//        return $this->helper;
+//    }
 
     public function getTournamentLogoPath(ImageSize|null $imageSize): string|null {
         $logoExtension = $this->tournament->getLogoExtension();
@@ -83,6 +72,7 @@ abstract class Document extends Zend_Pdf
         return $this->imagePathResolver->getPath($this->tournament, $imageProps, $logoExtension);
     }
 
+    #[\Override]
     public function render($newSegmentOnly = false, $outputStream = null): string
     {
         $this->renderCustom();
@@ -101,63 +91,63 @@ abstract class Document extends Zend_Pdf
         $this->progress->addProgression($this->maxSubjectProgress);
     }
 
-    /**
-     * @param Poule $poule
-     * @param CompetitionSport $competitionSport
-     * @return list<AgainstGame>
-     */
-    protected function getAgainstGames(Poule $poule, CompetitionSport $competitionSport): array
-    {
-        $games = $poule->getGamesWithState(GameState::Created);
-        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
-        });
-        return array_values($filtered);
-    }
+//    /**
+//     * @param Poule $poule
+//     * @param CompetitionSport $competitionSport
+//     * @return list<AgainstGame>
+//     */
+//    protected function getAgainstGames(Poule $poule, CompetitionSport $competitionSport): array
+//    {
+//        $games = $poule->getGamesWithState(GameState::Created);
+//        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
+//        });
+//        return array_values($filtered);
+//    }
 
-    /**
-     * @param Poule $poule
-     * @param CompetitionSport $competitionSport
-     * @return list<TogetherGame>
-     */
-    protected function getSingleGames(Poule $poule, CompetitionSport $competitionSport): array
-    {
-        $games = $poule->getGamesWithState(GameState::Created);
-        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
-        });
-        return array_values($filtered);
-    }
+//    /**
+//     * @param Poule $poule
+//     * @param CompetitionSport $competitionSport
+//     * @return list<TogetherGame>
+//     */
+//    protected function getSingleGames(Poule $poule, CompetitionSport $competitionSport): array
+//    {
+//        $games = $poule->getGamesWithState(GameState::Created);
+//        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
+//        });
+//        return array_values($filtered);
+//    }
 
-    /**
-     * @param Poule $poule
-     * @param CompetitionSport $competitionSport
-     * @return list<TogetherGame>
-     */
-    protected function getAllInOneGames(Poule $poule, CompetitionSport $competitionSport): array
-    {
-        $games = $poule->getGamesWithState(GameState::Created);
-        $games = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
-        });
-        return array_values($games);
-    }
+//    /**
+//     * @param Poule $poule
+//     * @param CompetitionSport $competitionSport
+//     * @return list<TogetherGame>
+//     */
+//    protected function getAllInOneGames(Poule $poule, CompetitionSport $competitionSport): array
+//    {
+//        $games = $poule->getGamesWithState(GameState::Created);
+//        $games = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
+//        });
+//        return array_values($games);
+//    }
 
-    public function hasTextWidth(string $key): bool
-    {
-        return array_key_exists($key, $this->widthText);
-    }
+//    public function hasTextWidth(string $key): bool
+//    {
+//        return array_key_exists($key, $this->widthText);
+//    }
 
-    public function getTextWidth(string $key): float
-    {
-        return $this->widthText[$key];
-    }
+//    public function getTextWidth(string $key): float
+//    {
+//        return $this->widthText[$key];
+//    }
 
-    public function setTextWidth(string $key, float $value): float
-    {
-        $this->widthText[$key] = $value;
-        return $value;
-    }
+//    public function setTextWidth(string $key, float $value): float
+//    {
+//        $this->widthText[$key] = $value;
+//        return $value;
+//    }
 
     public function getStructure(): Structure
     {

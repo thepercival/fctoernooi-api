@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\ImageService\Entity;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Competitor;
 use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
-use GdImage;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
-use App\ImageService\Entity as ImageEntity;
 
+/**
+ * @api
+ */
 class ImageService
 {
-    public const LOGO_ASPECTRATIO_THRESHOLD = 0.34;
+    public const float LOGO_ASPECTRATIO_THRESHOLD = 0.34;
     protected ImageResizer $resizer;
     protected ImagePathResolver $pathResolver;
 
@@ -49,10 +49,11 @@ class ImageService
     public function processUploadedImage(Sponsor|Competitor|Tournament $object, UploadedFileInterface $logostream): string|null
     {
         if ($logostream->getError() === UPLOAD_ERR_INI_SIZE) {
-            throw new Exception(
-                "het plaatje mag maximaal \"" . ini_get("upload_max_filesize") . "\" groot zijn",
-                E_ERROR
-            );
+            $upload_max_filesize = ini_get("upload_max_filesize");
+            if ( $upload_max_filesize === false ) {
+                $upload_max_filesize = '?';
+            }
+            throw new Exception("het plaatje mag maximaal '" . $upload_max_filesize . "' groot zijn",E_ERROR);
         }
 
         $imgPath = $this->saveUploadStream($object, $logostream);

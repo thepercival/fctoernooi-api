@@ -26,7 +26,7 @@ use Zend_Pdf_Exception;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class GamesDocument extends PdfPlanningDocument
+final class GamesDocument extends PdfPlanningDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -48,6 +48,7 @@ class GamesDocument extends PdfPlanningDocument
         );
     }
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $firstRoundNumber = $this->structure->getFirstRoundNumber();
@@ -64,6 +65,7 @@ class GamesDocument extends PdfPlanningDocument
      * @return PlanningPage
      * @throws Zend_Pdf_Exception
      */
+    #[\Override]
     protected function createPagePlanning(RoundNumber $roundNumber, string $title): PlanningPage
     {
         $page = new PlanningPage($this, $this->getPlanningPageDimension($roundNumber), $title);
@@ -90,7 +92,7 @@ class GamesDocument extends PdfPlanningDocument
         foreach ($games as $game) {
             $gameHeight = $page->getParent()->getGameLineConfig()->getRowHeight();
             $recessToDraw = $recessHelper->removeRecessBeforeGame($game, $recesses);
-            $gameHeight += $recessToDraw !== null ? $gameHeight : 0;
+            $gameHeight += $recessToDraw !== null ? $gameHeight : 0.0;
             if ($gameHorStartLine->getY() - $gameHeight < ToernooiPdfPage::PAGEMARGIN) {
                 $title = 'wedstrijden';
                 $page = $this->createPagePlanning($roundNumber, $title);

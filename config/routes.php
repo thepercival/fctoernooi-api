@@ -445,7 +445,6 @@ return function (App $app): void {
                         'users',
                         function (Group $group): void {
                             $group->options('/{tournamentUserId}', TournamentUserAction::class . ':options');
-                            $group->put('/{tournamentUserId}', TournamentUserAction::class . ':edit');
                             $group->delete('/{tournamentUserId}', TournamentUserAction::class . ':remove');
 
                             $group->options(
@@ -456,10 +455,14 @@ return function (App $app): void {
                                 '/{tournamentUserId}/emailaddress',
                                 TournamentUserAction::class . ':getEmailaddress'
                             );
+
+                            $group->options('/{tournamentUserId}/roles/{role}', TournamentUserAction::class . ':options');
+                            $group->post('/{tournamentUserId}/roles/{role}', TournamentUserAction::class . ':addRole');
+                            $group->delete('/{tournamentUserId}/roles/{role}', TournamentUserAction::class . ':removeRole');
                         }
-                    )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
+                    )->add(TournamentRoleAdminAuthMiddleware::class)
+                    ->add(UserMiddleware::class)
+                    ->add(TournamentMiddleware::class);
 
                     $group->group(
                         'invitations',
@@ -468,12 +471,16 @@ return function (App $app): void {
                             $group->get('', InvitationAction::class . ':fetch');
                             $group->post('', InvitationAction::class . ':add');
                             $group->options('/{invitationId}', InvitationAction::class . ':options');
-                            $group->put('/{invitationId}', InvitationAction::class . ':edit');
+//                            $group->put('/{invitationId}', InvitationAction::class . ':edit');
                             $group->delete('/{invitationId}', InvitationAction::class . ':remove');
+
+                            $group->options('/{invitationId}/roles/{role}', InvitationAction::class . ':options');
+                            $group->post('/{invitationId}/roles/{role}', InvitationAction::class . ':addRole');
+                            $group->delete('/{invitationId}/roles/{role}', InvitationAction::class . ':removeRole');
                         }
-                    )->add(TournamentRoleAdminAuthMiddleware::class)->add(UserMiddleware::class)->add(
-                        TournamentMiddleware::class
-                    );
+                    )->add(TournamentRoleAdminAuthMiddleware::class)
+                        ->add(UserMiddleware::class)
+                        ->add(TournamentMiddleware::class);
 
                     $group->group(
                         'categories/{categoryId}/registrations',

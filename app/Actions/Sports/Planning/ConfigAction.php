@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Sports\Planning;
 
 use App\Actions\Action;
+use App\Repositories\Sports\StructureRepository;
 use App\Response\ErrorResponse;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
@@ -13,25 +15,25 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Planning\Config as PlanningConfig;
-use Sports\Planning\Config\Repository as PlanningConfigRepository;
 use Sports\Planning\Config\Service as PlanningConfigService;
 use Sports\Round\Number as RoundNumber;
-use Sports\Structure\Repository as StructureRepository;
 
+/**
+ * @api
+ */
 final class ConfigAction extends Action
 {
-    protected PlanningConfigRepository $planningConfigRepos;
     protected PlanningConfigService $planningConfigService;
     protected StructureRepository $structureRepos;
 
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
-        PlanningConfigRepository $planningConfigRepos,
+        private EntityManagerInterface $entityManager,
         StructureRepository $structureRepos
     ) {
         parent::__construct($logger, $serializer);
-        $this->planningConfigRepos = $planningConfigRepos;
+
         $this->structureRepos = $structureRepos;
         $this->planningConfigService = new PlanningConfigService();
     }
@@ -61,10 +63,12 @@ final class ConfigAction extends Action
             $oldPlanningConfig = $roundNumber->getPlanningConfig();
             $planningConfig = $this->planningConfigService->copy($planningConfigSer, $roundNumber);
 
-            $this->planningConfigRepos->save($planningConfig);
+            $this->entityManager->persist($planningConfig);
+            $this->entityManager->flush();
 
             if ($oldPlanningConfig !== null) {
-                $this->planningConfigRepos->remove($oldPlanningConfig);
+                $this->entityManager->remove($oldPlanningConfig);
+                $this->entityManager->flush();
             }
             $this->removeNext($roundNumber);
 
@@ -84,7 +88,8 @@ final class ConfigAction extends Action
         $planningConfig = $next->getPlanningConfig();
         if ($planningConfig !== null) {
             $next->setPlanningConfig(null);
-            $this->planningConfigRepos->remove($planningConfig);
+            $this->entityManager->persist($planningConfig);
+            $this->entityManager->flush();
         }
         $this->removeNext($next);
     }

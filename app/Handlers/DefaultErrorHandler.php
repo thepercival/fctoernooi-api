@@ -10,7 +10,7 @@ use Slim\Handlers\ErrorHandler;
 use Slim\Interfaces\CallableResolverInterface;
 
 /** @psalm-suppress PropertyNotSetInConstructor */
-class DefaultErrorHandler extends ErrorHandler
+final class DefaultErrorHandler extends ErrorHandler
 {
     /**
      * @param CallableResolverInterface $callableResolver
@@ -25,6 +25,7 @@ class DefaultErrorHandler extends ErrorHandler
         parent::__construct($callableResolver, $responseFactory, $logger);
     }
 
+    #[\Override]
     protected function logError(string $error): void
     {
         header('Access-Control-Allow-Origin: *');

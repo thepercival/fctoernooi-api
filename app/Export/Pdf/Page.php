@@ -27,16 +27,17 @@ abstract class Page extends Zend_Pdf_Page
     use HeaderDrawer;
     use TitleDrawer;
 
-    public const A4_PORTRET_WIDTH = 595;
-    public const A4_PORTRET_HEIGHT = 842;
-    public const PAGEMARGIN = 20;
-    public const CELL_PADDING_X = 1;
-    public const DEFAULT_TEXT_COLOR = 'black';
+    public const float A4_PORTRET_WIDTH = 595.0;
+    public const float A4_PORTRET_HEIGHT = 842.0;
+    public const float PAGEMARGIN = 20.0;
+    public const float CELL_PADDING_X = 1.0;
+    public const string DEFAULT_TEXT_COLOR = 'black';
     protected Helper $helper;
 
     protected Zend_Pdf_Color $textColor;
     protected Zend_Pdf_Color $fillColor;
-    protected Zend_Pdf_Color|null $fillColorTmp = null;
+//    protected Zend_Pdf_Color|null $fillColorTmp = null;
+    /** @psalm-suppress PossiblyUnusedProperty */
     protected float $lineWidth;
 
     /**
@@ -70,7 +71,7 @@ abstract class Page extends Zend_Pdf_Page
         return $this->parent->getStructureNameService();
     }
 
-    public function getDateFormatter(string $pattern = null): \IntlDateFormatter {
+    public function getDateFormatter(string|null $pattern = null): \IntlDateFormatter {
         return $this->parent->getDateFormatter($pattern);
     }
 
@@ -90,6 +91,7 @@ abstract class Page extends Zend_Pdf_Page
     }
 
 
+    #[\Override]
     final public function setFillColor(Zend_Pdf_Color $color): self
     {
         parent::setFillColor($color);
@@ -97,15 +99,16 @@ abstract class Page extends Zend_Pdf_Page
         return $this;
     }
 
-    public function getLineWidth(): float
-    {
-        return $this->lineWidth;
-    }
+//    public function getLineWidth(): float
+//    {
+//        return $this->lineWidth;
+//    }
 
     /**
      * @param float $width
      * @return self
      */
+    #[\Override]
     public function setLineWidth($width): self
     {
         parent::setLineWidth($width);
@@ -115,7 +118,7 @@ abstract class Page extends Zend_Pdf_Page
 
     public function getDisplayWidth(): float
     {
-        return $this->getWidth() - (2 * self::PAGEMARGIN);
+        return $this->getWidth() - (2.0 * self::PAGEMARGIN);
     }
 
     /**
@@ -130,9 +133,9 @@ abstract class Page extends Zend_Pdf_Page
         string $sText,
         Rectangle $rectangle,
         Align $nAlign = Align::Left,
-        array|string $vtLineColors = null,
+        array|string|null $vtLineColors = null,
         array|null $cornerRadius = null,
-        int $nStyle = null
+        int|null $nStyle = null
     ): void {
         $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, $cornerRadius, $nStyle);
     }
@@ -150,8 +153,8 @@ abstract class Page extends Zend_Pdf_Page
         Rectangle $rectangle,
         Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
-        int $degrees = null,
-        int $nStyle = null
+        int|null $degrees = null,
+        int|null $nStyle = null
     ): void {
         $this->drawCellHelper($sText, $rectangle, $nAlign, $vtLineColors, null, $degrees, $nStyle);
     }
@@ -172,8 +175,8 @@ abstract class Page extends Zend_Pdf_Page
         Align $nAlign = Align::Left,
         array|string|null $vtLineColors = null,
         array|null $cornerRadius = null,
-        int $degrees = null,
-        int $nStyle = null
+        int|null $degrees = null,
+        int|null $nStyle = null
     ): void {
         if( $nStyle === null ) {
             $nStyle = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE;
@@ -243,7 +246,7 @@ abstract class Page extends Zend_Pdf_Page
         }
 
         $nFontSize = $this->getFontSize();
-        $nTextY = (int)($yPos - ((($rectangle->getHeight() / 2) + ($nFontSize / 2)) - 1.5));
+        $nTextY = (int)($yPos - ((($rectangle->getHeight() / 2.0) + ($nFontSize / 2.0)) - 1.5));
 
         $maxLength = $rectangle->getWidth();
         $stringXPos = $xPos;
@@ -251,7 +254,7 @@ abstract class Page extends Zend_Pdf_Page
             $degrees = 0;
         } elseif ($degrees > 45) {
             $maxLength = $rectangle->getHeight();
-            $stringXPos -= ($rectangle->getHeight() - $rectangle->getWidth()) / 2;
+            $stringXPos -= ($rectangle->getHeight() - $rectangle->getWidth()) / 2.0;
         }
         if ($nAlign === Align::Left) {
             $stringXPos += self::CELL_PADDING_X;
@@ -272,18 +275,18 @@ abstract class Page extends Zend_Pdf_Page
         );
     }
 
-    public function drawRectangleExt(
-        Rectangle $rectangle/*x1, $y1, $x2, $y2*/,
-        int $fillType = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE
-    ): void {
-        $this->drawRectangle(
-            $rectangle->getTop()->getStart()->getX(),
-            $rectangle->getTop()->getStart()->getY(),
-            $rectangle->getTop()->getEnd()->getX(),
-            $rectangle->getTop()->getEnd()->getY(),
-            $fillType
-        );
-    }
+//    public function drawRectangleExt(
+//        Rectangle $rectangle/*x1, $y1, $x2, $y2*/,
+//        int $fillType = Zend_Pdf_Page::SHAPE_DRAW_FILL_AND_STROKE
+//    ): void {
+//        $this->drawRectangle(
+//            $rectangle->getTop()->getStart()->getX(),
+//            $rectangle->getTop()->getStart()->getY(),
+//            $rectangle->getTop()->getEnd()->getX(),
+//            $rectangle->getTop()->getEnd()->getY(),
+//            $fillType
+//        );
+//    }
 
     /**
      * @param array<string, Zend_Pdf_Color | string>| Zend_Pdf_Color | string | null $vtLineColors
@@ -312,10 +315,13 @@ abstract class Page extends Zend_Pdf_Page
         return $vtLineColors;
     }
 
+    /**
+     * @psalm-suppress PossiblyUnusedReturnValue
+     */
     public function drawString(
         string|null $sText,
         Point $start,
-        float $nMaxWidth = null,
+        float|null $nMaxWidth = null,
         Align $nAlign = Align::Left,
         int $nRotationDegree = 0
     ): float {
@@ -325,19 +331,19 @@ abstract class Page extends Zend_Pdf_Page
         $sText = $sText === null ? '' : $sText;
 
         if ($nRotationDegree > 0) {
-            $nRotationAngle = M_PI / 6; //standaard M_PI/6 = 30 graden
+            $nRotationAngle = M_PI / 6.0; //standaard M_PI/6 = 30 graden
             if ($nRotationDegree == 45) {
-                $nRotationAngle = M_PI / 4;
+                $nRotationAngle = M_PI / 4.0;
             }
             if ($nRotationDegree == 90) {
-                $nRotationAngle = M_PI / 2;
+                $nRotationAngle = M_PI / 2.0;
             }
 
             $xMiddle = $start->getX();
             if ($nMaxWidth !== null) {
-                $xMiddle += ($nMaxWidth / 2);
+                $xMiddle += ($nMaxWidth / 2.0);
             }
-            $yMiddle = $start->getY() + ($nFontSize / 2);
+            $yMiddle = $start->getY() + ($nFontSize / 2.0);
             $this->rotate($xMiddle, $yMiddle, $nRotationAngle);
             // $yTextBase -= $nFontSize - $nPadding; //Y richting is nu horizontaal (bij hoek 90 graden)
             //$xTextBase -= round( ($nHeight )/2 ) - 2*$nPadding	 ; //MOET NOG ANDERS!!  //round( ($nWidth - $nTextWidth)/2 ) centreert hem nu verticaal
@@ -351,17 +357,17 @@ abstract class Page extends Zend_Pdf_Page
         $oFillColorTmp = $this->getFillColor();
         $this->setFillColor($this->textColor);
 
-        $widthForStartPosition = 0;
+        $widthForStartPosition = 0.0;
         if ($nMaxWidth !== null) {
             $widthForStartPosition = $nMaxWidth;
         }
         $nNewXPos = $this->getTextStartPosition($start->getX(), $sText, $nAlign, $widthForStartPosition, $nFontSize);
 
-        $nDotDotWidth = $font->widthForGlyph($font->glyphNumberForCharacter(ord('.')));
-        $nDotDotWidth = $nDotDotWidth / $nFontUnitsPerEM * $nFontSize;
-        $nDotDotWidth *= 2;
+        $nDotDotWidth = (float)$font->widthForGlyph($font->glyphNumberForCharacter(ord('.')));
+        $nDotDotWidth = $nDotDotWidth / ((float)$nFontUnitsPerEM) * $nFontSize;
+        $nDotDotWidth *= 2.0;
 
-        $nCharPosition = 0;
+        $nCharPosition = 0.0;
         // $unicodeString = 'aÄ…bcÄ�deÄ™Ã«Å‚';
         $chrArray = preg_split('//u', $sText, -1, PREG_SPLIT_NO_EMPTY);
         if ($chrArray === false) {
@@ -370,8 +376,8 @@ abstract class Page extends Zend_Pdf_Page
         for ($nCharIndex = 0; $nCharIndex < count($chrArray); $nCharIndex++) {
             $nTmp = $this->helper->uniord($chrArray[$nCharIndex]);
 
-            $nCharWidth = $font->widthForGlyph($font->glyphNumberForCharacter($nTmp));
-            $nCharWidth = $nCharWidth / $nFontUnitsPerEM * $nFontSize;
+            $nCharWidth = (float)$font->widthForGlyph($font->glyphNumberForCharacter($nTmp));
+            $nCharWidth = $nCharWidth / ((float)$nFontUnitsPerEM) * $nFontSize;
 
             if ($nMaxWidth !== null and ($nCharPosition + $nCharWidth + $nDotDotWidth) > $nMaxWidth
                 and $nCharIndex < (count($chrArray) - 2)
@@ -393,9 +399,9 @@ abstract class Page extends Zend_Pdf_Page
         return $nNewXPos;
     }
 
-    protected function getTextWidth(string $sText = null, float $fontSize, bool $withCellPaddingX = true): float
+    protected function getTextWidth(string|null $sText, float $fontSize, bool $withCellPaddingX = true): float
     {
-        $cellPaddingX = $withCellPaddingX ? self::CELL_PADDING_X : 0;
+        $cellPaddingX = $withCellPaddingX ? self::CELL_PADDING_X : 0.0;
         return $cellPaddingX + $this->helper->getTextWidth($sText ?? '', $this->getFont(), $fontSize) + $cellPaddingX;
     }
 
@@ -416,13 +422,13 @@ abstract class Page extends Zend_Pdf_Page
                    $textWidth = $maxWidth;
                }
 
-               $xPosText = ($xPos + ($width / 2)) - ($textWidth / 2);
+               $xPosText = ($xPos + ($width / 2.0)) - ($textWidth / 2.0);
            } elseif ($nAlign === Align::Right) {
                if ($textWidth > $maxWidth) {
                    $textWidth = $maxWidth;
                }
 
-               $xPosText = (($xPos + $width) - 1) - $textWidth;
+               $xPosText = (($xPos + $width) - 1.0) - $textWidth;
            }
         }
         return $xPosText;
@@ -448,100 +454,96 @@ abstract class Page extends Zend_Pdf_Page
             $line->getEnd()->getY());
     }
 
-    /**
-     * @param string $text
-     * @param Rectangle $rectangle
-     * @param Align $align
-     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColor
-     * @throws Zend_Pdf_Exception
-     */
-    public function drawTableHeader(
-        string $text,
-        Rectangle $rectangle,
-        Align $align = Align::Center,
-        array|string|null $vtLineColor = 'black'
-    ): void {
-        $arrLines = explode('<br>', $text);
-        $nNrOfLines = count($arrLines);
-
-        $this->drawCell('', $rectangle, $align, $vtLineColor);
-
-        $nLineHeight = ($rectangle->getHeight() / $nNrOfLines);
-        $yDelta = 0;
-        $nNrOfLines = count($arrLines);
-        if ($nNrOfLines === 1) {
-            $rectangle = new Rectangle(
-                $rectangle->getTop(),
-                $rectangle->getHeight() - ($nLineHeight + $yDelta)
-            );
-            $this->drawCell($text, $rectangle, $align, $vtLineColor);
-        } else {
-            $oFillColor = $this->getFillColor();
-            $arrTopLineColors = [];
-            $arrMiddleLineColors = [];
-            $arrBottomLineColors = [];
-            if (is_string($vtLineColor)) {
-                $arrTopLineColors = [
-                    'b' => $oFillColor,
-                    't' => $vtLineColor,
-                    'l' => $vtLineColor,
-                    'r' => $vtLineColor
-                ];
-                $arrMiddleLineColors = [
-                    'b' => $oFillColor,
-                    't' => $oFillColor,
-                    'l' => $vtLineColor,
-                    'r' => $vtLineColor
-                ];
-                $arrBottomLineColors = [
-                    'b' => $vtLineColor,
-                    't' => $oFillColor,
-                    'l' => $vtLineColor,
-                    'r' => $vtLineColor
-                ];
-            } elseif (is_array($vtLineColor)) {
-                if (array_key_exists('b', $vtLineColor) === true) {
-                    $arrTopLineColors['b'] = $oFillColor;
-                    $arrMiddleLineColors['b'] = $oFillColor;
-                    $arrBottomLineColors['b'] = $vtLineColor['b'];
-                }
-                if (array_key_exists('t', $vtLineColor) === true) {
-                    $arrTopLineColors['t'] = $vtLineColor['t'];
-                    $arrMiddleLineColors['t'] = $oFillColor;
-                    $arrBottomLineColors['t'] = $oFillColor;
-                }
-                if (array_key_exists('l', $vtLineColor) === true) {
-                    $arrTopLineColors['l'] = $vtLineColor['l'];
-                    $arrMiddleLineColors['l'] = $vtLineColor['l'];
-                    $arrBottomLineColors['l'] = $vtLineColor['l'];
-                }
-                if (array_key_exists('r', $vtLineColor) === true) {
-                    $arrTopLineColors['r'] = $vtLineColor['r'];
-                    $arrMiddleLineColors['r'] = $vtLineColor['r'];
-                    $arrBottomLineColors['r'] = $vtLineColor['r'];
-                }
-            }
-
-            $bTop = true;
-            $nLineNr = 0;
-            foreach ($arrLines as $sLine) {
-                $arrLineColors = $arrTopLineColors;
-                if ($bTop === false) {
-                    $arrLineColors = $arrMiddleLineColors;
-                } elseif (++$nLineNr === $nNrOfLines) {
-                    $arrLineColors = $arrBottomLineColors;
-                }
-//                $rectangle = new Rectangle(
-//                    $rectangle->getStart()->addY(- $yDelta),
-//                    new Point($rectangle->getWidth(), $nLineHeight)
-//                );
-                $this->drawCell($sLine, $rectangle, $align, $arrLineColors);
-                $yDelta += $nLineHeight;
-
-                $bTop = false;
-            }
-        }
-    }
+//    /**
+//     * @param string $text
+//     * @param Rectangle $rectangle
+//     * @param Align $align
+//     * @param array<string, Zend_Pdf_Color | string>| string | null $vtLineColor
+//     * @throws Zend_Pdf_Exception
+//     */
+//    public function drawTableHeader(
+//        string $text,
+//        Rectangle $rectangle,
+//        Align $align = Align::Center,
+//        array|string|null $vtLineColor = 'black'
+//    ): void {
+//        $arrLines = explode('<br>', $text);
+//        $nNrOfLines = count($arrLines);
+//
+//        $this->drawCell('', $rectangle, $align, $vtLineColor);
+//
+//        $nLineHeight = ($rectangle->getHeight() / $nNrOfLines);
+//        $yDelta = 0;
+//        $nNrOfLines = count($arrLines);
+//        if ($nNrOfLines === 1) {
+//            $rectangle = new Rectangle(
+//                $rectangle->getTop(),
+//                $rectangle->getHeight() - ($nLineHeight + $yDelta)
+//            );
+//            $this->drawCell($text, $rectangle, $align, $vtLineColor);
+//        } else {
+//            $oFillColor = $this->getFillColor();
+//            $arrTopLineColors = [];
+//            $arrMiddleLineColors = [];
+//            $arrBottomLineColors = [];
+//            if (is_string($vtLineColor)) {
+//                $arrTopLineColors = [
+//                    'b' => $oFillColor,
+//                    't' => $vtLineColor,
+//                    'l' => $vtLineColor,
+//                    'r' => $vtLineColor
+//                ];
+//                $arrMiddleLineColors = [
+//                    'b' => $oFillColor,
+//                    't' => $oFillColor,
+//                    'l' => $vtLineColor,
+//                    'r' => $vtLineColor
+//                ];
+//                $arrBottomLineColors = [
+//                    'b' => $vtLineColor,
+//                    't' => $oFillColor,
+//                    'l' => $vtLineColor,
+//                    'r' => $vtLineColor
+//                ];
+//            } elseif (is_array($vtLineColor)) {
+//                if (array_key_exists('b', $vtLineColor) === true) {
+//                    $arrTopLineColors['b'] = $oFillColor;
+//                    $arrMiddleLineColors['b'] = $oFillColor;
+//                    $arrBottomLineColors['b'] = $vtLineColor['b'];
+//                }
+//                if (array_key_exists('t', $vtLineColor) === true) {
+//                    $arrTopLineColors['t'] = $vtLineColor['t'];
+//                    $arrMiddleLineColors['t'] = $oFillColor;
+//                    $arrBottomLineColors['t'] = $oFillColor;
+//                }
+//                if (array_key_exists('l', $vtLineColor) === true) {
+//                    $arrTopLineColors['l'] = $vtLineColor['l'];
+//                    $arrMiddleLineColors['l'] = $vtLineColor['l'];
+//                    $arrBottomLineColors['l'] = $vtLineColor['l'];
+//                }
+//                if (array_key_exists('r', $vtLineColor) === true) {
+//                    $arrTopLineColors['r'] = $vtLineColor['r'];
+//                    $arrMiddleLineColors['r'] = $vtLineColor['r'];
+//                    $arrBottomLineColors['r'] = $vtLineColor['r'];
+//                }
+//            }
+//
+//            $bTop = true;
+//            $nLineNr = 0;
+//            foreach ($arrLines as $sLine) {
+//                $arrLineColors = $arrTopLineColors;
+//                if ($bTop === false) {
+//                    $arrLineColors = $arrMiddleLineColors;
+//                } elseif (++$nLineNr === $nNrOfLines) {
+//                    $arrLineColors = $arrBottomLineColors;
+//                }
+//
+//                $this->drawCell($sLine, $rectangle, $align, $arrLineColors);
+//
+//                $bTop = false;
+//            }
+//        }
+//    }
 
     /**
      * 1 determine text startpoint
@@ -576,14 +578,14 @@ abstract class Page extends Zend_Pdf_Page
         $textStartPoint = $rectangle->getTop()->getStart()->add($padding,$padding);
 
 //        * 2 determine maximum textwidth by usting width of rectangle and subtract padding
-        $maxTextWidth = $rectangle->getWidth() - (2 * $padding );
+        $maxTextWidth = $rectangle->getWidth() - (2.0 * $padding );
 
 //        * 3 determine height of fieldset
         $linesToDraw = $this->getLines($text, $maxTextWidth, $textFontSize);
         $rowHeight = $textFontSize + $textMargin;
-        $textTotalHeight = (count($linesToDraw) - 1) * $rowHeight;
+        $textTotalHeight = ((float)(count($linesToDraw) - 1)) * $rowHeight;
 
-        $height = $textTotalHeight + ( 2 * $padding );
+        $height = $textTotalHeight + ( 2.0 * $padding );
 
 //        * 4 draw fieldset
         if( $text !== null ) {
@@ -614,7 +616,7 @@ abstract class Page extends Zend_Pdf_Page
      * @param Rectangle $rectangle
      * @param Theme $theme
      * @param string|null $title
-     * @param FieldsetListConfig $ieldsetListConfig
+     * @param FieldsetListConfig $fieldsetListConfig
      * @return void
      */
     protected function drawFieldsetList(
@@ -635,13 +637,13 @@ abstract class Page extends Zend_Pdf_Page
         $textStartPoint = $rectangle->getTop()->getStart()->add($textMargin,$textMargin);
 
 //        * 2 determine maximum textwidth by usting width of rectangle and subtract padding
-        $maxTextWidth = $rectangle->getWidth() - (2 * $textMargin );
+//        $maxTextWidth = $rectangle->getWidth() - (2 * $textMargin );
 
 //        * 3 determine height of fieldset
         $rowHeight = $textFontSize + $textMargin;
-        $textTotalHeight = (count($linesToDraw) - 1) * $rowHeight;
+        $textTotalHeight = ((float)(count($linesToDraw) - 1)) * $rowHeight;
 
-        $height = $textTotalHeight + ( 2 * $textMargin );
+        $height = $textTotalHeight + ( 2.0 * $textMargin );
 
 //        * 4 draw fieldset
         $this->drawFieldsetOuter( $headerFontSize, $headerTextMargin, new Rectangle($rectangle->getTop(), -$height), $title, $theme);
@@ -649,9 +651,7 @@ abstract class Page extends Zend_Pdf_Page
         $this->setFont($this->helper->getTimesFont(false), $textFontSize);
 
 //        * 5 draw lines of text
-        foreach( $linesToDraw as $lineToDraw) {
-            $this->drawFieldsetLines($textStartPoint, $linesToDraw, $textFontSize, $textMargin);
-        }
+        $this->drawFieldsetLines($textStartPoint, $linesToDraw, $textFontSize, $textMargin);
 
         $this->setFont($this->helper->getTimesFont(false), $originalFontSize);
     }
@@ -678,7 +678,7 @@ abstract class Page extends Zend_Pdf_Page
             $nrOfLines += count($this->getLines($lineToDraw, $maxTextWidth, $textFontSize));
         }
         $textRowHeight = $textFontSize * $textMargin;
-        $linesTotalHeight = $nrOfLines * $textRowHeight;
+        $linesTotalHeight = ((float)$nrOfLines) * $textRowHeight;
 
         return $headerHeight + $linesTotalHeight;
     }
@@ -686,17 +686,17 @@ abstract class Page extends Zend_Pdf_Page
     /**
      * @param string|null $text
      * @param float $maxTextWidth
-     * @param int $fontSize
+     * @param float $fontSize
      * @return list<string>
      */
-    private function getLines( string|null $text, float $maxTextWidth, int $fontSize ): array {
+    private function getLines( string|null $text, float $maxTextWidth, float $fontSize ): array {
         $linesToDraw = [];
         if( $text === null ) {
             return $linesToDraw;
         }
         $lines = explode( PHP_EOL, $text);
         foreach( $lines as  $line ) {
-            $textWidth = 0;
+            $textWidth = 0.0;
             $lineToDraw = '';
             $words = explode( ' ', $line);
             $firstWord = true;
@@ -725,7 +725,7 @@ abstract class Page extends Zend_Pdf_Page
         return $linesToDraw;
     }
 
-    private function drawFieldsetOuter( int $headerFontSize, float $headerTextMargin, Rectangle $rectangle, string|null $title, Theme $theme): void {
+    private function drawFieldsetOuter( float $headerFontSize, float $headerTextMargin, Rectangle $rectangle, string|null $title, Theme $theme): void {
 
         if( $title !== null ) {
             $title =  ' ' . $title;
@@ -751,13 +751,12 @@ abstract class Page extends Zend_Pdf_Page
 
     /**
      * @param Point $textStartPoint
-     * @param float $maxTextWidth
      * @param list<string> $textLines
-     * @param int $fontSize
+     * @param float $fontSize
      * @param float $textMargin
      * @return void
      */
-    private function drawFieldsetText( Point $textStartPoint, array $textLines, int $fontSize, float $textMargin): void {
+    private function drawFieldsetText( Point $textStartPoint, array $textLines, float $fontSize, float $textMargin): void {
         $rowHeight = $fontSize + $textMargin;
         $point = new Point($textStartPoint);
         foreach( $textLines as  $textLine ) {
@@ -769,12 +768,12 @@ abstract class Page extends Zend_Pdf_Page
     /**
      * @param Point $textStartPoint
      * @param list<string> $textLines
-     * @param int $fontSize
+     * @param float $fontSize
      * @param float $textMargin
      * @return void
      * @throws \Exception
      */
-    private function drawFieldsetLines( Point $textStartPoint, array $textLines, int $fontSize, float $textMargin): void {
+    private function drawFieldsetLines( Point $textStartPoint, array $textLines, float $fontSize, float $textMargin): void {
         $rowHeight = $fontSize + $textMargin;
         $point = new Point($textStartPoint);
         foreach( $textLines as  $textLine ) {

@@ -20,14 +20,14 @@ final class ValidatorTest extends TestCase
 
     public function testRecessStartBeforeCompetitionStart(): void
     {
-        $season = new Season("2080/2081", new Period(
+        $season = new Season("2080/2081", Period::fromDate(
             new DateTimeImmutable("2080-08-01"),
             new DateTimeImmutable("2081-07-01"),
         ));
         $startDateTime = new DateTimeImmutable("2080-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
         $tournament = new Tournament('intro', $competition);
-        $recessPeriod = new Period($startDateTime->modify('-10 minutes'), $startDateTime->modify('+10 minutes'));
+        $recessPeriod = Period::fromDate($startDateTime->modify('-10 minutes'), $startDateTime->modify('+10 minutes'));
 
         $validator = new Recess\Validator();
 
@@ -37,14 +37,14 @@ final class ValidatorTest extends TestCase
 
     public function testRecessEndBeforeCompetitionStart(): void
     {
-        $season = new Season("2080/2081", new Period(
+        $season = new Season("2080/2081", Period::fromDate(
             new DateTimeImmutable("2080-08-01"),
             new DateTimeImmutable("2081-07-01"),
         ));
         $startDateTime = new DateTimeImmutable("2080-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
         $tournament = new Tournament('intro', $competition);
-        $recessPeriod = new Period($startDateTime->modify('-10 minutes'), $startDateTime->modify('-5 minutes'));
+        $recessPeriod = Period::fromDate($startDateTime->modify('-10 minutes'), $startDateTime->modify('-5 minutes'));
 
         $validator = new Recess\Validator();
 
@@ -54,17 +54,17 @@ final class ValidatorTest extends TestCase
 
     public function testOverlapping(): void
     {
-        $season = new Season("2080/2081", new Period(
+        $season = new Season("2080/2081", Period::fromDate(
             new DateTimeImmutable("2080-08-01"),
             new DateTimeImmutable("2081-07-01"),
         ));
         $startDateTime = new DateTimeImmutable("2081-01-01T12:00:00.000Z");
         $competition = $this->createCompetition(null, $season, $startDateTime);
         $tournament = new Tournament('intro', $competition);
-        $recessPeriod1 = new Period($startDateTime->modify('+10 minutes'), $startDateTime->modify('+20 minutes'));
+        $recessPeriod1 = Period::fromDate($startDateTime->modify('+10 minutes'), $startDateTime->modify('+20 minutes'));
         new Recess($tournament, 'pauze', $recessPeriod1);
 
-        $recessPeriod2 = new Period($startDateTime->modify('+15 minutes'), $startDateTime->modify('+25 minutes'));
+        $recessPeriod2 = Period::fromDate($startDateTime->modify('+15 minutes'), $startDateTime->modify('+25 minutes'));
 
         $validator = new Recess\Validator();
 

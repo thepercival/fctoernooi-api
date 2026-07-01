@@ -6,7 +6,10 @@ namespace FCToernooi;
 
 use SportsHelpers\Identifiable;
 
-class TournamentUser extends Identifiable
+/**
+ * @api
+ */
+final class TournamentUser extends Identifiable
 {
     private int $roles;
 

@@ -2,75 +2,41 @@
 
 declare(strict_types=1);
 
+use App\Repositories\CompetitorRepository;
+use App\Repositories\LockerRoomRepository;
+use App\Repositories\SponsorRepository;
+use App\Repositories\Sports\AgainstGameRepository;
+use App\Repositories\Sports\AgainstQualifyConfigRepository;
+use App\Repositories\Sports\AgainstScoreRepository;
+use App\Repositories\Sports\CompetitionSportRepository;
+use App\Repositories\Sports\RoundNumberRepository;
+use App\Repositories\Sports\SportRepository;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\Sports\TogetherGameRepository;
+use App\Repositories\Sports\TogetherScoreRepository;
+use App\Repositories\TournamentInvitationRepository;
+use App\Repositories\TournamentRegistrationRepository;
+use App\Repositories\TournamentRegistrationSettingsRepository;
+use App\Repositories\TournamentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FCToernooi\Competitor;
-use FCToernooi\Competitor\Repository as CompetitorRepository;
-use FCToernooi\CreditAction;
-use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\LockerRoom;
-use FCToernooi\LockerRoom\Repository as LockerRoomRepository;
-use FCToernooi\Payment;
-use FCToernooi\Payment\Repository as PaymentRepository;
-use FCToernooi\Recess;
-use FCToernooi\Recess\Repository as RecessRepository;
 use FCToernooi\Sponsor;
-use FCToernooi\Sponsor\Repository as SponsorRepository;
 use FCToernooi\Tournament;
-use FCToernooi\Tournament\Invitation as TournamentInvitation;
-use FCToernooi\Tournament\Invitation\Repository as TournamentInvitationRepository;
 use FCToernooi\Tournament\Registration as TournamentRegistration;
-use FCToernooi\Tournament\Registration\Repository as TournamentRegistrationRepository;
+use FCToernooi\Tournament\Invitation as TournamentInvitation;
 use FCToernooi\Tournament\RegistrationSettings as TournamentRegistrationSettings;
-use FCToernooi\Tournament\RegistrationSettings\Repository as TournamentRegistrationSettingsRepository;
-use FCToernooi\Tournament\Rule as TournamentRule;
-use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
-use FCToernooi\Tournament\Repository as TournamentRepository;
-use FCToernooi\TournamentUser;
-use FCToernooi\TournamentUser\Repository as TournamentUserRepository;
-use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use Psr\Container\ContainerInterface;
-use Sports\Competition;
-use Sports\Competition\Field;
-use Sports\Competition\Field\Repository as FieldRepository;
-use Sports\Competition\Referee;
-use Sports\Competition\Referee\Repository as RefereeRepository;
-use Sports\Competition\Repository as CompetitionRepository;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Against as AgainstGame;
-use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\Together as TogetherGame;
-use Sports\Game\Together\Repository as TogetherGameRepository;
-use Sports\League;
-use Sports\League\Repository as LeagueRepository;
-use Sports\Place;
-use Sports\Place\Repository as PlaceRepository;
-use Sports\Planning\Config as PlanningConfig;
-use Sports\Planning\Config\Repository as PlanningConfigRepository;
-use Sports\Planning\GameAmountConfig;
-use Sports\Planning\GameAmountConfig\Repository as GameAmountConfigRepository;
-use Sports\Poule;
 use Sports\Poule\Horizontal\Creator as HorizontalPouleCreator;
-use Sports\Poule\Repository as PouleRepository;
 use Sports\Qualify\AgainstConfig as AgainstQualifyConfig;
-use Sports\Qualify\AgainstConfig\Repository as AgainstQualifyConfigRepository;
 use Sports\Qualify\Rule\Creator as QualifyRuleCreator;
 use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Category as Category;
-use Sports\Category\Repository as CategoryRepository;
 use Sports\Score\Against as AgainstScore;
-use Sports\Score\Against\Repository as AgainstScoreRepository;
-use Sports\Score\Config as ScoreConfig;
-use Sports\Score\Config\Repository as ScoreConfigRepository;
 use Sports\Score\Together as TogetherScore;
-use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\Season;
-use Sports\Season\Repository as SeasonRepository;
 use Sports\Sport;
-use Sports\Sport\Repository as SportRepository;
-use Sports\Structure\Repository as StructureRepository;
 
 return [
     TournamentRepository::class => function (ContainerInterface $container): TournamentRepository {
@@ -78,36 +44,6 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(Tournament::class);
         return new TournamentRepository($entityManager, $metaData);
-    },
-    TournamentUserRepository::class => function (ContainerInterface $container): TournamentUserRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(TournamentUser::class);
-        return new TournamentUserRepository($entityManager, $metaData);
-    },
-    TournamentInvitationRepository::class => function (ContainerInterface $container): TournamentInvitationRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(TournamentInvitation::class);
-        return new TournamentInvitationRepository($entityManager, $metaData);
-    },
-    TournamentRuleRepository::class => function (ContainerInterface $container): TournamentRuleRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(TournamentRule::class);
-        return new TournamentRuleRepository($entityManager, $metaData);
-    },
-    UserRepository::class => function (ContainerInterface $container): UserRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(User::class);
-        return new UserRepository($entityManager, $metaData);
-    },
-    CreditActionRepository::class => function (ContainerInterface $container): CreditActionRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(CreditAction::class);
-        return new CreditActionRepository($entityManager, $metaData);
     },
     SponsorRepository::class => function (ContainerInterface $container): SponsorRepository {
         /** @var EntityManagerInterface $entityManager */
@@ -127,17 +63,11 @@ return [
         $metaData = $entityManager->getClassMetadata(TournamentRegistrationSettings::class);
         return new TournamentRegistrationSettingsRepository($entityManager, $metaData);
     },
-    PaymentRepository::class => function (ContainerInterface $container): PaymentRepository {
+    TournamentInvitationRepository::class => function (ContainerInterface $container): TournamentInvitationRepository {
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Payment::class);
-        return new PaymentRepository($entityManager, $metaData);
-    },
-    RecessRepository::class => function (ContainerInterface $container): RecessRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Recess::class);
-        return new RecessRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(TournamentInvitation::class);
+        return new TournamentInvitationRepository($entityManager, $metaData);
     },
     CompetitorRepository::class => function (ContainerInterface $container): CompetitorRepository {
         /** @var EntityManagerInterface $entityManager */
@@ -150,31 +80,6 @@ return [
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(LockerRoom::class);
         return new LockerRoomRepository($entityManager, $metaData);
-    },
-
-    SportRepository::class => function (ContainerInterface $container): SportRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Sport::class);
-        return new SportRepository($entityManager, $metaData);
-    },
-    SeasonRepository::class => function (ContainerInterface $container): SeasonRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Season::class);
-        return new SeasonRepository($entityManager, $metaData);
-    },
-    LeagueRepository::class => function (ContainerInterface $container): LeagueRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(League::class);
-        return new LeagueRepository($entityManager, $metaData);
-    },
-    CompetitionRepository::class => function (ContainerInterface $container): CompetitionRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Competition::class);
-        return new CompetitionRepository($entityManager, $metaData);
     },
     StructureRepository::class => function (ContainerInterface $container): StructureRepository {
         /** @var EntityManagerInterface $entityManager */
@@ -209,29 +114,17 @@ return [
         $metaData = $entityManager->getClassMetadata(TogetherScore::class);
         return new TogetherScoreRepository($entityManager, $metaData);
     },
-    FieldRepository::class => function (ContainerInterface $container): FieldRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Field::class);
-        return new FieldRepository($entityManager, $metaData);
-    },
-    RefereeRepository::class => function (ContainerInterface $container): RefereeRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Referee::class);
-        return new RefereeRepository($entityManager, $metaData);
-    },
     CompetitionSportRepository::class => function (ContainerInterface $container): CompetitionSportRepository {
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(CompetitionSport::class);
         return new CompetitionSportRepository($entityManager, $metaData);
     },
-    ScoreConfigRepository::class => function (ContainerInterface $container): ScoreConfigRepository {
+    SportRepository::class => function (ContainerInterface $container): SportRepository {
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(ScoreConfig::class);
-        return new ScoreConfigRepository($entityManager, $metaData);
+        $metaData = $entityManager->getClassMetadata(Sport::class);
+        return new SportRepository($entityManager, $metaData);
     },
     AgainstQualifyConfigRepository::class => function (ContainerInterface $container): AgainstQualifyConfigRepository {
         /** @var EntityManagerInterface $entityManager */
@@ -239,40 +132,10 @@ return [
         $metaData = $entityManager->getClassMetadata(AgainstQualifyConfig::class);
         return new AgainstQualifyConfigRepository($entityManager, $metaData);
     },
-    CategoryRepository::class => function (ContainerInterface $container): CategoryRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Category::class);
-        return new CategoryRepository($entityManager, $metaData);
-    },
     RoundNumberRepository::class => function (ContainerInterface $container): RoundNumberRepository {
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $container->get(EntityManagerInterface::class);
         $metaData = $entityManager->getClassMetadata(RoundNumber::class);
         return new RoundNumberRepository($entityManager, $metaData);
-    },
-    PouleRepository::class => function (ContainerInterface $container): PouleRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Poule::class);
-        return new PouleRepository($entityManager, $metaData);
-    },
-    PlaceRepository::class => function (ContainerInterface $container): PlaceRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(Place::class);
-        return new PlaceRepository($entityManager, $metaData);
-    },
-    PlanningConfigRepository::class => function (ContainerInterface $container): PlanningConfigRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(PlanningConfig::class);
-        return new PlanningConfigRepository($entityManager, $metaData);
-    },
-    GameAmountConfigRepository::class => function (ContainerInterface $container): GameAmountConfigRepository {
-        /** @var EntityManagerInterface $entityManager */
-        $entityManager = $container->get(EntityManagerInterface::class);
-        $metaData = $entityManager->getClassMetadata(GameAmountConfig::class);
-        return new GameAmountConfigRepository($entityManager, $metaData);
     },
 ];

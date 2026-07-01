@@ -36,7 +36,7 @@ trait TournamentCreator
         }
 
         $league = new League(new Association("knvb"), "my league");
-        $season = new Season("2018/2019", new Period(
+        $season = new Season("2018/2019", Period::fromDate(
             new DateTimeImmutable("2018-08-01"),
             new DateTimeImmutable("2019-07-01"),
         ));

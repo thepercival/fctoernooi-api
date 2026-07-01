@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class FieldsetTextConfig
+final readonly class FieldsetTextConfig
 {
     public function __construct(
-        private int $padding,
-        private int $headerFontSize,
-        private int $headerTextMargin,
-        private int $textFontSize,
+        private float $padding,
+        private float $headerFontSize,
+        private float $headerTextMargin,
+        private float $textFontSize,
         private float $textMargin
     ) {
 
     }
 
-    public function getPadding(): int
+    public function getPadding(): float
     {
         return $this->padding;
     }
 
-    public function getHeaderFontSize(): int
+    public function getHeaderFontSize(): float
     {
         return $this->headerFontSize;
     }
@@ -30,7 +30,7 @@ readonly class FieldsetTextConfig
         return $this->headerTextMargin;
     }
 
-    public function getTextFontSize(): int
+    public function getTextFontSize(): float
     {
         return $this->textFontSize;
     }

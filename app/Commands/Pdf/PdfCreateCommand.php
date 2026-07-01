@@ -6,17 +6,15 @@ namespace App\Commands\Pdf;
 
 use App\Command;
 use App\Export\Pdf\DocumentFactory;
-use App\Export\Pdf\DocumentFactory as PdfDocumentFactory;
 use App\Export\PdfService;
 use App\Export\PdfSubject;
 use App\Mailer;
 use App\QueueService\Pdf as PdfQueueService;
 use App\QueueService\Pdf\CreateMessage as PdfCreateMessage;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\TournamentRepository as TournamentRepository;
 use App\TmpService;
 use Doctrine\ORM\EntityManagerInterface;
-use FCToernooi\Tournament;
-use FCToernooi\Tournament\RegistrationSettings;
-use FCToernooi\Tournament\Repository as TournamentRepository;
 use Interop\Queue\Consumer;
 use Interop\Queue\Message;
 use Memcached;
@@ -25,25 +23,25 @@ use Psr\Log\LoggerInterface;
 use Selective\Config\Configuration;
 use Sports\Competition;
 use Sports\Round\Number as RoundNumber;
-use Sports\Round\Number\Repository as RoundNumberRepository;
-use Sports\Structure\Repository as StructureRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PdfCreateCommand extends Command
+/**
+ * php bin/console.php app:create-pdf --loglevel=Info --singleRun
+ */
+final class PdfCreateCommand extends Command
 {
     private string $customName = 'create-pdf';
     protected StructureRepository $structureRepos;
-    protected RoundNumberRepository $roundNumberRepos;
     protected TournamentRepository $tournamentRepos;
-    protected RegistrationSettings\Repository $registrationSettingsRepos;
+    protected \App\Repositories\TournamentRegistrationSettingsRepository $registrationSettingsRepos;
     protected PdfService $pdfService;
-    protected PdfQueueService $queueService;
+//    protected PdfQueueService $queueService;
     protected DocumentFactory $documentFactory;
     protected EntityManagerInterface $entityManager;
-    protected bool $showSuccessful = false;
-    protected bool $disableThrowOnTimeout = false;
+//    protected bool $showSuccessful = false;
+//    protected bool $disableThrowOnTimeout = false;
 
     public function __construct(ContainerInterface $container)
     {
@@ -60,16 +58,12 @@ class PdfCreateCommand extends Command
         $structureRepos = $container->get(StructureRepository::class);
         $this->structureRepos = $structureRepos;
 
-        /** @var RoundNumberRepository $roundNumberRepos */
-        $roundNumberRepos = $container->get(RoundNumberRepository::class);
-        $this->roundNumberRepos = $roundNumberRepos;
-
         /** @var TournamentRepository $tournamentRepos */
         $tournamentRepos = $container->get(TournamentRepository::class);
         $this->tournamentRepos = $tournamentRepos;
 
-        /** @var RegistrationSettings\Repository $registrationSettingsRepos */
-        $registrationSettingsRepos = $container->get(RegistrationSettings\Repository::class);
+        /** @var \App\Repositories\TournamentRegistrationSettingsRepository $registrationSettingsRepos */
+        $registrationSettingsRepos = $container->get(\App\Repositories\TournamentRegistrationSettingsRepository::class);
         $this->registrationSettingsRepos = $registrationSettingsRepos;
 
         /** @var EntityManagerInterface $entityManager */
@@ -83,16 +77,16 @@ class PdfCreateCommand extends Command
         $this->pdfService = new PdfService(
             $config,
             new TmpService(),
-            new PdfDocumentFactory($config),
             $memcached,
             $logger
         );
 
-        $this->queueService = new PdfQueueService($config->getArray('queue'));
+//        $this->queueService = new PdfQueueService($config->getArray('queue'));
 
         $this->documentFactory = new DocumentFactory($config);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -108,6 +102,7 @@ class PdfCreateCommand extends Command
         $this->addOption('singleRun', null, InputOption::VALUE_NONE, 'not waiting..');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
@@ -138,6 +133,7 @@ class PdfCreateCommand extends Command
 
     protected function getReceiver(PdfQueueService $queueService): callable
     {
+        /** @psalm-suppress UnusedVariable */
         return function (Message $message, Consumer $consumer) use ($queueService): void {
             // process message
             try {
@@ -205,14 +201,14 @@ class PdfCreateCommand extends Command
         $path = $this->pdfService->getTmpSubjectPath($tournamentId, $subject);
         $pdf->save($path);
         $duration = round(microtime(true) - $time_start, 1);
-        $this->getLogger()->info('     executed in ' . $duration . ' seconds');
+        $this->getLogger()->info('     executed in ' . ((string)$duration) . ' seconds');
 
         if ($this->pdfService->creationCompleted($progress->getProgress())) {
             $this->getLogger()->info('merging pdf for tournamentId "' . $tournamentId . '"');
             $time_start = microtime(true);
             $this->pdfService->mergePdfs($tournament, $message->getFileName());
             $duration = round(microtime(true) - $time_start, 1);
-            $this->getLogger()->info('     executed in ' . $duration . ' seconds');
+            $this->getLogger()->info('     executed in ' . ((string)$duration) . ' seconds');
         }
     }
 

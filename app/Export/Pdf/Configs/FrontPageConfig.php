@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Export\Pdf\Configs;
 
-readonly class FrontPageConfig
+final readonly class FrontPageConfig
 {
     public function __construct(
-        private int $padding,
-        private int $fontHeight,
+        private float $padding,
+        private float $fontHeight,
     ) {
     }
 
@@ -22,12 +22,12 @@ readonly class FrontPageConfig
 //        return $this->roundNumberHeaderHeight - 4;
 //    }
 
-    public function getPadding(): int
+    public function getPadding(): float
     {
         return $this->padding;
     }
 
-    public function getFontHeight(): int
+    public function getFontHeight(): float
     {
         return $this->fontHeight;
     }

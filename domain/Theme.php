@@ -2,7 +2,10 @@
 
 namespace FCToernooi;
 
-class Theme
+/**
+ * @api
+ */
+final class Theme
 {
     public function __construct(
         public readonly string $textColor = '#93c54b',

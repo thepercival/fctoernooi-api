@@ -9,63 +9,58 @@
     "authors": [
         {
             "name": "Coen Dunnink",
-            "email": "fctoernooi2018@gmail.com",
+            "email": "cdkdev@pm.me",
             "homepage": "https://fctoernooi.nl/"
         }
     ],
     "require": {
-      "php": ">=8.3",
+      "php": ">=8.4",
       "ext-gd": "*",
       "ext-gmp": "*",
       "ext-json": "*",
+      "ext-curl": "*",
+      "ext-intl": "*",
       "ext-memcached": "*",
-      "doctrine/orm": "^2.10",
+      "doctrine/orm": "^3.0",
       "doctrine/common": "^3.0",
       "endroid/qr-code": "^4.0",
       "jms/serializer": "^3.23",
       "middlewares/negotiation": "^2.0",
-      "monolog/monolog": "^2.0",
+      "monolog/monolog": "^3.0",
       "phpmailer/phpmailer": "^6.1",
-      "php-di/php-di": "^6.0",
+      "php-di/php-di": "^7.0",
       "selective/config": "^1.1",
       "slim/psr7": "^1.1",
       "slim/slim": "^4.3",
       "slim/php-view": "^3.0",
       "symfony/yaml": "^6.0",
       "symfony/property-access": "^6.0",
-      "symfony/console": "^5.0",
+      "symfony/console": "^6.0",
       "thepercival/php-sports": "^1.0",
-      "thepercival/php-sports-planning": "^1.0",
       "thepercival/php-sports-helpers": "^1.0",
+      "thepercival/php-sports-planning": "^1.0",
       "tuupola/base62": "^2.0",
       "tuupola/slim-basic-auth": "^3.2",
-      "tuupola/slim-jwt-auth": "^3.4",
+      "jimtools/jwt-auth": "^3.0",
       "vlucas/phpdotenv": "^5.3",
       "thepercival/zend-pdf": "^1.0",
       "slim/twig-view": "^3.1",
       "enqueue/amqp-lib": "^0.10",
       "symfony/cache": "^6.0",
       "mollie/mollie-api-php": "^2.0",
-      "ahamed/jsphp": "^0.5.0",
-      "ext-curl": "*",
-      "ext-intl": "*"
+      "ahamed/jsphp": "^0.5"
     },
     "require-dev": {
       "composer/composer": "^2.2",
-      "phpunit/phpunit": "^9.5",
-      "phpstan/phpstan": "^1.2",
-      "phpstan/phpstan-doctrine": "^1.0",
-      "phpstan/extension-installer": "^1.0",
-      "phpstan/phpstan-phpunit": "^1.0",
-      "phpstan/phpstan-strict-rules": "^1.1",
+      "phpunit/phpunit": "^12.0",
       "friendsofphp/php-cs-fixer": "^3.2",
-      "vimeo/psalm": "^4.15",
-      "psalm/plugin-phpunit": "^0.16",
-      "weirdan/doctrine-psalm-plugin": "^2.0"
+      "vimeo/psalm": "*",
+      "psalm/plugin-phpunit": "^0.19"
     },
     "autoload": {
         "psr-4": {
             "FCToernooi\\": "domain/",
+            "FCToernooi\\Database\\": "db",
             "App\\": "app/",
             "FCToernooi\\SerializationHandler\\": "serialization/handler"
         }
@@ -90,19 +85,19 @@
       ],
       "stan": "XDEBUG_MODE=off vendor/bin/phpstan analyse",
       "psalm": "XDEBUG_MODE=off vendor/bin/psalm --output-format=phpstorm --show-info=true --no-diff",
+      "doctrine-clearcache": [
+        "XDEBUG_MODE=off php cli-config.php orm:clear-cache:metadata",
+        "XDEBUG_MODE=off php cli-config.php orm:clear-cache:query"
+      ],
       "doctrine-try": [
         "composer run doctrine-clearcache",
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --dump-sql --complete"
+        "XDEBUG_MODE=off php cli-config.php orm:schema-tool:update --dump-sql"
       ],
       "doctrine-update": [
         "composer run doctrine-clearcache",
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:schema-tool:update --force --complete"
+        "XDEBUG_MODE=off php cli-config.php  orm:schema-tool:update --dump-sql --force"
       ],
       "doctrine-validate": "XDEBUG_MODE=off vendor/bin/doctrine orm:validate-schema",
-      "doctrine-clearcache": [
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:query --flush",
-        "XDEBUG_MODE=off vendor/bin/doctrine orm:clear-cache:metadata"
-      ],
       "planning-available-listener": "XDEBUG_MODE=off php bin/console.php app:planning-available-listener --loglevel=200 --logtofile",
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [

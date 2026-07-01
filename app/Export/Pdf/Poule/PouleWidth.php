@@ -4,19 +4,14 @@ namespace App\Export\Pdf\Poule;
 
 use Sports\Poule;
 
-class PouleWidth
+final class PouleWidth
 {
-    public function __construct(protected float $width, protected Poule $poule)
+    public function __construct(protected float $width)
     {
     }
 
     public function getWidth(): float
     {
         return $this->width;
-    }
-
-    public function getPoule(): Poule
-    {
-        return $this->poule;
     }
 }

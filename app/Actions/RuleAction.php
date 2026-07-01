@@ -6,27 +6,39 @@ namespace App\Actions;
 
 use App\Response\ErrorResponse;
 use App\Response\ForbiddenResponse as ForbiddenResponse;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Tournament;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use FCToernooi\Tournament\Rule as TournamentRule;
-use FCToernooi\Tournament\Rule\Repository as TournamentRuleRepository;
 use Psr\Log\LoggerInterface;
 use Sports\Priority\Service as PriorityService;
 
+/**
+ * @api
+ */
 final class RuleAction extends Action
 {
+    /** @var EntityRepository<TournamentRule>  */
+    protected EntityRepository $ruleRepos;
+
     public function __construct(
+        private EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        SerializerInterface $serializer,
-        private TournamentRuleRepository $ruleRepos
+        SerializerInterface $serializer
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(TournamentRule::class);
+        $this->ruleRepos = new EntityRepository($entityManager, $metaData);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -46,6 +58,7 @@ final class RuleAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -57,9 +70,9 @@ final class RuleAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute("tournament");
 
-//            if( $tournament->getRules() >= TournamentRule::MAX_PER_TOURNAMENT ) {
+            if( $tournament->getRules() >= TournamentRule::MAX_PER_TOURNAMENT ) {
                 throw new \Exception('Het maximum aantal regels is bereikt');
-  //          }
+            }
             /** @var TournamentRule $serRule */
             $serRule = $this->serializer->deserialize($this->getRawData($request), TournamentRule::class, 'json');
 
@@ -67,7 +80,8 @@ final class RuleAction extends Action
                 $tournament,
                 $serRule->getText()
             );
-            $this->ruleRepos->save($newRule, true);
+            $this->entityManager->persist($newRule);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($newRule, 'json');
             return $this->respondWithJson($response, $json);
@@ -100,7 +114,8 @@ final class RuleAction extends Action
             }
 
             $rule->setText($ruleSer->getText());
-            $this->ruleRepos->save($rule);
+            $this->entityManager->persist($rule);
+            $this->entityManager->flush();
 
             $json = $this->serializer->serialize($rule, 'json');
             return $this->respondWithJson($response, $json);
@@ -121,7 +136,7 @@ final class RuleAction extends Action
             /** @var Tournament $tournament */
             $tournament = $request->getAttribute('tournament');
 
-            $competition = $tournament->getCompetition();
+//            $competition = $tournament->getCompetition();
 
             $rule = $this->ruleRepos->find((int)$args['ruleId']);
             if ($rule === null) {
@@ -135,9 +150,11 @@ final class RuleAction extends Action
             $changedRules = $priorityService->upgrade($rule);
             foreach ($changedRules as $changedRule) {
                 if ($changedRule instanceof Tournament\Rule) {
-                    $this->ruleRepos->save($changedRule);
+                    $this->entityManager->persist($changedRule);
+
                 }
             }
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (Exception $exception) {
@@ -166,17 +183,20 @@ final class RuleAction extends Action
             }
 
             $tournament->getRules()->removeElement($rule);
-            $this->ruleRepos->remove($rule);
+            $this->entityManager->remove($rule);
+            $this->entityManager->flush();
 
             $priorityService = new PriorityService(array_values($tournament->getRules()->toArray()));
             $changedRules = $priorityService->validate();
             foreach ($changedRules as $changedRule) {
                 if ($changedRule instanceof Tournament\Rule) {
-                    $this->ruleRepos->save($changedRule);
+                    $this->entityManager->persist($changedRule);
+                    $this->entityManager->flush();
                 }
             }
 
-            $this->ruleRepos->remove($rule);
+            $this->entityManager->remove($rule);
+            $this->entityManager->flush();
 
             return $response->withStatus(200);
         } catch (\Exception $exception) {

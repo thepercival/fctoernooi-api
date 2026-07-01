@@ -19,7 +19,7 @@ use Zend_Pdf_Page;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class LockerRoomsDocument extends PdfDocument
+final class LockerRoomsDocument extends PdfDocument
 {
     public function __construct(
         Tournament $tournament,
@@ -44,6 +44,7 @@ class LockerRoomsDocument extends PdfDocument
     }
 
 
+    #[\Override]
     protected function renderCustom(): void
     {
         $page = $this->createLockerRoomsPage();

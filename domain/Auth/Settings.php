@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace FCToernooi\Auth;
 
-class Settings
+/**
+ * @api
+ */
+final class Settings
 {
     public function __construct(
         protected string $jwtSecret,

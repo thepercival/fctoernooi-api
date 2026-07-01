@@ -11,7 +11,7 @@ use JMS\Serializer\SerializerInterface;
 use SportsPlanning\Planning;
 use SportsScheduler\Queue\BestPlanningCreatedInterface;
 
-class BestPlanningCreated extends QueueServiceBase
+final class BestPlanningCreated extends QueueServiceBase
 {
     /**
      * @param array<string, mixed> $amqpOptions

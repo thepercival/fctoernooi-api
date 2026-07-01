@@ -6,7 +6,7 @@ namespace FCToernooiTest\TestHelper;
 
 use Sports\Planning\Config\Service as PlanningConfigService;
 use Sports\Structure\Editor as StructureEditor;
-use Sports\Competition\Sport\Editor as CompetitionSportEditor;
+use Sports\Competition\CompetitionSportEditor;
 use SportsHelpers\PlaceRanges;
 
 trait StructureEditorCreator

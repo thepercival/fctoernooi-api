@@ -9,7 +9,7 @@ use FCToernooi\Sponsor;
 use FCToernooi\Tournament;
 use Selective\Config\Configuration;
 
-class ImagePathResolver
+final class ImagePathResolver
 {
     private string $wwwApiurlLocalpath;
     private string $localFolder;

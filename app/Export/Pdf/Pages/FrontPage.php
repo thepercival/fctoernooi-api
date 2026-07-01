@@ -20,17 +20,17 @@ use Zend_Pdf_Resource_ImageFactory;
 /**
  * @template-extends ToernooiPdfPage<FrontPageDocument>
  */
-class FrontPage extends ToernooiPdfPage
+final class FrontPage extends ToernooiPdfPage
 {
     public function __construct(FrontPageDocument $document, mixed $param1)
     {
         parent::__construct($document, $param1);
         $this->setLineWidth(0.5);
         $theme = $this->parent->getTournament()->getTheme();
-        if( $theme && array_key_exists('textColor', $theme) ) {
+        if( $theme != null && array_key_exists('textColor', $theme) ) {
             $this->setTextColor(new \Zend_Pdf_Color_Html($theme['textColor']));
         }
-        if( $theme && array_key_exists('bgColor', $theme) ) {
+        if( $theme != null && array_key_exists('bgColor', $theme) ) {
             $this->setFillColor(new \Zend_Pdf_Color_Html($theme['textColor']));
         }
 
@@ -44,8 +44,8 @@ class FrontPage extends ToernooiPdfPage
 
        $padding = $config->getPadding();
 
-        $rectangleWidth = $this->getWidth() - (2 * $padding);
-        $rectangleHeight = $this->getHeight() - (2 * $padding);
+        $rectangleWidth = $this->getWidth() - (2.0 * $padding);
+        $rectangleHeight = $this->getHeight() - (2.0 * $padding);
         $horLine = new HorizontalLine(new Point($padding, $this->getHeight() - $padding), $rectangleWidth);
         $rectangle = new Rectangle($horLine, -$rectangleHeight);
 
@@ -68,9 +68,9 @@ class FrontPage extends ToernooiPdfPage
                 $this->parent->getTournament()->getName(), $startPointName, $rectangle->getWidth(), Align::Center
             );
 
-            $dateFontHeight = 10;
+            $dateFontHeight = 10.0;
             $this->setFont($this->helper->getTimesFont(), $dateFontHeight );
-            $startPointDate = new Point($xStartText, $yText - (2 * $dateFontHeight));
+            $startPointDate = new Point($xStartText, $yText - (2.0 * $dateFontHeight));
             $startDateTime = $this->parent->getTournament()->getCompetition()->getStartDateTime();
 
             $start = strtolower( $this->getDateFormatter('eeee d MMMM y')->format($startDateTime) );
@@ -82,9 +82,9 @@ class FrontPage extends ToernooiPdfPage
         // Draw Logo
         if( $logoPath !== null ) {
             try {
-                $logoSize = ImageSize::Normal->value;
-                $xCenter = $this->getWidth() / 2;
-                $xImage = $xCenter - ($logoSize / 2);
+                $logoSize = (float)ImageSize::Normal->value;
+                $xCenter = $this->getWidth() / 2.0;
+                $xImage = $xCenter - ($logoSize / 2.0);
                 $yImage = $rectangle->getBottom()->getY() + (0.33 * $rectangleHeight);
                 /** @var Zend_Pdf_Resource_Image $img */
                 $img = Zend_Pdf_Resource_ImageFactory::factory($logoPath);

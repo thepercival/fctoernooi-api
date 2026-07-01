@@ -10,7 +10,10 @@ use FCToernooi\Tournament\Registration\TextSubject;
 use Sports\Category;
 use SportsHelpers\Identifiable;
 
-class RegistrationSettings extends Identifiable
+/**
+ * @api
+ */
+final class RegistrationSettings extends Identifiable
 {
     private string $remark;
 

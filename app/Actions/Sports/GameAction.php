@@ -5,47 +5,55 @@ declare(strict_types=1);
 namespace App\Actions\Sports;
 
 use App\Actions\Action;
+use App\Repositories\Sports\AgainstGameRepository;
+use App\Repositories\Sports\AgainstScoreRepository;
+use App\Repositories\Sports\StructureRepository;
+use App\Repositories\Sports\TogetherGameRepository;
+use App\Repositories\Sports\TogetherScoreRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use JMS\Serializer\SerializerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface;
 use Sports\Competition;
-use Sports\Competition\Field;
-use Sports\Competition\Referee;
-use Sports\Competition\Sport as CompetitionSport;
-use Sports\Competition\Sport\Repository as CompetitionSportRepository;
+use Sports\Competition\CompetitionField;
+use Sports\Competition\CompetitionReferee;
+use Sports\Competition\CompetitionSport;
 use Sports\Game\Against as AgainstGame;
-use Sports\Game\Against\Repository as AgainstGameRepository;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
-use Sports\Game\Together\Repository as TogetherGameRepository;
 use Sports\Place;
-use Sports\Place\Repository as PlaceRepository;
 use Sports\Planning\EditMode as PlanningEditMode;
 use Sports\Poule;
-use Sports\Poule\Repository as PouleRepository;
 use Sports\Qualify\Service as QualifyService;
 use Sports\Round\Number as RoundNumber;
-use Sports\Score\Against\Repository as AgainstScoreRepository;
-use Sports\Score\Together\Repository as TogetherScoreRepository;
-use Sports\Structure\Repository as StructureRepository;
 
 class GameAction extends Action
 {
+    /** @var EntityRepository<Poule>  */
+    protected EntityRepository $pouleRepos;
+    /** @var EntityRepository<CompetitionSport>  */
+    protected EntityRepository $competitionSportRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         protected TogetherGameRepository|AgainstGameRepository $gameRepos,
         protected AgainstGameRepository $againstGameRepos,
         protected TogetherGameRepository $togetherGameRepos,
-        protected PouleRepository $pouleRepos,
-        protected PlaceRepository $placeRepos,
-        protected StructureRepository $structureRepos,
         protected AgainstScoreRepository $againstScoreRepos,
         protected TogetherScoreRepository $togetherScoreRepos,
-        protected CompetitionSportRepository $competitionSportRepos
+        protected StructureRepository $structureRepos,
+        protected EntityManagerInterface $entityManager
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(Poule::class);
+        $this->pouleRepos = new EntityRepository($entityManager, $metaData);
+
+        $metaData = $entityManager->getClassMetadata(CompetitionSport::class);
+        $this->competitionSportRepos = new EntityRepository($entityManager, $metaData);
     }
 
     protected function addBase(AgainstGame|TogetherGame $game, AgainstGame|TogetherGame $gameSer): void
@@ -111,16 +119,16 @@ class GameAction extends Action
         return $map;
     }
 
-    protected function getRefereeById(Competition $competition, Referee $referee): Referee|null
+    protected function getRefereeById(Competition $competition, CompetitionReferee $referee): CompetitionReferee|null
     {
-        $referees = $competition->getReferees()->filter(fn (Referee $refereeIt) => $referee->getId() === $refereeIt->getId());
+        $referees = $competition->getReferees()->filter(fn (CompetitionReferee $refereeIt) => $referee->getId() === $refereeIt->getId());
         $returnReferee = $referees->first();
         return $returnReferee === false ? null : $returnReferee;
     }
 
-    protected function getFieldById(CompetitionSport $competitionSport, Field $field): Field|null
+    protected function getFieldById(CompetitionSport $competitionSport, CompetitionField $field): CompetitionField|null
     {
-        $fields = $competitionSport->getFields()->filter(fn (Field $fieldIt) => $field->getId() === $fieldIt->getId());
+        $fields = $competitionSport->getFields()->filter(fn (CompetitionField $fieldIt) => $field->getId() === $fieldIt->getId());
         $returnField = $fields->first();
         return $returnField === false ? null : $returnField;
     }
@@ -178,7 +186,7 @@ class GameAction extends Action
         if (!$this->shouldQualifiersBeCalculated($poule, $originalPouleState)) {
             return [];
         }
-        $structure = $this->structureRepos->getStructure($competition);
+        $this->structureRepos->getStructure($competition);
 
         $qualifyService = new QualifyService($poule->getRound());
         $pouleToFilter = $this->shouldQualifiersBeCalculatedForRound($poule) ? null : $poule;
@@ -211,7 +219,8 @@ class GameAction extends Action
     protected function savePlaces(array $places): void
     {
         foreach ($places as $place) {
-            $this->placeRepos->save($place);
+            $this->entityManager->persist($place);
+            $this->entityManager->flush();
         }
     }
 
@@ -219,7 +228,8 @@ class GameAction extends Action
     {
         $changedPlaces = $this->getChangedQualifyPlaces($competition, $poule, $initialPouleState);
         foreach ($changedPlaces as $changedPlace) {
-            $this->placeRepos->save($changedPlace);
+            $this->entityManager->persist($changedPlace);
+            $this->entityManager->flush();
             foreach ($changedPlace->getGames() as $gameIt) {
                 $gameIt->setState(GameState::Created);
                 if ($gameIt instanceof AgainstGame) {

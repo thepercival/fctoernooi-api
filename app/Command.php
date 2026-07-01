@@ -7,6 +7,7 @@ namespace App;
 use Exception;
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Log\LoggerInterface;
@@ -25,10 +26,11 @@ class Command extends SymCommand
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this->addOption('logtofile', null, InputOption::VALUE_NONE, 'logtofile?');
-        $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, '' . Logger::INFO);
+        $this->addOption('loglevel', null, InputOption::VALUE_OPTIONAL, Level::Info->name);
         $this->addOption('maillog', null, InputOption::VALUE_NONE, 'maillog');
     }
 
@@ -41,7 +43,7 @@ class Command extends SymCommand
     }
 
     protected function initLogger(
-        int $logLevel,
+        Level $logLevel,
         bool $mailLog,
         string $pathOrStdOut,
         string $name,
@@ -54,11 +56,11 @@ class Command extends SymCommand
         // Format Line Start //////////////////////////
 
         // the default date format is "Y-m-d\TH:i:sP"
-        $dateFormat = "Y n j, g:i a";
+//        $dateFormat = "Y n j, g:i a";
 
         // the default output format is "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n"
         // we now change the default output format according to our needs.
-        $messageFormat = $logLevel === Logger::DEBUG ? 'info': 'default';
+        $messageFormat = $logLevel === Level::Debug ? 'info': 'default';
         if( $messageFormat === 'info' ) {
             $output = "%message% %context% %extra%\n";
         } else {
@@ -84,34 +86,35 @@ class Command extends SymCommand
 
     protected function getMailHandler(
         string|null $subject = null,
-        int|null $mailLogLevel = null
+        Level|null $mailLogLevel = null
     ): MailHandler {
         if ($subject === null) {
             $subject = ((string)$this->getName()) . ' : error';
         }
         if ($mailLogLevel === null) {
-            $mailLogLevel = Logger::ERROR;
+            $mailLogLevel = Level::Error;
         }
         $toEmailAddress = $this->config->getString('email.admin');
         $fromEmailAddress = $this->config->getString('email.from');
         return new MailHandler($toEmailAddress, $subject, $fromEmailAddress, $mailLogLevel);
     }
 
-    protected function getLogLevelFromInput(InputInterface $input, int|null $defaultLogLevel = null): int
+    protected function getLogLevelFromInput(InputInterface $input, Level|null $defaultLogLevel = null): Level
     {
-        if ($defaultLogLevel === null) {
-            $loggerSettings = $this->config->getArray('logger');
-            $defaultLogLevel = $loggerSettings['level'];
-        }
-
-        $logLevelParam = $input->getOption('loglevel');
-        if (is_string($logLevelParam) && strlen($logLevelParam) > 0) {
-            $logLevelTmp = filter_var($logLevelParam, FILTER_VALIDATE_INT);
-            if ($logLevelTmp !== false) {
-                return $logLevelTmp;
+        $logLevelNameParam = $input->getOption('loglevel');
+        if (is_string($logLevelNameParam) && strlen($logLevelNameParam) > 0) {
+            try {
+                /** @psalm-suppress ArgumentTypeCoercion */
+                return Level::fromName($logLevelNameParam);
+            } catch (\UnhandledMatchError $e) {
+                $this->getLogger()->warning("invalid parameter loglevel: {$logLevelNameParam} : {$e->getMessage()}");
             }
         }
-        return $defaultLogLevel;
+        if ($defaultLogLevel !== null) {
+            return $defaultLogLevel;
+        }
+        $loggerSettings = $this->config->getArray('logger');
+        return $loggerSettings['level'];
     }
 
     protected function getPathOrStdOutFromInput(InputInterface $input, string|null $fileName = null): string

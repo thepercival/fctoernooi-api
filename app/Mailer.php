@@ -7,6 +7,9 @@ namespace App;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @api
+ */
 final class Mailer
 {
     /**
@@ -78,23 +81,23 @@ final class Mailer
         return $mail;
     }
 
-    protected function getStyle(): string
-    {
-        return <<<EOT
-<style>
-table, th, td {
-  border-collapse: collapse;
-  border: 1px solid black;
-  padding: 0.5rem;
-  border: 0;  
-  border-bottom: 1px solid #ddd;
-  text-align: left;
-}
-th {
-  background-color: #3E3F3A;
-  color: white;
-}
-</style>
-EOT;
-    }
+//    protected function getStyle(): string
+//    {
+//        return <<<EOT
+//<style>
+//table, th, td {
+//  border-collapse: collapse;
+//  border: 1px solid black;
+//  padding: 0.5rem;
+//  border: 0;
+//  border-bottom: 1px solid #ddd;
+//  text-align: left;
+//}
+//th {
+//  background-color: #3E3F3A;
+//  color: white;
+//}
+//</style>
+//EOT;
+//    }
 }

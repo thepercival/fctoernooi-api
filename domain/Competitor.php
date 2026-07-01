@@ -9,7 +9,10 @@ use Sports\Competition;
 use Sports\Competitor as SportsCompetitor;
 use Sports\Competitor\StartLocation;
 
-class Competitor extends StartLocation implements SportsCompetitor
+/**
+ * @api
+ */
+final class Competitor extends StartLocation implements SportsCompetitor
 {
 
     public const MAX_LENGTH_TELEPHONE = 14;
@@ -51,11 +54,13 @@ class Competitor extends StartLocation implements SportsCompetitor
         return $this->tournament;
     }
 
+    #[\Override]
     public function getCompetition(): Competition
     {
         return $this->tournament->getCompetition();
     }
 
+    #[\Override]
     public function getName(): string
     {
         return $this->name;
@@ -86,6 +91,7 @@ class Competitor extends StartLocation implements SportsCompetitor
         $this->telephone = $telephone;
     }
 
+    #[\Override]
     public function getPresent(): bool
     {
         return $this->present;
@@ -107,6 +113,7 @@ class Competitor extends StartLocation implements SportsCompetitor
     }
 
 
+    #[\Override]
     public function getPublicInfo(): ?string
     {
         return $this->publicInfo;
@@ -123,6 +130,7 @@ class Competitor extends StartLocation implements SportsCompetitor
         $this->publicInfo = $publicInfo;
     }
 
+    #[\Override]
     public function getPrivateInfo(): ?string
     {
         return $this->privateInfo;

@@ -51,7 +51,7 @@ use Sports\Structure;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class DocumentFactory
+final class DocumentFactory
 {
     protected ImagePathResolver $imagePathResolver;
 
@@ -80,19 +80,19 @@ class DocumentFactory
                     $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    new RegistrationFormConfig(18, 14)
+                    new RegistrationFormConfig(18.0, 14.0)
                 );
             case PdfSubject::Structure:
                 $config = new StructureConfig(
                     new CategoryConfig(
-                        18,
-                        14,
-                        15,
+                        18.0,
+                        14.0,
+                        15.0,
                         new RoundConfig(
-                            18,
-                            14,
-                            15,
-                            new PouleConfig(2, 14, 15)
+                            18.0,
+                            14.0,
+                            15.0,
+                            new PouleConfig(2.0, 14.0, 15.0)
                         )
                     )
                 );
@@ -114,8 +114,8 @@ class DocumentFactory
                     new PoulePivotConfig()
                 );
             case PdfSubject::Planning:
-                $gamesCfg = new GamesConfig(20, 18, 14);
-                $gameLineCfg = new GameLineConfig(12, 10);
+                $gamesCfg = new GamesConfig(20.0/*, 18.0, 14.0*/);
+                $gameLineCfg = new GameLineConfig(12.0, 10.0);
                 return new GamesDocument(
                     $tournament,
                     $structure,
@@ -126,8 +126,8 @@ class DocumentFactory
                     $gameLineCfg
                 );
             case PdfSubject::GamesPerPoule:
-                $gamesCfg = new GamesConfig(20, 18, 14);
-                $gameLineCfg = new GameLineConfig(12, 11);
+                $gamesCfg = new GamesConfig(20.0/*, 18.0, 14.0*/);
+                $gameLineCfg = new GameLineConfig(12.0, 11.0);
                 return new GamesPerPouleDocument(
                     $tournament,
                     $structure,
@@ -138,8 +138,8 @@ class DocumentFactory
                     $gameLineCfg
                 );
             case PdfSubject::GamesPerField:
-                $gamesCfg = new GamesConfig(20, 18, 14);
-                $gameLineCfg = new GameLineConfig(12, 10);
+                $gamesCfg = new GamesConfig(20.0/*, 18.0, 14.0*/);
+                $gameLineCfg = new GameLineConfig(12.0, 10.0);
                 return new GamesPerFieldDocument(
                     $tournament,
                     $structure,
@@ -174,7 +174,7 @@ class DocumentFactory
                     $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    new LockerRoomConfig(20, 16, 12),
+                    new LockerRoomConfig(20.0, 16.0, 12.0),
                     new LockerRoomLabelConfig()
                 );
             case PdfSubject::FrontPage:
@@ -184,7 +184,7 @@ class DocumentFactory
                     $this->imagePathResolver,
                     $progress,
                     $maxSubjectProgress,
-                    new FrontPageConfig(ToernooiPage::PAGEMARGIN * 3, 28)
+                    new FrontPageConfig(ToernooiPage::PAGEMARGIN * 3.0, 28.0)
                 );
             case PdfSubject::Intro:
                 return new IntroDocument(
@@ -196,11 +196,11 @@ class DocumentFactory
                     new IntroConfig(
                        new FieldsetTextConfig(
                            ToernooiPage::PAGEMARGIN,
-                           14, IntroPage::FieldsetHeaderPadding,
-                        12, IntroPage::FieldsetTextMargin),
+                           14.0, IntroPage::FieldsetHeaderPadding,
+                        12.0, IntroPage::FieldsetTextMargin),
                         new FieldsetListConfig(
-                            14, IntroPage::FieldsetHeaderPadding,
-                            12, IntroPage::FieldsetTextMargin)
+                            14.0, IntroPage::FieldsetHeaderPadding,
+                            12.0, IntroPage::FieldsetTextMargin)
                     )
                 );
 //            case PdfSubject::Sponsor:
@@ -220,45 +220,45 @@ class DocumentFactory
         throw new \Exception('unknown subject', E_ERROR);
     }
 
-    /**
-     * @param Round $round
-     * @param CompetitionSport $competitionSport
-     * @return list<AgainstGame>
-     */
-    protected function getAgainstGames(Round $round, CompetitionSport $competitionSport): array
-    {
-        $games = $round->getGamesWithState(GameState::Created);
-        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
-        });
-        return array_values($filtered);
-    }
+//    /**
+//     * @param Round $round
+//     * @param CompetitionSport $competitionSport
+//     * @return list<AgainstGame>
+//     */
+//    protected function getAgainstGames(Round $round, CompetitionSport $competitionSport): array
+//    {
+//        $games = $round->getGamesWithState(GameState::Created);
+//        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof AgainstGame;
+//        });
+//        return array_values($filtered);
+//    }
 
-    /**
-     * @param Round $round
-     * @param CompetitionSport $competitionSport
-     * @return list<TogetherGame>
-     */
-    protected function getSingleGames(Round $round, CompetitionSport $competitionSport): array
-    {
-        $games = $round->getGamesWithState(GameState::Created);
-        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
-        });
-        return array_values($filtered);
-    }
+//    /**
+//     * @param Round $round
+//     * @param CompetitionSport $competitionSport
+//     * @return list<TogetherGame>
+//     */
+//    protected function getSingleGames(Round $round, CompetitionSport $competitionSport): array
+//    {
+//        $games = $round->getGamesWithState(GameState::Created);
+//        $filtered = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
+//        });
+//        return array_values($filtered);
+//    }
 
-    /**
-     * @param Poule $poule
-     * @param CompetitionSport $competitionSport
-     * @return list<TogetherGame>
-     */
-    protected function getAllInOneGames(Poule $poule, CompetitionSport $competitionSport): array
-    {
-        $games = $poule->getGamesWithState(GameState::Created);
-        $games = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
-            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
-        });
-        return array_values($games);
-    }
+//    /**
+//     * @param Poule $poule
+//     * @param CompetitionSport $competitionSport
+//     * @return list<TogetherGame>
+//     */
+//    protected function getAllInOneGames(Poule $poule, CompetitionSport $competitionSport): array
+//    {
+//        $games = $poule->getGamesWithState(GameState::Created);
+//        $games = array_filter($games, function (AgainstGame|TogetherGame $game) use ($competitionSport): bool {
+//            return $game->getCompetitionSport() === $competitionSport && $game instanceof TogetherGame;
+//        });
+//        return array_values($games);
+//    }
 }

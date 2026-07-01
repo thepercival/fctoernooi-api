@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpBadRequestException;
 
 /**
+ * @api
  * @tempate T
  */
 abstract class Action
@@ -29,6 +30,7 @@ abstract class Action
 //    abstract protected function remove( Request $request, Response $response, $args ): Response;
 
     /**
+     * @psalm-suppress PossiblyUnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args

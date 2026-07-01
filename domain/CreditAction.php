@@ -8,7 +8,10 @@ use DateTimeImmutable;
 use FCToernooi\CreditAction\Name as CreditActionName;
 use SportsHelpers\Identifiable;
 
-class CreditAction extends Identifiable
+/**
+ * @api
+ */
+final class CreditAction extends Identifiable
 {
     public function __construct(
         protected User $user,

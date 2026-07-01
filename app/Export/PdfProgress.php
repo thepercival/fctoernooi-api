@@ -6,12 +6,15 @@ namespace App\Export;
 
 use Memcached;
 
+/**
+ * @api
+ */
 final class PdfProgress
 {
     public function __construct(
         protected string $name,
         protected Memcached $memcached,
-        float $startProgress = null
+        float|null $startProgress = null
     ) {
         if ($startProgress !== null) {
             $this->validate($startProgress);
@@ -24,7 +27,7 @@ final class PdfProgress
     protected function validate(float $progress): void
     {
         if ($progress < 0.0 || $progress > 100.0) {
-            throw new \Exception('pdf-progress(' . round($progress, 1) . ') out of bounds', E_ERROR);
+            throw new \Exception('pdf-progress(' . ((string)round($progress, 1)) . ') out of bounds', E_ERROR);
         }
     }
 
@@ -40,7 +43,7 @@ final class PdfProgress
 
     private function setProgress(float $progress): void
     {
-        $this->memcached->set($this->name, '' . $progress, PdfService::CACHE_EXPIRATION);
+        $this->memcached->set($this->name, (string)$progress, PdfService::CACHE_EXPIRATION);
     }
 
     public function addProgression(float $progress): float

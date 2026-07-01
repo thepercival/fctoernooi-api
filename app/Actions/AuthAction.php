@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Services\AuthService as AuthService;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Exception;
 use FCToernooi\Auth\Item as AuthItem;
-use FCToernooi\Auth\Service as AuthService;
-use FCToernooi\CreditAction\Repository as CreditActionRepository;
 use FCToernooi\User;
-use FCToernooi\User\Repository as UserRepository;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
 use Memcached;
@@ -20,20 +20,29 @@ use Psr\Log\LoggerInterface;
 use Slim\Exception\HttpException;
 use stdClass;
 
+/**
+ * @api
+ */
 final class AuthAction extends Action
 {
+    /** @var EntityRepository<User>  */
+    private EntityRepository $userRepos;
+
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         private Memcached $memcached,
         private AuthService $authService,
-        private UserRepository $userRepos,
-        private CreditActionRepository $creditActionRepos
+        EntityManagerInterface $entityManager,
     ) {
         parent::__construct($logger, $serializer);
+
+        $metaData = $entityManager->getClassMetadata(User::class);
+        $this->userRepos = new EntityRepository($entityManager, $metaData);
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -52,6 +61,7 @@ final class AuthAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -84,6 +94,7 @@ final class AuthAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -124,6 +135,7 @@ final class AuthAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -150,6 +162,7 @@ final class AuthAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args
@@ -183,6 +196,7 @@ final class AuthAction extends Action
     }
 
     /**
+     * @psalm-suppress UnusedParam
      * @param Request $request
      * @param Response $response
      * @param array<string, int|string> $args

@@ -16,9 +16,9 @@ use Sports\Game\Phase as GamePhase;
 use Sports\Game\State as GameState;
 use Sports\Game\Together as TogetherGame;
 use Sports\Round\Number as RoundNumber;
-use SportsHelpers\Against\Side as AgainstSide;
+use SportsHelpers\Against\AgainstSide;
 
-class Against extends GameLineBase
+final class Against extends GameLineBase
 {
     public function __construct(PdfPage $page, GameLineConfig $config, RoundNumber $roundNumber)
     {
@@ -32,9 +32,10 @@ class Against extends GameLineBase
 
         $this->columnWidths[AgainstColumn::SidePlaces->value] = $this->columnWidths[Column::PlacesAndScore->value];
         $this->columnWidths[AgainstColumn::SidePlaces->value] -= $this->columnWidths[AgainstColumn::Score->value];
-        $this->columnWidths[AgainstColumn::SidePlaces->value] /= 2;
+        $this->columnWidths[AgainstColumn::SidePlaces->value] /= 2.0;
     }
 
+    #[\Override]
     protected function drawPlacesAndScoreHeader(VerticalLine $left): VerticalLine
     {
         $sideWidth = $this->getColumnWidth(AgainstColumn::SidePlaces);
@@ -48,6 +49,7 @@ class Against extends GameLineBase
         return $awayCell->getRight();
     }
 
+    #[\Override]
     protected function drawPlacesAndScoreCell(AgainstGame|TogetherGame $game, VerticalLine $left): VerticalLine
     {
         if ($game instanceof TogetherGame) {
@@ -82,6 +84,6 @@ class Against extends GameLineBase
             return $score;
         }
         $extension = $game->getFinalPhase() === GamePhase::ExtraTime ? '*' : '';
-        return $finalScore->getHome() . $score . $finalScore->getAway() . $extension;
+        return ((string)$finalScore->getHome()) . $score . ((string)$finalScore->getAway()) . $extension;
     }
 }
