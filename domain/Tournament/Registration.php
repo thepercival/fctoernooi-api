@@ -14,7 +14,7 @@ use FCToernooi\Tournament\Registration\State;
 /**
  * @api
  */
-final class Registration extends Identifiable
+class Registration extends Identifiable
 {
     private State $state = State::Created;
     private string $name;

@@ -13,7 +13,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class RegistrationSettings extends Identifiable
+class RegistrationSettings extends Identifiable
 {
     private string $remark;
 

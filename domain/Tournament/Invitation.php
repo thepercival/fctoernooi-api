@@ -13,7 +13,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class Invitation extends Identifiable
+class Invitation extends Identifiable
 {
     private string $emailaddress;
     private int $roles;

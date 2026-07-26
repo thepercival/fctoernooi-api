@@ -9,7 +9,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class TournamentUser extends Identifiable
+class TournamentUser extends Identifiable
 {
     private int $roles;
 
