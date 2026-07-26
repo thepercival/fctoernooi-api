@@ -42,8 +42,6 @@ return function (App $app): void {
     $app->add((new Middlewares\ContentType())->charsets(['UTF-8'])->errorResponse());
     $app->add((new Middlewares\ContentEncoding(['gzip', 'deflate'])));
 
-    $app->add(new CorsMiddleware($config->getString('www.wwwurl')));
-
     // Add Routing Middleware
     $app->addRoutingMiddleware();
 
@@ -69,22 +67,22 @@ return function (App $app): void {
 
     $errorMiddleware->setErrorHandler(
         AuthorizationException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) use($logger):  ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use($logger, $config):  ErrorResponse {
+            $message = $exception->getMessage();
             if( $displayErrorDetails ) {
                 $previous = $exception->getPrevious();
                 if( $previous !== null ) {
-                    return new ErrorResponse($previous->getMessage(), 405, $logger);
+                    $message = $previous->getMessage();
                 }
-
             }
-            return new ErrorResponse($exception->getMessage(), 405, $logger);
+            return new ErrorResponse($message, 401, $logger);
         });
 
     // Set the Not Found Handler
     /** @psalm-suppress UnusedClosureParam */
     $errorMiddleware->setErrorHandler(
         HttpNotFoundException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($config): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 404);
         }
     );
@@ -93,8 +91,10 @@ return function (App $app): void {
     /** @psalm-suppress UnusedClosureParam */
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails): ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($config): ErrorResponse {
             return new ErrorResponse($exception->getMessage(), 405);
         }
     );
+
+    $app->add(new CorsMiddleware($config->getString('www.wwwurl')));
 };

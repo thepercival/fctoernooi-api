@@ -30,16 +30,32 @@ final class CorsMiddleware implements MiddlewareInterface
     #[\Override]
     public function process(Request $request, RequestHandler $handler): Response
     {
-        $routeContext = RouteContext::fromRequest($request);
-        $routingResults = $routeContext->getRoutingResults();
-        $methods = $routingResults->getAllowedMethods();
-        // $requestHeaders = $request->getHeaderLine('Access-Control-Request-Headers');
+        if ($request->getMethod() === 'OPTIONS') {
+            $response = new \Slim\Psr7\Response();
+        } else {
+            $response = $handler->handle($request);
+        }
 
-        $response = $handler->handle($request);
+        $origin = $this->origin;
+        if (str_ends_with($origin, '/')) {
+            $origin = substr($origin, 0, -1);
+        }
+
+        try {
+            $routeContext = RouteContext::fromRequest($request);
+            $routingResults = $routeContext->getRoutingResults();
+            $methods = $routingResults->getAllowedMethods();
+        } catch (\RuntimeException) {
+            $methods = [];
+        }
+
+        if (count($methods) === 0) {
+            $methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
+        }
 
         return $response
             ->withHeader('Access-Control-Allow-Credentials', 'true')
-            ->withHeader('Access-Control-Allow-Origin', substr($this->origin, 0, strlen($this->origin) - 1))
+            ->withHeader('Access-Control-Allow-Origin', $origin)
             ->withHeader(
                 'Access-Control-Allow-Headers',
                 'X-Requested-With, Content-Type, Accept, Origin, Authorization, X-Api-Version, x-api-version'
