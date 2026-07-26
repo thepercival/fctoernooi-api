@@ -19,7 +19,7 @@ use SportsHelpers\Sport\Variant\MinNrOfPlacesCalculator;
 /**
  * @api
  */
-final class Tournament extends Identifiable
+class Tournament extends Identifiable
 {
     private DateTimeImmutable $createdDateTime;
     private bool $public = false;

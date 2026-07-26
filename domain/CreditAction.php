@@ -11,7 +11,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class CreditAction extends Identifiable
+class CreditAction extends Identifiable
 {
     public function __construct(
         protected User $user,

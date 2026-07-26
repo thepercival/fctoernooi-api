@@ -11,7 +11,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class LockerRoom extends Identifiable
+class LockerRoom extends Identifiable
 {
     protected string $name;
     /**

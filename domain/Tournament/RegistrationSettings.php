@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace FCToernooi\Tournament;
 
-use FCToernooi\Competitor;
 use FCToernooi\Tournament;
 use FCToernooi\Tournament\Registration\TextSubject;
-use Sports\Category;
 use SportsHelpers\Identifiable;
 
 /**
  * @api
  */
-final class RegistrationSettings extends Identifiable
+class RegistrationSettings extends Identifiable
 {
     private string $remark;
 

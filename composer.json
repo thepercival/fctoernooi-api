@@ -97,14 +97,14 @@
         "composer run doctrine-clearcache",
         "XDEBUG_MODE=off php cli-config.php  orm:schema-tool:update --dump-sql --force"
       ],
-      "doctrine-validate": "XDEBUG_MODE=off vendor/bin/doctrine orm:validate-schema",
+      "doctrine-validate": "XDEBUG_MODE=off php cli-config.php orm:validate-schema",
       "planning-available-listener": "XDEBUG_MODE=off php bin/console.php app:planning-available-listener --loglevel=200 --logtofile",
       "cs-fix": "php-cs-fixer fix .",
       "post-install-cmd": [
         "App\\Handlers\\ComposerPostInstall::execute",
         "composer run doctrine-update",
         "composer run doctrine-clearcache",
-        "php vendor/bin/doctrine orm:generate-proxies --quiet"
+        "php cli-config.php orm:generate-proxies --quiet"
       ]
     },
     "config": {

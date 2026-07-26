@@ -6,7 +6,10 @@ namespace FCToernooi;
 
 use SportsHelpers\Identifiable;
 
-final class Sponsor extends Identifiable
+/**
+ * @api
+ */
+class Sponsor extends Identifiable
 {
     private string $name;
     private string|null $url = null;

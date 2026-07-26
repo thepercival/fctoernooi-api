@@ -12,7 +12,7 @@ use Sports\Competitor\StartLocation;
 /**
  * @api
  */
-final class Competitor extends StartLocation implements SportsCompetitor
+class Competitor extends StartLocation implements SportsCompetitor
 {
 
     public const MAX_LENGTH_TELEPHONE = 14;

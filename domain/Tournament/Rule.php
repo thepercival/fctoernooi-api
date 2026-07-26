@@ -11,7 +11,7 @@ use SportsHelpers\Identifiable;
 /**
  * @api
  */
-final class Rule extends Identifiable implements Prioritizable
+class Rule extends Identifiable implements Prioritizable
 {
     private string $text;
     private int $priority;
