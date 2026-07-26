@@ -12,6 +12,7 @@ $apiUrlLocalPath = realpath(__DIR__ . '/../public/');
 
 return [
     'environment' => $_ENV['ENVIRONMENT'],
+    'apiVersion' => $_ENV['API_VERSION'],
     'namespace' => 'fctoernooi' . $_ENV['ENVIRONMENT'],
     'displayErrorDetails' => $_ENV['ENVIRONMENT'] === 'development',
     'tournament' => [
