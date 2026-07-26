@@ -28,7 +28,6 @@ final class DefaultErrorHandler extends ErrorHandler
     #[\Override]
     protected function logError(string $error): void
     {
-        header('Access-Control-Allow-Origin: *');
         parent::logError($error);
     }
 }
