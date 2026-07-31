@@ -26,8 +26,8 @@ return function (App $app): void {
     }
     /** @var Configuration $config */
     $config = $container->get(Configuration::class);
-//    /** @var LoggerInterface $logger */
-//    $logger = $container->get(LoggerInterface::class);
+    //    /** @var LoggerInterface $logger */
+    //    $logger = $container->get(LoggerInterface::class);
 
     $app->add(
         function (Request $request, RequestHandler $handler): Response {
@@ -54,7 +54,7 @@ return function (App $app): void {
         $container->get(LoggerInterface::class)
     );
 
-//    // always last, so it is called first!
+    //    // always last, so it is called first!
     $errorMiddleware = $app->addErrorMiddleware(
         $config->getString('environment') === 'development',
         true,
@@ -67,23 +67,24 @@ return function (App $app): void {
 
     $errorMiddleware->setErrorHandler(
         AuthorizationException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) use($logger, $config):  ErrorResponse {
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($logger): ErrorResponse {
             $message = $exception->getMessage();
-            if( $displayErrorDetails ) {
+            if ($displayErrorDetails) {
                 $previous = $exception->getPrevious();
-                if( $previous !== null ) {
+                if ($previous !== null) {
                     $message = $previous->getMessage();
                 }
             }
             return new ErrorResponse($message, 401, $logger);
-        });
+        }
+    );
 
     // Set the Not Found Handler
     /** @psalm-suppress UnusedClosureParam */
     $errorMiddleware->setErrorHandler(
         HttpNotFoundException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($config): ErrorResponse {
-            return new ErrorResponse($exception->getMessage(), 404);
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($logger): ErrorResponse {
+            return new ErrorResponse($exception->getMessage(), 404, $logger);
         }
     );
 
@@ -91,8 +92,8 @@ return function (App $app): void {
     /** @psalm-suppress UnusedClosureParam */
     $errorMiddleware->setErrorHandler(
         HttpMethodNotAllowedException::class,
-        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($config): ErrorResponse {
-            return new ErrorResponse($exception->getMessage(), 405);
+        function (Request $request, Throwable $exception, bool $displayErrorDetails) use ($logger): ErrorResponse {
+            return new ErrorResponse($exception->getMessage(), 405, $logger);
         }
     );
 

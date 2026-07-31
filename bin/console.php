@@ -19,7 +19,7 @@ try {
     $command = (string)$argv[1];
 
     $application = new Application();
-    $application->add($container->get($command));
+    $application->addCommand($container->get($command));
     $application->run();
 } catch (\Exception $exception) {
     echo $exception->getMessage() . PHP_EOL;

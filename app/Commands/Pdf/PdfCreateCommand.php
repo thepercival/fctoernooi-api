@@ -37,11 +37,11 @@ final class PdfCreateCommand extends Command
     protected TournamentRepository $tournamentRepos;
     protected \App\Repositories\TournamentRegistrationSettingsRepository $registrationSettingsRepos;
     protected PdfService $pdfService;
-//    protected PdfQueueService $queueService;
+    //    protected PdfQueueService $queueService;
     protected DocumentFactory $documentFactory;
     protected EntityManagerInterface $entityManager;
-//    protected bool $showSuccessful = false;
-//    protected bool $disableThrowOnTimeout = false;
+    //    protected bool $showSuccessful = false;
+    //    protected bool $disableThrowOnTimeout = false;
 
     public function __construct(ContainerInterface $container)
     {
@@ -81,7 +81,7 @@ final class PdfCreateCommand extends Command
             $logger
         );
 
-//        $this->queueService = new PdfQueueService($config->getArray('queue'));
+        //        $this->queueService = new PdfQueueService($config->getArray('queue'));
 
         $this->documentFactory = new DocumentFactory($config);
     }
@@ -103,7 +103,7 @@ final class PdfCreateCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $loggerName = 'command-' . $this->customName;
@@ -167,7 +167,8 @@ final class PdfCreateCommand extends Command
             throw new \Exception('incorrect input params for queue-pdf-command', E_ERROR);
         }
 
-        if ($tournament === null ||
+        if (
+            $tournament === null ||
             !property_exists($content, 'totalNrOfSubjects') || !property_exists($content, 'subject')
         ) {
             throw new \Exception('incorrect input params for queue-pdf-command', E_ERROR);
@@ -257,12 +258,12 @@ final class PdfCreateCommand extends Command
             $this->entityManager->refresh($round);
             foreach ($round->getPoules() as $poule) {
                 $this->entityManager->refresh($poule);
-//                foreach ($poule->getAgainstGames() as $game) {
-//                    $this->entityManager->refresh($game);
-//                }
+                //                foreach ($poule->getAgainstGames() as $game) {
+                //                    $this->entityManager->refresh($game);
+                //                }
             }
         }
-        $planningConfig =$roundNumber->getPlanningConfig();
+        $planningConfig = $roundNumber->getPlanningConfig();
         if ($planningConfig !== null) {
             $this->entityManager->refresh($planningConfig);
         }

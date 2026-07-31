@@ -47,37 +47,37 @@ class MailLogsCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-//            $loggerName = 'command-' . $this->customName;
-//            $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
-//            $logger = $this->initLogger(
-//                $this->getLogLevel($input),
-//                $this->getMailLog($input),
-//                $this->getPathOrStdOut($input, $loggerName),
-//                $loggerName,
-//                $mailHandler
-//            );
-//
-//            if ($this->nrOfMonthsBeforeRemoval <= 11) {
-//                throw new \Exception('nrOfMonthsBeforeRemoval must be greater than 11', E_ERROR);
-//            }
-//            $oldTournaments = $this->tournamentRepos->findByFilter(
-//                new ShellFilter(null, null, null, null, false),
-//                null, $this->getRemovalDeadline()
-//            );
-//            // $nrOfCompetitions = count($oldCompetitions);
-//            while ($oldTournament = array_shift($oldTournaments)) {
-//                if( $oldTournament->getExample() ) {
-//                    continue;
-//                }
-//                $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';
-//                $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
-//                $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';
-//                $logger->info($msg);
-//                $this->competitionRepos->remove($oldTournament->getCompetition(), true);
-//            }
+            //            $loggerName = 'command-' . $this->customName;
+            //            $mailHandler = $this->getMailHandler((string)$this->getName(), Logger::INFO);
+            //            $logger = $this->initLogger(
+            //                $this->getLogLevel($input),
+            //                $this->getMailLog($input),
+            //                $this->getPathOrStdOut($input, $loggerName),
+            //                $loggerName,
+            //                $mailHandler
+            //            );
+            //
+            //            if ($this->nrOfMonthsBeforeRemoval <= 11) {
+            //                throw new \Exception('nrOfMonthsBeforeRemoval must be greater than 11', E_ERROR);
+            //            }
+            //            $oldTournaments = $this->tournamentRepos->findByFilter(
+            //                new ShellFilter(null, null, null, null, false),
+            //                null, $this->getRemovalDeadline()
+            //            );
+            //            // $nrOfCompetitions = count($oldCompetitions);
+            //            while ($oldTournament = array_shift($oldTournaments)) {
+            //                if( $oldTournament->getExample() ) {
+            //                    continue;
+            //                }
+            //                $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';
+            //                $createdDateTime = $oldTournament->getCreatedDateTime()->format(DateTime::ISO8601);
+            //                $msg .= 'and tournament.createdDateTime = "' . $createdDateTime . '"';
+            //                $logger->info($msg);
+            //                $this->competitionRepos->remove($oldTournament->getCompetition(), true);
+            //            }
         } catch (\Exception $exception) {
             if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());
