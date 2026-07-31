@@ -68,7 +68,7 @@ final class BackupImagesCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $syncDbWithDisk = $input->getOption('sync-db-with-disk');
         $entityManager = $syncDbWithDisk === true ? $this->entityManager : null;
@@ -84,13 +84,13 @@ final class BackupImagesCommand extends Command
         try {
 
             $imgPath = $this->config->getString('www.apiurl-localpath') . 'images/';
-            if( file_exists($imgPath) === false ) {
+            if (file_exists($imgPath) === false) {
                 throw new \Exception("imgpath " . $imgPath . " not writable", E_ERROR);
             }
 
             $backupPath = $this->config->getString('images.backuppath');
-            if( file_exists($backupPath) === false ) {
-                if( !mkdir($backupPath) ) {
+            if (file_exists($backupPath) === false) {
+                if (!mkdir($backupPath)) {
                     throw new \Exception("backuppath " . $backupPath . " could not be created", E_ERROR);
                 }
             }
@@ -108,8 +108,8 @@ final class BackupImagesCommand extends Command
     protected function backupSponsors(ImageService $imageService, string $backupPath, EntityManagerInterface|null $syncDbWithDisk): void
     {
         try {
-            if( file_exists($backupPath) === false ) {
-                if( !mkdir($backupPath) ) {
+            if (file_exists($backupPath) === false) {
+                if (!mkdir($backupPath)) {
                     throw new \Exception("backuppath " . $backupPath . " could not be created", E_ERROR);
                 }
             }
@@ -120,7 +120,7 @@ final class BackupImagesCommand extends Command
             $sponsors = $this->sponsorRepos->findAll();
             foreach ($sponsors as $sponsor) {
                 $logoExtension = $sponsor->getLogoExtension();
-                if ($logoExtension === null ) {
+                if ($logoExtension === null) {
                     continue;
                 }
 
@@ -136,8 +136,8 @@ final class BackupImagesCommand extends Command
     protected function backupCompetitors(ImageService $imageService, string $backupPath, EntityManagerInterface|null $syncDbWithDisk): void
     {
         try {
-            if( file_exists($backupPath) === false ) {
-                if( !mkdir($backupPath) ) {
+            if (file_exists($backupPath) === false) {
+                if (!mkdir($backupPath)) {
                     throw new \Exception("backuppath " . $backupPath . " could not be created", E_ERROR);
                 }
             }
@@ -148,7 +148,7 @@ final class BackupImagesCommand extends Command
             $competitors = $this->competitorRepos->findAll();
             foreach ($competitors as $competitor) {
                 $logoExtension = $competitor->getLogoExtension();
-                if ($logoExtension === null ) {
+                if ($logoExtension === null) {
                     continue;
                 }
 

@@ -57,7 +57,7 @@ final class RemoveOldTournamentsCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $loggerName = 'command-' . $this->customName;
@@ -75,11 +75,12 @@ final class RemoveOldTournamentsCommand extends Command
             }
             $oldTournaments = $this->tournamentRepos->findByFilter(
                 new ShellFilter(null, null, null, null, false),
-                null, $this->getRemovalDeadline()
+                null,
+                $this->getRemovalDeadline()
             );
             // $nrOfCompetitions = count($oldCompetitions);
             while ($oldTournament = array_shift($oldTournaments)) {
-                if( $oldTournament->getExample() ) {
+                if ($oldTournament->getExample()) {
                     continue;
                 }
                 $msg = 'removed competition with id "' . (string)$oldTournament->getCompetition()->getId() . '" ';

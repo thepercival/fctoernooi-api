@@ -104,6 +104,8 @@ return [
 
             $docConfig->setMetadataCache($cache);
         }
+        $docConfig->enableNativeLazyObjects(true);
+
         /** @var string $proxyDir */
         $proxyDir = $doctrineMetaConfig['proxy_dir'];
         $docConfig->setProxyDir($proxyDir);
@@ -118,35 +120,20 @@ return [
         $em = new Doctrine\ORM\EntityManager($connection, $docConfig);
 
         Type::addType('enum_SelfReferee', SportsHelpers\DbEnums\SelfRefereeType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_SelfReferee');
         Type::addType('enum_GameMode', SportsHelpers\GameModeType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_GameMode');
         Type::addType('enum_AgainstSide', SportsHelpers\DbEnums\AgainstSideType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_AgainstSide');
         Type::addType('enum_EditMode', Sports\DbEnums\PlanningEditModeType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_EditMode');
         Type::addType('enum_QualifyTarget', Sports\DbEnums\QualifyTargetType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_QualifyTarget');
         Type::addType('enum_Distribution', Sports\DbEnums\QualifyDistributionType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_Distribution');
         Type::addType('enum_AgainstRuleSet', Sports\DbEnums\RankingAgainstRuleSetType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_AgainstRuleSet');
         Type::addType('enum_PointsCalculation', Sports\DbEnums\RankingPointsCalculationType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PointsCalculation');
         Type::addType('enum_PlanningState', SportsPlanning\Planning\StateType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningState');
         Type::addType('enum_PlanningTimeoutState', SportsPlanning\Planning\TimeoutStateType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PlanningTimeoutState');
         Type::addType('enum_GameState', Sports\DbEnums\GameStateType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_GameState');
         Type::addType('enum_CreditAction', FCToernooi\Database\enums\CreditActionNameEnumDbType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_CreditAction');
         Type::addType('enum_StartEditMode', FCToernooi\Database\enums\StartEditModeType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_StartEditMode');
         Type::addType('enum_PaymentState', FCToernooi\Database\enums\PaymentStateType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_PaymentState');
         Type::addType('enum_RegistrationState', FCToernooi\Database\enums\RegistrationStateType::class);
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('string', 'enum_RegistrationState');
 
         Type::overrideType('datetime_immutable', UTCDateTimeType::class);
         return $em;
@@ -190,14 +177,14 @@ return [
 
         //   $builder->configureListeners(function(JMS\Serializer\EventDispatcher\EventDispatcher $dispatcher) {
 
-//                /*$dispatcher->addListener('serializer.pre_serialize',
-//                    function(JMS\Serializer\EventDispatcher\PreSerializeEvent $event) {
-//                        // do something
-//                    }
-//                );*/
-//                //$dispatcher->addSubscriber(new RoundNumberEventSubscriber());
-//                $dispatcher->addSubscriber(new RoundNumberEventSubscriber());
-   //     });
+        //                /*$dispatcher->addListener('serializer.pre_serialize',
+        //                    function(JMS\Serializer\EventDispatcher\PreSerializeEvent $event) {
+        //                        // do something
+        //                    }
+        //                );*/
+        //                //$dispatcher->addSubscriber(new RoundNumberEventSubscriber());
+        //                $dispatcher->addSubscriber(new RoundNumberEventSubscriber());
+        //     });
         $builder = $builder->addDefaultHandlers();
 
         return $builder->build();
@@ -243,7 +230,8 @@ return [
             new Options(before: new JwtAuthBeforeHandler()),
             $decoder,
             [
-                new RequestMethodRule(), new RequestPathRule(ignore: [
+                new RequestMethodRule(),
+                new RequestPathRule(ignore: [
                     '/public'
                 ])
             ],

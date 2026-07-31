@@ -40,6 +40,6 @@ final class RegistrationStateType extends EnumDbType
     #[\Override]
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return 'varchar(10)';
+        return 'VARCHAR(10)';
     }
 }

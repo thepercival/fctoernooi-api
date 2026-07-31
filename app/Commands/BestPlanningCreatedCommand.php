@@ -89,7 +89,7 @@ final class BestPlanningCreatedCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $loggerName = 'command-' . $this->customName;
@@ -106,7 +106,8 @@ final class BestPlanningCreatedCommand extends Command
 
             $timeoutInSeconds = 295;
             $bestPlanningCreatedQueueService = new BestPlanningCreatedQueueService(
-                $this->config->getArray('queue'));
+                $this->config->getArray('queue')
+            );
 
             $bestPlanningCreatedQueueService->receive($this->getReceiver(), $timeoutInSeconds);
         } catch (\Exception $exception) {
@@ -136,17 +137,17 @@ final class BestPlanningCreatedCommand extends Command
                 $planningClient = new GuzzleClient($url, $apikey, $cacheService, $this->serializer, $logger);
 
                 $nrOfCompetitionsAssigned = 0;
-                foreach( $cacheService->getCompetitionIdsWithoutPlanning() as $competitionId ) {
+                foreach ($cacheService->getCompetitionIdsWithoutPlanning() as $competitionId) {
 
                     $competition = $this->competitionRepos->find($competitionId);
-                    if( $competition === null ) {
+                    if ($competition === null) {
                         $cacheService->removeCompetitionIdWithoutPlanning($competitionId);
-                        $logger->warning('   competition with id "' .$competitionId. '" not found');
+                        $logger->warning('   competition with id "' . $competitionId . '" not found');
                         continue;
                     }
                     $tournament = $this->tournamentRepos->findOneBy(['competition' => $competition]);
-                    if( $tournament === null ) {
-                        $logger->warning('   tournament with competitionId "' .$competitionId. '" not found');
+                    if ($tournament === null) {
+                        $logger->warning('   tournament with competitionId "' . $competitionId . '" not found');
                         $cacheService->removeCompetitionIdWithoutPlanning($competitionId);
                         continue;
                     }
@@ -155,39 +156,41 @@ final class BestPlanningCreatedCommand extends Command
 
                     $structure = $this->structureRepos->getStructure($competition);
 
-//                    $refereeInfo = new PlanningRefereeInfo( $roundNumber->getRefereeInfo());
-//                    $inputConfiguration = (new InputConfigurationCreator())->create($roundNumber, $refereeInfo);
-//                    if( $inputConfiguration->getName() !== $planningInputConfiguration->getName() ) {
-//                        $this->getLogger()->info('inputConfigs do not match => continue');
-//                        continue;
-//                    }
+                    //                    $refereeInfo = new PlanningRefereeInfo( $roundNumber->getRefereeInfo());
+                    //                    $inputConfiguration = (new InputConfigurationCreator())->create($roundNumber, $refereeInfo);
+                    //                    if( $inputConfiguration->getName() !== $planningInputConfiguration->getName() ) {
+                    //                        $this->getLogger()->info('inputConfigs do not match => continue');
+                    //                        continue;
+                    //                    }
 
                     try {
                         $roundNumbersWithPlanning = $planningClient->getRoundNumbersWithPlanning(
-                            $competition, $structure->getRoundNumbers(), false );
+                            $competition,
+                            $structure->getRoundNumbers(),
+                            false
+                        );
 
                         $planningWriter->write($tournament, $roundNumbersWithPlanning);
 
                         $nrOfCompetitionsAssigned++;
 
                         $logger->info('  for competitionId "' . $competitionId . '" planning assigned');
-                    } catch (\Exception $e ) {
-                        $logger->info('  for competitionId "' . $competitionId . '" no valid planning yet ('.$e->getMessage().')');
+                    } catch (\Exception $e) {
+                        $logger->info('  for competitionId "' . $competitionId . '" no valid planning yet (' . $e->getMessage() . ')');
                     }
                 }
 
-//                $tournamentId = (string)$createMessage->getTournament()->getId();
-//                $logMessage = 'creating pdf for tournamentId "' . $tournamentId . '"';
-//                $logMessage .= ' with subject "' . $createMessage->getSubject()->name . '"';
-//                $this->getLogger()->info($logMessage
-//);
+                //                $tournamentId = (string)$createMessage->getTournament()->getId();
+                //                $logMessage = 'creating pdf for tournamentId "' . $tournamentId . '"';
+                //                $logMessage .= ' with subject "' . $createMessage->getSubject()->name . '"';
+                //                $this->getLogger()->info($logMessage
+                //);
                 $logger->info('  nrOfCompetitionsAssigned : ' . $nrOfCompetitionsAssigned);
                 $consumer->acknowledge($message);
 
-                if( $this->processSingleMessage ) {
+                if ($this->processSingleMessage) {
                     return false;
                 }
-
             } catch (\Exception $exception) {
                 if ($this->logger !== null) {
                     $this->logger->error($exception->getMessage());
@@ -243,9 +246,9 @@ final class BestPlanningCreatedCommand extends Command
             $this->entityManager->refresh($round);
             foreach ($round->getPoules() as $poule) {
                 $this->entityManager->refresh($poule);
-//                foreach ($poule->getAgainstGames() as $game) {
-//                    $this->entityManager->refresh($game);
-//                }
+                //                foreach ($poule->getAgainstGames() as $game) {
+                //                    $this->entityManager->refresh($game);
+                //                }
             }
         }
         $planningConfig = $roundNumber->getPlanningConfig();
@@ -261,5 +264,4 @@ final class BestPlanningCreatedCommand extends Command
             $this->refreshRoundNumber($nextRoundNumber);
         }
     }
-
 }

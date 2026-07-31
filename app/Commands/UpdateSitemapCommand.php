@@ -41,7 +41,7 @@ final class UpdateSitemapCommand extends Command
     }
 
     #[\Override]
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $loggerName = 'command-' . $this->customName;
@@ -72,8 +72,8 @@ final class UpdateSitemapCommand extends Command
             file_put_contents($distPath . "robots.txt", $robotsContent);
 
             // chmod ( $distPath . "sitemap.txt", 744 );
-//            chown($distPath . "sitemap.txt", "coen");
-//            chgrp($distPath . "sitemap.txt", "coen");
+            //            chown($distPath . "sitemap.txt", "coen");
+            //            chgrp($distPath . "sitemap.txt", "coen");
         } catch (\Exception $exception) {
             if ($this->logger !== null) {
                 $this->logger->error($exception->getMessage());

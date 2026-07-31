@@ -36,6 +36,6 @@ final class CreditActionNameEnumDbType extends EnumDbType
     #[\Override]
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return 'varchar(20)';
+        return 'VARCHAR(20)';
     }
 }

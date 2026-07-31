@@ -1,0 +1,3783 @@
+openapi: 3.1.0
+info:
+  title: FCToernooi API
+  description: |
+    REST API for the FCToernooi tournament management application.
+    Built with Slim Framework 4.
+
+    **Authentication:** Most endpoints require a JWT Bearer token obtained via
+    `/public/auth/login` or `/public/auth/register`. Pass it as
+    `Authorization: Bearer <token>`.
+
+    Routes under `/public` are accessible without authentication.
+  version: 1.0.0
+  contact:
+    name: FCToernooi
+    email: info@fctoernooi.nl
+
+servers:
+  - url: /
+    description: Current server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /public/auth/login or /public/auth/register
+
+  schemas:
+    AuthItem:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        userId:
+          type: integer
+          description: ID of the authenticated user
+      required: [token, userId]
+
+    AuthRegisterRequest:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 1
+      required: [emailaddress, password]
+
+    AuthLoginRequest:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 1
+      required: [emailaddress, password]
+
+    AuthPasswordResetRequest:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+          format: email
+      required: [emailaddress]
+
+    AuthPasswordChangeRequest:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 1
+        code:
+          type: string
+      required: [emailaddress, password, code]
+
+    AuthProfileRequest:
+      type: object
+      properties:
+        emailaddress:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        emailaddress:
+          type: string
+          format: email
+        validated:
+          type: boolean
+        nrOfCredits:
+          type: integer
+
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        public:
+          type: boolean
+        startEditMode:
+          type: string
+        createAndJoinPlace:
+          type: boolean
+
+    TournamentShell:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        public:
+          type: boolean
+        startDateTime:
+          type: string
+          format: date-time
+
+    Structure:
+      type: object
+      description: Tournament structure (rounds, poules, places)
+      additionalProperties: true
+
+    PlanningTotals:
+      type: object
+      description: Planning totals per round number
+      additionalProperties: true
+
+    Referee:
+      type: object
+      properties:
+        id:
+          type: integer
+        initials:
+          type: string
+        name:
+          type: string
+        emailaddress:
+          type: string
+          format: email
+        priority:
+          type: integer
+
+    CompetitionSport:
+      type: object
+      properties:
+        id:
+          type: integer
+        sport:
+          $ref: '#/components/schemas/Sport'
+
+    Sport:
+      type: object
+      properties:
+        id:
+          type: integer
+        customId:
+          type: integer
+        name:
+          type: string
+
+    Field:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        priority:
+          type: integer
+
+    GameAgainst:
+      type: object
+      description: Against-type game
+      additionalProperties: true
+
+    GameTogether:
+      type: object
+      description: Together-type game
+      additionalProperties: true
+
+    Competitor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        registered:
+          type: boolean
+
+    PlanningConfig:
+      type: object
+      description: Planning configuration for a round number
+      additionalProperties: true
+
+    GameAmountConfig:
+      type: object
+      description: Game amount configuration for a round number and competition sport
+      additionalProperties: true
+
+    ScoreConfig:
+      type: object
+      description: Score configuration for a round and competition sport
+      additionalProperties: true
+
+    AgainstQualifyConfig:
+      type: object
+      description: Against qualify configuration for a round and competition sport
+      additionalProperties: true
+
+    Planning:
+      type: object
+      description: Planning for a round number
+      additionalProperties: true
+
+    PlanningProgress:
+      type: object
+      properties:
+        state:
+          type: string
+        nrOfBatchGames:
+          type: integer
+
+    Rule:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        priority:
+          type: integer
+
+    Sponsor:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        logoExtension:
+          type: string
+        screenNr:
+          type: integer
+
+    LockerRoom:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Recess:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+
+    TournamentUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        roles:
+          type: array
+          items:
+            type: integer
+
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: integer
+        emailaddress:
+          type: string
+          format: email
+        roles:
+          type: array
+          items:
+            type: integer
+
+    Registration:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        emailaddress:
+          type: string
+          format: email
+        telephone:
+          type: string
+        info:
+          type: string
+
+    RegistrationSettings:
+      type: object
+      description: Registration settings for a tournament
+      additionalProperties: true
+
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+
+    IDealIssuer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        checkoutUrl:
+          type: string
+          format: uri
+
+    BuyCreditsRequest:
+      type: object
+      properties:
+        method:
+          type: string
+        issuer:
+          type: string
+        amount:
+          type: number
+      required: [method, amount]
+
+    RoleState:
+      type: object
+      properties:
+        userId:
+          type: integer
+
+    PdfProgress:
+      type: object
+      properties:
+        state:
+          type: string
+        percentage:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Validation or business logic error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Auth
+    description: Authentication and account management
+  - name: User
+    description: User profile management
+  - name: Shell
+    description: Tournament shell (public listing)
+  - name: Sport
+    description: Sports catalogue
+  - name: Payment
+    description: Payments and credits (Mollie)
+  - name: Tournament
+    description: Tournament CRUD
+  - name: Structure
+    description: Tournament structure
+  - name: Referee
+    description: Tournament referees
+  - name: CompetitionSport
+    description: Competition sports per tournament
+  - name: Field
+    description: Fields per competition sport
+  - name: Game
+    description: Games (against / together)
+  - name: Competitor
+    description: Tournament competitors
+  - name: Planning
+    description: Tournament planning
+  - name: Rule
+    description: Tournament rules
+  - name: Sponsor
+    description: Tournament sponsors
+  - name: LockerRoom
+    description: Locker rooms
+  - name: Recess
+    description: Tournament recesses
+  - name: TournamentUser
+    description: Tournament user roles
+  - name: Invitation
+    description: Tournament invitations
+  - name: Registration
+    description: Tournament registrations
+  - name: RegistrationSettings
+    description: Registration settings and subjects
+  - name: Pdf
+    description: PDF generation
+
+paths:
+
+  # ─────────────────────────────────────────────
+  # PUBLIC AUTH
+  # ─────────────────────────────────────────────
+
+  /public/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user account
+      operationId: authRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '200':
+          description: Registration successful – returns JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthItem'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /public/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with email and password
+      operationId: authLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: Login successful – returns JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthItem'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /public/auth/passwordreset:
+    post:
+      tags: [Auth]
+      summary: Request a password reset code by email
+      operationId: authPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthPasswordResetRequest'
+      responses:
+        '200':
+          description: Reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  retval:
+                    type: boolean
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /public/auth/passwordchange:
+    post:
+      tags: [Auth]
+      summary: Change password using a reset code
+      operationId: authPasswordChange
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthPasswordChangeRequest'
+      responses:
+        '200':
+          description: Password changed – returns new JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthItem'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ─────────────────────────────────────────────
+  # AUTH (JWT required)
+  # ─────────────────────────────────────────────
+
+  /auth/extendtoken:
+    post:
+      tags: [Auth]
+      summary: Extend (refresh) the current JWT token
+      operationId: authExtendToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: New JWT token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /auth/profile/{userId}:
+    put:
+      tags: [Auth]
+      summary: Update the authenticated user's profile
+      operationId: authProfile
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /auth/validate/{code}:
+    post:
+      tags: [Auth]
+      summary: Validate account with a 6-digit code
+      operationId: authValidate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Account validated – returns updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /auth/validationrequest:
+    post:
+      tags: [Auth]
+      summary: Request a new validation code to be sent by email
+      operationId: authValidationRequest
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Validation email sent
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ─────────────────────────────────────────────
+  # USERS
+  # ─────────────────────────────────────────────
+
+  /users/{userId}:
+    get:
+      tags: [User]
+      summary: Fetch the authenticated user's profile
+      operationId: userFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [User]
+      summary: Edit the authenticated user's profile
+      operationId: userEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [User]
+      summary: Delete the authenticated user account
+      operationId: userRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ─────────────────────────────────────────────
+  # SHELLS (PUBLIC)
+  # ─────────────────────────────────────────────
+
+  /public/shells:
+    get:
+      tags: [Shell]
+      summary: Fetch public tournament shells (no auth required)
+      operationId: shellFetchPublic
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of tournament shells
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentShell'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /shellswithrole:
+    get:
+      tags: [Shell]
+      summary: Fetch tournament shells visible to the authenticated user (with role info)
+      operationId: shellFetchWithRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of tournament shells with role information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentShell'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /shells:
+    get:
+      tags: [Shell]
+      summary: Fetch tournament shells (authenticated)
+      operationId: shellFetchAuthenticated
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of tournament shells
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentShell'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ─────────────────────────────────────────────
+  # SPORTS
+  # ─────────────────────────────────────────────
+
+  /sports:
+    get:
+      tags: [Sport]
+      summary: Fetch all sports
+      operationId: sportFetch
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of sports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Sport]
+      summary: Add a new sport
+      operationId: sportAdd
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sport'
+      responses:
+        '200':
+          description: Created sport
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /sports/{sportCustomId}:
+    get:
+      tags: [Sport]
+      summary: Fetch a single sport by custom ID
+      operationId: sportFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sportCustomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sport
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ─────────────────────────────────────────────
+  # PAYMENTS
+  # ─────────────────────────────────────────────
+
+  /payments/methods:
+    get:
+      tags: [Payment]
+      summary: Fetch available payment methods
+      operationId: paymentFetchMethods
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of payment methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/idealissuers:
+    get:
+      tags: [Payment]
+      summary: Fetch iDeal issuers (banks)
+      operationId: paymentFetchIDealIssuers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of iDeal issuers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IDealIssuer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/buycredits:
+    post:
+      tags: [Payment]
+      summary: Buy credits via Mollie payment
+      operationId: paymentBuyCredits
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyCreditsRequest'
+      responses:
+        '200':
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /payments/mostrecentcreatedpayment:
+    get:
+      tags: [Payment]
+      summary: Fetch the most recently created payment for the current user
+      operationId: paymentFetchMostRecentCreated
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Most recent payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /payments/{paymentId}:
+    get:
+      tags: [Payment]
+      summary: Fetch a single payment by ID
+      operationId: paymentFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/paymentUpdate:
+    get:
+      tags: [Payment]
+      summary: Mollie payment webhook (GET)
+      operationId: paymentWebhookGet
+      responses:
+        '200':
+          description: Webhook processed
+    post:
+      tags: [Payment]
+      summary: Mollie payment webhook (POST)
+      operationId: paymentWebhookPost
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+      responses:
+        '200':
+          description: Webhook processed
+
+  /public/paymentRedirect/{paymentId}:
+    get:
+      tags: [Payment]
+      summary: Redirect after Mollie payment completion
+      operationId: paymentRedirect
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to frontend payment result page
+
+  # ─────────────────────────────────────────────
+  # USAGE REPORT
+  # ─────────────────────────────────────────────
+
+  /public/usagereport:
+    get:
+      tags: [Tournament]
+      summary: Public usage report (HTML)
+      operationId: reportUsage
+      responses:
+        '200':
+          description: HTML usage report
+          content:
+            text/html:
+              schema:
+                type: string
+
+  # ─────────────────────────────────────────────
+  # PUBLIC TOURNAMENT
+  # ─────────────────────────────────────────────
+
+  /public/tournaments/{tournamentId}:
+    get:
+      tags: [Tournament]
+      summary: Fetch a public tournament by ID
+      operationId: publicTournamentFetchOne
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/tournaments/{tournamentId}/structure:
+    get:
+      tags: [Structure]
+      summary: Fetch the structure of a public tournament
+      operationId: publicStructureFetchOne
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /public/tournaments/{tournamentId}/rules:
+    get:
+      tags: [Rule]
+      summary: Fetch rules of a public tournament
+      operationId: publicRuleFetch
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+
+  /public/tournaments/{tournamentId}/registrations/settings:
+    get:
+      tags: [RegistrationSettings]
+      summary: Fetch registration settings for a public tournament
+      operationId: publicRegistrationSettingsFetchOne
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Registration settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+
+  /public/tournaments/{tournamentId}/categories/{categoryId}/registrations:
+    post:
+      tags: [Registration]
+      summary: Submit a registration for a public tournament category
+      operationId: publicRegistrationAdd
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '200':
+          description: Registration created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  # ─────────────────────────────────────────────
+  # TOURNAMENTS (authenticated)
+  # ─────────────────────────────────────────────
+
+  /tournaments:
+    post:
+      tags: [Tournament]
+      summary: Create a new tournament
+      operationId: tournamentAdd
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tournament'
+      responses:
+        '200':
+          description: Created tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}:
+    get:
+      tags: [Tournament]
+      summary: Fetch a tournament (authenticated)
+      operationId: tournamentFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Tournament]
+      summary: Edit a tournament (tournament admin required)
+      operationId: tournamentEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tournament'
+      responses:
+        '200':
+          description: Updated tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      tags: [Tournament]
+      summary: Delete a tournament (tournament admin required)
+      operationId: tournamentRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/copy:
+    post:
+      tags: [Tournament]
+      summary: Copy a tournament
+      operationId: tournamentCopy
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Copied tournament
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tournament'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/upload:
+    post:
+      tags: [Tournament]
+      summary: Upload a tournament logo image (tournament admin required)
+      operationId: tournamentUpload
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/userrefereeid:
+    get:
+      tags: [Tournament]
+      summary: Get the referee ID linked to the authenticated user for this tournament
+      operationId: tournamentGetUserRefereeId
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Referee ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refereeId:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # STRUCTURE
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/structure:
+    get:
+      tags: [Structure]
+      summary: Fetch the structure of a tournament (authenticated)
+      operationId: structureFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [Structure]
+      summary: Update the tournament structure (tournament admin required)
+      operationId: structureEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Structure'
+      responses:
+        '200':
+          description: Updated structure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Structure'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/structure/planningtotals:
+    put:
+      tags: [Structure]
+      summary: Get planning totals for the structure (tournament admin required)
+      operationId: structureGetPlanningTotals
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Structure'
+      responses:
+        '200':
+          description: Planning totals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningTotals'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # REFEREES
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/referees/invite/{invite}:
+    post:
+      tags: [Referee]
+      summary: Invite a new referee by email (tournament admin required)
+      operationId: refereeAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: invite
+          in: path
+          required: true
+          schema:
+            type: integer
+            description: 1 = send invite email, 0 = do not send
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Referee'
+      responses:
+        '200':
+          description: Referee added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Referee'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/referees/{refereeId}/{invite}:
+    put:
+      tags: [Referee]
+      summary: Edit a referee (tournament admin required)
+      operationId: refereeEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: refereeId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: invite
+          in: path
+          required: true
+          schema:
+            type: integer
+            description: 1 = send invite email, 0 = do not send
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Referee'
+      responses:
+        '200':
+          description: Referee updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Referee'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/referees/{refereeId}:
+    delete:
+      tags: [Referee]
+      summary: Remove a referee (tournament admin required)
+      operationId: refereeRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: refereeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Referee removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/referees/{refereeId}/priorityup:
+    post:
+      tags: [Referee]
+      summary: Move a referee up in priority (tournament admin required)
+      operationId: refereePriorityUp
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: refereeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Priority updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/referees/{refereeId}/rolestate:
+    get:
+      tags: [Referee]
+      summary: Get the role state of a referee (tournament admin required)
+      operationId: refereeGetRoleState
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: refereeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # COMPETITION SPORTS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/competitionsports:
+    post:
+      tags: [CompetitionSport]
+      summary: Add a competition sport to a tournament (tournament admin required)
+      operationId: competitionSportAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionSport'
+      responses:
+        '200':
+          description: Competition sport added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionSport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}:
+    delete:
+      tags: [CompetitionSport]
+      summary: Remove a competition sport (tournament admin required)
+      operationId: competitionSportRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competition sport removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # FIELDS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/fields:
+    post:
+      tags: [Field]
+      summary: Add a field to a competition sport (tournament admin required)
+      operationId: fieldAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Field'
+      responses:
+        '200':
+          description: Field added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/fields/{fieldId}:
+    put:
+      tags: [Field]
+      summary: Edit a field (tournament admin required)
+      operationId: fieldEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fieldId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Field'
+      responses:
+        '200':
+          description: Field updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Field]
+      summary: Remove a field (tournament admin required)
+      operationId: fieldRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fieldId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Field removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/fields/{fieldId}/priorityup:
+    post:
+      tags: [Field]
+      summary: Move a field up in priority (tournament admin required)
+      operationId: fieldPriorityUp
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: fieldId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Priority updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # GAMES – AGAINST
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/games/against:
+    post:
+      tags: [Game]
+      summary: Add an against-type game (tournament admin required)
+      operationId: gameAgainstAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameAgainst'
+      responses:
+        '200':
+          description: Game added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAgainst'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/games/against/{gameId}:
+    put:
+      tags: [Game]
+      summary: Edit an against-type game (tournament admin required)
+      operationId: gameAgainstEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameAgainst'
+      responses:
+        '200':
+          description: Game updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAgainst'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Game]
+      summary: Remove an against-type game (tournament admin required)
+      operationId: gameAgainstRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # GAMES – TOGETHER
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/games/together:
+    post:
+      tags: [Game]
+      summary: Add a together-type game (tournament admin required)
+      operationId: gameTogetherAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameTogether'
+      responses:
+        '200':
+          description: Game added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameTogether'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/competitionsports/{competitionSportId}/games/together/{gameId}:
+    put:
+      tags: [Game]
+      summary: Edit a together-type game (tournament admin required)
+      operationId: gameTogetherEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameTogether'
+      responses:
+        '200':
+          description: Game updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameTogether'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Game]
+      summary: Remove a together-type game (tournament admin required)
+      operationId: gameTogetherRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # COMPETITORS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/competitors:
+    get:
+      tags: [Competitor]
+      summary: Fetch all competitors of a tournament (tournament admin required)
+      operationId: competitorFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of competitors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competitor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Competitor]
+      summary: Add a competitor to a tournament (tournament admin required)
+      operationId: competitorAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competitor'
+      responses:
+        '200':
+          description: Competitor added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competitor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /tournaments/{tournamentId}/competitors/{registrationId}:
+    post:
+      tags: [Competitor]
+      summary: Add a competitor from a registration (tournament admin required)
+      operationId: competitorAddFromRegistration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: registrationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competitor created from registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competitor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/competitors/{competitorId}:
+    get:
+      tags: [Competitor]
+      summary: Fetch a single competitor (tournament admin required)
+      operationId: competitorFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competitor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competitor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [Competitor]
+      summary: Edit a competitor (tournament admin required)
+      operationId: competitorEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competitor'
+      responses:
+        '200':
+          description: Competitor updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competitor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Competitor]
+      summary: Remove a competitor (tournament admin required)
+      operationId: competitorRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competitor removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/competitors/{competitorOneId}/{competitorTwoId}:
+    put:
+      tags: [Competitor]
+      summary: Swap two competitors (tournament admin required)
+      operationId: competitorSwap
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorOneId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorTwoId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Competitors swapped
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/competitors/{competitorId}/upload:
+    post:
+      tags: [Competitor]
+      summary: Upload a competitor logo (tournament admin required)
+      operationId: competitorUpload
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # PLANNING CONFIGS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/roundnumbers/{roundNumber}/planningconfigs:
+    post:
+      tags: [Planning]
+      summary: Save a planning config for a round number (tournament admin required)
+      operationId: planningConfigSave
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanningConfig'
+      responses:
+        '200':
+          description: Planning config saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/roundnumbers/{roundNumber}/competitionsports/{competitionSportId}/gameamountconfigs:
+    post:
+      tags: [Planning]
+      summary: Save a game amount config (tournament admin required)
+      operationId: gameAmountConfigSave
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameAmountConfig'
+      responses:
+        '200':
+          description: Game amount config saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAmountConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # SCORE CONFIGS & QUALIFY CONFIGS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/rounds/{roundId}/competitionsports/{competitionSportId}/scoreconfigs:
+    post:
+      tags: [Planning]
+      summary: Save a score config for a round and competition sport (tournament admin required)
+      operationId: scoreConfigSave
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreConfig'
+      responses:
+        '200':
+          description: Score config saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/rounds/{roundId}/competitionsports/{competitionSportId}/qualifyagainstconfigs:
+    post:
+      tags: [Planning]
+      summary: Save an against qualify config (tournament admin required)
+      operationId: againstQualifyConfigSave
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: competitionSportId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgainstQualifyConfig'
+      responses:
+        '200':
+          description: Against qualify config saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgainstQualifyConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # PLANNING
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/planning/{roundNumber}:
+    get:
+      tags: [Planning]
+      summary: Fetch the planning for a round number
+      operationId: planningFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Planning
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Planning'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tournaments/{tournamentId}/planning/{roundNumber}/create:
+    post:
+      tags: [Planning]
+      summary: Create the planning for a round number (tournament admin required)
+      operationId: planningCreate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Planning created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/planning/{roundNumber}/reschedule:
+    post:
+      tags: [Planning]
+      summary: Reschedule the planning for a round number (tournament admin required)
+      operationId: planningReschedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Planning rescheduled
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/planning/{roundNumber}/progress:
+    get:
+      tags: [Planning]
+      summary: Get planning progress for a round number
+      operationId: planningProgress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: roundNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Planning progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ─────────────────────────────────────────────
+  # RULES
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/rules:
+    get:
+      tags: [Rule]
+      summary: Fetch rules of a tournament (tournament admin required)
+      operationId: ruleFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Rule]
+      summary: Add a rule (tournament admin required)
+      operationId: ruleAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rule'
+      responses:
+        '200':
+          description: Rule added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/rules/{ruleId}:
+    put:
+      tags: [Rule]
+      summary: Edit a rule (tournament admin required)
+      operationId: ruleEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rule'
+      responses:
+        '200':
+          description: Rule updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Rule]
+      summary: Remove a rule (tournament admin required)
+      operationId: ruleRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rule removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/rules/{ruleId}/priorityup:
+    post:
+      tags: [Rule]
+      summary: Move a rule up in priority (tournament admin required)
+      operationId: rulePriorityUp
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ruleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Priority updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # SPONSORS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/sponsors:
+    get:
+      tags: [Sponsor]
+      summary: Fetch all sponsors of a tournament (tournament admin required)
+      operationId: sponsorFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of sponsors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sponsor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Sponsor]
+      summary: Add a sponsor (tournament admin required)
+      operationId: sponsorAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sponsor'
+      responses:
+        '200':
+          description: Sponsor added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sponsor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/sponsors/{sponsorId}:
+    get:
+      tags: [Sponsor]
+      summary: Fetch a single sponsor (tournament admin required)
+      operationId: sponsorFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: sponsorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sponsor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sponsor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [Sponsor]
+      summary: Edit a sponsor (tournament admin required)
+      operationId: sponsorEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: sponsorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sponsor'
+      responses:
+        '200':
+          description: Sponsor updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sponsor'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Sponsor]
+      summary: Remove a sponsor (tournament admin required)
+      operationId: sponsorRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: sponsorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sponsor removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/sponsors/{sponsorId}/upload:
+    post:
+      tags: [Sponsor]
+      summary: Upload a sponsor logo (tournament admin required)
+      operationId: sponsorUpload
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: sponsorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Upload successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # LOCKER ROOMS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/lockerrooms:
+    post:
+      tags: [LockerRoom]
+      summary: Add a locker room (tournament admin required)
+      operationId: lockerRoomAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockerRoom'
+      responses:
+        '200':
+          description: Locker room added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockerRoom'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/lockerrooms/{lockerRoomId}:
+    put:
+      tags: [LockerRoom]
+      summary: Edit a locker room (tournament admin required)
+      operationId: lockerRoomEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lockerRoomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockerRoom'
+      responses:
+        '200':
+          description: Locker room updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LockerRoom'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [LockerRoom]
+      summary: Remove a locker room (tournament admin required)
+      operationId: lockerRoomRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lockerRoomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Locker room removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/lockerrooms/{lockerRoomId}/synccompetitors:
+    post:
+      tags: [LockerRoom]
+      summary: Sync competitors to a locker room (tournament admin required)
+      operationId: lockerRoomSyncCompetitors
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lockerRoomId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competitorIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Competitors synced
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # RECESSES
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/recesses:
+    post:
+      tags: [Recess]
+      summary: Add a recess to a tournament (tournament admin required)
+      operationId: recessAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recess'
+      responses:
+        '200':
+          description: Recess added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recess'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/recesses/{recessId}:
+    delete:
+      tags: [Recess]
+      summary: Remove a recess (tournament admin required)
+      operationId: recessRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recessId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Recess removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # TOURNAMENT USERS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/users/{tournamentUserId}:
+    delete:
+      tags: [TournamentUser]
+      summary: Remove a tournament user (role admin required)
+      operationId: tournamentUserRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tournamentUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament user removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/users/{tournamentUserId}/emailaddress:
+    get:
+      tags: [TournamentUser]
+      summary: Get the email address of a tournament user (role admin required)
+      operationId: tournamentUserGetEmailaddress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tournamentUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emailaddress:
+                    type: string
+                    format: email
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/users/{tournamentUserId}/roles/{role}:
+    post:
+      tags: [TournamentUser]
+      summary: Add a role to a tournament user (role admin required)
+      operationId: tournamentUserAddRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tournamentUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [TournamentUser]
+      summary: Remove a role from a tournament user (role admin required)
+      operationId: tournamentUserRemoveRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tournamentUserId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentUser'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # INVITATIONS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/invitations:
+    get:
+      tags: [Invitation]
+      summary: Fetch all invitations for a tournament (role admin required)
+      operationId: invitationFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Invitation]
+      summary: Send an invitation (role admin required)
+      operationId: invitationAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Invitation'
+      responses:
+        '200':
+          description: Invitation sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/invitations/{invitationId}:
+    delete:
+      tags: [Invitation]
+      summary: Remove an invitation (role admin required)
+      operationId: invitationRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Invitation removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/invitations/{invitationId}/roles/{role}:
+    post:
+      tags: [Invitation]
+      summary: Add a role to an invitation (role admin required)
+      operationId: invitationAddRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Invitation]
+      summary: Remove a role from an invitation (role admin required)
+      operationId: invitationRemoveRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # REGISTRATIONS (authenticated)
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/categories/{categoryId}/registrations:
+    get:
+      tags: [Registration]
+      summary: Fetch all registrations for a category (role admin required)
+      operationId: registrationFetch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Registration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Registration]
+      summary: Add a registration (role admin required)
+      operationId: registrationAdd
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '200':
+          description: Registration added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/categories/{categoryId}/registrations/{registrationId}:
+    get:
+      tags: [Registration]
+      summary: Fetch a single registration (role admin required)
+      operationId: registrationFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: registrationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [Registration]
+      summary: Edit a registration (role admin required)
+      operationId: registrationEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: registrationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '200':
+          description: Registration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags: [Registration]
+      summary: Remove a registration (role admin required)
+      operationId: registrationRemove
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: registrationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Registration removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # REGISTRATION SETTINGS
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/registrations/settings:
+    get:
+      tags: [RegistrationSettings]
+      summary: Fetch registration settings (tournament admin required)
+      operationId: registrationSettingsFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Registration settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/registrations/settings/{settingsId}:
+    put:
+      tags: [RegistrationSettings]
+      summary: Edit registration settings (tournament admin required)
+      operationId: registrationSettingsEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: settingsId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationSettings'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/registrationsubjects/{subject}:
+    get:
+      tags: [RegistrationSettings]
+      summary: Fetch a registration subject text (tournament admin required)
+      operationId: registrationSubjectFetchOne
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: subject
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [description, terms]
+      responses:
+        '200':
+          description: Subject text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [RegistrationSettings]
+      summary: Edit a registration subject text (tournament admin required)
+      operationId: registrationSubjectEdit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: subject
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [description, terms]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '200':
+          description: Subject text updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ─────────────────────────────────────────────
+  # PDF
+  # ─────────────────────────────────────────────
+
+  /tournaments/{tournamentId}/pdf:
+    post:
+      tags: [Pdf]
+      summary: Create a PDF for a tournament (role admin required)
+      operationId: pdfCreate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: PDF creation options
+              additionalProperties: true
+      responses:
+        '200':
+          description: PDF creation started
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/pdf/progress:
+    get:
+      tags: [Pdf]
+      summary: Get PDF generation progress (role admin required)
+      operationId: pdfProgress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: PDF generation progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfProgress'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tournaments/{tournamentId}/pdf/apply-service:
+    post:
+      tags: [Pdf]
+      summary: Apply a PDF service to a tournament (role admin required)
+      operationId: pdfApplyService
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Service applied
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

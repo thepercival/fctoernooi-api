@@ -7,10 +7,11 @@ namespace FCToernooi;
 use App\TmpService;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\PngResult;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
 use Sports\Game;
 
 /**
@@ -92,21 +93,16 @@ final class QRService
         if (file_exists($path)) {
             return;
         }
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->writerOptions([])
-            ->data($qrCodeText)
-            ->encoding(new Encoding('UTF-8'))
-            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-            ->size($imgWidthPx)
-            ->margin(0)
-            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
-//            ->logoPath($path)
-//            ->labelText('This is the label')
-//            ->labelFont(new NotoSans(20))
-//            ->labelAlignment(new LabelAlignmentCenter())
-            ->build();
+        $writer = new PngWriter();
+        $qrCode = new QrCode(
+            $qrCodeText,
+            new Encoding('UTF-8'),
+            ErrorCorrectionLevel::High,
+            $imgWidthPx,
+            0
+        );
 
+        $result = $writer->write($qrCode);
         if (!($result instanceof  PngResult)) {
             throw new \Exception('could not create qrcode from path', E_ERROR);
         }
